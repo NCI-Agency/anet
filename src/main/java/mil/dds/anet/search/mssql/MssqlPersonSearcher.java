@@ -1,7 +1,6 @@
 package mil.dds.anet.search.mssql;
 
 import com.google.common.base.Joiner;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -130,11 +129,6 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
     if (query.getLocationUuid() != null) {
       whereClauses.add(" positions.locationUuid = :locationUuid ");
       sqlArgs.put("locationUuid", query.getLocationUuid());
-    }
-
-    if (whereClauses.isEmpty() && !doSoundex) {
-      return new AnetBeanList<Person>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<Person>());
     }
 
     if (!whereClauses.isEmpty()) {

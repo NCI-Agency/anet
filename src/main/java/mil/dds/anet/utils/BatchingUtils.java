@@ -42,7 +42,7 @@ public final class BatchingUtils {
         .setMaxBatchSize(1000);
     final DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
     // Give each registry its own thread pool
-    final ExecutorService dispatcherService = Executors.newCachedThreadPool();
+    final ExecutorService dispatcherService = Executors.newFixedThreadPool(3);
 
     dataLoaderRegistry.register("approvalSteps",
         new DataLoader<>(new BatchLoader<String, ApprovalStep>() {
@@ -234,7 +234,14 @@ public final class BatchingUtils {
             dispatcherService);
       }
     }, dataLoaderOptions));
-
+    dataLoaderRegistry.register("task.responsiblePositions",
+        new DataLoader<>(new BatchLoader<String, List<Position>>() {
+          @Override
+          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getTaskDao().getResponsiblePositions(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
     return dataLoaderRegistry;
   }
 

@@ -10,6 +10,9 @@ import Routing from "pages/Routing"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import "../components/reactToastify.css"
 
 class App extends Page {
   static propTypes = {
@@ -46,6 +49,17 @@ class App extends Page {
           uuid, name, code, type, status, isApprover
           organization { uuid, shortName , allDescendantOrgs { uuid }}
           location {uuid, name}
+          associatedPositions {
+            uuid, name,
+            person { uuid, name, rank,
+              position {
+                uuid, name, code, type
+                organization { uuid, shortName}
+                location {uuid, name}
+              }
+            }
+            organization { uuid, shortName }
+          }
         }
       }
 
@@ -105,6 +119,7 @@ class App extends Page {
           location={location}
           sidebarData={organizations}
         >
+          <ToastContainer />
           <Routing />
         </ResponsiveLayout>
       </AppContext.Provider>

@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const Page_URL = "/people/new"
+const PAGE_URL = "/people/new"
 
 class CreatePerson extends Page {
   get form() {
@@ -50,11 +50,11 @@ class CreatePerson extends Page {
   }
 
   openAsSuperUser() {
-    super.openAsSuperUser(Page_URL)
+    super.openAsSuperUser(PAGE_URL)
   }
 
   openAsAdmin() {
-    super.openAsAdminUser(Page_URL)
+    super.openAsAdminUser(PAGE_URL)
   }
 
   waitForAlertSuccessToLoad() {

@@ -1,15 +1,20 @@
 import API, { Settings } from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import {
+  AuthorizationGroupOverlayRow,
+  LocationOverlayRow,
+  PersonDetailedOverlayRow,
+  TaskDetailedOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import Autocomplete from "components/Autocomplete"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import MultiSelector from "components/MultiSelector"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import "components/reactToastify.css"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
@@ -22,8 +27,7 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
-import { toast, ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -123,7 +127,7 @@ class BaseReportForm extends Component {
         list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
       }
       taskRecents(maxResults:6) {
-        list { uuid, shortName, longName }
+        list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
       }
       authorizationGroupRecents(maxResults:6) {
         list { uuid, name, description }
@@ -179,7 +183,6 @@ class BaseReportForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -189,6 +192,104 @@ class BaseReportForm extends Component {
           submitForm,
           resetForm
         }) => {
+          const locationFilters = {
+            activeLocations: {
+              label: "Active locations",
+              searchQuery: true,
+              queryVars: { status: Location.STATUS.ACTIVE }
+            }
+          }
+
+          const attendeesFilters = {
+            all: {
+              label: "All",
+              searchQuery: true,
+              queryVars: { matchPositionName: true }
+            },
+            activeAdvisors: {
+              label: "All advisors",
+              searchQuery: true,
+              queryVars: { role: Person.ROLE.ADVISOR, matchPositionName: true }
+            },
+            activePrincipals: {
+              label: "All principals",
+              searchQuery: true,
+              queryVars: { role: Person.ROLE.PRINCIPAL }
+            }
+          }
+          if (this.props.currentUser.position) {
+            attendeesFilters.myColleagues = {
+              label: "My colleagues",
+              searchQuery: true,
+              queryVars: {
+                role: Person.ROLE.ADVISOR,
+                matchPositionName: true,
+                orgUuid: this.props.currentUser.position.organization.uuid
+              }
+            }
+            attendeesFilters.myCounterparts = {
+              label: "My counterparts",
+              searchQuery: false,
+              list: this.props.currentUser.position.associatedPositions
+                .filter(ap => ap.person)
+                .map(ap => ap.person)
+            }
+          }
+          if (values.location && values.location.uuid) {
+            attendeesFilters.atLocation = {
+              label: `At ${values.location.name}`,
+              searchQuery: true,
+              queryVars: {
+                locationUuid:
+                  values.location && values.location.uuid
+                    ? values.location.uuid
+                    : null
+              }
+            }
+          }
+
+          const tasksFilters = {
+            allTasks: {
+              label: "All tasks",
+              searchQuery: true
+            }
+          }
+          if (this.props.currentUser.position) {
+            tasksFilters.assignedToMyOrg = {
+              label: "Assigned to my organization",
+              searchQuery: true,
+              queryVars: {
+                responsibleOrgUuid: this.props.currentUser.position.organization
+                  .uuid
+              }
+            }
+          }
+          const primaryAdvisors = values.attendees.filter(
+            a => a.role === Person.ROLE.ADVISOR && a.primary === true
+          )
+          const primaryAdvisor = primaryAdvisors.length
+            ? primaryAdvisors[0]
+            : null
+          if (
+            primaryAdvisor &&
+            primaryAdvisor.position &&
+            primaryAdvisor.position.organization
+          ) {
+            tasksFilters.assignedToReportOrg = {
+              label: "Assigned to organization of report",
+              searchQuery: true,
+              queryVars: {
+                responsibleOrgUuid: primaryAdvisor.position.organization.uuid
+              }
+            }
+          }
+
+          const authorizationGroupsFilters = {
+            allAuthorizationGroups: {
+              label: "All authorization groups",
+              searchQuery: true
+            }
+          }
           // need up-to-date copies of these in the autosave handler
           this.autoSaveSettings.dirty = dirty
           this.autoSaveSettings.values = values
@@ -223,7 +324,6 @@ class BaseReportForm extends Component {
           return (
             <div className="report-form">
               <NavigationWarning isBlocking={dirty} />
-              <ToastContainer />
               <Messages error={this.state.error} />
 
               {showAssignedPositionWarning && (
@@ -262,14 +362,19 @@ class BaseReportForm extends Component {
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
                     placeholder="What is the engagement supposed to achieve?"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("intentCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "intentCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="intentCharsLeft">
-                          {250 - this.props.initialValues.intent.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.intent.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>
@@ -280,12 +385,14 @@ class BaseReportForm extends Component {
                   <Field
                     name="engagementDate"
                     component={FieldHelper.renderSpecialField}
-                    value={values.engagementDate}
-                    onChange={(value, formattedValue) =>
-                      setFieldValue("engagementDate", value)
-                    }
+                    onChange={value => setFieldValue("engagementDate", value)}
                     onBlur={() => setFieldTouched("engagementDate", true)}
-                    widget={<CustomDateInput id="engagementDate" />}
+                    widget={
+                      <CustomDateInput
+                        id="engagementDate"
+                        withTime={Settings.engagementsIncludeTimeAndDuration}
+                      />
+                    }
                   >
                     {values.engagementDate &&
                       moment()
@@ -299,39 +406,30 @@ class BaseReportForm extends Component {
                     )}
                   </Field>
 
-                  <Field
-                    name="location"
-                    component={FieldHelper.renderSpecialField}
+                  {Settings.engagementsIncludeTimeAndDuration && (
+                    <Field
+                      name="duration"
+                      label="Duration (minutes)"
+                      component={FieldHelper.renderInputField}
+                    />
+                  )}
+
+                  <AdvancedSingleSelect
+                    fieldName="location"
+                    fieldLabel="Location"
+                    placeholder="Search for the location where this happened..."
+                    value={values.location}
+                    overlayColumns={["Name"]}
+                    overlayRenderRow={LocationOverlayRow}
+                    filterDefs={locationFilters}
                     onChange={value => setFieldValue("location", value)}
+                    objectType={Location}
+                    fields={Location.autocompleteQuery}
+                    valueKey="name"
                     addon={LOCATIONS_ICON}
-                    extraColElem={
-                      recents.locations &&
-                      recents.locations.length > 0 && (
-                        <div className="location-form-group shortcut-list">
-                          <h5>Recent Locations</h5>
-                          {recents.locations.map(location => (
-                            <Button
-                              key={location.uuid}
-                              bsStyle="link"
-                              onClick={() =>
-                                setFieldValue("location", location)
-                              }
-                            >
-                              Add {location.name}
-                            </Button>
-                          ))}
-                        </div>
-                      )
-                    }
-                    widget={
-                      <Autocomplete
-                        objectType={Location}
-                        valueKey="name"
-                        fields={Location.autocompleteQuery}
-                        placeholder="Start typing to search for the location where this happened..."
-                        queryParams={{ status: Location.STATUS.ACTIVE }}
-                      />
-                    }
+                    shortcutsTitle="Recent Locations"
+                    shortcuts={recents.locations}
+                    renderExtraCol
                   />
 
                   <Field
@@ -383,6 +481,7 @@ class BaseReportForm extends Component {
                       label={Settings.fields.report.atmosphere}
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={this.atmosphereButtons}
+                      onChange={value => setFieldValue("atmosphere", value)}
                       className="atmosphere-form-group"
                     />
                   )}
@@ -398,13 +497,15 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
-                    widget={<ReportTags suggestions={tagSuggestions} />}
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderSpecialField}
+                      onChange={value => setFieldValue("reportTags", value)}
+                      widget={<ReportTags suggestions={tagSuggestions} />}
+                    />
+                  )}
                 </Fieldset>
 
                 <Fieldset
@@ -415,19 +516,11 @@ class BaseReportForm extends Component {
                   }
                   id="attendance-fieldset"
                 >
-                  <MultiSelector
-                    items={values.attendees}
-                    objectType={Person}
-                    queryParams={{
-                      status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER],
-                      matchPositionName: true
-                    }}
-                    placeholder="Start typing to search for people who attended the meeting..."
-                    fields={Person.autocompleteQuery}
-                    template={Person.autocompleteTemplate}
-                    addFieldName="attendees"
-                    addFieldLabel="Attendees"
-                    addon={PEOPLE_ICON}
+                  <AdvancedMultiSelect
+                    fieldName="attendees"
+                    fieldLabel="Attendees"
+                    placeholder="Search for attendees who attended the meeting..."
+                    value={values.attendees}
                     renderSelected={
                       <AttendeesTable
                         attendees={values.attendees}
@@ -435,10 +528,23 @@ class BaseReportForm extends Component {
                         showDelete
                       />
                     }
-                    onChange={value => {
+                    overlayColumns={[
+                      "Name",
+                      "Position",
+                      "Location",
+                      "Organization"
+                    ]}
+                    overlayRenderRow={PersonDetailedOverlayRow}
+                    filterDefs={attendeesFilters}
+                    onChange={value =>
                       this.updateAttendees(setFieldValue, "attendees", value)
-                      setFieldTouched("attendees", true)
+                    }
+                    objectType={Person}
+                    queryParams={{
+                      status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]
                     }}
+                    fields={Person.autocompleteQuery}
+                    addon={PEOPLE_ICON}
                     shortcutsTitle="Recent Attendees"
                     shortcuts={recents.persons}
                     renderExtraCol
@@ -449,18 +555,13 @@ class BaseReportForm extends Component {
                   title={Settings.fields.task.longLabel}
                   className="tasks-selector"
                 >
-                  <MultiSelector
-                    items={values.tasks}
-                    objectType={Task}
-                    queryParams={{ status: Task.STATUS.ACTIVE }}
-                    placeholder={`Start typing to search for ${pluralize(
+                  <AdvancedMultiSelect
+                    fieldName="tasks"
+                    fieldLabel={Settings.fields.task.shortLabel}
+                    placeholder={`Search for ${pluralize(
                       Settings.fields.task.shortLabel
                     )}...`}
-                    fields={Task.autocompleteQuery}
-                    template={Task.autocompleteTemplate}
-                    addFieldName="tasks"
-                    addFieldLabel={Settings.fields.task.shortLabel}
-                    addon={TASKS_ICON}
+                    value={values.tasks}
                     renderSelected={
                       <TaskTable
                         tasks={values.tasks}
@@ -468,10 +569,17 @@ class BaseReportForm extends Component {
                         showOrganization
                       />
                     }
+                    overlayColumns={["Name", "Organization"]}
+                    overlayRenderRow={TaskDetailedOverlayRow}
+                    filterDefs={tasksFilters}
                     onChange={value => {
                       setFieldValue("tasks", value)
                       setFieldTouched("tasks", true)
                     }}
+                    objectType={Task}
+                    queryParams={{ status: Task.STATUS.ACTIVE }}
+                    fields={Task.autocompleteQuery}
+                    addon={TASKS_ICON}
                     shortcutsTitle={`Recent ${pluralize(
                       Settings.fields.task.shortLabel
                     )}`}
@@ -494,14 +602,19 @@ class BaseReportForm extends Component {
                       label={Settings.fields.report.keyOutcomes}
                       component={FieldHelper.renderInputField}
                       componentClass="textarea"
-                      maxLength={250}
+                      maxLength={Settings.maxTextFieldLength}
                       onKeyUp={event =>
-                        this.countCharsLeft("keyOutcomesCharsLeft", 250, event)
+                        this.countCharsLeft(
+                          "keyOutcomesCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )
                       }
                       extraColElem={
                         <React.Fragment>
                           <span id="keyOutcomesCharsLeft">
-                            {250 - this.props.initialValues.keyOutcomes.length}
+                            {Settings.maxTextFieldLength -
+                              this.props.initialValues.keyOutcomes.length}
                           </span>{" "}
                           characters remaining
                         </React.Fragment>
@@ -514,14 +627,19 @@ class BaseReportForm extends Component {
                     label={Settings.fields.report.nextSteps}
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("nextStepsCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "nextStepsCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="nextStepsCharsLeft">
-                          {250 - this.props.initialValues.nextSteps.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>
@@ -568,26 +686,28 @@ class BaseReportForm extends Component {
                             <RichTextEditor className="reportSensitiveInformationField" />
                           }
                         />
-                        <MultiSelector
-                          items={values.authorizationGroups}
-                          objectType={AuthorizationGroup}
-                          queryParams={{
-                            status: AuthorizationGroup.STATUS.ACTIVE
-                          }}
-                          placeholder="Start typing to search for authorization groups..."
-                          fields={AuthorizationGroup.autocompleteQuery}
-                          template={AuthorizationGroup.autocompleteTemplate}
-                          addFieldName="authorizationGroups"
-                          addFieldLabel="Authorization Groups"
+                        <AdvancedMultiSelect
+                          fieldName="authorizationGroups"
+                          fieldLabel="Authorization Groups"
+                          placeholder="Search for authorization groups..."
+                          value={values.authorizationGroups}
                           renderSelected={
                             <AuthorizationGroupTable
                               authorizationGroups={values.authorizationGroups}
                               showDelete
                             />
                           }
+                          overlayColumns={["Name", "Description"]}
+                          overlayRenderRow={AuthorizationGroupOverlayRow}
+                          filterDefs={authorizationGroupsFilters}
                           onChange={value =>
                             setFieldValue("authorizationGroups", value)
                           }
+                          objectType={AuthorizationGroup}
+                          queryParams={{
+                            status: AuthorizationGroup.STATUS.ACTIVE
+                          }}
+                          fields={AuthorizationGroup.autocompleteQuery}
                           shortcutsTitle="Recent Authorization Groups"
                           shortcuts={recents.authorizationGroups}
                           renderExtraCol
@@ -606,7 +726,7 @@ class BaseReportForm extends Component {
                       <div>
                         Last autosaved at{" "}
                         {this.state.autoSavedAt.format(
-                          Settings.dateFormats.forms.withTime
+                          Settings.dateFormats.forms.displayShort.withTime
                         )}
                       </div>
                     )}
@@ -781,11 +901,14 @@ class BaseReportForm extends Component {
   }
 
   save = (values, sendEmail) => {
-    const report = Object.without(
-      new Report(values),
+    let report = new Report(values)
+    const attendees = report.attendees
+    report = Object.without(
+      report,
       "cancelled",
       "reportTags",
-      "showSensitiveInfo"
+      "showSensitiveInfo",
+      "attendees"
     )
     if (!values.cancelled) {
       delete report.cancelledReason
@@ -799,7 +922,7 @@ class BaseReportForm extends Component {
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = report.attendees.map(a =>
+    report.attendees = attendees.map(a =>
       Object.without(a, "firstName", "lastName", "position", "_loaded")
     )
     report.location = utils.getReference(report.location)

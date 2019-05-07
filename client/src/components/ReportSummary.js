@@ -31,7 +31,7 @@ export default class ReportSummary extends Component {
                 <span>
                 : last saved at{" "}
                   {moment(report.updatedAt).format(
-                    Settings.dateFormats.forms.withTime
+                    Settings.dateFormats.forms.displayShort.withTime
                   )}
                 </span>
               )}
@@ -77,7 +77,7 @@ export default class ReportSummary extends Component {
             {report.engagementDate && (
               <Label bsStyle="default" className="engagement-date">
                 {moment(report.engagementDate).format(
-                  Settings.dateFormats.forms.short
+                  Report.getEngagementDateFormat()
                 )}
               </Label>
             )}

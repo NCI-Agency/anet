@@ -2,7 +2,7 @@ import _clone from "lodash/clone"
 import _cloneDeepWith from "lodash/cloneDeepWith"
 import { createTransform, persistReducer } from "redux-persist"
 import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2"
-import storage from "redux-persist/lib/storage"
+import storageSession from "redux-persist/lib/storage/session"
 import rootReducer from "."
 
 const resolveToQuery = value => {
@@ -31,7 +31,7 @@ const SearchQueryTransform = createTransform(
 
 const persistConfig = {
   key: "root",
-  storage,
+  storage: storageSession,
   stateReconciler: autoMergeLevel2,
   transforms: [SearchQueryTransform]
 }

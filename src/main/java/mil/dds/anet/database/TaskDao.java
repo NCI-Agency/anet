@@ -3,15 +3,23 @@ package mil.dds.anet.database;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
@@ -55,6 +63,24 @@ public class TaskDao extends AnetBaseDao<Task> {
     return idBatcher.getByIds(uuids);
   }
 
+  static class ResponsiblePositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String sql =
+        "/* batch.getResponsiblePositionsForTask */ SELECT \"taskUuid\", "
+            + PositionDao.POSITIONS_FIELDS + " FROM positions, \"taskResponsiblePositions\" "
+            + "WHERE \"taskResponsiblePositions\".\"taskUuid\" IN ( <foreignKeys> ) "
+            + "AND \"taskResponsiblePositions\".\"positionUuid\" = positions.uuid";
+
+    public ResponsiblePositionsBatcher() {
+      super(sql, "foreignKeys", new PositionMapper(), "taskUuid");
+    }
+  }
+
+  public List<List<Position>> getResponsiblePositions(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Position> responsiblePositionsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(ResponsiblePositionsBatcher.class);
+    return responsiblePositionsBatcher.getByForeignKeys(foreignKeys);
+  }
+
   @Override
   public Task insertInternal(Task p) {
     getDbHandle().createUpdate("/* insertTask */ INSERT INTO tasks "
@@ -67,7 +93,17 @@ public class TaskDao extends AnetBaseDao<Task> {
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
         .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+    final TaskBatch tb = getDbHandle().attach(TaskBatch.class);
+    if (p.getResponsiblePositions() != null) {
+      tb.inserttaskResponsiblePositions(p.getUuid(), p.getResponsiblePositions());
+    }
     return p;
+  }
+
+  public interface TaskBatch {
+    @SqlBatch("INSERT INTO \"taskResponsiblePositions\" (\"taskUuid\", \"positionUuid\") VALUES (:taskUuid, :uuid)")
+    void inserttaskResponsiblePositions(@Bind("taskUuid") String taskUuid,
+        @BindBean List<Position> responsiblePositions);
   }
 
   @Override
@@ -88,6 +124,25 @@ public class TaskDao extends AnetBaseDao<Task> {
   @Override
   public int deleteInternal(String uuid) {
     throw new UnsupportedOperationException();
+  }
+
+  public int addPositionToTask(Position p, Task t) {
+    return getDbHandle().createUpdate(
+        "/* addPositionToTask */ INSERT INTO \"taskResponsiblePositions\" (\"taskUuid\", \"positionUuid\") "
+            + "VALUES (:taskUuid, :positionUuid)")
+        .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
+  }
+
+  public int removePositionFromTask(Position p, Task t) {
+    return getDbHandle()
+        .createUpdate("/* removePositionFromTask*/ DELETE FROM \"taskResponsiblePositions\" "
+            + "WHERE \"taskUuid\" = :taskUuid AND \"positionUuid\" = :positionUuid")
+        .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
+  }
+
+  public CompletableFuture<List<Position>> getResponsiblePositionsForTask(
+      Map<String, Object> context, String taskUuid) {
+    return new ForeignKeyFetcher<Position>().load(context, "task.responsiblePositions", taskUuid);
   }
 
   public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {

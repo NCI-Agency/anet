@@ -1,7 +1,6 @@
 package mil.dds.anet.search.mssql;
 
 import com.google.common.base.Joiner;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,13 +76,10 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
       sqlArgs.put("parentOrgUuid", query.getParentOrgUuid());
     }
 
-    if (whereClauses.isEmpty()) {
-      return new AnetBeanList<Organization>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<Organization>());
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
     }
-
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();

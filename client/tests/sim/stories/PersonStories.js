@@ -89,7 +89,7 @@ const _createPerson = async function(user) {
   )
 
   const { firstName, lastName, ...personStripped } = person // TODO: we need to do this more generically
-  return await runGQL(user, {
+  return runGQL(user, {
     query:
       "mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }",
     variables: { person: personStripped }
@@ -184,7 +184,7 @@ const _deletePerson = async function(user) {
 
     console.debug(`Deleting/Deactivating ${person.name.green}`)
     // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.
-    return await runGQL(user, {
+    return runGQL(user, {
       query:
         "mutation($person: PersonInput!) { updatePerson(person: $person) }",
       variables: { person: person }
@@ -214,7 +214,7 @@ const createPerson = async function(user, grow) {
       return "(skipped)"
     }
   }
-  return await _createPerson(user)
+  return _createPerson(user)
 }
 
 const deletePerson = async function(user, grow) {
@@ -225,7 +225,7 @@ const deletePerson = async function(user, grow) {
       return "(skipped)"
     }
   }
-  return await _deletePerson(user)
+  return _deletePerson(user)
 }
 
 export { createPerson, updatePerson, deletePerson }

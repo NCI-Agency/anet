@@ -13,7 +13,7 @@ organization(uuid:"${orgUuid}") {
 	},
 	reports(pageNum:0, pageSize:25) {
 		list { 
-			uuid, intent, engagementDate, keyOutcomes, nextSteps
+			uuid, intent, engagementDate, duration, keyOutcomes, nextSteps
 			author { uuid, name },
 			primaryAdvisor { uuid, name } ,
 			primaryPrincipal { uuid, name },

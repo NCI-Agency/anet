@@ -63,6 +63,12 @@ export default class Report extends Model {
             )
         )
         .default(null),
+      duration: yup
+        .number()
+        .integer()
+        .nullable()
+        .positive()
+        .default(null),
       // not actually in the database, but used for validation:
       cancelled: yup
         .boolean()
@@ -372,6 +378,12 @@ export default class Report extends Model {
     return attendees.find(el => el.role === role && el.primary)
   }
 
+  static getEngagementDateFormat() {
+    return Settings.engagementsIncludeTimeAndDuration
+      ? Settings.dateFormats.forms.displayLong.withTime
+      : Settings.dateFormats.forms.displayLong.date
+  }
+
   getReportApprovedAt() {
     if (this.workflow && this.isApproved()) {
       const actions = Object.assign([], this.workflow)
@@ -379,31 +391,5 @@ export default class Report extends Model {
       return !lastApprovalStep ? "" : lastApprovalStep.createdAt
     } else {
     }
-  }
-
-  addAttendee(newAttendee) {
-    if (!newAttendee || !newAttendee.uuid) {
-      return
-    }
-
-    let attendees = this.attendees
-
-    if (attendees.find(attendee => attendee.uuid === newAttendee.uuid)) {
-      return
-    }
-
-    let person = new Person(newAttendee)
-    person.primary = false
-
-    if (
-      !attendees.find(
-        attendee => attendee.role === person.role && attendee.primary
-      )
-    ) {
-      person.primary = true
-    }
-
-    this.attendees.push(person)
-    return true
   }
 }

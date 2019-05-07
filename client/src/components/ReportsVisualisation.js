@@ -8,8 +8,6 @@ import React, { Component } from "react"
 
 const d3 = require("d3")
 
-const Context = React.createContext()
-
 export const propTypes = {
   queryParams: PropTypes.object,
   showLoading: PropTypes.func.isRequired,

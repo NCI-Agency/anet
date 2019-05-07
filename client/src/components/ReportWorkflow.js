@@ -7,11 +7,6 @@ import React, { Component } from "react"
 import { Button, Modal } from "react-bootstrap"
 import "./ReportWorkflow.css"
 
-const APPROVE = "APPROVE"
-const REJECT = "REJECT"
-const SUBMIT = "SUBMIT"
-const PUBLISH = "PUBLISH"
-
 const ACTION_TYPE_DETAILS = {
   APPROVE: { text: "Approved", cssClass: "btn-success approved" },
   REJECT: { text: "Changes requested", cssClass: "btn-danger rejected" },
@@ -29,7 +24,9 @@ const ApprovalStepModalStatus = ({ action }) => {
         {actionType.text} by <LinkTo person={action.person} isLink={false} /> on
         <small>
           {" "}
-          {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}
+          {moment(action.createdAt).format(
+            Settings.dateFormats.forms.displayShort.withTime
+          )}
         </small>
       </span>
     )
@@ -119,7 +116,9 @@ const ActionDetails = ({ action }) => {
         <br />
         <small>
           On{" "}
-          {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}
+          {moment(action.createdAt).format(
+            Settings.dateFormats.forms.displayShort.withTime
+          )}
         </small>
       </div>
     )

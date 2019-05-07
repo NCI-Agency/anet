@@ -1,5 +1,5 @@
 import "@blueprintjs/core/lib/css/blueprint.css"
-import { DateInput } from "@blueprintjs/datetime"
+import { DateInput, TimePrecision } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { Settings } from "api"
 import moment from "moment"
@@ -28,20 +28,35 @@ export default class CustomDateInput extends Component {
   static propTypes = {
     id: PropTypes.string,
     showIcon: PropTypes.bool,
+    withTime: PropTypes.bool,
     value: PropTypes.object,
     onChange: PropTypes.func,
     onBlur: PropTypes.func
   }
 
   static defaultProps = {
-    showIcon: true
+    showIcon: true,
+    withTime: false
   }
 
   render() {
-    const { id, showIcon, value, onChange, onBlur } = this.props
+    const { id, showIcon, withTime, value, onChange, onBlur } = this.props
     const rightElement = showIcon && CalendarIcon(id)
-    const style = { width: showIcon ? "11em" : "8em", fontSize: "1.1em" }
-    const inputFormat = Settings.dateFormats.forms.input[0]
+    const width = 8 + (showIcon ? 3 : 0) + (withTime ? 3 : 0)
+    const style = { width: `${width}em`, fontSize: "1.1em" }
+    const dateFormats = withTime
+      ? Settings.dateFormats.forms.input.withTime
+      : Settings.dateFormats.forms.input.date
+    const inputFormat = dateFormats[0]
+    const timePickerProps = !withTime
+      ? {}
+      : {
+        precision: TimePrecision.MINUTE,
+        selectAllOnFocus: true
+        // FIXME: clicking a time arrow immediately closes the dialog;
+        // see https://github.com/palantir/blueprint/issues/3474
+        // showArrowButtons: true
+      }
     return (
       <DateInput
         inputProps={{ id, style, onBlur }}
@@ -49,9 +64,7 @@ export default class CustomDateInput extends Component {
         value={value}
         onChange={onChange}
         formatDate={date => moment(date).format(inputFormat)}
-        parseDate={str =>
-          moment(str, Settings.dateFormats.forms.input, true).toDate()
-        }
+        parseDate={str => moment(str, dateFormats, true).toDate()}
         placeholder={inputFormat}
         maxDate={moment()
           .add(20, "years")
@@ -59,6 +72,9 @@ export default class CustomDateInput extends Component {
           .toDate()}
         canClearSelection={false}
         showActionsBar
+        closeOnSelection={!withTime}
+        timePickerProps={timePickerProps}
+        popoverProps={{ usePortal: false }}
       />
     )
   }

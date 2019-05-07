@@ -1,8 +1,9 @@
-import API from "api"
+import API, { Settings } from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import MultiSelector from "components/MultiSelector"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -57,13 +58,27 @@ class AuthorizationGroupForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
           values,
           submitForm
         }) => {
+          const positionsFilters = {
+            allAdvisorPositions: {
+              label: "All advisor positions",
+              searchQuery: true,
+              queryVars: {
+                status: Position.STATUS.ACTIVE,
+                type: [
+                  Position.TYPE.ADVISOR,
+                  Position.TYPE.SUPER_USER,
+                  Position.TYPE.ADMINISTRATOR
+                ],
+                matchPersonName: true
+              }
+            }
+          }
           const action = (
             <div>
               <Button
@@ -71,7 +86,7 @@ class AuthorizationGroupForm extends Component {
                 bsStyle="primary"
                 type="button"
                 onClick={submitForm}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 Save Authorization Group
               </Button>
@@ -90,14 +105,19 @@ class AuthorizationGroupForm extends Component {
                     name="description"
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("descriptionCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "descriptionCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="descriptionCharsLeft">
-                          {250 - this.props.initialValues.description.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.description.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>
@@ -108,29 +128,24 @@ class AuthorizationGroupForm extends Component {
                     name="status"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={this.statusButtons}
+                    onChange={value => setFieldValue("status", value)}
                   />
 
-                  <MultiSelector
-                    items={values.positions}
-                    objectType={Position}
-                    queryParams={{
-                      status: Position.STATUS.ACTIVE,
-                      type: [
-                        Position.TYPE.ADVISOR,
-                        Position.TYPE.SUPER_USER,
-                        Position.TYPE.ADMINISTRATOR
-                      ]
-                    }}
-                    addFieldName="positions"
-                    addFieldLabel="Positions"
-                    addon={POSITIONS_ICON}
-                    placeholder="Start typing to search for a position..."
-                    fields={Position.autocompleteQuery}
-                    template={Position.autocompleteTemplate}
+                  <AdvancedMultiSelect
+                    fieldName="positions"
+                    fieldLabel="Positions"
+                    placeholder="Search for a position..."
+                    value={values.positions}
                     renderSelected={
                       <PositionTable positions={values.positions} showDelete />
                     }
+                    overlayColumns={["Position", "Current Occupant"]}
+                    overlayRenderRow={PositionOverlayRow}
+                    filterDefs={positionsFilters}
                     onChange={value => setFieldValue("positions", value)}
+                    objectType={Position}
+                    fields={Position.autocompleteQuery}
+                    addon={POSITIONS_ICON}
                   />
                 </Fieldset>
 
@@ -144,7 +159,7 @@ class AuthorizationGroupForm extends Component {
                       bsStyle="primary"
                       type="button"
                       onClick={submitForm}
-                      disabled={isSubmitting || !isValid}
+                      disabled={isSubmitting}
                     >
                       Save Authorization Group
                     </Button>

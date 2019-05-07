@@ -32,7 +32,7 @@ class ReportEdit extends Page {
     return API.query(
       /* GraphQL */ `
       report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, atmosphere, atmosphereDetails, state
+        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails, state
         keyOutcomes, reportText, nextSteps, cancelledReason,
         author { uuid, name, rank, role },
         location { uuid, name },

@@ -15,6 +15,14 @@
 	z-index: 1070 !important;
 }
 
+/* Make bp3 timepicker in-line
+.bp3-timepicker {
+	display: inline-block;
+	vertical-align: middle;
+	padding-left: 8px;
+}
+*/
+
 /* Make bp3 input and right element behave mostly like bootstrap inputs */
 .bp3-input {
 	height: 38px;

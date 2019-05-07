@@ -6,11 +6,15 @@ import utils from "utils"
 import * as yup from "yup"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
-  uuid createdAt updatedAt text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
+  uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
 `
 export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
   notes { ${GRAPHQL_NOTE_FIELDS} }
 `
+export const NOTE_TYPE = {
+  FREE_TEXT: "FREE_TEXT",
+  CHANGE_RECORD: "CHANGE_RECORD"
+}
 export const yupDate = yup.date().transform(function(value, originalValue) {
   if (this.isType(value)) {
     return value
@@ -166,7 +170,7 @@ export default class Model {
 
   setState(props) {
     Object.forEach(props, (key, value) => {
-      if (value !== null) this[key] = value
+      this[key] = value
     })
 
     return this

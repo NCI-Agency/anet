@@ -20,7 +20,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
-import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.junit.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
@@ -36,10 +36,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Create a new AO
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(aoUuid).isNotNull();
     final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoUuid,
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao.getShortName()).isEqualTo(created.getShortName());
     assertThat(ao.getLongName()).isEqualTo(created.getLongName());
     assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
@@ -52,7 +52,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Verify the AO name is updated.
     Organization updated = graphQLHelper.getObjectById(jack, "organization", FIELDS,
-        created.getUuid(), new TypeReference<GraphQLResponse<Organization>>() {});
+        created.getUuid(), new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(updated.getLongName()).isEqualTo(created.getLongName());
 
     // Create a position and put it in this AO
@@ -60,10 +60,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     b1.setOrganization(updated);
     b1.setCode(b1.getCode() + "_" + Instant.now().toEpochMilli());
     final String b1Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", b1, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", b1, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(b1Uuid).isNotNull();
     b1 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1Uuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(b1.getUuid()).isNotNull();
     assertThat(b1.getOrganizationUuid()).isEqualTo(updated.getUuid());
 
@@ -73,7 +73,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     Position ret = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(ret.getOrganization()).isNotNull();
     assertThat(ret.getOrganizationUuid()).isEqualTo(updated.getUuid());
 
@@ -85,17 +85,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     child.setStatus(OrganizationStatus.ACTIVE);
     child.setType(OrganizationType.ADVISOR_ORG);
     final String childUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", child, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", child, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(childUuid).isNotNull();
     child = graphQLHelper.getObjectById(admin, "organization", FIELDS, childUuid,
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(child.getUuid()).isNotNull();
 
     OrganizationSearchQuery query = new OrganizationSearchQuery();
     query.setParentOrgUuid(created.getUuid());
     final AnetBeanList<Organization> children = graphQLHelper.searchObjects(admin,
         "organizationList", "query", "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(children.getList()).hasSize(1).contains(child);
 
     // Give this Org some Approval Steps
@@ -109,7 +109,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Verify approval step was saved.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     List<ApprovalStep> returnedSteps = updated.loadApprovalSteps(context).get();
     assertThat(returnedSteps.size()).isEqualTo(1);
     assertThat(returnedSteps.get(0).loadApprovers(context).get()).contains(b1);
@@ -120,10 +120,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     task.setLongName("Verify that you can update Tasks on a Organization");
     task.setStatus(TaskStatus.ACTIVE);
     final String taskUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        task, new TypeReference<GraphQLResponse<Task>>() {});
+        task, new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(taskUuid).isNotNull();
     task = graphQLHelper.getObjectById(admin, "task", "uuid shortName longName status", taskUuid,
-        new TypeReference<GraphQLResponse<Task>>() {});
+        new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(task.getUuid()).isNotNull();
 
     child.setTasks(ImmutableList.of(task));
@@ -134,7 +134,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Verify task was saved.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(updated.loadTasks()).isNotNull();
     assertThat(updated.loadTasks().size()).isEqualTo(1);
     assertThat(updated.loadTasks().get(0).getUuid()).isEqualTo(task.getUuid());
@@ -152,7 +152,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Verify approval steps updated correct.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     returnedSteps = updated.loadApprovalSteps(context).get();
     assertThat(returnedSteps.size()).isEqualTo(2);
     assertThat(returnedSteps.get(0).getName()).isEqualTo(step1.getName());
@@ -167,10 +167,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Create a new AO
     final Organization ao = OrganizationTest.getTestAO(true);
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(aoUuid).isNotNull();
     final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoUuid,
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao.getShortName()).isEqualTo(created.getShortName());
     assertThat(ao.getLongName()).isEqualTo(created.getLongName());
     assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
@@ -178,7 +178,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Trying to create another AO with the same identificationCode should fail
     try {
       graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
-          ao, new TypeReference<GraphQLResponse<Organization>>() {});
+          ao, new TypeReference<GraphQlResponse<Organization>>() {});
       fail("Expected ClientErrorException");
     } catch (ClientErrorException expectedException) {
     }
@@ -189,10 +189,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Create a new AO
     final Organization ao1 = OrganizationTest.getTestAO(true);
     final String ao1Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao1Uuid).isNotNull();
     final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao1Uuid, new TypeReference<GraphQLResponse<Organization>>() {});
+        ao1Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
     assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
@@ -200,10 +200,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Create another new AO
     final Organization ao2 = OrganizationTest.getTestAO(true);
     final String ao2Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao2, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao2, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao2Uuid).isNotNull();
     final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao2Uuid, new TypeReference<GraphQLResponse<Organization>>() {});
+        ao2Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao2.getShortName()).isEqualTo(created2.getShortName());
     assertThat(ao2.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao2.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
@@ -223,20 +223,20 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Create a new AO with NULL identificationCode
     final Organization ao1 = OrganizationTest.getTestAO(false);
     final String ao1Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao1Uuid).isNotNull();
     final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao1Uuid, new TypeReference<GraphQLResponse<Organization>>() {});
+        ao1Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
     assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
 
     // Creating another AO with NULL identificationCode should succeed
     final String ao2Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao2Uuid).isNotNull();
     final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao2Uuid, new TypeReference<GraphQLResponse<Organization>>() {});
+        ao2Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao1.getShortName()).isEqualTo(created2.getShortName());
     assertThat(ao1.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao1.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
@@ -244,20 +244,20 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Creating an AO with empty identificationCode should succeed
     ao1.setIdentificationCode("");
     final String ao3Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao3Uuid).isNotNull();
     final Organization created3 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao3Uuid, new TypeReference<GraphQLResponse<Organization>>() {});
+        ao3Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao1.getShortName()).isEqualTo(created3.getShortName());
     assertThat(ao1.getLongName()).isEqualTo(created3.getLongName());
     assertThat(ao1.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
 
     // Creating another AO with empty identificationCode should succeed
     final String ao4Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao4Uuid).isNotNull();
     final Organization created4 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao4Uuid, new TypeReference<GraphQLResponse<Organization>>() {});
+        ao4Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao1.getShortName()).isEqualTo(created4.getShortName());
     assertThat(ao1.getLongName()).isEqualTo(created4.getLongName());
     assertThat(ao1.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
@@ -265,10 +265,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Create a new AO with non-NULL identificationCode
     final Organization ao2 = OrganizationTest.getTestAO(true);
     final String ao5Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao2, new TypeReference<GraphQLResponse<Organization>>() {});
+        "OrganizationInput", ao2, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao5Uuid).isNotNull();
     final Organization created5 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao5Uuid, new TypeReference<GraphQLResponse<Organization>>() {});
+        ao5Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(ao2.getShortName()).isEqualTo(created5.getShortName());
     assertThat(ao2.getLongName()).isEqualTo(created5.getLongName());
     assertThat(ao2.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());
@@ -295,20 +295,20 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     query.setText("Ministry");
     AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList()).isNotEmpty();
 
     // Search by name and type
     query.setType(OrganizationType.ADVISOR_ORG);
     orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList()).isEmpty(); // Should be empty!
 
     query.setType(OrganizationType.PRINCIPAL_ORG);
     orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList()).isNotEmpty();
 
     // Autocomplete puts the star in, verify that works.
@@ -316,28 +316,28 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     query.setType(null);
     orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("EF 2")).count())
         .isEqualTo(1);
 
     query.setText("EF 2.2*");
     orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("EF 2.2")).count())
         .isEqualTo(1);
 
     query.setText("MOD-F");
     orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("MOD-F")).count())
         .isEqualTo(1);
 
     query.setText("MOD-F*");
     orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("MOD-F")).count())
         .isEqualTo(1);
   }
@@ -349,14 +349,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     query.setPageSize(1);
     final AnetBeanList<Organization> list1 = graphQLHelper.searchObjects(admin, "organizationList",
         "query", "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(list1).isNotNull();
     assertThat(list1.getTotalCount()).isGreaterThan(1);
 
     query.setPageSize(0);
     final AnetBeanList<Organization> listAll = graphQLHelper.searchObjects(admin,
         "organizationList", "query", "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(listAll).isNotNull();
     assertThat(listAll.getTotalCount()).isEqualTo(list1.getTotalCount());
     assertThat(listAll.getTotalCount()).isEqualTo(listAll.getList().size());
@@ -374,7 +374,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     do {
       list = graphQLHelper.getAllObjects(jack,
           "organizations (pageNum: " + pageNum + ", pageSize: " + pageSize + ")", FIELDS,
-          new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+          new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
       assertThat(list).isNotNull();
       assertThat(list.getPageNum()).isEqualTo(pageNum);
       assertThat(list.getPageSize()).isEqualTo(pageSize);
