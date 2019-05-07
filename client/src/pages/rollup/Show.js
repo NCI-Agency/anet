@@ -747,7 +747,8 @@ class BaseRollupShow extends Page {
       toAddresses: r.to,
       comment: values.comment
     }
-    let graphql = "emailRollup(startDate: $startDate, endDate: $endDate"
+    let graphql =
+      /* GraphQL */ "emailRollup(startDate: $startDate, endDate: $endDate"
     const variables = {
       startDate: this.rollupStart.valueOf(),
       endDate: this.rollupEnd.valueOf(),

@@ -222,7 +222,8 @@ class AuthorizationGroupForm extends Component {
     const operation = edit
       ? "updateAuthorizationGroup"
       : "createAuthorizationGroup"
-    let graphql = operation + "(authorizationGroup: $authorizationGroup)"
+    let graphql =
+      /* GraphQL */ operation + "(authorizationGroup: $authorizationGroup)"
     graphql += edit ? "" : " { uuid }"
     const variables = { authorizationGroup: authGroup }
     const variableDef = "($authorizationGroup: AuthorizationGroupInput!)"

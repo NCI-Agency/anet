@@ -156,7 +156,7 @@ export default class OrganizationFilter extends Component {
     if (query[this.props.queryKey]) {
       let getInstanceName = Organization.getInstanceName
       let graphQlQuery =
-        getInstanceName +
+        /* GraphQL */ getInstanceName +
         '(uuid:"' +
         query[this.props.queryKey] +
         '") { uuid, shortName }'

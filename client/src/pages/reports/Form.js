@@ -846,7 +846,7 @@ class BaseReportForm extends Component {
 
   onConfirmDelete = (uuid, resetForm) => {
     const operation = "deleteReport"
-    let graphql = operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
     const variables = { uuid: uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)
@@ -929,7 +929,7 @@ class BaseReportForm extends Component {
     const edit = this.isEditMode(values)
     const operation = edit ? "updateReport" : "createReport"
     let graphql =
-      operation +
+      /* GraphQL */ operation +
       "(report: $report" +
       (edit ? ", sendEditEmail: $sendEditEmail" : "") +
       ")"

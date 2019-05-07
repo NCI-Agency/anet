@@ -374,7 +374,7 @@ class BasePositionShow extends Page {
 
   onConfirmDelete = () => {
     const operation = "deletePosition"
-    let graphql = operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
     const variables = { uuid: this.state.position.uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)
