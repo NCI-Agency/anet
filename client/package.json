@@ -90,7 +90,8 @@
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.3.0",
     "webpack-merge": "^4.2.1",
-    "xhr2": "^0.1.4"
+    "xhr2": "^0.1.4",
+    "xmlhttprequest": "1.8.0"
   },
   "dependencies": {
     "@blueprintjs/core": "^3.15.1",

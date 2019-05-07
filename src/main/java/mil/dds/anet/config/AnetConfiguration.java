@@ -142,6 +142,7 @@ public class AnetConfiguration extends Configuration {
     private Boolean startTls = true;
     private boolean disabled = false;
     private Integer nbOfHoursForStaleEmails;
+    private String sslTrust;
 
     public String getHostname() {
       return hostname;
@@ -197,6 +198,14 @@ public class AnetConfiguration extends Configuration {
 
     public void setNbOfHoursForStaleEmails(Integer hours) {
       this.nbOfHoursForStaleEmails = hours;
+    }
+
+    public String getSslTrust() {
+      return sslTrust;
+    }
+
+    public void setSslTrust(String sslTrust) {
+      this.sslTrust = sslTrust;
     }
   }
 

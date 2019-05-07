@@ -19,6 +19,8 @@ String fakeSmtpIp = "localhost"
 int fakeSmtpPort = 1025;
 String fakeSmtpHtmlIp = "localhost"
 int fakeSmtpHtmlPort = 1080;
+String fakeSmtp_username = "testAnet";
+String fakeSmtp_password = "testAnet";
 
 // Defaults for development variables
 run.environment("DB_DRIVER", "sqlserver")
@@ -33,9 +35,12 @@ run.environment("ANET_PORT", isTestEnv ? "8180" : "8080")
 run.environment("ANET_ADMIN_PORT", isTestEnv ? "8181" : "8081")
 run.environment("ANET_SMTP_PORT", isTestEnv ? fakeSmtpPort : "25")
 run.environment("ANET_SMTP_DISABLE", isTestEnv ? "false" : "true")
+run.environment("ANET_SMTP_SSLTRUST", isTestEnv ? "localhost" : "")
 
 if (isTestEnv) {
-	run.environment("ANET_SMTP_SERVER", "localhost")
+	run.environment("ANET_SMTP_SERVER", fakeSmtpIp)
+	run.environment("ANET_SMTP_USERNAME", fakeSmtp_username)
+	run.environment("ANET_SMTP_PASSWORD", fakeSmtp_password)
 }
 
 // If defined, load alternatives for variables
@@ -348,13 +353,13 @@ task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExec
 	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
 }
 
-task startFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "database container"
-	description = "Starts the fake SMTP email server."
-	targetContainerId { dbContainerName }
-	commands = [ ["d"], ["fake-smtp-server", "--headers", 
-			"--smtp-ip", fakeSmtpIp, "--smtp-port", fakeSmtpPort, 
-			"--http-ip", fakeSmtpHtmlIp, "--http-port", fakeSmtpHtmlPort ] ]
+task startFakeSmtpServer(type: Exec) {
+	commandLine "docker", "exec", "-d", dbContainerName, 
+		"fake-smtp-server", "--headers", 
+		"--auth", fakeSmtp_username + ":" + fakeSmtp_password,
+		"--smtp-ip", fakeSmtpIp, "--smtp-port", fakeSmtpPort, 
+		"--http-ip", fakeSmtpHtmlIp, "--http-port", fakeSmtpHtmlPort
+	println 'SMTP server API available at: ' + 'http://' + fakeSmtpHtmlIp + ':' + fakeSmtpHtmlPort
 }
 
 task stopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
@@ -362,6 +367,10 @@ task stopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerE
 	description = "Stops the fake SMTP email server."
 	targetContainerId { dbContainerName }
 	commands = [ ["pkill", "-f", "fake-smtp-server"] ]
+}
+
+task restartFakeSmtpServer() {
+	finalizedBy stopFakeSmtpServer, startFakeSmtpServer
 }
 
 // Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
@@ -373,7 +382,7 @@ task integrationTest(type: Test) {
     outputs.upToDateWhen { false }
 	environment(run.environment)
 
-	dependsOn dbDrop, dbMigrate, startFakeSmtpServer
+	dependsOn dbDrop, dbMigrate, restartFakeSmtpServer
     finalizedBy stopFakeSmtpServer
 }
 

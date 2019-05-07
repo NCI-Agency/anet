@@ -36,8 +36,7 @@ cache:
 install: true
 
 script:
-  - ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerWaitForDB dbMigrate dbLoad
-  - ./gradlew -PtestEnv startFakeSmtpServer &
+  - ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerWaitForDB dbMigrate dbLoad startFakeSmtpServer
   - ./gradlew -PtestEnv jar check test jacocoTestReport
   - |
     ./gradlew -PtestEnv run &

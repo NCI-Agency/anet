@@ -25,10 +25,11 @@ redirectToHttps: false
 
 # Settings for the SMTP server to send email 
 smtp:
-  hostname: ${ANET_SMTP_SERVER}
+  hostname: "${ANET_SMTP_SERVER}"
   port: ${ANET_SMTP_PORT}
   username: ${ANET_SMTP_USERNAME}
   password: ${ANET_SMTP_PASSWORD}
+  sslTrust: ${ANET_SMTP_SSLTRUST}
   startTls: true
   disabled: ${ANET_SMTP_DISABLE}
   nbOfHoursForStaleEmails: 72

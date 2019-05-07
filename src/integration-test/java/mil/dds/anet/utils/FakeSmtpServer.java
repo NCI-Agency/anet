@@ -6,11 +6,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -23,8 +26,10 @@ import org.json.JSONArray;
  */
 public class FakeSmtpServer {
   // TODO: Read settings from configuration
-  private final String smtpIP = "localhost";
-  private final String smtpPort = "1025";
+  private static final String smtpIP = "localhost";
+  private static final String smtpPort = "1025";
+  private static final String smtpUsername = "testAnet";
+  private static final String smtpPassword = "testAnet";
 
   private final String httpIP = "localhost";
   private final String httpPort = "1080";
@@ -75,6 +80,11 @@ public class FakeSmtpServer {
   private static String sendServerRequest(String request, String requestType) throws IOException {
     URL url = new URL(request);
     HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+
+    String userpass = smtpUsername + ":" + smtpPassword;
+    String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
+    httpConnection.setRequestProperty("Authorization", basicAuth);
+
     httpConnection.setDoOutput(true);
     httpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
     httpConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
@@ -100,10 +110,20 @@ public class FakeSmtpServer {
       String msg, Date date) throws MessagingException {
     Properties properties = System.getProperties();
 
-    properties.setProperty("mail.smtp.host", this.smtpIP);
-    properties.setProperty("mail.smtp.port", this.smtpPort);
+    properties.setProperty("mail.smtp.host", smtpIP);
+    properties.setProperty("mail.smtp.port", smtpPort);
+    properties.setProperty("mail.smtp.auth", "true");
+    properties.setProperty("mail.smtp.ssl.trust", "*");
+    properties.setProperty("mail.smtp.starttls.enable", "true");
 
-    Session session = Session.getDefaultInstance(properties);
+    Session session = Session.getDefaultInstance(properties, new Authenticator() {
+
+      @Override
+      protected PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication(smtpUsername, smtpPassword);
+      }
+
+    });
 
     Message message = new MimeMessage(session);
     message.setFrom(new InternetAddress(from));
@@ -121,7 +141,7 @@ public class FakeSmtpServer {
     message.setText(msg);
     message.setSentDate(date == null ? new Date() : date);
 
-    Transport.send(message);
+    Transport.send(message, message.getAllRecipients());
   }
 
   /**
