@@ -17,7 +17,6 @@ import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -28,24 +27,6 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
   public AuthorizationGroupDao() {
     super("ApprovalSteps", "approvalSteps", "*", null);
-  }
-
-  public AnetBeanList<AuthorizationGroup> getAll(int pageNum, int pageSize) {
-    String sql;
-    if (DaoUtils.isMsSql()) {
-      sql =
-          "/* getAllAuthorizationGroups */ SELECT \"authorizationGroups\".*, COUNT(*) OVER() AS totalCount "
-              + "FROM \"authorizationGroups\" ORDER BY name ASC "
-              + "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-    } else {
-      sql = "/* getAllAuthorizationGroups */ SELECT * from \"authorizationGroups\" "
-          + "ORDER BY name ASC LIMIT :limit OFFSET :offset";
-    }
-
-    final Query sqlQuery =
-        getDbHandle().createQuery(sql).bind("limit", pageSize).bind("offset", pageSize * pageNum);
-    return new AnetBeanList<AuthorizationGroup>(sqlQuery, pageNum, pageSize,
-        new AuthorizationGroupMapper(), null);
   }
 
   public AuthorizationGroup getByUuid(String uuid) {

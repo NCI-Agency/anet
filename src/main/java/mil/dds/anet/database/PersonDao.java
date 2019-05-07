@@ -14,7 +14,6 @@ import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
@@ -29,12 +28,6 @@ public class PersonDao extends AnetBaseDao<Person> {
 
   public PersonDao() {
     super("People", tableName, PERSON_FIELDS, null);
-  }
-
-  public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
-    final Query query = getPagedQuery(pageNum, pageSize);
-    Long manualCount = getSqliteRowCount();
-    return new AnetBeanList<Person>(query, pageNum, pageSize, new PersonMapper(), manualCount);
   }
 
   public Person getByUuid(String uuid) {

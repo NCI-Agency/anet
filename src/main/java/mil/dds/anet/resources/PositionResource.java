@@ -32,13 +32,6 @@ public class PositionResource {
     this.dao = engine.getPositionDao();
   }
 
-  @GraphQLQuery(name = "positions")
-  public AnetBeanList<Position> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") int pageSize) {
-    return dao.getAll(pageNum, pageSize);
-  }
-
   @GraphQLQuery(name = "position")
   public Position getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Position p = dao.getByUuid(uuid);
