@@ -64,8 +64,8 @@ public class ResponseUtils {
 
       // Remove whitespace outside tags
       document.normalize();
-      XPath xPath = XPathFactory.newInstance().newXPath();
-      NodeList nodeList = (NodeList) xPath.evaluate("//text()[normalize-space()='']", document,
+      XPath xpath = XPathFactory.newInstance().newXPath();
+      NodeList nodeList = (NodeList) xpath.evaluate("//text()[normalize-space()='']", document,
           XPathConstants.NODESET);
 
       for (int i = 0; i < nodeList.getLength(); ++i) {

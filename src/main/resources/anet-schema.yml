@@ -6,6 +6,17 @@
 #########################################################
 definitions:
 
+# base definition for a value with a description
+  describedValue:
+    type: object
+    additionalProperties: true
+    required: [value,description]
+    properties:
+      value:
+        type: string
+      description:
+        type: string
+
 # base definition for all Fields. Every field is assumed to have a label
   labeledField:
     type: object
@@ -56,6 +67,12 @@ properties:
     description: The email address where support requests can be sent.
     examples: [support@example.com]
 
+  engagementsIncludeTimeAndDuration:
+    type: boolean
+    default: false
+    title: Whether engagements also include a time and a duration
+    description: Used for report engagements; if set to `true`, you might also want to supply dateFormats.forms.inputWithTime and dateFormats.forms.longWithTime
+
   dateFormats:
     type: object
     additionalProperties: false
@@ -64,17 +81,17 @@ properties:
       email:
         type: object
         additionalProperties: false
-        required: [short, withTime]
+        required: [date]
         properties:
-          short:
+          date:
             type: string
-            title: The short date format for email
+            title: The date format for email
             description: Used in report emails; should be easy to read, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
             examples: ["d MMMM yyyy"]
           withTime:
             type: string
-            title: The date format including the time for email
-            description: Used in report emails; should be easy to read, e.g. "6 December 1998 @ 13:45"; see see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
+            title: The date format including the time for email if `engagementsIncludeTimeAndDuration` is `true`
+            description: Used to show the report engagement date/time in report emails; should be easy to read, e.g. "6 December 1998 @ 13:45"; see see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
             examples: ["d MMMM yyyy @ HH:mm"]
       excel:
         type: string
@@ -84,32 +101,59 @@ properties:
       forms:
         type: object
         additionalProperties: false
-        required: [input, short, long, withTime]
+        required: [input, displayShort, displayLong]
         properties:
           input:
-            type: array
-            uniqueItems: true
-            minItems: 1
-            items:
-              type: string
-              title: The supported date formats for form input fields
-              description: Used in date inputs in the user interface, the first one is used as placeholder; should be easy to type, e.g. "06-12-1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-              examples: ["DD-MM-YYYY", "DD/MM/YYYY", "D MMMM YYYY"]
-          short:
-            type: string
-            title: The short date format for forms
-            description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-            examples: ["D MMMM YYYY"]
-          long:
-            type: string
-            title: The long date format for forms
-            description: Used to show dates in forms in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-            examples: ["dddd, D MMMM YYYY"]
-          withTime:
-            type: string
-            title: The date format including the time for forms
-            description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998 @ 13:45"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-            examples: ["D MMMM YYYY @ HH:mm"]
+            type: object
+            additionalProperties: false
+            required: [date]
+            properties:
+              date:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: The supported date formats for form input fields
+                  description: Used in date inputs in the user interface, the first one is used as placeholder; should be easy to type, e.g. "06-12-1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+                  examples: ["DD-MM-YYYY", "DD/MM/YYYY", "D MMMM YYYY"]
+              withTime:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: The supported date/time formats if `engagementsIncludeTimeAndDuration` is `true`
+                  description: Used for the report engagement date input in the user interface, the first one is used as placeholder; should be easy to type, e.g. "06-12-1998 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+                  examples: ["DD-MM-YYYY HH:mm", "DD/MM/YYYY HH:mm", "D MMMM YYYY HH:mm"]
+          displayShort:
+            additionalProperties: false
+            required: [date]
+            properties:
+              date:
+                type: string
+                title: The short date format for forms
+                description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+                examples: ["D MMMM YYYY"]
+              withTime:
+                type: string
+                title: The date format including the time for forms
+                description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998 @ 13:45"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+                examples: ["D MMMM YYYY @ HH:mm"]
+          displayLong:
+            additionalProperties: false
+            required: [date]
+            properties:
+              date:
+                type: string
+                title: The long date format for forms
+                description: Used to show dates in forms in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+                examples: ["dddd, D MMMM YYYY"]
+              withTime:
+                type: string
+                title: The long date/time format if `engagementsIncludeTimeAndDuration` is `true`
+                description: Used to show the report engagement date/time in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998 @ 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+                examples: ["dddd, D MMMM YYYY @ HH:mm"]
 
   reportWorkflow:
     type: object
@@ -139,7 +183,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, longLabel, longName, responsibleOrg]
+        required: [shortLabel, shortName, longLabel, longName, responsibleOrg, responsiblePositions]
         properties:
           shortLabel:
             type: string
@@ -174,11 +218,13 @@ properties:
             title: The label for a task's responsible organization
             description: Used in the UI where a label for a task's responsible organization is shown.
             examples: [Responsible organization]
+          responsiblePositions:
+            "$ref": "#/definitions/inputField"
 
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,reportTags,nextSteps,keyOutcomes,reportText]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,keyOutcomes,reportText]
         properties:
           intent:
             type: string
@@ -251,10 +297,7 @@ properties:
             uniqueItems: true
             minItems: 1
             items:
-              type: string
-              title: The list of possible ranks
-              description: Used in the UI where a rank can be selected for a person.
-              examples: [CIV, CTR, OF-1, OF-2, OF-3]
+              "$ref": "#/definitions/describedValue"
           gender:
             type: string
             title: The label for a person's gender

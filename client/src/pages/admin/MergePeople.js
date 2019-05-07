@@ -1,5 +1,6 @@
 import API, { Settings } from "api"
-import Autocomplete from "components/Autocomplete"
+import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -15,6 +16,7 @@ import React from "react"
 import { Alert, Button, Checkbox, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
+import PEOPLE_ICON from "resources/people.png"
 import * as yup from "yup"
 
 class MergePeople extends Page {
@@ -29,9 +31,9 @@ class MergePeople extends Page {
       .object()
       .nullable()
       .default({})
-      // eslint-disable-next-line no-template-curly-in-string
       .test(
         "required-object",
+        // eslint-disable-next-line no-template-curly-in-string
         "You must select a ${path}",
         value => value && value.uuid
       ),
@@ -39,9 +41,9 @@ class MergePeople extends Page {
       .object()
       .nullable()
       .default({})
-      // eslint-disable-next-line no-template-curly-in-string
       .test(
         "required-object",
+        // eslint-disable-next-line no-template-curly-in-string
         "You must select a ${path}",
         value => value && value.uuid
       )
@@ -92,42 +94,46 @@ class MergePeople extends Page {
         >
           {({
             isSubmitting,
-            isValid,
             setFieldValue,
             setFieldTouched,
             values,
             submitForm
           }) => {
             const { loser, winner } = values
+            const peopleFilters = {
+              all: {
+                label: "All",
+                searchQuery: true,
+                queryVars: { matchPositionName: true }
+              }
+            }
             return (
               <Form>
                 <Grid fluid>
                   <Row>
                     <Col md={6}>
                       <Row>
-                        <Field
-                          name="loser"
-                          component={FieldHelper.renderSpecialField}
-                          vertical
+                        <AdvancedSingleSelect
+                          fieldName="loser"
+                          fieldLabel="Loser"
+                          placeholder="Select the duplicate person"
+                          value={values.loser}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={PersonSimpleOverlayRow}
+                          filterDefs={peopleFilters}
                           onChange={value => {
                             setFieldValue("loser", value)
                             setFieldTouched("loser") // onBlur doesn't work when selecting an option
                           }}
-                          widget={
-                            <Autocomplete
-                              valueKey="name"
-                              placeholder="Select the duplicate person"
-                              objectType={Person}
-                              fields={personFields}
-                              template={person => (
-                                <LinkTo person={person} isLink={false} />
-                              )}
-                            />
-                          }
+                          objectType={Person}
+                          valueKey="name"
+                          fields={personFields}
+                          addon={PEOPLE_ICON}
+                          vertical
                         />
                       </Row>
                       <Row>
-                        {loser.uuid && (
+                        {loser && loser.uuid && (
                           <fieldset>
                             {this.showPersonDetails(new Person(loser))}
                           </fieldset>
@@ -136,29 +142,27 @@ class MergePeople extends Page {
                     </Col>
                     <Col md={6}>
                       <Row>
-                        <Field
-                          name="winner"
-                          component={FieldHelper.renderSpecialField}
-                          vertical
+                        <AdvancedSingleSelect
+                          fieldName="winner"
+                          fieldLabel="Winner"
+                          placeholder="Select the OTHER duplicate person"
+                          value={values.winner}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={PersonSimpleOverlayRow}
+                          filterDefs={peopleFilters}
                           onChange={value => {
                             setFieldValue("winner", value)
                             setFieldTouched("winner") // onBlur doesn't work when selecting an option
                           }}
-                          widget={
-                            <Autocomplete
-                              valueKey="name"
-                              placeholder="Select the OTHER duplicate person"
-                              objectType={Person}
-                              fields={personFields}
-                              template={person => (
-                                <LinkTo person={person} isLink={false} />
-                              )}
-                            />
-                          }
+                          objectType={Person}
+                          valueKey="name"
+                          fields={personFields}
+                          addon={PEOPLE_ICON}
+                          vertical
                         />
                       </Row>
                       <Row>
-                        {winner.uuid && (
+                        {winner && winner.uuid && (
                           <fieldset>
                             {this.showPersonDetails(new Person(winner))}
                           </fieldset>
@@ -168,7 +172,7 @@ class MergePeople extends Page {
                   </Row>
                   <Row>
                     <Col md={12}>
-                      {loser.position && !winner.position && (
+                      {loser && loser.position && winner && !winner.position && (
                         <Field
                           name="copyPosition"
                           component={FieldHelper.renderSpecialField}
@@ -180,7 +184,7 @@ class MergePeople extends Page {
                           }
                         />
                       )}
-                      {loser.position && winner.position && (
+                      {loser && loser.position && winner && winner.position && (
                         <Alert bsStyle="danger">
                           <b>Danger:</b> Position on Loser (
                           {loser.position.name}) will be left unfilled
@@ -195,7 +199,7 @@ class MergePeople extends Page {
                         bsSize="large"
                         block
                         onClick={submitForm}
-                        disabled={isSubmitting || !isValid}
+                        disabled={isSubmitting}
                       >
                         Merge People
                       </Button>
@@ -260,7 +264,9 @@ class MergePeople extends Page {
           component={FieldHelper.renderReadonlyField}
           humanValue={
             person.createdAt &&
-            moment(person.createdAt).format(Settings.dateFormats.forms.withTime)
+            moment(person.createdAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )
           }
           vertical
         />

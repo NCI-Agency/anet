@@ -43,6 +43,9 @@ script:
     SERVER_PID=$!
     sleep 60
   - |
+    YARN_BIN="$PWD"/.gradle/yarn/yarn-latest/bin
+    NODE_BIN=`echo "$PWD"/.gradle/nodejs/*/bin`
+    export PATH="$YARN_BIN":"$NODE_BIN":$PATH
     cd client
     yarn run lint
     yarn run test-all

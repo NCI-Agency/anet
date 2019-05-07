@@ -7,7 +7,7 @@ import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { NOTE_TYPE } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
@@ -164,7 +164,10 @@ class BaseRelatedObjectNotes extends Component {
             <Icon icon={IconNames.ADD} />
           </button>
           <RelatedObjectNoteModal
-            note={{ noteRelatedObjects: [{ ...this.props.relatedObject }] }}
+            note={{
+              type: NOTE_TYPE.FREE_TEXT,
+              noteRelatedObjects: [{ ...this.props.relatedObject }]
+            }}
             showModal={this.state.showRelatedObjectNoteModal === "new"}
             onCancel={this.cancelRelatedObjectNoteModal}
             onSuccess={this.hideNewRelatedObjectNoteModal}
@@ -190,6 +193,23 @@ class BaseRelatedObjectNotes extends Component {
           const byMe = Person.isEqual(currentUser, note.author)
           const author = byMe ? "me" : <LinkTo person={note.author} />
           const canEdit = byMe || currentUser.isAdmin()
+          const isJson = note.type !== NOTE_TYPE.FREE_TEXT
+          const jsonFields = isJson ? JSON.parse(note.text) : {}
+          const noteText = isJson ? jsonFields.text : note.text
+          let msg = ""
+          if (isJson) {
+            if (jsonFields.oldValue === jsonFields.newValue) {
+              msg = `Field <b>${
+                jsonFields.changedField
+              }</b> was unchanged (<em>'${jsonFields.oldValue}'</em>)`
+            } else {
+              msg = `Field <b>${
+                jsonFields.changedField
+              }</b> was changed from <em>'${
+                jsonFields.oldValue
+              }'</em> to <em>'${jsonFields.newValue}'</em>`
+            }
+          }
           return (
             <div key={note.uuid} style={noteDivStyle}>
               <span style={{ float: "left" }}>
@@ -226,15 +246,40 @@ class BaseRelatedObjectNotes extends Component {
                   </ConfirmDelete>
                 </span>
               )}
-              <div
-                style={{
-                  clear: "both",
-                  backgroundColor: "white",
-                  overflowWrap: "break-word",
-                  /* IE: */ wordWrap: "break-word"
-                }}
-                dangerouslySetInnerHTML={{ __html: note.text }}
-              />
+              {isJson ? (
+                <div
+                  style={{
+                    clear: "both",
+                    backgroundColor: "white",
+                    overflowWrap: "break-word",
+                    /* IE: */ wordWrap: "break-word"
+                  }}
+                >
+                  {jsonFields.oldValue === jsonFields.newValue ? (
+                    <span>
+                      Field <b>{jsonFields.changedField}</b> was unchanged (
+                      <em>'{jsonFields.oldValue}'</em>):
+                    </span>
+                  ) : (
+                    <span>
+                      Field <b>{jsonFields.changedField}</b> was changed from{" "}
+                      <em>'{jsonFields.oldValue}'</em> to{" "}
+                      <em>'{jsonFields.newValue}'</em>:
+                    </span>
+                  )}
+                  <div dangerouslySetInnerHTML={{ __html: noteText }} />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    clear: "both",
+                    backgroundColor: "white",
+                    overflowWrap: "break-word",
+                    /* IE: */ wordWrap: "break-word"
+                  }}
+                  dangerouslySetInnerHTML={{ __html: noteText }}
+                />
+              )}
             </div>
           )
         })}

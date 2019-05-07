@@ -54,9 +54,9 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class ReportDao extends AnetBaseDao<Report> {
 
   private static final String[] fields = {"uuid", "state", "createdAt", "updatedAt",
-      "engagementDate", "locationUuid", "approvalStepUuid", "intent", "exsum", "atmosphere",
-      "cancelledReason", "advisorOrganizationUuid", "principalOrganizationUuid", "releasedAt",
-      "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "authorUuid"};
+      "engagementDate", "duration", "locationUuid", "approvalStepUuid", "intent", "exsum",
+      "atmosphere", "cancelledReason", "advisorOrganizationUuid", "principalOrganizationUuid",
+      "releasedAt", "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "authorUuid"};
   private static final String tableName = "reports";
   public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
@@ -113,7 +113,7 @@ public class ReportDao extends AnetBaseDao<Report> {
     StringBuilder sql = new StringBuilder("/* insertReport */ INSERT INTO reports "
         + "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, "
         + "text, \"keyOutcomes\", \"nextSteps\", \"authorUuid\", "
-        + "\"engagementDate\", \"releasedAt\", atmosphere, \"cancelledReason\", "
+        + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
         + "\"principalOrganizationUuid\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
@@ -124,7 +124,7 @@ public class ReportDao extends AnetBaseDao<Report> {
       sql.append(":engagementDate, :releasedAt, ");
     }
     sql.append(
-        ":atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
+        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
 
     getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -221,11 +221,6 @@ public class ReportDao extends AnetBaseDao<Report> {
     return updateInternal(r, null);
   }
 
-  /**
-   * @param r the report to update, in its updated state
-   * @param user the user attempting the update, for authorization purposes
-   * @return the number of rows updated by the final update call (should be 1 in all cases).
-   */
   public int updateInternal(Report r, Person user) {
     // Write sensitive information (if allowed)
     ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
@@ -247,10 +242,11 @@ public class ReportDao extends AnetBaseDao<Report> {
     } else {
       sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
     }
-    sql.append("atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
-        + "\"cancelledReason\" = :cancelledReason, "
-        + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
-        + "WHERE uuid = :uuid");
+    sql.append(
+        "duration = :duration, atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
+            + "\"cancelledReason\" = :cancelledReason, "
+            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
+            + "WHERE uuid = :uuid");
 
     return getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
@@ -593,17 +589,16 @@ public class ReportDao extends AnetBaseDao<Report> {
    * Helper method that builds and executes the daily rollup query Handles both MsSql and Sqlite
    * Searching for just all reports and for reports in certain organizations.
    * 
-   * @param orgType: the type of organization to be looking for
-   * @param orgs: the list of orgs for whose reports to find, null means all
-   * @param missingOrgReports: true if we want to look for reports specifically with NULL org
-   *        uuid's.
+   * @param orgType the type of organization to be looking for
+   * @param orgs the list of orgs for whose reports to find, null means all
+   * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
    */
   private List<Map<String, Object>> rollupQuery(Instant start, Instant end,
       OrganizationType orgType, List<Organization> orgs, boolean missingOrgReports) {
     String orgColumn =
         String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationUuid"
             : "principalOrganizationUuid");
-    Map<String, Object> sqlArgs = new HashMap<String, Object>();
+    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
     final Map<String, List<?>> listArgs = new HashMap<>();
 
     StringBuilder sql = new StringBuilder();
@@ -778,11 +773,6 @@ public class ReportDao extends AnetBaseDao<Report> {
     }
   }
 
-  /**
-   * @param r the report to update, in its updated state
-   * @param user the user attempting the update, for authorization purposes
-   * @return the number of rows updated by the final update call (should be 1 in all cases).
-   */
   public int publish(Report r, Person user) {
     // Write the publication action
     ReportAction action = new ReportAction();

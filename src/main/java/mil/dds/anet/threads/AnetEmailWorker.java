@@ -61,6 +61,8 @@ public class AnetEmailWorker implements Runnable {
   private final String supportEmailAddr;
   private final DateTimeFormatter dtf;
   private final DateTimeFormatter dttf;
+  private final boolean engagementsIncludeTimeAndDuration;
+  private final DateTimeFormatter edtf;
   private final Integer nbOfHoursForStaleEmails;
   private final boolean disabled;
 
@@ -74,11 +76,17 @@ public class AnetEmailWorker implements Runnable {
     this.serverUrl = config.getServerUrl();
     this.supportEmailAddr = (String) config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
     this.dtf =
-        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.short"))
+        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
             .withZone(DaoUtils.getDefaultZoneId());
     this.dttf = DateTimeFormatter
         .ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime"))
         .withZone(DaoUtils.getDefaultZoneId());
+    engagementsIncludeTimeAndDuration = Boolean.TRUE
+        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
+    final String edtfPattern = (String) config
+        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
+            : "dateFormats.email.date");
+    this.edtf = DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId());
     this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
     instance = this;
 
@@ -178,6 +186,8 @@ public class AnetEmailWorker implements Runnable {
     context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
     context.put("dateFormatter", dtf);
     context.put("dateTimeFormatter", dttf);
+    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
+    context.put("engagementDateFormatter", edtf);
     context.put("fields", fields);
 
     return email.getAction().buildContext(context);

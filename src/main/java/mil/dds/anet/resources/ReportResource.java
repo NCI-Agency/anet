@@ -80,14 +80,22 @@ public class ReportResource {
 
   private final RollupGraphComparator rollupGraphComparator;
   private final DateTimeFormatter dtf;
+  private final boolean engagementsIncludeTimeAndDuration;
+  private final DateTimeFormatter edtf;
 
   public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
     this.engine = engine;
     this.dao = engine.getReportDao();
     this.config = config;
     this.dtf = DateTimeFormatter
-        .ofPattern((String) this.config.getDictionaryEntry("dateFormats.email.short"))
+        .ofPattern((String) this.config.getDictionaryEntry("dateFormats.email.date"))
         .withZone(DaoUtils.getDefaultZoneId());
+    engagementsIncludeTimeAndDuration = Boolean.TRUE
+        .equals((Boolean) this.config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
+    final String edtfPattern = (String) this.config
+        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
+            : "dateFormats.email.date");
+    this.edtf = DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId());
     @SuppressWarnings("unchecked")
     List<String> pinnedOrgNames = (List<String>) this.config.getDictionaryEntry("pinned_ORGs");
     this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
@@ -508,9 +516,9 @@ public class ReportResource {
     return r;
   }
 
-  /***
+  /**
    * Throws a WebApplicationException when the report does not have an approval chain belonging to
-   * the advisor organization
+   * the advisor organization.
    */
   private void throwExceptionNoApprovalSteps(List<ApprovalStep> steps) {
     if (Utils.isEmptyOrNull(steps)) {
@@ -835,14 +843,16 @@ public class ReportResource {
   }
 
   /**
-   *
+   * Get the daily rollup graph.
+   * 
    * @param start Start timestamp for the rollup period
    * @param end end timestamp for the rollup period
-   * @param engagementDateStart minimum date on reports to include
-   * @param orgType If orgUuid is NULL then the type of organization (ADVISOR_ORG or PRINCIPAL_ORG)
-   *        that the chart should filter on
-   * @param orgUuid if orgType is NULL then the parent org to create the graph off of. All reports
-   *        will be by/about this org or a child org.
+   * @param orgType If both advisorOrgUuid and principalOrgUuid are NULL then the type of
+   *        organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
+   * @param advisorOrgUuid if set then the parent advisor org to create the graph off of. All
+   *        reports will be by/about this org or a child org.
+   * @param principalOrgUuid if set then the parent principal org to create the graph off of. All
+   *        reports will be by/about this org or a child org.
    */
   @GraphQLQuery(name = "rollupGraph")
   public List<RollupGraph> getDailyRollupGraph(@GraphQLArgument(name = "startDate") Long start,
@@ -926,6 +936,8 @@ public class ReportResource {
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
     context.put("dateFormatter", dtf);
+    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
+    context.put("engagementDateFormatter", edtf);
     context.put("fields", fields);
 
     try {

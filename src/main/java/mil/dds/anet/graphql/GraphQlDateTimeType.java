@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class GraphQLDateTimeType extends GraphQLScalarType {
+public class GraphQlDateTimeType extends GraphQLScalarType {
 
   private static final Coercing<Instant, Long> coercing = new Coercing<Instant, Long>() {
     @Override
@@ -37,7 +37,7 @@ public class GraphQLDateTimeType extends GraphQLScalarType {
     }
   };
 
-  public GraphQLDateTimeType() {
+  public GraphQlDateTimeType() {
     super("Instant", null, coercing);
   }
 

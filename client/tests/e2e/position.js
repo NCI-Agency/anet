@@ -93,14 +93,14 @@ test("Move someone in and out of a position", async t => {
   await $changeAssignedPersonButton.click()
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
-  let $assignedPerson = await t.context.pageHelpers.chooseAutocompleteOption(
-    ".select-person-autocomplete",
+  let $assignedPerson = await t.context.pageHelpers.chooseAdvancedSelectOption(
+    "#person",
     personName
   )
   t.is(
     await $assignedPerson.getAttribute("value"),
     person,
-    "Clicking a person autocomplete suggestion populates the autocomplete field."
+    "Clicking a person advanced single select widget suggestion populates the input field."
   )
   let $saveButton = await $("button.save-button")
   await $saveButton.click()

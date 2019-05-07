@@ -123,7 +123,6 @@ class BasePersonForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -174,7 +173,7 @@ class BasePersonForm extends Component {
                 bsStyle="primary"
                 type="button"
                 onClick={submitForm}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 {this.props.saveText}
               </Button>
@@ -255,8 +254,12 @@ class BasePersonForm extends Component {
                         <OptionListModal
                           title={modalTitle}
                           showModal={this.state.showWrongPersonModal}
-                          onCancel={this.hideWrongPersonModal.bind(this)}
-                          onSuccess={this.hideWrongPersonModal.bind(this)}
+                          onCancel={optionValue =>
+                            this.hideWrongPersonModal(optionValue)
+                          }
+                          onSuccess={optionValue =>
+                            this.hideWrongPersonModal(optionValue)
+                          }
                         >
                           {(isSelf && (
                             <div>
@@ -327,9 +330,8 @@ class BasePersonForm extends Component {
                       name="role"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={roleButtons}
-                      onClick={event => {
-                        const role = event.target.value
-                        const roleCountries = this.countries(role)
+                      onChange={value => {
+                        const roleCountries = this.countries(value)
                         // Reset country value on role change
                         if (roleCountries.length === 1) {
                           // Assign default country if there's only one
@@ -337,7 +339,7 @@ class BasePersonForm extends Component {
                         } else {
                           setFieldValue("country", "")
                         }
-                        setFieldValue("role", role)
+                        setFieldValue("role", value)
                       }}
                     >
                       {!edit && isAdvisor && (
@@ -368,6 +370,7 @@ class BasePersonForm extends Component {
                       name="status"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={this.statusButtons}
+                      onChange={value => setFieldValue("status", value)}
                     >
                       {willAutoKickPosition && (
                         <HelpBlock>
@@ -414,8 +417,9 @@ class BasePersonForm extends Component {
                       <Field component="select" className="form-control">
                         <option />
                         {ranks.map(rank => (
-                          <option key={rank} value={rank}>
-                            {rank}
+                          <option key={rank.value} value={rank.value}>
+                            {rank.value}{" "}
+                            {rank.description && ` - ( ${rank.description} )`}
                           </option>
                         ))}
                       </Field>
@@ -453,9 +457,7 @@ class BasePersonForm extends Component {
                     label={Settings.fields.person.endOfTourDate}
                     component={FieldHelper.renderSpecialField}
                     value={values.endOfTourDate}
-                    onChange={(value, formattedValue) =>
-                      setFieldValue("endOfTourDate", value)
-                    }
+                    onChange={value => setFieldValue("endOfTourDate", value)}
                     onBlur={() => setFieldTouched("endOfTourDate", true)}
                     widget={<CustomDateInput id="endOfTourDate" />}
                   />
@@ -476,7 +478,7 @@ class BasePersonForm extends Component {
                       bsStyle="primary"
                       type="button"
                       onClick={submitForm}
-                      disabled={isSubmitting || !isValid}
+                      disabled={isSubmitting}
                     >
                       {this.props.saveText}
                     </Button>

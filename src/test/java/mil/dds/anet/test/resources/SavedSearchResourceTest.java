@@ -14,7 +14,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.beans.search.SavedSearch.SearchObjectType;
-import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.junit.Test;
 
 public class SavedSearchResourceTest extends AbstractResourceTest {
@@ -32,12 +32,12 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
     ss.setQuery("{\"text\" : \"spreadsheets\"}");
 
     final String ssUuid = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch",
-        "SavedSearchInput", ss, new TypeReference<GraphQLResponse<SavedSearch>>() {});
+        "SavedSearchInput", ss, new TypeReference<GraphQlResponse<SavedSearch>>() {});
     assertThat(ssUuid).isNotNull();
 
     // Fetch a list of all of my saved searches
     List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS,
-        new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
+        new TypeReference<GraphQlResponse<List<SavedSearch>>>() {});
     final Optional<SavedSearch> optional =
         mine.stream().filter(e -> e.getUuid().equals(ssUuid)).findFirst();
     assertThat(optional).get().isNotNull();
@@ -49,7 +49,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
     ReportSearchQuery query = mapper.readValue(created.getQuery(), ReportSearchQuery.class);
     final AnetBeanList<Report> results = graphQLHelper.searchObjects(jack, "reportList", "query",
         "ReportSearchQueryInput", "uuid intent state", query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Report>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
     assertThat(results.getList()).isNotEmpty();
 
     // Delete it
@@ -58,7 +58,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
     assertThat(nrDeleted).isEqualTo(1);
 
     mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS,
-        new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
+        new TypeReference<GraphQlResponse<List<SavedSearch>>>() {});
     assertThat(mine).doesNotContain(created);
 
   }
@@ -74,12 +74,12 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
     ss.setQuery("{\"text\" : \"kabul\"}");
 
     final String ssUuid = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch",
-        "SavedSearchInput", ss, new TypeReference<GraphQLResponse<SavedSearch>>() {});
+        "SavedSearchInput", ss, new TypeReference<GraphQlResponse<SavedSearch>>() {});
     assertThat(ssUuid).isNotNull();
 
     // Fetch a list of all of my saved searches
     List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS,
-        new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
+        new TypeReference<GraphQlResponse<List<SavedSearch>>>() {});
     final Optional<SavedSearch> optional =
         mine.stream().filter(e -> e.getUuid().equals(ssUuid)).findFirst();
     assertThat(optional).get().isNotNull();
@@ -91,7 +91,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
     LocationSearchQuery query = mapper.readValue(created.getQuery(), LocationSearchQuery.class);
     final AnetBeanList<Location> results = graphQLHelper.searchObjects(jack, "locationList",
         "query", "LocationSearchQueryInput", "uuid name status lat lng", query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Location>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
     assertThat(results.getList()).isNotEmpty();
 
     // Delete it
@@ -100,7 +100,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
     assertThat(nrDeleted).isEqualTo(1);
 
     mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS,
-        new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
+        new TypeReference<GraphQlResponse<List<SavedSearch>>>() {});
     assertThat(mine).doesNotContain(created);
   }
 }

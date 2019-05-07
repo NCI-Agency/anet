@@ -6,6 +6,7 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, pageNum: 0, sortBy:
     releasedAt
     intent
     engagementDate
+    duration
     location {
       uuid
       name

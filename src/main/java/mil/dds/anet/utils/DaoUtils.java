@@ -168,6 +168,12 @@ public class DaoUtils {
     return rs.wasNull() ? null : value;
   }
 
+  public static Integer getOptionalInt(final ResultSet rs, final String columnName)
+      throws SQLException {
+    final Integer value = rs.getInt(columnName);
+    return rs.wasNull() ? null : value;
+  }
+
   public static Person getUser(Map<String, Object> context, Person user) {
     if (context != null && context.containsKey("user")) {
       user = getUserFromContext(context);

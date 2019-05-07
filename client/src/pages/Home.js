@@ -1,6 +1,5 @@
 import { SEARCH_OBJECT_TYPES } from "actions"
 import API, { Settings } from "api"
-import autobind from "autobind-decorator"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Fieldset from "components/Fieldset"
@@ -282,7 +281,7 @@ class BaseHome extends Page {
                 return (
                   <Button
                     bsStyle="link"
-                    onClick={this.onClickDashboard.bind(this, query)}
+                    onClick={event => this.onClickDashboard(query, event)}
                     className="home-tile"
                     key={index}
                   >
@@ -333,8 +332,7 @@ class BaseHome extends Page {
     )
   }
 
-  @autobind
-  onClickDashboard(queryDetails, event) {
+  onClickDashboard = (queryDetails, event) => {
     deserializeQueryParams(
       SEARCH_OBJECT_TYPES.REPORTS,
       queryDetails.query,
@@ -344,15 +342,13 @@ class BaseHome extends Page {
     event.stopPropagation()
   }
 
-  @autobind
-  onSaveSearchSelect(event) {
+  onSaveSearchSelect = event => {
     let uuid = event && event.target ? event.target.value : event
     let search = this.state.savedSearches.find(el => el.uuid === uuid)
     this.setState({ selectedSearch: search })
   }
 
-  @autobind
-  showSearch() {
+  showSearch = () => {
     let search = this.state.selectedSearch
     if (search) {
       const objType = SEARCH_OBJECT_TYPES[search.objectType]
@@ -361,8 +357,7 @@ class BaseHome extends Page {
     }
   }
 
-  @autobind
-  deserializeCallback(objectType, filters, text) {
+  deserializeCallback = (objectType, filters, text) => {
     // We update the Redux state
     this.props.setSearchQuery({
       objectType: objectType,
@@ -374,8 +369,7 @@ class BaseHome extends Page {
     })
   }
 
-  @autobind
-  onConfirmDelete() {
+  onConfirmDelete = () => {
     const search = this.state.selectedSearch
     const index = this.state.savedSearches.findIndex(
       s => s.uuid === search.uuid

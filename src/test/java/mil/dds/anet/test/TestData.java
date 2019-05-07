@@ -27,6 +27,14 @@ public class TestData {
     return org;
   }
 
+  public static Organization createOrganization(String shortName,
+      Organization.OrganizationType type) {
+    Organization org = new Organization();
+    org.setShortName(shortName);
+    org.setType(type);
+    return org;
+  }
+
   public static Task createTask(String shortName, String longName, String category) {
     return TestData.createTask(shortName, longName, category, null, null, Task.TaskStatus.ACTIVE);
   }
@@ -47,14 +55,6 @@ public class TestData {
     Comment c = new Comment();
     c.setText(text);
     return c;
-  }
-
-  public static Organization createOrganization(String shortName,
-      Organization.OrganizationType type) {
-    Organization org = new Organization();
-    org.setShortName(shortName);
-    org.setType(type);
-    return org;
   }
 
   public static Location createLocation(String name, Double lat, Double lng) {

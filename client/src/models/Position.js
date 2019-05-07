@@ -62,9 +62,9 @@ export default class Position extends Model {
         .object()
         .nullable()
         .default({})
-        // eslint-disable-next-line no-template-curly-in-string
         .test(
           "required-object",
+          // eslint-disable-next-line no-template-curly-in-string
           "${path} is required",
           value => value && value.uuid
         ),

@@ -1,8 +1,8 @@
 import { expect } from "chai"
 import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page"
 
-const POSITION_AUTOCOMPLETE = "ANET"
-const POSITION = "ANET Administrator"
+const POSITION = "ANET"
+const POSITION_COMPLETE = "ANET Administrator"
 
 describe("Create authorization group form page", () => {
   beforeEach("On the create authorization group page...", () => {
@@ -28,14 +28,19 @@ describe("Create authorization group form page", () => {
       ).to.not.include("active")
       CreateAuthorizationGroup.statusInactiveButton.click()
       expect($(".positions_table").isExisting()).to.equal(false)
-      CreateAuthorizationGroup.positions.setValue(POSITION_AUTOCOMPLETE)
-      CreateAuthorizationGroup.waitForPositionsAutoCompleteToChange(POSITION)
+      CreateAuthorizationGroup.positionsInput.click()
+      CreateAuthorizationGroup.positionsInput.setValue(POSITION)
+      CreateAuthorizationGroup.waitForPositionsAdvancedSelectToChange(
+        POSITION_COMPLETE
+      )
       expect(
-        CreateAuthorizationGroup.positionsAutocomplete.getText()
-      ).to.include(POSITION)
-      CreateAuthorizationGroup.positionsAutocomplete.click()
-      // Autocomplete gets empty, the position is added to a table underneath
-      expect(CreateAuthorizationGroup.positions.getValue()).to.equal("")
+        CreateAuthorizationGroup.positionsAdvancedSelectFirstItem.getText()
+      ).to.include(POSITION_COMPLETE)
+      CreateAuthorizationGroup.positionsAdvancedSelectFirstItem.click()
+      // Click outside the positions overlay
+      CreateAuthorizationGroup.name.click()
+      // Advanced select input gets empty, the position is added to a table underneath
+      expect(CreateAuthorizationGroup.positionsInput.getValue()).to.equal("")
       // positions table exists now
       expect($(".positions_table").isExisting())
       CreateAuthorizationGroup.submitForm()

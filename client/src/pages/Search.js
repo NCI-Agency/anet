@@ -1,6 +1,5 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import API, { Settings } from "api"
-import autobind from "autobind-decorator"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -12,13 +11,13 @@ import Page, {
   propTypes as pagePropTypes
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import "components/reactToastify.css"
 import ReportCollection from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import UltimatePagination from "components/UltimatePagination"
 import FileSaver from "file-saver"
 import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
+import _isEmpty from "lodash/isEmpty"
 import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -26,8 +25,7 @@ import React from "react"
 import { Alert, Badge, Button, Modal, Nav, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
-import { toast, ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { toast } from "react-toastify"
 import DOWNLOAD_ICON from "resources/download.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -35,18 +33,17 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
-import utils from "utils"
 
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
-    listName: "reports: reportList",
+    listName: `${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
     sortBy: "ENGAGEMENT_DATE",
     sortOrder: "DESC",
     variableType: "ReportSearchQueryInput",
     fields: ReportCollection.GQL_REPORT_FIELDS
   },
   [SEARCH_OBJECT_TYPES.PEOPLE]: {
-    listName: "people: personList",
+    listName: `${SEARCH_OBJECT_TYPES.PEOPLE}: personList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "PersonSearchQueryInput",
@@ -54,7 +51,7 @@ const SEARCH_CONFIG = {
       "uuid, name, rank, role, emailAddress, position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
   },
   [SEARCH_OBJECT_TYPES.POSITIONS]: {
-    listName: "positions: positionList",
+    listName: `${SEARCH_OBJECT_TYPES.POSITIONS}: positionList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "PositionSearchQueryInput",
@@ -62,21 +59,21 @@ const SEARCH_CONFIG = {
       "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role }"
   },
   [SEARCH_OBJECT_TYPES.TASKS]: {
-    listName: "tasks: taskList",
+    listName: `${SEARCH_OBJECT_TYPES.TASKS}: taskList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "TaskSearchQueryInput",
     fields: "uuid, shortName, longName"
   },
   [SEARCH_OBJECT_TYPES.LOCATIONS]: {
-    listName: "locations: locationList",
+    listName: `${SEARCH_OBJECT_TYPES.LOCATIONS}: locationList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "LocationSearchQueryInput",
     fields: "uuid, name, lat, lng"
   },
   [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: {
-    listName: "organizations: organizationList",
+    listName: `${SEARCH_OBJECT_TYPES.ORGANIZATIONS}: organizationList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "OrganizationSearchQueryInput",
@@ -102,19 +99,20 @@ class Search extends Page {
       toastId: this.successToastId
     })
   }
+  noResults = {
+    [SEARCH_OBJECT_TYPES.REPORTS]: null,
+    people: null,
+    organizations: null,
+    positions: null,
+    locations: null,
+    tasks: null
+  }
+
   state = {
-    success: null,
     error: null,
     didSearch: false,
     query: this.props.searchQuery.text || null,
-    results: {
-      reports: null,
-      people: null,
-      organizations: null,
-      positions: null,
-      locations: null,
-      tasks: null
-    },
+    results: this.noResults,
     showSaveSearch: false
   }
 
@@ -128,7 +126,6 @@ class Search extends Page {
 
   getPaginated = type => {
     const { pagination } = this.props
-    const searchType = SEARCH_OBJECT_TYPES[type]
     const pageLabel = this.pageLabel(type)
     return pagination[pageLabel]
   }
@@ -157,56 +154,63 @@ class Search extends Page {
     return gqlPart
   }
 
-  @autobind
-  _dataFetcher(props, callback, pageNum, pageSize) {
+  _dataFetcher = (props, callback, pageNum, pageSize) => {
     const { searchQuery } = props
     const queryTypes = searchQuery.objectType
       ? { [SEARCH_OBJECT_TYPES[searchQuery.objectType]]: {} }
       : SEARCH_CONFIG
     const query = this.getSearchQuery(props)
-    const parts = Object.keys(queryTypes).map(type => {
-      const paginatedPart = this.getPaginated(type)
-      const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
-      return this.getSearchPart(type, query, goToPageNum, pageSize)
-    })
-    return callback(parts)
+    if (!_isEmpty(query)) {
+      const parts = Object.keys(queryTypes).map(type => {
+        const paginatedPart = this.getPaginated(type)
+        const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
+        return this.getSearchPart(type, query, goToPageNum, pageSize)
+      })
+      return callback(parts)
+    } else {
+      this.setState({
+        didSearch: false,
+        results: this.noResults,
+        error: { message: "You did not enter any search criteria." }
+      })
+    }
   }
 
-  @autobind
-  _fetchDataCallback(parts) {
+  _fetchDataCallback = parts => {
     return GQL.run(parts)
       .then(data => {
         this.setState({
-          success: null,
           error: null,
           results: data,
           didSearch: true
         })
       })
-      .catch(error =>
-        this.setState({ success: null, error: error, didSearch: true })
-      )
+      .catch(error => this.setState({ error: error, didSearch: true }))
   }
 
   fetchData(props) {
     return this._dataFetcher(props, this._fetchDataCallback)
   }
 
-  componentDidMount() {
-    super.componentDidMount()
-    const { success } = this.state
-    this.notify(success)
-  }
-
   render() {
-    const { results, success, error } = this.state
-    const numReports = results.reports ? results.reports.totalCount : 0
-    const numPeople = results.people ? results.people.totalCount : 0
-    const numPositions = results.positions ? results.positions.totalCount : 0
-    const numTasks = results.tasks ? results.tasks.totalCount : 0
-    const numLocations = results.locations ? results.locations.totalCount : 0
-    const numOrganizations = results.organizations
-      ? results.organizations.totalCount
+    const { results, error } = this.state
+    const numReports = results[SEARCH_OBJECT_TYPES.REPORTS]
+      ? results[SEARCH_OBJECT_TYPES.REPORTS].totalCount
+      : 0
+    const numPeople = results[SEARCH_OBJECT_TYPES.PEOPLE]
+      ? results[SEARCH_OBJECT_TYPES.PEOPLE].totalCount
+      : 0
+    const numPositions = results[SEARCH_OBJECT_TYPES.POSITIONS]
+      ? results[SEARCH_OBJECT_TYPES.POSITIONS].totalCount
+      : 0
+    const numTasks = results[SEARCH_OBJECT_TYPES.TASKS]
+      ? results[SEARCH_OBJECT_TYPES.TASKS].totalCount
+      : 0
+    const numLocations = results[SEARCH_OBJECT_TYPES.LOCATIONS]
+      ? results[SEARCH_OBJECT_TYPES.LOCATIONS].totalCount
+      : 0
+    const numOrganizations = results[SEARCH_OBJECT_TYPES.ORGANIZATIONS]
+      ? results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].totalCount
       : 0
 
     const numResults =
@@ -218,12 +222,9 @@ class Search extends Page {
       numTasks
     const noResults = numResults === 0
 
-    const qs = utils.parseQueryString(this.props.location.search)
-
     const taskShortLabel = Settings.fields.task.shortLabel
     return (
       <div>
-        <ToastContainer />
         <SubNav subnavElemId="search-nav">
           <div>
             <Button onClick={this.props.history.goBack} bsStyle="link">
@@ -284,13 +285,15 @@ class Search extends Page {
               />
             </Button>
           )}
-          <Button
-            onClick={this.openSaveModal}
-            id="saveSearchButton"
-            style={{ marginRight: 12 }}
-          >
-            Save search
-          </Button>
+          {this.state.didSearch && (
+            <Button
+              onClick={this.openSaveModal}
+              id="saveSearchButton"
+              style={{ marginRight: 12 }}
+            >
+              Save search
+            </Button>
+          )}
         </div>
         <Messages error={error} /> {/* success is shown through toast */}
         {this.state.query && (
@@ -338,8 +341,7 @@ class Search extends Page {
     )
   }
 
-  @autobind
-  paginationFor(type) {
+  paginationFor = type => {
     const { pageSize, totalCount } = this.state.results[type]
     const paginatedPart = this.getPaginated(type)
     const goToPage = this.getPaginatedNum(paginatedPart)
@@ -364,8 +366,7 @@ class Search extends Page {
     )
   }
 
-  @autobind
-  goToPage(type, pageNum) {
+  goToPage = (type, pageNum) => {
     const { setPagination } = this.props
     const query = this.getSearchQuery()
     const part = this.getSearchPart(type, query, pageNum)
@@ -377,13 +378,13 @@ class Search extends Page {
           setPagination(this.pageLabel(type), pageNum)
         )
       })
-      .catch(error => this.setState({ success: null, error: error }))
+      .catch(error => this.setState({ error: error }))
   }
 
   renderReports() {
     const { results } = this.state
     const { pagination } = this.props
-    const reports = results.reports
+    const reports = results[SEARCH_OBJECT_TYPES.REPORTS]
     const paginatedPart =
       pagination[this.pageLabel(SEARCH_OBJECT_TYPES.REPORTS)]
     const goToPageNum = this.getPaginatedNum(paginatedPart)
@@ -391,7 +392,7 @@ class Search extends Page {
     return (
       <ReportCollection
         paginatedReports={paginatedReports}
-        goToPage={this.goToPage.bind(this, SEARCH_OBJECT_TYPES.REPORTS)}
+        goToPage={value => this.goToPage(SEARCH_OBJECT_TYPES.REPORTS, value)}
       />
     )
   }
@@ -399,7 +400,8 @@ class Search extends Page {
   renderPeople() {
     return (
       <div>
-        {this.paginationFor("people")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.PEOPLE)}
+        <br />
         <Table responsive hover striped className="people-search-results">
           <thead>
             <tr>
@@ -410,30 +412,33 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Person.map(this.state.results.people.list, person => (
-              <tr key={person.uuid}>
-                <td>
-                  <LinkTo person={person} />
-                </td>
-                <td>
-                  <LinkTo position={person.position} />
-                  {person.position && person.position.code
-                    ? `, ${person.position.code}`
-                    : ""}
-                </td>
-                <td>
-                  <LinkTo
-                    whenUnspecified=""
-                    anetLocation={person.position && person.position.location}
-                  />
-                </td>
-                <td>
-                  {person.position && person.position.organization && (
-                    <LinkTo organization={person.position.organization} />
-                  )}
-                </td>
-              </tr>
-            ))}
+            {Person.map(
+              this.state.results[SEARCH_OBJECT_TYPES.PEOPLE].list,
+              person => (
+                <tr key={person.uuid}>
+                  <td>
+                    <LinkTo person={person} />
+                  </td>
+                  <td>
+                    <LinkTo position={person.position} />
+                    {person.position && person.position.code
+                      ? `, ${person.position.code}`
+                      : ""}
+                  </td>
+                  <td>
+                    <LinkTo
+                      whenUnspecified=""
+                      anetLocation={person.position && person.position.location}
+                    />
+                  </td>
+                  <td>
+                    {person.position && person.position.organization && (
+                      <LinkTo organization={person.position.organization} />
+                    )}
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </Table>
       </div>
@@ -443,7 +448,8 @@ class Search extends Page {
   renderOrgs() {
     return (
       <div>
-        {this.paginationFor("organizations")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.ORGANIZATIONS)}
+        <br />
         <Table responsive hover striped id="organizations-search-results">
           <thead>
             <tr>
@@ -454,16 +460,19 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Organization.map(this.state.results.organizations.list, org => (
-              <tr key={org.uuid}>
-                <td>
-                  <LinkTo organization={org} />
-                </td>
-                <td>{org.longName}</td>
-                <td>{org.identificationCode}</td>
-                <td>{org.humanNameOfType()}</td>
-              </tr>
-            ))}
+            {Organization.map(
+              this.state.results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].list,
+              org => (
+                <tr key={org.uuid}>
+                  <td>
+                    <LinkTo organization={org} />
+                  </td>
+                  <td>{org.longName}</td>
+                  <td>{org.identificationCode}</td>
+                  <td>{org.humanNameOfType()}</td>
+                </tr>
+              )
+            )}
           </tbody>
         </Table>
       </div>
@@ -473,8 +482,11 @@ class Search extends Page {
   renderPositions() {
     return (
       <div>
-        {this.paginationFor("positions")}
-        <PositionTable positions={this.state.results.positions.list} />
+        {this.paginationFor(SEARCH_OBJECT_TYPES.POSITIONS)}
+        <br />
+        <PositionTable
+          positions={this.state.results[SEARCH_OBJECT_TYPES.POSITIONS].list}
+        />
       </div>
     )
   }
@@ -482,7 +494,8 @@ class Search extends Page {
   renderLocations() {
     return (
       <div>
-        {this.paginationFor("locations")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.LOCATIONS)}
+        <br />
         <Table responsive hover striped>
           <thead>
             <tr>
@@ -490,7 +503,7 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {this.state.results.locations.list.map(loc => (
+            {this.state.results[SEARCH_OBJECT_TYPES.LOCATIONS].list.map(loc => (
               <tr key={loc.uuid}>
                 <td>
                   <LinkTo anetLocation={loc} />
@@ -506,7 +519,8 @@ class Search extends Page {
   renderTasks() {
     return (
       <div>
-        {this.paginationFor("tasks")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.TASKS)}
+        <br />
         <Table responsive hover striped>
           <thead>
             <tr>
@@ -514,15 +528,18 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Task.map(this.state.results.tasks.list, task => (
-              <tr key={task.uuid}>
-                <td>
-                  <LinkTo task={task}>
-                    {task.shortName} {task.longName}
-                  </LinkTo>
-                </td>
-              </tr>
-            ))}
+            {Task.map(
+              this.state.results[SEARCH_OBJECT_TYPES.TASKS].list,
+              task => (
+                <tr key={task.uuid}>
+                  <td>
+                    <LinkTo task={task}>
+                      {task.shortName} {task.longName}
+                    </LinkTo>
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </Table>
       </div>
@@ -578,7 +595,6 @@ class Search extends Page {
       .catch(error => {
         this.setState(
           {
-            success: null,
             error: error,
             showSaveSearch: false
           },
@@ -592,12 +608,11 @@ class Search extends Page {
 
   onSubmitSaveSearchSuccess = (response, values, form) => {
     if (response.createSavedSearch.uuid) {
+      toast.success("Search saved")
       this.setState({
-        success: "Search saved",
         error: null,
         showSaveSearch: false
       })
-      jumpToTop()
     }
   }
 
@@ -617,27 +632,23 @@ class Search extends Page {
     return API.mutation(graphql, variables, variableDef)
   }
 
-  @autobind
-  openSaveModal() {
+  openSaveModal = () => {
     this.setState({ showSaveSearch: true })
   }
 
-  @autobind
-  closeSaveModal() {
+  closeSaveModal = () => {
     this.setState({ showSaveSearch: false })
   }
 
-  @autobind
-  _exportSearchResultsCallback(parts) {
+  _exportSearchResultsCallback = parts => {
     GQL.runExport(parts, "xlsx")
       .then(blob => {
         FileSaver.saveAs(blob, "anet_export.xlsx")
       })
-      .catch(error => this.setState({ success: null, error: error }))
+      .catch(error => this.setState({ error: error }))
   }
 
-  @autobind
-  exportSearchResults() {
+  exportSearchResults = () => {
     this._dataFetcher(this.props, this._exportSearchResultsCallback, 0, 0)
   }
 }

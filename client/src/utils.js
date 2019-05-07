@@ -125,6 +125,21 @@ export default {
       text = html // no document context, what else can we do?
     }
     return _isEmpty(text)
+  },
+
+  pushHash: function(hash) {
+    const { history, location } = window
+    hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""
+    if (history.replaceState) {
+      let loc = window.location
+      history.replaceState(
+        null,
+        null,
+        hash ? loc.pathname + loc.search + hash : loc.pathname + loc.search // remove hash
+      )
+    } else {
+      location.hash = hash
+    }
   }
 }
 
