@@ -602,30 +602,13 @@ const removeAssociatedPosition = async function(user) {
 }
 
 async function countPositions(user) {
-  // return (await runGQL(user,
-  //     {
-  //         query: `query {
-  //             positions(pageNum: 0, pageSize: 1) {
-  //                 totalCount
-  //             }
-  //         }`,
-  //         variables: {}
-  //     })).data.positions.totalCount
-
   return (await runGQL(user, {
-    query: `query ($positionsQuery: PositionSearchQueryInput) {
-                positionList(query: $positionsQuery) {
-                  totalCount
-                }
-              }
-              `,
-    variables: {
-      positionsQuery: {
-        pageNum: 0,
-        pageSize: 10,
-        status: Position.STATUS.ACTIVE
+    query: `query {
+      positionList(query: {pageNum: 0, pageSize: 1}) {
+        totalCount
       }
-    }
+    }`,
+    variables: {}
   })).data.positionList.totalCount
 }
 

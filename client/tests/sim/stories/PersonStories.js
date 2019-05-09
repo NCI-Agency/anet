@@ -198,10 +198,10 @@ const _deletePerson = async function(user) {
 async function countPersons(user) {
   return (await runGQL(user, {
     query: `query {
-                personList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
-                    totalCount
-                }
-            }`,
+      personList(query: {pageNum: 0, pageSize: 1}) {
+        totalCount
+      }
+    }`,
     variables: {}
   })).data.personList.totalCount
 }
