@@ -7,7 +7,6 @@ public class TagSearchQuery extends AbstractSearchQuery {
   }
 
   private TagSearchSortBy sortBy;
-  private SortOrder sortOrder;
 
   public TagSearchSortBy getSortBy() {
     return sortBy;
@@ -15,14 +14,6 @@ public class TagSearchQuery extends AbstractSearchQuery {
 
   public void setSortBy(TagSearchSortBy sortBy) {
     this.sortBy = sortBy;
-  }
-
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
   }
 
   public static TagSearchQuery withText(String text, int pageNum, int pageSize) {

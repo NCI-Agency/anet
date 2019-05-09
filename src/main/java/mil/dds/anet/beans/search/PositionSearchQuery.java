@@ -20,7 +20,6 @@ public class PositionSearchQuery extends AbstractSearchQuery {
   private String authorizationGroupUuid;
 
   private PositionSearchSortBy sortBy;
-  private SortOrder sortOrder;
 
   public PositionSearchQuery() {
     super();
@@ -97,14 +96,6 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 
   public void setSortBy(PositionSearchSortBy sortBy) {
     this.sortBy = sortBy;
-  }
-
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
   }
 
   public static PositionSearchQuery withText(String text, int pageNum, int pageSize) {

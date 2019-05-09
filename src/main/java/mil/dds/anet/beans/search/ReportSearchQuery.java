@@ -49,12 +49,11 @@ public class ReportSearchQuery extends AbstractSearchQuery {
   private Boolean sensitiveInfo;
 
   private ReportSearchSortBy sortBy;
-  private SortOrder sortOrder;
 
   public ReportSearchQuery() {
     super();
     this.sortBy = ReportSearchSortBy.CREATED_AT;
-    this.sortOrder = SortOrder.DESC;
+    this.setSortOrder(SortOrder.DESC);
   }
 
   public String getAuthorUuid() {
@@ -295,14 +294,6 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 
   public void setSortBy(ReportSearchSortBy sortBy) {
     this.sortBy = sortBy;
-  }
-
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
   }
 
   public static ReportSearchQuery withText(String text, int pageNum, int pageSize) {

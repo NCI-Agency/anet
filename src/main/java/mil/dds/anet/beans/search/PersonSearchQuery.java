@@ -30,12 +30,11 @@ public class PersonSearchQuery extends AbstractSearchQuery {
   Boolean pendingVerification;
 
   private PersonSearchSortBy sortBy;
-  private SortOrder sortOrder;
 
   public PersonSearchQuery() {
     this.setPageSize(100);
-    this.sortOrder = SortOrder.ASC;
     this.sortBy = PersonSearchSortBy.NAME;
+    this.setSortOrder(SortOrder.ASC);
   }
 
   public String getOrgUuid() {
@@ -116,14 +115,6 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 
   public void setSortBy(PersonSearchSortBy sortBy) {
     this.sortBy = sortBy;
-  }
-
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
   }
 
   public Instant getEndOfTourDateStart() {
