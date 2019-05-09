@@ -36,10 +36,10 @@ public final class BatchingUtils {
 
   public static DataLoaderRegistry registerDataLoaders(AnetObjectEngine engine,
       boolean batchingEnabled, boolean cachingEnabled) {
-    final DataLoaderOptions dataLoaderOptions = DataLoaderOptions.newOptions()
-        .setStatisticsCollector(() -> new SimpleStatisticsCollector())
-        .setBatchingEnabled(batchingEnabled).setCachingEnabled(cachingEnabled)
-        .setMaxBatchSize(1000);
+    final DataLoaderOptions dataLoaderOptions =
+        DataLoaderOptions.newOptions().setStatisticsCollector(() -> new SimpleStatisticsCollector())
+            .setBatchingEnabled(batchingEnabled).setCachingEnabled(cachingEnabled)
+            .setMaxBatchSize(1000);
     final DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
     // Give each registry its own thread pool
     final ExecutorService dispatcherService = Executors.newFixedThreadPool(3);
