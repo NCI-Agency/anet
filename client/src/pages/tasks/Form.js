@@ -204,7 +204,11 @@ class BaseTaskForm extends Component {
                         showDelete
                       />
                     }
-                    overlayColumns={["Position", "Current Occupant"]}
+                    overlayColumns={[
+                      "Position",
+                      "Organization",
+                      "Current Occupant"
+                    ]}
                     overlayRenderRow={PositionOverlayRow}
                     filterDefs={positionsFilters}
                     onChange={value =>

@@ -139,7 +139,11 @@ class AuthorizationGroupForm extends Component {
                     renderSelected={
                       <PositionTable positions={values.positions} showDelete />
                     }
-                    overlayColumns={["Position", "Current Occupant"]}
+                    overlayColumns={[
+                      "Position",
+                      "Organization",
+                      "Current Occupant"
+                    ]}
                     overlayRenderRow={PositionOverlayRow}
                     filterDefs={positionsFilters}
                     onChange={value => setFieldValue("positions", value)}

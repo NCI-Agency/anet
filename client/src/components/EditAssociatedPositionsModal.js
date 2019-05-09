@@ -127,7 +127,11 @@ class BaseEditAssociatedPositionsModal extends Component {
                               associatedPositions={values.associatedPositions}
                             />
                           }
-                          overlayColumns={["Position", "Current Occupant"]}
+                          overlayColumns={[
+                            "Position",
+                            "Organization",
+                            "Current Occupant"
+                          ]}
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           onChange={value =>
