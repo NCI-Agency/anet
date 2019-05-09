@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -272,13 +273,38 @@ public class PositionDao extends AnetBaseDao<Position> {
     return people;
   }
 
-  public List<Position> getAssociatedPositions(String positionUuid) {
-    return getDbHandle().createQuery("/* getAssociatedPositions */ SELECT " + POSITIONS_FIELDS
-        + " FROM positions " + "WHERE positions.uuid IN "
-        + "(SELECT \"positionUuid_a\" FROM \"positionRelationships\" WHERE \"positionUuid_b\" = :positionUuid AND deleted = :deleted) "
-        + "OR positions.uuid IN "
-        + "(SELECT \"positionUuid_b\" FROM \"positionRelationships\" WHERE \"positionUuid_a\" = :positionUuid AND deleted = :deleted)")
-        .bind("positionUuid", positionUuid).bind("deleted", false).map(new PositionMapper()).list();
+  public CompletableFuture<List<Position>> getAssociatedPositions(Map<String, Object> context,
+      String positionUuid) {
+    return new ForeignKeyFetcher<Position>().load(context, "position.associatedPositions",
+        positionUuid);
+  }
+
+  static class AssociatedPositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String sql = "/* batch.getAssociatedPositionsForPosition */ SELECT "
+        + POSITIONS_FIELDS
+        + ", CASE WHEN positions.uuid = \"positionRelationships\".\"positionUuid_a\""
+        + " THEN \"positionRelationships\".\"positionUuid_b\""
+        + " ELSE \"positionRelationships\".\"positionUuid_a\" END AS \"associatedPositionUuid\" "
+        + "FROM positions, \"positionRelationships\" "
+        + "WHERE \"positionRelationships\".deleted = :deleted AND (("
+        + "  positions.uuid = \"positionRelationships\".\"positionUuid_a\""
+        + "  AND \"positionRelationships\".\"positionUuid_b\" IN ( <foreignKeys> ) ) OR ("
+        + "  positions.uuid = \"positionRelationships\".\"positionUuid_b\""
+        + "  AND \"positionRelationships\".\"positionUuid_a\" IN ( <foreignKeys> ) ))";
+    private static final Map<String, Object> additionalParams = new HashMap<>();
+    static {
+      additionalParams.put("deleted", false);
+    }
+
+    public AssociatedPositionsBatcher() {
+      super(sql, "foreignKeys", new PositionMapper(), "associatedPositionUuid", additionalParams);
+    }
+  }
+
+  public List<List<Position>> getAssociatedPositionsForPosition(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Position> associatedPositionsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(AssociatedPositionsBatcher.class);
+    return associatedPositionsBatcher.getByForeignKeys(foreignKeys);
   }
 
   public int associatePosition(String positionUuidA, String positionUuidB) {
