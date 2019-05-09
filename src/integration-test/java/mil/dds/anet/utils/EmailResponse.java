@@ -26,6 +26,11 @@ public class EmailResponse {
   public final JSONObject header;
   public final JSONArray headerLines;
 
+  /**
+   * Parse a response from the SMTP server.
+   * 
+   * @param responseData The JSON object received from the server
+   */
   public EmailResponse(JSONObject responseData) {
     this.from =
         responseData.keySet().contains("from") ? new ToFromData(responseData.getJSONObject("from"))
@@ -53,6 +58,9 @@ public class EmailResponse {
     this.headerLines = responseData.optJSONArray("headerLines");
   }
 
+  /**
+   * This class represents the the 'to' and 'from' data fields.
+   */
   public class ToFromData {
     public final List<ValueData> values;
     public final String html;
@@ -68,6 +76,9 @@ public class EmailResponse {
       this.text = responseData.optString("text");
     }
 
+    /**
+     * This class represents the the 'value' data from the 'to' and 'from' fields.
+     */
     public final class ValueData {
       public final String address;
       public final String name;

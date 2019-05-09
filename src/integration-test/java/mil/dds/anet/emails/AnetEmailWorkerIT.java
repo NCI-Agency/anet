@@ -34,8 +34,11 @@ public class AnetEmailWorkerIT {
   FakeSmtpServer emailServer;
   AnetObjectEngine instance;
 
+  /**
+   * Sets up the test.
+   */
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     emailServer = new FakeSmtpServer();
 
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
@@ -68,6 +71,12 @@ public class AnetEmailWorkerIT {
     when(AnetObjectEngine.getInstance()).thenReturn(instance);
   }
 
+
+  /**
+   * Test the worker.
+   * 
+   * @throws IOException On error from the email server
+   */
   @Test
   public void testWorker() throws IOException {
     // Setup

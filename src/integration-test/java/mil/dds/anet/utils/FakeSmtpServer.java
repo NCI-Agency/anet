@@ -22,20 +22,20 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 
 /**
- * This class provides a wrapper for the fake SMTP server's API
+ * This class provides a wrapper for the fake SMTP server's API.
  */
 public class FakeSmtpServer {
-  // TODO: Read settings from configuration
+  // TODO: Read settings from configuration (?)
   private static final String smtpIP = "localhost";
   private static final String smtpPort = "1025";
   private static final String smtpUsername = "testAnet";
   private static final String smtpPassword = "testAnet";
 
-  private final String httpIP = "localhost";
-  private final String httpPort = "1080";
+  private static final String httpIP = "localhost";
+  private static final String httpPort = "1080";
 
   /**
-   * Retrieves all emails from the server
+   * Retrieves all emails from the server.
    * 
    * @return All emails from the server
    * @throws IOException If the request fails
@@ -45,24 +45,24 @@ public class FakeSmtpServer {
   }
 
   /**
-   * Retrieves all emails from the server according to a filter
+   * Retrieves all emails from the server according to a filter.
    * 
    * @param queryFilter The filter to use
    * @return All filtered emails from the server
    * @throws IOException If the request fails
    */
   public List<EmailResponse> requestEmailsFromServer(QueryFilter queryFilter) throws IOException {
-    String request = queryFilter.createFilteredServerQuery(this.httpIP, this.httpPort);
+    String request = queryFilter.createFilteredServerQuery(httpIP, httpPort);
     String response = sendServerRequest(request, "GET");
     System.out.println(response);
     return parseServeResponse(response);
   }
 
   /**
-   * Clears all emails from the server
+   * Clears all emails from the server.
    */
   public void clearEmailServer() throws IOException {
-    String request = String.format("http://%s:%s/api/emails", this.httpIP, this.httpPort);
+    String request = String.format("http://%s:%s/api/emails", httpIP, httpPort);
     sendServerRequest(request, "DELETE");
   }
 
@@ -95,7 +95,7 @@ public class FakeSmtpServer {
   }
 
   /**
-   * Sends an email to the server Warning: The server does not support the BCC field
+   * Sends an email to the server Warning: The server does not support the BCC field.
    * 
    * @param to 'To' address
    * @param from 'From' address
@@ -145,7 +145,7 @@ public class FakeSmtpServer {
   }
 
   /**
-   * A filter for the queries to the email server
+   * A filter for the queries to the email server.
    */
   public class QueryFilter {
     public final String from;

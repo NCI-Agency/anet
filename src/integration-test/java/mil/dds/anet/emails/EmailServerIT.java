@@ -10,10 +10,15 @@ import org.junit.Test;
 /**
  * This class is only meant to show the basic capabilities of the fake SMTP server. It shows how to
  * query the email server and parse the response. Web-interface available at
- * http://<smtp_adress>:<stmp_port>
+ * http://[smtp_adress]:[stmp_port]
  */
 public class EmailServerIT {
 
+  /**
+   * Test the basic functions of the fake SMTP email server.
+   * 
+   * @throws Exception On SMTP query error
+   */
   @Test
   public void runTest() throws Exception {
     FakeSmtpServer emailServer = new FakeSmtpServer();
