@@ -27,8 +27,8 @@ import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderOptions;
 import org.dataloader.DataLoaderRegistry;
+import org.dataloader.stats.SimpleStatisticsCollector;
 import org.dataloader.stats.Statistics;
-import org.dataloader.stats.ThreadLocalStatisticsCollector;
 
 public final class BatchingUtils {
 
@@ -37,7 +37,7 @@ public final class BatchingUtils {
   public static DataLoaderRegistry registerDataLoaders(AnetObjectEngine engine,
       boolean batchingEnabled, boolean cachingEnabled) {
     final DataLoaderOptions dataLoaderOptions = DataLoaderOptions.newOptions()
-        .setStatisticsCollector(() -> new ThreadLocalStatisticsCollector())
+        .setStatisticsCollector(() -> new SimpleStatisticsCollector())
         .setBatchingEnabled(batchingEnabled).setCachingEnabled(cachingEnabled)
         .setMaxBatchSize(1000);
     final DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
