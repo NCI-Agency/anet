@@ -101,7 +101,7 @@ const advancedSelectFilterPositionProps = {
   addon: POSITIONS_ICON
 }
 const advancedSelectFilterLocationProps = {
-  overlayColumns: ["Location", "Name"],
+  overlayColumns: ["Name"],
   overlayRenderRow: LocationOverlayRow,
   objectType: Location,
   valueKey: "name",
