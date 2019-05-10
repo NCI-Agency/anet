@@ -210,7 +210,7 @@ const createPerson = async function(user, grow) {
   if (grow) {
     const count = await countPersons(user)
     if (!grow(count)) {
-      console.debug(`Skipping delete person (currenty ${count} persons exist)`)
+      console.debug(`Skipping delete person (currently ${count} persons exist)`)
       return "(skipped)"
     }
   }
@@ -221,7 +221,7 @@ const deletePerson = async function(user, grow) {
   if (grow) {
     const count = await countPersons(user)
     if (grow(count)) {
-      console.debug(`Skipping delete person (currenty ${count} persons exist)`)
+      console.debug(`Skipping delete person (currently ${count} persons exist)`)
       return "(skipped)"
     }
   }
