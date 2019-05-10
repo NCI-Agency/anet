@@ -87,9 +87,10 @@ const simpleScenario = {
                   pageNum: 0,
                   status: ${Position.STATUS.ACTIVE},
                   isFilled: true,
-                  type: [${Position.TYPE.SUPER_USER}, ${
-            Position.TYPE.ADMINISTRATOR
-          }]
+                  type: [
+                    ${Position.TYPE.SUPER_USER},
+                    ${Position.TYPE.ADMINISTRATOR}
+                  ]
                 }) {
                   list {
                     uuid

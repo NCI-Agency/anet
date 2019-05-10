@@ -130,7 +130,7 @@ async function createHiearchy(user, grow) {
     const subOrgCount = randomSubOrgCount(level)
     var i
     for (i = 1; i <= subOrgCount; i++) {
-      await createSubOrg(result.data.createOrganization, path.concat(i))
+      await createSubOrg(result, path.concat(i))
     }
 
     return result
@@ -159,18 +159,14 @@ const dryRun = false
 async function gqlCreateOrganization(user, org) {
   if (dryRun) {
     return {
-      data: {
-        createOrganization: {
-          uuid: faker.random.uuid()
-        }
-      }
+      uuid: faker.random.uuid()
     }
   } else {
-    return runGQL(user, {
+    return (await runGQL(user, {
       query:
         "mutation($organization: OrganizationInput!) { createOrganization(organization: $organization) { uuid } }",
       variables: { organization: org }
-    })
+    })).data.createOrganization
   }
 }
 
@@ -208,18 +204,20 @@ const createOrganization = async function(user, parentOrg, path) {
   }
 
   return {
-    data: {
-      createOrganization: {
-        uuid: faker.random.uuid()
-      }
-    }
+    uuid: faker.random.uuid()
   }
 
-  // return await runGQL(user,
-  //     {
-  //         query: `mutation($organization: OrganizationInput!) { createOrganization(organization: $organization) { uuid } }`,
-  //         variables: { organization: org }
-  //     })
+  // return (await runGQL(user,
+  //   {
+  //     query: `
+  //       mutation($organization: OrganizationInput!) {
+  //         createOrganization(organization: $organization) {
+  //           uuid
+  //         }
+  //       }
+  //     `,
+  //     variables: { organization: org }
+  //   })).data.createOrganization
 }
 
 const deleteOrganization = function(user) {
@@ -229,11 +227,17 @@ const deleteOrganization = function(user) {
 const organizationsBuildup = async function(user, number) {
   async function count() {
     return (await runGQL(user, {
-      query: `query {
-                    organizationList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
-                        totalCount
-                    }
-                }`,
+      query: `
+        query {
+          organizationList(query: {
+            pageNum: 0,
+            pageSize: 0,
+            status: ${Organization.STATUS.ACTIVE}
+          }) {
+            totalCount
+          }
+        }
+      `,
       variables: {}
     })).data.organizationList.totalCount
   }
@@ -245,11 +249,16 @@ const organizationsBuildup = async function(user, number) {
 
 async function countOrganizations(user) {
   return (await runGQL(user, {
-    query: `query {
-      organizationList(query: {pageNum: 0, pageSize: 1}) {
-        totalCount
+    query: `
+      query {
+        organizationList(query: {
+          pageNum: 0,
+          pageSize: 1
+        }) {
+          totalCount
+        }
       }
-    }`,
+    `,
     variables: {}
   })).data.organizationList.totalCount
 }
