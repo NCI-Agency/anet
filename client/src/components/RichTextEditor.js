@@ -46,8 +46,13 @@ class RichTextEditor extends Component {
     this.initializeEditorState = this._initializeEditorState.bind(this)
 
     this.focus = () => this.refs.editor.focus()
-    this.onChange = editorState =>
-      this.setState({ editorState }, this.handleOnChangeHTML)
+    this.onChange = editorState => this.setState({ editorState })
+    this.onBlur = editorState => {
+      this.handleOnChangeHTML(editorState)
+      if (this.props.onHandleBlur) {
+        this.props.onHandleBlur(editorState)
+      }
+    }
   }
 
   componentDidUpdate() {
@@ -195,7 +200,7 @@ class RichTextEditor extends Component {
             handleKeyCommand={this.handleKeyCommand}
             keyBindingFn={this.mapKeyToEditorCommand}
             onChange={this.onChange}
-            onBlur={this.props.onHandleBlur}
+            onBlur={this.onBlur}
             placeholder="..."
             ref="editor"
             spellCheck
