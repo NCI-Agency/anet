@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -39,6 +40,7 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +67,7 @@ public class AnetEmailWorker implements Runnable {
   private final DateTimeFormatter edtf;
   private final Integer nbOfHoursForStaleEmails;
   private final boolean disabled;
+  private final List<String> activeDomainNames;
 
   @SuppressWarnings("unchecked")
   public AnetEmailWorker(EmailDao dao, AnetConfiguration config,
@@ -88,6 +91,9 @@ public class AnetEmailWorker implements Runnable {
             : "dateFormats.email.date");
     this.edtf = DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId());
     this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
+    this.activeDomainNames = ((List<String>) config.getDictionaryEntry("activeDomainNames"))
+        .stream().map(String::toLowerCase).collect(Collectors.toList());
+
     instance = this;
 
     SmtpConfiguration smtpConfig = config.getSmtp();
@@ -196,6 +202,8 @@ public class AnetEmailWorker implements Runnable {
       throws MessagingException, IOException, TemplateException {
     // Remove any null email addresses
     email.getToAddresses().removeIf(s -> Objects.equals(s, null));
+    email.getToAddresses()
+        .removeIf(emailAddress -> !Utils.isEmailWhitelisted(emailAddress, activeDomainNames));
     if (email.getToAddresses().size() == 0) {
       // This email will never get sent... just kill it off
       // log.error("Unable to send email of subject {}, because there are no valid to email
