@@ -424,7 +424,7 @@ class BaseReportForm extends Component {
                   <AdvancedSingleSelect
                     fieldName="location"
                     fieldLabel="Location"
-                    placeholder="Search for the location where this happened..."
+                    placeholder="Search for the engagement location..."
                     value={values.location}
                     overlayColumns={["Name"]}
                     overlayRenderRow={LocationOverlayRow}
@@ -521,7 +521,7 @@ class BaseReportForm extends Component {
 
                 <Fieldset
                   title={
-                    !values.cancelled
+                    !values.cancelled && !isFutureEngagement
                       ? "Meeting attendance"
                       : "Planned attendance"
                   }
@@ -530,7 +530,7 @@ class BaseReportForm extends Component {
                   <AdvancedMultiSelect
                     fieldName="attendees"
                     fieldLabel="Attendees"
-                    placeholder="Search for attendees who attended the meeting..."
+                    placeholder="Search for the meeting attendees..."
                     value={values.attendees}
                     renderSelected={
                       <AttendeesTable
