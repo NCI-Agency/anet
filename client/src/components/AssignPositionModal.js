@@ -73,7 +73,8 @@ class BaseAssignPositionModal extends Component {
       <Modal show={this.props.showModal} onHide={this.close}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Set Position for <LinkTo person={person} isLink={false} />
+            Set Position for{" "}
+            <LinkTo person={person} isLink={false} showIcon={false} />
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -84,8 +85,13 @@ class BaseAssignPositionModal extends Component {
                 onClick={this.remove}
                 className="remove-person-from-position"
               >
-                Remove <LinkTo person={person} isLink={false} /> from{" "}
-                <LinkTo position={person.position} isLink={false} />
+                Remove{" "}
+                <LinkTo person={person} isLink={false} showIcon={false} /> from{" "}
+                <LinkTo
+                  position={person.position}
+                  isLink={false}
+                  showIcon={false}
+                />
               </Button>
               <hr className="assignModalSplit" />
             </div>

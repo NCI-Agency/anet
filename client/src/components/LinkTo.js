@@ -92,7 +92,20 @@ export default class LinkTo extends Component {
     showIcon = showIcon && !button
     const modelIcon = showIcon && modelInstance.iconUrl()
 
-    if (!isLink) return <span>{modelInstance.toString()}</span>
+    const linkContent = (
+      <React.Fragment>
+        {showIcon && modelIcon && (
+          <img
+            src={modelIcon}
+            alt=""
+            style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
+          />
+        )}
+        {children || modelInstance.toString()}
+      </React.Fragment>
+    )
+
+    if (!isLink) return linkContent
 
     let to = modelFields
     if (!isModel) {
@@ -111,16 +124,7 @@ export default class LinkTo extends Component {
     const LinkToComponent = componentClass
     return (
       <LinkToComponent to={to} {...componentProps}>
-        <React.Fragment>
-          {showIcon && modelIcon && (
-            <img
-              src={modelIcon}
-              alt=""
-              style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
-            />
-          )}
-          {children || modelInstance.toString()}
-        </React.Fragment>
+        {linkContent}
       </LinkToComponent>
     )
   }

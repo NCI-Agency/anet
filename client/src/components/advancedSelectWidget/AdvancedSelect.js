@@ -509,7 +509,8 @@ export default class AdvancedSelect extends Component {
             const shortcutLinkProps = {
               [this.props.objectType.getModelNameLinkTo]: shortcut,
               isLink: false,
-              forShortcut: true
+              forShortcut: true,
+              showIcon: false
             }
             return (
               <Button
