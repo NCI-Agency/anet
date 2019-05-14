@@ -1,10 +1,11 @@
 import Aigle from "aigle"
+import colors from "colors"
 import faker from "faker"
 import { simpleScenario } from "./Scenario"
 import { fuzzy, normalCDF, normalPPF } from "./simutils"
 
 const simulate = async() => {
-  console.log("Sim starting".green)
+  console.log(colors.green("Sim starting"))
 
   // simpleScenario.buildup.forEach(async buildup => {
   //     const userTypeName = faker.random.arrayElement(buildup.userTypes)

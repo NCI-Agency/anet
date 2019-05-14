@@ -102,13 +102,6 @@ public class ReportResource {
 
   }
 
-  @GraphQLQuery(name = "reports")
-  public AnetBeanList<Report> getAll(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") Integer pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") Integer pageSize) {
-    return dao.getAll(pageNum, pageSize, DaoUtils.getUserFromContext(context));
-  }
-
   @GraphQLQuery(name = "report")
   public Report getByUuid(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {

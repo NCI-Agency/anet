@@ -1,6 +1,6 @@
 import faker from "faker"
 import { Position } from "models"
-import { runGQL } from "./simutils"
+import { runGQL, specialUser } from "./simutils"
 import { createHiearchy } from "./stories/OrganizationStories"
 import {
   createPerson,
@@ -37,28 +37,35 @@ const simpleScenario = {
       name: "existingAdvisor",
       frequency: 1,
       userFunction: async function(value) {
-        const json = await runGQL(
-          { name: "erin", password: "erin" },
+        const positions = (await runGQL(
+          { ...specialUser },
           {
             query: `
-                    query {
-                        personList(query: {pageSize: 0, pageNum: 0, status: ACTIVE, role: ADVISOR}) {
-                          list {
-                            uuid
-                            name
-                            domainUsername
-                            position {
-                                uuid
-                            }
-                          }
-                        }
-                      }                    
-                    `
+              query {
+                positionList(query: {
+                  pageSize: 0,
+                  pageNum: 0,
+                  status: ${Position.STATUS.ACTIVE},
+                  isFilled: true,
+                  type: [${Position.TYPE.ADVISOR}]
+                }) {
+                  list {
+                    uuid
+                    type
+                    person {
+                      uuid
+                      name
+                      domainUsername
+                    }
+                  }
+                }
+              }
+            `
           }
-        )
+        )).data.positionList.list
         const person = faker.random.arrayElement(
-          json.data.personList.list.filter(p => p.domainUsername)
-        )
+          positions.filter(p => p.person.domainUsername)
+        ).person
         return {
           name: person.domainUsername,
           password: person.domainUsername,
@@ -70,36 +77,38 @@ const simpleScenario = {
       name: "existingSuperUser",
       frequency: 1,
       userFunction: async function(value) {
-        const json = await runGQL(
-          { name: "erin", password: "erin" },
+        const positions = (await runGQL(
+          { ...specialUser },
           {
             query: `
-                    query {
-                        personList(query: {pageSize: 0, pageNum: 0, status: ACTIVE, role: ADVISOR}) {
-                          list {
-                            uuid
-                            name
-                            domainUsername
-                            position {
-                                uuid
-                                type
-                            }
-                          }
-                        }
-                      }                    
-                    `
+              query {
+                positionList(query: {
+                  pageSize: 0,
+                  pageNum: 0,
+                  status: ${Position.STATUS.ACTIVE},
+                  isFilled: true,
+                  type: [
+                    ${Position.TYPE.SUPER_USER},
+                    ${Position.TYPE.ADMINISTRATOR}
+                  ]
+                }) {
+                  list {
+                    uuid
+                    type
+                    person {
+                      uuid
+                      name
+                      domainUsername
+                    }
+                  }
+                }
+              }
+            `
           }
-        )
+        )).data.positionList.list
         const person = faker.random.arrayElement(
-          json.data.personList.list.filter(p => {
-            return (
-              p.domainUsername &&
-              p.position &&
-              (p.position.type === Position.TYPE.SUPER_USER ||
-                p.position.type === Position.TYPE.ADMINISTRATOR)
-            )
-          })
-        )
+          positions.filter(p => p.person.domainUsername)
+        ).person
         return {
           name: person.domainUsername,
           password: person.domainUsername,
@@ -111,23 +120,40 @@ const simpleScenario = {
       name: "existingAdmin",
       frequency: 1,
       userFunction: async function(value) {
-        // const json = await runGQL({name:"erin", password:"erin"},
-        //     {
-        //     query: `
-        // query {
-        //     personList(query: {pageSize: 0, pageNum: 0, status: ACTIVE, role: ADVISOR}) {
-        //       list {
-        //         uuid
-        //         name
-        //         domainUsername
-        //       }
-        //     }
-        //   }
-        // `,
-        // })
-        // const person = faker.random.arrayElement(json.data.personList.list)
-        // return { name: person.domainUsername, password: person.domainUsername, person: person }
-        return { name: "arthur", password: "", person: {} }
+        const positions = (await runGQL(
+          { ...specialUser },
+          {
+            query: `
+              query {
+                positionList(query: {
+                  pageSize: 0,
+                  pageNum: 0,
+                  status: ${Position.STATUS.ACTIVE},
+                  isFilled: true,
+                  type: [${Position.TYPE.ADMINISTRATOR}]
+                }) {
+                  list {
+                    uuid
+                    type
+                    person {
+                      uuid
+                      name
+                      domainUsername
+                    }
+                  }
+                }
+              }
+            `
+          }
+        )).data.positionList.list
+        const person = faker.random.arrayElement(
+          positions.filter(p => p.person.domainUsername)
+        ).person
+        return {
+          name: person.domainUsername,
+          password: person.domainUsername,
+          person: person
+        }
       }
     }
   ],

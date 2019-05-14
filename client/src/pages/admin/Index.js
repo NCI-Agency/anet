@@ -110,7 +110,7 @@ class BaseAdminIndex extends Page {
   save = (values, form) => {
     // settings as JSON
     let settings = Object.map(values, (key, value) => ({ key, value }))
-    let graphql = "saveAdminSettings(settings: $settings)"
+    let graphql = /* GraphQL */ "saveAdminSettings(settings: $settings)"
     const variables = { settings: settings }
     const variableDef = "($settings: [AdminSettingInput]!)"
     return API.mutation(graphql, variables, variableDef)

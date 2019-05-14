@@ -10,12 +10,10 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
@@ -23,22 +21,6 @@ public class NoteDao extends AnetBaseDao<Note> {
 
   public NoteDao() {
     super("Notes", "notes", "*", null);
-  }
-
-  public AnetBeanList<Note> getAll(int pageNum, int pageSize) {
-    final String sql;
-    if (DaoUtils.isMsSql()) {
-      sql = "/* getAllNotes */ SELECT notes.*, COUNT(*) OVER() AS totalCount "
-          + "FROM notes ORDER BY \"updatedAt\" DESC "
-          + "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-    } else {
-      sql = "/* getAllNotes */ SELECT * from notes "
-          + "ORDER BY \"updatedAt\" DESC LIMIT :limit OFFSET :offset";
-    }
-
-    final Query query =
-        getDbHandle().createQuery(sql).bind("limit", pageSize).bind("offset", pageSize * pageNum);
-    return new AnetBeanList<Note>(query, pageNum, pageSize, new NoteMapper(), null);
   }
 
   public Note getByUuid(String uuid) {

@@ -28,7 +28,10 @@ public class MssqlSearcher extends Searcher {
     if (query.getPageSize() > 0) {
       sql.append(" OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
     }
-    final Query q = dbHandle.createQuery(sql.toString()).bindMap(args);
+    final Query q = dbHandle.createQuery(sql.toString());
+    if (args != null && !args.isEmpty()) {
+      q.bindMap(args);
+    }
     if (query.getPageSize() > 0) {
       q.bind("offset", query.getPageSize() * query.getPageNum()).bind("limit", query.getPageSize());
     }

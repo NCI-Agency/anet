@@ -32,13 +32,6 @@ public class AuthorizationGroupResource {
     this.dao = engine.getAuthorizationGroupDao();
   }
 
-  @GraphQLQuery(name = "authorizationGroups")
-  public AnetBeanList<AuthorizationGroup> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") int pageSize) {
-    return dao.getAll(pageNum, pageSize);
-  }
-
   @GraphQLQuery(name = "authorizationGroup")
   public AuthorizationGroup getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final AuthorizationGroup t = dao.getByUuid(uuid);

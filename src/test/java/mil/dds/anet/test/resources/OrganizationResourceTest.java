@@ -361,30 +361,4 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(listAll.getTotalCount()).isEqualTo(list1.getTotalCount());
     assertThat(listAll.getTotalCount()).isEqualTo(listAll.getList().size());
   }
-
-  @Test
-  public void getAllOrgsTest() {
-    Person jack = getJackJackson();
-
-    int pageNum = 0;
-    int pageSize = 10;
-    int totalReturned = 0;
-    int firstTotalCount = 0;
-    AnetBeanList<Organization> list = null;
-    do {
-      list = graphQLHelper.getAllObjects(jack,
-          "organizations (pageNum: " + pageNum + ", pageSize: " + pageSize + ")", FIELDS,
-          new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
-      assertThat(list).isNotNull();
-      assertThat(list.getPageNum()).isEqualTo(pageNum);
-      assertThat(list.getPageSize()).isEqualTo(pageSize);
-      totalReturned += list.getList().size();
-      if (pageNum == 0) {
-        firstTotalCount = list.getTotalCount();
-      }
-      pageNum++;
-    } while (list.getList().size() != 0);
-
-    assertThat(totalReturned).isEqualTo(firstTotalCount);
-  }
 }

@@ -46,13 +46,6 @@ public class OrganizationResource {
     this.engine = engine;
   }
 
-  @GraphQLQuery(name = "organizations")
-  public AnetBeanList<Organization> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") Integer pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") Integer pageSize) {
-    return dao.getAll(pageNum, pageSize);
-  }
-
   @GraphQLQuery(name = "organizationTopLevelOrgs")
   public AnetBeanList<Organization> getTopLevelOrgs(
       @GraphQLArgument(name = "type") OrganizationType type) {

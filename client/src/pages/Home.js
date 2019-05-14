@@ -378,7 +378,7 @@ class BaseHome extends Page {
       s => s.uuid === search.uuid
     )
     const operation = "deleteSavedSearch"
-    let graphql = operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
     const variables = { uuid: search.uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)

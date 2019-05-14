@@ -630,7 +630,7 @@ class BaseReportShow extends Page {
 
   onConfirmDelete = () => {
     const operation = "deleteReport"
-    let graphql = operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
     const variables = { uuid: this.state.report.uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)
@@ -776,7 +776,7 @@ class BaseReportShow extends Page {
       comment: values.comment
     }
 
-    let graphql = "emailReport(uuid: $uuid, email: $email)"
+    let graphql = /* GraphQL */ "emailReport(uuid: $uuid, email: $email)"
     const variables = {
       uuid: this.state.report.uuid,
       email: emailDelivery
@@ -801,7 +801,7 @@ class BaseReportShow extends Page {
   }
 
   submitDraft = () => {
-    let graphql = "submitReport(uuid: $uuid) { uuid }"
+    let graphql = /* GraphQL */ "submitReport(uuid: $uuid) { uuid }"
     const variables = {
       uuid: this.state.report.uuid
     }
@@ -817,7 +817,7 @@ class BaseReportShow extends Page {
   }
 
   publishReport = () => {
-    const graphql = "publishReport(uuid: $uuid) { uuid }"
+    const graphql = /* GraphQL */ "publishReport(uuid: $uuid) { uuid }"
     const variables = {
       uuid: this.state.report.uuid
     }
@@ -836,7 +836,8 @@ class BaseReportShow extends Page {
     if (_isEmpty(text)) {
       return
     }
-    let graphql = "addComment(uuid: $uuid, comment: $comment) { uuid }"
+    let graphql =
+      /* GraphQL */ "addComment(uuid: $uuid, comment: $comment) { uuid }"
     const variables = {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })
@@ -862,7 +863,8 @@ class BaseReportShow extends Page {
     }
 
     const text = "REQUESTED CHANGES: " + rejectionComment
-    let graphql = "rejectReport(uuid: $uuid, comment: $comment) { uuid }"
+    let graphql =
+      /* GraphQL */ "rejectReport(uuid: $uuid, comment: $comment) { uuid }"
     const variables = {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })
@@ -904,7 +906,8 @@ class BaseReportShow extends Page {
   }
 
   approveReport = text => {
-    let graphql = "approveReport(uuid: $uuid, comment: $comment) { uuid }"
+    let graphql =
+      /* GraphQL */ "approveReport(uuid: $uuid, comment: $comment) { uuid }"
     const variables = {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })

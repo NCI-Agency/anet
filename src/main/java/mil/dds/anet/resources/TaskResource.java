@@ -6,7 +6,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.security.PermitAll;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -40,13 +38,6 @@ public class TaskResource {
     this.dao = engine.getTaskDao();
     final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortLabel");
     duplicateTaskShortName = String.format("Duplicate %s number", taskShortLabel);
-  }
-
-  @GraphQLQuery(name = "tasks")
-  public AnetBeanList<Task> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") Integer pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") Integer pageSize) {
-    return dao.getAll(pageNum, pageSize);
   }
 
   @GraphQLQuery(name = "task")
