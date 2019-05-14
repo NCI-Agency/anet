@@ -27,16 +27,11 @@ import mil.dds.anet.utils.Utils;
 public class PositionResource {
 
   private final PositionDao dao;
+  private final AnetObjectEngine engine;
 
   public PositionResource(AnetObjectEngine engine) {
+    this.engine = engine;
     this.dao = engine.getPositionDao();
-  }
-
-  @GraphQLQuery(name = "positions")
-  public AnetBeanList<Position> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") int pageSize) {
-    return dao.getAll(pageNum, pageSize);
   }
 
   @GraphQLQuery(name = "position")
@@ -100,8 +95,8 @@ public class PositionResource {
 
     // Run the diff and see if anything changed and update.
     if (pos.getAssociatedPositions() != null) {
-      Utils.addRemoveElementsByUuid(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
-          newPosition -> {
+      Utils.addRemoveElementsByUuid(current.loadAssociatedPositions(engine.getContext()).join(),
+          pos.getAssociatedPositions(), newPosition -> {
             dao.associatePosition(DaoUtils.getUuid(newPosition), DaoUtils.getUuid(pos));
           }, oldPositionUuid -> {
             dao.deletePositionAssociation(DaoUtils.getUuid(pos), oldPositionUuid);

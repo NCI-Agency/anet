@@ -154,6 +154,15 @@ public final class BatchingUtils {
             dispatcherService);
       }
     }, dataLoaderOptions));
+    dataLoaderRegistry.register("position.associatedPositions",
+        new DataLoader<>(new BatchLoader<String, List<Position>>() {
+          @Override
+          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getPositionDao().getAssociatedPositionsForPosition(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register("position.currentPositionForPerson",
         new DataLoader<>(new BatchLoader<String, List<Position>>() {
           @Override

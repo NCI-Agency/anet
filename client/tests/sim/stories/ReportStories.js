@@ -13,11 +13,15 @@ const populateReport = async function(report, user) {
   }
 
   const activeLocations = (await runGQL(user, {
-    query: `query ($locationQuery: LocationSearchQueryInput) {
-                locationList(query: $locationQuery) {
-                  list { uuid }
-                }
-              }`,
+    query: `
+      query ($locationQuery: LocationSearchQueryInput) {
+        locationList(query: $locationQuery) {
+          list {
+            uuid
+          }
+        }
+      }
+    `,
     variables: {
       locationQuery: {
         pageNum: 0,
@@ -28,11 +32,15 @@ const populateReport = async function(report, user) {
   })).data.locationList.list
 
   const activeTasks = (await runGQL(user, {
-    query: `query ($taskQuery: TaskSearchQueryInput) {
-                taskList(query: $taskQuery) {
-                  list { uuid }
-                }
-              }`,
+    query: `
+      query ($taskQuery: TaskSearchQueryInput) {
+        taskList(query: $taskQuery) {
+          list {
+            uuid
+          }
+        }
+      }
+    `,
     variables: {
       taskQuery: {
         pageNum: 0,
@@ -43,11 +51,20 @@ const populateReport = async function(report, user) {
   })).data.taskList.list
 
   const assignedAdvisors = (await runGQL(user, {
-    query: `query ($peopleQuery: PersonSearchQueryInput) {
-                personList(query: $peopleQuery) {
-                  list { uuid, role, position { uuid , status } }
-                }
-              }`,
+    query: `
+      query ($peopleQuery: PersonSearchQueryInput) {
+        personList(query: $peopleQuery) {
+          list {
+            uuid
+            role
+            position {
+              uuid
+              status
+            }
+          }
+        }
+      }
+    `,
     variables: {
       peopleQuery: {
         pageNum: 0,
@@ -60,11 +77,20 @@ const populateReport = async function(report, user) {
   )
 
   const assignedPrincipals = (await runGQL(user, {
-    query: `query ($peopleQuery: PersonSearchQueryInput) {
-                personList(query: $peopleQuery) {
-                    list { uuid, role, position { uuid , status } }
-                }
-            }`,
+    query: `
+      query ($peopleQuery: PersonSearchQueryInput) {
+        personList(query: $peopleQuery) {
+          list {
+            uuid
+            role
+            position {
+              uuid
+              status
+            }
+          }
+        }
+      }
+    `,
     variables: {
       peopleQuery: {
         pageNum: 0,
@@ -165,91 +191,113 @@ const createReport = async function(user) {
   if (await populateReport(report, user)) {
     const { reportTags, cancelled, ...reportStripped } = report // TODO: we need to do this more generically
 
-    return runGQL(user, {
+    return (await runGQL(user, {
       query:
         "mutation($report: ReportInput!) { createReport(report: $report) { uuid } }",
       variables: { report: reportStripped }
-    })
+    })).data.createReport
   }
 }
 
 const updateDraftReport = async function(user) {
-  const reports = await runGQL(user, {
-    query: `query {
-                reportList(query: {pageNum: 0, pageSize: 0, state:DRAFT, authorUuid: "${
-  user.person.uuid
-}"}) {
-                  list {
-                    uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason
-                    atmosphere, atmosphereDetails
-                    attendees {
-                        uuid, primary
-                    }
-                  }
-                }
-              }`,
+  const reports = (await runGQL(user, {
+    query: `
+      query {
+        reportList(query: {
+          pageNum: 0,
+          pageSize: 0,
+          state: ${Report.STATE.DRAFT},
+          authorUuid: "${user.person.uuid}"
+        }) {
+          list {
+            uuid
+            intent
+            engagementDate
+            duration
+            keyOutcomes
+            nextSteps
+            cancelledReason
+            atmosphere
+            atmosphereDetails
+            attendees {
+              uuid
+              primary
+            }
+          }
+        }
+      }
+    `,
     variables: {}
-  })
-  const report = faker.random.arrayElement(reports.data.reportList.list)
+  })).data.reportList.list
+  const report = faker.random.arrayElement(reports)
   if (!report) {
-    return
+    return null
   }
 
   if (await populateReport(report, user)) {
-    return runGQL(user, {
+    return (await runGQL(user, {
       query:
         "mutation($report: ReportInput!) { updateReport(report: $report) { uuid } }",
       variables: { report: report }
-    })
+    })).data.updateReport
   }
 }
 
 const submitDraftReport = async function(user) {
-  const reports = await runGQL(user, {
-    query: `query {
-                reportList(query: {pageNum: 0, pageSize: 0, state:DRAFT, authorUuid: "${
-  user.person.uuid
-}"}) {
-                  list {
-                    uuid
-                  }
-                }
-              }`,
+  const reports = (await runGQL(user, {
+    query: `
+      query {
+        reportList(query: {
+          pageNum: 0,
+          pageSize: 0,
+          state: ${Report.STATE.DRAFT},
+          authorUuid: "${user.person.uuid}"
+        }) {
+          list {
+            uuid
+          }
+        }
+      }
+    `,
     variables: {}
-  })
-  const report = faker.random.arrayElement(reports.data.reportList.list)
+  })).data.reportList.list
+  const report = faker.random.arrayElement(reports)
   if (!report) {
-    return
+    return null
   }
 
-  return runGQL(user, {
+  return (await runGQL(user, {
     query: "mutation($uuid: String!) { submitReport(uuid: $uuid) { uuid } }",
     variables: { uuid: report.uuid }
-  })
+  })).data.submitReport
 }
 
 const approveReport = async function(user) {
-  const reports = await runGQL(user, {
-    query: `query {
-                reportList(query: {pageNum: 0, pageSize: 0, pendingApprovalOf: "${
-  user.person.uuid
-}"}) {
-                  list {
-                    uuid
-                  }
-                }
-              }`,
+  const reports = (await runGQL(user, {
+    query: `
+      query {
+        reportList(query: {
+          pageNum: 0,
+          pageSize: 0,
+          pendingApprovalOf: "${user.person.uuid}"
+        }) {
+          list {
+            uuid
+          }
+        }
+      }
+    `,
     variables: {}
-  })
-  const report = faker.random.arrayElement(reports.data.reportList.list)
+  })).data.reportList.list
+  const report = faker.random.arrayElement(reports)
   if (!report) {
-    return
+    return null
   }
 
-  return runGQL(user, {
+  return (await runGQL(user, {
     query: "mutation ($uuid: String!) { approveReport(uuid: $uuid) { uuid } }",
     variables: { uuid: report.uuid }
-  })
+  })).data.approveReport
 }
 
 export { createReport, updateDraftReport, submitDraftReport, approveReport }

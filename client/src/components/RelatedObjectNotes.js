@@ -101,7 +101,7 @@ class BaseRelatedObjectNotes extends Component {
 
   deleteNote = uuid => {
     const operation = "deleteNote"
-    let graphql = operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
     const variables = { uuid: uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)
