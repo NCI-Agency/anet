@@ -32,6 +32,7 @@ public class PersonSearchQuery extends AbstractSearchQuery {
   private PersonSearchSortBy sortBy;
 
   public PersonSearchQuery() {
+    super();
     this.setPageSize(100);
     this.sortBy = PersonSearchSortBy.NAME;
     this.setSortOrder(SortOrder.ASC);
