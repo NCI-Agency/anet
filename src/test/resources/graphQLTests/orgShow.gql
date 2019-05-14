@@ -11,17 +11,6 @@ organization(uuid:"${orgUuid}") {
 			person { uuid, name }
 		}
 	},
-	reports(pageNum:0, pageSize:25) {
-		list { 
-			uuid, intent, engagementDate, duration, keyOutcomes, nextSteps
-			author { uuid, name },
-			primaryAdvisor { uuid, name } ,
-			primaryPrincipal { uuid, name },
-			advisorOrg { uuid, shortName, longName }
-			principalOrg { uuid, shortName, longName }
-			location { uuid, name, lat, lng }
-		}
-	},
 	approvalSteps {
 		uuid, name, approvers { uuid, name, person { uuid, name }}
 	},

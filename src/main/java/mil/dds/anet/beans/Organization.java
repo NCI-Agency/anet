@@ -1,7 +1,6 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -10,9 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -196,21 +193,6 @@ public class Organization extends AbstractAnetBean {
 
   public void setTasks(List<Task> tasks) {
     this.tasks = tasks;
-  }
-
-  // TODO: batch load? (appears to be unused)
-  @GraphQLQuery(name = "reports")
-  public AnetBeanList<Report> fetchReports(@GraphQLArgument(name = "pageNum") int pageNum,
-      @GraphQLArgument(name = "pageSize") int pageSize) {
-    ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    if (this.getType() == OrganizationType.ADVISOR_ORG) {
-      query.setAdvisorOrgUuid(uuid);
-    } else {
-      query.setPrincipalOrgUuid(uuid);
-    }
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
   }
 
   @Override
