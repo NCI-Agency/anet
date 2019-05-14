@@ -105,7 +105,8 @@ class BaseRelatedObjectNoteModal extends Component {
   save = (values, form) => {
     const edit = !!this.props.note.uuid
     const operation = edit ? "updateNote" : "createNote"
-    const graphql = operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
+    const graphql =
+      /* GraphQL */ operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
     const newNote = values
     const isJson = newNote.type !== NOTE_TYPE.FREE_TEXT
     if (isJson) {

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Comment;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.CommentMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -19,11 +18,6 @@ public class CommentDao extends AnetBaseDao<Comment> {
 
   public CommentDao() {
     super("Comments", tableName, COMMENT_FIELDS, null);
-  }
-
-  @Override
-  public AnetBeanList<?> getAll(int pageNum, int pageSize) {
-    throw new UnsupportedOperationException();
   }
 
   public Comment getByUuid(String uuid) {

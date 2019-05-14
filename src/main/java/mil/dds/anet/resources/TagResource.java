@@ -26,13 +26,6 @@ public class TagResource {
     this.dao = engine.getTagDao();
   }
 
-  @GraphQLQuery(name = "tags")
-  public AnetBeanList<Tag> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") int pageSize) {
-    return dao.getAll(pageNum, pageSize);
-  }
-
   @GraphQLQuery(name = "tag")
   public Tag getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final Tag t = dao.getByUuid(uuid);

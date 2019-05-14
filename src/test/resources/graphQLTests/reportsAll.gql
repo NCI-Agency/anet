@@ -1,4 +1,4 @@
-reports(pageSize:100, pageNum:0) {
+reportList(query:{pageSize:100, pageNum:0}) {
 	totalCount, list { 
 	    uuid, intent, state
 	    author {

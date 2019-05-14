@@ -55,6 +55,9 @@ export const PositionOverlayRow = item => (
       <LinkTo position={item} isLink={false} />
     </td>
     <td>
+      <LinkTo organization={item.organization} isLink={false} />
+    </td>
+    <td>
       <LinkTo person={item.person} isLink={false} />
     </td>
   </React.Fragment>

@@ -15,6 +15,7 @@ import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -39,8 +40,9 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     System.out.println();
     System.out.println("Detecting state of database...");
 
-    List<Person> currPeople = engine.getPersonDao().getAll(0, 100).getList();
-    if (currPeople.size() > 0) {
+    final PersonSearchQuery psq = new PersonSearchQuery();
+    final List<Person> currPeople = engine.getPersonDao().search(psq).getList();
+    if (!currPeople.isEmpty()) {
       System.out.println("ERROR: Data detected in database");
       System.out.println("\tThis task can only be run on an empty database");
       System.exit(1);

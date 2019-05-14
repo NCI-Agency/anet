@@ -20,14 +20,19 @@ class AuthorizationGroups extends Page {
   }
 
   fetchData(props) {
+    const query = {
+      pageNum: 0,
+      pageSize: 0 // retrieve all
+    }
     return API.query(
       /* GraphQL */ `
-      authorizationGroups {
+      authorizationGroupList(query:$query) {
         list { uuid, name, description, positions { uuid, name, type }, status }
-      }
-    `
+      }`,
+      { query },
+      "($query: AuthorizationGroupSearchQueryInput)"
     ).then(data => {
-      this.setState({ authorizationGroups: data.authorizationGroups.list })
+      this.setState({ authorizationGroups: data.authorizationGroupList.list })
     })
   }
 

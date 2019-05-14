@@ -222,4 +222,15 @@ function populate(instance, scheme, context) {
   return populator
 }
 
-export { runGQL, fuzzy, populate, identity, normalPDF, normalCDF, normalPPF }
+const specialUser = { name: "erin", password: "erin" }
+
+export {
+  runGQL,
+  fuzzy,
+  populate,
+  identity,
+  normalPDF,
+  normalCDF,
+  normalPPF,
+  specialUser
+}
