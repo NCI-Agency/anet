@@ -41,7 +41,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     System.out.println("Detecting state of database...");
 
     final PersonSearchQuery psq = new PersonSearchQuery();
-    final List<Person> currPeople = engine.getPersonDao().search(psq).getList();
+    final List<Person> currPeople = engine.getPersonDao().search(psq, null).getList();
     if (!currPeople.isEmpty()) {
       System.out.println("ERROR: Data detected in database");
       System.out.println("\tThis task can only be run on an empty database");
