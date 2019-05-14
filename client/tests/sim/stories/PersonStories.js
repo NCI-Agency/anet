@@ -89,43 +89,51 @@ const _createPerson = async function(user) {
   )
 
   const { firstName, lastName, ...personStripped } = person // TODO: we need to do this more generically
-  return runGQL(user, {
+  return (await runGQL(user, {
     query:
       "mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }",
     variables: { person: personStripped }
-  })
+  })).data.createPerson
 }
 
 const updatePerson = async function(user) {
-  const people = await runGQL(user, {
-    query: `query {
-                personList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
-                  list {
-                    uuid
-                  }
-                }
-            }`,
+  const people = (await runGQL(user, {
+    query: `
+      query {
+        personList(query: {
+          pageNum: 0,
+          pageSize: 0,
+          status: ${Person.STATUS.ACTIVE}
+        }) {
+          list {
+            uuid
+          }
+        }
+      }
+    `,
     variables: {}
-  })
+  })).data.personList.list
 
-  let person = faker.random.arrayElement(people.data.personList.list)
+  let person = faker.random.arrayElement(people)
   person = (await runGQL(user, {
-    query: `query {
-                    person (uuid:"${person.uuid}") {
-                        uuid
-                        biography
-                        country
-                        emailAddress
-                        endOfTourDate
-                        gender
-                        name
-                        domainUsername
-                        phoneNumber
-                        rank
-                        role
-                        status
-                    }
-                }`,
+    query: `
+      query {
+        person (uuid:"${person.uuid}") {
+          uuid
+          biography
+          country
+          emailAddress
+          endOfTourDate
+          gender
+          name
+          domainUsername
+          phoneNumber
+          rank
+          role
+          status
+        }
+      }
+    `,
     variables: {}
   })).data.person
 
@@ -140,55 +148,64 @@ const updatePerson = async function(user) {
     .biography.often()
     .emailAddress.rarely()
 
-  const json = await runGQL(user, {
+  return (await runGQL(user, {
     query: "mutation($person: PersonInput!) { updatePerson(person: $person) }",
     variables: { person: person }
-  })
+  })).data.updatePerson
 }
 
 const _deletePerson = async function(user) {
-  const people = await runGQL(user, {
-    query: `query {
-                personList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
-                  list {
-                    uuid, name,
-                    position { uuid }
-                  }
-                }
-              }`,
+  const people = (await runGQL(user, {
+    query: `
+      query {
+        personList(query: {
+          pageNum: 0,
+          pageSize: 0,
+          status: ${Person.STATUS.ACTIVE}
+      }) {
+        list {
+          uuid
+          name
+          position {
+            uuid
+          }
+        }
+      }
+    }
+  `,
     variables: {}
-  })
-  const person0 = faker.random.arrayElement(
-    people.data.personList.list.filter(p => !(p.position && p.position.length))
-  )
+  })).data.personList.list.filter(p => !p.position)
+  const person0 = faker.random.arrayElement(people)
   if (person0) {
     const person = (await runGQL(user, {
-      query: `query {
-                    person(uuid: "${person0.uuid}") {
-                        biography
-                        country
-                        emailAddress
-                        endOfTourDate
-                        gender
-                        name
-                        phoneNumber
-                        rank
-                        role
-                        status
-                        uuid
-                    }
-                  }`,
+      query: `
+        query {
+          person(uuid: "${person0.uuid}") {
+              biography
+              country
+              emailAddress
+              endOfTourDate
+              gender
+              name
+              phoneNumber
+              rank
+              role
+              status
+              uuid
+          }
+        }
+      `,
       variables: {}
     })).data.person
     person.status = Person.STATUS.ACTIVE
 
     console.debug(`Deleting/Deactivating ${person.name.green}`)
     // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.
-    return runGQL(user, {
+    return (await runGQL(user, {
       query:
         "mutation($person: PersonInput!) { updatePerson(person: $person) }",
       variables: { person: person }
-    })
+    })).data.updatePerson
   } else {
     console.debug("No person to delete")
     return null
@@ -197,11 +214,16 @@ const _deletePerson = async function(user) {
 
 async function countPersons(user) {
   return (await runGQL(user, {
-    query: `query {
-      personList(query: {pageNum: 0, pageSize: 1}) {
-        totalCount
+    query: `
+      query {
+        personList(query: {
+          pageNum: 0,
+          pageSize: 1
+        }) {
+          totalCount
+        }
       }
-    }`,
+    `,
     variables: {}
   })).data.personList.totalCount
 }
@@ -210,7 +232,7 @@ const createPerson = async function(user, grow) {
   if (grow) {
     const count = await countPersons(user)
     if (!grow(count)) {
-      console.debug(`Skipping delete person (currenty ${count} persons exist)`)
+      console.debug(`Skipping delete person (currently ${count} persons exist)`)
       return "(skipped)"
     }
   }
@@ -221,7 +243,7 @@ const deletePerson = async function(user, grow) {
   if (grow) {
     const count = await countPersons(user)
     if (grow(count)) {
-      console.debug(`Skipping delete person (currenty ${count} persons exist)`)
+      console.debug(`Skipping delete person (currently ${count} persons exist)`)
       return "(skipped)"
     }
   }
