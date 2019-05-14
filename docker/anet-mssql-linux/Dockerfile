@@ -13,14 +13,12 @@ RUN export DEBIAN_FRONTEND=noninteractive ACCEPT_EULA=Y && \
     apt-get update && \
     apt-get install -y mssql-server=14.0.3006.16-3 mssql-server-fts=14.0.3006.16-3 mssql-tools unixodbc-dev locales sudo && \
     rm -rf /var/lib/apt/lists/* && \
-    locale-gen en_US.UTF-8   && \
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - && \
-    sudo apt-get install -y nodejs && \
-    npm install -g fake-smtp-server    
+    locale-gen en_US.UTF-8
+    
 
 ADD entrypoint.sh /opt/
 ADD waitTillServiceStarted.sh /opt/
 
-EXPOSE 1433 1080 1025
+EXPOSE 1433
 
 ENTRYPOINT /opt/entrypoint.sh

@@ -112,7 +112,7 @@ public class FakeSmtpServer {
 
     properties.setProperty("mail.smtp.host", smtpIP);
     properties.setProperty("mail.smtp.port", smtpPort);
-    properties.setProperty("mail.smtp.auth", "true");
+    properties.setProperty("mail.smtp.auth", "false");
     properties.setProperty("mail.smtp.ssl.trust", "*");
     properties.setProperty("mail.smtp.starttls.enable", "true");
 
