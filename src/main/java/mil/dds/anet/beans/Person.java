@@ -210,7 +210,7 @@ public class Person extends AbstractAnetBean implements Principal {
     this.previousPositions = previousPositions;
   }
 
-  // TODO: batch load? (used in people/Show.js, admin/MergePeople.js)
+  // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "authoredReports")
   public AnetBeanList<Report> loadAuthoredReports(
       @GraphQLArgument(name = "pageNum") Integer pageNum,
