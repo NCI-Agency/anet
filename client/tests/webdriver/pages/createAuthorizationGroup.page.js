@@ -25,9 +25,7 @@ class CreateAuthorizationGroup extends Page {
     return browser.$("#positions")
   }
   get positionsAdvancedSelectFirstItem() {
-    return browser.$(
-      "#positions-popover tbody tr:first-child td:nth-child(2) span"
-    )
+    return browser.$("#positions-popover tbody tr:first-child td:nth-child(2)")
   }
   get submitButton() {
     return browser.$("#formBottomSubmit")
@@ -49,7 +47,7 @@ class CreateAuthorizationGroup extends Page {
     this.positionsAdvancedSelectFirstItem.waitForExist()
     return browser.waitUntil(
       () => {
-        return this.positionsAdvancedSelectFirstItem.getText() === value
+        return this.positionsAdvancedSelectFirstItem.getText().includes(value)
       },
       5000,
       'Expected positions advanced select input to contain "' +
