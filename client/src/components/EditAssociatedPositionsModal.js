@@ -127,7 +127,11 @@ class BaseEditAssociatedPositionsModal extends Component {
                               associatedPositions={values.associatedPositions}
                             />
                           }
-                          overlayColumns={["Position", "Current Occupant"]}
+                          overlayColumns={[
+                            "Position",
+                            "Organization",
+                            "Current Occupant"
+                          ]}
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           onChange={value =>
@@ -181,7 +185,8 @@ class BaseEditAssociatedPositionsModal extends Component {
     position.associatedPositions = values.associatedPositions
     delete position.previousPeople
     delete position.person // prevent any changes to person.
-    const graphql = "updateAssociatedPosition(position: $position)"
+    const graphql =
+      /* GraphQL */ "updateAssociatedPosition(position: $position)"
     const variables = { position: position }
     const variableDef = "($position: PositionInput!)"
     return API.mutation(graphql, variables, variableDef)

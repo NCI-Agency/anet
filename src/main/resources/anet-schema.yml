@@ -59,7 +59,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -525,6 +525,16 @@ properties:
     items:
       type: string
       title: The list of possible (email) domain names
+      description: Valid email domain names for this ANET instance; may contain wildcards.
+      examples: ["*.nato.int", dds.mil]
+
+  activeDomainNames:
+    type: array
+    uniqueItems: true
+    minItems: 1
+    items:
+      type: string
+      title: The list of active (email) domain names
       description: Valid email domain names for this ANET instance; may contain wildcards.
       examples: ["*.nato.int", dds.mil]
 

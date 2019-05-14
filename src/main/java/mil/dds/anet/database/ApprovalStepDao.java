@@ -9,7 +9,6 @@ import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ApprovalStepMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -21,10 +20,6 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 
   public ApprovalStepDao() {
     super("ApprovalSteps", "approvalSteps", "*", null);
-  }
-
-  public AnetBeanList<?> getAll(int pageNum, int pageSize) {
-    throw new UnsupportedOperationException();
   }
 
   public CompletableFuture<List<ApprovalStep>> getByAdvisorOrganizationUuid(

@@ -395,7 +395,7 @@ export default class AdvancedSelect extends Component {
     const resourceName = this.props.objectType.resourceName
     const listName = filterDefs.listName || this.props.objectType.listName
     this.setState({ isLoading: true }, () => {
-      let graphQlQuery = ""
+      let graphQlQuery = /* GraphQL */ ""
       let variables = {}
       let variableDef = ""
       if (filterDefs.searchQuery) {
