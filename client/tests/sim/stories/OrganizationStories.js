@@ -246,12 +246,12 @@ const organizationsBuildup = async function(user, number) {
 async function countOrganizations(user) {
   return (await runGQL(user, {
     query: `query {
-                organizations(pageNum: 0, pageSize: 1) {
-                    totalCount
-                }
-            }`,
+      organizationList(query: {pageNum: 0, pageSize: 1}) {
+        totalCount
+      }
+    }`,
     variables: {}
-  })).data.organizations.totalCount
+  })).data.organizationList.totalCount
 }
 
 export { organizationsBuildup, createOrganization, createHiearchy }

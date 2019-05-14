@@ -560,7 +560,7 @@ class BasePersonForm extends Component {
     // Clean up person object for JSON response
     person = Object.without(person, "firstName", "lastName")
     const operation = edit ? "updatePerson" : "createPerson"
-    let graphql = operation + "(person: $person)"
+    let graphql = /* GraphQL */ operation + "(person: $person)"
     graphql += edit ? "" : " { uuid }"
     const variables = { person: person }
     const variableDef = "($person: PersonInput!)"

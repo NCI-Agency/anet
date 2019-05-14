@@ -22,7 +22,6 @@ import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -36,13 +35,6 @@ public class PositionDao extends AnetBaseDao<Position> {
 
   public PositionDao() {
     super("Positions", tableName, POSITIONS_FIELDS, null);
-  }
-
-  public AnetBeanList<Position> getAll(int pageNum, int pageSize) {
-    final Query query = getPagedQuery(pageNum, pageSize);
-    Long manualRowCount = getSqliteRowCount();
-    return new AnetBeanList<Position>(query, pageNum, pageSize, new PositionMapper(),
-        manualRowCount);
   }
 
   @Override

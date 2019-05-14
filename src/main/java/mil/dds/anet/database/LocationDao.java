@@ -9,7 +9,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
@@ -17,22 +16,6 @@ public class LocationDao extends AnetBaseDao<Location> {
 
   public LocationDao() {
     super("Locations", "locations", "*", null);
-  }
-
-  public AnetBeanList<Location> getAll(int pageNum, int pageSize) {
-    String sql;
-    if (DaoUtils.isMsSql()) {
-      sql = "/* getAllLocations */ SELECT locations.*, COUNT(*) OVER() AS totalCount "
-          + "FROM locations ORDER BY \"createdAt\" DESC "
-          + "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-    } else {
-      sql = "/* getAllLocations */ SELECT * from locations "
-          + "ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
-    }
-
-    final Query sqlQuery =
-        getDbHandle().createQuery(sql).bind("limit", pageSize).bind("offset", pageSize * pageNum);
-    return new AnetBeanList<Location>(sqlQuery, pageNum, pageSize, new LocationMapper(), null);
   }
 
   public Location getByUuid(String uuid) {

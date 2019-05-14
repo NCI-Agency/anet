@@ -38,20 +38,6 @@ public class PersonResource {
   }
 
   /**
-   * Returns all people objects in the ANET system. Does no filtering on role/status/etc.
-   * 
-   * @param pageNum 0 indexed page number of results to get. Defaults to 0.
-   * @param pageSize Defaults to 100
-   * @return List of People objects in the system
-   */
-  @GraphQLQuery(name = "people")
-  public AnetBeanList<Person> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") int pageSize) {
-    return dao.getAll(pageNum, pageSize);
-  }
-
-  /**
    * Returns a single person entry based on UUID.
    */
   @GraphQLQuery(name = "person")

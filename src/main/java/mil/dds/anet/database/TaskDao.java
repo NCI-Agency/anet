@@ -16,7 +16,6 @@ import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -27,20 +26,6 @@ public class TaskDao extends AnetBaseDao<Task> {
 
   public TaskDao() {
     super("Tasks", "tasks", "*", null);
-  }
-
-  public AnetBeanList<Task> getAll(int pageNum, int pageSize) {
-    String sql;
-    if (DaoUtils.isMsSql()) {
-      sql = "/* getAllTasks */ SELECT tasks.*, COUNT(*) OVER() AS totalCount "
-          + "FROM tasks ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-    } else {
-      sql =
-          "/* getAllTasks */ SELECT * from tasks ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
-    }
-    final Query query =
-        getDbHandle().createQuery(sql).bind("limit", pageSize).bind("offset", pageSize * pageNum);
-    return new AnetBeanList<Task>(query, pageNum, pageSize, new TaskMapper(), null);
   }
 
   public Task getByUuid(String uuid) {

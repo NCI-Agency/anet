@@ -8,7 +8,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.utils.DaoUtils;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
@@ -16,21 +15,6 @@ public class TagDao extends AnetBaseDao<Tag> {
 
   public TagDao() {
     super("Tags", "tags", "*", null);
-  }
-
-  public AnetBeanList<Tag> getAll(int pageNum, int pageSize) {
-    String sql;
-    if (DaoUtils.isMsSql()) {
-      sql = "/* getAllTags */ SELECT tags.*, COUNT(*) OVER() AS totalCount "
-          + "FROM tags ORDER BY name ASC " + "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-    } else {
-      sql =
-          "/* getAllTags */ SELECT * from tags " + "ORDER BY name ASC LIMIT :limit OFFSET :offset";
-    }
-
-    final Query query =
-        getDbHandle().createQuery(sql).bind("limit", pageSize).bind("offset", pageSize * pageNum);
-    return new AnetBeanList<Tag>(query, pageNum, pageSize, new TagMapper(), null);
   }
 
   public Tag getByUuid(String uuid) {

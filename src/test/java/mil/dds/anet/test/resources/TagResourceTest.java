@@ -65,14 +65,6 @@ public class TagResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void tagListTest() throws UnsupportedEncodingException {
-    // All
-    final AnetBeanList<Tag> tagList = graphQLHelper.getAllObjects(admin, "tags", FIELDS,
-        new TypeReference<GraphQlResponse<AnetBeanList<Tag>>>() {});
-    assertThat(tagList).isNotNull();
-  }
-
-  @Test
   public void tagSearchTest() throws UnsupportedEncodingException {
     // Search for a tag from the initial data
     final TagSearchQuery query = new TagSearchQuery();

@@ -26,13 +26,6 @@ public class LocationResource {
     this.dao = engine.getLocationDao();
   }
 
-  @GraphQLQuery(name = "locations")
-  public AnetBeanList<Location> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") int pageSize) {
-    return dao.getAll(pageNum, pageSize);
-  }
-
   @GraphQLQuery(name = "location")
   public Location getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Location loc = dao.getByUuid(uuid);
