@@ -435,7 +435,7 @@ public class ReportDao extends AnetBaseDao<Report> {
       OrganizationSearchQuery query = new OrganizationSearchQuery();
       query.setParentOrgUuid(parentOrgUuid);
       query.setParentOrgRecursively(true);
-      query.setPageSize(Integer.MAX_VALUE);
+      query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =
           orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();
