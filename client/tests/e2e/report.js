@@ -169,7 +169,7 @@ test("Draft and submit a report", async t => {
 
   var serverResponse = await httpRequestSmtpServer("GET")
   var jsonRepsonse = JSON.parse(serverResponse)
-  await assert.equal(jsonRepsonse.length, 1)
+  await assert.equal(jsonRepsonse.length, 0) // Domain not in active users
 })
 
 test("Publish report chain", async t => {
@@ -337,7 +337,7 @@ test("Publish report chain", async t => {
 
   var serverResponse = await httpRequestSmtpServer("GET")
   var jsonRepsonse = JSON.parse(serverResponse)
-  await assert.equal(jsonRepsonse.length, 2)
+  await assert.equal(jsonRepsonse.length, 0) // Domains not in active users
 })
 
 test("Verify that validation and other reports/new interactions work", async t => {
@@ -610,7 +610,7 @@ test("Verify that validation and other reports/new interactions work", async t =
 
   var serverResponse = await httpRequestSmtpServer("GET")
   var jsonRepsonse = JSON.parse(serverResponse)
-  await assert.equal(jsonRepsonse.length, 0)
+  await assert.equal(jsonRepsonse.length, 0) // No email should be sent
 })
 
 function httpRequestSmtpServer(requestType) {

@@ -51,6 +51,7 @@ public class AnetEmailWorkerIT {
     when(config.getDictionaryEntry("dateFormats.email.date")).thenReturn("d MMMM yyyy");
     when(config.getDictionaryEntry("dateFormats.email.withTime")).thenReturn("d MMMM yyyy @ HH:mm");
     when(config.getDictionaryEntry("engagementsIncludeTimeAndDuration")).thenReturn(true);
+    when(config.getDictionaryEntry("activeDomainNames")).thenReturn(Arrays.asList("anet.com"));
     when(config.getDictionaryEntry("fields")).thenReturn(new HashMap<String, Object>());
 
     when(config.getEmailFromAddr()).thenReturn("test_from_address@anet.com");
