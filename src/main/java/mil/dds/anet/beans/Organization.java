@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -152,10 +153,9 @@ public class Organization extends AbstractAnetBean {
 
   // TODO: batch load? (used in organizations/Show.js)
   @GraphQLQuery(name = "childrenOrgs")
-  public synchronized List<Organization> loadChildrenOrgs() {
+  public synchronized List<Organization> loadChildrenOrgs(
+      @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     if (childrenOrgs == null) {
-      OrganizationSearchQuery query = new OrganizationSearchQuery();
-      query.setPageSize(Integer.MAX_VALUE);
       query.setParentOrgUuid(uuid);
       query.setParentOrgRecursively(false);
       childrenOrgs = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
@@ -164,11 +164,10 @@ public class Organization extends AbstractAnetBean {
   }
 
   // TODO: batch load? (used in App.js for me → position → organization)
-  @GraphQLQuery(name = "allDescendantOrgs")
-  public synchronized List<Organization> loadAllDescendants() {
+  @GraphQLQuery(name = "descendantOrgs")
+  public synchronized List<Organization> loadDescendantOrgs(
+      @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     if (descendants == null) {
-      OrganizationSearchQuery query = new OrganizationSearchQuery();
-      query.setPageSize(Integer.MAX_VALUE);
       query.setParentOrgUuid(uuid);
       query.setParentOrgRecursively(true);
       descendants = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();

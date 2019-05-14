@@ -266,7 +266,7 @@ export default class Person extends Model {
     if (!this.position || !this.position.organization) {
       return false
     }
-    let orgs = this.position.organization.allDescendantOrgs || []
+    let orgs = this.position.organization.descendantOrgs || []
     orgs.push(this.position.organization)
     let orgUuids = orgs.map(o => o.uuid)
 
