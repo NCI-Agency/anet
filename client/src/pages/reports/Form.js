@@ -326,6 +326,11 @@ class BaseReportForm extends Component {
               </Button>
             </div>
           )
+          const isFutureEngagement =
+            values.engagementDate &&
+            moment()
+              .endOf("day")
+              .isBefore(values.engagementDate)
           return (
             <div className="report-form">
               <NavigationWarning isBlocking={dirty} />
@@ -399,14 +404,11 @@ class BaseReportForm extends Component {
                       />
                     }
                   >
-                    {values.engagementDate &&
-                      moment()
-                        .endOf("day")
-                        .isBefore(values.engagementDate) && (
-                        <HelpBlock>
+                    {isFutureEngagement && (
+                      <HelpBlock>
                         <span className="text-success">
-                            This will create an upcoming engagement
-                          </span>
+                          This will create an upcoming engagement
+                        </span>
                       </HelpBlock>
                     )}
                   </Field>
@@ -437,30 +439,32 @@ class BaseReportForm extends Component {
                     renderExtraCol
                   />
 
-                  <Field
-                    name="cancelled"
-                    component={FieldHelper.renderSpecialField}
-                    label={Settings.fields.report.cancelled}
-                    widget={
-                      <Checkbox
-                        inline
-                        className="cancelled-checkbox"
-                        checked={values.cancelled}
-                        onClick={event =>
-                          event.target.checked &&
-                          !values.cancelledReason &&
-                          // set a default reason when cancelled has been checked and no reason has been selected
-                          setFieldValue(
-                            "cancelledReason",
-                            this.cancelledReasonOptions[0].value
-                          )
-                        }
-                      >
-                        This engagement was cancelled
-                      </Checkbox>
-                    }
-                  />
-                  {values.cancelled && (
+                  {!isFutureEngagement && (
+                    <Field
+                      name="cancelled"
+                      component={FieldHelper.renderSpecialField}
+                      label={Settings.fields.report.cancelled}
+                      widget={
+                        <Checkbox
+                          inline
+                          className="cancelled-checkbox"
+                          checked={values.cancelled}
+                          onClick={event =>
+                            event.target.checked &&
+                            !values.cancelledReason &&
+                            // set a default reason when cancelled has been checked and no reason has been selected
+                            setFieldValue(
+                              "cancelledReason",
+                              this.cancelledReasonOptions[0].value
+                            )
+                          }
+                        >
+                          This engagement was cancelled
+                        </Checkbox>
+                      }
+                    />
+                  )}
+                  {!isFutureEngagement && values.cancelled && (
                     <Field
                       name="cancelledReason"
                       label="due to"
@@ -480,7 +484,7 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  {!values.cancelled && (
+                  {!isFutureEngagement && !values.cancelled && (
                     <Field
                       name="atmosphere"
                       label={Settings.fields.report.atmosphere}
@@ -490,7 +494,9 @@ class BaseReportForm extends Component {
                       className="atmosphere-form-group"
                     />
                   )}
-                  {!values.cancelled && values.atmosphere && (
+                  {!isFutureEngagement &&
+                    !values.cancelled &&
+                    values.atmosphere && (
                     <Field
                       name="atmosphereDetails"
                       label={Settings.fields.report.atmosphereDetails}
@@ -601,7 +607,7 @@ class BaseReportForm extends Component {
                   }
                   id="meeting-details"
                 >
-                  {!values.cancelled && (
+                  {!isFutureEngagement && !values.cancelled && (
                     <Field
                       name="keyOutcomes"
                       label={Settings.fields.report.keyOutcomes}
@@ -627,29 +633,31 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <Field
-                    name="nextSteps"
-                    label={Settings.fields.report.nextSteps}
-                    component={FieldHelper.renderInputField}
-                    componentClass="textarea"
-                    maxLength={Settings.maxTextFieldLength}
-                    onKeyUp={event =>
-                      this.countCharsLeft(
-                        "nextStepsCharsLeft",
-                        Settings.maxTextFieldLength,
-                        event
-                      )
-                    }
-                    extraColElem={
-                      <React.Fragment>
-                        <span id="nextStepsCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            this.props.initialValues.nextSteps.length}
-                        </span>{" "}
-                        characters remaining
-                      </React.Fragment>
-                    }
-                  />
+                  {!isFutureEngagement && (
+                    <Field
+                      name="nextSteps"
+                      label={Settings.fields.report.nextSteps}
+                      component={FieldHelper.renderInputField}
+                      componentClass="textarea"
+                      maxLength={Settings.maxTextFieldLength}
+                      onKeyUp={event =>
+                        this.countCharsLeft(
+                          "nextStepsCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )
+                      }
+                      extraColElem={
+                        <React.Fragment>
+                          <span id="nextStepsCharsLeft">
+                            {Settings.maxTextFieldLength -
+                              this.props.initialValues.nextSteps.length}
+                          </span>{" "}
+                          characters remaining
+                        </React.Fragment>
+                      }
+                    />
+                  )}
 
                   <Field
                     name="reportText"
