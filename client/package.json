@@ -76,7 +76,7 @@
     "node-fetch": "^2.5.0",
     "postcss-flexbugs-fixes": "^4.1.0",
     "postcss-loader": "^3.0.0",
-    "prettier": "^1.17.0",
+    "prettier": "^1.17.1",
     "react-test-renderer": "^16.8.6",
     "selenium-webdriver": "^4.0.0-alpha.1",
     "style-loader": "^0.23.1",
