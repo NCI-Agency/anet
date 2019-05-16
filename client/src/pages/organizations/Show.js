@@ -24,10 +24,19 @@ import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem, Nav } from "react-bootstrap"
 import { connect } from "react-redux"
+import FullCalendar from "@fullcalendar/react"
+import dayGridPlugin from "@fullcalendar/daygrid"
+import timeGridPlugin from "@fullcalendar/timegrid"
+import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
+import "@fullcalendar/core/main.css"
+import "@fullcalendar/daygrid/main.css"
+import "@fullcalendar/timegrid/main.css"
+import _isEmpty from "lodash/isEmpty"
+import moment from "moment"
 
 const NO_REPORT_FILTER = "NO_FILTER"
 
@@ -71,7 +80,7 @@ class BaseOrganizationShow extends Page {
     }
   }
 
-  getReportQueryPart = orgUuid => {
+  getReportQueryPart = (orgUuid, extras) => {
     const { organization } = this.state
     const { pagination } = this.props
     const orgLabel = this.orgLabel(organization)
@@ -81,6 +90,9 @@ class BaseOrganizationShow extends Page {
       pageSize: 10,
       orgUuid: orgUuid,
       state: this.reportsFilterIsSet() ? this.state.reportsFilter : null
+    }
+    if (!_isEmpty(extras)) {
+      Object.assign(reportQuery, extras)
     }
     let reportsPart = new GQL.Part(/* GraphQL */ `
       reports: reportList(query:$reportQuery) {
@@ -159,6 +171,23 @@ class BaseOrganizationShow extends Page {
     }
     this.setState({ reportsFilter: toggleToFilter })
   }
+  calendarComponentRef = React.createRef()
+
+  getEvents = (info, successCallback, failureCallback) => {
+    let reportsPart = this.getReportQueryPart(this.props.match.params.uuid, {
+      engagementDateStart: info.start.valueOf(),
+      engagementDateEnd: info.end.valueOf()
+    })
+    return GQL.run([reportsPart]).then(data => {
+      if (data.reports && data.reports.list) {
+        return data.reports.list.map(r => ({
+          title: r.intent,
+          start: moment(r.engagementDate).format("YYYY-MM-DD")
+        }))
+      }
+      return []
+    })
+  }
 
   render() {
     const { organization, reports, tasks } = this.state
@@ -206,6 +235,7 @@ class BaseOrganizationShow extends Page {
     if (currentUser._loaded !== true) {
       return <div className="loader" />
     }
+
     return (
       <Formik enableReinitialize initialValues={organization} {...myFormProps}>
         {({ values }) => {
@@ -375,6 +405,24 @@ class BaseOrganizationShow extends Page {
                 )}
 
                 <Fieldset
+                  id="reports-calendar"
+                  title={`Reports calendar from ${organization.shortName}`}
+                >
+                  <FullCalendar
+                    defaultView="dayGridMonth"
+                    header={{
+                      left: "prev,next today",
+                      center: "title",
+                      right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
+                    }}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    events={this.getEvents}
+                    ref={this.calendarComponentRef}
+                    allDayDefault
+                  />
+                </Fieldset>
+
+                <Fieldset
                   id="reports"
                   title={`Reports from ${organization.shortName}`}
                 >
@@ -394,6 +442,9 @@ class BaseOrganizationShow extends Page {
     )
   }
 
+  handleViewRender = (a, b) => {
+    console.log("handleviewrender", a.view.activeStart)
+  }
   orgLabel = organization => {
     return `r_${organization.uuid}`
   }
