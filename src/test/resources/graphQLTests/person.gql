@@ -9,7 +9,7 @@ person(uuid:"${personUuid}") {
             shortName, longName
         }
     },
-    authoredReports(query: {pageNum: 0, pageSize: 10}) { list {
+    authoredReports(query: {pageSize: 10}) { list {
         uuid,
         engagementDate, duration,
         advisorOrg { uuid, shortName, longName }
@@ -19,7 +19,7 @@ person(uuid:"${personUuid}") {
             name
         }
     }},
-    attendedReports(query: {pageNum: 0, pageSize: 10}) { list {
+    attendedReports(query: {pageSize: 10}) { list {
         uuid,
         engagementDate, duration,
         advisorOrg { uuid, shortName, longName }

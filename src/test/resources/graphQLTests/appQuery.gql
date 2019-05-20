@@ -2,7 +2,7 @@ me {
     uuid, name, role
     position {
         uuid, name, type,
-		organization { uuid, shortName, longName, descendantOrgs(query: {pageNum: 0, pageSize: 0}) { uuid }}
+		organization { uuid, shortName, longName, descendantOrgs(query: {pageSize: 0}) { uuid }}
     }
 }
 

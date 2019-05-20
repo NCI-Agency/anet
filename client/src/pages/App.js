@@ -49,7 +49,7 @@ class App extends Page {
           uuid, name, code, type, status, isApprover
           organization {
             uuid, shortName,
-            descendantOrgs (query: { pageNum: 0, pageSize: 0 }) {
+            descendantOrgs (query: { pageSize: 0 }) {
               uuid
             }
           }
