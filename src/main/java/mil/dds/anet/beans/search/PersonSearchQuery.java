@@ -134,12 +134,4 @@ public class PersonSearchQuery extends AbstractSearchQuery {
     this.endOfTourDateEnd = endOfTourDateEnd;
   }
 
-  public static PersonSearchQuery withText(String text, int pageNum, int pageSize) {
-    PersonSearchQuery query = new PersonSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
-  }
-
 }

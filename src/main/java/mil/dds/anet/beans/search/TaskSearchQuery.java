@@ -133,12 +133,4 @@ public class TaskSearchQuery extends AbstractSearchQuery {
     this.sortBy = sortBy;
   }
 
-  public static TaskSearchQuery withText(String text, int pageNum, int pageSize) {
-    TaskSearchQuery query = new TaskSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
-  }
-
 }

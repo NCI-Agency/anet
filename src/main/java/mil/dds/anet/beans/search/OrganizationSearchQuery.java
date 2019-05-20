@@ -61,12 +61,4 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
     this.sortBy = sortBy;
   }
 
-  public static OrganizationSearchQuery withText(String text, int pageNum, int pageSize) {
-    OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
-  }
-
 }

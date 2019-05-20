@@ -36,12 +36,4 @@ public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
     this.sortBy = sortBy;
   }
 
-  public static AuthorizationGroupSearchQuery withText(String text, int pageNum, int pageSize) {
-    final AuthorizationGroupSearchQuery query = new AuthorizationGroupSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
-  }
-
 }

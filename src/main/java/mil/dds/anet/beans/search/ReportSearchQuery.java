@@ -296,12 +296,4 @@ public class ReportSearchQuery extends AbstractSearchQuery {
     this.sortBy = sortBy;
   }
 
-  public static ReportSearchQuery withText(String text, int pageNum, int pageSize) {
-    ReportSearchQuery query = new ReportSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
-  }
-
 }
