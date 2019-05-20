@@ -11,11 +11,11 @@ public interface ISearchQuery {
 
   public int getPageNum();
 
-  public void setPageNum(int pageNum);
+  public void setPageNum(Integer pageNum);
 
   public int getPageSize();
 
-  public void setPageSize(int pageSize);
+  public void setPageSize(Integer pageSize);
 
   public SortOrder getSortOrder();
 
