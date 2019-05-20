@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -125,7 +127,10 @@ public class Organization extends AbstractAnetBean {
   @GraphQLQuery(name = "positions")
   public synchronized List<Position> loadPositions() {
     if (positions == null) {
-      positions = AnetObjectEngine.getInstance().getPositionDao().getByOrganization(uuid);
+      final PositionSearchQuery query = new PositionSearchQuery();
+      query.setPageSize(0);
+      query.setOrganizationUuid(uuid);
+      positions = AnetObjectEngine.getInstance().getPositionDao().search(query).getList();
     }
     return positions;
   }
@@ -179,8 +184,10 @@ public class Organization extends AbstractAnetBean {
   @GraphQLQuery(name = "tasks")
   public synchronized List<Task> loadTasks() {
     if (tasks == null) {
-      tasks =
-          AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationUuid(this.getUuid());
+      final TaskSearchQuery query = new TaskSearchQuery();
+      query.setPageSize(0);
+      query.setResponsibleOrgUuid(uuid);
+      tasks = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
     }
     return tasks;
   }

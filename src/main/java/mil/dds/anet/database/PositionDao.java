@@ -343,13 +343,6 @@ public class PositionDao extends AnetBaseDao<Position> {
         .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
   }
 
-  public List<Position> getByOrganization(String organizationUuid) {
-    return getDbHandle()
-        .createQuery("/* getPositionByOrg */ SELECT " + POSITIONS_FIELDS + "FROM positions "
-            + "WHERE \"organizationUuid\" = :orgUuid")
-        .bind("orgUuid", organizationUuid).map(new PositionMapper()).list();
-  }
-
   public AnetBeanList<Position> search(PositionSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query);
   }

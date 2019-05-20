@@ -169,11 +169,4 @@ public class TaskDao extends AnetBaseDao<Task> {
         .bind("maxResults", maxResults).bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
         .map(new TaskMapper()).list();
   }
-
-  public List<Task> getTasksByOrganizationUuid(String orgUuid) {
-    return getDbHandle()
-        .createQuery(
-            "/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationUuid\" = :orgUuid")
-        .bind("orgUuid", orgUuid).map(new TaskMapper()).list();
-  }
 }
