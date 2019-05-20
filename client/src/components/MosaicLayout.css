@@ -50,7 +50,20 @@
 
 .bp3-navbar {
   margin: 8px;
-  width: inherit;
+  width: auto;
+  height: auto;
+  padding: 5px 15px;
+}
+
+.bp3-navbar-group {
+  height: auto !important;
+}
+
+.chart-description {
+  color: #777;
+  text-align: left;
+  padding-bottom: 8px;
+  padding-left: 8px;
 }
 
 @media print {
