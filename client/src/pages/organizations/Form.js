@@ -574,7 +574,7 @@ class BaseOrganizationForm extends Component {
     organization.parentOrg = utils.getReference(organization.parentOrg)
     const { edit } = this.props
     const operation = edit ? "updateOrganization" : "createOrganization"
-    let graphql = operation + "(organization: $organization)"
+    let graphql = /* GraphQL */ operation + "(organization: $organization)"
     graphql += edit ? "" : " { uuid }"
     const variables = { organization: organization }
     const variableDef = "($organization: OrganizationInput!)"

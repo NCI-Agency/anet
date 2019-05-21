@@ -86,17 +86,6 @@ public class ReportDao extends AnetBaseDao<Report> {
     }
   }
 
-  @Override
-  public AnetBeanList<Report> getAll(int pageNum, int pageSize) {
-    // Return the reports without sensitive information
-    return getAll(pageNum, pageSize, null);
-  }
-
-  public AnetBeanList<Report> getAll(int pageNum, int pageSize, Person user) {
-    final Query query = getPagedQuery(pageNum, pageSize);
-    return AnetBeanList.getReportList(user, query, pageNum, pageSize, new ReportMapper());
-  }
-
   public Report insert(Report r, Person user) {
     DaoUtils.setInsertFields(r);
     return insertInternal(r, user);

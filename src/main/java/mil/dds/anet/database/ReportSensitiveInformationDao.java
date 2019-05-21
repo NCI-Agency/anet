@@ -8,7 +8,6 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
@@ -28,11 +27,6 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
 
   public ReportSensitiveInformationDao() {
     super("ReportsSensitiveInformation", tableName, REPORTS_SENSITIVE_INFORMATION_FIELDS, null);
-  }
-
-  @Override
-  public AnetBeanList<?> getAll(int pageNum, int pageSize) {
-    throw new UnsupportedOperationException();
   }
 
   public ReportSensitiveInformation getByUuid(String uuid) {

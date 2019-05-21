@@ -207,7 +207,11 @@ class BaseTaskForm extends Component {
                         showDelete
                       />
                     }
-                    overlayColumns={["Position", "Current Occupant"]}
+                    overlayColumns={[
+                      "Position",
+                      "Organization",
+                      "Current Occupant"
+                    ]}
                     overlayRenderRow={PositionOverlayRow}
                     filterDefs={positionsFilters}
                     onChange={value =>
@@ -405,7 +409,7 @@ class BaseTaskForm extends Component {
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     const { edit } = this.props
     const operation = edit ? "updateTask" : "createTask"
-    let graphql = operation + "(task: $task)"
+    let graphql = /* GraphQL */ operation + "(task: $task)"
     graphql += edit ? "" : " { uuid }"
     const variables = { task: task }
     let variableDef = "($task: TaskInput!"

@@ -93,7 +93,7 @@ const advancedSelectFilterPersonProps = {
   addon: PEOPLE_ICON
 }
 const advancedSelectFilterPositionProps = {
-  overlayColumns: ["Position", "Current Occupant"],
+  overlayColumns: ["Position", "Organization", "Current Occupant"],
   overlayRenderRow: PositionOverlayRow,
   objectType: Position,
   valueKey: "name",
@@ -101,7 +101,7 @@ const advancedSelectFilterPositionProps = {
   addon: POSITIONS_ICON
 }
 const advancedSelectFilterLocationProps = {
-  overlayColumns: ["Location", "Name"],
+  overlayColumns: ["Name"],
   overlayRenderRow: LocationOverlayRow,
   objectType: Location,
   valueKey: "name",

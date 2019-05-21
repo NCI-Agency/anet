@@ -40,13 +40,6 @@ public class TaskResource {
     duplicateTaskShortName = String.format("Duplicate %s number", taskShortLabel);
   }
 
-  @GraphQLQuery(name = "tasks")
-  public AnetBeanList<Task> getAll(
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") Integer pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "100") Integer pageSize) {
-    return dao.getAll(pageNum, pageSize);
-  }
-
   @GraphQLQuery(name = "task")
   public Task getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Task p = dao.getByUuid(uuid);

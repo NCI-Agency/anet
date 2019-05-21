@@ -15,7 +15,6 @@ import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
@@ -31,13 +30,6 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 
   public OrganizationDao() {
     super("Organizations", tableName, ORGANIZATION_FIELDS, null);
-  }
-
-  public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
-    final Query query = getPagedQuery(pageNum, pageSize);
-    Long manualRowCount = getSqliteRowCount();
-    return new AnetBeanList<Organization>(query, pageNum, pageSize, new OrganizationMapper(),
-        manualRowCount);
   }
 
   public Organization getByUuid(String uuid) {

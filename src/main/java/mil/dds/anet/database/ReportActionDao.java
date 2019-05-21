@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ReportAction;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -38,11 +37,6 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
   public CompletableFuture<List<ReportAction>> getActionsForReport(Map<String, Object> context,
       String reportUuid) {
     return new ForeignKeyFetcher<ReportAction>().load(context, "report.reportActions", reportUuid);
-  }
-
-  @Override
-  public AnetBeanList<?> getAll(int pageNum, int pageSize) {
-    throw new UnsupportedOperationException();
   }
 
   public ReportAction getByUuid(String uuid) {

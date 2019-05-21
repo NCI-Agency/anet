@@ -138,14 +138,17 @@ public class Position extends AbstractAnetBean {
     return person.getForeignObject();
   }
 
-  // TODO: batch load? (used in positions/{Edit,Show}.js, {organizations,people}/Show.js)
   @GraphQLQuery(name = "associatedPositions")
-  public synchronized List<Position> loadAssociatedPositions() {
-    if (associatedPositions == null) {
-      associatedPositions =
-          AnetObjectEngine.getInstance().getPositionDao().getAssociatedPositions(uuid);
+  public CompletableFuture<List<Position>> loadAssociatedPositions(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (associatedPositions != null) {
+      return CompletableFuture.completedFuture(associatedPositions);
     }
-    return associatedPositions;
+    return AnetObjectEngine.getInstance().getPositionDao().getAssociatedPositions(context, uuid)
+        .thenApply(o -> {
+          associatedPositions = o;
+          return o;
+        });
   }
 
   @GraphQLIgnore
