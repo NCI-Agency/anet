@@ -123,14 +123,14 @@ export default class Person extends Model {
         .label(Settings.fields.person.phoneNumber),
       endOfTourDate: yupDate
         .nullable()
-        .when(["role", "status", "uuid"], (role, status, uuid, schema) => {
+        .when(["role", "status"], (role, status, schema) => {
           if (Person.isPrincipal({ role })) {
             return schema
           } else {
             schema = schema.required(
               `You must provide the ${Settings.fields.person.endOfTourDate}`
             )
-            if (Person.isNewFormUser({ status, uuid })) {
+            if (Person.isNewUser({ status })) {
               schema = schema.test(
                 "end-of-tour-date",
                 `The ${
@@ -215,10 +215,6 @@ export default class Person extends Model {
 
   static isNewUser(person) {
     return person.status === Person.STATUS.NEW_USER
-  }
-
-  static isNewFormUser(person) {
-    return _isEmpty(person.uuid) || person.status === Person.STATUS.NEW_USER
   }
 
   isNewUser() {

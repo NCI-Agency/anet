@@ -111,27 +111,6 @@ describe("Create new Person form page", () => {
       )
     })
 
-    it("Should not save if endOfTourDate is not in the future", () => {
-      CreatePerson.roleAdvisorButton.waitForExist()
-      CreatePerson.roleAdvisorButton.click()
-      CreatePerson.endOfTourDate.click()
-      CreatePerson.endOfTourDay.waitForExist()
-      // select a date
-      CreatePerson.endOfTourDay.click()
-      CreatePerson.lastName.click()
-      let errorMessage = CreatePerson.endOfTourDate
-        .$("..")
-        .$("..")
-        .$("..")
-        .$("..")
-        .$("span.help-block")
-      errorMessage.waitForExist()
-      errorMessage.waitForDisplayed()
-      expect(errorMessage.getText()).to.equal(
-        "The End of tour date must be in the future"
-      )
-    })
-
     it("Should save with a valid email address in uppercase", () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
