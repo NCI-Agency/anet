@@ -2386,21 +2386,30 @@
     deepmerge "^2.0.1"
     glob "^7.1.2"
 
-"@wdio/local-runner@^5.8.3":
-  version "5.8.3"
-  resolved "https://registry.yarnpkg.com/@wdio/local-runner/-/local-runner-5.8.3.tgz#fefc4d8c0e2d2c08758cee7141712ea513dc3f94"
-  integrity sha512-vrqHYBe7haKPF2Y8f2Ytp2U2SI8ufSNztOaRqU/dfzOkXNJgqx3E8GzZ8Y1x4V8ZvnKdI8wbe089N2+eoHnqFA==
+"@wdio/config@^5.9.1":
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.9.1.tgz#a4337d4743e57def03064e0044c634a7120da413"
+  integrity sha512-u5dqcTpUk4eXILEy5ytKX+0s7vXVHAwU/GghhbWrbL3mDTvZ65Wn6IyDGtBLckY6lfa2KF5Tswk0cg9mCw0mnA==
   dependencies:
-    "@wdio/logger" "^5.8.0"
-    "@wdio/repl" "^5.8.1"
-    "@wdio/runner" "^5.8.3"
+    "@wdio/logger" "^5.9.0"
+    deepmerge "^2.0.1"
+    glob "^7.1.2"
+
+"@wdio/local-runner@^5.9.1":
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/@wdio/local-runner/-/local-runner-5.9.1.tgz#f4d5b11ebb8ec663dfb532423b5514322df0bb3f"
+  integrity sha512-RrWqgacwlkBGTwf3W8ZsOzVJKNS8IQ+pGCu+FphYz/AOQ8DjVGlNXnkCUbBdSMoy57Z8DrwEjO3Wxltt7b60ZA==
+  dependencies:
+    "@wdio/logger" "^5.9.0"
+    "@wdio/repl" "^5.9.1"
+    "@wdio/runner" "^5.9.1"
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
-"@wdio/logger@^5.8.0":
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.8.0.tgz#9d69dec2eaaee011c03de0f9239f8c520dfe8260"
-  integrity sha512-YQ6fybKvWEZPBVf/rrhedohj6g4U1cb9w/6IkHOOhDYbiwwvmAVk7h7QTCsdVc1pxO7Y4/5gI46bmoASgPsrnw==
+"@wdio/logger@^5.8.0", "@wdio/logger@^5.9.0":
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.9.0.tgz#e43b31dd40bcd9af0ff3dc35aace5d7457087fa7"
+  integrity sha512-L08MyO844LoTOnOZFxbupbTeqMAH7ZmrrNtN5AXpk3hJP7t4i5A+7eCiNWMpUpmOGHzM+04W27mYdaSei7imKg==
   dependencies:
     chalk "^2.3.0"
     loglevel "^1.6.0"
@@ -2417,12 +2426,12 @@
     "@wdio/logger" "^5.8.0"
     mocha "^6.1.0"
 
-"@wdio/repl@^5.8.1":
-  version "5.8.1"
-  resolved "https://registry.yarnpkg.com/@wdio/repl/-/repl-5.8.1.tgz#8bd9c4f4132a530d51440b02ae0cca6c225fa9cd"
-  integrity sha512-vbX3tCeNjav07N5wYbeJQT5wM1VUoMk0++dQNCP8H05j0Hyqs1Z8K4VpLa1JCieWxQIUFgY703y6cZ6+YhDJEg==
+"@wdio/repl@^5.8.1", "@wdio/repl@^5.9.1":
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/@wdio/repl/-/repl-5.9.1.tgz#6f5550e6559ed5b4cc6e236c8824cd89880968b0"
+  integrity sha512-GUZ35ZLfNAIwKH/3TNrrusisMVX5Ukm9aLjbCRRKUCqGudD9yMFnkw1iJgfWFk38OnEcGS7plgdAJJooQx5Kqw==
   dependencies:
-    "@wdio/config" "^5.8.1"
+    "@wdio/config" "^5.9.1"
 
 "@wdio/reporter@^5.7.8":
   version "5.7.8"
@@ -2431,17 +2440,17 @@
   dependencies:
     fs-extra "^7.0.1"
 
-"@wdio/runner@^5.8.3":
-  version "5.8.3"
-  resolved "https://registry.yarnpkg.com/@wdio/runner/-/runner-5.8.3.tgz#cf1be7d21de06882cc6ad187ab7594bcab02103b"
-  integrity sha512-2jnAQWjtgkClhW+AqVC87Gb60WHcWsaNCV7GNHwwUXTTqIDwIT2l4FlbwYWVQRgJNvIzLt90WrMfEmRhnVLnVg==
+"@wdio/runner@^5.9.1":
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/@wdio/runner/-/runner-5.9.1.tgz#6ab4ee41e2087e52ed3617f8c7eb58591ff436b2"
+  integrity sha512-guEml6vv2bQxZYMR7VBDjxzbDy8XJWaLuFvktJWuaETbNCKo9D6nNBORGz04E+FdXhttjgIL3tHIATf/OzKUxw==
   dependencies:
-    "@wdio/config" "^5.8.1"
-    "@wdio/logger" "^5.8.0"
-    "@wdio/utils" "^5.8.1"
+    "@wdio/config" "^5.9.1"
+    "@wdio/logger" "^5.9.0"
+    "@wdio/utils" "^5.9.0"
     deepmerge "^2.0.1"
     gaze "^1.1.2"
-    webdriverio "^5.8.3"
+    webdriverio "^5.9.1"
 
 "@wdio/spec-reporter@^5.8.0":
   version "5.8.0"
@@ -2467,6 +2476,14 @@
   integrity sha512-SO9rDLsgTdKuw1MUDVvKzoETZfEP87ikfNnB3xJM40ka7TIFk0n4oM3T3W8JgvTJvsmn1zGG0vxaB+WJ8ZxZWA==
   dependencies:
     "@wdio/logger" "^5.8.0"
+    deepmerge "^3.2.0"
+
+"@wdio/utils@^5.9.0":
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-5.9.0.tgz#a3e63a38f84023fd1675879f48359c7162b510a9"
+  integrity sha512-yDomtpjFzyMjhuTrKnbonimSJeMt5M+sYvT+2smt3nIDbT34RlF91m4k6f9hH3zUcEoA2XOI5WZGyszKpnPXtA==
+  dependencies:
+    "@wdio/logger" "^5.9.0"
     deepmerge "^3.2.0"
 
 "@webassemblyjs/ast@1.8.5":
@@ -12736,6 +12753,13 @@ resq@^1.4.0-rc.1:
   dependencies:
     fast-deep-equal "^2.0.1"
 
+resq@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/resq/-/resq-1.5.0.tgz#a5f238e0c90f4e32ad0bfe3f36f041fae8b90f1d"
+  integrity sha512-6US6oo2fQ/vgs7wBwqq1w9901Z5VEDgxQH0LrNaN8HcHUZInhtrIt1a0Icysu0vuoK26Bt+SR1dIYeR9+ftMxA==
+  dependencies:
+    fast-deep-equal "^2.0.1"
+
 restore-cursor@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/restore-cursor/-/restore-cursor-2.0.0.tgz#9f7ee287f82fd326d4fd162923d62129eee0dfaf"
@@ -14531,6 +14555,17 @@ webdriver@^5.8.3:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
+webdriver@^5.9.1:
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-5.9.1.tgz#03344549f09e4f123438d5e1e76444f96a1cd0ac"
+  integrity sha512-emUetEEJKN6ZsyZzj28D4HKC5p7Qo3ZSuuRlH9TpWyCp8ahxu3UicgL19ES//Sy1xPomWOi2Xk54/FLv/BIxgQ==
+  dependencies:
+    "@wdio/config" "^5.9.1"
+    "@wdio/logger" "^5.9.0"
+    deepmerge "^2.0.1"
+    lodash.merge "^4.6.1"
+    request "^2.83.0"
+
 webdriverio@^5.8.3:
   version "5.8.3"
   resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.8.3.tgz#5977e6f3ffc9d2995fd42e2332bacb188a32a7de"
@@ -14549,6 +14584,25 @@ webdriverio@^5.8.3:
     rgb2hex "^0.1.0"
     serialize-error "^3.0.0"
     webdriver "^5.8.3"
+
+webdriverio@^5.9.1:
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.9.1.tgz#07b26bba7fa2d164a0f192adcb049dcda89f9e4e"
+  integrity sha512-QYlIIrfqr7I0OSkg9HsZyOGpo7d8MlrH7ueo5MHsgNR2QgZG1OxHk/1edV3Te9Q2AUcpCmIKO1IOAJDxlYA+Rw==
+  dependencies:
+    "@wdio/config" "^5.9.1"
+    "@wdio/logger" "^5.9.0"
+    "@wdio/repl" "^5.9.1"
+    css-value "^0.0.1"
+    grapheme-splitter "^1.0.2"
+    lodash.isobject "^3.0.2"
+    lodash.isplainobject "^4.0.6"
+    lodash.merge "^4.6.1"
+    lodash.zip "^4.2.0"
+    resq "^1.5.0"
+    rgb2hex "^0.1.0"
+    serialize-error "^3.0.0"
+    webdriver "^5.9.1"
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
