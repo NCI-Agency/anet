@@ -119,7 +119,6 @@ class BaseReportForm extends Component {
 
   componentDidMount() {
     const tagQuery = {
-      pageNum: 0,
       pageSize: 0 // retrieve all
     }
     API.query(

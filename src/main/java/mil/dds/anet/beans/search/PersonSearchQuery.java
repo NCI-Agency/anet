@@ -30,12 +30,12 @@ public class PersonSearchQuery extends AbstractSearchQuery {
   Boolean pendingVerification;
 
   private PersonSearchSortBy sortBy;
-  private SortOrder sortOrder;
 
   public PersonSearchQuery() {
+    super();
     this.setPageSize(100);
-    this.sortOrder = SortOrder.ASC;
     this.sortBy = PersonSearchSortBy.NAME;
+    this.setSortOrder(SortOrder.ASC);
   }
 
   public String getOrgUuid() {
@@ -118,14 +118,6 @@ public class PersonSearchQuery extends AbstractSearchQuery {
     this.sortBy = sortBy;
   }
 
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
-  }
-
   public Instant getEndOfTourDateStart() {
     return endOfTourDateStart;
   }
@@ -140,14 +132,6 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 
   public void setEndOfTourDateEnd(Instant endOfTourDateEnd) {
     this.endOfTourDateEnd = endOfTourDateEnd;
-  }
-
-  public static PersonSearchQuery withText(String text, int pageNum, int pageSize) {
-    PersonSearchQuery query = new PersonSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
   }
 
 }
