@@ -32,7 +32,7 @@
     "@wdio/mocha-framework": "^5.8.1",
     "@wdio/spec-reporter": "^5.8.0",
     "@wdio/sync": "^5.8.1",
-    "aigle": "^1.12.0",
+    "aigle": "^1.13.1",
     "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.5.1",
     "ava": "^1.4.1",
