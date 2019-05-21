@@ -31,9 +31,9 @@ public class SqliteOrganizationSearcher extends AbstractSearcherBase
     final AnetBeanList<Organization> result = new AnetBeanList<Organization>(query.getPageNum(),
         query.getPageSize(), new ArrayList<Organization>());
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
+      final String text = query.getText();
       whereClauses.add(
           "(\"shortName\" LIKE '%' || :text || '%' OR \"longName\" LIKE '%' || :text || '%' )");
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));

@@ -9,7 +9,6 @@ import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TagSearchQuery;
-import mil.dds.anet.beans.search.TagSearchQuery.TagSearchSortBy;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ITagSearcher;
@@ -25,7 +24,7 @@ public class MssqlTagSearcher extends AbstractSearcherBase implements ITagSearch
     final StringBuilder sql = new StringBuilder("/* MssqlTagSearch */ SELECT tags.*");
 
     final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
       // so we can sort on it (show the most relevant hits at the top).
@@ -54,18 +53,12 @@ public class MssqlTagSearcher extends AbstractSearcherBase implements ITagSearch
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && query.getSortBy() == null) {
+    if (doFullTextSearch && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
-    if (query.getSortBy() == null) {
-      query.setSortBy(TagSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortBy()) {
       case CREATED_AT:
         orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tags", "createdAt"));

@@ -9,9 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
@@ -40,9 +38,9 @@ public class SqlitePositionSearcher extends AbstractSearcherBase implements IPos
     final AnetBeanList<Position> result = new AnetBeanList<Position>(query.getPageNum(),
         query.getPageSize(), new ArrayList<Position>());
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
+      final String text = query.getText();
       if (query.getMatchPersonName() != null && query.getMatchPersonName()) {
         whereClauses.add("((positions.name LIKE '%' || :text || '%' "
             + "OR positions.code LIKE '%' || :text || '%') "
@@ -99,9 +97,6 @@ public class SqlitePositionSearcher extends AbstractSearcherBase implements IPos
 
     // Sort Ordering
     sql.append(" ORDER BY ");
-    if (query.getSortBy() == null) {
-      query.setSortBy(PositionSearchSortBy.NAME);
-    }
     switch (query.getSortBy()) {
       case CODE:
         sql.append("positions.code");
@@ -115,9 +110,6 @@ public class SqlitePositionSearcher extends AbstractSearcherBase implements IPos
         break;
     }
 
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortOrder()) {
       case ASC:
         sql.append(" ASC ");

@@ -9,7 +9,6 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
-import mil.dds.anet.beans.search.LocationSearchQuery.LocationSearchSortBy;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ILocationSearcher;
@@ -25,8 +24,7 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
     final Map<String, Object> sqlArgs = new HashMap<String, Object>();
     final StringBuilder sql = new StringBuilder("/* MssqlLocationSearch */ SELECT locations.*");
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
       // If we're doing a full-text search, add a pseudo-rank
       // so we can sort on it (show the most relevant hits at the top).
@@ -36,6 +34,7 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
     sql.append(", count(*) over() as totalCount FROM locations");
 
     if (doFullTextSearch) {
+      final String text = query.getText();
       sql.append(" LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
           + " ON locations.uuid = c_locations.[Key]");
       whereClauses.add("c_locations.rank IS NOT NULL");
@@ -54,18 +53,12 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && query.getSortBy() == null) {
+    if (doFullTextSearch && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
-    if (query.getSortBy() == null) {
-      query.setSortBy(LocationSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortBy()) {
       case CREATED_AT:
         orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "locations", "createdAt"));

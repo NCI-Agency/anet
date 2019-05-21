@@ -27,9 +27,9 @@ public class SqliteTaskSearcher extends AbstractSearcherBase implements ITaskSea
     final AnetBeanList<Task> result =
         new AnetBeanList<Task>(query.getPageNum(), query.getPageSize(), new ArrayList<Task>());
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
+      final String text = query.getText();
       whereClauses
           .add("(\"longName\" LIKE '%' || :text || '%' OR \"shortName\" LIKE '%' || :text || '%')");
       args.put("text", Utils.getSqliteFullTextQuery(text));

@@ -9,7 +9,6 @@ import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.beans.search.TaskSearchQuery.TaskSearchSortBy;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ITaskSearcher;
@@ -25,8 +24,7 @@ public class MssqlTaskSearcher extends AbstractSearcherBase implements ITaskSear
     final Map<String, Object> args = new HashMap<String, Object>();
     final StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*");
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
       // If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest
       // possible score)
@@ -38,6 +36,7 @@ public class MssqlTaskSearcher extends AbstractSearcherBase implements ITaskSear
     sql.append(", COUNT(*) OVER() AS totalCount FROM tasks");
 
     if (doFullTextSearch) {
+      final String text = query.getText();
       sql.append(" LEFT JOIN CONTAINSTABLE (tasks, (longName), :containsQuery) c_tasks"
           + " ON tasks.uuid = c_tasks.[Key]");
       whereClauses.add("(c_tasks.rank IS NOT NULL" + " OR tasks.shortName LIKE :likeQuery)");
@@ -123,18 +122,12 @@ public class MssqlTaskSearcher extends AbstractSearcherBase implements ITaskSear
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && query.getSortBy() == null) {
+    if (doFullTextSearch && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
-    if (query.getSortBy() == null) {
-      query.setSortBy(TaskSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortBy()) {
       case CREATED_AT:
         orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tasks", "createdAt"));

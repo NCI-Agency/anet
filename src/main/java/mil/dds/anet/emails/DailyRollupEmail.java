@@ -16,7 +16,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
+import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.utils.DaoUtils;
 import org.slf4j.Logger;

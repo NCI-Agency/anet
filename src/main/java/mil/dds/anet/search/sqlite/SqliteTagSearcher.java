@@ -15,12 +15,12 @@ public class SqliteTagSearcher extends AbstractSearcherBase implements ITagSearc
   public AnetBeanList<Tag> runSearch(TagSearchQuery query) {
     final AnetBeanList<Tag> result =
         new AnetBeanList<Tag>(query.getPageNum(), query.getPageSize(), new ArrayList<Tag>());
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (!doFullTextSearch) {
       return result;
     }
 
+    final String text = query.getText();
     result.setList(getDbHandle()
         .createQuery("/* SqliteTagSearch */ SELECT * FROM tags "
             + "WHERE name LIKE '%' || :text || '%' " + "OR description LIKE '%' || :text || '%' "

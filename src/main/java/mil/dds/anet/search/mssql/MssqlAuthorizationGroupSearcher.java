@@ -8,7 +8,6 @@ import java.util.Map;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
-import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery.AuthorizationGroupSearchSortBy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
@@ -27,8 +26,7 @@ public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase
     final StringBuilder sql =
         new StringBuilder("/* MssqlAuthorizationGroupSearch */ SELECT authorizationGroups.*");
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
       // so we can sort on it (show the most relevant hits at the top).
@@ -41,6 +39,7 @@ public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase
     sql.append(", count(*) over() as totalCount FROM authorizationGroups");
 
     if (doFullTextSearch) {
+      final String text = query.getText();
       sql.append(
           " LEFT JOIN CONTAINSTABLE (authorizationGroups, (name, description), :containsQuery) c_authorizationGroups"
               + " ON authorizationGroups.uuid = c_authorizationGroups.[Key]"
@@ -71,18 +70,12 @@ public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && query.getSortBy() == null) {
+    if (doFullTextSearch && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
-    if (query.getSortBy() == null) {
-      query.setSortBy(AuthorizationGroupSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortBy()) {
       case CREATED_AT:
         orderByClauses

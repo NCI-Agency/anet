@@ -17,9 +17,7 @@ import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
@@ -70,9 +68,9 @@ public class SqliteReportSearcher extends AbstractSearcherBase implements IRepor
       args.put("authorUuid", query.getAuthorUuid());
     }
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
+      final String text = query.getText();
       whereClauses.add("(text LIKE '%' || :text || '%' OR " + "intent LIKE '%' || :text || '%' OR "
           + "\"keyOutcomes\" LIKE '%' || :text || '%' OR "
           + "\"nextSteps\" LIKE '%' || :text || '%' OR " + "tags.name LIKE '%' || :text || '%' OR "
@@ -263,9 +261,6 @@ public class SqliteReportSearcher extends AbstractSearcherBase implements IRepor
 
     // Sort Ordering
     sql.append(" ORDER BY ");
-    if (query.getSortBy() == null) {
-      query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
-    }
     switch (query.getSortBy()) {
       case ENGAGEMENT_DATE:
         sql.append("reports.\"engagementDate\"");
@@ -282,9 +277,6 @@ public class SqliteReportSearcher extends AbstractSearcherBase implements IRepor
         break;
     }
 
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.DESC);
-    }
     switch (query.getSortOrder()) {
       case ASC:
         sql.append(" ASC ");

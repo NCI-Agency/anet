@@ -21,7 +21,7 @@ public class MssqlSearcher extends Searcher {
         injector.getInstance(MssqlAuthorizationGroupSearcher.class));
   }
 
-  protected static Query addPagination(AbstractSearchQuery query, Handle dbHandle,
+  protected static Query addPagination(AbstractSearchQuery<?> query, Handle dbHandle,
       StringBuilder sql, Map<String, Object> args) {
     if (query.getPageSize() > 0) {
       sql.append(" OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
@@ -36,7 +36,7 @@ public class MssqlSearcher extends Searcher {
     return q;
   }
 
-  protected static Query addPagination(AbstractSearchQuery query, Handle dbHandle,
+  protected static Query addPagination(AbstractSearchQuery<?> query, Handle dbHandle,
       StringBuilder sql, Map<String, Object> args, Map<String, List<?>> listArgs) {
     final Query q = addPagination(query, dbHandle, sql, args);
     for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {

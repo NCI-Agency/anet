@@ -10,7 +10,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchBuilder.Comparison;
@@ -31,9 +30,8 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
     final StringBuilder sql =
         new StringBuilder("/* MssqlPersonSearch */ SELECT " + PersonDao.PERSON_FIELDS);
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
-    final boolean doSoundex = doFullTextSearch && query.getSortBy() == null;
+    final boolean doFullTextSearch = query.isTextPresent();
+    final boolean doSoundex = doFullTextSearch && !query.isSortByPresent();
     if (doSoundex) {
       sql.append(", EXP(SUM(LOG(1.0/(5-DIFFERENCE(name_token.value, search_token.value)))))");
       sql.append(" AS search_rank");
@@ -56,6 +54,7 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
       sql.append(" LEFT JOIN positions ON people.uuid = positions.currentPersonUuid ");
     }
 
+    final String text = query.getText();
     if (doSoundex) {
       sql.append(" CROSS APPLY STRING_SPLIT(people.name, ' ') AS name_token"
           + " CROSS APPLY STRING_SPLIT(:freetextQuery, ' ') AS search_token");
@@ -143,18 +142,12 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && query.getSortBy() == null) {
+    if (doFullTextSearch && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
-    if (query.getSortBy() == null) {
-      query.setSortBy(PersonSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortBy()) {
       case CREATED_AT:
         orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "people", "createdAt"));

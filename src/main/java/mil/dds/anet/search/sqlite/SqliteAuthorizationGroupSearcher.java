@@ -9,7 +9,6 @@ import java.util.Map;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
-import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery.AuthorizationGroupSearchSortBy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
@@ -27,9 +26,9 @@ public class SqliteAuthorizationGroupSearcher extends AbstractSearcherBase
     final StringBuilder sql = new StringBuilder(
         "/* SqliteAuthorizationGroupSearch */ SELECT * FROM \"authorizationGroups\"");
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
+      final String text = query.getText();
       whereClauses.add("(name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%' )");
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
     }
@@ -57,12 +56,6 @@ public class SqliteAuthorizationGroupSearcher extends AbstractSearcherBase
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
-    if (query.getSortBy() == null) {
-      query.setSortBy(AuthorizationGroupSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortBy()) {
       case CREATED_AT:
         orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "\"createdAt\""));

@@ -24,9 +24,9 @@ public class SqliteLocationSearcher extends AbstractSearcherBase implements ILoc
     final StringBuilder sql =
         new StringBuilder("/* SqliteLocationSearch */ SELECT * FROM locations");
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
+      final String text = query.getText();
       whereClauses.add("name LIKE '%' || :text || '%'");
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
     }

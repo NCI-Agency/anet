@@ -9,7 +9,6 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.beans.search.OrganizationSearchQuery.OrganizationSearchSortBy;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
@@ -28,8 +27,7 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
     final StringBuilder sql = new StringBuilder(
         "/* MssqlOrganizationSearch */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS);
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
       // If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest
       // possible score)
@@ -42,6 +40,7 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
     sql.append(", count(*) OVER() AS totalCount FROM organizations");
 
     if (doFullTextSearch) {
+      final String text = query.getText();
       sql.append(
           " LEFT JOIN CONTAINSTABLE (organizations, (longName), :containsQuery) c_organizations"
               + " ON organizations.uuid = c_organizations.[Key]");
@@ -83,18 +82,12 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && query.getSortBy() == null) {
+    if (doFullTextSearch && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
-    if (query.getSortBy() == null) {
-      query.setSortBy(OrganizationSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     switch (query.getSortBy()) {
       case CREATED_AT:
         orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "organizations", "createdAt"));

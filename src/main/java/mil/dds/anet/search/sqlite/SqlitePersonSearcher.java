@@ -9,9 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
@@ -23,12 +21,6 @@ import org.jdbi.v3.core.statement.Query;
 public class SqlitePersonSearcher extends AbstractSearcherBase implements IPersonSearcher {
 
   protected String buildOrderBy(PersonSearchQuery query) {
-    if (query.getSortBy() == null) {
-      query.setSortBy(PersonSearchSortBy.NAME);
-    }
-    if (query.getSortOrder() == null) {
-      query.setSortOrder(SortOrder.ASC);
-    }
     StringBuilder orderBy = new StringBuilder(" ORDER BY ");
     switch (query.getSortBy()) {
       case RANK:
@@ -75,9 +67,9 @@ public class SqlitePersonSearcher extends AbstractSearcherBase implements IPerso
     final AnetBeanList<Person> result =
         new AnetBeanList<Person>(query.getPageNum(), query.getPageSize(), new ArrayList<Person>());
 
-    final String text = query.getText();
-    final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+    final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
+      final String text = query.getText();
       if (query.getMatchPositionName()) {
         whereClauses.add("(people.name LIKE '%' || :text || '%' "
             + "OR \"emailAddress\" LIKE '%' || :text || '%' "
