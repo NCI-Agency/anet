@@ -46,9 +46,6 @@ export default class MosaicLayout extends Component {
     return (
       <div className="mosaic-box" style={this.props.style}>
         <div className="mosaic-container">
-          {this.props.description && (
-            <p className="chart-description">{this.props.description}</p>
-          )}
           {this.renderNavBar()}
           <Mosaic
             value={this.state.currentNode}
@@ -80,6 +77,9 @@ export default class MosaicLayout extends Component {
             <Icon icon={IconNames.GRID_VIEW} />
           </button>
           {this.renderButtons()}
+          {this.props.description && (
+            <span className="chart-description">{this.props.description}</span>
+          )}
         </div>
       </div>
     )

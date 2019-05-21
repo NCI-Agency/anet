@@ -98,7 +98,11 @@ class BaseAssignPositionModal extends Component {
                   fieldLabel="Select a position"
                   placeholder="Select a position for this person"
                   value={this.state.position}
-                  overlayColumns={["Position", "Current Occupant"]}
+                  overlayColumns={[
+                    "Position",
+                    "Organization",
+                    "Current Occupant"
+                  ]}
                   overlayRenderRow={PositionOverlayRow}
                   filterDefs={positionsFilters}
                   onChange={this.handlePositionChange}
@@ -160,7 +164,7 @@ class BaseAssignPositionModal extends Component {
 
   @autobind
   save() {
-    let graphql = "deletePersonFromPosition(uuid: $uuid)"
+    let graphql = /* GraphQL */ "deletePersonFromPosition(uuid: $uuid)"
     let variables = {
       uuid: this.props.person.position.uuid
     }

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.mappers.SavedSearchMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -15,11 +14,6 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
   public SavedSearchDao() {
     super("SavedSearches", "savedSearches", "*", null);
-  }
-
-  @Override
-  public AnetBeanList<?> getAll(int pageNum, int pageSize) {
-    throw new UnsupportedOperationException();
   }
 
   public SavedSearch getByUuid(String uuid) {

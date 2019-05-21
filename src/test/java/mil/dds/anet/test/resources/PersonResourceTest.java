@@ -300,31 +300,6 @@ public class PersonResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void getAllPeopleTest() {
-    Person liz = getElizabethElizawell();
-
-    AnetBeanList<Person> results = graphQLHelper.getAllObjects(liz, "people", FIELDS,
-        new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
-    assertThat(results.getTotalCount()).isGreaterThan(0);
-
-    AnetBeanList<Person> pageOne =
-        graphQLHelper.getAllObjects(liz, "people (pageNum: 0, pageSize: 2)", FIELDS,
-            new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
-    assertThat(pageOne.getTotalCount()).isEqualTo(results.getTotalCount());
-    assertThat(pageOne.getList().size()).isEqualTo(2);
-    assertThat(results.getList()).containsAll(pageOne.getList());
-
-    AnetBeanList<Person> pageTwo =
-        graphQLHelper.getAllObjects(liz, "people (pageNum: 1, pageSize: 2)", FIELDS,
-            new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
-    assertThat(pageTwo.getTotalCount()).isEqualTo(results.getTotalCount());
-    assertThat(pageTwo.getList().size()).isEqualTo(2);
-    assertThat(results.getList()).containsAll(pageTwo.getList());
-    assertThat(pageOne.getList()).doesNotContainAnyElementsOf(pageTwo.getList());
-
-  }
-
-  @Test
   public void mergePeopleTest() {
     // Create a person
     Person loser = new Person();

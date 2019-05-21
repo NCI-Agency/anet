@@ -181,15 +181,6 @@ public class TaskResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void getAllTasksTest() {
-    final Person jack = getJackJackson();
-    final AnetBeanList<Task> taskList = graphQLHelper.getAllObjects(jack, "tasks", FIELDS,
-        new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
-    assertThat(taskList).isNotNull();
-    assertThat(taskList.getList()).isNotEmpty();
-  }
-
-  @Test
   public void duplicateTaskTest() {
     final String aUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
         TestData.createTask("DupTest", "Test dups", "Test-EF"),

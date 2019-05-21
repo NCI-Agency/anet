@@ -465,32 +465,6 @@ public class PositionResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void getAllPositionsTest() {
-    Person jack = getJackJackson();
-
-    int pageNum = 0;
-    int pageSize = 10;
-    int totalReturned = 0;
-    int firstTotalCount = 0;
-    AnetBeanList<Position> list = null;
-    do {
-      list = graphQLHelper.getAllObjects(jack,
-          "positions (pageNum: " + pageNum + ", pageSize: " + pageSize + ")", FIELDS,
-          new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {});
-      assertThat(list).isNotNull();
-      assertThat(list.getPageNum()).isEqualTo(pageNum);
-      assertThat(list.getPageSize()).isEqualTo(pageSize);
-      totalReturned += list.getList().size();
-      if (pageNum == 0) {
-        firstTotalCount = list.getTotalCount();
-      }
-      pageNum++;
-    } while (list.getList().size() != 0);
-
-    assertThat(totalReturned).isEqualTo(firstTotalCount);
-  }
-
-  @Test
   public void createPositionTest() throws ExecutionException, InterruptedException {
     // Create a new position and designate the person upfront
     Person newb = new Person();

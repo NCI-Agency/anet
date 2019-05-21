@@ -362,6 +362,7 @@ dictionary:
   non_reporting_ORGs: [ANET Administrators]
   tasking_ORGs: [EF 2.2]
   domainNames: [cmil.mil, mission.ita, nato.int, dds.mil, "*.isaf.nato.int"]
+  activeDomainNames: [cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
   imagery:
     mapOptions:
       crs: EPSG3857
