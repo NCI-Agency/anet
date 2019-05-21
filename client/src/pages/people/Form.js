@@ -466,7 +466,7 @@ class BasePersonForm extends Component {
                   >
                     {isAdvisor && endOfTourDateInPast && (
                       <Alert bsStyle="warning">
-                        Be aware that the end of tour date is not in the future.
+                        Be aware that the end of tour date is in the past.
                       </Alert>
                     )}
                   </Field>
