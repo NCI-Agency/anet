@@ -20,6 +20,7 @@ import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
@@ -275,8 +276,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 
   public CompletableFuture<List<Position>> getAssociatedPositions(Map<String, Object> context,
       String positionUuid) {
-    return new ForeignKeyFetcher<Position>().load(context, "position.associatedPositions",
-        positionUuid);
+    return new ForeignKeyFetcher<Position>().load(context,
+        BatchingUtils.DataLoaderKey.FK_POSITION_ASSOCIATED_POSITIONS, positionUuid);
   }
 
   static class AssociatedPositionsBatcher extends ForeignKeyBatcher<Position> {
@@ -343,28 +344,21 @@ public class PositionDao extends AnetBaseDao<Position> {
         .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
   }
 
-  public List<Position> getByOrganization(String organizationUuid) {
-    return getDbHandle()
-        .createQuery("/* getPositionByOrg */ SELECT " + POSITIONS_FIELDS + "FROM positions "
-            + "WHERE \"organizationUuid\" = :orgUuid")
-        .bind("orgUuid", organizationUuid).map(new PositionMapper()).list();
-  }
-
   public AnetBeanList<Position> search(PositionSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query);
   }
 
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
       Map<String, Object> context, String positionUuid) {
-    return new ForeignKeyFetcher<PersonPositionHistory>()
-        .load(context, "position.personPositionHistory", positionUuid)
+    return new ForeignKeyFetcher<PersonPositionHistory>().load(context,
+        BatchingUtils.DataLoaderKey.FK_POSITION_PERSON_POSITION_HISTORY, positionUuid)
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
   public CompletableFuture<Position> getCurrentPositionForPerson(Map<String, Object> context,
       String personUuid) {
-    return new ForeignKeyFetcher<Position>()
-        .load(context, "position.currentPositionForPerson", personUuid)
+    return new ForeignKeyFetcher<Position>().load(context,
+        BatchingUtils.DataLoaderKey.FK_POSITION_CURRENT_POSITION_FOR_PERSON, personUuid)
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 

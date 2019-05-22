@@ -17,6 +17,7 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -130,7 +131,8 @@ public class TaskDao extends AnetBaseDao<Task> {
 
   public CompletableFuture<List<Position>> getResponsiblePositionsForTask(
       Map<String, Object> context, String taskUuid) {
-    return new ForeignKeyFetcher<Position>().load(context, "task.responsiblePositions", taskUuid);
+    return new ForeignKeyFetcher<Position>().load(context,
+        BatchingUtils.DataLoaderKey.FK_TASK_RESPONSIBLE_POSITIONS, taskUuid);
   }
 
   public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {
@@ -173,13 +175,6 @@ public class TaskDao extends AnetBaseDao<Task> {
         .map(new TaskMapper()).list();
   }
 
-  public List<Task> getTasksByOrganizationUuid(String orgUuid) {
-    return getDbHandle()
-        .createQuery(
-            "/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationUuid\" = :orgUuid")
-        .bind("orgUuid", orgUuid).map(new TaskMapper()).list();
-  }
-
   static class ReportsBatcher extends ForeignKeyBatcher<Report> {
     private static final String sql = "/* batch.getReportsForTasks */ SELECT "
         + ReportDao.REPORT_FIELDS + ", reportUuid, taskUuid FROM reports, \"reportTasks\" "
@@ -199,8 +194,8 @@ public class TaskDao extends AnetBaseDao<Task> {
 
   public CompletableFuture<List<Report>> getReportsForTask(
       @GraphQLRootContext Map<String, Object> context, String taskUuid) {
-    return new ForeignKeyFetcher<Report>().load(context, "task.reports", taskUuid);
+    return new ForeignKeyFetcher<Report>().load(context,
+        BatchingUtils.DataLoaderKey.FK_TASK_REPORTS, taskUuid);
   }
-
 
 }

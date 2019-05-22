@@ -48,7 +48,7 @@ public class ReportPublicationWorker implements Runnable {
         .minusHours(this.nbOfHoursQuarantineApproved).toInstant();
     // Get a list of all APPROVED reports
     final ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageSize(Integer.MAX_VALUE);
+    query.setPageSize(0);
     query.setState(Collections.singletonList(ReportState.APPROVED));
     final List<Report> reports = dao.search(query, null, true).getList();
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();

@@ -10,9 +10,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -87,7 +88,8 @@ public class Organization extends AbstractAnetBean {
       return CompletableFuture.completedFuture(parentOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, "organizations", parentOrg.getForeignUuid()).thenApply(o -> {
+        .load(context, BatchingUtils.DataLoaderKey.ID_ORGANIZATIONS, parentOrg.getForeignUuid())
+        .thenApply(o -> {
           parentOrg.setForeignObject(o);
           return o;
         });
@@ -127,7 +129,10 @@ public class Organization extends AbstractAnetBean {
   @GraphQLQuery(name = "positions")
   public synchronized List<Position> loadPositions() {
     if (positions == null) {
-      positions = AnetObjectEngine.getInstance().getPositionDao().getByOrganization(uuid);
+      final PositionSearchQuery query = new PositionSearchQuery();
+      query.setPageSize(0);
+      query.setOrganizationUuid(uuid);
+      positions = AnetObjectEngine.getInstance().getPositionDao().search(query).getList();
     }
     return positions;
   }
@@ -155,10 +160,9 @@ public class Organization extends AbstractAnetBean {
 
   // TODO: batch load? (used in organizations/Show.js)
   @GraphQLQuery(name = "childrenOrgs")
-  public synchronized List<Organization> loadChildrenOrgs() {
+  public synchronized List<Organization> loadChildrenOrgs(
+      @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     if (childrenOrgs == null) {
-      OrganizationSearchQuery query = new OrganizationSearchQuery();
-      query.setPageSize(Integer.MAX_VALUE);
       query.setParentOrgUuid(uuid);
       query.setParentOrgRecursively(false);
       childrenOrgs = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
@@ -167,11 +171,10 @@ public class Organization extends AbstractAnetBean {
   }
 
   // TODO: batch load? (used in App.js for me → position → organization)
-  @GraphQLQuery(name = "allDescendantOrgs")
-  public synchronized List<Organization> loadAllDescendants() {
+  @GraphQLQuery(name = "descendantOrgs")
+  public synchronized List<Organization> loadDescendantOrgs(
+      @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     if (descendants == null) {
-      OrganizationSearchQuery query = new OrganizationSearchQuery();
-      query.setPageSize(Integer.MAX_VALUE);
       query.setParentOrgUuid(uuid);
       query.setParentOrgRecursively(true);
       descendants = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
@@ -183,8 +186,10 @@ public class Organization extends AbstractAnetBean {
   @GraphQLQuery(name = "tasks")
   public synchronized List<Task> loadTasks() {
     if (tasks == null) {
-      tasks =
-          AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationUuid(this.getUuid());
+      final TaskSearchQuery query = new TaskSearchQuery();
+      query.setPageSize(0);
+      query.setResponsibleOrgUuid(uuid);
+      tasks = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
     }
     return tasks;
   }
@@ -196,21 +201,6 @@ public class Organization extends AbstractAnetBean {
 
   public void setTasks(List<Task> tasks) {
     this.tasks = tasks;
-  }
-
-  // TODO: batch load? (appears to be unused)
-  @GraphQLQuery(name = "reports")
-  public AnetBeanList<Report> fetchReports(@GraphQLArgument(name = "pageNum") int pageNum,
-      @GraphQLArgument(name = "pageSize") int pageSize) {
-    ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    if (this.getType() == OrganizationType.ADVISOR_ORG) {
-      query.setAdvisorOrgUuid(uuid);
-    } else {
-      query.setPrincipalOrgUuid(uuid);
-    }
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
   }
 
   @Override

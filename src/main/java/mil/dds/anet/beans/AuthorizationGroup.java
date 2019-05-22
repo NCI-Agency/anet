@@ -1,18 +1,13 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -74,28 +69,6 @@ public class AuthorizationGroup extends AbstractAnetBean {
 
   public void setStatus(AuthorizationGroupStatus status) {
     this.status = status;
-  }
-
-  // TODO: batch load? (appears to be unused)
-  @GraphQLQuery(name = "reports")
-  public AnetBeanList<Report> fetchReports(@GraphQLArgument(name = "pageNum") int pageNum,
-      @GraphQLArgument(name = "pageSize") int pageSize) {
-    ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    query.setAuthorizationGroupUuid(Arrays.asList(uuid));
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
-  }
-
-  // TODO: batch load? (appears to be unused)
-  @GraphQLQuery(name = "paginatedPositions")
-  public AnetBeanList<Position> fetchPositions(@GraphQLArgument(name = "pageNum") int pageNum,
-      @GraphQLArgument(name = "pageSize") int pageSize) {
-    PositionSearchQuery query = new PositionSearchQuery();
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    query.setAuthorizationGroupUuid(uuid);
-    return AnetObjectEngine.getInstance().getPositionDao().search(query);
   }
 
   @Override

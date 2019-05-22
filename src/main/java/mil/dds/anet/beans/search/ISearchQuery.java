@@ -1,8 +1,6 @@
 package mil.dds.anet.beans.search;
 
 public interface ISearchQuery {
-  // marker interface
-
   public enum SortOrder {
     ASC, DESC
   }
@@ -13,9 +11,13 @@ public interface ISearchQuery {
 
   public int getPageNum();
 
-  public void setPageNum(int pageNum);
+  public void setPageNum(Integer pageNum);
 
   public int getPageSize();
 
-  public void setPageSize(int pageSize);
+  public void setPageSize(Integer pageSize);
+
+  public SortOrder getSortOrder();
+
+  public void setSortOrder(SortOrder sortOrder);
 }

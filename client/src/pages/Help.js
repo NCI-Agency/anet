@@ -42,7 +42,6 @@ class BaseHelp extends Page {
     }
 
     const positionQuery = {
-      pageNum: 0,
       pageSize: 0, // retrieve all these positions
       type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR],
       status: Position.STATUS.ACTIVE,
