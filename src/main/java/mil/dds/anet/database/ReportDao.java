@@ -518,7 +518,7 @@ public class ReportDao extends AnetBaseDao<Report> {
     sql.append("\"reportPeople\",");
     sql.append("organizations");
 
-    sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".personUuid");
+    sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
     sql.append(" %6$s");
     sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
