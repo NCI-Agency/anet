@@ -1639,6 +1639,11 @@
   resolved "https://registry.yarnpkg.com/@fullcalendar/interaction/-/interaction-4.1.0.tgz#5d0c4c2c407934ff8bd45071ff76fb6736937da3"
   integrity sha512-s9679mbLnBqvQJpIqj4CJi36yGCOXKYshasW7PL5a/BgNXYEScHtdSNZubJx26zHlgGOh8S0wIvBlYQUihMcLQ==
 
+"@fullcalendar/list@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/list/-/list-4.1.0.tgz#290274fc4e4616bea9238a31f49f53e295d11d3f"
+  integrity sha512-NSCiD3I8HVioq7M1jzyovZDTjBq1L8QRqUZDiYZXq14lAKYwYUdZL3MUlH7MNjL/xU/dKJWD+rTKGno7FXmT9g==
+
 "@fullcalendar/react@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@fullcalendar/react/-/react-4.1.0.tgz#16c197f2b84819853c8e82ab09ead8fdff0f344d"

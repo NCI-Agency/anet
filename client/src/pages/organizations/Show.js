@@ -27,6 +27,7 @@ import { connect } from "react-redux"
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timegrid"
+import listPlugin from "@fullcalendar/list"
 import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
@@ -35,6 +36,7 @@ import OrganizationTasks from "./OrganizationTasks"
 import "@fullcalendar/core/main.css"
 import "@fullcalendar/daygrid/main.css"
 import "@fullcalendar/timegrid/main.css"
+import "@fullcalendar/list/main.css"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 
@@ -180,10 +182,20 @@ class BaseOrganizationShow extends Page {
     })
     return GQL.run([reportsPart]).then(data => {
       if (data.reports && data.reports.list) {
-        return data.reports.list.map(r => ({
-          title: r.intent,
-          start: moment(r.engagementDate).format("YYYY-MM-DD")
-        }))
+        return data.reports.list.map(r => {
+          const who =
+            (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+          const where =
+            (r.principalOrg && r.principalOrg.shortName) ||
+            (r.location && r.location.name) ||
+            ""
+          return {
+            title: who + "@" + where,
+            start: moment(r.engagementDate).format("YYYY-MM-DD"),
+            classNames: ["event-" + r.state.toLowerCase()],
+            extendedProps: { ...r }
+          }
+        })
       }
       return []
     })
@@ -410,15 +422,33 @@ class BaseOrganizationShow extends Page {
                 >
                   <FullCalendar
                     defaultView="dayGridMonth"
+                    slotDuration={{ hours: 2 }}
                     header={{
-                      left: "prev,next today",
+                      left: "prev,next today filterDraft",
                       center: "title",
-                      right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
+                      right:
+                        "dayGridMonth,timeGridWeek,timeGridDay,listMonth,listWeek,listDay"
                     }}
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    buttonText={{
+                      listMonth: "list month",
+                      listWeek: "list week",
+                      listDay: "list day"
+                    }}
+                    plugins={[
+                      dayGridPlugin,
+                      timeGridPlugin,
+                      listPlugin,
+                      interactionPlugin
+                    ]}
                     events={this.getEvents}
                     ref={this.calendarComponentRef}
                     allDayDefault
+                    eventOverlap
+                    dateClick={info => {
+                      let calendarApi = this.calendarComponentRef.current.getApi()
+                      calendarApi.changeView("timeGridDay", info.dateStr) // call a method on the Calendar object
+                    }}
+                    eventClick={eventInfo => {}}
                   />
                 </Fieldset>
 
