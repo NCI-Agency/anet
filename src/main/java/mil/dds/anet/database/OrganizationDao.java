@@ -12,8 +12,8 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
-import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
@@ -26,11 +26,11 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 
   private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode",
       "type", "createdAt", "updatedAt", "parentOrgUuid"};
-  private static String tableName = "organizations";
-  public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
+  public static String TABLE_NAME = "organizations";
+  public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   public OrganizationDao() {
-    super("Organizations", tableName, ORGANIZATION_FIELDS, null);
+    super("Organizations", TABLE_NAME, ORGANIZATION_FIELDS, null);
   }
 
   public Organization getByUuid(String uuid) {
@@ -72,8 +72,8 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 
   public CompletableFuture<List<Organization>> getOrganizationsForPerson(
       Map<String, Object> context, String personUuid) {
-    return new ForeignKeyFetcher<Organization>().load(context,
-        BatchingUtils.DataLoaderKey.FK_PERSON_ORGANIZATIONS, personUuid);
+    return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
+        personUuid);
   }
 
   public List<Organization> getTopLevelOrgs(OrganizationType type) {

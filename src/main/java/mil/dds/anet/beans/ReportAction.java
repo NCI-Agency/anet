@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
-import mil.dds.anet.utils.BatchingUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -36,8 +36,7 @@ public class ReportAction extends AbstractAnetBean {
       return CompletableFuture.completedFuture(step.getForeignObject());
     }
     return new UuidFetcher<ApprovalStep>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_APPROVAL_STEPS, step.getForeignUuid())
-        .thenApply(o -> {
+        .load(context, IdDataLoaderKey.APPROVAL_STEPS, step.getForeignUuid()).thenApply(o -> {
           step.setForeignObject(o);
           return o;
         });
@@ -69,8 +68,7 @@ public class ReportAction extends AbstractAnetBean {
     if (person.hasForeignObject()) {
       return CompletableFuture.completedFuture(person.getForeignObject());
     }
-    return new UuidFetcher<Person>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_PEOPLE, person.getForeignUuid())
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, person.getForeignUuid())
         .thenApply(o -> {
           person.setForeignObject(o);
           return o;

@@ -12,8 +12,8 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
-import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -23,12 +23,12 @@ public class PersonDao extends AnetBaseDao<Person> {
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
       "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
       "pendingVerification", "createdAt", "updatedAt"};
-  private static String tableName = "people";
-  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
-  public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(tableName, fields, false);
+  public static String TABLE_NAME = "people";
+  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
 
   public PersonDao() {
-    super("People", tableName, PERSON_FIELDS, null);
+    super("People", TABLE_NAME, PERSON_FIELDS, null);
   }
 
   public Person getByUuid(String uuid) {
@@ -223,7 +223,7 @@ public class PersonDao extends AnetBaseDao<Person> {
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
       Map<String, Object> context, String personUuid) {
     return new ForeignKeyFetcher<PersonPositionHistory>()
-        .load(context, BatchingUtils.DataLoaderKey.FK_PERSON_PERSON_POSITION_HISTORY, personUuid)
+        .load(context, FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY, personUuid)
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 

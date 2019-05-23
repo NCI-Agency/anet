@@ -14,8 +14,10 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 @InTransaction
 public class LocationDao extends AnetBaseDao<Location> {
 
+  public static final String TABLE_NAME = "locations";
+
   public LocationDao() {
-    super("Locations", "locations", "*", null);
+    super("Locations", TABLE_NAME, "*", null);
   }
 
   public Location getByUuid(String uuid) {

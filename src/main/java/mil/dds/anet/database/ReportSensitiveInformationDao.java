@@ -10,8 +10,8 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
-import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
@@ -22,12 +22,12 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveInformation> {
 
   private static final String[] fields = {"uuid", "text", "reportUuid", "createdAt", "updatedAt"};
-  private static final String tableName = "reportsSensitiveInformation";
+  public static final String TABLE_NAME = "reportsSensitiveInformation";
   public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS =
-      DaoUtils.buildFieldAliases(tableName, fields, true);
+      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   public ReportSensitiveInformationDao() {
-    super("ReportsSensitiveInformation", tableName, REPORTS_SENSITIVE_INFORMATION_FIELDS, null);
+    super("ReportsSensitiveInformation", TABLE_NAME, REPORTS_SENSITIVE_INFORMATION_FIELDS, null);
   }
 
   public ReportSensitiveInformation getByUuid(String uuid) {
@@ -43,7 +43,7 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
       extends ForeignKeyBatcher<ReportSensitiveInformation> {
     private static final String sql =
         "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT "
-            + REPORTS_SENSITIVE_INFORMATION_FIELDS + " FROM \"" + tableName + "\""
+            + REPORTS_SENSITIVE_INFORMATION_FIELDS + " FROM \"" + TABLE_NAME + "\""
             + " WHERE \"reportUuid\" IN ( <foreignKeys> )";
 
     public ReportsSensitiveInformationBatcher() {
@@ -71,7 +71,7 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
     }
     DaoUtils.setInsertFields(rsi);
     getDbHandle()
-        .createUpdate("/* insertReportsSensitiveInformation */ INSERT INTO \"" + tableName + "\" "
+        .createUpdate("/* insertReportsSensitiveInformation */ INSERT INTO \"" + TABLE_NAME + "\" "
             + " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
             + "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
         .bindBean(rsi).bind("createdAt", DaoUtils.asLocalDateTime(rsi.getCreatedAt()))
@@ -93,13 +93,13 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
     final int numRows;
     if (Utils.isEmptyHtml(rsi.getText())) {
       numRows = getDbHandle().createUpdate("/* deleteReportsSensitiveInformation */ DELETE FROM \""
-          + tableName + "\"" + " WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
+          + TABLE_NAME + "\"" + " WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
       AnetAuditLogger.log("Empty ReportSensitiveInformation {} deleted by {} ", rsi, user);
     } else {
       // Update relevant fields, but do not allow the reportUuid to be updated by the query!
       rsi.setUpdatedAt(Instant.now());
       numRows = getDbHandle()
-          .createUpdate("/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
+          .createUpdate("/* updateReportsSensitiveInformation */ UPDATE \"" + TABLE_NAME + "\""
               + " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(rsi).bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt())).execute();
       AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
@@ -121,8 +121,8 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
     if (!isAuthorized(user, report)) {
       return CompletableFuture.completedFuture(null);
     }
-    return new ForeignKeyFetcher<ReportSensitiveInformation>().load(context,
-        BatchingUtils.DataLoaderKey.FK_REPORT_REPORT_SENSITIVE_INFORMATION, report.getUuid())
+    return new ForeignKeyFetcher<ReportSensitiveInformation>()
+        .load(context, FkDataLoaderKey.REPORT_REPORT_SENSITIVE_INFORMATION, report.getUuid())
         .thenApply(l -> {
           ReportSensitiveInformation rsi = Utils.isEmptyOrNull(l) ? null : l.get(0);
           if (rsi != null) {

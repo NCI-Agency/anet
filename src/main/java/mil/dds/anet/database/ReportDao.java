@@ -40,8 +40,8 @@ import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
-import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
@@ -58,13 +58,13 @@ public class ReportDao extends AnetBaseDao<Report> {
       "engagementDate", "duration", "locationUuid", "approvalStepUuid", "intent", "exsum",
       "atmosphere", "cancelledReason", "advisorOrganizationUuid", "principalOrganizationUuid",
       "releasedAt", "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "authorUuid"};
-  private static final String tableName = "reports";
-  public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
+  public static final String TABLE_NAME = "reports";
+  public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   private String weekFormat;
 
   public ReportDao() {
-    super("Reports", tableName, REPORT_FIELDS, "reports.\"createdAt\"");
+    super("Reports", TABLE_NAME, REPORT_FIELDS, "reports.\"createdAt\"");
   }
 
   public String getWeekFormat() {
@@ -321,8 +321,8 @@ public class ReportDao extends AnetBaseDao<Report> {
 
   public CompletableFuture<List<ReportPerson>> getAttendeesForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<ReportPerson>().load(context,
-        BatchingUtils.DataLoaderKey.FK_REPORT_ATTENDEES, reportUuid);
+    return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_ATTENDEES,
+        reportUuid);
   }
 
   public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
@@ -335,14 +335,12 @@ public class ReportDao extends AnetBaseDao<Report> {
 
   public CompletableFuture<List<Task>> getTasksForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<Task>().load(context, BatchingUtils.DataLoaderKey.FK_REPORT_TASKS,
-        reportUuid);
+    return new ForeignKeyFetcher<Task>().load(context, FkDataLoaderKey.REPORT_TASKS, reportUuid);
   }
 
   public CompletableFuture<List<Tag>> getTagsForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<Tag>().load(context, BatchingUtils.DataLoaderKey.FK_REPORT_TAGS,
-        reportUuid);
+    return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
   }
 
   public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
