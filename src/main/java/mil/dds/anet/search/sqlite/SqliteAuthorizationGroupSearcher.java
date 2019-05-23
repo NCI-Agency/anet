@@ -15,11 +15,12 @@ public class SqliteAuthorizationGroupSearcher
   @Override
   public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query) {
     start("SqliteAuthorizationGroupSearch");
-    sql.append("SELECT * FROM \"authorizationGroups\"");
+    selectClauses.add("*");
+    fromClauses.add("\"authorizationGroups\"");
 
     if (query.isTextPresent()) {
+      whereClauses.add("(name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%')");
       final String text = query.getText();
-      whereClauses.add("(name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%' )");
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
     }
 
@@ -28,8 +29,8 @@ public class SqliteAuthorizationGroupSearcher
     if (query.getPositionUuid() != null) {
       // Search for authorization groups related to a given position
       whereClauses
-          .add("uuid IN ( SELECT \"authorizationGroupUuid\" FROM \"authorizationGroupPositions\" "
-              + "WHERE \"positionUuid\" = :positionUuid )");
+          .add("uuid IN (SELECT \"authorizationGroupUuid\" FROM \"authorizationGroupPositions\""
+              + " WHERE \"positionUuid\" = :positionUuid)");
       sqlArgs.put("positionUuid", query.getPositionUuid());
     }
 

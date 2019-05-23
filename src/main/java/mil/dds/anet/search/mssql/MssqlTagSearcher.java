@@ -13,26 +13,23 @@ public class MssqlTagSearcher extends AbstractMssqlSearcherBase<Tag, TagSearchQu
 
   public AnetBeanList<Tag> runSearch(TagSearchQuery query) {
     start("MssqlTagSearch");
-    sql.append("SELECT tags.*");
+    selectClauses.add("tags.*");
+    selectClauses.add("count(*) over() as totalCount");
+    fromClauses.add("tags");
 
-    final String text = query.getText();
     if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
       // so we can sort on it (show the most relevant hits at the top).
       // Note that summing up independent ranks is not ideal, but it's the best we can do now.
       // See
       // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
-      sql.append(", ISNULL(c_tags.rank, 0) + ISNULL(f_tags.rank, 0)");
-      sql.append(" AS search_rank");
-    }
-    sql.append(", count(*) over() as totalCount FROM tags");
-
-    if (query.isTextPresent()) {
-      sql.append(" LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
+      selectClauses.add("ISNULL(c_tags.rank, 0) + ISNULL(f_tags.rank, 0) AS search_rank");
+      fromClauses.add("LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
           + " ON tags.uuid = c_tags.[Key]"
           + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
           + " ON tags.uuid = f_tags.[Key]");
       whereClauses.add("c_tags.rank IS NOT NULL");
+      final String text = query.getText();
       sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
       sqlArgs.put("freetextQuery", text);
     }

@@ -43,23 +43,17 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
   public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user,
       boolean systemSearch) {
     start("SqliteReportSearch");
-    sql.append("SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
-    if (query.getIncludeEngagementDayOfWeek()) {
-      sql.append(", ");
-      sql.append(String.format(this.isoDowFormat, "engagementDate"));
-      sql.append(" as \"engagementDayOfWeek\" ");
-    }
-    sql.append(" FROM reports ");
-    sql.append("WHERE reports.uuid IN ( SELECT reports.uuid FROM reports ");
-    sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid ");
-    sql.append("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid ");
+    selectClauses.add("reports.uuid");
+    fromClauses.add("reports");
+    fromClauses.add("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
+    fromClauses.add("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
 
     if (query.isTextPresent()) {
+      whereClauses.add("(text LIKE '%' || :text || '%' OR intent LIKE '%' || :text || '%'"
+          + " OR \"keyOutcomes\" LIKE '%' || :text || '%'"
+          + " OR \"nextSteps\" LIKE '%' || :text || '%' OR tags.name LIKE '%' || :text || '%'"
+          + " OR tags.description LIKE '%' || :text || '%')");
       final String text = query.getText();
-      whereClauses.add("(text LIKE '%' || :text || '%' OR " + "intent LIKE '%' || :text || '%' OR "
-          + "\"keyOutcomes\" LIKE '%' || :text || '%' OR "
-          + "\"nextSteps\" LIKE '%' || :text || '%' OR " + "tags.name LIKE '%' || :text || '%' OR "
-          + "tags.description LIKE '%' || :text || '%'" + ")");
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
     }
 
@@ -96,7 +90,7 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
     if (query.getAuthorPositionUuid() != null) {
       // Search for reports authored by people serving in that position at the report's creation
       // date
-      whereClauses.add("reports.uuid IN ( SELECT r.uuid FROM reports r "
+      whereClauses.add("reports.uuid IN (SELECT r.uuid FROM reports r "
           + PositionDao.generateCurrentPositionFilter("r.\"authorUuid\"", "r.\"createdAt\"",
               "authorPositionUuid")
           + ")");
@@ -105,8 +99,8 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
 
     if (query.getAttendeePositionUuid() != null) {
       // Search for reports attended by people serving in that position at the engagement date
-      whereClauses.add("reports.uuid IN ( SELECT r.uuid FROM reports r "
-          + "JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
+      whereClauses.add("reports.uuid IN (SELECT r.uuid FROM reports r"
+          + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
           + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"engagementDate\"",
               "attendeePositionUuid")
           + ")");
@@ -136,12 +130,12 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
         whereClauses.add(
             "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
       } else {
-        withClauses.add("WITH RECURSIVE parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :orgUuid " + "UNION ALL "
-            + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
-            + ") ");
-        whereClauses.add("(reports.\"advisorOrganizationUuid\" IN (SELECT uuid from parent_orgs) "
-            + "OR reports.\"principalOrganizationUuid\" IN (SELECT uuid from parent_orgs))");
+        withClauses.add("RECURSIVE parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
+            + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
+            + ")");
+        whereClauses.add("(reports.\"advisorOrganizationUuid\" IN (SELECT uuid from parent_orgs)"
+            + " OR reports.\"principalOrganizationUuid\" IN (SELECT uuid from parent_orgs))");
       }
       sqlArgs.put("orgUuid", query.getOrgUuid());
     }
@@ -153,10 +147,10 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
         addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
             query.getAdvisorOrgUuid());
       } else {
-        withClauses.add("WITH RECURSIVE advisor_parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid " + "UNION ALL "
-            + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
-            + ") ");
+        withClauses.add("RECURSIVE advisor_parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid UNION ALL"
+            + " SELECT o.uuid from advisor_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
+            + ")");
         whereClauses
             .add("reports.\"advisorOrganizationUuid\" IN (SELECT uuid from advisor_parent_orgs)");
         sqlArgs.put("advisorOrgUuid", query.getAdvisorOrgUuid());
@@ -170,10 +164,10 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
         addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
             query.getPrincipalOrgUuid());
       } else {
-        withClauses.add("WITH RECURSIVE principal_parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid " + "UNION ALL "
-            + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
-            + ") ");
+        withClauses.add("RECURSIVE principal_parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid UNION ALL"
+            + " SELECT o.uuid from principal_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
+            + ")");
         whereClauses.add(
             "reports.\"principalOrganizationUuid\" IN (SELECT uuid from principal_parent_orgs)");
         sqlArgs.put("principalOrgUuid", query.getPrincipalOrgUuid());
@@ -190,9 +184,9 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
 
     if (query.getPendingApprovalOf() != null) {
       whereClauses.add("reports.\"authorUuid\" != :approverUuid");
-      whereClauses.add("reports.\"approvalStepUuid\" IN "
-          + "(SELECT \"approvalStepUuid\" from approvers where \"positionUuid\" IN "
-          + "(SELECT uuid FROM positions where \"currentPersonUuid\" = :approverUuid))");
+      whereClauses.add("reports.\"approvalStepUuid\" IN"
+          + " (SELECT \"approvalStepUuid\" from approvers where \"positionUuid\" IN"
+          + " (SELECT uuid FROM positions where \"currentPersonUuid\" = :approverUuid))");
       sqlArgs.put("approverUuid", query.getPendingApprovalOf());
     }
 
@@ -239,8 +233,23 @@ public class SqliteReportSearcher extends AbstractSqliteSearcherBase<Report, Rep
     }
 
     finish(query);
-    sql.append(")"); // close open parenthesis
     return getResult(query, new ReportMapper(), user);
+  }
+
+  @Override
+  protected void finish(ReportSearchQuery query) {
+    addWithClauses();
+    sql.append("SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
+    if (query.getIncludeEngagementDayOfWeek()) {
+      sql.append(
+          ", " + String.format(this.isoDowFormat, "engagementDate") + " AS engagementDayOfWeek");
+    }
+    sql.append(" FROM reports WHERE reports.uuid IN (");
+    addSelectClauses();
+    addFromClauses();
+    addWhereClauses();
+    sql.append(")");
+    addOrderByClauses(query);
   }
 
   @Override

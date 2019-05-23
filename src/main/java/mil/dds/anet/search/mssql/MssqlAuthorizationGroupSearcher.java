@@ -15,28 +15,26 @@ public class MssqlAuthorizationGroupSearcher
   @Override
   public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query) {
     start("MssqlAuthorizationGroupSearch");
-    sql.append("SELECT authorizationGroups.*");
+    selectClauses.add("authorizationGroups.*");
+    selectClauses.add("count(*) over() as totalCount");
+    fromClauses.add("authorizationGroups");
 
-    final boolean doFullTextSearch = query.isTextPresent();
-    if (doFullTextSearch) {
+    if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
       // so we can sort on it (show the most relevant hits at the top).
       // Note that summing up independent ranks is not ideal, but it's the best we can do now.
       // See
       // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
-      sql.append(", ISNULL(c_authorizationGroups.rank, 0) + ISNULL(f_authorizationGroups.rank, 0)");
-      sql.append(" AS search_rank");
-    }
-    sql.append(", count(*) over() as totalCount FROM authorizationGroups");
-
-    if (doFullTextSearch) {
-      final String text = query.getText();
-      sql.append(
-          " LEFT JOIN CONTAINSTABLE (authorizationGroups, (name, description), :containsQuery) c_authorizationGroups"
+      selectClauses
+          .add("ISNULL(c_authorizationGroups.rank, 0) + ISNULL(f_authorizationGroups.rank, 0)"
+              + " AS search_rank");
+      fromClauses.add(
+          "LEFT JOIN CONTAINSTABLE (authorizationGroups, (name, description), :containsQuery) c_authorizationGroups"
               + " ON authorizationGroups.uuid = c_authorizationGroups.[Key]"
               + " LEFT JOIN FREETEXTTABLE(authorizationGroups, (name, description), :freetextQuery) f_authorizationGroups"
               + " ON authorizationGroups.uuid = f_authorizationGroups.[Key]");
       whereClauses.add("c_authorizationGroups.rank IS NOT NULL");
+      final String text = query.getText();
       sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
       sqlArgs.put("freetextQuery", text);
     }
@@ -46,8 +44,8 @@ public class MssqlAuthorizationGroupSearcher
     if (query.getPositionUuid() != null) {
       // Search for authorization groups related to a given position
       whereClauses.add(
-          "authorizationGroups.uuid IN ( SELECT ap.authorizationGroupUuid FROM authorizationGroupPositions ap "
-              + "WHERE ap.positionUuid = :positionUuid )");
+          "authorizationGroups.uuid IN (SELECT ap.authorizationGroupUuid FROM authorizationGroupPositions ap"
+              + " WHERE ap.positionUuid = :positionUuid)");
       sqlArgs.put("positionUuid", query.getPositionUuid());
     }
 

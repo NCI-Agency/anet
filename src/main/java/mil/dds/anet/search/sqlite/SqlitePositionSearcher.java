@@ -15,23 +15,23 @@ public class SqlitePositionSearcher
   @Override
   public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
     start("SqlitePositionSearch");
-    sql.append("SELECT " + PositionDao.POSITIONS_FIELDS
-        + " FROM positions WHERE positions.uuid IN (SELECT positions.uuid FROM positions ");
+    selectClauses.add("positions.uuid");
+    fromClauses.add("positions");
 
     if (query.getMatchPersonName() != null && query.getMatchPersonName()) {
-      sql.append(" LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid ");
+      fromClauses.add("LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid");
     }
 
     if (query.isTextPresent()) {
-      final String text = query.getText();
       if (query.getMatchPersonName() != null && query.getMatchPersonName()) {
-        whereClauses.add("((positions.name LIKE '%' || :text || '%' "
-            + "OR positions.code LIKE '%' || :text || '%') "
-            + "OR (people.name LIKE '%' || :text || '%'))");
+        whereClauses.add("((positions.name LIKE '%' || :text || '%'"
+            + " OR positions.code LIKE '%' || :text || '%')"
+            + " OR (people.name LIKE '%' || :text || '%'))");
       } else {
         whereClauses.add("(name LIKE '%' || :text || '%' OR code LIKE '%' || :text || '%')");
       }
 
+      final String text = query.getText();
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
     }
 
@@ -39,11 +39,11 @@ public class SqlitePositionSearcher
 
     if (query.getOrganizationUuid() != null) {
       if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-        withClauses.add("RECURSIVE parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :orgUuid " + "UNION ALL "
-            + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
+        withClauses.add("RECURSIVE parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
+            + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
             + ")");
-        whereClauses.add(" positions.\"organizationUuid\" IN (SELECT uuid from parent_orgs)");
+        whereClauses.add("positions.\"organizationUuid\" IN (SELECT uuid from parent_orgs)");
       } else {
         whereClauses.add("positions.\"organizationUuid\" = :orgUuid");
       }
@@ -62,8 +62,19 @@ public class SqlitePositionSearcher
     addEqualsClause("status", "positions.status", query.getStatus());
 
     finish(query);
-    sql.append(")"); // close open parenthesis
     return getResult(query, new PositionMapper());
+  }
+
+  @Override
+  protected void finish(PositionSearchQuery query) {
+    addWithClauses();
+    sql.append(
+        "SELECT " + PositionDao.POSITIONS_FIELDS + " FROM positions WHERE positions.uuid IN (");
+    addSelectClauses();
+    addFromClauses();
+    addWhereClauses();
+    sql.append(")");
+    addOrderByClauses(query);
   }
 
   @Override

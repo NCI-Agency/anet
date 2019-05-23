@@ -16,27 +16,25 @@ public class MssqlOrganizationSearcher
   @Override
   public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
     start("MssqlOrganizationSearch");
-    sql.append("SELECT " + OrganizationDao.ORGANIZATION_FIELDS);
+    selectClauses.add(OrganizationDao.ORGANIZATION_FIELDS);
+    selectClauses.add("count(*) OVER() AS totalCount");
+    fromClauses.add("organizations");
 
     if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest
       // possible score)
       // so we can sort on it (show the most relevant hits at the top).
-      sql.append(", ISNULL(c_organizations.rank, 0)"
+      selectClauses.add("ISNULL(c_organizations.rank, 0)"
           + " + CASE WHEN organizations.shortName LIKE :likeQuery THEN 1000 ELSE 0 END"
-          + " + CASE WHEN organizations.identificationCode LIKE :likeQuery THEN 1000 ELSE 0 END");
-      sql.append(" AS search_rank");
-    }
-    sql.append(", count(*) OVER() AS totalCount FROM organizations");
-
-    if (query.isTextPresent()) {
-      final String text = query.getText();
-      sql.append(
+          + " + CASE WHEN organizations.identificationCode LIKE :likeQuery THEN 1000 ELSE 0 END"
+          + " AS search_rank");
+      fromClauses.add(
           " LEFT JOIN CONTAINSTABLE (organizations, (longName), :containsQuery) c_organizations"
               + " ON organizations.uuid = c_organizations.[Key]");
       whereClauses.add("(c_organizations.rank IS NOT NULL"
           + " OR organizations.identificationCode LIKE :likeQuery"
           + " OR organizations.shortName LIKE :likeQuery)");
+      final String text = query.getText();
       sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
       sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
     }
@@ -46,12 +44,12 @@ public class MssqlOrganizationSearcher
 
     if (query.getParentOrgUuid() != null) {
       if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
-        withClauses.add("parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid " + "UNION ALL "
-            + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid AND o.uuid != :parentOrgUuid"
-            + ") ");
-        whereClauses.add("( organizations.parentOrgUuid IN (SELECT uuid from parent_orgs) "
-            + "OR organizations.uuid = :parentOrgUuid)");
+        withClauses.add("parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid UNION ALL"
+            + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid AND o.uuid != :parentOrgUuid"
+            + ")");
+        whereClauses.add("(organizations.parentOrgUuid IN (SELECT uuid from parent_orgs)"
+            + " OR organizations.uuid = :parentOrgUuid)");
       } else {
         whereClauses.add("organizations.parentOrgUuid = :parentOrgUuid");
       }

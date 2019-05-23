@@ -29,8 +29,10 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
   public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user,
       boolean systemSearch) {
     start("MssqlReportSearch");
-    sql.append("SELECT *, count(*) OVER() AS totalCount FROM (");
-    sql.append(" SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
+    selectClauses.add("DISTINCT " + ReportDao.REPORT_FIELDS);
+    fromClauses.add("reports");
+    fromClauses.add("LEFT JOIN reportTags ON reportTags.reportUuid = reports.uuid"
+        + " LEFT JOIN tags ON reportTags.tagUuid = tags.uuid");
 
     if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
@@ -38,30 +40,20 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
       // Note that summing up independent ranks is not ideal, but it's the best we can do now.
       // See
       // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
-      sql.append(", ISNULL(c_reports.rank, 0) + ISNULL(f_reports.rank, 0)"
-          + " + ISNULL(c_tags.rank, 0) + ISNULL(f_tags.rank, 0)");
-      sql.append(" AS search_rank");
-    }
-    if (query.getIncludeEngagementDayOfWeek()) {
-      sql.append(", DATEPART(dw, reports.engagementDate) as engagementDayOfWeek");
-    }
-    sql.append(" FROM reports");
-    sql.append(" LEFT JOIN reportTags ON reportTags.reportUuid = reports.uuid"
-        + " LEFT JOIN tags ON reportTags.tagUuid = tags.uuid");
-
-    if (query.isTextPresent()) {
-      final String text = query.getText();
-      sql.append(
-          " LEFT JOIN CONTAINSTABLE (reports, (text, intent, keyOutcomes, nextSteps), :containsQuery) c_reports"
+      selectClauses.add("ISNULL(c_reports.rank, 0) + ISNULL(f_reports.rank, 0)"
+          + " + ISNULL(c_tags.rank, 0) + ISNULL(f_tags.rank, 0) AS search_rank");
+      fromClauses.add(
+          "LEFT JOIN CONTAINSTABLE (reports, (text, intent, keyOutcomes, nextSteps), :containsQuery) c_reports"
               + " ON reports.uuid = c_reports.[Key]"
               + " LEFT JOIN FREETEXTTABLE(reports, (text, intent, keyOutcomes, nextSteps), :freetextQuery) f_reports"
               + " ON reports.uuid = f_reports.[Key]");
-      sql.append(" LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
+      fromClauses.add("LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
           + " ON tags.uuid = c_tags.[Key]"
           + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
           + " ON tags.uuid = f_tags.[Key]");
-      whereClauses.add("(c_reports.rank IS NOT NULL" + " OR f_reports.rank IS NOT NULL"
-          + " OR c_tags.rank IS NOT NULL" + " OR f_tags.rank IS NOT NULL)");
+      whereClauses.add("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL"
+          + " OR c_tags.rank IS NOT NULL OR f_tags.rank IS NOT NULL)");
+      final String text = query.getText();
       sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
       sqlArgs.put("freetextQuery", text);
     }
@@ -82,6 +74,9 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
     addDateClause("releasedAtEnd", "reports.releasedAt", Comparison.BEFORE,
         query.getReleasedAtEnd());
 
+    if (query.getIncludeEngagementDayOfWeek()) {
+      selectClauses.add("DATEPART(dw, reports.engagementDate) as engagementDayOfWeek");
+    }
     if (query.getEngagementDayOfWeek() != null) {
       whereClauses.add("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
       sqlArgs.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
@@ -116,12 +111,12 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
         whereClauses.add(
             "(reports.advisorOrganizationUuid = :orgUuid OR reports.principalOrganizationUuid = :orgUuid)");
       } else {
-        withClauses.add("parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :orgUuid " + "UNION ALL "
-            + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
-            + ") ");
-        whereClauses.add("(reports.advisorOrganizationUuid IN (SELECT uuid from parent_orgs) "
-            + "OR reports.principalOrganizationUuid IN (SELECT uuid from parent_orgs))");
+        withClauses.add("parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
+            + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
+            + ")");
+        whereClauses.add("(reports.advisorOrganizationUuid IN (SELECT uuid from parent_orgs)"
+            + " OR reports.principalOrganizationUuid IN (SELECT uuid from parent_orgs))");
       }
       sqlArgs.put("orgUuid", query.getOrgUuid());
     }
@@ -133,10 +128,10 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
         addEqualsClause("advisorOrganizationUuid", "reports.advisorOrganizationUuid",
             query.getAdvisorOrgUuid());
       } else {
-        withClauses.add("advisor_parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid " + "UNION ALL "
-            + "SELECT o.uuid from advisor_parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
-            + ") ");
+        withClauses.add("advisor_parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid UNION ALL"
+            + " SELECT o.uuid from advisor_parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
+            + ")");
         whereClauses
             .add("reports.advisorOrganizationUuid IN (SELECT uuid from advisor_parent_orgs)");
         sqlArgs.put("advisorOrgUuid", query.getAdvisorOrgUuid());
@@ -150,10 +145,10 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
         addEqualsClause("principalOrganizationUuid", "reports.principalOrganizationUuid",
             query.getPrincipalOrgUuid());
       } else {
-        withClauses.add("principal_parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid " + "UNION ALL "
-            + "SELECT o.uuid from principal_parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
-            + ") ");
+        withClauses.add("principal_parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid UNION ALL"
+            + " SELECT o.uuid from principal_parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
+            + ")");
         whereClauses
             .add("reports.principalOrganizationUuid IN (SELECT uuid from principal_parent_orgs)");
         sqlArgs.put("principalOrgUuid", query.getPrincipalOrgUuid());
@@ -170,9 +165,9 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
 
     if (query.getPendingApprovalOf() != null) {
       whereClauses.add("reports.authorUuid != :approverUuid");
-      whereClauses.add("reports.approvalStepUuid IN "
-          + "(SELECT approvalStepUuid from approvers where positionUuid IN "
-          + "(SELECT uuid FROM positions where currentPersonUuid = :approverUuid))");
+      whereClauses.add("reports.approvalStepUuid IN"
+          + " (SELECT approvalStepUuid from approvers where positionUuid IN"
+          + " (SELECT uuid FROM positions where currentPersonUuid = :approverUuid))");
       sqlArgs.put("approverUuid", query.getPendingApprovalOf());
     }
 
@@ -195,7 +190,7 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
     if (query.getAuthorPositionUuid() != null) {
       // Search for reports authored by people serving in that position at the report's creation
       // date
-      whereClauses.add("reports.uuid IN ( SELECT r.uuid FROM reports r " + PositionDao
+      whereClauses.add("reports.uuid IN (SELECT r.uuid FROM reports r " + PositionDao
           .generateCurrentPositionFilter("r.authorUuid", "r.createdAt", "authorPositionUuid")
           + ")");
       sqlArgs.put("authorPositionUuid", query.getAuthorPositionUuid());
@@ -207,14 +202,14 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
       } else {
         listArgs.put("authorizationGroupUuids", query.getAuthorizationGroupUuid());
       }
-      whereClauses.add("reports.uuid IN ( SELECT ra.reportUuid FROM reportAuthorizationGroups ra "
-          + "WHERE ra.authorizationGroupUuid IN ( <authorizationGroupUuids> ))");
+      whereClauses.add("reports.uuid IN (SELECT ra.reportUuid FROM reportAuthorizationGroups ra"
+          + " WHERE ra.authorizationGroupUuid IN ( <authorizationGroupUuids> ))");
     }
 
     if (query.getAttendeePositionUuid() != null) {
       // Search for reports attended by people serving in that position at the engagement date
-      whereClauses.add("reports.uuid IN ( SELECT r.uuid FROM reports r "
-          + "JOIN reportPeople rp ON rp.reportUuid = r.uuid "
+      whereClauses.add("reports.uuid IN (SELECT r.uuid FROM reports r"
+          + " JOIN reportPeople rp ON rp.reportUuid = r.uuid "
           + PositionDao.generateCurrentPositionFilter("rp.personUuid", "r.engagementDate",
               "attendeePositionUuid")
           + ")");
@@ -222,11 +217,10 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
     }
 
     if (query.getSensitiveInfo()) {
-      sql.append(" LEFT JOIN reportAuthorizationGroups ra ON ra.reportUuid = reports.uuid");
-      sql.append(" LEFT JOIN authorizationGroups ag ON ag.uuid = ra.authorizationGroupUuid");
-      sql.append(
-          " LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupUuid = ag.uuid");
-      sql.append(" LEFT JOIN positions pos ON pos.uuid = agp.positionUuid");
+      fromClauses.add("LEFT JOIN reportAuthorizationGroups ra ON ra.reportUuid = reports.uuid"
+          + " LEFT JOIN authorizationGroups ag ON ag.uuid = ra.authorizationGroupUuid"
+          + " LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupUuid = ag.uuid"
+          + " LEFT JOIN positions pos ON pos.uuid = agp.positionUuid");
       whereClauses.add("pos.currentPersonUuid = :userUuid");
       sqlArgs.put("userUuid", user.getUuid());
     }
@@ -264,8 +258,11 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
   @Override
   protected void finish(ReportSearchQuery query) {
     addWithClauses();
+    sql.append("SELECT *, count(*) OVER() AS totalCount FROM (");
+    addSelectClauses();
+    addFromClauses();
     addWhereClauses();
-    sql.append(" ) l");
+    sql.append(") l");
     addOrderByClauses(query);
   }
 

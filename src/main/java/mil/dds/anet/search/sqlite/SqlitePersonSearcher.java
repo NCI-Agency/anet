@@ -15,26 +15,26 @@ public class SqlitePersonSearcher extends AbstractSqliteSearcherBase<Person, Per
   @Override
   public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
     start("SqlitePersonSearch");
-    sql.append("SELECT " + PersonDao.PERSON_FIELDS
-        + " FROM people WHERE people.uuid IN (SELECT people.uuid FROM people ");
+    selectClauses.add("people.uuid");
+    fromClauses.add("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null
         || query.getMatchPositionName()) {
-      sql.append(" LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" ");
+      fromClauses.add("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
     }
 
     if (query.isTextPresent()) {
-      final String text = query.getText();
       if (query.getMatchPositionName()) {
-        whereClauses.add("(people.name LIKE '%' || :text || '%' "
-            + "OR \"emailAddress\" LIKE '%' || :text || '%' "
-            + "OR biography LIKE '%' || :text || '%'" + "OR positions.name LIKE '%' || :text || '%'"
-            + "OR positions.code LIKE '%' || :text || '%')");
+        whereClauses.add("(people.name LIKE '%' || :text || '%'"
+            + " OR \"emailAddress\" LIKE '%' || :text || '%'"
+            + " OR biography LIKE '%' || :text || '%' OR positions.name LIKE '%' || :text || '%'"
+            + " OR positions.code LIKE '%' || :text || '%')");
       } else {
-        whereClauses.add("(people.name LIKE '%' || :text || '%' "
-            + "OR \"emailAddress\" LIKE '%' || :text || '%' "
-            + "OR biography LIKE '%' || :text || '%')");
+        whereClauses.add("(people.name LIKE '%' || :text || '%'"
+            + " OR \"emailAddress\" LIKE '%' || :text || '%'"
+            + " OR biography LIKE '%' || :text || '%')");
       }
+      final String text = query.getText();
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
     }
 
@@ -47,12 +47,12 @@ public class SqlitePersonSearcher extends AbstractSqliteSearcherBase<Person, Per
 
     if (query.getOrgUuid() != null) {
       if (!query.getIncludeChildOrgs()) {
-        whereClauses.add(" positions.\"organizationUuid\" = :orgUuid ");
+        whereClauses.add("positions.\"organizationUuid\" = :orgUuid");
       } else {
-        whereClauses.add(" positions.\"organizationUuid\" IN ( "
-            + "WITH RECURSIVE parent_orgs(uuid) AS ( "
-            + "SELECT uuid FROM organizations WHERE uuid = :orgUuid " + "UNION ALL "
-            + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
+        whereClauses.add("positions.\"organizationUuid\" IN ("
+            + " WITH RECURSIVE parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
+            + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
             + ") SELECT uuid from parent_orgs)");
       }
       sqlArgs.put("orgUuid", query.getOrgUuid());
@@ -61,8 +61,18 @@ public class SqlitePersonSearcher extends AbstractSqliteSearcherBase<Person, Per
     addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
 
     finish(query);
-    sql.append(")"); // close open parenthesis
     return getResult(query, new PersonMapper());
+  }
+
+  @Override
+  protected void finish(PersonSearchQuery query) {
+    addWithClauses();
+    sql.append("SELECT " + PersonDao.PERSON_FIELDS + " FROM people WHERE people.uuid IN (");
+    addSelectClauses();
+    addFromClauses();
+    addWhereClauses();
+    sql.append(")");
+    addOrderByClauses(query);
   }
 
   @Override

@@ -14,7 +14,8 @@ public class SqliteLocationSearcher
   @Override
   public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
     start("SqliteLocationSearch");
-    sql.append("SELECT * FROM locations");
+    selectClauses.add("*");
+    fromClauses.add("locations");
 
     if (query.isTextPresent()) {
       final String text = query.getText();

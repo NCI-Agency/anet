@@ -14,12 +14,12 @@ public class SqliteTagSearcher extends AbstractSqliteSearcherBase<Tag, TagSearch
   @Override
   public AnetBeanList<Tag> runSearch(TagSearchQuery query) {
     start("SqliteTagSearch");
-    sql.append("SELECT * FROM tags");
+    selectClauses.add("*");
+    fromClauses.add("tags");
 
     if (query.isTextPresent()) {
+      whereClauses.add("(name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%')");
       final String text = query.getText();
-      whereClauses
-          .add("(name LIKE '%' || :text || '%' " + "OR description LIKE '%' || :text || '%')");
       sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
     }
 

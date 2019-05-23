@@ -14,21 +14,18 @@ public class MssqlLocationSearcher extends AbstractMssqlSearcherBase<Location, L
   @Override
   public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
     start("MssqlLocationSearch");
-    sql.append("SELECT locations.*");
+    selectClauses.add("locations.*");
+    selectClauses.add("count(*) over() as totalCount");
+    fromClauses.add("locations");
 
     if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank
       // so we can sort on it (show the most relevant hits at the top).
-      sql.append(", ISNULL(c_locations.rank, 0)");
-      sql.append(" AS search_rank");
-    }
-    sql.append(", count(*) over() as totalCount FROM locations");
-
-    if (query.isTextPresent()) {
-      final String text = query.getText();
-      sql.append(" LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
+      selectClauses.add("ISNULL(c_locations.rank, 0) AS search_rank");
+      fromClauses.add("LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
           + " ON locations.uuid = c_locations.[Key]");
       whereClauses.add("c_locations.rank IS NOT NULL");
+      final String text = query.getText();
       sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
     }
 

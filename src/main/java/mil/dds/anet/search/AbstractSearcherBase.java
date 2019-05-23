@@ -37,6 +37,8 @@ public abstract class AbstractSearcherBase<B extends AbstractAnetBean, T extends
 
   protected StringBuilder sql;
   protected List<String> withClauses;
+  protected List<String> selectClauses;
+  protected List<String> fromClauses;
   protected List<String> whereClauses;
   protected Map<String, Object> sqlArgs;
   protected Map<String, List<?>> listArgs;
@@ -49,6 +51,8 @@ public abstract class AbstractSearcherBase<B extends AbstractAnetBean, T extends
   protected void start(String queryName) {
     sql = new StringBuilder(String.format("/* %s */ ", queryName));
     withClauses = new LinkedList<String>();
+    selectClauses = new LinkedList<String>();
+    fromClauses = new LinkedList<String>();
     whereClauses = new LinkedList<String>();
     sqlArgs = new HashMap<String, Object>();
     listArgs = new HashMap<>();
@@ -104,8 +108,17 @@ public abstract class AbstractSearcherBase<B extends AbstractAnetBean, T extends
 
   protected void finish(T query) {
     addWithClauses();
+    addSelectClauses();
+    addFromClauses();
     addWhereClauses();
     addOrderByClauses(query);
+  }
+
+  protected void addFromClauses() {
+    if (!selectClauses.isEmpty()) {
+      sql.append(" FROM ");
+      sql.append(Joiner.on(" ").join(fromClauses));
+    }
   }
 
   protected void addOrderByClauses(T query) {
@@ -113,6 +126,13 @@ public abstract class AbstractSearcherBase<B extends AbstractAnetBean, T extends
     if (!orderByClauses.isEmpty()) {
       sql.append(" ORDER BY ");
       sql.append(Joiner.on(", ").join(orderByClauses));
+    }
+  }
+
+  protected void addSelectClauses() {
+    if (!selectClauses.isEmpty()) {
+      sql.append(" SELECT ");
+      sql.append(Joiner.on(", ").join(selectClauses));
     }
   }
 
