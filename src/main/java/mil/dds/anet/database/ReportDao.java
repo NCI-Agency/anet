@@ -345,11 +345,6 @@ public class ReportDao extends AnetBaseDao<Report> {
         reportUuid);
   }
 
-  // Does an unauthenticated search. This will never return any DRAFT or REJECTED reports
-  public AnetBeanList<Report> search(ReportSearchQuery query) {
-    return search(query, null);
-  }
-
   public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
     return search(query, user, false);
   }

@@ -74,7 +74,8 @@ public class DailyRollupEmail implements AnetEmailAction {
     query.setAdvisorOrgUuid(advisorOrganizationUuid);
     query.setIncludeAdvisorOrgChildren(true);
 
-    List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
+    List<Report> reports =
+        AnetObjectEngine.getInstance().getReportDao().search(query, null).getList();
 
     ReportGrouping allReports = new ReportGrouping(reports);
 
