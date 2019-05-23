@@ -5,7 +5,8 @@ import HorizontalBarChart from "components/HorizontalBarChart"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
-  FORMAT_TABLE
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
 } from "components/ReportCollection"
 import ReportsVisualisation, {
   propTypes as rvPropTypes
@@ -184,7 +185,7 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
             <ReportCollection
               paginatedReports={context.reports}
               goToPage={this.goToReportsPage}
-              viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY]}
+              viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
             />
           </div>
         )}

@@ -6,14 +6,17 @@ import ReportTable from "components/ReportTable"
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import _get from "lodash/get"
-import { Location } from "models"
+import { Location, Person } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
+import Calendar from "components/Calendar"
+import moment from "moment"
 
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
+export const FORMAT_CALENDAR = "calendar"
 
 export const GQL_REPORT_FIELDS = /* GraphQL */ `
   uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason
@@ -55,8 +58,10 @@ export default class ReportCollection extends Component {
   }
 
   static defaultProps = {
-    viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP]
+    viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP, FORMAT_CALENDAR]
   }
+
+  calendarComponentRef = React.createRef()
 
   constructor(props) {
     super(props)
@@ -101,6 +106,9 @@ export default class ReportCollection extends Component {
                   {this.props.viewFormats.includes(FORMAT_MAP) && (
                     <Button value={FORMAT_MAP}>Map</Button>
                   )}
+                  {this.props.viewFormats.includes(FORMAT_CALENDAR) && (
+                    <Button value={FORMAT_CALENDAR}>Calendar</Button>
+                  )}
                 </ButtonToggleGroup>
               )}
 
@@ -133,6 +141,8 @@ export default class ReportCollection extends Component {
               {this.state.viewFormat === FORMAT_SUMMARY &&
                 this.renderSummary(reports)}
               {this.state.viewFormat === FORMAT_MAP && this.renderMap(reports)}
+              {this.state.viewFormat === FORMAT_CALENDAR &&
+                this.renderCalendar(reports)}
             </div>
           )}
 
@@ -208,6 +218,36 @@ export default class ReportCollection extends Component {
         width={this.props.width}
         height={this.props.height}
         marginBottom={this.props.marginBottom}
+      />
+    )
+  }
+
+  getEvents = reports => {
+    if (reports) {
+      return reports.map(r => {
+        const who =
+          (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+        const where =
+          (r.principalOrg && r.principalOrg.shortName) ||
+          (r.location && r.location.name) ||
+          ""
+        return {
+          title: who + "@" + where,
+          start: moment(r.engagementDate).format("YYYY-MM-DD"),
+          classNames: ["event-" + r.state.toLowerCase()],
+          extendedProps: { ...r }
+        }
+      })
+    } else {
+      return []
+    }
+  }
+
+  renderCalendar(reports) {
+    return (
+      <Calendar
+        events={this.getEvents(reports)}
+        calendarComponentRef={this.calendarComponentRef}
       />
     )
   }

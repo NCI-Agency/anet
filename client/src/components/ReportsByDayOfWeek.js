@@ -4,7 +4,8 @@ import BarChart from "components/BarChart"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
-  FORMAT_TABLE
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
 } from "components/ReportCollection"
 import ReportsVisualisation, {
   propTypes as rvPropTypes
@@ -148,7 +149,7 @@ class ReportsByDayOfWeek extends ReportsVisualisation {
             <ReportCollection
               paginatedReports={context.reports}
               goToPage={this.goToReportsPage}
-              viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY]}
+              viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
             />
           </div>
         )}

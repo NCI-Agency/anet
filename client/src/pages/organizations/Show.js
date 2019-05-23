@@ -24,21 +24,13 @@ import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem, Nav } from "react-bootstrap"
 import { connect } from "react-redux"
-import FullCalendar from "@fullcalendar/react"
-import dayGridPlugin from "@fullcalendar/daygrid"
-import timeGridPlugin from "@fullcalendar/timegrid"
-import listPlugin from "@fullcalendar/list"
-import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
+import Calendar from "components/Calendar"
+import _isEmpty from "lodash/isEmpty"
+import moment from "moment"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
-import "@fullcalendar/core/main.css"
-import "@fullcalendar/daygrid/main.css"
-import "@fullcalendar/timegrid/main.css"
-import "@fullcalendar/list/main.css"
-import _isEmpty from "lodash/isEmpty"
-import moment from "moment"
 
 const NO_REPORT_FILTER = "NO_FILTER"
 
@@ -420,35 +412,9 @@ class BaseOrganizationShow extends Page {
                   id="reports-calendar"
                   title={`Reports calendar from ${organization.shortName}`}
                 >
-                  <FullCalendar
-                    defaultView="dayGridMonth"
-                    slotDuration={{ hours: 2 }}
-                    header={{
-                      left: "prev,next today filterDraft",
-                      center: "title",
-                      right:
-                        "dayGridMonth,timeGridWeek,timeGridDay,listMonth,listWeek,listDay"
-                    }}
-                    buttonText={{
-                      listMonth: "list month",
-                      listWeek: "list week",
-                      listDay: "list day"
-                    }}
-                    plugins={[
-                      dayGridPlugin,
-                      timeGridPlugin,
-                      listPlugin,
-                      interactionPlugin
-                    ]}
+                  <Calendar
                     events={this.getEvents}
                     ref={this.calendarComponentRef}
-                    allDayDefault
-                    eventOverlap
-                    dateClick={info => {
-                      let calendarApi = this.calendarComponentRef.current.getApi()
-                      calendarApi.changeView("timeGridDay", info.dateStr) // call a method on the Calendar object
-                    }}
-                    eventClick={eventInfo => {}}
                   />
                 </Fieldset>
 
