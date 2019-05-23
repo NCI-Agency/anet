@@ -1,30 +1,21 @@
 package mil.dds.anet.search.mssql;
 
-import com.google.common.base.Joiner;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
-import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IAuthorizationGroupSearcher;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.jdbi.v3.core.statement.Query;
 
-public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase
+public class MssqlAuthorizationGroupSearcher
+    extends AbstractMssqlSearcherBase<AuthorizationGroup, AuthorizationGroupSearchQuery>
     implements IAuthorizationGroupSearcher {
 
   @Override
   public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query) {
-    final List<String> whereClauses = new LinkedList<String>();
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
-    final StringBuilder sql =
-        new StringBuilder("/* MssqlAuthorizationGroupSearch */ SELECT authorizationGroups.*");
+    start("MssqlAuthorizationGroupSearch");
+    sql.append("SELECT authorizationGroups.*");
 
     final boolean doFullTextSearch = query.isTextPresent();
     if (doFullTextSearch) {
@@ -50,27 +41,23 @@ public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase
       sqlArgs.put("freetextQuery", text);
     }
 
-    if (query.getStatus() != null) {
-      whereClauses.add("authorizationGroups.status = :status");
-      sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
-    }
+    addEqualsClause("status", "authorizationGroups.status", query.getStatus());
 
     if (query.getPositionUuid() != null) {
       // Search for authorization groups related to a given position
       whereClauses.add(
           "authorizationGroups.uuid IN ( SELECT ap.authorizationGroupUuid FROM authorizationGroupPositions ap "
-              + "WHERE ap.positionUuid = :positionUuid) ");
+              + "WHERE ap.positionUuid = :positionUuid )");
       sqlArgs.put("positionUuid", query.getPositionUuid());
     }
 
-    if (!whereClauses.isEmpty()) {
-      sql.append(" WHERE ");
-      sql.append(Joiner.on(" AND ").join(whereClauses));
-    }
+    finish(query);
+    return getResult(query, new AuthorizationGroupMapper());
+  }
 
-    // Sort Ordering
-    final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && !query.isSortByPresent()) {
+  @Override
+  protected void getOrderByClauses(AuthorizationGroupSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
@@ -88,12 +75,6 @@ public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase
         break;
     }
     orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "authorizationGroups", "uuid"));
-    sql.append(" ORDER BY ");
-    sql.append(Joiner.on(", ").join(orderByClauses));
-
-    final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs);
-    return new AnetBeanList<AuthorizationGroup>(sqlQuery, query.getPageNum(), query.getPageSize(),
-        new AuthorizationGroupMapper(), null);
   }
 
 }

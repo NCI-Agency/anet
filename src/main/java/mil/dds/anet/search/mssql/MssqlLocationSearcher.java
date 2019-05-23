@@ -1,31 +1,22 @@
 package mil.dds.anet.search.mssql;
 
-import com.google.common.base.Joiner;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
-import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ILocationSearcher;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.jdbi.v3.core.statement.Query;
 
-public class MssqlLocationSearcher extends AbstractSearcherBase implements ILocationSearcher {
+public class MssqlLocationSearcher extends AbstractMssqlSearcherBase<Location, LocationSearchQuery>
+    implements ILocationSearcher {
 
   @Override
   public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
-    final List<String> whereClauses = new LinkedList<String>();
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
-    final StringBuilder sql = new StringBuilder("/* MssqlLocationSearch */ SELECT locations.*");
+    start("MssqlLocationSearch");
+    sql.append("SELECT locations.*");
 
-    final boolean doFullTextSearch = query.isTextPresent();
-    if (doFullTextSearch) {
+    if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank
       // so we can sort on it (show the most relevant hits at the top).
       sql.append(", ISNULL(c_locations.rank, 0)");
@@ -33,7 +24,7 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
     }
     sql.append(", count(*) over() as totalCount FROM locations");
 
-    if (doFullTextSearch) {
+    if (query.isTextPresent()) {
       final String text = query.getText();
       sql.append(" LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
           + " ON locations.uuid = c_locations.[Key]");
@@ -41,19 +32,15 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
       sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
     }
 
-    if (query.getStatus() != null) {
-      whereClauses.add("status = :status");
-      sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
-    }
+    addEqualsClause("status", "status", query.getStatus());
 
-    if (!whereClauses.isEmpty()) {
-      sql.append(" WHERE ");
-      sql.append(Joiner.on(" AND ").join(whereClauses));
-    }
+    finish(query);
+    return getResult(query, new LocationMapper());
+  }
 
-    // Sort Ordering
-    final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && !query.isSortByPresent()) {
+  @Override
+  protected void getOrderByClauses(LocationSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
@@ -69,12 +56,6 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
         break;
     }
     orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
-    sql.append(" ORDER BY ");
-    sql.append(Joiner.on(", ").join(orderByClauses));
-
-    final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs);
-    return new AnetBeanList<Location>(sqlQuery, query.getPageNum(), query.getPageSize(),
-        new LocationMapper(), null);
   }
 
 }

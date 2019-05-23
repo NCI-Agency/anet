@@ -54,8 +54,8 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
     this.status = status;
   }
 
-  public Boolean getIncludeChildOrgs() {
-    return includeChildOrgs;
+  public boolean getIncludeChildOrgs() {
+    return Boolean.TRUE.equals(includeChildOrgs);
   }
 
   public void setIncludeChildOrgs(Boolean includeChildOrgs) {

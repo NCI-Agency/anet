@@ -1,35 +1,23 @@
 package mil.dds.anet.search.mssql;
 
-import com.google.common.base.Joiner;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
-import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IPositionSearcher;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.jdbi.v3.core.statement.Query;
 
-public class MssqlPositionSearcher extends AbstractSearcherBase implements IPositionSearcher {
+public class MssqlPositionSearcher extends AbstractMssqlSearcherBase<Position, PositionSearchQuery>
+    implements IPositionSearcher {
 
   @Override
   public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
-    final List<String> whereClauses = new LinkedList<String>();
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
-    final Map<String, List<?>> listArgs = new HashMap<>();
-    final StringBuilder sql =
-        new StringBuilder("/* MssqlPositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS);
+    start("MssqlPositionSearch");
+    sql.append("SELECT " + PositionDao.POSITIONS_FIELDS);
 
-    final boolean doFullTextSearch = query.isTextPresent();
-    if (doFullTextSearch) {
+    if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
       // so we can sort on it (show the most relevant hits at the top).
       // Note that summing up independent ranks is not ideal, but it's the best we can do now.
@@ -47,7 +35,7 @@ public class MssqlPositionSearcher extends AbstractSearcherBase implements IPosi
       sql.append(" LEFT JOIN people ON positions.currentPersonUuid = people.uuid");
     }
 
-    if (doFullTextSearch) {
+    if (query.isTextPresent()) {
       final String text = query.getText();
       sql.append(" LEFT JOIN CONTAINSTABLE (positions, (name), :containsQuery) c_positions"
           + " ON positions.uuid = c_positions.[Key]");
@@ -64,19 +52,14 @@ public class MssqlPositionSearcher extends AbstractSearcherBase implements IPosi
       sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
     }
 
-    if (!Utils.isEmptyOrNull(query.getType())) {
-      whereClauses.add("positions.type IN ( <types> )");
-      listArgs.put("types", query.getType().stream().map(type -> DaoUtils.getEnumId(type))
-          .collect(Collectors.toList()));
-    }
+    addInClause("types", "positions.type", query.getType());
 
-    String commonTableExpression = null;
     if (query.getOrganizationUuid() != null) {
       if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-        commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+        withClauses.add("parent_orgs(uuid) AS ( "
             + "SELECT uuid FROM organizations WHERE uuid = :orgUuid " + "UNION ALL "
             + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
-            + ") ";
+            + ") ");
         whereClauses.add(" positions.organizationUuid IN (SELECT uuid from parent_orgs)");
       } else {
         whereClauses.add("positions.organizationUuid = :orgUuid");
@@ -92,15 +75,8 @@ public class MssqlPositionSearcher extends AbstractSearcherBase implements IPosi
       }
     }
 
-    if (query.getLocationUuid() != null) {
-      whereClauses.add("positions.locationUuid = :locationUuid");
-      sqlArgs.put("locationUuid", query.getLocationUuid());
-    }
-
-    if (query.getStatus() != null) {
-      whereClauses.add("positions.status = :status");
-      sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
-    }
+    addEqualsClause("locationUuid", "positions.locationUuid", query.getLocationUuid());
+    addEqualsClause("status", "positions.status", query.getStatus());
 
     if (query.getAuthorizationGroupUuid() != null) {
       // Search for positions related to a given authorization group
@@ -110,14 +86,13 @@ public class MssqlPositionSearcher extends AbstractSearcherBase implements IPosi
       sqlArgs.put("authorizationGroupUuid", query.getAuthorizationGroupUuid());
     }
 
-    if (!whereClauses.isEmpty()) {
-      sql.append(" WHERE ");
-      sql.append(Joiner.on(" AND ").join(whereClauses));
-    }
+    finish(query);
+    return getResult(query, new PositionMapper());
+  }
 
-    // Sort Ordering
-    final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && !query.isSortByPresent()) {
+  @Override
+  protected void getOrderByClauses(PositionSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
@@ -136,17 +111,6 @@ public class MssqlPositionSearcher extends AbstractSearcherBase implements IPosi
         break;
     }
     orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "positions", "uuid"));
-    sql.append(" ORDER BY ");
-    sql.append(Joiner.on(", ").join(orderByClauses));
-
-    if (commonTableExpression != null) {
-      sql.insert(0, commonTableExpression);
-    }
-
-    final Query sqlQuery =
-        MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs, listArgs);
-    return new AnetBeanList<Position>(sqlQuery, query.getPageNum(), query.getPageSize(),
-        new PositionMapper(), null);
   }
 
 }

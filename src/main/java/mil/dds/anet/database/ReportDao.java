@@ -351,12 +351,11 @@ public class ReportDao extends AnetBaseDao<Report> {
   }
 
   public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, user,
-        false);
+    return search(query, user, false);
   }
 
   public AnetBeanList<Report> search(ReportSearchQuery query, Person user, Boolean systemSearch) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, null,
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, user,
         systemSearch);
   }
 

@@ -1,41 +1,27 @@
 package mil.dds.anet.search.mssql;
 
-import com.google.common.base.Joiner;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
-import mil.dds.anet.search.AbstractSearchBuilder.Comparison;
-import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IPersonSearcher;
-import mil.dds.anet.search.PersonSearchBuilder;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.jdbi.v3.core.statement.Query;
 
-public class MssqlPersonSearcher extends AbstractSearcherBase implements IPersonSearcher {
+public class MssqlPersonSearcher extends AbstractMssqlSearcherBase<Person, PersonSearchQuery>
+    implements IPersonSearcher {
 
   @Override
   public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
-    final List<String> whereClauses = new LinkedList<String>();
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
-    final Map<String, List<?>> listArgs = new HashMap<>();
-    final StringBuilder sql =
-        new StringBuilder("/* MssqlPersonSearch */ SELECT " + PersonDao.PERSON_FIELDS);
+    start("MssqlPersonSearch");
+    sql.append("SELECT " + PersonDao.PERSON_FIELDS);
 
-    final boolean doFullTextSearch = query.isTextPresent();
-    final boolean doSoundex = doFullTextSearch && !query.isSortByPresent();
+    final boolean doSoundex = query.isTextPresent() && !query.isSortByPresent();
     if (doSoundex) {
       sql.append(", EXP(SUM(LOG(1.0/(5-DIFFERENCE(name_token.value, search_token.value)))))");
       sql.append(" AS search_rank");
-    } else if (doFullTextSearch) {
+    } else if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
       // so we can sort on it (show the most relevant hits at the top).
       // Note that summing up independent ranks is not ideal, but it's the best we can do now.
@@ -59,7 +45,7 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
       sql.append(" CROSS APPLY STRING_SPLIT(people.name, ' ') AS name_token"
           + " CROSS APPLY STRING_SPLIT(:freetextQuery, ' ') AS search_token");
       sqlArgs.put("freetextQuery", text);
-    } else if (doFullTextSearch) {
+    } else if (query.isTextPresent()) {
       sql.append(
           " LEFT JOIN CONTAINSTABLE (people, (name, emailAddress, biography), :containsQuery) c_people"
               + " ON people.uuid = c_people.[Key]"
@@ -79,70 +65,49 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
       sqlArgs.put("freetextQuery", text);
     }
 
-    PersonSearchBuilder searchBuilder = new PersonSearchBuilder(sqlArgs, whereClauses);
-    searchBuilder.addDateClause(query.getEndOfTourDateStart(), Comparison.AFTER, "endOfTourDate",
-        "startDate");
-    searchBuilder.addDateClause(query.getEndOfTourDateEnd(), Comparison.BEFORE, "endOfTourDate",
-        "endDate");
+    addDateClause("startDate", "people.endOfTourDate", Comparison.AFTER,
+        query.getEndOfTourDateStart());
+    addDateClause("endDate", "people.endOfTourDate", Comparison.BEFORE,
+        query.getEndOfTourDateEnd());
+    addEqualsClause("role", "people.role", query.getRole());
+    addInClause("statuses", "people.status", query.getStatus());
+    addEqualsClause("rank", "people.rank", query.getRank());
+    addEqualsClause("country", "people.country", query.getCountry());
+    addEqualsClause("pendingVerification", "people.pendingVerification",
+        query.getPendingVerification());
 
-    if (query.getRole() != null) {
-      whereClauses.add(" people.role = :role ");
-      sqlArgs.put("role", DaoUtils.getEnumId(query.getRole()));
-    }
-
-    if (!Utils.isEmptyOrNull(query.getStatus())) {
-      whereClauses.add("people.status IN ( <statuses> )");
-      listArgs.put("statuses", query.getStatus().stream().map(status -> DaoUtils.getEnumId(status))
-          .collect(Collectors.toList()));
-    }
-
-    if (query.getRank() != null && query.getRank().trim().length() > 0) {
-      whereClauses.add(" people.rank = :rank ");
-      sqlArgs.put("rank", query.getRank());
-    }
-
-    if (query.getCountry() != null && query.getCountry().trim().length() > 0) {
-      whereClauses.add(" people.country = :country ");
-      sqlArgs.put("country", query.getCountry());
-    }
-
-    if (query.getPendingVerification() != null) {
-      whereClauses.add(" people.pendingVerification = :pendingVerification ");
-      sqlArgs.put("pendingVerification", query.getPendingVerification());
-    }
-
-    String commonTableExpression = null;
     if (query.getOrgUuid() != null) {
-      if (query.getIncludeChildOrgs() != null && query.getIncludeChildOrgs()) {
-        commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+      if (!query.getIncludeChildOrgs()) {
+        whereClauses.add(" positions.organizationUuid = :orgUuid ");
+      } else {
+        withClauses.add("parent_orgs(uuid) AS ( "
             + "SELECT uuid FROM organizations WHERE uuid = :orgUuid " + "UNION ALL "
             + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
-            + ") ";
+            + ") ");
         whereClauses.add(" positions.organizationUuid IN (SELECT uuid from parent_orgs)");
-      } else {
-        whereClauses.add(" positions.organizationUuid = :orgUuid ");
       }
       sqlArgs.put("orgUuid", query.getOrgUuid());
     }
 
-    if (query.getLocationUuid() != null) {
-      whereClauses.add(" positions.locationUuid = :locationUuid ");
-      sqlArgs.put("locationUuid", query.getLocationUuid());
-    }
+    addEqualsClause("locationUuid", "positions.locationUuid", query.getLocationUuid());
 
-    if (!whereClauses.isEmpty()) {
-      sql.append(" WHERE ");
-      sql.append(Joiner.on(" AND ").join(whereClauses));
-    }
+    finish(doSoundex, query);
+    return getResult(query, new PersonMapper());
+  }
 
+  protected void finish(boolean doSoundex, PersonSearchQuery query) {
+    addWithClauses();
+    addWhereClauses();
     if (doSoundex) {
       // Add grouping needed for soundex score
       sql.append(" GROUP BY " + PersonDao.PERSON_FIELDS_NOAS);
     }
+    addOrderByClauses(query);
+  }
 
-    // Sort Ordering
-    final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && !query.isSortByPresent()) {
+  @Override
+  protected void getOrderByClauses(PersonSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
@@ -161,17 +126,6 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
         break;
     }
     orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "people", "uuid"));
-    sql.append(" ORDER BY ");
-    sql.append(Joiner.on(", ").join(orderByClauses));
-
-    if (commonTableExpression != null) {
-      sql.insert(0, commonTableExpression);
-    }
-
-    final Query sqlQuery =
-        MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs, listArgs);
-    return new AnetBeanList<Person>(sqlQuery, query.getPageNum(), query.getPageSize(),
-        new PersonMapper(), null);
   }
 
 }

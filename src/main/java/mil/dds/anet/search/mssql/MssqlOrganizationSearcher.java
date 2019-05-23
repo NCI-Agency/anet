@@ -1,34 +1,24 @@
 package mil.dds.anet.search.mssql;
 
-import com.google.common.base.Joiner;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
-import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IOrganizationSearcher;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.jdbi.v3.core.statement.Query;
 
-public class MssqlOrganizationSearcher extends AbstractSearcherBase
+public class MssqlOrganizationSearcher
+    extends AbstractMssqlSearcherBase<Organization, OrganizationSearchQuery>
     implements IOrganizationSearcher {
 
   @Override
   public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
-    final List<String> whereClauses = new LinkedList<String>();
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
-    final StringBuilder sql = new StringBuilder(
-        "/* MssqlOrganizationSearch */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS);
+    start("MssqlOrganizationSearch");
+    sql.append("SELECT " + OrganizationDao.ORGANIZATION_FIELDS);
 
-    final boolean doFullTextSearch = query.isTextPresent();
-    if (doFullTextSearch) {
+    if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest
       // possible score)
       // so we can sort on it (show the most relevant hits at the top).
@@ -39,7 +29,7 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
     }
     sql.append(", count(*) OVER() AS totalCount FROM organizations");
 
-    if (doFullTextSearch) {
+    if (query.isTextPresent()) {
       final String text = query.getText();
       sql.append(
           " LEFT JOIN CONTAINSTABLE (organizations, (longName), :containsQuery) c_organizations"
@@ -51,19 +41,12 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
       sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
     }
 
-    if (query.getStatus() != null) {
-      whereClauses.add("organizations.status = :status");
-      sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
-    }
-
-    if (query.getType() != null) {
-      whereClauses.add(" organizations.type = :type ");
-      sqlArgs.put("type", DaoUtils.getEnumId(query.getType()));
-    }
+    addEqualsClause("status", "organizations.status", query.getStatus());
+    addEqualsClause("type", "organizations.type", query.getType());
 
     if (query.getParentOrgUuid() != null) {
       if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
-        sql.insert(0, "WITH parent_orgs(uuid) AS ( "
+        withClauses.add("parent_orgs(uuid) AS ( "
             + "SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid " + "UNION ALL "
             + "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid AND o.uuid != :parentOrgUuid"
             + ") ");
@@ -75,14 +58,13 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
       sqlArgs.put("parentOrgUuid", query.getParentOrgUuid());
     }
 
-    if (!whereClauses.isEmpty()) {
-      sql.append(" WHERE ");
-      sql.append(Joiner.on(" AND ").join(whereClauses));
-    }
+    finish(query);
+    return getResult(query, new OrganizationMapper());
+  }
 
-    // Sort Ordering
-    final List<String> orderByClauses = new LinkedList<>();
-    if (doFullTextSearch && !query.isSortByPresent()) {
+  @Override
+  protected void getOrderByClauses(OrganizationSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
@@ -102,12 +84,6 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase
         break;
     }
     orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "organizations", "uuid"));
-    sql.append(" ORDER BY ");
-    sql.append(Joiner.on(", ").join(orderByClauses));
-
-    final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs);
-    return new AnetBeanList<Organization>(sqlQuery, query.getPageNum(), query.getPageSize(),
-        new OrganizationMapper(), null);
   }
 
 }
