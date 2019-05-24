@@ -11,7 +11,7 @@ import React, { Component } from "react"
 
 export default class Calendar extends Component {
   render() {
-    const { events, calendarComponentRef } = this.props
+    const { events, calendarComponentRef, eventRender } = this.props
     return (
       <FullCalendar
         defaultView="dayGridMonth"
@@ -29,6 +29,7 @@ export default class Calendar extends Component {
         }}
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         events={events}
+        eventRender={eventRender}
         ref={calendarComponentRef}
         allDayDefault
         eventOverlap

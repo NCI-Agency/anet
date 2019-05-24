@@ -6,7 +6,7 @@ import ReportTable from "components/ReportTable"
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import _get from "lodash/get"
-import { Location, Person } from "models"
+import { Location, Person, Report } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
@@ -231,9 +231,11 @@ export default class ReportCollection extends Component {
           (r.principalOrg && r.principalOrg.shortName) ||
           (r.location && r.location.name) ||
           ""
+
         return {
           title: who + "@" + where,
           start: moment(r.engagementDate).format("YYYY-MM-DD"),
+          url: Report.pathFor(r),
           classNames: ["event-" + r.state.toLowerCase()],
           extendedProps: { ...r }
         }
