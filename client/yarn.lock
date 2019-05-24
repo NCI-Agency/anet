@@ -1624,6 +1624,11 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.2.tgz#63985d3d8b02530e0869962f4da09142ee8e200e"
   integrity sha512-n/VQ4mbfr81aqkx/XmVicOLjviMuy02eenSdJY33SVA7S2J42EU0P1H0mOogfYedb3wXA0d/LVtBrgTSm04WEA==
 
+"@fullcalendar/bootstrap@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/bootstrap/-/bootstrap-4.1.0.tgz#489aabfddd4b82d72616f5acbdf109df27bc95be"
+  integrity sha512-mfgs8hg2Uo+P+fQQ/de3r9/VTezgiPH0KO01dM2sqN7Bi7jetyBxI97bl1EEF2fhkoDRMMv28pfsoY3saUP64Q==
+
 "@fullcalendar/core@^4.1.0", "@fullcalendar/core@~4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@fullcalendar/core/-/core-4.1.0.tgz#9f09c4c35e308a81a97e4d62c05f64548d0e5666"
@@ -6901,6 +6906,11 @@ follow-redirects@^1.0.0:
   integrity sha512-m/pZQy4Gj287eNy94nivy5wchN3Kp+Q5WgUPNy5lJSZ3sgkVKSYV/ZChMAQVIgx1SqfZ2zBZtPA2YlXIWxxJOQ==
   dependencies:
     debug "^3.2.6"
+
+font-awesome@^4.7.0:
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/font-awesome/-/font-awesome-4.7.0.tgz#8fa8cf0411a1a31afd07b06d2902bb9fc815a133"
+  integrity sha1-j6jPBBGhoxr9B7BtKQK7n8gVoTM=
 
 for-in@^0.1.3:
   version "0.1.8"
