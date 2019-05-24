@@ -38,6 +38,16 @@ export default class Calendar extends Component {
         }}
         eventClick={eventInfo => {}}
         height="auto"
+        views={{
+          timeGridWeek: {
+            eventLimit: 2,
+            eventLimitClick: "day"
+          },
+          dayGrid: {
+            eventLimit: 2,
+            eventLimitClick: "popover"
+          }
+        }}
       />
     )
   }
