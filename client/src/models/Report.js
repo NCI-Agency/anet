@@ -52,16 +52,6 @@ export default class Report extends Model {
       engagementDate: yupDate
         .nullable()
         .required("You must provide the Date of Engagement")
-        .when("cancelled", (cancelled, schema) =>
-          cancelled
-            ? schema
-            : schema.test(
-              "future-engagement",
-              "You cannot submit reports for future dates, except for cancelled engagements",
-              engagementDate =>
-                !moment(engagementDate).isAfter(moment().endOf("day"))
-            )
-        )
         .default(null),
       duration: yup
         .number()
