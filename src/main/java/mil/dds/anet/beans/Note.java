@@ -17,7 +17,7 @@ import mil.dds.anet.views.UuidFetcher;
 public class Note extends AbstractAnetBean {
 
   public static enum NoteType {
-    FREE_TEXT, CHANGE_RECORD
+    FREE_TEXT, CHANGE_RECORD, PARTNER_ASSESSMENT
   }
 
   private NoteType type;

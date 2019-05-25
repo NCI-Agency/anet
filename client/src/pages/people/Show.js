@@ -190,6 +190,7 @@ class BasePersonShow extends Page {
                     relatedObjectUuid: person.uuid
                   }
                 }
+                relatedObjectValue={person}
               />
               <Messages error={this.state.error} success={this.state.success} />
               <Form className="form-horizontal" method="post">

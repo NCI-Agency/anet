@@ -20,18 +20,42 @@ class BaseRelatedObjectNoteModal extends Component {
     onSuccess: PropTypes.func.isRequired
   }
   yupSchema = yup.object().shape({
-    type: yup
-      .string()
-      .required()
-      .default(NOTE_TYPE.FREE_TEXT),
-    text: yup
-      .string()
-      .required()
-      .default("")
+    type: yup.string().required(),
+    text: yup.string().default("")
   })
   state = {
     error: null
   }
+
+  cooperativeButtons = [
+    {
+      value: "Yes",
+      label: "Yes"
+    },
+    {
+      value: "Sometimes",
+      label: "Sometimes"
+    },
+    {
+      value: "No",
+      label: "No"
+    }
+  ]
+
+  competentButtons = [
+    {
+      value: "Yes, do something",
+      label: "Yes, do something"
+    },
+    {
+      value: "Yes, do something else",
+      label: "Yes, do something else"
+    },
+    {
+      value: "No",
+      label: "No"
+    }
+  ]
 
   render() {
     const { showModal, note } = this.props
@@ -46,25 +70,63 @@ class BaseRelatedObjectNoteModal extends Component {
         >
           {({ isSubmitting, isValid, setFieldValue, values, submitForm }) => {
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-            const jsonFields = isJson ? JSON.parse(note.text) : {}
+            const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
+            const typeName =
+              note.type === NOTE_TYPE.PARTNER_ASSESSMENT ? "assessment" : "note"
             return (
               <Form>
                 <Modal.Header closeButton>
                   <Modal.Title>
-                    {note.uuid ? "Edit note" : "Post a new note"}
+                    {(note.uuid ? "Edit " : "Post a new ") + typeName}
                   </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  <Messages error={this.state.error} />
-                  <Field
-                    name="text"
-                    value={noteText}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("text", value)}
-                    widget={<RichTextEditor className="textField" />}
-                    vertical
-                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: 5,
+                      height: "100%"
+                    }}
+                  >
+                    <Messages error={this.state.error} />
+
+                    {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
+                      <>
+                        <Field
+                          name="Q1"
+                          label="question 1?"
+                          component={FieldHelper.renderButtonToggleGroup}
+                          buttons={this.cooperativeButtons}
+                          onChange={value => {
+                            setFieldValue("Q1", value)
+                          }}
+                        />
+                        <br />
+                        <br />
+                        <Field
+                          name="Q2"
+                          label="question 2?"
+                          component={FieldHelper.renderButtonToggleGroup}
+                          buttons={this.competentButtons}
+                          onChange={value => {
+                            setFieldValue("Q2", value)
+                          }}
+                        />
+                        <br />
+                      </>
+                    )}
+
+                    <Field
+                      name="note"
+                      value={noteText}
+                      component={FieldHelper.renderSpecialField}
+                      onChange={value => setFieldValue("text", value)}
+                      widget={<RichTextEditor className="textField" />}
+                      vertical
+                    />
+                  </div>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button className="pull-left" onClick={this.close}>
@@ -107,11 +169,14 @@ class BaseRelatedObjectNoteModal extends Component {
     const operation = edit ? "updateNote" : "createNote"
     const graphql =
       /* GraphQL */ operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
-    const newNote = values
+    const newNote = {
+      type: values.type,
+      noteRelatedObjects: values.noteRelatedObjects,
+      text: values.text
+    }
     const isJson = newNote.type !== NOTE_TYPE.FREE_TEXT
     if (isJson) {
-      const jsonFields = JSON.parse(this.props.note.text)
-      jsonFields.text = newNote.text
+      const { type, noteRelatedObjects, ...jsonFields } = values
       newNote.text = JSON.stringify(jsonFields)
     }
     const variables = { note: newNote }

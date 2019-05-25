@@ -68,6 +68,7 @@ class PersonEdit extends Page {
               relatedObjectUuid: person.uuid
             }
           }
+          relatedObjectValue={person}
         />
         <PersonForm
           initialValues={person}

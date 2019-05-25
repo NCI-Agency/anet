@@ -44,6 +44,7 @@ class BaseRelatedObjectNotes extends Component {
       error: null,
       hide: true,
       showRelatedObjectNoteModal: null,
+      noteType: null,
       notes: this.props.notes
     }
   }
@@ -62,11 +63,12 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({ hide: !this.state.hide })
   }
 
-  showRelatedObjectNoteModal = key => {
+  showRelatedObjectNoteModal = (type, key) => {
     this.setState({
       success: null,
       error: null,
-      showRelatedObjectNoteModal: key
+      showRelatedObjectNoteModal: key,
+      noteType: type
     })
   }
 
@@ -74,7 +76,8 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({
       success: null,
       error: null,
-      showRelatedObjectNoteModal: null
+      showRelatedObjectNoteModal: null,
+      noteType: null
     })
   }
 
@@ -84,6 +87,7 @@ class BaseRelatedObjectNotes extends Component {
       success: "note added",
       error: null,
       showRelatedObjectNoteModal: null,
+      noteType: null,
       notes: this.state.notes
     })
   }
@@ -95,6 +99,7 @@ class BaseRelatedObjectNotes extends Component {
       success: "note updated",
       error: null,
       showRelatedObjectNoteModal: null,
+      noteType: null,
       notes: notes
     })
   }
@@ -131,6 +136,20 @@ class BaseRelatedObjectNotes extends Component {
     const noNotes = _isEmpty(notes)
     const nrNotes = noNotes ? 0 : notes.length
     const badgeLabel = nrNotes > 10 ? "10+" : null
+    const assessments = notes.filter(
+      note => note.type === NOTE_TYPE.PARTNER_ASSESSMENT
+    )
+    const assessmentsSummary = assessments.reduce(
+      (counter, assessment) => {
+        const assessmentJson = JSON.parse(assessment.text)
+        counter.cooperative[assessmentJson.cooperative] =
+          ++counter.cooperative[assessmentJson.cooperative] || 1
+        counter.competent[assessmentJson.competent] =
+          ++counter.competent[assessmentJson.competent] || 1
+        return counter
+      },
+      { cooperative: {}, competent: {} }
+    )
     return this.state.hide ? (
       <div style={{ minWidth: 50, padding: 5, marginRight: 15 }}>
         <NotificationBadge
@@ -178,15 +197,33 @@ class BaseRelatedObjectNotes extends Component {
         >
           <Button
             bsStyle="primary"
-            onClick={() => this.showRelatedObjectNoteModal("new")}
+            style={{ margin: "5px" }}
+            onClick={() =>
+              this.showRelatedObjectNoteModal(NOTE_TYPE.FREE_TEXT, "new")
+            }
           >
             Post new note
           </Button>
+          {this.props.relatedObject.relatedObjectType === "people" &&
+            this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL && (
+            <Button
+              bsStyle="primary"
+              style={{ margin: "5px" }}
+              onClick={() =>
+                this.showRelatedObjectNoteModal(
+                  NOTE_TYPE.PARTNER_ASSESSMENT,
+                  "new"
+                )
+              }
+            >
+                Assess Person
+            </Button>
+          )}
         </div>
         <br />
         <RelatedObjectNoteModal
           note={{
-            type: NOTE_TYPE.FREE_TEXT,
+            type: this.state.noteType,
             noteRelatedObjects: [{ ...this.props.relatedObject }]
           }}
           showModal={this.state.showRelatedObjectNoteModal === "new"}
@@ -198,11 +235,40 @@ class BaseRelatedObjectNotes extends Component {
             <i>No notes</i>
           </div>
         )}
+
+        {assessments.length > 0 && (
+          <Panel bsStyle="primary" style={{ width: "100%" }}>
+            <Panel.Heading>
+              Summary of <b>{assessments.length}</b> assessments for{" "}
+              {this.props.relatedObjectValue.rank}{" "}
+              {this.props.relatedObjectValue.name}
+            </Panel.Heading>
+            <Panel.Body>
+              Partner is <u>cooperative</u>
+              <br />
+              {Object.keys(assessmentsSummary.cooperative).map(key => (
+                <span key={key}>
+                  {key} (<b>{assessmentsSummary.cooperative[key]}</b>){" "}
+                </span>
+              ))}
+              <br />
+              <br />
+              Partner is <u>competent</u>
+              <br />
+              {Object.keys(assessmentsSummary.competent).map(key => (
+                <span key={key}>
+                  {key} (<b>{assessmentsSummary.competent[key]}</b>){" "}
+                </span>
+              ))}
+            </Panel.Body>
+          </Panel>
+        )}
+
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            overflow: "scroll"
+            overflow: "auto"
           }}
         >
           {notes.map(note => {
@@ -211,22 +277,8 @@ class BaseRelatedObjectNotes extends Component {
             const author = byMe ? "me" : <LinkTo person={note.author} />
             const canEdit = byMe || currentUser.isAdmin()
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-            const jsonFields = isJson ? JSON.parse(note.text) : {}
+            const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
-            let msg = ""
-            if (isJson) {
-              if (jsonFields.oldValue === jsonFields.newValue) {
-                msg = `Field <b>${
-                  jsonFields.changedField
-                }</b> was unchanged (<em>'${jsonFields.oldValue}'</em>)`
-              } else {
-                msg = `Field <b>${
-                  jsonFields.changedField
-                }</b> was changed from <em>'${
-                  jsonFields.oldValue
-                }'</em> to <em>'${jsonFields.newValue}'</em>`
-              }
-            }
             return (
               <Panel
                 key={note.uuid}
@@ -239,7 +291,9 @@ class BaseRelatedObjectNotes extends Component {
                     textAlign: "right",
                     borderTopLeftRadius: "15px",
                     borderTopRightRadius: "15px",
-                    paddingRight: "10px"
+                    paddingRight: "10px",
+                    paddingLeft: "10px",
+                    whiteSpace: "nowrap"
                   }}
                 >
                   <i>{updatedAt}</i> by <b>{author}</b>
@@ -277,14 +331,14 @@ class BaseRelatedObjectNotes extends Component {
                   )}
                 </Panel.Heading>
                 <Panel.Body>
-                  {isJson ? (
-                    <div
-                      style={{
-                        overflowWrap: "break-word",
-                        /* IE: */ wordWrap: "break-word"
-                      }}
-                    >
-                      {jsonFields.oldValue === jsonFields.newValue ? (
+                  <div
+                    style={{
+                      overflowWrap: "break-word",
+                      /* IE: */ wordWrap: "break-word"
+                    }}
+                  >
+                    {note.type === NOTE_TYPE.CHANGE_RECORD &&
+                      (jsonFields.oldValue === jsonFields.newValue ? (
                         <span>
                           Field <b>{jsonFields.changedField}</b> was unchanged (
                           <em>'{jsonFields.oldValue}'</em>):
@@ -295,18 +349,31 @@ class BaseRelatedObjectNotes extends Component {
                           from <em>'{jsonFields.oldValue}'</em> to{" "}
                           <em>'{jsonFields.newValue}'</em>:
                         </span>
-                      )}
-                      <div dangerouslySetInnerHTML={{ __html: noteText }} />
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        overflowWrap: "break-word",
-                        /* IE: */ wordWrap: "break-word"
-                      }}
-                      dangerouslySetInnerHTML={{ __html: noteText }}
-                    />
-                  )}
+                      ))}
+                    {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
+                      <>
+                        <h4>
+                          <u>
+                            <b>Partner assessment</b>
+                          </u>
+                        </h4>
+                        {Object.keys(jsonFields)
+                          .filter(field => field !== "text")
+                          .map(field => (
+                            <p>
+                              <i>{field}</i>: <b>{jsonFields[field]}</b>
+                            </p>
+                          ))}
+                      </>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      overflowWrap: "break-word",
+                      /* IE: */ wordWrap: "break-word"
+                    }}
+                    dangerouslySetInnerHTML={{ __html: noteText }}
+                  />
                 </Panel.Body>
               </Panel>
             )
