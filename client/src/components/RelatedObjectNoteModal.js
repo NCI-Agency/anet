@@ -41,7 +41,7 @@ class BaseRelatedObjectNoteModal extends Component {
           enableReinitialize
           onSubmit={this.onSubmit}
           validationSchema={this.yupSchema}
-          isInitialValid={() => this.yupSchema.isValidSync(note)}
+          isInitialValid
           initialValues={note}
         >
           {({ isSubmitting, isValid, setFieldValue, values, submitForm }) => {
