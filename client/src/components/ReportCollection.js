@@ -13,10 +13,10 @@ import { Button } from "react-bootstrap"
 import Calendar from "components/Calendar"
 import moment from "moment"
 
+export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
-export const FORMAT_CALENDAR = "calendar"
 
 export const GQL_REPORT_FIELDS = /* GraphQL */ `
   uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason
@@ -136,13 +136,13 @@ export default class ReportCollection extends Component {
 
           {reportsExist && (
             <div>
+              {this.state.viewFormat === FORMAT_CALENDAR &&
+                this.renderCalendar(reports)}
               {this.state.viewFormat === FORMAT_TABLE &&
                 this.renderTable(reports)}
               {this.state.viewFormat === FORMAT_SUMMARY &&
                 this.renderSummary(reports)}
               {this.state.viewFormat === FORMAT_MAP && this.renderMap(reports)}
-              {this.state.viewFormat === FORMAT_CALENDAR &&
-                this.renderCalendar(reports)}
             </div>
           )}
 
