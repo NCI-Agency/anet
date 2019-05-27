@@ -35,7 +35,7 @@ export default class Calendar extends Component {
         eventLimit
         dateClick={info => {
           let calendarApi = calendarComponentRef.current.getApi()
-          calendarApi.changeView("timeGridDay", info.dateStr) // call a method on the Calendar object
+          calendarApi.changeView("listDay", info.dateStr) // call a method on the Calendar object
         }}
         eventClick={eventInfo => {}}
         height="auto"
