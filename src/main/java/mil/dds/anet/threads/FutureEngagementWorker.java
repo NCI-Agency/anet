@@ -42,7 +42,7 @@ public class FutureEngagementWorker implements Runnable {
   private void runInternal() {
     // Get a list of all FUTURE and engagementDate < today reports, and their authors
     ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageSize(Integer.MAX_VALUE);
+    query.setPageSize(0);
     query.setState(Collections.singletonList(ReportState.FUTURE));
     Instant endOfToday = Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23)
         .withMinute(59).withSecond(59).withNano(999999999).toInstant();

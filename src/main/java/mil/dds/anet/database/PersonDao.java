@@ -12,6 +12,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -222,7 +223,7 @@ public class PersonDao extends AnetBaseDao<Person> {
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
       Map<String, Object> context, String personUuid) {
     return new ForeignKeyFetcher<PersonPositionHistory>()
-        .load(context, "person.personPositionHistory", personUuid)
+        .load(context, BatchingUtils.DataLoaderKey.FK_PERSON_PERSON_POSITION_HISTORY, personUuid)
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 

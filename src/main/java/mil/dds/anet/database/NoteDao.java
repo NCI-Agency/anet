@@ -10,6 +10,7 @@ import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -73,8 +74,8 @@ public class NoteDao extends AnetBaseDao<Note> {
 
   public CompletableFuture<List<Note>> getNotesForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
-    return new ForeignKeyFetcher<Note>().load(context, "noteRelatedObject.notes",
-        relatedObjectUuid);
+    return new ForeignKeyFetcher<Note>().load(context,
+        BatchingUtils.DataLoaderKey.FK_NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid);
   }
 
   static class NotesBatcher extends ForeignKeyBatcher<Note> {
@@ -113,8 +114,8 @@ public class NoteDao extends AnetBaseDao<Note> {
 
   public CompletableFuture<List<NoteRelatedObject>> getRelatedObjects(Map<String, Object> context,
       Note note) {
-    return new ForeignKeyFetcher<NoteRelatedObject>().load(context, "note.noteRelatedObjects",
-        note.getUuid());
+    return new ForeignKeyFetcher<NoteRelatedObject>().load(context,
+        BatchingUtils.DataLoaderKey.FK_NOTE_NOTE_RELATED_OBJECTS, note.getUuid());
   }
 
   private void insertNoteRelatedObjects(String uuid, List<NoteRelatedObject> noteRelatedObjects) {

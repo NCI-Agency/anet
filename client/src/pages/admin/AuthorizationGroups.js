@@ -21,7 +21,6 @@ class AuthorizationGroups extends Page {
 
   fetchData(props) {
     const query = {
-      pageNum: 0,
       pageSize: 0 // retrieve all
     }
     return API.query(

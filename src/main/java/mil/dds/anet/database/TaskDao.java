@@ -14,6 +14,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -127,7 +128,8 @@ public class TaskDao extends AnetBaseDao<Task> {
 
   public CompletableFuture<List<Position>> getResponsiblePositionsForTask(
       Map<String, Object> context, String taskUuid) {
-    return new ForeignKeyFetcher<Position>().load(context, "task.responsiblePositions", taskUuid);
+    return new ForeignKeyFetcher<Position>().load(context,
+        BatchingUtils.DataLoaderKey.FK_TASK_RESPONSIBLE_POSITIONS, taskUuid);
   }
 
   public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {
@@ -168,12 +170,5 @@ public class TaskDao extends AnetBaseDao<Task> {
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
         .map(new TaskMapper()).list();
-  }
-
-  public List<Task> getTasksByOrganizationUuid(String orgUuid) {
-    return getDbHandle()
-        .createQuery(
-            "/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationUuid\" = :orgUuid")
-        .bind("orgUuid", orgUuid).map(new TaskMapper()).list();
   }
 }

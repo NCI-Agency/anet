@@ -40,6 +40,7 @@ import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -320,7 +321,8 @@ public class ReportDao extends AnetBaseDao<Report> {
 
   public CompletableFuture<List<ReportPerson>> getAttendeesForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<ReportPerson>().load(context, "report.attendees", reportUuid);
+    return new ForeignKeyFetcher<ReportPerson>().load(context,
+        BatchingUtils.DataLoaderKey.FK_REPORT_ATTENDEES, reportUuid);
   }
 
   public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
@@ -333,12 +335,14 @@ public class ReportDao extends AnetBaseDao<Report> {
 
   public CompletableFuture<List<Task>> getTasksForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<Task>().load(context, "report.tasks", reportUuid);
+    return new ForeignKeyFetcher<Task>().load(context, BatchingUtils.DataLoaderKey.FK_REPORT_TASKS,
+        reportUuid);
   }
 
   public CompletableFuture<List<Tag>> getTagsForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<Tag>().load(context, "report.tags", reportUuid);
+    return new ForeignKeyFetcher<Tag>().load(context, BatchingUtils.DataLoaderKey.FK_REPORT_TAGS,
+        reportUuid);
   }
 
   // Does an unauthenticated search. This will never return any DRAFT or REJECTED reports
@@ -435,7 +439,7 @@ public class ReportDao extends AnetBaseDao<Report> {
       OrganizationSearchQuery query = new OrganizationSearchQuery();
       query.setParentOrgUuid(parentOrgUuid);
       query.setParentOrgRecursively(true);
-      query.setPageSize(Integer.MAX_VALUE);
+      query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =
           orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();

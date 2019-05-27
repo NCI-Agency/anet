@@ -6,8 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public abstract class AbstractSearchQuery implements ISearchQuery {
 
   private String text;
-  private int pageNum;
-  private int pageSize;
+  private Integer pageNum;
+  private Integer pageSize;
+  private SortOrder sortOrder;
 
   public AbstractSearchQuery() {
     this.pageNum = 0;
@@ -30,7 +31,7 @@ public abstract class AbstractSearchQuery implements ISearchQuery {
   }
 
   @Override
-  public void setPageNum(int pageNum) {
+  public void setPageNum(Integer pageNum) {
     this.pageNum = pageNum;
   }
 
@@ -40,8 +41,18 @@ public abstract class AbstractSearchQuery implements ISearchQuery {
   }
 
   @Override
-  public void setPageSize(int pageSize) {
+  public void setPageSize(Integer pageSize) {
     this.pageSize = pageSize;
+  }
+
+  @Override
+  public SortOrder getSortOrder() {
+    return sortOrder;
+  }
+
+  @Override
+  public void setSortOrder(SortOrder sortOrder) {
+    this.sortOrder = sortOrder;
   }
 
 }

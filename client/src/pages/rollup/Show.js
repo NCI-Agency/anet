@@ -247,7 +247,6 @@ class BaseRollupShow extends Page {
     chartQuery += ")"
     chartQueryParamsDef += ")"
     Object.assign(chartQueryParams, {
-      pageNum: 0,
       pageSize: 0 // retrieve all the filtered reports
     })
     return [chartQuery, chartQueryParams, chartQueryParamsDef]

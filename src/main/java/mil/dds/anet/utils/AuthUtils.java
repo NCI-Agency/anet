@@ -12,6 +12,7 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +70,9 @@ public class AuthUtils {
     try {
       Organization posOrg =
           position.loadOrganization(AnetObjectEngine.getInstance().getContext()).get();
-      Optional<Organization> orgMatch = posOrg.loadAllDescendants().stream()
+      final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
+      osQuery.setPageSize(0);
+      Optional<Organization> orgMatch = posOrg.loadDescendantOrgs(osQuery).stream()
           .filter(o -> o.getUuid().equals(organizationUuid)).findFirst();
       return orgMatch.isPresent();
     } catch (InterruptedException | ExecutionException e) {

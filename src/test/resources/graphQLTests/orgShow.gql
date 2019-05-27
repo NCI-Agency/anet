@@ -2,24 +2,13 @@ organization(uuid:"${orgUuid}") {
 	uuid, shortName, longName, type
 	parentOrg { uuid, shortName, longName }
 	tasks { uuid, longName, shortName }
-	childrenOrgs { uuid, shortName, longName },
+	childrenOrgs(query: {pageSize: 0}) { uuid, shortName, longName },
 	positions {
 		uuid, name, code
 		person { uuid, name }
 		associatedPositions {
 			uuid, name, code
 			person { uuid, name }
-		}
-	},
-	reports(pageNum:0, pageSize:25) {
-		list { 
-			uuid, intent, engagementDate, duration, keyOutcomes, nextSteps
-			author { uuid, name },
-			primaryAdvisor { uuid, name } ,
-			primaryPrincipal { uuid, name },
-			advisorOrg { uuid, shortName, longName }
-			principalOrg { uuid, shortName, longName }
-			location { uuid, name, lat, lng }
 		}
 	},
 	approvalSteps {

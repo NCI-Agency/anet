@@ -1,4 +1,4 @@
-reportList(query: {releasedAtStart: -259200000, pageSize: 3, pageNum: 0, sortBy: RELEASED_AT, sortOrder: DESC}) {
+reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT, sortOrder: DESC}) {
   pageNum
   totalCount
   list {

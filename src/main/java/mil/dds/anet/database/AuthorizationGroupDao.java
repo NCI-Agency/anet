@@ -15,6 +15,7 @@ import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -120,8 +121,8 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
   public CompletableFuture<List<Position>> getPositionsForAuthorizationGroup(
       Map<String, Object> context, String authorizationGroupUuid) {
-    return new ForeignKeyFetcher<Position>().load(context, "authorizationGroup.positions",
-        authorizationGroupUuid);
+    return new ForeignKeyFetcher<Position>().load(context,
+        BatchingUtils.DataLoaderKey.FK_AUTHORIZATION_GROUP_POSITIONS, authorizationGroupUuid);
   }
 
   public AnetBeanList<AuthorizationGroup> search(AuthorizationGroupSearchQuery query) {
