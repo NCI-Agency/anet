@@ -17,30 +17,24 @@ export default class Calendar extends Component {
     return (
       <FullCalendar
         defaultView="dayGridMonth"
-        slotDuration={{ hours: 2 }}
         header={{
           left: "prev,next today filterDraft",
           center: "title",
           right:
             "dayGridMonth,timeGridWeek,timeGridDay,listMonth,listWeek,listDay"
         }}
-
         buttonText={{
           listMonth: "list month",
           listWeek: "list week",
           listDay: "list day"
         }}
-        plugins={[
-          dayGridPlugin,
-          timeGridPlugin,
-          listPlugin,
-          interactionPlugin
-        ]}
+        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         events={events}
         eventRender={eventRender}
         ref={calendarComponentRef}
-        allDayDefault
+        allDayDefault={false}
         eventOverlap
+        eventLimit
         dateClick={info => {
           let calendarApi = calendarComponentRef.current.getApi()
           calendarApi.changeView("timeGridDay", info.dateStr) // call a method on the Calendar object
@@ -49,11 +43,9 @@ export default class Calendar extends Component {
         height="auto"
         views={{
           timeGridWeek: {
-            eventLimit: 2,
             eventLimitClick: "day"
           },
           dayGrid: {
-            eventLimit: 2,
             eventLimitClick: "popover"
           }
         }}

@@ -234,10 +234,14 @@ export default class ReportCollection extends Component {
 
         return {
           title: who + "@" + where,
-          start: moment(r.engagementDate).format("YYYY-MM-DD"),
+          start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
+          end: moment(r.engagementDate)
+            .add(r.duration, "minutes")
+            .format("YYYY-MM-DD HH:mm"),
           url: Report.pathFor(r),
           classNames: ["event-" + r.state.toLowerCase()],
-          extendedProps: { ...r }
+          extendedProps: { ...r },
+          allDay: !!r.duration
         }
       })
     } else {
