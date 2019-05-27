@@ -40,6 +40,7 @@ public class Organization extends AbstractAnetBean {
 
   /* The following are all Lazy Loaded */
   List<Position> positions; /* Positions in this Org */
+  List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Org */
   List<ApprovalStep> approvalSteps; /* Approval process for this Org */
   List<Organization> childrenOrgs; /* Immediate children */
   List<Organization> descendants; /* All descendants (children of children..) */
@@ -135,6 +136,27 @@ public class Organization extends AbstractAnetBean {
       positions = AnetObjectEngine.getInstance().getPositionDao().search(query).getList();
     }
     return positions;
+  }
+
+  @GraphQLQuery(name = "planningApprovalSteps")
+  public CompletableFuture<List<ApprovalStep>> loadPlanningApprovalSteps(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (planningApprovalSteps != null) {
+      return CompletableFuture.completedFuture(planningApprovalSteps);
+    }
+    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForOrg(context, uuid).thenApply(o -> {
+    	planningApprovalSteps = o;
+      return o;
+    });
+  }
+
+  @GraphQLIgnore
+  public List<ApprovalStep> getPlanningApprovalSteps() {
+    return planningApprovalSteps;
+  }
+
+  public void setPlanningApprovalSteps(List<ApprovalStep> steps) {
+    this.planningApprovalSteps = steps;
   }
 
   @GraphQLQuery(name = "approvalSteps")
