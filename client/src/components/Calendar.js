@@ -3,7 +3,6 @@ import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import listPlugin from "@fullcalendar/list"
 import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
-import bootstrapPlugin from "@fullcalendar/bootstrap"
 import "@fullcalendar/core/main.css"
 import "@fullcalendar/daygrid/main.css"
 import "@fullcalendar/timegrid/main.css"
@@ -25,16 +24,8 @@ export default class Calendar extends Component {
           right:
             "dayGridMonth,timeGridWeek,timeGridDay,listMonth,listWeek,listDay"
         }}
-        bootstrapFontAwesome={{
-          close: "fa-times",
-          prev: "fa-chevron-left",
-          next: "fa-chevron-right",
-          prevYear: "fa-angle-double-left",
-          nextYear: "fa-angle-double-right"
-        }}
+
         buttonText={{
-          //          prev: "<",
-          //          next: ">",
           listMonth: "list month",
           listWeek: "list week",
           listDay: "list day"
@@ -43,8 +34,7 @@ export default class Calendar extends Component {
           dayGridPlugin,
           timeGridPlugin,
           listPlugin,
-          interactionPlugin,
-          bootstrapPlugin
+          interactionPlugin
         ]}
         events={events}
         eventRender={eventRender}
@@ -57,7 +47,6 @@ export default class Calendar extends Component {
         }}
         eventClick={eventInfo => {}}
         height="auto"
-        themeSystem="bootstrap"
         views={{
           timeGridWeek: {
             eventLimit: 2,
