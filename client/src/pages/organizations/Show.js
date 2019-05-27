@@ -24,9 +24,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem, Nav } from "react-bootstrap"
 import { connect } from "react-redux"
-import Calendar from "components/Calendar"
-import _isEmpty from "lodash/isEmpty"
-import moment from "moment"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
@@ -74,7 +71,7 @@ class BaseOrganizationShow extends Page {
     }
   }
 
-  getReportQueryPart = (orgUuid, extras) => {
+  getReportQueryPart = orgUuid => {
     const { organization } = this.state
     const { pagination } = this.props
     const orgLabel = this.orgLabel(organization)
@@ -84,9 +81,6 @@ class BaseOrganizationShow extends Page {
       pageSize: 10,
       orgUuid: orgUuid,
       state: this.reportsFilterIsSet() ? this.state.reportsFilter : null
-    }
-    if (!_isEmpty(extras)) {
-      Object.assign(reportQuery, extras)
     }
     let reportsPart = new GQL.Part(/* GraphQL */ `
       reports: reportList(query:$reportQuery) {
@@ -164,33 +158,6 @@ class BaseOrganizationShow extends Page {
       toggleToFilter = Report.STATE.PENDING_APPROVAL
     }
     this.setState({ reportsFilter: toggleToFilter })
-  }
-  calendarComponentRef = React.createRef()
-
-  getEvents = (info, successCallback, failureCallback) => {
-    let reportsPart = this.getReportQueryPart(this.props.match.params.uuid, {
-      engagementDateStart: info.start.valueOf(),
-      engagementDateEnd: info.end.valueOf()
-    })
-    return GQL.run([reportsPart]).then(data => {
-      if (data.reports && data.reports.list) {
-        return data.reports.list.map(r => {
-          const who =
-            (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
-          const where =
-            (r.principalOrg && r.principalOrg.shortName) ||
-            (r.location && r.location.name) ||
-            ""
-          return {
-            title: who + "@" + where,
-            start: moment(r.engagementDate).format("YYYY-MM-DD"),
-            classNames: ["event-" + r.state.toLowerCase()],
-            extendedProps: { ...r }
-          }
-        })
-      }
-      return []
-    })
   }
 
   render() {
@@ -407,16 +374,6 @@ class BaseOrganizationShow extends Page {
                     goToPage={this.goToTasksPage}
                   />
                 )}
-
-                <Fieldset
-                  id="reports-calendar"
-                  title={`Reports calendar from ${organization.shortName}`}
-                >
-                  <Calendar
-                    events={this.getEvents}
-                    ref={this.calendarComponentRef}
-                  />
-                </Fieldset>
 
                 <Fieldset
                   id="reports"
