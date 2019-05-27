@@ -58,7 +58,7 @@ export default class ReportCollection extends Component {
   }
 
   static defaultProps = {
-    viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP, FORMAT_CALENDAR]
+    viewFormats: [FORMAT_CALENDAR, FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP]
   }
 
   calendarComponentRef = React.createRef()
@@ -97,6 +97,9 @@ export default class ReportCollection extends Component {
                   onChange={this.changeViewFormat}
                   className="hide-for-print"
                 >
+                  {this.props.viewFormats.includes(FORMAT_CALENDAR) && (
+                    <Button value={FORMAT_CALENDAR}>Calendar</Button>
+                  )}
                   {this.props.viewFormats.includes(FORMAT_SUMMARY) && (
                     <Button value={FORMAT_SUMMARY}>Summary</Button>
                   )}
@@ -105,9 +108,6 @@ export default class ReportCollection extends Component {
                   )}
                   {this.props.viewFormats.includes(FORMAT_MAP) && (
                     <Button value={FORMAT_MAP}>Map</Button>
-                  )}
-                  {this.props.viewFormats.includes(FORMAT_CALENDAR) && (
-                    <Button value={FORMAT_CALENDAR}>Calendar</Button>
                   )}
                 </ButtonToggleGroup>
               )}
