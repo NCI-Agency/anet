@@ -21,11 +21,9 @@ export default class Calendar extends Component {
           left: "prev,next today filterDraft",
           center: "title",
           right:
-            "dayGridMonth,timeGridWeek,timeGridDay,listMonth,listWeek,listDay"
+            "dayGridMonth,timeGridWeek,timeGridDay,listDay"
         }}
         buttonText={{
-          listMonth: "list month",
-          listWeek: "list week",
           listDay: "list day"
         }}
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
