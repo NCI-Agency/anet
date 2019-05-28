@@ -116,7 +116,7 @@
     "locale-compare-polyfill": "^0.0.2",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
-    "pluralize": "^7.0.0",
+    "pluralize": "^8.0.0",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-bootstrap": "^0.32.4",
