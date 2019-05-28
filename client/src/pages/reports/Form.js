@@ -162,6 +162,15 @@ class BaseReportForm extends Component {
     window.clearTimeout(this.autoSaveSettings.timeoutId)
   }
 
+  checkIsFutureEngagement(engagementDate) {
+    return (
+      engagementDate &&
+      moment()
+        .endOf("day")
+        .isBefore(engagementDate)
+    )
+  }
+
   render() {
     const { currentUser, edit, title, ...myFormProps } = this.props
     const { recents, tagSuggestions } = this.state
@@ -325,6 +334,9 @@ class BaseReportForm extends Component {
               </Button>
             </div>
           )
+          const isFutureEngagement = this.checkIsFutureEngagement(
+            values.engagementDate
+          )
           return (
             <div className="report-form">
               <NavigationWarning isBlocking={dirty} />
@@ -398,14 +410,11 @@ class BaseReportForm extends Component {
                       />
                     }
                   >
-                    {values.engagementDate &&
-                      moment()
-                        .endOf("day")
-                        .isBefore(values.engagementDate) && (
-                        <HelpBlock>
+                    {isFutureEngagement && (
+                      <HelpBlock>
                         <span className="text-success">
-                            This will create an upcoming engagement
-                          </span>
+                          This will create an upcoming engagement
+                        </span>
                       </HelpBlock>
                     )}
                   </Field>
@@ -421,7 +430,7 @@ class BaseReportForm extends Component {
                   <AdvancedSingleSelect
                     fieldName="location"
                     fieldLabel="Location"
-                    placeholder="Search for the location where this happened..."
+                    placeholder="Search for the engagement location..."
                     value={values.location}
                     overlayColumns={["Name"]}
                     overlayRenderRow={LocationOverlayRow}
@@ -436,30 +445,32 @@ class BaseReportForm extends Component {
                     renderExtraCol
                   />
 
-                  <Field
-                    name="cancelled"
-                    component={FieldHelper.renderSpecialField}
-                    label={Settings.fields.report.cancelled}
-                    widget={
-                      <Checkbox
-                        inline
-                        className="cancelled-checkbox"
-                        checked={values.cancelled}
-                        onClick={event =>
-                          event.target.checked &&
-                          !values.cancelledReason &&
-                          // set a default reason when cancelled has been checked and no reason has been selected
-                          setFieldValue(
-                            "cancelledReason",
-                            this.cancelledReasonOptions[0].value
-                          )
-                        }
-                      >
-                        This engagement was cancelled
-                      </Checkbox>
-                    }
-                  />
-                  {values.cancelled && (
+                  {!isFutureEngagement && (
+                    <Field
+                      name="cancelled"
+                      component={FieldHelper.renderSpecialField}
+                      label={Settings.fields.report.cancelled}
+                      widget={
+                        <Checkbox
+                          inline
+                          className="cancelled-checkbox"
+                          checked={values.cancelled}
+                          onClick={event =>
+                            event.target.checked &&
+                            !values.cancelledReason &&
+                            // set a default reason when cancelled has been checked and no reason has been selected
+                            setFieldValue(
+                              "cancelledReason",
+                              this.cancelledReasonOptions[0].value
+                            )
+                          }
+                        >
+                          This engagement was cancelled
+                        </Checkbox>
+                      }
+                    />
+                  )}
+                  {!isFutureEngagement && values.cancelled && (
                     <Field
                       name="cancelledReason"
                       label="due to"
@@ -479,7 +490,7 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  {!values.cancelled && (
+                  {!isFutureEngagement && !values.cancelled && (
                     <Field
                       name="atmosphere"
                       label={Settings.fields.report.atmosphere}
@@ -489,7 +500,9 @@ class BaseReportForm extends Component {
                       className="atmosphere-form-group"
                     />
                   )}
-                  {!values.cancelled && values.atmosphere && (
+                  {!isFutureEngagement &&
+                    !values.cancelled &&
+                    values.atmosphere && (
                     <Field
                       name="atmosphereDetails"
                       label={Settings.fields.report.atmosphereDetails}
@@ -514,7 +527,7 @@ class BaseReportForm extends Component {
 
                 <Fieldset
                   title={
-                    !values.cancelled
+                    !values.cancelled && !isFutureEngagement
                       ? "Meeting attendance"
                       : "Planned attendance"
                   }
@@ -523,7 +536,7 @@ class BaseReportForm extends Component {
                   <AdvancedMultiSelect
                     fieldName="attendees"
                     fieldLabel="Attendees"
-                    placeholder="Search for attendees who attended the meeting..."
+                    placeholder="Search for the meeting attendees..."
                     value={values.attendees}
                     renderSelected={
                       <AttendeesTable
@@ -600,7 +613,7 @@ class BaseReportForm extends Component {
                   }
                   id="meeting-details"
                 >
-                  {!values.cancelled && (
+                  {!isFutureEngagement && !values.cancelled && (
                     <Field
                       name="keyOutcomes"
                       label={Settings.fields.report.keyOutcomes}
@@ -626,29 +639,31 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <Field
-                    name="nextSteps"
-                    label={Settings.fields.report.nextSteps}
-                    component={FieldHelper.renderInputField}
-                    componentClass="textarea"
-                    maxLength={Settings.maxTextFieldLength}
-                    onKeyUp={event =>
-                      this.countCharsLeft(
-                        "nextStepsCharsLeft",
-                        Settings.maxTextFieldLength,
-                        event
-                      )
-                    }
-                    extraColElem={
-                      <React.Fragment>
-                        <span id="nextStepsCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            this.props.initialValues.nextSteps.length}
-                        </span>{" "}
-                        characters remaining
-                      </React.Fragment>
-                    }
-                  />
+                  {!isFutureEngagement && (
+                    <Field
+                      name="nextSteps"
+                      label={Settings.fields.report.nextSteps}
+                      component={FieldHelper.renderInputField}
+                      componentClass="textarea"
+                      maxLength={Settings.maxTextFieldLength}
+                      onKeyUp={event =>
+                        this.countCharsLeft(
+                          "nextStepsCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )
+                      }
+                      extraColElem={
+                        <React.Fragment>
+                          <span id="nextStepsCharsLeft">
+                            {Settings.maxTextFieldLength -
+                              this.props.initialValues.nextSteps.length}
+                          </span>{" "}
+                          characters remaining
+                        </React.Fragment>
+                      }
+                    />
+                  )}
 
                   <Field
                     name="reportText"
@@ -914,6 +929,15 @@ class BaseReportForm extends Component {
       "showSensitiveInfo",
       "attendees"
     )
+    if (this.checkIsFutureEngagement(values.engagementDate)) {
+      // Empty fields which should not be set for future reports.
+      // They might have been set before the report has been marked as future.
+      report.atmosphere = null
+      report.atmosphereDetails = ""
+      report.nextSteps = ""
+      report.keyOutcomes = ""
+      delete report.cancelledReason
+    }
     if (!values.cancelled) {
       delete report.cancelledReason
     } else {
