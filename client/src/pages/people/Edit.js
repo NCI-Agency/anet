@@ -34,7 +34,7 @@ class PersonEdit extends Page {
       person(uuid:"${props.match.params.uuid}") {
         uuid,
         name, rank, role, emailAddress, phoneNumber, status, domainUsername,
-        biography, country, gender, endOfTourDate,
+        biography, country, gender, endOfTourDate, avatarImage
         position {
           uuid, name, type
         }

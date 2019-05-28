@@ -86,7 +86,7 @@ class BasePersonShow extends Page {
       person(uuid:"${props.match.params.uuid}") {
         uuid,
         name, rank, role, status, emailAddress, phoneNumber, domainUsername,
-        biography, country, gender, endOfTourDate,
+        biography, country, gender, endOfTourDate, avatarImage,
         position {
           uuid,
           name,
@@ -168,6 +168,8 @@ class BasePersonShow extends Page {
             <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
           )
 
+          const Avatar = () => <img src={`data:image/jpeg;base64,${person.avatarImage}`} />
+
           return (
             <div>
               <div className="pull-right">
@@ -197,7 +199,8 @@ class BasePersonShow extends Page {
                   title={`${person.rank} ${person.name}`}
                   action={action}
                 />
-                <Fieldset>
+                <Avatar />               
+                <Fieldset>                
                   <Field
                     name="rank"
                     label={Settings.fields.person.rank}
