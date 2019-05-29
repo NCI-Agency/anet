@@ -1,35 +1,28 @@
 package mil.dds.anet.search.mssql;
 
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.search.AbstractPersonSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
-import mil.dds.anet.search.AbstractSearcher;
-import mil.dds.anet.search.IPersonSearcher;
 import mil.dds.anet.utils.Utils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class MssqlPersonSearcher extends AbstractSearcher implements IPersonSearcher {
+public class MssqlPersonSearcher extends AbstractPersonSearcher {
 
-  @InTransaction
+  public MssqlPersonSearcher() {
+    super(new MssqlSearchQueryBuilder<Person, PersonSearchQuery>("MssqlPersonSearch"));
+  }
+
   @Override
-  public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
-    final MssqlSearchQueryBuilder<Person, PersonSearchQuery> qb =
-        new MssqlSearchQueryBuilder<Person, PersonSearchQuery>("MssqlPersonSearch");
-    qb.addSelectClause(PersonDao.PERSON_FIELDS);
-    qb.addSelectClause("count(*) over() as totalCount");
-    qb.addFromClause("people");
+  protected void buildQuery(PersonSearchQuery query) {
+    super.buildQuery(query);
+    qb.addSelectClause("COUNT(*) OVER() AS totalCount");
+  }
 
-    if (query.getOrgUuid() != null || query.getLocationUuid() != null
-        || query.getMatchPositionName()) {
-      qb.addFromClause("LEFT JOIN positions ON people.uuid = positions.currentPersonUuid");
-    }
-
-    final boolean doSoundex = query.isTextPresent() && !query.isSortByPresent();
+  @Override
+  protected void addTextQuery(PersonSearchQuery query) {
+    final boolean doSoundex = !query.isSortByPresent();
     final String text = query.getText();
     if (doSoundex) {
       qb.addSelectClause("EXP(SUM(LOG(1.0/(5-DIFFERENCE(name_token.value, search_token.value)))))"
@@ -39,7 +32,7 @@ public class MssqlPersonSearcher extends AbstractSearcher implements IPersonSear
       qb.addSqlArg("freetextQuery", text);
       // Add grouping needed for soundex score
       qb.addGroupByClause(PersonDao.PERSON_FIELDS_NOAS);
-    } else if (query.isTextPresent()) {
+    } else {
       // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
       // so we can sort on it (show the most relevant hits at the top).
       // Note that summing up independent ranks is not ideal, but it's the best we can do now.
@@ -66,35 +59,20 @@ public class MssqlPersonSearcher extends AbstractSearcher implements IPersonSear
       qb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
       qb.addSqlArg("freetextQuery", text);
     }
+  }
 
-    qb.addDateClause("startDate", "people.endOfTourDate", Comparison.AFTER,
-        query.getEndOfTourDateStart());
-    qb.addDateClause("endDate", "people.endOfTourDate", Comparison.BEFORE,
-        query.getEndOfTourDateEnd());
-    qb.addEqualsClause("role", "people.role", query.getRole());
-    qb.addInClause("statuses", "people.status", query.getStatus());
-    qb.addEqualsClause("rank", "people.rank", query.getRank());
-    qb.addEqualsClause("country", "people.country", query.getCountry());
-    qb.addEqualsClause("pendingVerification", "people.pendingVerification",
-        query.getPendingVerification());
-
-    if (query.getOrgUuid() != null) {
-      if (!query.getIncludeChildOrgs()) {
-        qb.addWhereClause("positions.organizationUuid = :orgUuid");
-      } else {
-        qb.addWithClause("parent_orgs(uuid) AS ("
-            + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
-            + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
-            + ")");
-        qb.addWhereClause("positions.organizationUuid IN (SELECT uuid from parent_orgs)");
-      }
-      qb.addSqlArg("orgUuid", query.getOrgUuid());
+  @Override
+  protected void addOrgUuidQuery(PersonSearchQuery query) {
+    if (!query.getIncludeChildOrgs()) {
+      qb.addWhereClause("positions.organizationUuid = :orgUuid");
+    } else {
+      qb.addWithClause("parent_orgs(uuid) AS ("
+          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
+          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
+          + ")");
+      qb.addWhereClause("positions.organizationUuid IN (SELECT uuid FROM parent_orgs)");
     }
-
-    qb.addEqualsClause("locationUuid", "positions.locationUuid", query.getLocationUuid());
-
-    addOrderByClauses(qb, query);
-    return qb.buildAndRun(getDbHandle(), query, new PersonMapper());
+    qb.addSqlArg("orgUuid", query.getOrgUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
@@ -103,20 +81,7 @@ public class MssqlPersonSearcher extends AbstractSearcher implements IPersonSear
       // so sort first on the search pseudo-rank.
       qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
-
-    switch (query.getSortBy()) {
-      case CREATED_AT:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "people", "createdAt"));
-        break;
-      case RANK:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "people", "rank"));
-        break;
-      case NAME:
-      default:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "people", "name"));
-        break;
-    }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "people", "uuid"));
+    super.addOrderByClauses(qb, query);
   }
 
 }

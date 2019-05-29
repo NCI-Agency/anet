@@ -18,8 +18,8 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
     super(queryName);
   }
 
-  @Override
   @InTransaction
+  @Override
   protected AnetBeanList<B> getResult(Handle handle, T query, RowMapper<B> mapper) {
     final Query sqlQuery = addPagination(query, handle, sql, sqlArgs, listArgs);
     return new AnetBeanList<B>(sqlQuery, query.getPageNum(), query.getPageSize(), mapper, null);
@@ -30,15 +30,13 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
     if (query.getPageSize() > 0) {
       sql.append(" OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
     }
-    final Query q1 = dbHandle.createQuery(sql.toString());
+    final Query q = dbHandle.createQuery(sql.toString());
     if (args != null && !args.isEmpty()) {
-      q1.bindMap(args);
+      q.bindMap(args);
     }
     if (query.getPageSize() > 0) {
-      q1.bind("offset", query.getPageSize() * query.getPageNum()).bind("limit",
-          query.getPageSize());
+      q.bind("offset", query.getPageSize() * query.getPageNum()).bind("limit", query.getPageSize());
     }
-    final Query q = q1;
     for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
       q.bindList(listArg.getKey(), listArg.getValue());
     }
