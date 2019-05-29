@@ -16,22 +16,28 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
+import mil.dds.anet.search.AbstractSearcher;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, ReportSearchQuery>
-    implements IReportSearcher {
+public class MssqlReportSearcher extends AbstractSearcher implements IReportSearcher {
 
+  @InTransaction
+  @Override
   public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user,
       boolean systemSearch) {
-    start("MssqlReportSearch");
-    selectClauses.add("DISTINCT " + ReportDao.REPORT_FIELDS);
-    fromClauses.add("reports");
-    fromClauses.add("LEFT JOIN reportTags ON reportTags.reportUuid = reports.uuid"
+    final MssqlSearchQueryBuilder<Report, ReportSearchQuery> outerQb =
+        new MssqlSearchQueryBuilder<Report, ReportSearchQuery>("MssqlReportSearch");
+    final MssqlSearchQueryBuilder<Report, ReportSearchQuery> innerQb =
+        new MssqlSearchQueryBuilder<Report, ReportSearchQuery>("MssqlReportSearch");
+    innerQb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
+    innerQb.addFromClause("reports");
+    innerQb.addFromClause("LEFT JOIN reportTags ON reportTags.reportUuid = reports.uuid"
         + " LEFT JOIN tags ON reportTags.tagUuid = tags.uuid");
 
     if (query.isTextPresent()) {
@@ -40,64 +46,67 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
       // Note that summing up independent ranks is not ideal, but it's the best we can do now.
       // See
       // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
-      selectClauses.add("ISNULL(c_reports.rank, 0) + ISNULL(f_reports.rank, 0)"
+      innerQb.addSelectClause("ISNULL(c_reports.rank, 0) + ISNULL(f_reports.rank, 0)"
           + " + ISNULL(c_tags.rank, 0) + ISNULL(f_tags.rank, 0) AS search_rank");
-      fromClauses.add(
+      innerQb.addFromClause(
           "LEFT JOIN CONTAINSTABLE (reports, (text, intent, keyOutcomes, nextSteps), :containsQuery) c_reports"
               + " ON reports.uuid = c_reports.[Key]"
               + " LEFT JOIN FREETEXTTABLE(reports, (text, intent, keyOutcomes, nextSteps), :freetextQuery) f_reports"
               + " ON reports.uuid = f_reports.[Key]");
-      fromClauses.add("LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
-          + " ON tags.uuid = c_tags.[Key]"
-          + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
-          + " ON tags.uuid = f_tags.[Key]");
-      whereClauses.add("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL"
+      innerQb.addFromClause(
+          "LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
+              + " ON tags.uuid = c_tags.[Key]"
+              + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
+              + " ON tags.uuid = f_tags.[Key]");
+      innerQb.addWhereClause("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL"
           + " OR c_tags.rank IS NOT NULL OR f_tags.rank IS NOT NULL)");
       final String text = query.getText();
-      sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
-      sqlArgs.put("freetextQuery", text);
+      innerQb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
+      innerQb.addSqlArg("freetextQuery", text);
     }
 
-    addEqualsClause("authorUuid", "reports.authorUuid", query.getAuthorUuid());
-    addDateClause("startDate", "reports.engagementDate", Comparison.AFTER,
+    innerQb.addEqualsClause("authorUuid", "reports.authorUuid", query.getAuthorUuid());
+    innerQb.addDateClause("startDate", "reports.engagementDate", Comparison.AFTER,
         query.getEngagementDateStart());
-    addDateClause("endDate", "reports.engagementDate", Comparison.BEFORE,
+    innerQb.addDateClause("endDate", "reports.engagementDate", Comparison.BEFORE,
         query.getEngagementDateEnd());
-    addDateClause("startCreatedAt", "reports.createdAt", Comparison.AFTER,
+    innerQb.addDateClause("startCreatedAt", "reports.createdAt", Comparison.AFTER,
         query.getCreatedAtStart());
-    addDateClause("endCreatedAt", "reports.createdAt", Comparison.BEFORE, query.getCreatedAtEnd());
-    addDateClause("updatedAtStart", "reports.updatedAt", Comparison.AFTER,
+    innerQb.addDateClause("endCreatedAt", "reports.createdAt", Comparison.BEFORE,
+        query.getCreatedAtEnd());
+    innerQb.addDateClause("updatedAtStart", "reports.updatedAt", Comparison.AFTER,
         query.getUpdatedAtStart());
-    addDateClause("updatedAtEnd", "reports.updatedAt", Comparison.BEFORE, query.getUpdatedAtEnd());
-    addDateClause("releasedAtStart", "reports.releasedAt", Comparison.AFTER,
+    innerQb.addDateClause("updatedAtEnd", "reports.updatedAt", Comparison.BEFORE,
+        query.getUpdatedAtEnd());
+    innerQb.addDateClause("releasedAtStart", "reports.releasedAt", Comparison.AFTER,
         query.getReleasedAtStart());
-    addDateClause("releasedAtEnd", "reports.releasedAt", Comparison.BEFORE,
+    innerQb.addDateClause("releasedAtEnd", "reports.releasedAt", Comparison.BEFORE,
         query.getReleasedAtEnd());
 
     if (query.getIncludeEngagementDayOfWeek()) {
-      selectClauses.add("DATEPART(dw, reports.engagementDate) as engagementDayOfWeek");
+      innerQb.addSelectClause("DATEPART(dw, reports.engagementDate) as engagementDayOfWeek");
     }
     if (query.getEngagementDayOfWeek() != null) {
-      whereClauses.add("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
-      sqlArgs.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
+      innerQb.addWhereClause("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
+      innerQb.addSqlArg("engagementDayOfWeek", query.getEngagementDayOfWeek());
     }
 
     if (query.getAttendeeUuid() != null) {
-      whereClauses.add(
+      innerQb.addWhereClause(
           "reports.uuid IN (SELECT reportUuid from reportPeople where personUuid = :attendeeUuid)");
-      sqlArgs.put("attendeeUuid", query.getAttendeeUuid());
+      innerQb.addSqlArg("attendeeUuid", query.getAttendeeUuid());
     }
 
-    addEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
+    innerQb.addEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
 
     if (query.getTaskUuid() != null) {
       if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
-        whereClauses
-            .add("NOT EXISTS (SELECT taskUuid from reportTasks where reportUuid = reports.uuid)");
+        innerQb.addWhereClause(
+            "NOT EXISTS (SELECT taskUuid from reportTasks where reportUuid = reports.uuid)");
       } else {
-        whereClauses
-            .add("reports.uuid IN (SELECT reportUuid from reportTasks where taskUuid = :taskUuid)");
-        sqlArgs.put("taskUuid", query.getTaskUuid());
+        innerQb.addWhereClause(
+            "reports.uuid IN (SELECT reportUuid from reportTasks where taskUuid = :taskUuid)");
+        innerQb.addSqlArg("taskUuid", query.getTaskUuid());
       }
     }
 
@@ -108,121 +117,123 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
             Status.BAD_REQUEST);
       }
       if (!query.getIncludeOrgChildren()) {
-        whereClauses.add(
+        innerQb.addWhereClause(
             "(reports.advisorOrganizationUuid = :orgUuid OR reports.principalOrganizationUuid = :orgUuid)");
       } else {
-        withClauses.add("parent_orgs(uuid) AS ("
+        outerQb.addWithClause("parent_orgs(uuid) AS ("
             + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
             + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
             + ")");
-        whereClauses.add("(reports.advisorOrganizationUuid IN (SELECT uuid from parent_orgs)"
+        innerQb.addWhereClause("(reports.advisorOrganizationUuid IN (SELECT uuid from parent_orgs)"
             + " OR reports.principalOrganizationUuid IN (SELECT uuid from parent_orgs))");
       }
-      sqlArgs.put("orgUuid", query.getOrgUuid());
+      innerQb.addSqlArg("orgUuid", query.getOrgUuid());
     }
 
     if (query.getAdvisorOrgUuid() != null) {
       if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
-        whereClauses.add("reports.advisorOrganizationUuid IS NULL");
+        innerQb.addWhereClause("reports.advisorOrganizationUuid IS NULL");
       } else if (!query.getIncludeAdvisorOrgChildren()) {
-        addEqualsClause("advisorOrganizationUuid", "reports.advisorOrganizationUuid",
+        innerQb.addEqualsClause("advisorOrganizationUuid", "reports.advisorOrganizationUuid",
             query.getAdvisorOrgUuid());
       } else {
-        withClauses.add("advisor_parent_orgs(uuid) AS ("
+        outerQb.addWithClause("advisor_parent_orgs(uuid) AS ("
             + " SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid UNION ALL"
             + " SELECT o.uuid from advisor_parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
             + ")");
-        whereClauses
-            .add("reports.advisorOrganizationUuid IN (SELECT uuid from advisor_parent_orgs)");
-        sqlArgs.put("advisorOrgUuid", query.getAdvisorOrgUuid());
+        innerQb.addWhereClause(
+            "reports.advisorOrganizationUuid IN (SELECT uuid from advisor_parent_orgs)");
+        innerQb.addSqlArg("advisorOrgUuid", query.getAdvisorOrgUuid());
       }
     }
 
     if (query.getPrincipalOrgUuid() != null) {
       if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
-        whereClauses.add("reports.principalOrganizationUuid IS NULL");
+        innerQb.addWhereClause("reports.principalOrganizationUuid IS NULL");
       } else if (!query.getIncludePrincipalOrgChildren()) {
-        addEqualsClause("principalOrganizationUuid", "reports.principalOrganizationUuid",
+        innerQb.addEqualsClause("principalOrganizationUuid", "reports.principalOrganizationUuid",
             query.getPrincipalOrgUuid());
       } else {
-        withClauses.add("principal_parent_orgs(uuid) AS ("
+        outerQb.addWithClause("principal_parent_orgs(uuid) AS ("
             + " SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid UNION ALL"
             + " SELECT o.uuid from principal_parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
             + ")");
-        whereClauses
-            .add("reports.principalOrganizationUuid IN (SELECT uuid from principal_parent_orgs)");
-        sqlArgs.put("principalOrgUuid", query.getPrincipalOrgUuid());
+        innerQb.addWhereClause(
+            "reports.principalOrganizationUuid IN (SELECT uuid from principal_parent_orgs)");
+        innerQb.addSqlArg("principalOrgUuid", query.getPrincipalOrgUuid());
       }
     }
 
     if (query.getLocationUuid() != null) {
       if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
-        whereClauses.add("reports.locationUuid IS NULL");
+        innerQb.addWhereClause("reports.locationUuid IS NULL");
       } else {
-        addEqualsClause("locationUuid", "reports.locationUuid", query.getLocationUuid());
+        innerQb.addEqualsClause("locationUuid", "reports.locationUuid", query.getLocationUuid());
       }
     }
 
     if (query.getPendingApprovalOf() != null) {
-      whereClauses.add("reports.authorUuid != :approverUuid");
-      whereClauses.add("reports.approvalStepUuid IN"
+      innerQb.addWhereClause("reports.authorUuid != :approverUuid");
+      innerQb.addWhereClause("reports.approvalStepUuid IN"
           + " (SELECT approvalStepUuid from approvers where positionUuid IN"
           + " (SELECT uuid FROM positions where currentPersonUuid = :approverUuid))");
-      sqlArgs.put("approverUuid", query.getPendingApprovalOf());
+      innerQb.addSqlArg("approverUuid", query.getPendingApprovalOf());
     }
 
-    addInClause("states", "reports.state", query.getState());
+    innerQb.addInClause("states", "reports.state", query.getState());
 
     if (query.getCancelledReason() != null) {
       if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
-        whereClauses.add("reports.cancelledReason IS NULL");
+        innerQb.addWhereClause("reports.cancelledReason IS NULL");
       } else {
-        addEqualsClause("cancelledReason", "reports.cancelledReason", query.getCancelledReason());
+        innerQb.addEqualsClause("cancelledReason", "reports.cancelledReason",
+            query.getCancelledReason());
       }
     }
 
     if (query.getTagUuid() != null) {
-      whereClauses
-          .add("reports.uuid IN (SELECT reportUuid from reportTags where tagUuid = :tagUuid)");
-      sqlArgs.put("tagUuid", query.getTagUuid());
+      innerQb.addWhereClause(
+          "reports.uuid IN (SELECT reportUuid from reportTags where tagUuid = :tagUuid)");
+      innerQb.addSqlArg("tagUuid", query.getTagUuid());
     }
 
     if (query.getAuthorPositionUuid() != null) {
       // Search for reports authored by people serving in that position at the report's creation
       // date
-      whereClauses.add("reports.uuid IN (SELECT r.uuid FROM reports r " + PositionDao
+      innerQb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r " + PositionDao
           .generateCurrentPositionFilter("r.authorUuid", "r.createdAt", "authorPositionUuid")
           + ")");
-      sqlArgs.put("authorPositionUuid", query.getAuthorPositionUuid());
+      innerQb.addSqlArg("authorPositionUuid", query.getAuthorPositionUuid());
     }
 
     if (query.getAuthorizationGroupUuid() != null) {
       if (query.getAuthorizationGroupUuid().isEmpty()) {
-        listArgs.put("authorizationGroupUuids", Arrays.asList("-1"));
+        innerQb.addListArg("authorizationGroupUuids", Arrays.asList("-1"));
       } else {
-        listArgs.put("authorizationGroupUuids", query.getAuthorizationGroupUuid());
+        innerQb.addListArg("authorizationGroupUuids", query.getAuthorizationGroupUuid());
       }
-      whereClauses.add("reports.uuid IN (SELECT ra.reportUuid FROM reportAuthorizationGroups ra"
-          + " WHERE ra.authorizationGroupUuid IN ( <authorizationGroupUuids> ))");
+      innerQb
+          .addWhereClause("reports.uuid IN (SELECT ra.reportUuid FROM reportAuthorizationGroups ra"
+              + " WHERE ra.authorizationGroupUuid IN ( <authorizationGroupUuids> ))");
     }
 
     if (query.getAttendeePositionUuid() != null) {
       // Search for reports attended by people serving in that position at the engagement date
-      whereClauses.add("reports.uuid IN (SELECT r.uuid FROM reports r"
+      innerQb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r"
           + " JOIN reportPeople rp ON rp.reportUuid = r.uuid "
           + PositionDao.generateCurrentPositionFilter("rp.personUuid", "r.engagementDate",
               "attendeePositionUuid")
           + ")");
-      sqlArgs.put("attendeePositionUuid", query.getAttendeePositionUuid());
+      innerQb.addSqlArg("attendeePositionUuid", query.getAttendeePositionUuid());
     }
 
     if (query.getSensitiveInfo()) {
-      fromClauses.add("LEFT JOIN reportAuthorizationGroups ra ON ra.reportUuid = reports.uuid"
+      innerQb.addFromClause("LEFT JOIN reportAuthorizationGroups ra ON ra.reportUuid = reports.uuid"
           + " LEFT JOIN authorizationGroups ag ON ag.uuid = ra.authorizationGroupUuid"
           + " LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupUuid = ag.uuid"
           + " LEFT JOIN positions pos ON pos.uuid = agp.positionUuid");
-      whereClauses.add("pos.currentPersonUuid = :userUuid");
-      sqlArgs.put("userUuid", user.getUuid());
+      innerQb.addWhereClause("pos.currentPersonUuid = :userUuid");
+      innerQb.addSqlArg("userUuid", user.getUuid());
     }
 
     if (!systemSearch) {
@@ -230,77 +241,66 @@ public class MssqlReportSearcher extends AbstractMssqlSearcherBase<Report, Repor
       // When the search is performed by the system (for instance by a worker, systemSearch = true)
       // do not apply this filter.
       if (user == null) {
-        whereClauses.add("reports.state != :draftState");
-        whereClauses.add("reports.state != :rejectedState");
-        whereClauses.add("reports.state != :approvedState");
-        sqlArgs.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-        sqlArgs.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-        sqlArgs.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
+        innerQb.addWhereClause("reports.state != :draftState");
+        innerQb.addWhereClause("reports.state != :rejectedState");
+        innerQb.addWhereClause("reports.state != :approvedState");
+        innerQb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
+        innerQb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+        innerQb.addSqlArg("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
       } else {
-        whereClauses.add(
+        innerQb.addWhereClause(
             "((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.authorUuid = :userUuid))");
-        sqlArgs.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-        sqlArgs.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-        sqlArgs.put("userUuid", user.getUuid());
+        innerQb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
+        innerQb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+        innerQb.addSqlArg("userUuid", user.getUuid());
         if (AuthUtils.isAdmin(user) == false) {
           // Admin users may access all approved reports, other users only owned approved reports
-          whereClauses
-              .add("((reports.state != :approvedState) OR (reports.authorUuid = :userUuid))");
-          sqlArgs.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
+          innerQb.addWhereClause(
+              "((reports.state != :approvedState) OR (reports.authorUuid = :userUuid))");
+          innerQb.addSqlArg("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
         }
       }
     }
 
-    finish(query);
-    return getResult(query, new ReportMapper(), user);
+    outerQb.addSelectClause("*");
+    outerQb.addSelectClause("count(*) OVER() AS totalCount");
+    outerQb.addFromClause("( " + innerQb.build() + " ) l");
+    outerQb.addSqlArgs(innerQb.getSqlArgs());
+    outerQb.addListArgs(innerQb.getListArgs());
+    addOrderByClauses(outerQb, query);
+    final AnetBeanList<Report> result =
+        outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
+    for (final Report report : result.getList()) {
+      report.setUser(user);
+    }
+    return result;
   }
 
-  @Override
-  protected void finish(ReportSearchQuery query) {
-    addWithClauses();
-    sql.append("SELECT *, count(*) OVER() AS totalCount FROM (");
-    addSelectClauses();
-    addFromClauses();
-    addWhereClauses();
-    sql.append(") l");
-    addOrderByClauses(query);
-  }
-
-  @Override
-  protected void getOrderByClauses(ReportSearchQuery query) {
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
-      orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+      qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
     // Beware of the sort field names, they have to match what's in the selected fields!
     switch (query.getSortBy()) {
       case CREATED_AT:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_createdAt"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), null, "reports_createdAt"));
         break;
       case RELEASED_AT:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_releasedAt"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), null, "reports_releasedAt"));
         break;
       case UPDATED_AT:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_updatedAt"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), null, "reports_updatedAt"));
         break;
       case ENGAGEMENT_DATE:
       default:
-        orderByClauses
-            .addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_engagementDate"));
+        qb.addAllOrderByClauses(
+            Utils.addOrderBy(query.getSortOrder(), null, "reports_engagementDate"));
         break;
     }
-    orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "reports_uuid"));
-  }
-
-  @InTransaction
-  protected AnetBeanList<Report> getResult(ReportSearchQuery query, ReportMapper mapper,
-      Person user) {
-    final Query sqlQuery =
-        MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs, listArgs);
-    return AnetBeanList.getReportList(user, sqlQuery, query.getPageNum(), query.getPageSize(),
-        mapper);
+    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, null, "reports_uuid"));
   }
 
 }

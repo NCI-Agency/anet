@@ -5,34 +5,38 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import mil.dds.anet.search.AbstractSearcher;
 import mil.dds.anet.search.ILocationSearcher;
+import mil.dds.anet.search.mssql.MssqlSearchQueryBuilder;
 import mil.dds.anet.utils.Utils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class SqliteLocationSearcher
-    extends AbstractSqliteSearcherBase<Location, LocationSearchQuery> implements ILocationSearcher {
+public class SqliteLocationSearcher extends AbstractSearcher implements ILocationSearcher {
 
+  @InTransaction
   @Override
   public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
-    start("SqliteLocationSearch");
-    selectClauses.add("*");
-    fromClauses.add("locations");
+    final MssqlSearchQueryBuilder<Location, LocationSearchQuery> qb =
+        new MssqlSearchQueryBuilder<Location, LocationSearchQuery>("SqliteLocationSearch");
+    qb.addSelectClause("*");
+    qb.addFromClause("locations");
 
     if (query.isTextPresent()) {
       final String text = query.getText();
-      whereClauses.add("(name LIKE '%' || :text || '%')");
-      sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
+      qb.addWhereClause("(name LIKE '%' || :text || '%')");
+      qb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
     }
 
-    addEqualsClause("status", "status", query.getStatus());
+    qb.addEqualsClause("status", "status", query.getStatus());
 
-    finish(query);
-    return getResult(query, new LocationMapper());
+    addOrderByClauses(qb, query);
+    return qb.buildAndRun(getDbHandle(), query, new LocationMapper());
   }
 
-  @Override
-  protected void getOrderByClauses(LocationSearchQuery query) {
-    orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "locations", "name"));
-    orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
+    qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "locations", "name"));
+    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
   }
 
 }

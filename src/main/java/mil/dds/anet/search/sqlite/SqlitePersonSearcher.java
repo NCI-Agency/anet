@@ -6,92 +6,93 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import mil.dds.anet.search.AbstractSearcher;
 import mil.dds.anet.search.IPersonSearcher;
+import mil.dds.anet.search.mssql.MssqlSearchQueryBuilder;
 import mil.dds.anet.utils.Utils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class SqlitePersonSearcher extends AbstractSqliteSearcherBase<Person, PersonSearchQuery>
-    implements IPersonSearcher {
+public class SqlitePersonSearcher extends AbstractSearcher implements IPersonSearcher {
 
+  @InTransaction
   @Override
   public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
-    start("SqlitePersonSearch");
-    selectClauses.add("people.uuid");
-    fromClauses.add("people");
+    final MssqlSearchQueryBuilder<Person, PersonSearchQuery> outerQb =
+        new MssqlSearchQueryBuilder<Person, PersonSearchQuery>("SqlitePersonSearch");
+    final MssqlSearchQueryBuilder<Person, PersonSearchQuery> innerQb =
+        new MssqlSearchQueryBuilder<Person, PersonSearchQuery>("SqlitePersonSearch");
+    innerQb.addSelectClause("people.uuid");
+    innerQb.addFromClause("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null
         || query.getMatchPositionName()) {
-      fromClauses.add("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
+      innerQb.addFromClause("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
     }
 
     if (query.isTextPresent()) {
       if (query.getMatchPositionName()) {
-        whereClauses.add("(people.name LIKE '%' || :text || '%'"
+        innerQb.addWhereClause("(people.name LIKE '%' || :text || '%'"
             + " OR \"emailAddress\" LIKE '%' || :text || '%'"
             + " OR biography LIKE '%' || :text || '%' OR positions.name LIKE '%' || :text || '%'"
             + " OR positions.code LIKE '%' || :text || '%')");
       } else {
-        whereClauses.add("(people.name LIKE '%' || :text || '%'"
+        innerQb.addWhereClause("(people.name LIKE '%' || :text || '%'"
             + " OR \"emailAddress\" LIKE '%' || :text || '%'"
             + " OR biography LIKE '%' || :text || '%')");
       }
       final String text = query.getText();
-      sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
+      innerQb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
     }
 
-    addEqualsClause("role", "people.role", query.getRole());
-    addInClause("statuses", "people.status", query.getStatus());
-    addEqualsClause("rank", "people.rank", query.getRank());
-    addEqualsClause("country", "people.country", query.getCountry());
-    addEqualsClause("pendingVerification", "people.pendingVerification",
+    innerQb.addEqualsClause("role", "people.role", query.getRole());
+    innerQb.addInClause("statuses", "people.status", query.getStatus());
+    innerQb.addEqualsClause("rank", "people.rank", query.getRank());
+    innerQb.addEqualsClause("country", "people.country", query.getCountry());
+    innerQb.addEqualsClause("pendingVerification", "people.pendingVerification",
         query.getPendingVerification());
 
     if (query.getOrgUuid() != null) {
       if (!query.getIncludeChildOrgs()) {
-        whereClauses.add("positions.\"organizationUuid\" = :orgUuid");
+        innerQb.addWhereClause("positions.\"organizationUuid\" = :orgUuid");
       } else {
-        whereClauses.add("positions.\"organizationUuid\" IN ("
+        innerQb.addWhereClause("positions.\"organizationUuid\" IN ("
             + " WITH RECURSIVE parent_orgs(uuid) AS ("
             + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
             + " SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
             + ") SELECT uuid from parent_orgs)");
       }
-      sqlArgs.put("orgUuid", query.getOrgUuid());
+      innerQb.addSqlArg("orgUuid", query.getOrgUuid());
     }
 
-    addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    innerQb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
 
-    finish(query);
-    return getResult(query, new PersonMapper());
+    outerQb.addSelectClause(PersonDao.PERSON_FIELDS);
+    outerQb.addFromClause("people");
+    outerQb.addSelectClause("people.uuid IN ( " + innerQb.build() + " )");
+    outerQb.addSqlArgs(innerQb.getSqlArgs());
+    outerQb.addListArgs(innerQb.getListArgs());
+    addOrderByClauses(outerQb, query);
+    return outerQb.buildAndRun(getDbHandle(), query, new PersonMapper());
   }
 
-  @Override
-  protected void finish(PersonSearchQuery query) {
-    addWithClauses();
-    sql.append("SELECT " + PersonDao.PERSON_FIELDS + " FROM people WHERE people.uuid IN (");
-    addSelectClauses();
-    addFromClauses();
-    addWhereClauses();
-    sql.append(")");
-    addOrderByClauses(query);
-  }
-
-  @Override
-  protected void getOrderByClauses(PersonSearchQuery query) {
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     switch (query.getSortBy()) {
       case RANK:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "people.rank"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), null, "people.rank"));
         break;
       case CREATED_AT:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "people.\"createdAt\""));
+        qb.addAllOrderByClauses(
+            Utils.addOrderBy(query.getSortOrder(), null, "people.\"createdAt\""));
         break;
       case NAME:
       default:
         // case-insensitive ordering! could use COLLATE NOCASE but not if we want this to
         // work as a generic new-database searcher for pg/mysql
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "LOWER(people.name)"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), null, "LOWER(people.name)"));
         break;
     }
-    orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "uuid"));
+    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, null, "uuid"));
   }
 
 }

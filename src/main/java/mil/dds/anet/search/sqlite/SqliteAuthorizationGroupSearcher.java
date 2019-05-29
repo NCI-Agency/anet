@@ -5,51 +5,57 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import mil.dds.anet.search.AbstractSearcher;
 import mil.dds.anet.search.IAuthorizationGroupSearcher;
+import mil.dds.anet.search.mssql.MssqlSearchQueryBuilder;
 import mil.dds.anet.utils.Utils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class SqliteAuthorizationGroupSearcher
-    extends AbstractSqliteSearcherBase<AuthorizationGroup, AuthorizationGroupSearchQuery>
+public class SqliteAuthorizationGroupSearcher extends AbstractSearcher
     implements IAuthorizationGroupSearcher {
 
+  @InTransaction
   @Override
   public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query) {
-    start("SqliteAuthorizationGroupSearch");
-    selectClauses.add("*");
-    fromClauses.add("\"authorizationGroups\"");
+    final MssqlSearchQueryBuilder<AuthorizationGroup, AuthorizationGroupSearchQuery> qb =
+        new MssqlSearchQueryBuilder<AuthorizationGroup, AuthorizationGroupSearchQuery>(
+            "SqliteAuthorizationGroupSearch");
+    qb.addSelectClause("*");
+    qb.addFromClause("\"authorizationGroups\"");
 
     if (query.isTextPresent()) {
-      whereClauses.add("(name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%')");
+      qb.addWhereClause("(name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%')");
       final String text = query.getText();
-      sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
+      qb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
     }
 
-    addEqualsClause("status", "status", query.getStatus());
+    qb.addEqualsClause("status", "status", query.getStatus());
 
     if (query.getPositionUuid() != null) {
       // Search for authorization groups related to a given position
-      whereClauses
-          .add("uuid IN (SELECT \"authorizationGroupUuid\" FROM \"authorizationGroupPositions\""
+      qb.addWhereClause(
+          "uuid IN (SELECT \"authorizationGroupUuid\" FROM \"authorizationGroupPositions\""
               + " WHERE \"positionUuid\" = :positionUuid)");
-      sqlArgs.put("positionUuid", query.getPositionUuid());
+      qb.addSqlArg("positionUuid", query.getPositionUuid());
     }
 
-    finish(query);
-    return getResult(query, new AuthorizationGroupMapper());
+    addOrderByClauses(qb, query);
+    return qb.buildAndRun(getDbHandle(), query, new AuthorizationGroupMapper());
   }
 
-  @Override
-  protected void getOrderByClauses(AuthorizationGroupSearchQuery query) {
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
+      AuthorizationGroupSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "\"createdAt\""));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), null, "\"createdAt\""));
         break;
       case NAME:
       default:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "name"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), null, "name"));
         break;
     }
-    orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "uuid"));
+    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, null, "uuid"));
   }
 
 }

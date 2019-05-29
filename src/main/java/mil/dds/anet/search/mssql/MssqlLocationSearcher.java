@@ -5,54 +5,57 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import mil.dds.anet.search.AbstractSearcher;
 import mil.dds.anet.search.ILocationSearcher;
 import mil.dds.anet.utils.Utils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class MssqlLocationSearcher extends AbstractMssqlSearcherBase<Location, LocationSearchQuery>
-    implements ILocationSearcher {
+public class MssqlLocationSearcher extends AbstractSearcher implements ILocationSearcher {
 
+  @InTransaction
   @Override
   public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
-    start("MssqlLocationSearch");
-    selectClauses.add("locations.*");
-    selectClauses.add("count(*) over() as totalCount");
-    fromClauses.add("locations");
+    final MssqlSearchQueryBuilder<Location, LocationSearchQuery> qb =
+        new MssqlSearchQueryBuilder<Location, LocationSearchQuery>("MssqlLocationSearch");
+    qb.addSelectClause("locations.*");
+    qb.addSelectClause("count(*) over() as totalCount");
+    qb.addFromClause("locations");
 
     if (query.isTextPresent()) {
       // If we're doing a full-text search, add a pseudo-rank
       // so we can sort on it (show the most relevant hits at the top).
-      selectClauses.add("ISNULL(c_locations.rank, 0) AS search_rank");
-      fromClauses.add("LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
+      qb.addSelectClause("ISNULL(c_locations.rank, 0) AS search_rank");
+      qb.addFromClause("LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
           + " ON locations.uuid = c_locations.[Key]");
-      whereClauses.add("c_locations.rank IS NOT NULL");
+      qb.addWhereClause("c_locations.rank IS NOT NULL");
       final String text = query.getText();
-      sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
+      qb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
     }
 
-    addEqualsClause("status", "status", query.getStatus());
+    qb.addEqualsClause("status", "status", query.getStatus());
 
-    finish(query);
-    return getResult(query, new LocationMapper());
+    addOrderByClauses(qb, query);
+    return qb.buildAndRun(getDbHandle(), query, new LocationMapper());
   }
 
-  @Override
-  protected void getOrderByClauses(LocationSearchQuery query) {
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
-      orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+      qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
     switch (query.getSortBy()) {
       case CREATED_AT:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "locations", "createdAt"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "locations", "createdAt"));
         break;
       case NAME:
       default:
-        orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "locations", "name"));
+        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "locations", "name"));
         break;
     }
-    orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
+    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
   }
 
 }
