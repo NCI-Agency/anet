@@ -86,6 +86,8 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     selectClauses.add(clause);
   }
 
+  public abstract void addTotalCount();
+
   public void addFromClause(String clause) {
     fromClauses.add(clause);
   }

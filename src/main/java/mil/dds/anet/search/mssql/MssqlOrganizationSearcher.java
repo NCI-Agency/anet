@@ -17,7 +17,7 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
   @Override
   protected void buildQuery(OrganizationSearchQuery query) {
     super.buildQuery(query);
-    qb.addSelectClause("COUNT(*) OVER() AS totalCount");
+    qb.addTotalCount();
   }
 
   @Override

@@ -18,6 +18,11 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
     super(queryName);
   }
 
+  @Override
+  public void addTotalCount() {
+    addSelectClause("COUNT(*) OVER() AS totalCount");
+  }
+
   @InTransaction
   @Override
   protected AnetBeanList<B> getResult(Handle handle, T query, RowMapper<B> mapper) {

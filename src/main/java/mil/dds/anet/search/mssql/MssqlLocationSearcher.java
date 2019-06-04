@@ -16,7 +16,7 @@ public class MssqlLocationSearcher extends AbstractLocationSearcher {
   @Override
   protected void buildQuery(LocationSearchQuery query) {
     super.buildQuery(query);
-    qb.addSelectClause("COUNT(*) OVER() AS totalCount");
+    qb.addTotalCount();
   }
 
   @Override

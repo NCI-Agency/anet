@@ -34,7 +34,7 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
       boolean systemSearch) {
     buildQuery(query, user, systemSearch);
     outerQb.addSelectClause("*");
-    outerQb.addSelectClause("count(*) OVER() AS totalCount");
+    outerQb.addTotalCount();
     outerQb.addFromClause("( " + qb.build() + " ) l");
     outerQb.addSqlArgs(qb.getSqlArgs());
     outerQb.addListArgs(qb.getListArgs());

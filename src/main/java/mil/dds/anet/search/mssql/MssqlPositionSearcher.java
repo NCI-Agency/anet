@@ -16,7 +16,7 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
   @Override
   protected void buildQuery(PositionSearchQuery query) {
     super.buildQuery(query);
-    qb.addSelectClause("COUNT(*) OVER() AS totalCount");
+    qb.addTotalCount();
   }
 
   @Override

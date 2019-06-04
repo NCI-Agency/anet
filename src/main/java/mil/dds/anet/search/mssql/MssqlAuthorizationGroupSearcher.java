@@ -17,7 +17,7 @@ public class MssqlAuthorizationGroupSearcher extends AbstractAuthorizationGroupS
   @Override
   protected void buildQuery(AuthorizationGroupSearchQuery query) {
     super.buildQuery(query);
-    qb.addSelectClause("COUNT(*) OVER() AS totalCount");
+    qb.addTotalCount();
   }
 
   @Override

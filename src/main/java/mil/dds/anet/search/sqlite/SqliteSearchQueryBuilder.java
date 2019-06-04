@@ -18,6 +18,12 @@ public class SqliteSearchQueryBuilder<B extends AbstractAnetBean, T extends Abst
     super(queryName);
   }
 
+  @Override
+  public void addTotalCount() {
+    // SQLite can't do total counts, so this is computed in
+    // {@link AnetBeanList#AnetBeanList(Query, int, int, RowMapper, Long)}
+  }
+
   @InTransaction
   @Override
   protected AnetBeanList<B> getResult(Handle handle, T query, RowMapper<B> mapper) {

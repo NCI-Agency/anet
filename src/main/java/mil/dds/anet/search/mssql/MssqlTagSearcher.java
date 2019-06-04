@@ -16,7 +16,7 @@ public class MssqlTagSearcher extends AbstractTagSearcher {
   @Override
   protected void buildQuery(TagSearchQuery query) {
     super.buildQuery(query);
-    qb.addSelectClause("COUNT(*) OVER() AS totalCount");
+    qb.addTotalCount();
   }
 
   @Override

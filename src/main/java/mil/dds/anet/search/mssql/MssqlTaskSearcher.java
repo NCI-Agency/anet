@@ -16,7 +16,7 @@ public class MssqlTaskSearcher extends AbstractTaskSearcher {
   @Override
   protected void buildQuery(TaskSearchQuery query) {
     super.buildQuery(query);
-    qb.addSelectClause("COUNT(*) OVER() AS totalCount");
+    qb.addTotalCount();
   }
 
   @Override
