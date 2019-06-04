@@ -112,7 +112,9 @@ class BaseOrganizationShow extends Page {
       organization(uuid:"${props.match.params.uuid}") {
         uuid, shortName, longName, status, identificationCode, type
         parentOrg { uuid, shortName, longName, identificationCode }
-        childrenOrgs { uuid, shortName, longName, identificationCode },
+        childrenOrgs(query: { pageSize: 0 }) {
+          uuid, shortName, longName, identificationCode
+        },
         positions {
           uuid, name, code, status, type,
           person { uuid, name, status, rank, role }

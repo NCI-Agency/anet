@@ -135,6 +135,9 @@ class BasePersonForm extends Component {
           const isAdmin = currentUser && currentUser.isAdmin()
           const isAdvisor = Person.isAdvisor(values)
           const isNewUser = Person.isNewUser(values)
+          const endOfTourDateInPast = values.endOfTourDate
+            ? values.endOfTourDate <= Date.now()
+            : false
           const willAutoKickPosition =
             values.status === Person.STATUS.INACTIVE &&
             values.position &&
@@ -465,7 +468,13 @@ class BasePersonForm extends Component {
                     onChange={value => setFieldValue("endOfTourDate", value)}
                     onBlur={() => setFieldTouched("endOfTourDate", true)}
                     widget={<CustomDateInput id="endOfTourDate" />}
-                  />
+                  >
+                    {isAdvisor && endOfTourDateInPast && (
+                      <Alert bsStyle="warning">
+                        Be aware that the end of tour date is in the past.
+                      </Alert>
+                    )}
+                  </Field>
                   <Field
                     name="biography"
                     component={FieldHelper.renderSpecialField}

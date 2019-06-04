@@ -133,7 +133,7 @@ class BaseInsightsShow extends Page {
     super(props, DEFAULT_PAGE_PROPS, insightConfig.searchProps)
   }
 
-  get insightQueryParams() {
+  get insightDefaultQueryParams() {
     return {
       [NOT_APPROVED_REPORTS]: {
         state: [Report.STATE.PENDING_APPROVAL],
@@ -188,7 +188,7 @@ class BaseInsightsShow extends Page {
     this.props.setSearchProps(Object.assign({}, insightConfig.searchProps))
     deserializeQueryParams(
       SEARCH_OBJECT_TYPES.REPORTS,
-      this.insightQueryParams[this.props.match.params.insight],
+      this.insightDefaultQueryParams[this.props.match.params.insight],
       this.deserializeCallback
     )
   }
@@ -238,22 +238,24 @@ class BaseInsightsShow extends Page {
     return (
       <div style={flexStyle}>
         <Messages error={this.state.error} success={this.state.success} />
-        {!_isEmpty(queryParams) ? (
+        {_isEmpty(
+          this.insightDefaultQueryParams[this.props.match.params.insight]
+        ) || !_isEmpty(queryParams) ? (
           <Fieldset
-            id={this.props.match.params.insight}
-            title={insightConfig.title}
-            style={flexStyle}
-          >
-            <InsightComponent
+              id={this.props.match.params.insight}
+              title={insightConfig.title}
+              style={flexStyle}
+            >
+              <InsightComponent
               style={mosaicLayoutStyle}
               queryParams={queryParams}
+              />
+            </Fieldset>
+          ) : (
+            <Messages
+              error={{ message: "You did not enter any search criteria." }}
             />
-          </Fieldset>
-        ) : (
-          <Messages
-            error={{ message: "You did not enter any search criteria." }}
-          />
-        )}
+          )}
       </div>
     )
   }

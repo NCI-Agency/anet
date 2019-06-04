@@ -99,13 +99,6 @@ fieldset .help-text {
 	margin-bottom: 24px;
 }
 
-fieldset .chart-description {
-	color: #777;
-	text-align: left;
-	padding-bottom: 8px;
-	padding-left: 8px;
-}
-
 fieldset.collapsable {
 	background: none;
 	border: none;

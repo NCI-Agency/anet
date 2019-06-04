@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -38,7 +39,8 @@ public class PersonPositionHistory extends AbstractAnetBean {
     if (person.hasForeignObject()) {
       return CompletableFuture.completedFuture(person.getForeignObject());
     }
-    return new UuidFetcher<Person>().load(context, "people", person.getForeignUuid())
+    return new UuidFetcher<Person>()
+        .load(context, BatchingUtils.DataLoaderKey.ID_PEOPLE, person.getForeignUuid())
         .thenApply(o -> {
           person.setForeignObject(o);
           return o;
@@ -71,7 +73,8 @@ public class PersonPositionHistory extends AbstractAnetBean {
     if (position.hasForeignObject()) {
       return CompletableFuture.completedFuture(position.getForeignObject());
     }
-    return new UuidFetcher<Position>().load(context, "positions", position.getForeignUuid())
+    return new UuidFetcher<Position>()
+        .load(context, BatchingUtils.DataLoaderKey.ID_POSITIONS, position.getForeignUuid())
         .thenApply(o -> {
           position.setForeignObject(o);
           return o;

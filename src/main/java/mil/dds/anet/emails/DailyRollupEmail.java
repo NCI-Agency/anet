@@ -63,7 +63,7 @@ public class DailyRollupEmail implements AnetEmailAction {
     Instant engagementDateStart =
         startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
     ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageSize(Integer.MAX_VALUE);
+    query.setPageSize(0);
     query.setReleasedAtStart(startDate);
     query.setReleasedAtEnd(endDate);
     query.setEngagementDateStart(engagementDateStart);

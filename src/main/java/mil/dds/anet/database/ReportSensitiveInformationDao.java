@@ -10,6 +10,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -120,8 +121,9 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
     if (!isAuthorized(user, report)) {
       return CompletableFuture.completedFuture(null);
     }
-    return new ForeignKeyFetcher<ReportSensitiveInformation>()
-        .load(context, "report.reportSensitiveInformation", report.getUuid()).thenApply(l -> {
+    return new ForeignKeyFetcher<ReportSensitiveInformation>().load(context,
+        BatchingUtils.DataLoaderKey.FK_REPORT_REPORT_SENSITIVE_INFORMATION, report.getUuid())
+        .thenApply(l -> {
           ReportSensitiveInformation rsi = Utils.isEmptyOrNull(l) ? null : l.get(0);
           if (rsi != null) {
             AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);

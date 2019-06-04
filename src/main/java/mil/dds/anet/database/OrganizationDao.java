@@ -12,6 +12,7 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -71,7 +72,8 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 
   public CompletableFuture<List<Organization>> getOrganizationsForPerson(
       Map<String, Object> context, String personUuid) {
-    return new ForeignKeyFetcher<Organization>().load(context, "person.organizations", personUuid);
+    return new ForeignKeyFetcher<Organization>().load(context,
+        BatchingUtils.DataLoaderKey.FK_PERSON_ORGANIZATIONS, personUuid);
   }
 
   public List<Organization> getTopLevelOrgs(OrganizationType type) {
