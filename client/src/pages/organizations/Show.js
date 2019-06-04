@@ -13,7 +13,7 @@ import Page, {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection from "components/ReportCollection"
+import ReportCollectionContainer from "components/ReportCollectionContainer"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
@@ -44,9 +44,7 @@ class BaseOrganizationShow extends Page {
   state = {
     organization: new Organization(),
     reportsFilter: NO_REPORT_FILTER,
-    reports: null,
     tasks: null,
-    reportsPageNum: 0,
     tasksPageNum: 0,
     success: null,
     error: null
@@ -61,34 +59,7 @@ class BaseOrganizationShow extends Page {
     // Re-load data if uuid has changed
     if (this.props.match.params.uuid !== prevProps.match.params.uuid) {
       this.loadData()
-    } else if (
-      prevState.reportsFilter !== this.state.reportsFilter ||
-      prevProps.pagination !== this.props.pagination ||
-      prevState.organization !== this.state.organization
-    ) {
-      let reports = this.getReportQueryPart(this.props.match.params.uuid)
-      this.runGQLReports([reports])
     }
-  }
-
-  getReportQueryPart = orgUuid => {
-    const { organization } = this.state
-    const { pagination } = this.props
-    const orgLabel = this.orgLabel(organization)
-    const reports = pagination[orgLabel]
-    let reportQuery = {
-      pageNum: reports === undefined ? 0 : reports.pageNum,
-      pageSize: 10,
-      orgUuid: orgUuid,
-      state: this.reportsFilterIsSet() ? this.state.reportsFilter : null
-    }
-    let reportsPart = new GQL.Part(/* GraphQL */ `
-      reports: reportList(query:$reportQuery) {
-        pageNum, pageSize, totalCount, list {
-          ${ReportCollection.GQL_REPORT_FIELDS}
-        }
-      }`).addVariable("reportQuery", "ReportSearchQueryInput", reportQuery)
-    return reportsPart
   }
 
   getTaskQueryPart = orgUuid => {
@@ -128,24 +99,18 @@ class BaseOrganizationShow extends Page {
         }
         ${GRAPHQL_NOTES_FIELDS}
       }`)
-    let reportsPart = this.getReportQueryPart(props.match.params.uuid)
     let tasksPart = this.getTaskQueryPart(props.match.params.uuid)
 
-    return this.runGQL([orgPart, reportsPart, tasksPart])
+    return this.runGQL([orgPart, tasksPart])
   }
 
   runGQL = queries => {
     return GQL.run(queries).then(data =>
       this.setState({
         organization: new Organization(data.organization),
-        reports: data.reports,
         tasks: data.tasks
       })
     )
-  }
-
-  runGQLReports = reports => {
-    GQL.run(reports).then(data => this.setState({ reports: data.reports }))
   }
 
   reportsFilterIsSet = () => {
@@ -163,7 +128,7 @@ class BaseOrganizationShow extends Page {
   }
 
   render() {
-    const { organization, reports, tasks } = this.state
+    const { organization, tasks } = this.state
     const { currentUser, ...myFormProps } = this.props
 
     const isSuperUser =
@@ -208,7 +173,12 @@ class BaseOrganizationShow extends Page {
     if (currentUser._loaded !== true) {
       return <div className="loader" />
     }
-
+    const reportQueryParams = {
+      orgUuid: this.props.match.params.uuid
+    }
+    if (this.reportsFilterIsSet()) {
+      reportQueryParams.state = this.state.reportsFilter
+    }
     return (
       <Formik enableReinitialize initialValues={organization} {...myFormProps}>
         {({ values }) => {
@@ -381,13 +351,7 @@ class BaseOrganizationShow extends Page {
                   id="reports"
                   title={`Reports from ${organization.shortName}`}
                 >
-                  <ReportCollection
-                    paginatedReports={reports}
-                    goToPage={this.goToReportsPage}
-                    setReportsFilter={this.togglePendingApprovalFilter}
-                    filterIsSet={this.reportsFilterIsSet()}
-                    isSuperUser={isSuperUser}
-                  />
+                  <ReportCollectionContainer queryParams={reportQueryParams} />
                 </Fieldset>
               </Form>
             </div>
@@ -402,20 +366,6 @@ class BaseOrganizationShow extends Page {
   }
   orgLabel = organization => {
     return `r_${organization.uuid}`
-  }
-
-  goToReportsPage = pageNum => {
-    const { organization } = this.state
-    const { setPagination } = this.props
-    const orgLabel = this.orgLabel(organization)
-    const reportQueryPart = this.getReportQueryPart(
-      this.state.organization.uuid
-    )
-    GQL.run([reportQueryPart]).then(data =>
-      this.setState({ reports: data.reports }, () =>
-        setPagination(orgLabel, pageNum)
-      )
-    )
   }
 
   goToTasksPage = pageNum => {

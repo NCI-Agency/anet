@@ -31,6 +31,7 @@ class BaseAuthorizationGroupShow extends Page {
     authorizationGroup: new AuthorizationGroup(),
     positions: null,
     reports: null,
+    allReports: null,
     positionsPageNum: 0,
     reportsPageNum: 0,
     success: null,
@@ -59,18 +60,22 @@ class BaseAuthorizationGroupShow extends Page {
     return positionsPart
   }
 
-  getReportQueryPart(authGroupUuid) {
+  getReportQueryPart(authGroupUuid, withPagination) {
+    const result = withPagination ? "paginatedReports" : "allReports"
     const reportQuery = {
-      pageNum: this.state.reportsPageNum,
-      pageSize: 10,
+      pageNum: withPagination ? this.state.reportsPageNum : 0,
+      pageSize: withPagination ? 10 : 0,
       authorizationGroupUuid: authGroupUuid
     }
-    const reportsPart = new GQL.Part(/* GraphQL */ `
-      reports: reportList(query:$reportQuery) {
+    const reportsPart = new GQL.Part(
+      /* GraphQL */ result +
+        `
+      : reportList(query:$reportQuery) {
         pageNum, pageSize, totalCount, list {
           ${ReportCollection.GQL_REPORT_FIELDS}
         }
-      }`).addVariable("reportQuery", "ReportSearchQueryInput", reportQuery)
+      }`
+    ).addVariable("reportQuery", "ReportSearchQueryInput", reportQuery)
     return reportsPart
   }
 
@@ -83,8 +88,17 @@ class BaseAuthorizationGroupShow extends Page {
       ${GRAPHQL_NOTES_FIELDS}
     }`)
     const positionsPart = this.getPositionQueryPart(props.match.params.uuid)
-    const reportsPart = this.getReportQueryPart(props.match.params.uuid)
-    return this.runGQL([authGroupPart, positionsPart, reportsPart])
+    const reportsPart = this.getReportQueryPart(props.match.params.uuid, true)
+    const allReportsPart = this.getReportQueryPart(
+      props.match.params.uuid,
+      false
+    )
+    return this.runGQL([
+      authGroupPart,
+      positionsPart,
+      reportsPart,
+      allReportsPart
+    ])
   }
 
   runGQL(queries) {
@@ -92,13 +106,14 @@ class BaseAuthorizationGroupShow extends Page {
       this.setState({
         authorizationGroup: new AuthorizationGroup(data.authorizationGroup),
         positions: data.paginatedPositions,
-        reports: data.reports
+        reports: data.paginatedReports,
+        allReports: data.allReports.list
       })
     })
   }
 
   render() {
-    const { authorizationGroup, reports, positions } = this.state
+    const { authorizationGroup, reports, allReports, positions } = this.state
     const { currentUser, ...myFormProps } = this.props
 
     const canEdit = currentUser.isSuperUser()
@@ -158,6 +173,7 @@ class BaseAuthorizationGroupShow extends Page {
 
                 <Fieldset title="Reports">
                   <ReportCollection
+                    reports={allReports}
                     paginatedReports={reports}
                     goToPage={this.goToReportsPage}
                   />
@@ -187,7 +203,7 @@ class BaseAuthorizationGroupShow extends Page {
         this.state.authorizationGroup.uuid
       )
       GQL.run([reportQueryPart]).then(data =>
-        this.setState({ reports: data.reports })
+        this.setState({ reports: data.paginatedReports })
       )
     })
   }

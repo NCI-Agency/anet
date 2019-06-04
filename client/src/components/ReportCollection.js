@@ -60,6 +60,7 @@ export default class ReportCollection extends Component {
   static defaultProps = {
     viewFormats: [FORMAT_CALENDAR, FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP]
   }
+  static VIEW_FORMATS_WITH_PAGINATION = [FORMAT_SUMMARY, FORMAT_TABLE]
 
   calendarComponentRef = React.createRef()
 
@@ -72,18 +73,21 @@ export default class ReportCollection extends Component {
   }
 
   render() {
-    var reports
-
-    if (this.props.paginatedReports) {
+    var reports = []
+    const viewWithPagination =
+      ReportCollection.VIEW_FORMATS_WITH_PAGINATION.includes(
+        this.state.viewFormat
+      ) && this.props.paginatedReports
+    if (viewWithPagination) {
       var { pageSize, pageNum, totalCount } = this.props.paginatedReports
       var numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
       reports = this.props.paginatedReports.list
       pageNum++
-    } else {
+    } else if (this.props.reports) {
       reports = this.props.reports
     }
 
-    let reportsExist = _get(reports, "length", 0) > 0
+    const reportsExist = _get(reports, "length", 0) > 0
     const showHeader = this.props.viewFormats.length > 1 || numPages > 1
 
     return (
@@ -112,7 +116,7 @@ export default class ReportCollection extends Component {
                 </ButtonToggleGroup>
               )}
 
-              {numPages > 1 && (
+              {viewWithPagination && numPages > 1 && (
                 <UltimatePagination
                   className="pull-right"
                   currentPage={pageNum}
@@ -146,7 +150,7 @@ export default class ReportCollection extends Component {
             </div>
           )}
 
-          {numPages > 1 && (
+          {viewWithPagination && numPages > 1 && (
             <footer>
               <UltimatePagination
                 className="pull-right"
