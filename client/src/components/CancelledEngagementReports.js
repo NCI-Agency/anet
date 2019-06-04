@@ -239,6 +239,7 @@ class CancelledEngagementReports extends ReportsVisualisation {
         {context => (
           <div className="scrollable">
             <ReportCollection
+              reports={context.allReports}
               paginatedReports={context.reports}
               goToPage={this.goToReportsPage}
               viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
