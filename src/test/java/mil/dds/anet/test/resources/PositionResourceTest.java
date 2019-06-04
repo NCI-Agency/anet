@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
+import java.text.Collator;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -429,10 +430,12 @@ public class PositionResourceTest extends AbstractResourceTest {
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
             new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
+    final Collator collator = Collator.getInstance();
+    collator.setStrength(Collator.PRIMARY);
     String prevName = null;
     for (Position p : searchResults) {
       if (prevName != null) {
-        assertThat(p.getName().compareToIgnoreCase(prevName)).isLessThanOrEqualTo(0);
+        assertThat(collator.compare(p.getName(), prevName)).isLessThanOrEqualTo(0);
       }
       prevName = p.getName();
     }
