@@ -251,6 +251,11 @@ public class Person extends AbstractAnetBean implements Principal {
     return avatar == null ? defaultAvatarData : avatar.getImageData();
   }
 
+  public void setAvatar(String avatarImage) {
+    Avatar avatar = AnetObjectEngine.getInstance().getAvatarDao().getByUuid(uuid);
+    avatar.setImageData(avatarImage);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || !(o instanceof Person)) {
