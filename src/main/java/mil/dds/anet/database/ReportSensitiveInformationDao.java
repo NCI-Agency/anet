@@ -26,10 +26,6 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
   public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
-  public ReportSensitiveInformationDao() {
-    super("ReportsSensitiveInformation", TABLE_NAME, REPORTS_SENSITIVE_INFORMATION_FIELDS, null);
-  }
-
   public ReportSensitiveInformation getByUuid(String uuid) {
     throw new UnsupportedOperationException();
   }

@@ -21,10 +21,6 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 
   public static final String TABLE_NAME = "approvalSteps";
 
-  public ApprovalStepDao() {
-    super("ApprovalSteps", TABLE_NAME, "*", null);
-  }
-
   public CompletableFuture<List<ApprovalStep>> getByAdvisorOrganizationUuid(
       Map<String, Object> context, String aoUuid) {
     return new ForeignKeyFetcher<ApprovalStep>().load(context,

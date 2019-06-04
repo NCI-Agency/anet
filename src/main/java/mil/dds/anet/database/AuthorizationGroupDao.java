@@ -28,10 +28,6 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
   public static final String TABLE_NAME = "authorizationGroups";
 
-  public AuthorizationGroupDao() {
-    super("AuthorizationGroups", TABLE_NAME, "*", null);
-  }
-
   public AuthorizationGroup getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

@@ -29,10 +29,6 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
   public static String TABLE_NAME = "organizations";
   public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
-  public OrganizationDao() {
-    super("Organizations", TABLE_NAME, ORGANIZATION_FIELDS, null);
-  }
-
   public Organization getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

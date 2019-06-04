@@ -20,10 +20,6 @@ public class NoteDao extends AnetBaseDao<Note> {
 
   public static final String TABLE_NAME = "notes";
 
-  public NoteDao() {
-    super("Notes", TABLE_NAME, "*", null);
-  }
-
   public Note getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

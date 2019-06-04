@@ -63,10 +63,6 @@ public class ReportDao extends AnetBaseDao<Report> {
 
   private String weekFormat;
 
-  public ReportDao() {
-    super("Reports", TABLE_NAME, REPORT_FIELDS, "reports.\"createdAt\"");
-  }
-
   public String getWeekFormat() {
     if (weekFormat == null) {
       weekFormat = getWeekFormat(getDbType());

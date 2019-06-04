@@ -27,10 +27,6 @@ public class TaskDao extends AnetBaseDao<Task> {
 
   public static final String TABLE_NAME = "tasks";
 
-  public TaskDao() {
-    super("Tasks", TABLE_NAME, "*", null);
-  }
-
   public Task getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

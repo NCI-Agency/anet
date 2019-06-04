@@ -16,10 +16,6 @@ public class LocationDao extends AnetBaseDao<Location> {
 
   public static final String TABLE_NAME = "locations";
 
-  public LocationDao() {
-    super("Locations", TABLE_NAME, "*", null);
-  }
-
   public Location getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

@@ -35,10 +35,6 @@ public class PositionDao extends AnetBaseDao<Position> {
   public static String TABLE_NAME = "positions";
   public static String POSITIONS_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
-  public PositionDao() {
-    super("Positions", TABLE_NAME, POSITIONS_FIELDS, null);
-  }
-
   @Override
   public Position insertInternal(Position p) {
     // prevent code conflicts

@@ -14,10 +14,6 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
   public static final String TABLE_NAME = "savedSearches";
 
-  public SavedSearchDao() {
-    super("SavedSearches", TABLE_NAME, "*", null);
-  }
-
   public SavedSearch getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

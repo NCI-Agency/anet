@@ -16,10 +16,6 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
   public static final String TABLE_NAME = "reportActions";
 
-  public ReportActionDao() {
-    super("ReportActions", TABLE_NAME, "*", null);
-  }
-
   @Override
   public ReportAction insertInternal(ReportAction action) {
     getDbHandle()

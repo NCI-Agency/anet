@@ -15,10 +15,6 @@ public class TagDao extends AnetBaseDao<Tag> {
 
   public static final String TABLE_NAME = "tags";
 
-  public TagDao() {
-    super("Tags", TABLE_NAME, "*", null);
-  }
-
   public Tag getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

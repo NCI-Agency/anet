@@ -27,10 +27,6 @@ public class PersonDao extends AnetBaseDao<Person> {
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
 
-  public PersonDao() {
-    super("People", TABLE_NAME, PERSON_FIELDS, null);
-  }
-
   public Person getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
