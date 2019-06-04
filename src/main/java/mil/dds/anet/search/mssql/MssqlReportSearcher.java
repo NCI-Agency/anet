@@ -10,7 +10,6 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class MssqlReportSearcher extends AbstractReportSearcher {
@@ -67,7 +66,7 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
     qb.addWhereClause("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL"
         + " OR c_tags.rank IS NOT NULL OR f_tags.rank IS NOT NULL)");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
+    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
     qb.addSqlArg("freetextQuery", text);
   }
 
@@ -139,30 +138,27 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
-      outerQb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+      outerQb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
     }
 
     // Beware of the sort field names, they have to match what's in the selected fields!
     switch (query.getSortBy()) {
       case CREATED_AT:
-        outerQb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), null, "reports_createdAt"));
+        outerQb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "reports_createdAt"));
         break;
       case RELEASED_AT:
-        outerQb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), null, "reports_releasedAt"));
+        outerQb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "reports_releasedAt"));
         break;
       case UPDATED_AT:
-        outerQb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), null, "reports_updatedAt"));
+        outerQb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "reports_updatedAt"));
         break;
       case ENGAGEMENT_DATE:
       default:
-        outerQb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), null, "reports_engagementDate"));
+        outerQb
+            .addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "reports_engagementDate"));
         break;
     }
-    outerQb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, null, "reports_uuid"));
+    outerQb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, null, "reports_uuid"));
   }
 
 }

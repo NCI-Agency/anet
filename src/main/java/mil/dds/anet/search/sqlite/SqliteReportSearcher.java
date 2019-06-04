@@ -10,7 +10,6 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class SqliteReportSearcher extends AbstractReportSearcher {
@@ -25,7 +24,7 @@ public class SqliteReportSearcher extends AbstractReportSearcher {
   }
 
   public SqliteReportSearcher() {
-    this("strftime('%%w', substr(\"%s\", 1, 10)) + 1"); // %w day of week 0-6 with Sunday==0
+    this("strftime('%%w', substr(%s, 1, 10)) + 1"); // %w day of week 0-6 with Sunday==0
   }
 
   @Override
@@ -42,13 +41,13 @@ public class SqliteReportSearcher extends AbstractReportSearcher {
     outerQb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
     if (query.getIncludeEngagementDayOfWeek()) {
       outerQb.addSelectClause(String.format(this.isoDowFormat, "reports.\"engagementDate\"")
-          + " AS engagementDayOfWeek");
+          + " AS \"engagementDayOfWeek\"");
     }
+    outerQb.addTotalCount();
     outerQb.addFromClause("reports");
-    outerQb.addSelectClause("reports.uuid IN ( " + qb.build() + " )");
+    outerQb.addWhereClause("reports.uuid IN ( " + qb.build() + " )");
     outerQb.addSqlArgs(qb.getSqlArgs());
     outerQb.addListArgs(qb.getListArgs());
-    addOrderByClauses(outerQb, query);
     final AnetBeanList<Report> result =
         outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
     for (final Report report : result.getList()) {
@@ -61,33 +60,28 @@ public class SqliteReportSearcher extends AbstractReportSearcher {
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
     switch (query.getSortBy()) {
       case ENGAGEMENT_DATE:
-        qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "reports", "\"engagementDate\""));
+        outerQb.addAllOrderByClauses(
+            getOrderBy(query.getSortOrder(), "reports", "\"engagementDate\""));
         break;
       case RELEASED_AT:
-        qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "reports", "\"releasedAt\""));
+        outerQb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "reports", "\"releasedAt\""));
         break;
       case UPDATED_AT:
-        qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "reports", "\"releasedAt\""));
+        outerQb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "reports", "\"releasedAt\""));
         break;
       case CREATED_AT:
       default:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "reports", "\"updatedAt\""));
+        outerQb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "reports", "\"updatedAt\""));
         break;
     }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "reports", "uuid"));
+    outerQb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "reports", "uuid"));
   }
 
   @Override
   protected void addTextQuery(ReportSearchQuery query) {
-    qb.addWhereClause("(text LIKE '%' || :text || '%' OR intent LIKE '%' || :text || '%'"
-        + " OR \"keyOutcomes\" LIKE '%' || :text || '%'"
-        + " OR \"nextSteps\" LIKE '%' || :text || '%' OR tags.name LIKE '%' || :text || '%'"
-        + " OR tags.description LIKE '%' || :text || '%')");
-    final String text = query.getText();
-    qb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
+    final String text = qb.getFullTextQuery(query.getText());
+    qb.addLikeClauses("text", new String[] {"reports.text", "reports.intent",
+        "reports.\"keyOutcomes\"", "reports.\"nextSteps\"", "tags.name", "tags.description"}, text);
   }
 
   @Override
@@ -108,7 +102,7 @@ public class SqliteReportSearcher extends AbstractReportSearcher {
       qb.addWhereClause(
           "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
     } else {
-      outerQb.addWithClause("RECURSIVE parent_orgs(uuid) AS ("
+      outerQb.addWithClause("parent_orgs(uuid) AS ("
           + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
           + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
           + ")");
@@ -126,7 +120,7 @@ public class SqliteReportSearcher extends AbstractReportSearcher {
       qb.addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
           query.getAdvisorOrgUuid());
     } else {
-      outerQb.addWithClause("RECURSIVE advisor_parent_orgs(uuid) AS ("
+      outerQb.addWithClause("advisor_parent_orgs(uuid) AS ("
           + " SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid UNION ALL"
           + " SELECT o.uuid FROM advisor_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
           + ")");
@@ -144,7 +138,7 @@ public class SqliteReportSearcher extends AbstractReportSearcher {
       qb.addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
           query.getPrincipalOrgUuid());
     } else {
-      outerQb.addWithClause("RECURSIVE principal_parent_orgs(uuid) AS ("
+      outerQb.addWithClause("principal_parent_orgs(uuid) AS ("
           + " SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid UNION ALL"
           + " SELECT o.uuid FROM principal_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
           + ")");

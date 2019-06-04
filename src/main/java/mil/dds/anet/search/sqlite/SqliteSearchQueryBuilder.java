@@ -1,5 +1,6 @@
 package mil.dds.anet.search.sqlite;
 
+import com.google.common.base.Joiner;
 import java.util.List;
 import java.util.Map;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -15,13 +16,27 @@ public class SqliteSearchQueryBuilder<B extends AbstractAnetBean, T extends Abst
     extends AbstractSearchQueryBuilder<B, T> {
 
   public SqliteSearchQueryBuilder(String queryName) {
-    super(queryName);
+    super(queryName, "ILIKE"); // for PostgreSQL
   }
 
   @Override
   public void addTotalCount() {
     // SQLite can't do total counts, so this is computed in
     // {@link AnetBeanList#AnetBeanList(Query, int, int, RowMapper, Long)}
+    addSelectClause("COUNT(*) OVER() AS \"totalCount\""); // for PostgreSQL
+  }
+
+  @Override
+  public String getFullTextQuery(String text) {
+    return "%" + stripWildcards(text) + "%";
+  }
+
+  @Override
+  protected void addWithClauses() {
+    if (!withClauses.isEmpty()) {
+      sql.insert(0, Joiner.on(", ").join(withClauses));
+      sql.insert(0, "WITH RECURSIVE ");
+    }
   }
 
   @InTransaction

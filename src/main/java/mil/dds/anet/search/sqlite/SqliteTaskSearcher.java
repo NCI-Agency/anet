@@ -3,7 +3,6 @@ package mil.dds.anet.search.sqlite;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.search.AbstractTaskSearcher;
-import mil.dds.anet.utils.Utils;
 
 public class SqliteTaskSearcher extends AbstractTaskSearcher {
 
@@ -13,16 +12,14 @@ public class SqliteTaskSearcher extends AbstractTaskSearcher {
 
   @Override
   protected void addTextQuery(TaskSearchQuery query) {
-    qb.addWhereClause(
-        "(tasks.\"longName\" LIKE '%' || :text || '%' OR tasks.\"shortName\" LIKE '%' || :text || '%')");
-    final String text = query.getText();
-    qb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
+    final String text = qb.getFullTextQuery(query.getText());
+    qb.addLikeClauses("text", new String[] {"tasks.\"longName\"", "tasks.\"shortName\""}, text);
   }
 
   @Override
   protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
     if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {
-      qb.addWithClause("RECURSIVE parent_orgs(uuid) AS ("
+      qb.addWithClause("parent_orgs(uuid) AS ("
           + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
           + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
           + ")");

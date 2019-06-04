@@ -121,7 +121,7 @@ public class DaoUtils {
     for (String field : fields) {
       final StringBuilder sb = new StringBuilder(String.format("\"%s\".\"%s\"", tableName, field));
       if (addAs) {
-        sb.append(String.format(" AS %s_%s", tableName, field));
+        sb.append(String.format(" AS \"%s_%s\"", tableName, field));
       }
       fieldAliases.add(sb.toString());
     }

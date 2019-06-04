@@ -4,9 +4,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractOrganizationSearcher extends
@@ -25,7 +23,6 @@ public abstract class AbstractOrganizationSearcher extends
   }
 
   protected void buildQuery(OrganizationSearchQuery query) {
-    qb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
     qb.addFromClause("organizations");
 
     if (query.isTextPresent()) {
@@ -50,19 +47,18 @@ public abstract class AbstractOrganizationSearcher extends
       OrganizationSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "organizations", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations", "\"createdAt\""));
         break;
       case TYPE:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "organizations", "type"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations", "type"));
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "organizations",
-            "\"shortName\"", "\"longName\"", "\"identificationCode\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations", "\"shortName\"",
+            "\"longName\"", "\"identificationCode\""));
         break;
     }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "organizations", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "organizations", "uuid"));
   }
 
 }

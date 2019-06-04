@@ -6,7 +6,6 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.search.AbstractPersonSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 
 public class MssqlPersonSearcher extends AbstractPersonSearcher {
 
@@ -16,6 +15,7 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
 
   @Override
   protected void buildQuery(PersonSearchQuery query) {
+    qb.addSelectClause(PersonDao.PERSON_FIELDS);
     super.buildQuery(query);
     qb.addTotalCount();
   }
@@ -52,11 +52,11 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
         qb.addFromClause("LEFT JOIN CONTAINSTABLE(positions, (name), :containsQuery) c_positions"
             + " ON positions.uuid = c_positions.[Key]");
         whereRank.append(" OR c_positions.rank IS NOT NULL OR positions.code LIKE :likeQuery");
-        qb.addSqlArg("likeQuery", Utils.prepForLikeQuery(text) + "%");
+        qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
       }
       whereRank.append(")");
       qb.addWhereClause(whereRank.toString());
-      qb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
+      qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
       qb.addSqlArg("freetextQuery", text);
     }
   }
@@ -79,7 +79,7 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
-      qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
     }
     super.addOrderByClauses(qb, query);
   }

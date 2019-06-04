@@ -7,7 +7,6 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractPersonSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class SqlitePersonSearcher extends AbstractPersonSearcher {
@@ -19,13 +18,20 @@ public class SqlitePersonSearcher extends AbstractPersonSearcher {
     outerQb = new SqliteSearchQueryBuilder<Person, PersonSearchQuery>("SqlitePersonSearch");
   }
 
+  @Override
+  protected void buildQuery(PersonSearchQuery query) {
+    qb.addSelectClause("people.uuid");
+    super.buildQuery(query);
+  }
+
   @InTransaction
   @Override
   public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
     buildQuery(query);
     outerQb.addSelectClause(PersonDao.PERSON_FIELDS);
+    outerQb.addTotalCount();
     outerQb.addFromClause("people");
-    outerQb.addSelectClause("people.uuid IN ( " + qb.build() + " )");
+    outerQb.addWhereClause("people.uuid IN ( " + qb.build() + " )");
     outerQb.addSqlArgs(qb.getSqlArgs());
     outerQb.addListArgs(qb.getListArgs());
     return outerQb.buildAndRun(getDbHandle(), query, new PersonMapper());
@@ -33,19 +39,14 @@ public class SqlitePersonSearcher extends AbstractPersonSearcher {
 
   @Override
   protected void addTextQuery(PersonSearchQuery query) {
+    final String text = qb.getFullTextQuery(query.getText());
     if (query.getMatchPositionName()) {
-      qb.addWhereClause("(people.name LIKE '%' || :text || '%'"
-          + " OR people.\"emailAddress\" LIKE '%' || :text || '%'"
-          + " OR people.biography LIKE '%' || :text || '%'"
-          + " OR positions.name LIKE '%' || :text || '%'"
-          + " OR positions.code LIKE '%' || :text || '%')");
+      qb.addLikeClauses("text", new String[] {"people.name", "people.\"emailAddress\"",
+          "people.biography", "positions.name", "positions.code"}, text);
     } else {
-      qb.addWhereClause("(people.name LIKE '%' || :text || '%'"
-          + " OR people.\"emailAddress\" LIKE '%' || :text || '%'"
-          + " OR people.biography LIKE '%' || :text || '%')");
+      qb.addLikeClauses("text",
+          new String[] {"people.name", "people.\"emailAddress\"", "people.biography"}, text);
     }
-    final String text = query.getText();
-    qb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
   }
 
   @Override

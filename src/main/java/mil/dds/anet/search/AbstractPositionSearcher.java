@@ -4,9 +4,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
-import mil.dds.anet.utils.Utils;
 
 public abstract class AbstractPositionSearcher
     extends AbstractSearcher<Position, PositionSearchQuery> implements IPositionSearcher {
@@ -22,7 +20,6 @@ public abstract class AbstractPositionSearcher
   }
 
   protected void buildQuery(PositionSearchQuery query) {
-    qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
     qb.addFromClause("positions");
 
     if (Boolean.TRUE.equals(query.getMatchPersonName())) {
@@ -68,18 +65,17 @@ public abstract class AbstractPositionSearcher
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "positions", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions", "\"createdAt\""));
         break;
       case CODE:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "positions", "code"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions", "code"));
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "positions", "name"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions", "name"));
         break;
     }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "positions", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "positions", "uuid"));
   }
 
 }

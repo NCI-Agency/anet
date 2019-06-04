@@ -3,9 +3,9 @@ package mil.dds.anet.search.mssql;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.search.AbstractOrganizationSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 
 public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
 
@@ -16,6 +16,7 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
 
   @Override
   protected void buildQuery(OrganizationSearchQuery query) {
+    qb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
     super.buildQuery(query);
     qb.addTotalCount();
   }
@@ -36,8 +37,8 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
         "(c_organizations.rank IS NOT NULL" + " OR organizations.identificationCode LIKE :likeQuery"
             + " OR organizations.shortName LIKE :likeQuery)");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
-    qb.addSqlArg("likeQuery", Utils.prepForLikeQuery(text) + "%");
+    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 
   @Override
@@ -61,7 +62,7 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
-      qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
     }
     super.addOrderByClauses(qb, query);
   }

@@ -7,7 +7,6 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.search.AbstractOrganizationSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class SqliteOrganizationSearcher extends AbstractOrganizationSearcher {
@@ -20,13 +19,20 @@ public class SqliteOrganizationSearcher extends AbstractOrganizationSearcher {
         "SqliteOrganizationSearch");
   }
 
+  @Override
+  protected void buildQuery(OrganizationSearchQuery query) {
+    qb.addSelectClause("organizations.uuid");
+    super.buildQuery(query);
+  }
+
   @InTransaction
   @Override
   public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
     buildQuery(query);
     outerQb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
+    outerQb.addTotalCount();
     outerQb.addFromClause("organizations");
-    outerQb.addSelectClause("organizations.uuid IN ( " + qb.build() + " )");
+    outerQb.addWhereClause("organizations.uuid IN ( " + qb.build() + " )");
     outerQb.addSqlArgs(qb.getSqlArgs());
     outerQb.addListArgs(qb.getListArgs());
     return outerQb.buildAndRun(getDbHandle(), query, new OrganizationMapper());
@@ -34,10 +40,9 @@ public class SqliteOrganizationSearcher extends AbstractOrganizationSearcher {
 
   @Override
   protected void addTextQuery(OrganizationSearchQuery query) {
-    qb.addWhereClause(
-        "(organizations.\"shortName\" LIKE '%' || :text || '%' OR organizations.\"longName\" LIKE '%' || :text || '%')");
-    final String text = query.getText();
-    qb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
+    final String text = qb.getFullTextQuery(query.getText());
+    qb.addLikeClauses("text",
+        new String[] {"organizations.\"shortName\"", "organizations.\"longName\""}, text);
   }
 
   @Override

@@ -5,7 +5,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractAuthorizationGroupSearcher
@@ -27,6 +26,7 @@ public abstract class AbstractAuthorizationGroupSearcher
   @Override
   protected void buildQuery(AuthorizationGroupSearchQuery query) {
     qb.addSelectClause("\"authorizationGroups\".*");
+    qb.addTotalCount();
     qb.addFromClause("\"authorizationGroups\"");
 
     if (query.isTextPresent()) {
@@ -44,7 +44,6 @@ public abstract class AbstractAuthorizationGroupSearcher
     }
 
     addOrderByClauses(qb, query);
-
   }
 
   protected abstract void addTextQuery(AuthorizationGroupSearchQuery query);
@@ -54,15 +53,15 @@ public abstract class AbstractAuthorizationGroupSearcher
     switch (query.getSortBy()) {
       case CREATED_AT:
         qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "\"authorizationGroups\"", "\"createdAt\""));
+            getOrderBy(query.getSortOrder(), "\"authorizationGroups\"", "\"createdAt\""));
         break;
       case NAME:
       default:
         qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "\"authorizationGroups\"", "name"));
+            getOrderBy(query.getSortOrder(), "\"authorizationGroups\"", "name"));
         break;
     }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "\"authorizationGroups\"", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "\"authorizationGroups\"", "uuid"));
   }
 
 }

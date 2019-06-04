@@ -3,9 +3,9 @@ package mil.dds.anet.search.mssql;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.search.AbstractPositionSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 
 public class MssqlPositionSearcher extends AbstractPositionSearcher {
 
@@ -15,6 +15,7 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
 
   @Override
   protected void buildQuery(PositionSearchQuery query) {
+    qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
     super.buildQuery(query);
     qb.addTotalCount();
   }
@@ -41,8 +42,8 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     whereRank.append(")");
     qb.addWhereClause(whereRank.toString());
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
-    qb.addSqlArg("likeQuery", Utils.prepForLikeQuery(text) + "%");
+    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 
   @Override
@@ -63,7 +64,7 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
-      qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
     }
     super.addOrderByClauses(qb, query);
   }

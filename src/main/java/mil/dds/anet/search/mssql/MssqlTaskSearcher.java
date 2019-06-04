@@ -5,18 +5,11 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.search.AbstractTaskSearcher;
-import mil.dds.anet.utils.Utils;
 
 public class MssqlTaskSearcher extends AbstractTaskSearcher {
 
   public MssqlTaskSearcher() {
     super(new MssqlSearchQueryBuilder<Task, TaskSearchQuery>("MssqlTaskSearch"));
-  }
-
-  @Override
-  protected void buildQuery(TaskSearchQuery query) {
-    super.buildQuery(query);
-    qb.addTotalCount();
   }
 
   @Override
@@ -30,8 +23,8 @@ public class MssqlTaskSearcher extends AbstractTaskSearcher {
         + " ON tasks.uuid = c_tasks.[Key]");
     qb.addWhereClause("(c_tasks.rank IS NOT NULL OR tasks.shortName LIKE :likeQuery)");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", Utils.getSqlServerFullTextQuery(text));
-    qb.addSqlArg("likeQuery", Utils.prepForLikeQuery(text) + "%");
+    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 
   @Override
@@ -69,7 +62,7 @@ public class MssqlTaskSearcher extends AbstractTaskSearcher {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
-      qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
     }
     super.addOrderByClauses(qb, query);
   }

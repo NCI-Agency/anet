@@ -5,7 +5,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractLocationSearcher
@@ -24,6 +23,7 @@ public abstract class AbstractLocationSearcher
 
   protected void buildQuery(LocationSearchQuery query) {
     qb.addSelectClause("locations.*");
+    qb.addTotalCount();
     qb.addFromClause("locations");
 
     if (query.isTextPresent()) {
@@ -38,15 +38,14 @@ public abstract class AbstractLocationSearcher
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "locations", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "locations", "\"createdAt\""));
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "locations", "name"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "locations", "name"));
         break;
     }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "locations", "uuid"));
   }
 
 }

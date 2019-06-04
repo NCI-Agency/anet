@@ -7,7 +7,6 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.AbstractPositionSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class SqlitePositionSearcher extends AbstractPositionSearcher {
@@ -19,13 +18,20 @@ public class SqlitePositionSearcher extends AbstractPositionSearcher {
     outerQb = new SqliteSearchQueryBuilder<Position, PositionSearchQuery>("SqlitePositionSearch");
   }
 
+  @Override
+  protected void buildQuery(PositionSearchQuery query) {
+    qb.addSelectClause("positions.uuid");
+    super.buildQuery(query);
+  }
+
   @InTransaction
   @Override
   public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
     buildQuery(query);
     outerQb.addSelectClause(PositionDao.POSITIONS_FIELDS);
+    outerQb.addTotalCount();
     outerQb.addFromClause("positions");
-    outerQb.addSelectClause("positions.uuid IN ( " + qb.build() + " )");
+    outerQb.addWhereClause("positions.uuid IN ( " + qb.build() + " )");
     outerQb.addSqlArgs(qb.getSqlArgs());
     outerQb.addListArgs(qb.getListArgs());
     return outerQb.buildAndRun(getDbHandle(), query, new PositionMapper());
@@ -33,22 +39,19 @@ public class SqlitePositionSearcher extends AbstractPositionSearcher {
 
   @Override
   protected void addTextQuery(PositionSearchQuery query) {
+    final String text = qb.getFullTextQuery(query.getText());
     if (query.getMatchPersonName() != null && query.getMatchPersonName()) {
-      qb.addWhereClause("((positions.name LIKE '%' || :text || '%'"
-          + " OR positions.code LIKE '%' || :text || '%')"
-          + " OR (people.name LIKE '%' || :text || '%'))");
+      qb.addLikeClauses("text", new String[] {"positions.name", "positions.code", "people.name"},
+          text);
     } else {
-      qb.addWhereClause("(positions.name LIKE '%' || :text || '%'"
-          + " OR positions.code LIKE '%' || :text || '%')");
+      qb.addLikeClauses("text", new String[] {"positions.name", "positions.code"}, text);
     }
-    final String text = query.getText();
-    qb.addSqlArg("text", Utils.getSqliteFullTextQuery(text));
   }
 
   @Override
   protected void addOrganizationUuidQuery(PositionSearchQuery query) {
     if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-      outerQb.addWithClause("RECURSIVE parent_orgs(uuid) AS ("
+      outerQb.addWithClause("parent_orgs(uuid) AS ("
           + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
           + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
           + ")");

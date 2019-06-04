@@ -4,10 +4,8 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
-import mil.dds.anet.utils.Utils;
 
 public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, PersonSearchQuery>
     implements IPersonSearcher {
@@ -23,7 +21,6 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   }
 
   protected void buildQuery(PersonSearchQuery query) {
-    qb.addSelectClause(PersonDao.PERSON_FIELDS);
     qb.addFromClause("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null
@@ -62,17 +59,17 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "people", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people", "\"createdAt\""));
         break;
       case RANK:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "people", "rank"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people", "rank"));
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "people", "name"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people", "name"));
         break;
     }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "people", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "people", "uuid"));
   }
 
 }

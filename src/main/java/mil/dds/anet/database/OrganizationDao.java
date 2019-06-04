@@ -83,12 +83,12 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
   public interface OrgListQueries {
     @RegisterRowMapper(OrganizationMapper.class)
     @SqlQuery("SELECT uuid AS organizations_uuid" + ", uuid AS uuid"
-        + ", \"shortName\" AS organizations_shortName" + ", \"longName\" AS organizations_longName"
-        + ", status AS organizations_status"
-        + ", \"identificationCode\" AS organizations_identificationCode"
-        + ", type AS organizations_type" + ", \"parentOrgUuid\" AS organizations_parentOrgUuid"
-        + ", \"createdAt\" AS organizations_createdAt"
-        + ", \"updatedAt\" AS organizations_updatedAt"
+        + ", \"shortName\" AS \"organizations_shortName\""
+        + ", \"longName\" AS \"organizations_longName\"" + ", status AS organizations_status"
+        + ", \"identificationCode\" AS \"organizations_identificationCode\""
+        + ", type AS organizations_type" + ", \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
+        + ", \"createdAt\" AS \"organizations_createdAt\""
+        + ", \"updatedAt\" AS \"organizations_updatedAt\""
         + " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
     public List<Organization> getOrgsByShortNames(@BindList("shortNames") List<String> shortNames);
   }

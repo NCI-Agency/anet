@@ -97,7 +97,7 @@ public class NoteDao extends AnetBaseDao<Note> {
   static class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<NoteRelatedObject> {
     private static final String sql =
         "/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
-            + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectuuid\" ASC";
+            + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public NoteRelatedObjectsBatcher() {
       super(sql, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");

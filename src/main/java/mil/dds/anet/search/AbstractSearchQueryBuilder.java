@@ -1,7 +1,9 @@
 package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +16,8 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>> {
 
@@ -34,18 +38,20 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   protected final Map<String, Object> sqlArgs;
   protected final Map<String, List<?>> listArgs;
 
-  private final List<String> withClauses;
+  private final String likeKeyword;
+  protected final List<String> withClauses;
   private final List<String> selectClauses;
   private final List<String> fromClauses;
   private final List<String> whereClauses;
   private final List<String> groupByClauses;
   private final List<String> orderByClauses;
 
-  public AbstractSearchQueryBuilder(String queryName) {
+  public AbstractSearchQueryBuilder(String queryName, String likeKeyword) {
     sql = new StringBuilder(String.format("/* %s */ ", queryName));
     sqlArgs = new HashMap<>();
     listArgs = new HashMap<>();
 
+    this.likeKeyword = likeKeyword;
     withClauses = new LinkedList<>();
     selectClauses = new LinkedList<>();
     fromClauses = new LinkedList<>();
@@ -104,6 +110,12 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     orderByClauses.addAll(clauses);
   }
 
+  public String getLikeQuery(String text) {
+    return stripWildcards(text) + "%";
+  }
+
+  public abstract String getFullTextQuery(String text);
+
   public final void addDateClause(String paramName, String fieldName, Comparison comp,
       Instant fieldValue) {
     if (fieldValue != null) {
@@ -144,10 +156,28 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
 
   public final void addLikeClause(String paramName, String fieldName, String fieldValue) {
     if (fieldValue != null) {
-      whereClauses.add(String.format("%s LIKE :%s", fieldName, paramName));
-      sqlArgs.put(paramName, Utils.prepForLikeQuery(fieldValue) + "%");
+      whereClauses.add(getLikeClause(fieldName, paramName));
+      sqlArgs.put(paramName, fieldValue);
     }
   }
+
+  public final void addLikeClauses(String paramName, String[] fieldNames, String fieldValue) {
+    if (fieldValue != null) {
+      final List<String> likeClauses = new ArrayList<>();
+      for (int i = 0; i < fieldNames.length; i++) {
+        likeClauses.add(getLikeClause(fieldNames[i], paramName));
+      }
+      whereClauses.add("(" + Joiner.on(" OR ").join(likeClauses) + ")");
+      sqlArgs.put(paramName, fieldValue);
+    }
+  }
+
+  private final String getLikeClause(String fieldName, String paramName) {
+    return String.format("%s %s :%s", fieldName, likeKeyword, paramName);
+  }
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public String build() {
     addWithClauses();
@@ -156,12 +186,18 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     addWhereClauses();
     addGroupByClauses();
     addOrderByClauses();
-    return sql.toString();
+    final String sqlString = sql.toString();
+    logger.error("GO: sql={}, sqlArgs={}, listArgs={}", sqlString, sqlArgs, listArgs);
+    return sqlString;
   }
 
   public AnetBeanList<B> buildAndRun(Handle handle, T query, RowMapper<B> mapper) {
     build();
-    return getResult(handle, query, mapper);
+    final AnetBeanList<B> result = getResult(handle, query, mapper);
+    logger.error("GO: result={}, size={}, list={}", result,
+        (result == null) ? null : result.getTotalCount(),
+        (result == null) ? null : result.getList());
+    return result;
   }
 
   protected void addWithClauses() {
@@ -204,6 +240,13 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
       sql.append(" ORDER BY ");
       sql.append(Joiner.on(", ").join(orderByClauses));
     }
+  }
+
+  /**
+   * Prepares text to be used in a LIKE or CONTAINS query in SQL. Removes quotes and wildcards.
+   */
+  protected String stripWildcards(String text) {
+    return text.trim().replaceAll("[\"*]", "");
   }
 
   protected abstract AnetBeanList<B> getResult(Handle handle, T query, RowMapper<B> mapper);

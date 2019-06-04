@@ -6,7 +6,6 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
-import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSearchQuery>
@@ -26,6 +25,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   @Override
   protected void buildQuery(TaskSearchQuery query) {
     qb.addSelectClause("tasks.*");
+    qb.addTotalCount();
     qb.addFromClause("tasks");
 
     if (query.isTextPresent()) {
@@ -65,18 +65,18 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "tasks", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "\"createdAt\""));
         break;
       case CATEGORY:
-        qb.addAllOrderByClauses(Utils.addOrderBy(query.getSortOrder(), "tasks", "category"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "category"));
         break;
       case NAME:
       default:
         qb.addAllOrderByClauses(
-            Utils.addOrderBy(query.getSortOrder(), "tasks", "\"shortName\"", "\"longName\""));
+            getOrderBy(query.getSortOrder(), "tasks", "\"shortName\"", "\"longName\""));
         break;
     }
-    qb.addAllOrderByClauses(Utils.addOrderBy(SortOrder.ASC, "tasks", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "tasks", "uuid"));
   }
 
 }
