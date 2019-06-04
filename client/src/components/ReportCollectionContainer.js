@@ -12,7 +12,9 @@ import React, { Component } from "react"
 import { Button } from "react-bootstrap"
 import Calendar from "components/Calendar"
 import moment from "moment"
-import ReportCollection, { GQL_REPORT_FIELDS } from "components/ReportCollection"
+import ReportCollection, {
+  GQL_REPORT_FIELDS
+} from "components/ReportCollection"
 
 import API from "api"
 
