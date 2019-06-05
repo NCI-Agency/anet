@@ -1,338 +1,158 @@
-import classNames from "classnames"
-import { convertToHTML } from "draft-convert"
-import {
-  CompositeDecorator,
-  ContentState,
-  convertFromHTML,
-  Editor,
-  EditorState,
-  getDefaultKeyBinding,
-  Modifier,
-  RichUtils
-} from "draft-js"
+import React from "react"
+import { convertFromHTML, convertToHTML } from "draft-convert"
+import { convertToRaw, convertFromRaw } from "draft-js"
+import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+
+import createLinkifyPlugin from "draft-js-linkify-plugin"
+
+import Link from "components/editor/Link"
+import LinkSource from "components/editor/LinkSource"
+import ImageSource from "components/editor/ImageSource"
+import ImageBlock from "components/editor/ImageBlock"
+
 import "draft-js/dist/Draft.css"
-import PropTypes from "prop-types"
-import React, { Component } from "react"
-import "./RichTextEditor.css"
+import "draftail/dist/draftail.css"
+import "components/RichTextEditor.css"
 
-class RichTextEditor extends Component {
-  static propTypes = {
-    value: PropTypes.string,
-    onChange: PropTypes.func.isRequired,
-    onHandleBlur: PropTypes.func,
-    className: PropTypes.string
-  }
-
-  constructor(props) {
-    super(props)
-    const decorator = new CompositeDecorator([
-      {
-        strategy: findImageEntities,
-        component: ReactImage
-      }
-    ])
-
-    this.state = {
-      editorState: EditorState.createEmpty(decorator),
-      decorator,
-      isLoaded: false
-    }
-    this.handleOnChangeHTML = this._handleOnChangeHTML.bind(this)
-    this.handleKeyCommand = this._handleKeyCommand.bind(this)
-    this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this)
-    this.toggleBlockType = this._toggleBlockType.bind(this)
-    this.toggleInlineStyle = this._toggleInlineStyle.bind(this)
-    this.setEditorStateFromHTML = this._setEditorStateFromHTML.bind(this)
-    this.initializeEditorState = this._initializeEditorState.bind(this)
-
-    this.focus = () => this.refs.editor.focus()
-    this.onChange = editorState => this.setState({ editorState })
-    this.onBlur = editorState => {
-      this.handleOnChangeHTML(editorState)
-      if (this.props.onHandleBlur) {
-        this.props.onHandleBlur(editorState)
-      }
-    }
-  }
-
-  componentDidUpdate() {
-    this.initializeEditorState()
-  }
-
-  componentDidMount() {
-    this.initializeEditorState()
-  }
-
-  _initializeEditorState() {
-    const { isLoaded } = this.state
-    const { value } = this.props
-    const valueString = value || ""
-    if (!isLoaded && valueString.length > 0) {
-      this.setState({ isLoaded: true }, this.setEditorStateFromHTML(value))
-    }
-  }
-
-  _handleOnChangeHTML() {
-    const { editorState } = this.state
-    const html = convertToHTML({
-      entityToHTML: (entity, originalText) => {
-        if (entity.type === "IMAGE") {
-          const { src, width, height, alt } = entity.data
-          return (
-            <img
-              src={imageDataSrc(src)}
-              width={width}
-              height={height}
-              alt={alt}
-            />
-          )
-        }
-        return originalText
-      }
-    })(editorState.getCurrentContent())
-    this.props.onChange(html)
-  }
-
-  pushEditorState = contentState => {
-    const { editorState } = this.state
-    const newState = Modifier.replaceWithFragment(
-      editorState.getCurrentContent(),
-      editorState.getSelection(),
-      contentState.getBlockMap()
-    )
-    this.onChange(EditorState.push(editorState, newState, "insert-fragment"))
-  }
-
-  handlePastedText = (text, html) => {
-    const htmlRegex = new RegExp(/<[a-z][\s\S]*>/i)
-    if (htmlRegex.test(html)) {
-      this.setEditorStateFromHTML(html)
-    } else {
-      this.setEditorStateFromText(text)
-    }
-    return true
-  }
-
-  setEditorStateFromText(text) {
-    const contentState = ContentState.createFromText(text)
-    this.pushEditorState(contentState)
-  }
-
-  _setEditorStateFromHTML(html) {
-    const blocksFromHTML = convertFromHTML(html)
-    if (blocksFromHTML.contentBlocks === null) {
-      return
-    }
-    const contentState = ContentState.createFromBlockArray(
-      blocksFromHTML.contentBlocks,
-      blocksFromHTML.entityMap
-    )
-    this.pushEditorState(contentState)
-  }
-
-  _handleKeyCommand(command, editorState) {
-    const newState = RichUtils.handleKeyCommand(editorState, command)
-    if (newState) {
-      this.onChange(newState)
-      return true
-    }
-    return false
-  }
-
-  _mapKeyToEditorCommand(e) {
-    if (e.keyCode === 9 /* TAB */) {
-      const newEditorState = RichUtils.onTab(
-        e,
-        this.state.editorState,
-        4 /* maxDepth */
-      )
-      if (newEditorState !== this.state.editorState) {
-        this.onChange(newEditorState)
-      }
-      return
-    }
-    return getDefaultKeyBinding(e)
-  }
-
-  _toggleBlockType(blockType) {
-    this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
-  }
-
-  _toggleInlineStyle(inlineStyle) {
-    this.onChange(
-      RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
-    )
-  }
-
-  render() {
-    const { editorState } = this.state
-
-    // If the user changes block type before entering any text, we can
-    // either style the placeholder or hide it. Let's just hide it now.
-    let className = "RichEditor-editor"
-    var contentState = editorState.getCurrentContent()
-    if (!contentState.hasText()) {
-      if (
-        contentState
-          .getBlockMap()
-          .first()
-          .getType() !== "unstyled"
-      ) {
-        className += " RichEditor-hidePlaceholder"
-      }
-    }
-
-    return (
-      <div className={classNames("RichEditor-root", this.props.className)}>
-        <BlockStyleControls
-          editorState={editorState}
-          onToggle={this.toggleBlockType}
-        />
-        <InlineStyleControls
-          editorState={editorState}
-          onToggle={this.toggleInlineStyle}
-        />
-        <div className={className} onClick={this.focus}>
-          <Editor
-            blockStyleFn={getBlockStyle}
-            editorState={editorState}
-            handlePastedText={this.handlePastedText}
-            handleKeyCommand={this.handleKeyCommand}
-            keyBindingFn={this.mapKeyToEditorCommand}
-            onChange={this.onChange}
-            onBlur={this.onBlur}
-            placeholder="..."
-            ref="editor"
-            spellCheck
-          />
-        </div>
-      </div>
-    )
-  }
-}
-
-// Custom overrides for "code" style.
-function getBlockStyle(block) {
-  switch (block.getType()) {
-    case "blockquote":
-      return "RichEditor-blockquote"
-    default:
-      return null
-  }
-}
-
-function findImageEntities(contentBlock, callback, contentState) {
-  contentBlock.findEntityRanges(character => {
-    const entityKey = character.getEntity()
-    return (
-      entityKey !== null &&
-      contentState.getEntity(entityKey).getType() === "IMAGE"
-    )
-  }, callback)
-}
-
-function imageDataSrc(src) {
-  const canvas = document.createElement("canvas")
-  const image = new Image()
-  image.onload = function() {
-    const ctx = canvas.getContext("2d")
-    canvas.width = image.naturalWidth
-    canvas.height = image.naturalHeight
-    ctx.drawImage(image, 0, 0)
-  }
-  image.crossOrigin = "Anonymous"
-  image.src = src
-  // Convert to in-line data
-  return !src.startsWith("data:") ? canvas.toDataURL("image/jpeg") : src
-}
-
-const ReactImage = props => {
-  const { height, src, width, alt } = props.contentState
-    .getEntity(props.entityKey)
-    .getData()
-  return <img src={imageDataSrc(src)} height={height} width={width} alt={alt} />
-}
-
-class StyleButton extends React.Component {
-  constructor() {
-    super()
-    this.onToggle = e => {
-      e.preventDefault()
-      this.props.onToggle(this.props.style)
-    }
-  }
-
-  render() {
-    let className = "RichEditor-styleButton"
-    if (this.props.active) {
-      className += " RichEditor-activeButton"
-    }
-
-    return (
-      <span className={className} onMouseDown={this.onToggle}>
-        {this.props.label}
-      </span>
-    )
-  }
-}
+const linkifyPlugin = createLinkifyPlugin()
 
 const BLOCK_TYPES = [
-  { label: "H1", style: "header-one" },
-  { label: "H2", style: "header-two" },
-  { label: "H3", style: "header-three" },
-  { label: "H4", style: "header-four" },
-  { label: "H5", style: "header-five" },
-  { label: "H6", style: "header-six" },
-  { label: "Blockquote", style: "blockquote" },
-  { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" }
+  { type: BLOCK_TYPE.HEADER_ONE },
+  { type: BLOCK_TYPE.HEADER_TWO },
+  { type: BLOCK_TYPE.HEADER_THREE },
+  { type: BLOCK_TYPE.HEADER_FOUR },
+  { type: BLOCK_TYPE.HEADER_FIVE },
+  { type: BLOCK_TYPE.HEADER_SIX },
+  { type: BLOCK_TYPE.BLOCKQUOTE },
+  { type: BLOCK_TYPE.UNORDERED_LIST_ITEM },
+  { type: BLOCK_TYPE.ORDERED_LIST_ITEM }
 ]
-
-const BlockStyleControls = props => {
-  const { editorState } = props
-  const selection = editorState.getSelection()
-  const blockType = editorState
-    .getCurrentContent()
-    .getBlockForKey(selection.getStartKey())
-    .getType()
-
-  return (
-    <div className="RichEditor-controls">
-      {BLOCK_TYPES.map(type => (
-        <StyleButton
-          key={type.label}
-          active={type.style === blockType}
-          label={type.label}
-          onToggle={props.onToggle}
-          style={type.style}
-        />
-      ))}
-    </div>
-  )
-}
 
 const INLINE_STYLES = [
-  { label: "Bold", style: "BOLD" },
-  { label: "Italic", style: "ITALIC" },
-  { label: "Underline", style: "UNDERLINE" }
+  { type: INLINE_STYLE.BOLD },
+  { type: INLINE_STYLE.ITALIC },
+  { type: INLINE_STYLE.UNDERLINE }
 ]
 
-const InlineStyleControls = props => {
-  const currentStyle = props.editorState.getCurrentInlineStyle()
-
-  return (
-    <div className="RichEditor-controls">
-      {INLINE_STYLES.map(type => (
-        <StyleButton
-          key={type.label}
-          active={currentStyle.has(type.style)}
-          label={type.label}
-          onToggle={props.onToggle}
-          style={type.style}
-        />
-      ))}
-    </div>
-  )
+const ENTITY_CONTROL = {
+  LINK: {
+    type: ENTITY_TYPE.LINK,
+    description: "Link",
+    source: LinkSource,
+    decorator: Link,
+    attributes: ["url"],
+    whitelist: {
+      href: "^(?![#/])"
+    }
+  },
+  IMAGE: {
+    type: ENTITY_TYPE.IMAGE,
+    description: "Image",
+    source: ImageSource,
+    block: ImageBlock,
+    attributes: ["src", "alt"],
+    whitelist: {
+      src: "^(?!(data:|file:))"
+    }
+  }
 }
+
+const content = `
+<p>This editor demonstrates <strong>HTML import and export</strong>.</p>
+<hr />
+<blockquote>Built with <a href="http://localhost:3000/reports/f486b7a7-2af2-450d-af45-920d4ea8c80a">Report-Org-25th june</a></blockquote>
+<img src="/static/example-lowres-image2.jpg"/>
+    <p></p>
+`
+
+const importerConfig = {
+  htmlToEntity: (nodeName, node, createEntity) => {
+    // a tags will become LINK entities, marked as mutable, with only the URL as data.
+    if (nodeName === "a") {
+      return createEntity(ENTITY_TYPE.LINK, "MUTABLE", { url: node.href })
+    }
+
+    if (nodeName === "img") {
+      return createEntity(ENTITY_TYPE.IMAGE, "IMMUTABLE", {
+        src: node.src
+      })
+    }
+
+    if (nodeName === "hr") {
+      return createEntity(ENTITY_TYPE.HORIZONTAL_RULE, "IMMUTABLE", {})
+    }
+
+    return null
+  },
+  htmlToBlock: nodeName => {
+    if (nodeName === "hr" || nodeName === "img") {
+      // "atomic" blocks is how Draft.js structures block-level entities.
+      return "atomic"
+    }
+
+    return null
+  }
+}
+
+const exporterConfig = {
+  blockToHTML: block => {
+    if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
+      return <blockquote />
+    }
+
+    // Discard atomic blocks, as they get converted based on their entity.
+    if (block.type === BLOCK_TYPE.ATOMIC) {
+      return {
+        start: "",
+        end: ""
+      }
+    }
+
+    return null
+  },
+
+  entityToHTML: (entity, originalText) => {
+    if (entity.type === ENTITY_TYPE.LINK) {
+      return <a href={entity.data.url}>{originalText}</a>
+    }
+
+    if (entity.type === ENTITY_TYPE.IMAGE) {
+      return <img src={entity.data.src} alt={entity.data.alt} />
+    }
+
+    if (entity.type === ENTITY_TYPE.HORIZONTAL_RULE) {
+      return <hr />
+    }
+
+    return originalText
+  }
+}
+
+const fromHTML = html => convertToRaw(convertFromHTML(importerConfig)(html))
+const toHTML = raw =>
+  raw ? convertToHTML(exporterConfig)(convertFromRaw(raw)) : ""
+
+const onSave = content => {
+  console.log("saving", content)
+  toHTML(content)
+}
+const RichTextEditor = () => (
+  <DraftailEditor
+    id="rich-text"
+    ariaDescribedBy="rich-text-editor"
+    blockTypes={BLOCK_TYPES}
+    enableHorizontalRule
+    entityTypes={[ENTITY_CONTROL.LINK, ENTITY_CONTROL.IMAGE]}
+    inlineStyles={INLINE_STYLES}
+    maxListNesting={4}
+    onSave={onSave}
+    plugins={[linkifyPlugin]}
+    rawContentState={null}
+    showUndoControl
+    showRedoControl
+    spellCheck
+    stripPastedStyles={false}
+  />
+)
 
 export default RichTextEditor
