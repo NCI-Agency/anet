@@ -1,7 +1,6 @@
 package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +15,6 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>> {
 
@@ -176,9 +173,6 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     return String.format("%s %s :%s", fieldName, likeKeyword, paramName);
   }
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
   public String build() {
     addWithClauses();
     addSelectClauses();
@@ -186,18 +180,12 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     addWhereClauses();
     addGroupByClauses();
     addOrderByClauses();
-    final String sqlString = sql.toString();
-    logger.error("GO: sql={}, sqlArgs={}, listArgs={}", sqlString, sqlArgs, listArgs);
-    return sqlString;
+    return sql.toString();
   }
 
   public AnetBeanList<B> buildAndRun(Handle handle, T query, RowMapper<B> mapper) {
     build();
-    final AnetBeanList<B> result = getResult(handle, query, mapper);
-    logger.error("GO: result={}, size={}, list={}", result,
-        (result == null) ? null : result.getTotalCount(),
-        (result == null) ? null : result.getList());
-    return result;
+    return getResult(handle, query, mapper);
   }
 
   protected void addWithClauses() {
