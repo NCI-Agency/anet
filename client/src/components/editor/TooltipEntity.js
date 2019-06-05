@@ -1,4 +1,3 @@
-// @flow
 import React, { Component } from "react"
 import PropTypes from "prop-types"
 
@@ -20,11 +19,16 @@ class TooltipEntity extends Component {
     this.closeTooltip = this.closeTooltip.bind(this)
   }
 
+  /* :: openTooltip: (e: Event) => void; */
   openTooltip(e) {
     const trigger = e.target
-    this.setState({ showTooltipAt: trigger.getBoundingClientRect() })
+
+    if (trigger instanceof Element) {
+      this.setState({ showTooltipAt: trigger.getBoundingClientRect() })
+    }
   }
 
+  /* :: closeTooltip: () => void; */
   closeTooltip() {
     this.setState({ showTooltipAt: null })
   }
@@ -102,6 +106,7 @@ TooltipEntity.propTypes = {
   onRemove: PropTypes.func.isRequired,
   icon: PropTypes.oneOfType([
     PropTypes.string.isRequired,
+    PropTypes.array.isRequired,
     PropTypes.object.isRequired
   ]).isRequired,
   label: PropTypes.string.isRequired
