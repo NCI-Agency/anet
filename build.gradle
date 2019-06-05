@@ -162,6 +162,15 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	args = ['run', 'build']
 }
 
+task dbWait(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Wait for the ANET database to become available."
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	args = ["waitForDB", anetConfig]
+}
+
 task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
 	description = "Runs the ANET database initialization command."
