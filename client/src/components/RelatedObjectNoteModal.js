@@ -66,10 +66,11 @@ class BaseRelatedObjectNoteModal extends Component {
                     {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
                       <>
                         {this.props.questions.map(question => (
-                          <>
+                          <React.Fragment key={question.id}>
+                            <p>{question.label}</p>
                             <Field
                               name={question.id}
-                              label={question.label}
+                              label=""
                               component={FieldHelper.renderButtonToggleGroup}
                               buttons={question.choice}
                               onChange={value => {
@@ -78,7 +79,7 @@ class BaseRelatedObjectNoteModal extends Component {
                             />
                             <br />
                             <br />
-                          </>
+                          </React.Fragment>
                         ))}
                       </>
                     )}

@@ -183,7 +183,6 @@ class BaseRelatedObjectNotes extends Component {
     ) : (
       <div
         style={{
-          display: "flex",
           flexDirection: "column",
           alignItems: "flex-end",
           padding: 5,
