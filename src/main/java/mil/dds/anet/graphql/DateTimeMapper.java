@@ -9,7 +9,7 @@ import java.time.Instant;
 
 public class DateTimeMapper extends CachingMapper<GraphQLScalarType, GraphQLScalarType> {
 
-  public static final GraphQLScalarType GraphQLInstant = new GraphQlDateTimeType();
+  public static final GraphQLScalarType GraphQLInstant = GraphQlDateTimeType.getInstance();
 
   @Override
   public GraphQLScalarType toGraphQLType(String typeName, AnnotatedType javaType,
