@@ -2370,13 +2370,13 @@
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-12.0.10.tgz#17a8ec65cd8e88f51b418ceb271af18d3137df67"
   integrity sha512-WsVzTPshvCSbHThUduGGxbmnwcpkgSctHGHTqzWyFg4lYAuV5qXlyFPOsP3OWqCINfmg/8VXP+zJaa4OxEsBQQ==
 
-"@wdio/browserstack-service@^5.8.0":
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.8.0.tgz#bde29ecf10679f1bb80199891b149359ed48dbd2"
-  integrity sha512-A2T5I4vqoDaNBT0h/zt+2e/3fogotnE3BTkCQ3HR55guD8VCbq2vrwqB0ZmgBeV4CFMTfRdfKm5KmAe19NhcnQ==
+"@wdio/browserstack-service@^5.9.3":
+  version "5.9.3"
+  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.9.3.tgz#7ff82c2dafbc34b25168ef304e909973d3d270ea"
+  integrity sha512-8kBAdXpBqYGBC4e7ymI+YDiq09XjFQa4wrTBRc9mNN8f9ONwUGXQYt2iyWTF/Stl2Qr3CQe4sg1wuucnw2Y/Jg==
   dependencies:
-    "@wdio/logger" "^5.8.0"
-    browserstack-local "1.3.7"
+    "@wdio/logger" "^5.9.3"
+    browserstack-local "1.4.0"
     request "^2.85.0"
 
 "@wdio/cli@^5.8.3":
@@ -2423,15 +2423,15 @@
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
-"@wdio/logger@^5.8.0":
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.8.0.tgz#9d69dec2eaaee011c03de0f9239f8c520dfe8260"
-  integrity sha512-YQ6fybKvWEZPBVf/rrhedohj6g4U1cb9w/6IkHOOhDYbiwwvmAVk7h7QTCsdVc1pxO7Y4/5gI46bmoASgPsrnw==
+"@wdio/logger@^5.8.0", "@wdio/logger@^5.9.3":
+  version "5.9.3"
+  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.9.3.tgz#8aab6f1e8aafe7b655b0840e0ed9dcfd70744887"
+  integrity sha512-tpvu/wQqLAaShIIqZr7e/xl3lt9IeE6z/9DN59r+6xTC+RfD8YJ3D1n/c2jOsGbs/IW8RSWRvOERBWvpPcyQxw==
   dependencies:
     chalk "^2.3.0"
     loglevel "^1.6.0"
-    loglevel-plugin-prefix "^0.5.3"
-    strip-ansi "^4.0.0"
+    loglevel-plugin-prefix "^0.8.4"
+    strip-ansi "^5.2.0"
 
 "@wdio/mocha-framework@^5.8.1":
   version "5.8.1"
@@ -3989,10 +3989,10 @@ browserslist@^4.5.4, browserslist@^4.6.1:
     electron-to-chromium "^1.3.137"
     node-releases "^1.1.21"
 
-browserstack-local@1.3.7:
-  version "1.3.7"
-  resolved "https://registry.yarnpkg.com/browserstack-local/-/browserstack-local-1.3.7.tgz#cac9fc958eaa0a352e8f1ca1dc91bb141ba5da6f"
-  integrity sha512-ilZlmiy7XYJxsztYan7XueHVr3Ix9EVh/mCiYN1G53wRPEW/hg1KMsseM6UExzVbexEqFEfwjkBLeFlSqxh+bQ==
+browserstack-local@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/browserstack-local/-/browserstack-local-1.4.0.tgz#d979cac056f57b9af159b3bcd7fdc09b4354537c"
+  integrity sha512-BUJWxIsJkJxqfTPJIvGWTsf+IYSqSFUeFNW9tnuyTG7va/0LkXLhIi/ErFGDle1urQkol48HlQUXj4QrliXFpg==
   dependencies:
     https-proxy-agent "^2.2.1"
     is-running "^2.0.0"
@@ -9920,10 +9920,10 @@ log-update@^2.3.0:
     cli-cursor "^2.0.0"
     wrap-ansi "^3.0.1"
 
-loglevel-plugin-prefix@^0.5.3:
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/loglevel-plugin-prefix/-/loglevel-plugin-prefix-0.5.3.tgz#8e9131b96e4697a0dba517996f76b9e6c3f43210"
-  integrity sha512-zRAJw3WYCQAJ6xfEIi04/oqlmR6jkwg3hmBcMW82Zic3iPWyju1gwntcgic0m5NgqYNJ62alCmb0g/div26WjQ==
+loglevel-plugin-prefix@^0.8.4:
+  version "0.8.4"
+  resolved "https://registry.yarnpkg.com/loglevel-plugin-prefix/-/loglevel-plugin-prefix-0.8.4.tgz#2fe0e05f1a820317d98d8c123e634c1bd84ff644"
+  integrity sha512-WpG9CcFAOjz/FtNht+QJeGpvVl/cdR6P0z6OcXSkr8wFJOsV2GRj2j10JLfjuA4aYkcKCNIEqRGCyTife9R8/g==
 
 loglevel@^1.6.0:
   version "1.6.1"
