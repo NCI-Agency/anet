@@ -104,7 +104,7 @@ class ImageSource extends Component {
           <Modal.Title>Enter a valid image url</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form className="ImageSource" onSubmit={this.onConfirm}>
+          <form className="ImageSource">
             <label className="form-field">
               <span className="form-field__label">Image src</span>
               <input
@@ -118,7 +118,11 @@ class ImageSource extends Component {
               />
             </label>
 
-            <button type="submit" className="Tooltip__button">
+            <button
+              type="submit"
+              className="Tooltip__button"
+              onClick={this.onConfirm}
+            >
               Save
             </button>
           </form>
