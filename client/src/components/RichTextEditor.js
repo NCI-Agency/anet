@@ -3,8 +3,6 @@ import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertToRaw, convertFromRaw } from "draft-js"
 import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
 
-import createLinkifyPlugin from "draft-js-linkify-plugin"
-
 import Link from "components/editor/Link"
 import LinkSource from "components/editor/LinkSource"
 import ImageSource from "components/editor/ImageSource"
