@@ -1,4 +1,4 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -9,13 +9,13 @@ import mil.dds.anet.search.AbstractPersonSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class SqlitePersonSearcher extends AbstractPersonSearcher {
+public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
 
-  private final SqliteSearchQueryBuilder<Person, PersonSearchQuery> outerQb;
+  private final PostgresqlSearchQueryBuilder<Person, PersonSearchQuery> outerQb;
 
-  public SqlitePersonSearcher() {
-    super(new SqliteSearchQueryBuilder<Person, PersonSearchQuery>(""));
-    outerQb = new SqliteSearchQueryBuilder<Person, PersonSearchQuery>("SqlitePersonSearch");
+  public PostgresqlPersonSearcher() {
+    super(new PostgresqlSearchQueryBuilder<Person, PersonSearchQuery>(""));
+    outerQb = new PostgresqlSearchQueryBuilder<Person, PersonSearchQuery>("PostgresqlPersonSearch");
   }
 
   @Override

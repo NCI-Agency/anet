@@ -1,4 +1,4 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -9,13 +9,14 @@ import mil.dds.anet.search.AbstractPositionSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class SqlitePositionSearcher extends AbstractPositionSearcher {
+public class PostgresqlPositionSearcher extends AbstractPositionSearcher {
 
-  private final SqliteSearchQueryBuilder<Position, PositionSearchQuery> outerQb;
+  private final PostgresqlSearchQueryBuilder<Position, PositionSearchQuery> outerQb;
 
-  public SqlitePositionSearcher() {
-    super(new SqliteSearchQueryBuilder<Position, PositionSearchQuery>(""));
-    outerQb = new SqliteSearchQueryBuilder<Position, PositionSearchQuery>("SqlitePositionSearch");
+  public PostgresqlPositionSearcher() {
+    super(new PostgresqlSearchQueryBuilder<Position, PositionSearchQuery>(""));
+    outerQb =
+        new PostgresqlSearchQueryBuilder<Position, PositionSearchQuery>("PostgresqlPositionSearch");
   }
 
   @Override

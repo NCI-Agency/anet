@@ -56,7 +56,6 @@ dependencies {
 	compile 'ru.vyarus.guicey:guicey-jdbi3:0.6.0'
 	compile 'com.google.guava:guava:27.1-jre' // Pick the non-Android version of Guice
 
-	compile 'org.xerial:sqlite-jdbc:3.27.2.1' //If using SQLite
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.3' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
@@ -130,11 +129,6 @@ if (run.environment['DB_DRIVER'] == "sqlserver") {
 } else if (run.environment['DB_DRIVER'] == "postgresql") {
 	run.environment("ANET_DB_DRIVER", "org.postgresql.Driver")
 	run.environment("ANET_DB_URL", "jdbc:postgresql://${dbLoc}/${run.environment['ANET_DB_NAME']}")
-} else if (run.environment['DB_DRIVER'] == "sqlite") {
-	run.environment("ANET_DB_DRIVER", "org.sqlite.JDBC")
-	run.environment("ANET_DB_URL", "jdbc:sqlite:development.db?foreign_keys=on")
-	run.environment("ANET_DB_DATE_STRING_FORMAT", "yyyy-MM-dd hh:mm:ss.SSS Z")
-	run.environment("ANET_DB_DATE_CLASS", "text")
 } else {
 	throw new GradleException( "Unsupported DB_DRIVER value \'${run.environment['DB_DRIVER']}\'")
 }
@@ -346,13 +340,6 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	group = "database container"
 	description = "Removes " + dbContainerName + " container."
 	targetContainerId { dbContainerName }
-}
-
-task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "database container"
-	description = "Waiting until the " + dbContainerName + " DB has started."
-	targetContainerId { dbContainerName }
-	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
 }
 
 classes.dependsOn buildClient

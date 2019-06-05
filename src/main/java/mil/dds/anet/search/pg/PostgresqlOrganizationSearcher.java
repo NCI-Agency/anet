@@ -1,4 +1,4 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -9,14 +9,14 @@ import mil.dds.anet.search.AbstractOrganizationSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class SqliteOrganizationSearcher extends AbstractOrganizationSearcher {
+public class PostgresqlOrganizationSearcher extends AbstractOrganizationSearcher {
 
-  private final SqliteSearchQueryBuilder<Organization, OrganizationSearchQuery> outerQb;
+  private final PostgresqlSearchQueryBuilder<Organization, OrganizationSearchQuery> outerQb;
 
-  public SqliteOrganizationSearcher() {
-    super(new SqliteSearchQueryBuilder<Organization, OrganizationSearchQuery>(""));
-    outerQb = new SqliteSearchQueryBuilder<Organization, OrganizationSearchQuery>(
-        "SqliteOrganizationSearch");
+  public PostgresqlOrganizationSearcher() {
+    super(new PostgresqlSearchQueryBuilder<Organization, OrganizationSearchQuery>(""));
+    outerQb = new PostgresqlSearchQueryBuilder<Organization, OrganizationSearchQuery>(
+        "PostgresqlOrganizationSearch");
   }
 
   @Override

@@ -1,14 +1,14 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.search.AbstractAuthorizationGroupSearcher;
 
-public class SqliteAuthorizationGroupSearcher extends AbstractAuthorizationGroupSearcher {
+public class PostgresqlAuthorizationGroupSearcher extends AbstractAuthorizationGroupSearcher {
 
-  public SqliteAuthorizationGroupSearcher() {
-    super(new SqliteSearchQueryBuilder<AuthorizationGroup, AuthorizationGroupSearchQuery>(
-        "SqliteAuthorizationGroupSearch"));
+  public PostgresqlAuthorizationGroupSearcher() {
+    super(new PostgresqlSearchQueryBuilder<AuthorizationGroup, AuthorizationGroupSearchQuery>(
+        "PostgresqlAuthorizationGroupSearch"));
   }
 
   @Override

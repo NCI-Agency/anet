@@ -6,9 +6,8 @@ React structures the application into components instead of technologies. This m
 1. Pull down any updates `git pull`
 1. If you see any changes to `src/main/resources/migrations.xml` this means there are updates to the database schema.  Run `./gradlew dbMigrate` to update your database schema.
   - If you are using sqlserver then you need to run `export DB_DRIVER='sqlserver'` to tell gradle to use your sqlserver configuration
-1. If you see any changes to `insertBaseData.sql` then there are updates to the base data set.
-  - If you are using sqlite, then run `cat insertBaseData.sql | ./mssql2sqlite.sh | sqlite3 development.db`
-  - If you are using sqlserver, then use your favorite SQL connector to run the insertBaseData.sql file.
+1. If you see any changes to `insertBaseData-mssql.sql` then there are updates to the base data set.
+  - Run `./gradlew dbDrop dbMigrate dbLoad` to start with a freshly updated database.
 1. Re launch the backend server with `./gradlew run`
 1. Re launch the frontend server with `./yarn run start`
 

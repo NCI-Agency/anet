@@ -1,4 +1,4 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import com.google.common.base.Joiner;
 import java.util.List;
@@ -12,18 +12,16 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class SqliteSearchQueryBuilder<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
+public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends AbstractSearchQueryBuilder<B, T> {
 
-  public SqliteSearchQueryBuilder(String queryName) {
-    super(queryName, "ILIKE"); // for PostgreSQL
+  public PostgresqlSearchQueryBuilder(String queryName) {
+    super(queryName, "ILIKE");
   }
 
   @Override
   public void addTotalCount() {
-    // SQLite can't do total counts, so this is computed in
-    // {@link AnetBeanList#AnetBeanList(Query, int, int, RowMapper, Long)}
-    addSelectClause("COUNT(*) OVER() AS \"totalCount\""); // for PostgreSQL
+    addSelectClause("COUNT(*) OVER() AS \"totalCount\"");
   }
 
   @Override

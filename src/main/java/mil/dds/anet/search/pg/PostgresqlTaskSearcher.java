@@ -1,13 +1,13 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.search.AbstractTaskSearcher;
 
-public class SqliteTaskSearcher extends AbstractTaskSearcher {
+public class PostgresqlTaskSearcher extends AbstractTaskSearcher {
 
-  public SqliteTaskSearcher() {
-    super(new SqliteSearchQueryBuilder<Task, TaskSearchQuery>("SqliteTaskSearch"));
+  public PostgresqlTaskSearcher() {
+    super(new PostgresqlSearchQueryBuilder<Task, TaskSearchQuery>("PostgresqlTaskSearch"));
   }
 
   @Override

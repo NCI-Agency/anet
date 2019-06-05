@@ -1,13 +1,13 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.search.AbstractTagSearcher;
 
-public class SqliteTagSearcher extends AbstractTagSearcher {
+public class PostgresqlTagSearcher extends AbstractTagSearcher {
 
-  public SqliteTagSearcher() {
-    super(new SqliteSearchQueryBuilder<Tag, TagSearchQuery>("SqliteTagSearch"));
+  public PostgresqlTagSearcher() {
+    super(new PostgresqlSearchQueryBuilder<Tag, TagSearchQuery>("PostgresqlTagSearch"));
   }
 
   @Override

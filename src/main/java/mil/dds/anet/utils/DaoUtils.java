@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class DaoUtils {
 
   public enum DbType {
-    MSSQL("sqlserver"), SQLITE("sqlite"), POSTGRESQL("postgresql");
+    MSSQL("sqlserver"), POSTGRESQL("postgresql");
 
     private String jdbcTag;
 

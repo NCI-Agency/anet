@@ -1,13 +1,14 @@
-package mil.dds.anet.search.sqlite;
+package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.search.AbstractLocationSearcher;
 
-public class SqliteLocationSearcher extends AbstractLocationSearcher {
+public class PostgresqlLocationSearcher extends AbstractLocationSearcher {
 
-  public SqliteLocationSearcher() {
-    super(new SqliteSearchQueryBuilder<Location, LocationSearchQuery>("SqliteLocationSearch"));
+  public PostgresqlLocationSearcher() {
+    super(new PostgresqlSearchQueryBuilder<Location, LocationSearchQuery>(
+        "PostgresqlLocationSearch"));
   }
 
   @Override
