@@ -20,11 +20,6 @@ public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends 
   }
 
   @Override
-  public void addTotalCount() {
-    addSelectClause("COUNT(*) OVER() AS \"totalCount\"");
-  }
-
-  @Override
   public String getFullTextQuery(String text) {
     return "%" + stripWildcards(text) + "%";
   }

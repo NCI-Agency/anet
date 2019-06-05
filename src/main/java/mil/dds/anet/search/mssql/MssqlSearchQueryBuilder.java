@@ -18,11 +18,6 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
     super(queryName, "LIKE");
   }
 
-  @Override
-  public void addTotalCount() {
-    addSelectClause("COUNT(*) OVER() AS totalCount");
-  }
-
   /**
    * Converts a text search query into a SQL Server Full Text query. If the text ends with a * then
    * we do a prefix match on the string else we do an inflectional match.
