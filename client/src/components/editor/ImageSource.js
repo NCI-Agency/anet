@@ -1,31 +1,8 @@
-// @flow
 import React, { Component } from "react"
 
 import { AtomicBlockUtils, EditorState } from "draft-js"
 
 import { Modal } from "react-bootstrap"
-
-// function imageDataSrc(src) {
-//   const canvas = document.createElement("canvas")
-//   const image = new Image()
-//   image.onload = function() {
-//     const ctx = canvas.getContext("2d")
-//     canvas.width = image.naturalWidth
-//     canvas.height = image.naturalHeight
-//     ctx.drawImage(image, 0, 0)
-//   }
-//   image.crossOrigin = "Anonymous"
-//   image.src = src
-//   // Convert to in-line data
-//   return !src.startsWith("data:") ? canvas.toDataURL("image/jpeg") : src
-// }
-
-// const ReactImage = props => {
-//   const { height, src, width, alt } = props.contentState
-//     .getEntity(props.entityKey)
-//     .getData()
-//   return <img src={imageDataSrc(src)} height={height} width={width} alt={alt} />
-// }
 
 class ImageSource extends Component {
   constructor(props) {
