@@ -2,8 +2,9 @@ import React, { Component } from "react"
 import PropTypes from "prop-types"
 
 import { RichUtils } from "draft-js"
-
 import { Modal } from "react-bootstrap"
+
+import createEntity from "./utils/createEntity"
 
 import "./LinkSource.css"
 
@@ -36,24 +37,36 @@ class LinkSource extends Component {
 
     e.preventDefault()
 
-    const contentState = editorState.getCurrentContent()
+    let nextState = editorState
 
-    const data = {
-      url: url.replace(/\s/g, "")
+    if (url) {
+      const selection = editorState.getSelection()
+      const entityData = {
+        url: url.replace(/\s/g, "")
+      }
+
+      const hasText = !selection.isCollapsed()
+
+      if (hasText) {
+        const contentState = editorState.getCurrentContent()
+        const contentStateWithEntity = contentState.createEntity(
+          entityType.type,
+          "MUTABLE",
+          entityData
+        )
+
+        const entityKey = contentStateWithEntity.getLastCreatedEntityKey()
+        nextState = RichUtils.toggleLink(editorState, selection, entityKey)
+      } else {
+        nextState = createEntity(
+          editorState,
+          entityType.type,
+          entityData,
+          url,
+          "MUTABLE"
+        )
+      }
     }
-    const contentStateWithEntity = contentState.createEntity(
-      // Fixed in https://github.com/facebook/draft-js/commit/6ba124cf663b78c41afd6c361a67bd29724fa617, to be released.
-      // $FlowFixMe
-      entityType.type,
-      "MUTABLE",
-      data
-    )
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey()
-    const nextState = RichUtils.toggleLink(
-      editorState,
-      editorState.getSelection(),
-      entityKey
-    )
 
     onComplete(nextState)
   }
