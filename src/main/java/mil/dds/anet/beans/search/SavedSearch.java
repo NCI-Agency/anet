@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.ForeignObjectHolder;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -36,7 +37,7 @@ public class SavedSearch extends AbstractAnetBean {
     if (owner.hasForeignObject()) {
       return CompletableFuture.completedFuture(owner.getForeignObject());
     }
-    return new UuidFetcher<Person>().load(context, "people", owner.getForeignUuid())
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, owner.getForeignUuid())
         .thenApply(o -> {
           owner.setForeignObject(o);
           return o;

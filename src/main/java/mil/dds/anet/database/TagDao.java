@@ -13,9 +13,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 @InTransaction
 public class TagDao extends AnetBaseDao<Tag> {
 
-  public TagDao() {
-    super("Tags", "tags", "*", null);
-  }
+  public static final String TABLE_NAME = "tags";
 
   public Tag getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);

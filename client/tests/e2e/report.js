@@ -41,7 +41,7 @@ test("Draft and submit a report", async t => {
 
   let $attendeesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#attendees",
-    "christopf topferness"
+    "topferness, christopf"
   )
 
   let $attendeesShortcutTitle = await $("#attendees-shortcut-title")

@@ -204,7 +204,6 @@ class BaseHome extends Page {
     let queries = this.getQueriesForUser(currentUser)
     let queryParts = [] // GQL query parts
     queries.forEach((q, index) => {
-      q.query.pageNum = 0
       q.query.pageSize = 1 // we're only interested in the totalCount, so just get at most one report
       queryParts.push(
         new GQL.Part(

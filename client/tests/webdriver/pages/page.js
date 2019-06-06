@@ -2,7 +2,8 @@ class Page {
   static DEFAULT_CREDENTIALS = {
     user: "erin",
     superUser: "rebecca",
-    adminUser: "arthur"
+    adminUser: "arthur",
+    onboardUser: "bonny"
   }
 
   _buildUrl(pathName, credentials) {
@@ -26,6 +27,10 @@ class Page {
 
   openAsAdminUser(pathName = "/") {
     this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
+  }
+
+  openAsOnboardUser(pathName = "/") {
+    this._open(pathName, Page.DEFAULT_CREDENTIALS.onboardUser)
   }
 
   getRandomOption(select) {

@@ -6,11 +6,7 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 
-public class ReportSearchQuery extends SubscribableObjectSearchQuery {
-
-  public enum ReportSearchSortBy {
-    CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT, UPDATED_AT
-  }
+public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearchSortBy> {
 
   String authorUuid;
   Instant engagementDateStart;
@@ -48,13 +44,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery {
   private List<String> authorizationGroupUuid;
   private Boolean sensitiveInfo;
 
-  private ReportSearchSortBy sortBy;
-  private SortOrder sortOrder;
-
   public ReportSearchQuery() {
-    super();
-    this.sortBy = ReportSearchSortBy.CREATED_AT;
-    this.sortOrder = SortOrder.DESC;
+    super(ReportSearchSortBy.CREATED_AT);
+    this.setSortOrder(SortOrder.DESC);
   }
 
   public String getAuthorUuid() {
@@ -287,30 +279,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery {
 
   public void setSensitiveInfo(Boolean sensitiveInfo) {
     this.sensitiveInfo = sensitiveInfo;
-  }
-
-  public ReportSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(ReportSearchSortBy sortBy) {
-    this.sortBy = sortBy;
-  }
-
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
-  }
-
-  public static ReportSearchQuery withText(String text, int pageNum, int pageSize) {
-    ReportSearchQuery query = new ReportSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
   }
 
 }

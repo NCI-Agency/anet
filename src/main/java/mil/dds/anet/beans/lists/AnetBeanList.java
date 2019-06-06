@@ -2,8 +2,6 @@ package mil.dds.anet.beans.lists;
 
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.List;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Report;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
 
@@ -27,13 +25,10 @@ public class AnetBeanList<T> {
     this.list = list;
   }
 
-  public AnetBeanList(Query query, int pageNum, int pageSize, RowMapper<T> mapper,
-      Long manualRowCount) {
+  public AnetBeanList(Query query, int pageNum, int pageSize, RowMapper<T> mapper) {
     this(pageNum, pageSize, query.map(mapper).list());
     int resultSize = getList().size();
-    if (manualRowCount != null) {
-      setTotalCount(manualRowCount.intValue());
-    } else if (resultSize == 0) {
+    if (resultSize == 0) {
       setTotalCount(0);
     } else {
       Integer foundCount = (Integer) query.getContext().getAttribute("totalCount");
@@ -74,13 +69,4 @@ public class AnetBeanList<T> {
     this.totalCount = totalCount;
   }
 
-  public static AnetBeanList<Report> getReportList(Person user, Query query, int pageNum,
-      int pageSize, RowMapper<Report> mapper) {
-    final AnetBeanList<Report> results =
-        new AnetBeanList<Report>(query, pageNum, pageSize, mapper, null);
-    for (final Report report : results.getList()) {
-      report.setUser(user);
-    }
-    return results;
-  }
 }

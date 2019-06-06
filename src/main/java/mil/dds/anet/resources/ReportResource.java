@@ -998,9 +998,9 @@ public class ReportResource {
       final List<Map<String, Object>> groupStats = (List<Map<String, Object>>) group.get(groupName);
       for (final Map<String, Object> groupSt : groupStats) {
         AdvisorReportsStats st = new AdvisorReportsStats();
-        st.setWeek((int) groupSt.get("week"));
-        st.setNrReportsSubmitted((int) groupSt.get("nrReportsSubmitted"));
-        st.setNrEngagementsAttended((int) groupSt.get("nrEngagementsAttended"));
+        st.setWeek(((Number) groupSt.get("week")).intValue());
+        st.setNrReportsSubmitted(((Number) groupSt.get("nrReportsSubmitted")).intValue());
+        st.setNrEngagementsAttended(((Number) groupSt.get("nrEngagementsAttended")).intValue());
         stats.add(st);
       }
       entry.setStats(stats);

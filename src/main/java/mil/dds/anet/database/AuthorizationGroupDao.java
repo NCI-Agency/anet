@@ -16,6 +16,7 @@ import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -25,9 +26,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 @InTransaction
 public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
-  public AuthorizationGroupDao() {
-    super("ApprovalSteps", "approvalSteps", "*", null);
-  }
+  public static final String TABLE_NAME = "authorizationGroups";
 
   public AuthorizationGroup getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
@@ -120,8 +119,8 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
   public CompletableFuture<List<Position>> getPositionsForAuthorizationGroup(
       Map<String, Object> context, String authorizationGroupUuid) {
-    return new ForeignKeyFetcher<Position>().load(context, "authorizationGroup.positions",
-        authorizationGroupUuid);
+    return new ForeignKeyFetcher<Position>().load(context,
+        FkDataLoaderKey.AUTHORIZATION_GROUP_POSITIONS, authorizationGroupUuid);
   }
 
   public AnetBeanList<AuthorizationGroup> search(AuthorizationGroupSearchQuery query) {

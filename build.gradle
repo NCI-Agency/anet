@@ -13,19 +13,6 @@ apply plugin: 'com.diffplug.gradle.spotless'
 sourceCompatibility = 1.8
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String dbContainerName = isTestEnv ? "anet-mssql-test-server" : "anet-mssql-server"
-
-// Defaults for development variables
-run.environment("DB_DRIVER", "sqlserver")
-run.environment("ANET_DB_SERVER", "localhost")
-run.environment("ANET_DB_NAME", isTestEnv ? "testAnet" : "devAnet")
-run.environment("ANET_DB_USERNAME", isTestEnv ? "anetTestUser" : "anetDevUser")
-run.environment("ANET_DB_PASSWORD", isTestEnv ? "Test-P@ssw0rd" : "Dev-P@ssw0rd")
-run.environment("ANET_SA_PASSWORD", "SA-P@ssw0rd")
-run.environment("ANET_DB_PORT", "1433")
-run.environment("ANET_DB_EXPOSED_PORT", isTestEnv ? "1434" : "1433")
-run.environment("ANET_PORT", isTestEnv ? "8180" : "8080")
-run.environment("ANET_ADMIN_PORT", isTestEnv ? "8181" : "8081")
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
@@ -33,6 +20,22 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 } else if (isTestEnv && file('localTestSettings.gradle').exists()) {
 	apply from: 'localTestSettings.gradle'
 }
+
+// Defaults for development variables
+run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "sqlserver")
+boolean isMssql = run.environment["DB_DRIVER"] == "sqlserver"
+String dbType = isMssql ? "mssql" : "psql"
+run.environment("ANET_DB_SERVER", run.environment["ANET_DB_SERVER"] ?: "localhost")
+run.environment("ANET_DB_NAME", run.environment["ANET_DB_NAME"] ?: isTestEnv ? "testAnet" : "devAnet")
+run.environment("ANET_DB_USERNAME", run.environment["ANET_DB_USERNAME"] ?: isTestEnv ? "anetTestUser" : "anetDevUser")
+run.environment("ANET_DB_PASSWORD", run.environment["ANET_DB_PASSWORD"] ?: isTestEnv ? "Test-P@ssw0rd" : "Dev-P@ssw0rd")
+run.environment("ANET_SA_PASSWORD", run.environment["ANET_SA_PASSWORD"] ?: "SA-P@ssw0rd")
+run.environment("ANET_DB_PORT", run.environment["ANET_DB_PORT"] ?: isMssql ? "1433" : "5432")
+run.environment("ANET_DB_EXPOSED_PORT", run.environment["ANET_DB_EXPOSED_PORT"] ?: isMssql ? (isTestEnv ? "1434" : "1433") : (isTestEnv ? "5433" : "5432"))
+run.environment("ANET_PORT", run.environment["ANET_PORT"] ?: isTestEnv ? "8180" : "8080")
+run.environment("ANET_ADMIN_PORT", run.environment["ANET_ADMIN_PORT"] ?: isTestEnv ? "8181" : "8081")
+
+String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -44,16 +47,17 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.3.11'
-	compile group: 'io.dropwizard', name: 'dropwizard-jdbi3', version: '1.3.11'
-	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.3.11'
-	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.3.11'
-	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.3.11'
-	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.3.11'
+	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.3.12'
+	compile group: 'io.dropwizard', name: 'dropwizard-jdbi3', version: '1.3.12'
+	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.3.12'
+	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.3.12'
+	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.3.12'
+	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.3.12'
 	compile 'ru.vyarus.guicey:guicey-jdbi3:0.6.0'
 	compile 'com.google.guava:guava:27.1-jre' // Pick the non-Android version of Guice
 
-	compile 'org.xerial:sqlite-jdbc:3.27.2.1' //If using SQLite
+	// Supported databases:
+	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.2.1.jre8'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.3' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
@@ -62,9 +66,8 @@ dependencies {
 	compile 'ch.qos.logback:logback-core:1.2.3'
 	compile 'ch.qos.logback:logback-access:1.2.3'
 	compile 'com.github.waffle:waffle-jna:1.9.1'
-	compile 'com.graphql-java:graphql-java:11.0'
 	compile 'com.graphql-java:java-dataloader:2.2.1'
-	compile 'io.leangen.graphql:spqr:0.9.9'
+	compile 'io.leangen.graphql:spqr:0.10.0'
 	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190503.1'
 
 	// Used for converting GraphQL request output to XML:
@@ -72,17 +75,15 @@ dependencies {
 	// For JSON schema validation
 	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
 
-	compile 'com.microsoft.sqlserver:mssql-jdbc:7.2.1.jre8'
-
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
 	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
 
 	// For parsing HTML to check for 'empty' input
-	compile 'org.jsoup:jsoup:1.11.3'
+	compile 'org.jsoup:jsoup:1.12.1'
 
-	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.3.11'
-	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.3.11'
+	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.3.12'
+	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.3.12'
 	testCompile 'org.apache.commons:commons-io:1.3.2'
 }
 
@@ -113,11 +114,7 @@ String anetConfig = "anet.yml"
 
 applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
 
-// Set up developer DB parameters, with sensible defaults:
-String dbDriver = run.environment['DB_DRIVER'] ?: 'sqlite'
-String dbLoc = run.environment['ANET_DB_SERVER'] ?: 'localhost'
-String dbName = run.environment['ANET_DB_NAME'] ?: 'anet'
-
+String dbLoc = run.environment['ANET_DB_SERVER']
 if (run.environment['ANET_DB_EXPOSED_PORT']) {
 	dbLoc = dbLoc + ":" + run.environment['ANET_DB_EXPOSED_PORT'].toString()
 }
@@ -125,19 +122,14 @@ if (!run.environment['ANET_DB_USERNAME']) {
 	run.environment('ANET_DB_USERNAME', run.environment['USER'])
 }
 
-if (dbDriver == "sqlserver") {
+if (run.environment['DB_DRIVER'] == "sqlserver") {
 	run.environment("ANET_DB_DRIVER", "com.microsoft.sqlserver.jdbc.SQLServerDriver")
-	run.environment("ANET_DB_URL", "jdbc:sqlserver://${dbLoc};databaseName=${dbName}")
-} else if (dbDriver == "postgresql") {
+	run.environment("ANET_DB_URL", "jdbc:sqlserver://${dbLoc};databaseName=${run.environment['ANET_DB_NAME']}")
+} else if (run.environment['DB_DRIVER'] == "postgresql") {
 	run.environment("ANET_DB_DRIVER", "org.postgresql.Driver")
-	run.environment("ANET_DB_URL", "jdbc:postgresql://${dbLoc}/${dbName}")
-} else if (dbDriver == "sqlite") {
-	run.environment("ANET_DB_DRIVER", "org.sqlite.JDBC")
-	run.environment("ANET_DB_URL", "jdbc:sqlite:development.db?foreign_keys=on")
-	run.environment("ANET_DB_DATE_STRING_FORMAT", "yyyy-MM-dd hh:mm:ss.SSS Z")
-	run.environment("ANET_DB_DATE_CLASS", "text")
+	run.environment("ANET_DB_URL", "jdbc:postgresql://${dbLoc}/${run.environment['ANET_DB_NAME']}")
 } else {
-	throw new GradleException( "Unsupported DB_DRIVER value \'${dbDriver}\'")
+	throw new GradleException( "Unsupported DB_DRIVER value \'${run.environment['DB_DRIVER']}\'")
 }
 
 test.environment = run.environment
@@ -163,6 +155,15 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	args = ['run', 'build']
 }
 
+task dbWait(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Wait for the ANET database to become available."
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	args = ["waitForDB", anetConfig]
+}
+
 task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
 	description = "Runs the ANET database initialization command."
@@ -182,7 +183,16 @@ task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["db", "status", anetConfig]
 }
 
-task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
+task dbPrep(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database preparation command."
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	args = ["dbScript", "-S", "prepare-${dbType}.sql", anetConfig]
+}
+
+task dbMigrate(dependsOn: dbPrep, type: JavaExec) {
 	group = "database"
 	description = "Runs the ANET database migration (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
@@ -224,13 +234,33 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 
-task dbLoad(dependsOn: 'compileJava', type: JavaExec) {
+task dbLoad(dependsOn: "dbLoad_${dbType}") {
 	group = "database"
 	description = "Runs the ANET database load command; loads demo data."
+}
+
+task dbLoad_mssql(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database load command for MS SQL; loads demo data."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
-	args = ["dbScript", "-S", "insertBaseData.sql", anetConfig]
+	args = ["dbScript", "-S", "insertBaseData-mssql.sql", anetConfig]
+}
+
+task dbLoad_psql(dependsOn: "dbLoad_psql_createData", type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "database"
+	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
+	targetContainerId { dbContainerName }
+	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "/hostdata/insertBaseData-psql.sql"] ]
+}
+
+task dbLoad_psql_createData(type: Exec) {
+	group = "database"
+	description = "Convert the ANET demo data from MS SQL to PostgreSQL format."
+	standardInput = new FileInputStream("${projectDir}/insertBaseData-mssql.sql")
+	standardOutput = new FileOutputStream("${projectDir}/insertBaseData-psql.sql")
+	commandLine "${projectDir}/mssql2pg.pl"
 }
 
 task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
@@ -267,7 +297,7 @@ task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImag
 
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "database container"
-	repository = "ncia/anet-mssql-linux"
+	repository = isMssql ? "ncia/anet-mssql-linux" : "postgres"
 	description = "Pulls a docker image for the ANET DB from " + repository + "."
 	tag = "latest"
 }
@@ -276,17 +306,23 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	group = "database container"
 	imageId = dockerPullDB.getImageId()
 	containerName = dbContainerName
-	description = "Creates an ANET MS SQL DB container named " + dbContainerName + "."
+	description = "Creates an ANET ${dbType} SQL DB container named " + dbContainerName + "."
 	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
-	withEnvVar('ACCEPT_EULA', 'Y')
-	withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
-	withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
-	withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
-	withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+	if (isMssql) {
+	  withEnvVar('ACCEPT_EULA', 'Y')
+	  withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
+	  withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
+	  withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
+	  withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+	} else {
+	  withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
+	  withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
+	  withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+	}
 	portBindings = [run.environment["ANET_DB_EXPOSED_PORT"]+":"+run.environment["ANET_DB_PORT"]]
 }
 
-// need to make this invoke dbCreateContainer if there is no anet-mssql-server and possibly get newer image if available
+// need to make this invoke dockerCreateDB if there is no anet-${dbType}-server and possibly get newer image if available
 task dockerStartDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
 	group = "database container"
 	description = "Starts " + dbContainerName + " container."
@@ -303,13 +339,6 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	group = "database container"
 	description = "Removes " + dbContainerName + " container."
 	targetContainerId { dbContainerName }
-}
-
-task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "database container"
-	description = "Waiting until the " + dbContainerName + " DB has started."
-	targetContainerId { dbContainerName }
-	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
 }
 
 classes.dependsOn buildClient

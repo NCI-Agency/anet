@@ -13,15 +13,14 @@ import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
 public class NoteDao extends AnetBaseDao<Note> {
 
-  public NoteDao() {
-    super("Notes", "notes", "*", null);
-  }
+  public static final String TABLE_NAME = "notes";
 
   public Note getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
@@ -100,7 +99,7 @@ public class NoteDao extends AnetBaseDao<Note> {
 
   public CompletableFuture<List<Note>> getNotesForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
-    return new ForeignKeyFetcher<Note>().load(context, "noteRelatedObject.notes",
+    return new ForeignKeyFetcher<Note>().load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES,
         relatedObjectUuid);
   }
 
@@ -125,7 +124,7 @@ public class NoteDao extends AnetBaseDao<Note> {
   static class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<NoteRelatedObject> {
     private static final String sql =
         "/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
-            + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectuuid\" ASC";
+            + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public NoteRelatedObjectsBatcher() {
       super(sql, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
@@ -140,8 +139,8 @@ public class NoteDao extends AnetBaseDao<Note> {
 
   public CompletableFuture<List<NoteRelatedObject>> getRelatedObjects(Map<String, Object> context,
       Note note) {
-    return new ForeignKeyFetcher<NoteRelatedObject>().load(context, "note.noteRelatedObjects",
-        note.getUuid());
+    return new ForeignKeyFetcher<NoteRelatedObject>().load(context,
+        FkDataLoaderKey.NOTE_NOTE_RELATED_OBJECTS, note.getUuid());
   }
 
   private void insertNoteRelatedObjects(String uuid, List<NoteRelatedObject> noteRelatedObjects) {

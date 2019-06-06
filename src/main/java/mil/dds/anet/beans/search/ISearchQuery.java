@@ -1,11 +1,11 @@
 package mil.dds.anet.beans.search;
 
-public interface ISearchQuery {
-  // marker interface
-
+public interface ISearchQuery<T extends ISortBy> {
   public enum SortOrder {
     ASC, DESC
   }
+
+  public boolean isTextPresent();
 
   public String getText();
 
@@ -13,9 +13,19 @@ public interface ISearchQuery {
 
   public int getPageNum();
 
-  public void setPageNum(int pageNum);
+  public void setPageNum(Integer pageNum);
 
   public int getPageSize();
 
-  public void setPageSize(int pageSize);
+  public void setPageSize(Integer pageSize);
+
+  public SortOrder getSortOrder();
+
+  public void setSortOrder(SortOrder sortOrder);
+
+  public boolean isSortByPresent();
+
+  public T getSortBy();
+
+  public void setSortBy(T sortBy);
 }

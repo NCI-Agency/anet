@@ -144,7 +144,7 @@ public final class GraphQlHelper {
    * @return the object list matching the search query
    */
   public <T extends AbstractAnetBean> AnetBeanList<T> searchObjects(Person user, String searchQuery,
-      String paramName, String paramType, String fields, AbstractSearchQuery param,
+      String paramName, String paramType, String fields, AbstractSearchQuery<?> param,
       TypeReference<GraphQlResponse<AnetBeanList<T>>> responseType) {
     final String q = String.format(searchFmt, paramName, paramType, searchQuery, fields);
     return graphQlClient.doGraphQlQuery(user, q, paramName, param, responseType);

@@ -76,7 +76,7 @@ public class AccountDeactivationWorker implements Runnable {
   private void runInternal(int daysUntilEndOfTour, int daysTillNextWarning) {
     // Get a list of all people with a end of tour coming up
     PersonSearchQuery query = new PersonSearchQuery();
-    query.setPageSize(Integer.MAX_VALUE);
+    query.setPageSize(0);
     Instant now = Instant.now().atZone(DaoUtils.getDefaultZoneId()).toInstant();
     Instant warningDate = now.plus(daysUntilEndOfTour, ChronoUnit.DAYS);
     query.setEndOfTourDateEnd(warningDate);

@@ -18,6 +18,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -78,7 +79,8 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
       return CompletableFuture.completedFuture(approvalStep.getForeignObject());
     }
     return new UuidFetcher<ApprovalStep>()
-        .load(context, "approvalSteps", approvalStep.getForeignUuid()).thenApply(o -> {
+        .load(context, IdDataLoaderKey.APPROVAL_STEPS, approvalStep.getForeignUuid())
+        .thenApply(o -> {
           approvalStep.setForeignObject(o);
           return o;
         });
@@ -161,8 +163,8 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
     if (location.hasForeignObject()) {
       return CompletableFuture.completedFuture(location.getForeignObject());
     }
-    return new UuidFetcher<Location>().load(context, "locations", location.getForeignUuid())
-        .thenApply(o -> {
+    return new UuidFetcher<Location>()
+        .load(context, IdDataLoaderKey.LOCATIONS, location.getForeignUuid()).thenApply(o -> {
           location.setForeignObject(o);
           return o;
         });
@@ -353,7 +355,7 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
     if (author.hasForeignObject()) {
       return CompletableFuture.completedFuture(author.getForeignObject());
     }
-    return new UuidFetcher<Person>().load(context, "people", author.getForeignUuid())
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, author.getForeignUuid())
         .thenApply(o -> {
           author.setForeignObject(o);
           return o;
@@ -388,7 +390,7 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
       return CompletableFuture.completedFuture(advisorOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, "organizations", advisorOrg.getForeignUuid()).thenApply(o -> {
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, advisorOrg.getForeignUuid()).thenApply(o -> {
           advisorOrg.setForeignObject(o);
           return o;
         });
@@ -422,7 +424,8 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
       return CompletableFuture.completedFuture(principalOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, "organizations", principalOrg.getForeignUuid()).thenApply(o -> {
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, principalOrg.getForeignUuid())
+        .thenApply(o -> {
           principalOrg.setForeignObject(o);
           return o;
         });

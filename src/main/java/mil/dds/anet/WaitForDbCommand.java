@@ -43,7 +43,7 @@ public class WaitForDbCommand extends ConfiguredCommand<AnetConfiguration> {
       try {
         jdbi.open().close();
         break;
-      } catch (Exception exception) {
+      } catch (Throwable exception) {
         if (remainingTries == 0) {
           throw new RuntimeException(exception);
         }

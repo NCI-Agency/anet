@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -118,8 +119,8 @@ public class Task extends AbstractAnetBean implements SubscribableObject {
     if (customFieldRef1.hasForeignObject()) {
       return CompletableFuture.completedFuture(customFieldRef1.getForeignObject());
     }
-    return new UuidFetcher<Task>().load(context, "tasks", customFieldRef1.getForeignUuid())
-        .thenApply(o -> {
+    return new UuidFetcher<Task>()
+        .load(context, IdDataLoaderKey.TASKS, customFieldRef1.getForeignUuid()).thenApply(o -> {
           customFieldRef1.setForeignObject(o);
           return o;
         });
@@ -162,7 +163,8 @@ public class Task extends AbstractAnetBean implements SubscribableObject {
       return CompletableFuture.completedFuture(responsibleOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, "organizations", responsibleOrg.getForeignUuid()).thenApply(o -> {
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, responsibleOrg.getForeignUuid())
+        .thenApply(o -> {
           responsibleOrg.setForeignObject(o);
           return o;
         });

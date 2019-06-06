@@ -254,7 +254,7 @@ public class AnetObjectEngine {
    */
   public Map<String, Organization> buildTopLevelOrgHash(OrganizationType orgType) {
     OrganizationSearchQuery orgQuery = new OrganizationSearchQuery();
-    orgQuery.setPageSize(Integer.MAX_VALUE);
+    orgQuery.setPageSize(0);
     orgQuery.setType(orgType);
     List<Organization> orgs = getOrganizationDao().search(orgQuery, null).getList();
 
@@ -270,7 +270,7 @@ public class AnetObjectEngine {
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
     query.setParentOrgUuid(parentOrgUuid);
     query.setParentOrgRecursively(true);
-    query.setPageSize(Integer.MAX_VALUE);
+    query.setPageSize(0);
     final List<Organization> orgList =
         AnetObjectEngine.getInstance().getOrganizationDao().search(query, null).getList();
     return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
@@ -285,7 +285,7 @@ public class AnetObjectEngine {
     final TaskSearchQuery query = new TaskSearchQuery();
     query.setCustomFieldRef1Uuid(parentTaskUuid);
     query.setCustomFieldRef1Recursively(true);
-    query.setPageSize(Integer.MAX_VALUE);
+    query.setPageSize(0);
     final List<Task> taskList =
         AnetObjectEngine.getInstance().getTaskDao().search(query, null).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);

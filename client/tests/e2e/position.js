@@ -95,7 +95,7 @@ test("Move someone in and out of a position", async t => {
 
   let $assignedPerson = await t.context.pageHelpers.chooseAdvancedSelectOption(
     "#person",
-    personName
+    person
   )
   t.is(
     await $assignedPerson.getAttribute("value"),

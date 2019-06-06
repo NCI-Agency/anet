@@ -4,8 +4,28 @@ import faker from "faker"
 import { simpleScenario } from "./Scenario"
 import { fuzzy, normalCDF, normalPPF } from "./simutils"
 
-const simulate = async() => {
-  console.log(colors.green("Sim starting"))
+const parseNumericArg = (args, argIndex, defaultValue) => {
+  if (args && args[argIndex]) {
+    const f = Number.parseFloat(args[argIndex])
+    if (!Number.isNaN(f)) {
+      return f
+    }
+  }
+  return defaultValue
+}
+
+const simulate = async args => {
+  const cycle = parseNumericArg(args, 0, 3)
+  const runningTime = parseNumericArg(args, 1, 3)
+  console.log(
+    colors.green(
+      "Sim starting, cycle:",
+      cycle,
+      ", running time:",
+      runningTime,
+      "minutes"
+    )
+  )
 
   // simpleScenario.buildup.forEach(async buildup => {
   //     const userTypeName = faker.random.arrayElement(buildup.userTypes)
@@ -15,8 +35,6 @@ const simulate = async() => {
   //         await buildup.runnable(user, buildup.number)
   //     }
   // })
-
-  const cycle = 3
 
   const storyRuns = simpleScenario.stories.map(story => {
     const period = cycle * (1 / story.frequency) * 1000
@@ -47,7 +65,7 @@ const simulate = async() => {
     return Date.now() - t0
   }
 
-  while (time() < cycle * 60 * 1000) {
+  while (time() < runningTime * 60 * 1000) {
     await Aigle.resolve(simpleScenario.userTypes).each(async userType => {
       // delay some arbitrary time
       await Aigle.delay(10)
@@ -123,7 +141,7 @@ const simulate = async() => {
 
 ;(async() => {
   try {
-    await simulate()
+    await simulate(process.argv.slice(3))
   } catch (e) {
     console.error(e)
   }

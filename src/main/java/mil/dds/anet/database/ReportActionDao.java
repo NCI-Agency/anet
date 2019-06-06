@@ -7,15 +7,14 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
 public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
-  public ReportActionDao() {
-    super("ReportActions", "reportActions", "*", null);
-  }
+  public static final String TABLE_NAME = "reportActions";
 
   @Override
   public ReportAction insertInternal(ReportAction action) {
@@ -36,7 +35,8 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
    */
   public CompletableFuture<List<ReportAction>> getActionsForReport(Map<String, Object> context,
       String reportUuid) {
-    return new ForeignKeyFetcher<ReportAction>().load(context, "report.reportActions", reportUuid);
+    return new ForeignKeyFetcher<ReportAction>().load(context,
+        FkDataLoaderKey.REPORT_REPORT_ACTIONS, reportUuid);
   }
 
   public ReportAction getByUuid(String uuid) {

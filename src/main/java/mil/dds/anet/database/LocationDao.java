@@ -14,11 +14,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 @InTransaction
 public class LocationDao extends AnetSubscribableObjectDao<Location> {
 
-  private static final String tableName = "locations";
-
-  public LocationDao() {
-    super("Locations", tableName, "*", null);
-  }
+  public static final String TABLE_NAME = "locations";
 
   public Location getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);

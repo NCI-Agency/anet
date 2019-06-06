@@ -4,11 +4,7 @@ import java.util.List;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 
-public class PositionSearchQuery extends SubscribableObjectSearchQuery {
-
-  public enum PositionSearchSortBy {
-    CREATED_AT, NAME, CODE
-  }
+public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionSearchSortBy> {
 
   Boolean matchPersonName;
   String organizationUuid;
@@ -19,11 +15,8 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery {
   PositionStatus status;
   private String authorizationGroupUuid;
 
-  private PositionSearchSortBy sortBy;
-  private SortOrder sortOrder;
-
   public PositionSearchQuery() {
-    super();
+    super(PositionSearchSortBy.NAME);
     this.matchPersonName = false;
   }
 
@@ -89,30 +82,6 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery {
 
   public void setAuthorizationGroupUuid(String authorizationGroupUuid) {
     this.authorizationGroupUuid = authorizationGroupUuid;
-  }
-
-  public PositionSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(PositionSearchSortBy sortBy) {
-    this.sortBy = sortBy;
-  }
-
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
-  }
-
-  public static PositionSearchQuery withText(String text, int pageNum, int pageSize) {
-    PositionSearchQuery query = new PositionSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
   }
 
 }
