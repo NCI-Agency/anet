@@ -67,14 +67,6 @@ const ENTITY_CONTROL = {
   }
 }
 
-const content = `
-<p>This editor demonstrates <strong>HTML import and export</strong>.</p>
-<hr />
-<blockquote>Built with <a href="http://localhost:3000/reports/f486b7a7-2af2-450d-af45-920d4ea8c80a">Report-Org-25th june</a></blockquote>
-<img src="/static/example-lowres-image2.jpg"/>
-    <p></p>
-`
-
 const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
     // a tags will become LINK entities, marked as mutable, with only the URL as data.
