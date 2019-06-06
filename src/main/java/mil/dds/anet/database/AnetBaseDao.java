@@ -7,7 +7,6 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.DaoUtils.DbType;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
@@ -15,20 +14,6 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean> implements IAnetDa
 
   @Inject
   private Provider<Handle> handle;
-  private final String entityTag;
-  private String tableName;
-  private String fieldList;
-  private String orderBy;
-
-  private String getAllSql;
-  private String countAllSql;
-
-  public AnetBaseDao(String entityTag, String tableName, String fieldList, String orderBy) {
-    this.entityTag = entityTag;
-    this.tableName = tableName;
-    this.fieldList = fieldList;
-    this.orderBy = orderBy;
-  }
 
   public T insert(T obj) {
     DaoUtils.setInsertFields(obj);
@@ -52,30 +37,4 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean> implements IAnetDa
     return DaoUtils.getDbType(AnetObjectEngine.getInstance().getDbUrl());
   }
 
-  protected Query getPagedQuery(int pageNum, int pageSize) {
-    return getDbHandle().createQuery(getGetAllSql()).bind("limit", pageSize).bind("offset",
-        pageSize * pageNum);
-  }
-
-  protected Long getSqliteRowCount() {
-    if (getDbType() == DbType.SQLITE) {
-      return getDbHandle().createQuery(getCountAllSql()).mapTo(Long.class).findFirst().orElse(null);
-    }
-    return null;
-  }
-
-  public String getGetAllSql() {
-    if (getAllSql == null) {
-      getAllSql =
-          DaoUtils.buildPagedGetAllSql(getDbType(), entityTag, tableName, fieldList, orderBy);
-    }
-    return getAllSql;
-  }
-
-  public String getCountAllSql() {
-    if (countAllSql == null) {
-      countAllSql = DaoUtils.buildCountAllSql(entityTag, tableName);
-    }
-    return countAllSql;
-  }
 }

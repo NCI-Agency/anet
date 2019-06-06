@@ -18,13 +18,13 @@ services:
 #  - wait for 10 seconds until the database initializes
 #  - drop the database
 #  - build the latest schema
-#  - load the bootstraping insertBaseData.sql script
+#  - load the bootstraping insertBaseData-mssql.sql script
 #  - start ANET
     entrypoint: ["/bin/sh", "-c",
           "sleep 10 && \
           /anet/bin/anet db drop-all --confirm-delete-everything /home/anet/anet.yml && \
           /anet/bin/anet db migrate /home/anet/anet.yml && \\
-          /anet/bin/anet dbScript -S /home/anet/insertBaseData.sql /home/anet/anet.yml && \\
+          /anet/bin/anet dbScript -S /home/anet/insertBaseData-mssql.sql /home/anet/anet.yml && \\
           /anet/bin/anet server /home/anet/anet.yml"]
     ports:
       - "80:8080"
@@ -38,4 +38,4 @@ services:
       ANET_DB_URL: jdbc:sqlserver://anet-mssql:1433;databaseName=ANET
     volumes:
       -  ${PWD}/anet.yml:/home/anet/anet.yml
-      -  ${PWD}/insertBaseData.sql:/home/anet/insertBaseData.sql
+      -  ${PWD}/insertBaseData-mssql.sql:/home/anet/insertBaseData-mssql.sql
