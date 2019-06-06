@@ -56,6 +56,8 @@ dependencies {
 	compile 'ru.vyarus.guicey:guicey-jdbi3:0.6.0'
 	compile 'com.google.guava:guava:27.1-jre' // Pick the non-Android version of Guice
 
+	// Supported databases:
+	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.2.1.jre8'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.3' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
@@ -72,8 +74,6 @@ dependencies {
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
 	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
-
-	compile 'com.microsoft.sqlserver:mssql-jdbc:7.2.1.jre8'
 
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
