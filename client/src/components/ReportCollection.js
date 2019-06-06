@@ -39,6 +39,13 @@ export const GQL_REPORT_FIELDS = /* GraphQL */ `
   updatedAt
 `
 
+export const GQL_BASIC_REPORT_FIELDS = /* GraphQL */ `
+	uuid
+	intent
+	state
+	location { uuid name lat lng }
+`
+
 export default class ReportCollection extends Component {
   static propTypes = {
     width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

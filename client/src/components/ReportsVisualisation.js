@@ -1,7 +1,10 @@
 import API from "api"
 import autobind from "autobind-decorator"
 import MosaicLayout from "components/MosaicLayout"
-import { GQL_REPORT_FIELDS } from "components/ReportCollection"
+import {
+  GQL_REPORT_FIELDS,
+  GQL_BASIC_REPORT_FIELDS
+} from "components/ReportCollection"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -44,13 +47,8 @@ export default class ReportsVisualisation extends Component {
     return GQL_REPORT_FIELDS
   }
 
-  get gqlMapFields() {
-    return /* GraphQL */ `
-      uuid
-      intent
-      state
-      location { uuid name lat lng }
-    `
+  get gqlBasicReportFields() {
+    return GQL_BASIC_REPORT_FIELDS
   }
 
   render() {
@@ -119,12 +117,12 @@ export default class ReportsVisualisation extends Component {
     )
   }
 
-  reportsQueryParams = forMapOrCalendar => {
+  reportsQueryParams = includeAll => {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
-      pageNum: forMapOrCalendar ? 0 : this.state.reportsPageNum,
-      pageSize: forMapOrCalendar ? 0 : 10
+      pageNum: includeAll ? 0 : this.state.reportsPageNum,
+      pageSize: includeAll ? 0 : 10
     })
     if (this.state.focusedSelection) {
       Object.assign(reportsQueryParams, this.additionalReportParams)
@@ -132,12 +130,12 @@ export default class ReportsVisualisation extends Component {
     return reportsQueryParams
   }
 
-  runReportsQuery = (reportsQueryParams, forMapOrCalendar) => {
+  runReportsQuery = (reportsQueryParams, includeAll) => {
     return API.query(
       /* GraphQL */ `
       reportList(query:$reportsQueryParams) {
         pageNum, pageSize, totalCount, list {
-          ${forMapOrCalendar ? this.gqlMapFields : this.gqlReportFields}
+          ${includeAll ? this.gqlBasicReportFields : this.gqlReportFields}
         }
       }`,
       { reportsQueryParams },

@@ -1,19 +1,8 @@
-import autobind from "autobind-decorator"
-import ButtonToggleGroup from "components/ButtonToggleGroup"
-import Leaflet from "components/Leaflet"
-import ReportSummary from "components/ReportSummary"
-import ReportTable from "components/ReportTable"
-import UltimatePagination from "components/UltimatePagination"
-import _escape from "lodash/escape"
-import _get from "lodash/get"
-import { Location, Person, Report } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Button } from "react-bootstrap"
-import Calendar from "components/Calendar"
-import moment from "moment"
 import ReportCollection, {
-  GQL_REPORT_FIELDS
+  GQL_REPORT_FIELDS,
+  GQL_BASIC_REPORT_FIELDS
 } from "components/ReportCollection"
 
 import API from "api"
@@ -84,7 +73,10 @@ export default class ReportCollectionContainer extends Component {
     if (includeAll) {
       // Query used by the map and calendar views
       queries.push(
-        this.runReportsQuery(this.reportsQueryParams(true), GQL_REPORT_FIELDS)
+        this.runReportsQuery(
+          this.reportsQueryParams(true),
+          GQL_BASIC_REPORT_FIELDS
+        )
       )
     }
     return Promise.all(queries).then(values => {
