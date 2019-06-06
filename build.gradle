@@ -258,9 +258,9 @@ task dbLoad_psql(dependsOn: "dbLoad_psql_createData", type: com.bmuschko.gradle.
 task dbLoad_psql_createData(type: Exec) {
 	group = "database"
 	description = "Convert the ANET demo data from MS SQL to PostgreSQL format."
-	standardInput = new FileInputStream("insertBaseData-mssql.sql")
-	standardOutput = new FileOutputStream("insertBaseData-psql.sql")
-	commandLine "./mssql2pg.pl"
+	standardInput = new FileInputStream("${projectDir}/insertBaseData-mssql.sql")
+	standardOutput = new FileOutputStream("${projectDir}/insertBaseData-psql.sql")
+	commandLine "${projectDir}/mssql2pg.pl"
 }
 
 task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
