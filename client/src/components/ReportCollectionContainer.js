@@ -104,12 +104,14 @@ export default class ReportCollectionContainer extends Component {
     const { curPageReports, allReports } = this.state
     const { queryParams, ...othersProps } = this.props
     return (
-      <ReportCollection
-        paginatedReports={curPageReports}
-        reports={allReports}
-        goToPage={this.goToReportsPage}
-        {...othersProps}
-      />
+      (curPageReports !== null || allReports !== null) && (
+        <ReportCollection
+          paginatedReports={curPageReports}
+          reports={allReports}
+          goToPage={this.goToReportsPage}
+          {...othersProps}
+        />
+      )
     )
   }
 
