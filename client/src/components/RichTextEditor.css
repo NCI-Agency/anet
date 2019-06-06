@@ -1,5 +1,5 @@
 .Draftail-Editor .DraftEditor-root {
-  font-size: 2rem;
+  font-size: 1.75rem;
 }
 
 .Draftail-ToolbarButton {
@@ -9,4 +9,8 @@
 
 .Draftail-Editor--focus .Draftail-Toolbar {
   top: -15px;
+}
+
+.Draftail-block--unstyled {
+  margin: 0.75rem 0;
 }

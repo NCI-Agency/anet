@@ -8,12 +8,14 @@ import LinkSource from "components/editor/LinkSource"
 import ImageSource from "components/editor/ImageSource"
 import ImageBlock from "components/editor/ImageBlock"
 import linkifyPlugin from "components/editor/plugins/linkifyPlugin"
+import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
 
 import "draft-js/dist/Draft.css"
 import "draftail/dist/draftail.css"
 import "components/RichTextEditor.css"
 
 const linkify = linkifyPlugin()
+const newlinePlugin = createNewlinePlugin()
 
 const BLOCK_TYPES = [
   { type: BLOCK_TYPE.HEADER_ONE },
@@ -154,7 +156,7 @@ const RichTextEditor = () => (
     inlineStyles={INLINE_STYLES}
     maxListNesting={4}
     onSave={onSave}
-    plugins={[linkify]}
+    plugins={[linkify, newlinePlugin]}
     rawContentState={null}
     showUndoControl
     showRedoControl
