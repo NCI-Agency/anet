@@ -84,7 +84,7 @@ export default class ReportCollection extends Component {
     const viewWithPagination =
       ReportCollection.VIEW_FORMATS_WITH_PAGINATION.includes(
         this.state.viewFormat
-      ) && this.props.paginatedReports
+      ) && this.props.paginatedReports !== null
     if (viewWithPagination) {
       var { pageSize, pageNum, totalCount } = this.props.paginatedReports
       var numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)

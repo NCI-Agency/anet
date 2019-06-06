@@ -61,13 +61,13 @@ export default class ReportCollectionContainer extends Component {
   fetchReportData(includeAll) {
     // Query used by the paginated views
     const queries = [
-      this.runReportsQuery(this.reportsQueryParams(false), GQL_REPORT_FIELDS)
+      this.runReportsQuery(this.reportsQueryParams(true), GQL_REPORT_FIELDS)
     ]
     if (includeAll) {
       // Query used by the map and calendar views
       queries.push(
         this.runReportsQuery(
-          this.reportsQueryParams(true),
+          this.reportsQueryParams(false),
           GQL_BASIC_REPORT_FIELDS
         )
       )
