@@ -2171,10 +2171,10 @@
     browserstack-local "1.4.0"
     request "^2.85.0"
 
-"@wdio/cli@^5.8.3":
-  version "5.9.6"
-  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.9.6.tgz#9b2b4f8a73663ccb8d2d3752f6d0404e6aa7729a"
-  integrity sha512-LQJAL9tKNn45tvQMkJRLUWILSkma8odM5oIhZDgpmDDra/ScpBT2pmZkAlF2Ks0bnhy9XN+TxQIddYWsEotcrA==
+"@wdio/cli@^5.10.0":
+  version "5.10.0"
+  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.10.0.tgz#ba75e80e1693fa6522d37c492eb8e1fcf43bbcc7"
+  integrity sha512-G3ks94GmE5Py3geqk02C16VU8zfGPcTJbl0JEhKyoxKYFA39p/6KaNmgAEia1B4A/g2A5JRZEQa/vjIdYnTbog==
   dependencies:
     "@wdio/config" "^5.9.4"
     "@wdio/logger" "^5.9.3"
@@ -2191,7 +2191,7 @@
     lodash.pickby "^4.6.0"
     lodash.union "^4.6.0"
     log-update "^3.2.0"
-    webdriverio "^5.9.6"
+    webdriverio "^5.10.0"
     yargs "^13.2.4"
     yarn-install "^1.0.0"
 
@@ -4238,12 +4238,7 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-spinners@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-2.0.0.tgz#4b078756fc17a8f72043fdc9f1f14bf4fa87e2df"
-  integrity sha512-yiEBmhaKPPeBj7wWm4GEdtPZK940p9pl3EANIrnJ3JnvWyrPjcFcsEq6qRUuQ7fzB0+Y82ld3p6B34xo95foWw==
-
-cli-spinners@^2.1.0:
+cli-spinners@^2.0.0, cli-spinners@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-2.1.0.tgz#22c34b4d51f573240885b201efda4e4ec9fff3c7"
   integrity sha512-8B00fJOEh1HPrx4fo5eW16XmE1PcL1tGpGrxy63CXGP9nHdPBN63X75hA1zhvQuhVztJWLqV58Roj2qlNM7cAA==
@@ -8118,7 +8113,7 @@ inquirer@6.2.0:
     strip-ansi "^4.0.0"
     through "^2.3.6"
 
-inquirer@6.2.2, inquirer@^6.2.2:
+inquirer@6.2.2:
   version "6.2.2"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-6.2.2.tgz#46941176f65c9eb20804627149b743a218f25406"
   integrity sha512-Z2rREiXA6cHRR9KBOarR3WuLlFzlIfAEIiB45ll5SSadMg7WqOh1MKEjjndfuH5ewXdixWCxqnVfGOQzPeiztA==
@@ -8137,7 +8132,7 @@ inquirer@6.2.2, inquirer@^6.2.2:
     strip-ansi "^5.0.0"
     through "^2.3.6"
 
-inquirer@^6.2.0, inquirer@^6.2.1:
+inquirer@^6.2.0, inquirer@^6.2.1, inquirer@^6.2.2:
   version "6.3.1"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-6.3.1.tgz#7a413b5e7950811013a3db491c61d1f3b776e8e7"
   integrity sha512-MmL624rfkFt4TG9y/Jvmt8vdmOo836U7Y0Hxr2aFk3RelZEGX4Igk0KabWrcaaZaTv9uzglOqWh1Vly+FAWAXA==
@@ -14669,10 +14664,10 @@ web-namespaces@^1.1.2:
   resolved "https://registry.yarnpkg.com/web-namespaces/-/web-namespaces-1.1.3.tgz#9bbf5c99ff0908d2da031f1d732492a96571a83f"
   integrity sha512-r8sAtNmgR0WKOKOxzuSgk09JsHlpKlB+uHi937qypOu3PZ17UxPrierFKDye/uNHjNTTEshu5PId8rojIPj/tA==
 
-webdriver@^5.9.6:
-  version "5.9.6"
-  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-5.9.6.tgz#0c4b46da389b7050bd194a81e5f8479bd5e5245d"
-  integrity sha512-cEPtbOCTMRiedWyAlc2Bxnxw0lTRKqrAEDP9yB7rwUKQs3OZQzpDrmqiYZ/rBhJ0j+up6Cmx/L9rdm9Iyp4WVQ==
+webdriver@^5.10.0:
+  version "5.10.0"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-5.10.0.tgz#13a450dba65e39c5eb691655001cb77ddf1c29c1"
+  integrity sha512-nUgPwBDh5FTBkYaUd1Vh4chQqJcJFFLdj1n+Yh2TKH5gxHmGYvQg5gJIsMA3z68crmxp4fNkXdFwiJculS8GIQ==
   dependencies:
     "@wdio/config" "^5.9.4"
     "@wdio/logger" "^5.9.3"
@@ -14680,10 +14675,10 @@ webdriver@^5.9.6:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@^5.8.3, webdriverio@^5.9.6:
-  version "5.9.6"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.9.6.tgz#7cfe77d234bb9961b71a4070541458348de34702"
-  integrity sha512-xjQyz0hdDXyPViaMTUuP8lpg91CxOVNQA20bp3kqRHlolipCmALTo1EFHF9+pz2aI5KGgVyz4r2+5T11VW9MYg==
+webdriverio@^5.10.0, webdriverio@^5.8.3, webdriverio@^5.9.6:
+  version "5.10.0"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.10.0.tgz#6fd51965aa741f6d64a186dd17d4295f0d0f7d1c"
+  integrity sha512-/uNU/7rvv6TplMMRE8R+VKxXwUtbEsCXvx8NumstnJ/dR/bG88Xf0tP1X/KRlVXqku5YqPRfE5ay4rUSjUIYCg==
   dependencies:
     "@wdio/config" "^5.9.4"
     "@wdio/logger" "^5.9.3"
@@ -14697,7 +14692,7 @@ webdriverio@^5.8.3, webdriverio@^5.9.6:
     resq "^1.5.0"
     rgb2hex "^0.1.0"
     serialize-error "^4.1.0"
-    webdriver "^5.9.6"
+    webdriver "^5.10.0"
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
