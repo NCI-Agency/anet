@@ -92,10 +92,8 @@ export const LINKIFY_REGEX_EXACT = new RegExp(`^${LINKIFY_PATTERN}$`, "ig")
 const linkifyPlugin = () => ({
   handlePastedText(text, html, editorState, { setEditorState }) {
     let nextState = editorState
-    console.log("text", text)
     if (text.match(LINKIFY_REGEX_EXACT)) {
       const selection = nextState.getSelection()
-      console.log(text.match(LINKIFY_REGEX_EXACT))
       if (selection.isCollapsed()) {
         nextState = createEntity(
           nextState,
