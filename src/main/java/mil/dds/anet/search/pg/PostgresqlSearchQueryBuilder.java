@@ -36,7 +36,7 @@ public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends 
   @Override
   protected AnetBeanList<B> getResult(Handle handle, T query, RowMapper<B> mapper) {
     final Query sqlQuery = addPagination(query, handle, sql, sqlArgs, listArgs);
-    return new AnetBeanList<B>(sqlQuery, query.getPageNum(), query.getPageSize(), mapper, null);
+    return new AnetBeanList<B>(sqlQuery, query.getPageNum(), query.getPageSize(), mapper);
   }
 
   protected Query addPagination(AbstractSearchQuery<?> query, Handle dbHandle, StringBuilder sql,

@@ -25,13 +25,10 @@ public class AnetBeanList<T> {
     this.list = list;
   }
 
-  public AnetBeanList(Query query, int pageNum, int pageSize, RowMapper<T> mapper,
-      Long manualRowCount) {
+  public AnetBeanList(Query query, int pageNum, int pageSize, RowMapper<T> mapper) {
     this(pageNum, pageSize, query.map(mapper).list());
     int resultSize = getList().size();
-    if (manualRowCount != null) {
-      setTotalCount(manualRowCount.intValue());
-    } else if (resultSize == 0) {
+    if (resultSize == 0) {
       setTotalCount(0);
     } else {
       Integer foundCount = (Integer) query.getContext().getAttribute("totalCount");
