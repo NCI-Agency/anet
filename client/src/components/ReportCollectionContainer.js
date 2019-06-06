@@ -28,19 +28,12 @@ export default class ReportCollectionContainer extends Component {
     this.fetchReportData(true)
   }
 
-  //  componentDidUpdate(prevProps, prevState) {
-  //    // Re-load data if uuid has changed
-  //    if (this.props.match.params.uuid !== prevProps.match.params.uuid) {
-  //      this.loadData()
-  //    } else if (
-  //      prevState.reportsFilter !== this.state.reportsFilter ||
-  //      prevProps.pagination !== this.props.pagination ||
-  //      prevState.organization !== this.state.organization
-  //    ) {
-  //      let reports = this.getReportQueryPart(this.props.match.params.uuid)
-  //      this.runGQLReports([reports])
-  //    }
-  //  }
+  componentDidUpdate(prevProps, prevState) {
+    // Re-load all data if queryParams has changed
+    if (this.props.queryParams !== prevProps.queryParams) {
+      this.fetchReportData(true)
+    }
+  }
 
   reportsQueryParams = withPagination => {
     const reportsQueryParams = {}
