@@ -48,6 +48,7 @@ export default class ReportsVisualisation extends Component {
     return /* GraphQL */ `
       uuid
       intent
+      state
       location { uuid name lat lng }
     `
   }
@@ -79,7 +80,7 @@ export default class ReportsVisualisation extends Component {
       this.runReportsQuery(this.reportsQueryParams(false), false)
     ]
     if (includeAll) {
-      // Query used by the map
+      // Query used by the map and calendar
       queries.push(this.runReportsQuery(this.reportsQueryParams(true), true))
     }
     return Promise.all(queries).then(values => {
@@ -118,12 +119,12 @@ export default class ReportsVisualisation extends Component {
     )
   }
 
-  reportsQueryParams = forMap => {
+  reportsQueryParams = forMapOrCalendar => {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
-      pageNum: forMap ? 0 : this.state.reportsPageNum,
-      pageSize: forMap ? 0 : 10
+      pageNum: forMapOrCalendar ? 0 : this.state.reportsPageNum,
+      pageSize: forMapOrCalendar ? 0 : 10
     })
     if (this.state.focusedSelection) {
       Object.assign(reportsQueryParams, this.additionalReportParams)
@@ -131,12 +132,12 @@ export default class ReportsVisualisation extends Component {
     return reportsQueryParams
   }
 
-  runReportsQuery = (reportsQueryParams, forMap) => {
+  runReportsQuery = (reportsQueryParams, forMapOrCalendar) => {
     return API.query(
       /* GraphQL */ `
       reportList(query:$reportsQueryParams) {
         pageNum, pageSize, totalCount, list {
-          ${forMap ? this.gqlMapFields : this.gqlReportFields}
+          ${forMapOrCalendar ? this.gqlMapFields : this.gqlReportFields}
         }
       }`,
       { reportsQueryParams },
