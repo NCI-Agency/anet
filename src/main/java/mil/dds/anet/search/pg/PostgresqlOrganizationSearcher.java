@@ -1,6 +1,7 @@
 package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
@@ -20,15 +21,15 @@ public class PostgresqlOrganizationSearcher extends AbstractOrganizationSearcher
   }
 
   @Override
-  protected void buildQuery(OrganizationSearchQuery query) {
+  protected void buildQuery(OrganizationSearchQuery query, Person user) {
     qb.addSelectClause("organizations.uuid");
-    super.buildQuery(query);
+    super.buildQuery(query, user);
   }
 
   @InTransaction
   @Override
-  public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Person user) {
+    buildQuery(query, user);
     outerQb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
     outerQb.addTotalCount();
     outerQb.addFromClause("organizations");

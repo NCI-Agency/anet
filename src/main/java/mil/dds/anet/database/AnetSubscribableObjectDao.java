@@ -16,11 +16,6 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & SubscribableObject>
     extends AnetBaseDao<T> {
 
-  public AnetSubscribableObjectDao(String entityTag, String tableName, String fieldList,
-      String orderBy) {
-    super(entityTag, tableName, fieldList, orderBy);
-  }
-
   public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
 
   @Override

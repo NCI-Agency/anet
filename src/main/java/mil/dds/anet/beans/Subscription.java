@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -23,8 +24,8 @@ public class Subscription extends AbstractAnetBean {
     if (subscriber.hasForeignObject()) {
       return CompletableFuture.completedFuture(subscriber.getForeignObject());
     }
-    return new UuidFetcher<Position>().load(context, "positions", subscriber.getForeignUuid())
-        .thenApply(o -> {
+    return new UuidFetcher<Position>()
+        .load(context, IdDataLoaderKey.POSITIONS, subscriber.getForeignUuid()).thenApply(o -> {
           subscriber.setForeignObject(o);
           return o;
         });
@@ -74,7 +75,8 @@ public class Subscription extends AbstractAnetBean {
       return CompletableFuture.completedFuture(subscribedObject);
     }
     return new UuidFetcher<AbstractAnetBean>()
-        .load(context, subscribedObjectType, subscribedObjectUuid).thenApply(o -> {
+        .load(context, IdDataLoaderKey.valueOfTableName(subscribedObjectType), subscribedObjectUuid)
+        .thenApply(o -> {
           subscribedObject = (SubscribableObject) o;
           return subscribedObject;
         });

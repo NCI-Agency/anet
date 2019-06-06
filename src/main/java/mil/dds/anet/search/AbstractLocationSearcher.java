@@ -1,6 +1,8 @@
 package mil.dds.anet.search;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
@@ -16,18 +18,28 @@ public abstract class AbstractLocationSearcher
 
   @InTransaction
   @Override
-  public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Location> runSearch(LocationSearchQuery query, Person user) {
+    buildQuery(query, user);
     return qb.buildAndRun(getDbHandle(), query, new LocationMapper());
   }
 
-  protected void buildQuery(LocationSearchQuery query) {
+  @Override
+  protected final void buildQuery(LocationSearchQuery query) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected void buildQuery(LocationSearchQuery query, Person user) {
     qb.addSelectClause("locations.*");
     qb.addTotalCount();
     qb.addFromClause("locations");
 
     if (query.isTextPresent()) {
       addTextQuery(query);
+    }
+
+    if (user != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getLocationDao().getSubscriptionUpdate(null)));
     }
 
     addOrderByClauses(qb, query);

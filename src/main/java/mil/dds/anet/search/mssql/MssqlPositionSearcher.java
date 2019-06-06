@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -14,9 +15,9 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
   }
 
   @Override
-  protected void buildQuery(PositionSearchQuery query) {
+  protected void buildQuery(PositionSearchQuery query, Person user) {
     qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
-    super.buildQuery(query);
+    super.buildQuery(query, user);
     qb.addTotalCount();
   }
 

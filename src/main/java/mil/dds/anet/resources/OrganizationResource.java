@@ -134,7 +134,7 @@ public class OrganizationResource {
 
     // Load the existing org, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
-    final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(org, existing) : 1;
+    final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(context, org, existing) : 1;
     doSuperUserUpdates(org, existing);
 
     AnetAuditLogger.log("Organization {} updated by {}", org, user);
@@ -142,7 +142,7 @@ public class OrganizationResource {
     return numRows;
   }
 
-  private int doAdminUpdates(Organization org, Organization existing) {
+  private int doAdminUpdates(Map<String, Object> context, Organization org, Organization existing) {
     final int numRows;
     try {
       numRows = dao.update(org);
@@ -156,7 +156,7 @@ public class OrganizationResource {
 
     if (org.getTasks() != null) {
       logger.debug("Editing tasks for {}", org);
-      Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
+      Utils.addRemoveElementsByUuid(existing.loadTasks(context), org.getTasks(),
           newTask -> engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(newTask),
               DaoUtils.getUuid(existing)),
           oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(oldTaskUuid, null));

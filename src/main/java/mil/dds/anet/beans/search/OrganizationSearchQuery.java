@@ -3,7 +3,8 @@ package mil.dds.anet.beans.search;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 
-public class OrganizationSearchQuery extends SubscribableObjectSearchQuery<OrganizationSearchSortBy> {
+public class OrganizationSearchQuery
+    extends SubscribableObjectSearchQuery<OrganizationSearchSortBy> {
 
   private OrganizationStatus status;
   private OrganizationType type;

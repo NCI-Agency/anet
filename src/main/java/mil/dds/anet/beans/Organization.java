@@ -13,6 +13,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -124,13 +125,16 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
     this.type = type;
   }
 
-  @GraphQLQuery(name = "positions") // TODO: batch load? (used in organizations/Show.js)
-  public synchronized List<Position> loadPositions() {
+  // TODO: batch load? (used in organizations/Show.js)
+  @GraphQLQuery(name = "positions")
+  public synchronized List<Position> loadPositions(
+      @GraphQLRootContext Map<String, Object> context) {
     if (positions == null) {
       final PositionSearchQuery query = new PositionSearchQuery();
       query.setPageSize(0);
       query.setOrganizationUuid(uuid);
-      positions = AnetObjectEngine.getInstance().getPositionDao().search(query).getList();
+      positions = AnetObjectEngine.getInstance().getPositionDao()
+          .search(query, DaoUtils.getUserFromContext(context)).getList();
     }
     return positions;
   }
@@ -182,13 +186,15 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
     return descendants;
   }
 
-  @GraphQLQuery(name = "tasks") // TODO: batch load? (used in organizations/Edit.js)
-  public synchronized List<Task> loadTasks() {
+  // TODO: batch load? (used in organizations/Edit.js)
+  @GraphQLQuery(name = "tasks")
+  public synchronized List<Task> loadTasks(@GraphQLRootContext Map<String, Object> context) {
     if (tasks == null) {
       final TaskSearchQuery query = new TaskSearchQuery();
       query.setPageSize(0);
       query.setResponsibleOrgUuid(uuid);
-      tasks = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+      tasks = AnetObjectEngine.getInstance().getTaskDao()
+          .search(query, DaoUtils.getUserFromContext(context)).getList();
     }
     return tasks;
   }

@@ -137,6 +137,6 @@ public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
 
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj) {
-    return getCommonSubscriptionUpdate(obj, tableName, "organizations.uuid");
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "organizations.uuid");
   }
 }

@@ -1,5 +1,7 @@
 package mil.dds.anet.search;
 
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -17,19 +19,28 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   @InTransaction
   @Override
-  public AnetBeanList<Task> runSearch(TaskSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Task> runSearch(TaskSearchQuery query, Person user) {
+    buildQuery(query, user);
     return qb.buildAndRun(getDbHandle(), query, new TaskMapper());
   }
 
   @Override
-  protected void buildQuery(TaskSearchQuery query) {
+  protected final void buildQuery(TaskSearchQuery query) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected void buildQuery(TaskSearchQuery query, Person user) {
     qb.addSelectClause("tasks.*");
     qb.addTotalCount();
     qb.addFromClause("tasks");
 
     if (query.isTextPresent()) {
       addTextQuery(query);
+    }
+
+    if (user != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
     }
 
     if (query.getResponsibleOrgUuid() != null) {

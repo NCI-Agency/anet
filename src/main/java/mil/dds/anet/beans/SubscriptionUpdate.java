@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -39,7 +40,8 @@ public class SubscriptionUpdate extends AbstractAnetBean {
       return CompletableFuture.completedFuture(subscription.getForeignObject());
     }
     return new UuidFetcher<Subscription>()
-        .load(context, "subscriptions", subscription.getForeignUuid()).thenApply(o -> {
+        .load(context, IdDataLoaderKey.SUBSCRIPTIONS, subscription.getForeignUuid())
+        .thenApply(o -> {
           subscription.setForeignObject(o);
           return o;
         });
@@ -88,7 +90,8 @@ public class SubscriptionUpdate extends AbstractAnetBean {
     if (updatedObject != null) {
       return CompletableFuture.completedFuture(updatedObject);
     }
-    return new UuidFetcher<AbstractAnetBean>().load(context, updatedObjectType, updatedObjectUuid)
+    return new UuidFetcher<AbstractAnetBean>()
+        .load(context, IdDataLoaderKey.valueOfTableName(updatedObjectType), updatedObjectUuid)
         .thenApply(o -> {
           updatedObject = (SubscribableObject) o;
           return updatedObject;

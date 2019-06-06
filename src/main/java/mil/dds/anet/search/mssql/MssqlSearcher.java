@@ -7,6 +7,8 @@ import mil.dds.anet.search.IOrganizationSearcher;
 import mil.dds.anet.search.IPersonSearcher;
 import mil.dds.anet.search.IPositionSearcher;
 import mil.dds.anet.search.IReportSearcher;
+import mil.dds.anet.search.ISubscriptionSearcher;
+import mil.dds.anet.search.ISubscriptionUpdateSearcher;
 import mil.dds.anet.search.ITagSearcher;
 import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.search.Searcher;
@@ -45,6 +47,16 @@ public class MssqlSearcher extends Searcher {
   @Override
   public IReportSearcher getReportSearcher() {
     return injector.getInstance(MssqlReportSearcher.class);
+  }
+
+  @Override
+  public ISubscriptionSearcher getSubscriptionSearcher() {
+    return injector.getInstance(MssqlSubscriptionSearcher.class);
+  }
+
+  @Override
+  public ISubscriptionUpdateSearcher getSubscriptionUpdateSearcher() {
+    return injector.getInstance(MssqlSubscriptionUpdateSearcher.class);
   }
 
   @Override

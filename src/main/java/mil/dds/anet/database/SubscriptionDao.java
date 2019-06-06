@@ -29,9 +29,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  public SubscriptionDao() {
-    super("Subscriptions", "subscriptions", "*", null);
-  }
+  public static final String TABLE_NAME = "subscriptions";
 
   public AnetBeanList<Subscription> getAll(int pageNum, int pageSize) {
     final String sql;
@@ -46,7 +44,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
     final Query query =
         getDbHandle().createQuery(sql).bind("limit", pageSize).bind("offset", pageSize * pageNum);
-    return new AnetBeanList<Subscription>(query, pageNum, pageSize, new SubscriptionMapper(), null);
+    return new AnetBeanList<Subscription>(query, pageNum, pageSize, new SubscriptionMapper());
   }
 
   public Subscription getByUuid(String uuid) {

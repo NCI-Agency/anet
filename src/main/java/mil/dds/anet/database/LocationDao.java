@@ -86,6 +86,6 @@ public class LocationDao extends AnetSubscribableObjectDao<Location> {
 
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Location obj) {
-    return getCommonSubscriptionUpdate(obj, tableName, "locations.uuid");
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "locations.uuid");
   }
 }

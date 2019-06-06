@@ -19,15 +19,15 @@ public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
   }
 
   @Override
-  protected void buildQuery(PersonSearchQuery query) {
+  protected void buildQuery(PersonSearchQuery query, Person user) {
     qb.addSelectClause("people.uuid");
-    super.buildQuery(query);
+    super.buildQuery(query, user);
   }
 
   @InTransaction
   @Override
-  public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Person> runSearch(PersonSearchQuery query, Person user) {
+    buildQuery(query, user);
     outerQb.addSelectClause(PersonDao.PERSON_FIELDS);
     outerQb.addTotalCount();
     outerQb.addFromClause("people");

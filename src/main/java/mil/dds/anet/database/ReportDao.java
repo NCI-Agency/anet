@@ -801,7 +801,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
     }
 
     final SubscriptionUpdateGroup update =
-        getCommonSubscriptionUpdate(obj, tableName, "reports.uuid");
+        getCommonSubscriptionUpdate(obj, TABLE_NAME, "reports.uuid");
     // update author
     update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
         isParam ? obj.getAuthorUuid() : null, "people", "reports.authorUuid"));

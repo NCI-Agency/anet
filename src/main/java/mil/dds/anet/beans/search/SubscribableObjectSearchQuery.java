@@ -1,6 +1,11 @@
 package mil.dds.anet.beans.search;
 
-public abstract class SubscribableObjectSearchQuery extends AbstractSearchQuery {
+public abstract class SubscribableObjectSearchQuery<T extends ISortBy>
+    extends AbstractSearchQuery<T> {
+
+  public SubscribableObjectSearchQuery(T defaultSortBy) {
+    super(defaultSortBy);
+  }
 
   private Boolean subscribed;
 

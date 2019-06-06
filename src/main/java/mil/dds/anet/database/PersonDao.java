@@ -225,6 +225,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
 
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj) {
-    return getCommonSubscriptionUpdate(obj, tableName, "people.uuid");
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid");
   }
 }

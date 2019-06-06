@@ -1,5 +1,6 @@
 package mil.dds.anet.search.pg;
 
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -20,15 +21,15 @@ public class PostgresqlPositionSearcher extends AbstractPositionSearcher {
   }
 
   @Override
-  protected void buildQuery(PositionSearchQuery query) {
+  protected void buildQuery(PositionSearchQuery query, Person user) {
     qb.addSelectClause("positions.uuid");
-    super.buildQuery(query);
+    super.buildQuery(query, user);
   }
 
   @InTransaction
   @Override
-  public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Position> runSearch(PositionSearchQuery query, Person user) {
+    buildQuery(query, user);
     outerQb.addSelectClause(PositionDao.POSITIONS_FIELDS);
     outerQb.addTotalCount();
     outerQb.addFromClause("positions");

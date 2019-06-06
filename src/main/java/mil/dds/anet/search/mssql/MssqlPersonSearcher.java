@@ -14,9 +14,9 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
   }
 
   @Override
-  protected void buildQuery(PersonSearchQuery query) {
+  protected void buildQuery(PersonSearchQuery query, Person user) {
     qb.addSelectClause(PersonDao.PERSON_FIELDS);
-    super.buildQuery(query);
+    super.buildQuery(query, user);
     qb.addTotalCount();
   }
 

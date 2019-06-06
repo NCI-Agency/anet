@@ -1,5 +1,6 @@
 package mil.dds.anet.search;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -15,12 +16,17 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   }
 
   @Override
-  public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Person> runSearch(PersonSearchQuery query, Person user) {
+    buildQuery(query, user);
     return qb.buildAndRun(getDbHandle(), query, new PersonMapper());
   }
 
-  protected void buildQuery(PersonSearchQuery query) {
+  @Override
+  protected final void buildQuery(PersonSearchQuery query) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected void buildQuery(PersonSearchQuery query, Person user) {
     qb.addFromClause("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null
@@ -30,6 +36,11 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     if (query.isTextPresent()) {
       addTextQuery(query);
+    }
+
+    if (user != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getPersonDao().getSubscriptionUpdate(null)));
     }
 
     qb.addDateClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,

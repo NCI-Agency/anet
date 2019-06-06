@@ -1,5 +1,7 @@
 package mil.dds.anet.search;
 
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -14,12 +16,17 @@ public abstract class AbstractPositionSearcher
   }
 
   @Override
-  public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Position> runSearch(PositionSearchQuery query, Person user) {
+    buildQuery(query, user);
     return qb.buildAndRun(getDbHandle(), query, new PositionMapper());
   }
 
-  protected void buildQuery(PositionSearchQuery query) {
+  @Override
+  protected final void buildQuery(PositionSearchQuery query) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected void buildQuery(PositionSearchQuery query, Person user) {
     qb.addFromClause("positions");
 
     if (Boolean.TRUE.equals(query.getMatchPersonName())) {
@@ -28,6 +35,11 @@ public abstract class AbstractPositionSearcher
 
     if (query.isTextPresent()) {
       addTextQuery(query);
+    }
+
+    if (user != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getPositionDao().getSubscriptionUpdate(null)));
     }
 
     qb.addInClause("types", "positions.type", query.getType());

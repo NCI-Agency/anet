@@ -3,6 +3,7 @@ package mil.dds.anet.search;
 import java.util.Arrays;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -32,7 +33,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   }
 
   @Override
-  protected void buildQuery(ReportSearchQuery query) {
+  protected final void buildQuery(ReportSearchQuery query) {
     throw new UnsupportedOperationException();
   }
 
@@ -43,6 +44,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (query.isTextPresent()) {
       addTextQuery(query);
+    }
+
+    if (user != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getReportDao().getSubscriptionUpdate(null)));
     }
 
     qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());

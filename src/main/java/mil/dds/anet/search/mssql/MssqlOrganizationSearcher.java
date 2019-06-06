@@ -1,6 +1,7 @@
 package mil.dds.anet.search.mssql;
 
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
@@ -15,9 +16,9 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
   }
 
   @Override
-  protected void buildQuery(OrganizationSearchQuery query) {
+  protected void buildQuery(OrganizationSearchQuery query, Person user) {
     qb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
-    super.buildQuery(query);
+    super.buildQuery(query, user);
     qb.addTotalCount();
   }
 
