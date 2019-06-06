@@ -699,7 +699,7 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 SET @reportUuid = lower(newid());
 INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
-	'keep on testing!','have reports in organizations', (SELECT uuid FROM people where domainUsername='arthur'), 2, CURRENT_TIMESTAMP, 0,
+	'keep on testing!','have reports in organizations', (SELECT uuid FROM people where domainUsername='arthur'), 2, DATEADD (minute, 1, CURRENT_TIMESTAMP), 0,
 	(SELECT uuid FROM organizations where shortName = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+arthur@dds.mil'), @reportUuid, 1);
