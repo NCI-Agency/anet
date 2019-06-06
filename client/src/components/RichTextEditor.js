@@ -1,4 +1,5 @@
 import React from "react"
+import PropTypes from "prop-types"
 import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertToRaw, convertFromRaw } from "draft-js"
 import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
@@ -134,11 +135,7 @@ const fromHTML = html => convertToRaw(convertFromHTML(importerConfig)(html))
 const toHTML = raw =>
   raw ? convertToHTML(exporterConfig)(convertFromRaw(raw)) : ""
 
-const onSave = content => {
-  console.log("saving", content)
-  toHTML(content)
-}
-const RichTextEditor = () => (
+const RichTextEditor = ({ value, onChange }) => (
   <DraftailEditor
     id="rich-text"
     ariaDescribedBy="rich-text-editor"
@@ -147,14 +144,21 @@ const RichTextEditor = () => (
     entityTypes={[ENTITY_CONTROL.LINK, ENTITY_CONTROL.IMAGE]}
     inlineStyles={INLINE_STYLES}
     maxListNesting={4}
-    onSave={onSave}
+    onSave={raw => {
+      onChange(toHTML(raw))
+    }}
     plugins={[linkify, newlinePlugin]}
-    rawContentState={null}
+    rawContentState={value ? fromHTML(value) : null}
     showUndoControl
     showRedoControl
     spellCheck
     stripPastedStyles={false}
   />
 )
+
+RichTextEditor.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func
+}
 
 export default RichTextEditor
