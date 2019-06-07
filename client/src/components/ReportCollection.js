@@ -40,10 +40,10 @@ export const GQL_REPORT_FIELDS = /* GraphQL */ `
 `
 
 export const GQL_BASIC_REPORT_FIELDS = /* GraphQL */ `
-	uuid
-	intent
-	state
-	location { uuid name lat lng }
+  uuid
+  intent
+  state
+  location { uuid name lat lng }
 `
 
 export default class ReportCollection extends Component {
@@ -93,7 +93,6 @@ export default class ReportCollection extends Component {
     } else if (this.props.reports) {
       reports = this.props.reports
     }
-
     const reportsExist = _get(reports, "length", 0) > 0
     const showHeader = this.props.viewFormats.length > 1 || numPages > 1
 
