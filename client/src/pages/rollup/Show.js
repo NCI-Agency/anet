@@ -21,7 +21,8 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE,
   FORMAT_CALENDAR,
-  GQL_REPORT_FIELDS
+  GQL_REPORT_FIELDS,
+  GQL_BASIC_REPORT_FIELDS
 } from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import LoaderHOC, {
@@ -97,11 +98,6 @@ class BaseRollupShow extends Page {
       org {uuid shortName}
       published
       cancelled
-    `
-    this.GQL_MAP_FIELDS = /* GraphQL */ `
-      uuid
-      intent
-      location { uuid name lat lng }
     `
     this.VISUALIZATIONS = [
       {
@@ -263,7 +259,7 @@ class BaseRollupShow extends Page {
     )
   }
 
-  reportsQueryParams = forMap => {
+  reportsQueryParams = includeAll => {
     const reportsQueryParams = {
       state: [Report.STATE.PUBLISHED], // Specifically excluding cancelled engagements.
       releasedAtStart: this.rollupStart.valueOf(),
@@ -276,8 +272,8 @@ class BaseRollupShow extends Page {
     }
     Object.assign(reportsQueryParams, this.getSearchQuery(this.props))
     Object.assign(reportsQueryParams, {
-      pageNum: forMap ? 0 : this.state.reportsPageNum,
-      pageSize: forMap ? 0 : 10
+      pageNum: includeAll ? 0 : this.state.reportsPageNum,
+      pageSize: includeAll ? 0 : 10
     })
     if (this.state.focusedOrg) {
       if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
@@ -291,12 +287,12 @@ class BaseRollupShow extends Page {
     return reportsQueryParams
   }
 
-  runReportsQuery = (reportsQueryParams, forMap) => {
+  runReportsQuery = (reportsQueryParams, includeAll) => {
     return API.query(
       /* GraphQL */ `
       reportList(query:$reportsQueryParams) {
         pageNum, pageSize, totalCount, list {
-          ${forMap ? this.GQL_MAP_FIELDS : GQL_REPORT_FIELDS}
+          ${includeAll ? GQL_BASIC_REPORT_FIELDS : GQL_REPORT_FIELDS}
         }
       }`,
       { reportsQueryParams },
@@ -407,6 +403,7 @@ class BaseRollupShow extends Page {
           <div className="scrollable">
             <ReportCollection
               paginatedReports={context.reports}
+              reports={context.allReports}
               goToPage={this.goToReportsPage}
               viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
             />
