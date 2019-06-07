@@ -43,8 +43,7 @@ class BaseMyReports extends Page {
       }
     }
     Object.keys(this.sectionQueryParams).forEach(
-      key =>
-        (this.sectionQueryParams[key].authorUuid = props.currentUser.uuid)
+      key => (this.sectionQueryParams[key].authorUuid = props.currentUser.uuid)
     )
   }
 
