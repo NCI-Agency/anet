@@ -5,11 +5,7 @@ import java.util.List;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 
-public class PersonSearchQuery extends AbstractSearchQuery {
-
-  public enum PersonSearchSortBy {
-    CREATED_AT, NAME, RANK
-  }
+public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
 
   String orgUuid;
   Role role;
@@ -29,13 +25,9 @@ public class PersonSearchQuery extends AbstractSearchQuery {
   // Find people who are pending verification
   Boolean pendingVerification;
 
-  private PersonSearchSortBy sortBy;
-
   public PersonSearchQuery() {
-    super();
+    super(PersonSearchSortBy.NAME);
     this.setPageSize(100);
-    this.sortBy = PersonSearchSortBy.NAME;
-    this.setSortOrder(SortOrder.ASC);
   }
 
   public String getOrgUuid() {
@@ -62,8 +54,8 @@ public class PersonSearchQuery extends AbstractSearchQuery {
     this.status = status;
   }
 
-  public Boolean getIncludeChildOrgs() {
-    return includeChildOrgs;
+  public boolean getIncludeChildOrgs() {
+    return Boolean.TRUE.equals(includeChildOrgs);
   }
 
   public void setIncludeChildOrgs(Boolean includeChildOrgs) {
@@ -108,14 +100,6 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 
   public void setPendingVerification(Boolean pendingVerification) {
     this.pendingVerification = pendingVerification;
-  }
-
-  public PersonSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(PersonSearchSortBy sortBy) {
-    this.sortBy = sortBy;
   }
 
   public Instant getEndOfTourDateStart() {

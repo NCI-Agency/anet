@@ -12,9 +12,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 @InTransaction
 public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
-  public SavedSearchDao() {
-    super("SavedSearches", "savedSearches", "*", null);
-  }
+  public static final String TABLE_NAME = "savedSearches";
 
   public SavedSearch getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
