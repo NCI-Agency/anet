@@ -37,6 +37,7 @@ import TASKS_ICON from "resources/tasks.png"
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
     listName: `${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
+    listAllName: `all${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
     sortBy: "ENGAGEMENT_DATE",
     sortOrder: "DESC",
     variableType: "ReportSearchQueryInput",
@@ -134,7 +135,7 @@ class Search extends Page {
     return `${prefix}${type}`
   }
 
-  getSearchPart(type, query, pageNum = 0, pageSize = 10) {
+  getSearchPart(type, query, pageNum = 0, pageSize = 10, includeAll = false) {
     const searchType = SEARCH_OBJECT_TYPES[type]
     let subQuery = Object.assign({}, query)
     subQuery.pageNum = pageNum
@@ -147,7 +148,9 @@ class Search extends Page {
       subQuery.sortOrder = config.sortOrder
     }
     let gqlPart = new GQL.Part(/* GraphQL */ `
-      ${config.listName} (query:$${searchType}Query) {
+      ${
+  includeAll ? config.listAllName : config.listName
+} (query:$${searchType}Query) {
         pageNum, pageSize, totalCount, list { ${config.fields} }
       }
       `).addVariable(searchType + "Query", config.variableType, subQuery)
@@ -166,6 +169,10 @@ class Search extends Page {
         const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
         return this.getSearchPart(type, query, goToPageNum, pageSize)
       })
+      // add query for all reports
+      parts.push(
+        this.getSearchPart(SEARCH_OBJECT_TYPES.REPORTS, query, 0, 0, true)
+      )
       return callback(parts)
     } else {
       this.setState({
@@ -385,6 +392,7 @@ class Search extends Page {
     const { results } = this.state
     const { pagination } = this.props
     const reports = results[SEARCH_OBJECT_TYPES.REPORTS]
+    const allReports = results["all" + SEARCH_OBJECT_TYPES.REPORTS].list
     const paginatedPart =
       pagination[this.pageLabel(SEARCH_OBJECT_TYPES.REPORTS)]
     const goToPageNum = this.getPaginatedNum(paginatedPart)
@@ -392,6 +400,7 @@ class Search extends Page {
     return (
       <ReportCollection
         paginatedReports={paginatedReports}
+        reports={allReports}
         goToPage={value => this.goToPage(SEARCH_OBJECT_TYPES.REPORTS, value)}
       />
     )
