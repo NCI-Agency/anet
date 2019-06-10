@@ -2171,10 +2171,10 @@
     browserstack-local "1.4.0"
     request "^2.85.0"
 
-"@wdio/cli@^5.8.3":
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.10.0.tgz#ba75e80e1693fa6522d37c492eb8e1fcf43bbcc7"
-  integrity sha512-G3ks94GmE5Py3geqk02C16VU8zfGPcTJbl0JEhKyoxKYFA39p/6KaNmgAEia1B4A/g2A5JRZEQa/vjIdYnTbog==
+"@wdio/cli@^5.10.1":
+  version "5.10.1"
+  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.10.1.tgz#adec354d4de1c178553097a0135d315e3157831c"
+  integrity sha512-/YaUGLz48MMu0TsUE+PtqaREp7ErYx3wWz667sOEXo9INIs78Fz192R6vsopj5BdHBiAiFPNIwA/8YLyi8ZRsQ==
   dependencies:
     "@wdio/config" "^5.9.4"
     "@wdio/logger" "^5.9.3"
@@ -2191,7 +2191,7 @@
     lodash.pickby "^4.6.0"
     lodash.union "^4.6.0"
     log-update "^3.2.0"
-    webdriverio "^5.10.0"
+    webdriverio "^5.10.1"
     yargs "^13.2.4"
     yarn-install "^1.0.0"
 
@@ -4238,12 +4238,7 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-spinners@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-2.0.0.tgz#4b078756fc17a8f72043fdc9f1f14bf4fa87e2df"
-  integrity sha512-yiEBmhaKPPeBj7wWm4GEdtPZK940p9pl3EANIrnJ3JnvWyrPjcFcsEq6qRUuQ7fzB0+Y82ld3p6B34xo95foWw==
-
-cli-spinners@^2.1.0:
+cli-spinners@^2.0.0, cli-spinners@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-2.1.0.tgz#22c34b4d51f573240885b201efda4e4ec9fff3c7"
   integrity sha512-8B00fJOEh1HPrx4fo5eW16XmE1PcL1tGpGrxy63CXGP9nHdPBN63X75hA1zhvQuhVztJWLqV58Roj2qlNM7cAA==
@@ -8118,7 +8113,7 @@ inquirer@6.2.0:
     strip-ansi "^4.0.0"
     through "^2.3.6"
 
-inquirer@6.2.2, inquirer@^6.2.2:
+inquirer@6.2.2:
   version "6.2.2"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-6.2.2.tgz#46941176f65c9eb20804627149b743a218f25406"
   integrity sha512-Z2rREiXA6cHRR9KBOarR3WuLlFzlIfAEIiB45ll5SSadMg7WqOh1MKEjjndfuH5ewXdixWCxqnVfGOQzPeiztA==
@@ -8137,7 +8132,7 @@ inquirer@6.2.2, inquirer@^6.2.2:
     strip-ansi "^5.0.0"
     through "^2.3.6"
 
-inquirer@^6.2.0, inquirer@^6.2.1:
+inquirer@^6.2.0, inquirer@^6.2.1, inquirer@^6.2.2:
   version "6.3.1"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-6.3.1.tgz#7a413b5e7950811013a3db491c61d1f3b776e8e7"
   integrity sha512-MmL624rfkFt4TG9y/Jvmt8vdmOo836U7Y0Hxr2aFk3RelZEGX4Igk0KabWrcaaZaTv9uzglOqWh1Vly+FAWAXA==
@@ -14694,10 +14689,10 @@ webdriver@^5.10.0:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@^5.10.0, webdriverio@^5.8.3:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.10.0.tgz#6fd51965aa741f6d64a186dd17d4295f0d0f7d1c"
-  integrity sha512-/uNU/7rvv6TplMMRE8R+VKxXwUtbEsCXvx8NumstnJ/dR/bG88Xf0tP1X/KRlVXqku5YqPRfE5ay4rUSjUIYCg==
+webdriverio@^5.10.0, webdriverio@^5.10.1, webdriverio@^5.8.3:
+  version "5.10.1"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.10.1.tgz#01be58e6a457c1d5a8c1fa9f70e91234b77dce84"
+  integrity sha512-bCd5aZoYlevb0GGiNZqKG3DRdg7X/uaxStrqmM1EvdJBfhiSh2Nnb7AiOnrh83qpSWUUEg80gPLxIXCZhacZrg==
   dependencies:
     "@wdio/config" "^5.9.4"
     "@wdio/logger" "^5.9.3"
