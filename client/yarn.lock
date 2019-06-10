@@ -2269,10 +2269,10 @@
     chalk "^2.3.2"
     pretty-ms "^5.0.0"
 
-"@wdio/sync@^5.8.1":
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.10.0.tgz#b8310d347cf4eb7bd322346c4fe1e11e60f7a00c"
-  integrity sha512-FCdbH2BUHDExrovTvI4kCnrwKaNlBpwuwEQYPRLzP2fqFl6W0++XSTsjPChYwS5zV2aiDVU9VUVZSfic8ct+Aw==
+"@wdio/sync@^5.10.1":
+  version "5.10.1"
+  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.10.1.tgz#04476a4cffca1e5a537aafd97ebaf5874b43bccd"
+  integrity sha512-tY32WRjqWe2B+7NghE04tMMq/ojUl1kXOtL5NKa49fGafa8yPj12PJJvmI30RkqrY5/pcQKGfNy9fLTs4MAVAw==
   dependencies:
     "@wdio/config" "^5.9.4"
     "@wdio/logger" "^5.9.3"
