@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
+import java.text.Collator;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
+import mil.dds.anet.beans.search.PersonSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
@@ -257,17 +258,19 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    final Collator collator = Collator.getInstance();
+    collator.setStrength(Collator.PRIMARY);
     String prevName = null;
     for (Person p : searchResults.getList()) {
       if (prevName != null) {
-        assertThat(p.getName().compareToIgnoreCase(prevName)).isLessThanOrEqualTo(0);
+        assertThat(collator.compare(p.getName(), prevName)).isLessThanOrEqualTo(0);
       }
       prevName = p.getName();
     }
 
     // Search for a person with the name "A Dvisor"
     query = new PersonSearchQuery();
-    query.setText("A Dvisor");
+    query.setText("Dvisor");
     query.setRole(Role.ADVISOR);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
@@ -277,7 +280,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(matchCount).isEqualTo(1);
 
     // Search for same person from an autocomplete box.
-    query.setText("A Dvisor*");
+    query.setText("Dvisor*");
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});

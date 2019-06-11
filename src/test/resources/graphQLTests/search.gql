@@ -1,4 +1,4 @@
-reportList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
+reportList (query:{text:"${searchQuery}",pageSize:0}) {
 	list { uuid, intent, engagementDate, duration, keyOutcomes, nextSteps
         primaryAdvisor { uuid, name, position { organization { uuid, shortName, longName}}},
         primaryPrincipal { uuid, name, position { organization { uuid, shortName, longName}}},
@@ -9,19 +9,19 @@ reportList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
 	}
 }
 
-personList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
+personList (query:{text:"${searchQuery}",pageSize:0}) {
 	totalCount, list { uuid, name, rank, emailAddress }
 }
-positionList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
+positionList (query:{text:"${searchQuery}",pageSize:0}) {
 	totalCount, list { uuid, name, type, organization{ uuid, shortName} , person { uuid, name}}
 }
-taskList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
+taskList (query:{text:"${searchQuery}",pageSize:0}) {
 	totalCount, list { uuid, shortName, longName}
 }
-locationList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
+locationList (query:{text:"${searchQuery}",pageSize:0}) {
 	totalCount, list { uuid, name, lat, lng}
 }
-organizationList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
+organizationList (query:{text:"${searchQuery}",pageSize:0}) {
 	totalCount, list { uuid, shortName, longName }
 }
 

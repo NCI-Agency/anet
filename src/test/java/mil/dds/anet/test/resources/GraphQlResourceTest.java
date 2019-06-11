@@ -17,6 +17,7 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.search.ReportSearchQuery;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -40,7 +41,10 @@ public class GraphQlResourceTest extends AbstractResourceTest {
     variables.put("positionUuid", steve.loadPosition().getUuid());
     variables.put("orgUuid", steve.getPosition().getOrganizationUuid());
     variables.put("searchQuery", "hospital");
-    variables.put("reportUuid", jack.loadAttendedReports(0, 1).getList().get(0).getUuid());
+    final ReportSearchQuery jaQuery = new ReportSearchQuery();
+    jaQuery.setPageSize(1);
+    variables.put("reportUuid",
+        jack.loadAttendedReports(context, jaQuery).getList().get(0).getUuid());
     variables.put("pageNum", 0);
     variables.put("pageSize", 10);
     variables.put("maxResults", 6);

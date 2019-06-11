@@ -3,11 +3,7 @@ package mil.dds.anet.beans.search;
 import java.time.Instant;
 import mil.dds.anet.beans.Task.TaskStatus;
 
-public class TaskSearchQuery extends AbstractSearchQuery {
-
-  public enum TaskSearchSortBy {
-    CREATED_AT, NAME, CATEGORY
-  }
+public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
   private String responsibleOrgUuid;
   private Boolean includeChildrenOrgs;
@@ -27,8 +23,9 @@ public class TaskSearchQuery extends AbstractSearchQuery {
   // Including the parent Task.
   private Boolean customFieldRef1Recursively;
 
-  private TaskSearchSortBy sortBy;
-  private SortOrder sortOrder;
+  public TaskSearchQuery() {
+    super(TaskSearchSortBy.NAME);
+  }
 
   public String getResponsibleOrgUuid() {
     return responsibleOrgUuid;
@@ -124,30 +121,6 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 
   public void setCustomFieldRef1Recursively(Boolean customFieldRef1Recursively) {
     this.customFieldRef1Recursively = customFieldRef1Recursively;
-  }
-
-  public TaskSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(TaskSearchSortBy sortBy) {
-    this.sortBy = sortBy;
-  }
-
-  public SortOrder getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(SortOrder sortOrder) {
-    this.sortOrder = sortOrder;
-  }
-
-  public static TaskSearchQuery withText(String text, int pageNum, int pageSize) {
-    TaskSearchQuery query = new TaskSearchQuery();
-    query.setText(text);
-    query.setPageNum(pageNum);
-    query.setPageSize(pageSize);
-    return query;
   }
 
 }

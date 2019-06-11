@@ -138,7 +138,14 @@ export const renderInputField = ({
     extraAddon,
     ...otherProps
   } = props
-  const widgetElem = <FormControl {...field} ref={innerRef} {...otherProps} />
+  const widgetElem = (
+    <FormControl
+      {...Object.without(field, "value")}
+      value={field.value === null ? "" : field.value}
+      ref={innerRef}
+      {...otherProps}
+    />
+  )
   return renderField(
     field,
     label,
@@ -158,7 +165,13 @@ export const renderInputFieldNoLabel = ({
   ...props
 }) => {
   const { children, ...otherProps } = props
-  const widgetElem = <FormControl {...field} {...otherProps} />
+  const widgetElem = (
+    <FormControl
+      {...Object.without(field, "value")}
+      value={field.value === null ? "" : field.value}
+      {...otherProps}
+    />
+  )
   return renderFieldNoLabel(field, form, widgetElem, children)
 }
 

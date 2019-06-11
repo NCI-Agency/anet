@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import moment from "moment"
 import CreatePerson from "../pages/createNewPerson.page"
 
 const VALID_PERSON_PRINCIPAL = {
@@ -135,10 +136,13 @@ describe("Create new Person form page", () => {
         "value",
         CreatePerson.getRandomOption(CreatePerson.country)
       )
-      CreatePerson.endOfTourDate.click()
-      CreatePerson.endOfTourDay.waitForExist()
-      // select a date
-      CreatePerson.endOfTourDay.click()
+      const tomorrow = moment()
+        .add(1, "days")
+        .format("DD-MM-YYYY")
+
+      CreatePerson.endOfTourDate.setValue(
+        "\uE003".repeat(CreatePerson.endOfTourDate.getValue().length) + tomorrow
+      )
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = CreatePerson.alertSuccess.getText()

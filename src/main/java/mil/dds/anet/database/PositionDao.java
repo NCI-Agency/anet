@@ -21,6 +21,7 @@ import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
@@ -31,12 +32,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 
   private static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid"};
-  private static String tableName = "positions";
-  public static String POSITIONS_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
-
-  public PositionDao() {
-    super("Positions", tableName, POSITIONS_FIELDS, null);
-  }
+  public static String TABLE_NAME = "positions";
+  public static String POSITIONS_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   @Override
   public Position insertInternal(Position p) {
@@ -275,8 +272,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 
   public CompletableFuture<List<Position>> getAssociatedPositions(Map<String, Object> context,
       String positionUuid) {
-    return new ForeignKeyFetcher<Position>().load(context, "position.associatedPositions",
-        positionUuid);
+    return new ForeignKeyFetcher<Position>().load(context,
+        FkDataLoaderKey.POSITION_ASSOCIATED_POSITIONS, positionUuid);
   }
 
   static class AssociatedPositionsBatcher extends ForeignKeyBatcher<Position> {
@@ -343,13 +340,6 @@ public class PositionDao extends AnetBaseDao<Position> {
         .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
   }
 
-  public List<Position> getByOrganization(String organizationUuid) {
-    return getDbHandle()
-        .createQuery("/* getPositionByOrg */ SELECT " + POSITIONS_FIELDS + "FROM positions "
-            + "WHERE \"organizationUuid\" = :orgUuid")
-        .bind("orgUuid", organizationUuid).map(new PositionMapper()).list();
-  }
-
   public AnetBeanList<Position> search(PositionSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query);
   }
@@ -357,14 +347,14 @@ public class PositionDao extends AnetBaseDao<Position> {
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
       Map<String, Object> context, String positionUuid) {
     return new ForeignKeyFetcher<PersonPositionHistory>()
-        .load(context, "position.personPositionHistory", positionUuid)
+        .load(context, FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY, positionUuid)
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
   public CompletableFuture<Position> getCurrentPositionForPerson(Map<String, Object> context,
       String personUuid) {
     return new ForeignKeyFetcher<Position>()
-        .load(context, "position.currentPositionForPerson", personUuid)
+        .load(context, FkDataLoaderKey.POSITION_CURRENT_POSITION_FOR_PERSON, personUuid)
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 

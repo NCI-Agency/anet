@@ -123,7 +123,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
-- **database**: The configuration for your database. ANET supports either sqlite for development, or Microsoft SQL Server for production.  Additonal Instructions can be found here instructions here: https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html for avaiable configuration options for the database connection. 
+- **database**: The configuration for your database. ANET supports either PostgreSQL or Microsoft SQL Server.  Additonal Instructions can be found here instructions here: https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.

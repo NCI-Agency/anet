@@ -45,7 +45,7 @@ class CreatePerson extends Page {
   get submitButton() {
     return browser.$("#formBottomSubmit")
   }
-  get endOfTourDay() {
+  get endOfTourToday() {
     return browser.$(".bp3-datepicker-footer button.bp3-button:first-child")
   }
 

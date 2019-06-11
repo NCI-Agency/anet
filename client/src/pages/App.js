@@ -47,7 +47,12 @@ class App extends Page {
         uuid, name, rank, role, emailAddress, status
         position {
           uuid, name, code, type, status, isApprover
-          organization { uuid, shortName , allDescendantOrgs { uuid }}
+          organization {
+            uuid, shortName,
+            descendantOrgs (query: { pageSize: 0 }) {
+              uuid
+            }
+          }
           location {uuid, name}
           associatedPositions {
             uuid, name,

@@ -34,6 +34,10 @@ export default class Person extends Model {
   static yupSchema = yup
     .object()
     .shape({
+      uuid: yup
+        .string()
+        .nullable()
+        .default(null),
       name: yup
         .string()
         .nullable()
@@ -119,15 +123,25 @@ export default class Person extends Model {
         .label(Settings.fields.person.phoneNumber),
       endOfTourDate: yupDate
         .nullable()
-        .when("role", (role, schema) =>
-          Person.isAdvisor({ role })
-            ? schema
-              .nullable()
-              .required(
-                `You must provide the ${Settings.fields.person.endOfTourDate}`
+        .when(["role", "status"], (role, status, schema) => {
+          if (Person.isPrincipal({ role })) {
+            return schema
+          } else {
+            schema = schema.required(
+              `You must provide the ${Settings.fields.person.endOfTourDate}`
+            )
+            if (Person.isNewUser({ status })) {
+              schema = schema.test(
+                "end-of-tour-date",
+                `The ${
+                  Settings.fields.person.endOfTourDate
+                } date must be in the future`,
+                endOfTourDate => endOfTourDate > Date.now()
               )
-            : schema.nullable()
-        )
+            }
+            return schema
+          }
+        })
         .default(null)
         .label(Settings.fields.person.endOfTourDate),
       biography: yup
@@ -215,8 +229,12 @@ export default class Person extends Model {
     return Person.isAdvisor(this)
   }
 
+  static isPrincipal(person) {
+    return person.role === Person.ROLE.PRINCIPAL
+  }
+
   isPrincipal() {
-    return this.role === Person.ROLE.PRINCIPAL
+    return Person.isPrincipal(this)
   }
 
   isAdmin() {
@@ -266,7 +284,7 @@ export default class Person extends Model {
     if (!this.position || !this.position.organization) {
       return false
     }
-    let orgs = this.position.organization.allDescendantOrgs || []
+    let orgs = this.position.organization.descendantOrgs || []
     orgs.push(this.position.organization)
     let orgUuids = orgs.map(o => o.uuid)
 

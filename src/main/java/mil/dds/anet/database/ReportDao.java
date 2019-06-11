@@ -41,6 +41,7 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
@@ -57,14 +58,10 @@ public class ReportDao extends AnetBaseDao<Report> {
       "engagementDate", "duration", "locationUuid", "approvalStepUuid", "intent", "exsum",
       "atmosphere", "cancelledReason", "advisorOrganizationUuid", "principalOrganizationUuid",
       "releasedAt", "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "authorUuid"};
-  private static final String tableName = "reports";
-  public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
+  public static final String TABLE_NAME = "reports";
+  public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   private String weekFormat;
-
-  public ReportDao() {
-    super("Reports", tableName, REPORT_FIELDS, "reports.\"createdAt\"");
-  }
 
   public String getWeekFormat() {
     if (weekFormat == null) {
@@ -77,8 +74,6 @@ public class ReportDao extends AnetBaseDao<Report> {
     switch (dbType) {
       case MSSQL:
         return "DATEPART(week, %s)";
-      case SQLITE:
-        return "strftime('%%%%W', substr(%s, 1, 10))";
       case POSTGRESQL:
         return "EXTRACT(WEEK FROM %s)";
       default:
@@ -320,7 +315,8 @@ public class ReportDao extends AnetBaseDao<Report> {
 
   public CompletableFuture<List<ReportPerson>> getAttendeesForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<ReportPerson>().load(context, "report.attendees", reportUuid);
+    return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_ATTENDEES,
+        reportUuid);
   }
 
   public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
@@ -333,26 +329,20 @@ public class ReportDao extends AnetBaseDao<Report> {
 
   public CompletableFuture<List<Task>> getTasksForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<Task>().load(context, "report.tasks", reportUuid);
+    return new ForeignKeyFetcher<Task>().load(context, FkDataLoaderKey.REPORT_TASKS, reportUuid);
   }
 
   public CompletableFuture<List<Tag>> getTagsForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<Tag>().load(context, "report.tags", reportUuid);
-  }
-
-  // Does an unauthenticated search. This will never return any DRAFT or REJECTED reports
-  public AnetBeanList<Report> search(ReportSearchQuery query) {
-    return search(query, null);
+    return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
   }
 
   public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, user,
-        false);
+    return search(query, user, false);
   }
 
   public AnetBeanList<Report> search(ReportSearchQuery query, Person user, Boolean systemSearch) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, null,
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, user,
         systemSearch);
   }
 
@@ -435,7 +425,7 @@ public class ReportDao extends AnetBaseDao<Report> {
       OrganizationSearchQuery query = new OrganizationSearchQuery();
       query.setParentOrgUuid(parentOrgUuid);
       query.setParentOrgRecursively(true);
-      query.setPageSize(Integer.MAX_VALUE);
+      query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =
           orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();
@@ -522,7 +512,7 @@ public class ReportDao extends AnetBaseDao<Report> {
     sql.append("\"reportPeople\",");
     sql.append("organizations");
 
-    sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".personUuid");
+    sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
     sql.append(" %6$s");
     sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
@@ -575,8 +565,8 @@ public class ReportDao extends AnetBaseDao<Report> {
   }
 
   /**
-   * Helper method that builds and executes the daily rollup query Handles both MsSql and Sqlite
-   * Searching for just all reports and for reports in certain organizations.
+   * Helper method that builds and executes the daily rollup query. Searching for just all reports
+   * and for reports in certain organizations.
    * 
    * @param orgType the type of organization to be looking for
    * @param orgs the list of orgs for whose reports to find, null means all
@@ -596,13 +586,13 @@ public class ReportDao extends AnetBaseDao<Report> {
     sql.append("FROM reports WHERE ");
 
     // NOTE: more date-comparison work here that might be worth abstracting, but might not
-    if (getDbType() != DaoUtils.DbType.SQLITE) {
-      sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
-          + "AND \"engagementDate\" > :engagementDateStart ");
-    } else {
-      sql.append("\"releasedAt\"  >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) "
-          + "AND \"engagementDate\" > DateTime(:engagementDateStart) ");
-    }
+    // if (getDbType() != DaoUtils.DbType.SQLITE) {
+    sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
+        + "AND \"engagementDate\" > :engagementDateStart ");
+    // } else {
+    // sql.append("\"releasedAt\" >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) "
+    // + "AND \"engagementDate\" > DateTime(:engagementDateStart) ");
+    // }
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "engagementDateStart",

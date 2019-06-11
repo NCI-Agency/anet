@@ -16,7 +16,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
+import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.utils.DaoUtils;
 import org.slf4j.Logger;
@@ -63,7 +63,7 @@ public class DailyRollupEmail implements AnetEmailAction {
     Instant engagementDateStart =
         startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
     ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageSize(Integer.MAX_VALUE);
+    query.setPageSize(0);
     query.setReleasedAtStart(startDate);
     query.setReleasedAtEnd(endDate);
     query.setEngagementDateStart(engagementDateStart);
@@ -74,7 +74,8 @@ public class DailyRollupEmail implements AnetEmailAction {
     query.setAdvisorOrgUuid(advisorOrganizationUuid);
     query.setIncludeAdvisorOrgChildren(true);
 
-    List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
+    List<Report> reports =
+        AnetObjectEngine.getInstance().getReportDao().search(query, null).getList();
 
     ReportGrouping allReports = new ReportGrouping(reports);
 

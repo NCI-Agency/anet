@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -78,7 +79,8 @@ public class Position extends AbstractAnetBean {
       return CompletableFuture.completedFuture(organization.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, "organizations", organization.getForeignUuid()).thenApply(o -> {
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, organization.getForeignUuid())
+        .thenApply(o -> {
           organization.setForeignObject(o);
           return o;
         });
@@ -110,7 +112,7 @@ public class Position extends AbstractAnetBean {
     if (person.hasForeignObject()) {
       return CompletableFuture.completedFuture(person.getForeignObject());
     }
-    return new UuidFetcher<Person>().load(context, "people", person.getForeignUuid())
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, person.getForeignUuid())
         .thenApply(o -> {
           person.setForeignObject(o);
           return o;
@@ -165,8 +167,8 @@ public class Position extends AbstractAnetBean {
     if (location.hasForeignObject()) {
       return CompletableFuture.completedFuture(location.getForeignObject());
     }
-    return new UuidFetcher<Location>().load(context, "locations", location.getForeignUuid())
-        .thenApply(o -> {
+    return new UuidFetcher<Location>()
+        .load(context, IdDataLoaderKey.LOCATIONS, location.getForeignUuid()).thenApply(o -> {
           location.setForeignObject(o);
           return o;
         });
