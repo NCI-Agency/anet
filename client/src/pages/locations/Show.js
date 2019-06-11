@@ -130,6 +130,7 @@ class BaseLocationShow extends Page {
               <Fieldset title={"Reports at this Location"}>
                 <ReportCollectionContainer
                   queryParams={{ locationUuid: this.props.match.params.uuid }}
+                  paginationKey={`r_${this.props.match.params.uuid}`}
                   mapId="reports"
                 />
               </Fieldset>

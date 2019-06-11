@@ -1,3 +1,4 @@
+import { setPagination } from "actions"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import ReportCollection, {
@@ -6,22 +7,33 @@ import ReportCollection, {
 } from "components/ReportCollection"
 
 import API from "api"
+import { connect } from "react-redux"
+import _isEqualWith from "lodash/isEqualWith"
+import utils from "utils"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
 
-export default class ReportCollectionContainer extends Component {
+class ReportCollectionContainer extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
-    mapId: PropTypes.string
+    mapId: PropTypes.string,
+    paginationKey: PropTypes.string,
+    setPagination: PropTypes.func.isRequired
   }
 
   state = {
-    pageNum: 0,
     curPageReports: null,
     allReports: null
+  }
+
+  get curPageNum() {
+    const { pagination, paginationKey } = this.props
+    return pagination[paginationKey] === undefined
+      ? 0
+      : pagination[paginationKey].pageNum
   }
 
   componentDidMount() {
@@ -30,22 +42,32 @@ export default class ReportCollectionContainer extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     // Re-load all data if queryParams has changed
-    if (this.props.queryParams !== prevProps.queryParams) {
+    if (
+      !_isEqualWith(
+        this.props.queryParams,
+        prevProps.queryParams,
+        utils.treatFunctionsAsEqual
+      )
+    ) {
       this.fetchReportData(true)
     }
   }
 
-  reportsQueryParams = withPagination => {
+  reportsQueryParams = (withPagination, pageNum) => {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
-      pageNum: withPagination ? this.state.pageNum : 0,
-      pageSize: withPagination ? 10 : 0
+      pageNum: withPagination
+        ? pageNum === undefined
+          ? this.curPageNum
+          : pageNum
+        : 0,
+      pageSize: withPagination ? 1 : 0
     })
     return reportsQueryParams
   }
 
-  runReportsQuery = (reportsQueryParams, reportFields) => {
+  getReportsQuery = (reportsQueryParams, reportFields) => {
     return API.query(
       /* GraphQL */ `
       reportList(query:$reportsQueryParams) {
@@ -58,15 +80,18 @@ export default class ReportCollectionContainer extends Component {
     )
   }
 
-  fetchReportData(includeAll) {
+  fetchReportData(includeAll, pageNum) {
     // Query used by the paginated views
     const queries = [
-      this.runReportsQuery(this.reportsQueryParams(true), GQL_REPORT_FIELDS)
+      this.getReportsQuery(
+        this.reportsQueryParams(true, pageNum),
+        GQL_REPORT_FIELDS
+      )
     ]
     if (includeAll) {
       // Query used by the map and calendar views
       queries.push(
-        this.runReportsQuery(
+        this.getReportsQuery(
           this.reportsQueryParams(false),
           GQL_BASIC_REPORT_FIELDS
         )
@@ -81,7 +106,12 @@ export default class ReportCollectionContainer extends Component {
           allReports: values[1].reportList.list
         })
       }
-      this.setState(stateUpdate)
+      this.setState(stateUpdate, () =>
+        this.props.setPagination(
+          this.props.paginationKey,
+          this.state.curPageReports.pageNum
+        )
+      )
     })
   }
 
@@ -101,6 +131,20 @@ export default class ReportCollectionContainer extends Component {
   }
 
   goToReportsPage = newPageNum => {
-    this.setState({ pageNum: newPageNum }, () => this.fetchReportData(false))
+    this.fetchReportData(false, newPageNum)
   }
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  setPagination: (paginationKey, pageNum) =>
+    dispatch(setPagination(paginationKey, pageNum))
+})
+
+const mapStateToProps = (state, ownProps) => ({
+  pagination: state.pagination
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ReportCollectionContainer)

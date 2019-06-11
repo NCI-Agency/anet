@@ -142,6 +142,7 @@ class BaseAuthorizationGroupShow extends Page {
                     queryParams={{
                       authorizationGroupUuid: this.props.match.params.uuid
                     }}
+                    paginationKey={`r_${this.props.match.params.uuid}`}
                     mapId="reports"
                   />
                 </Fieldset>

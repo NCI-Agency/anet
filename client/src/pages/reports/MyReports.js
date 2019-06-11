@@ -90,6 +90,7 @@ class BaseMyReports extends Page {
       </div>
     )
   }
+
   renderSection = (title, id, section) => {
     const queryParams = Object.assign(
       {},
@@ -98,7 +99,11 @@ class BaseMyReports extends Page {
     )
     return (
       <Fieldset title={title} id={id}>
-        <ReportCollectionContainer queryParams={queryParams} mapId={id} />
+        <ReportCollectionContainer
+          queryParams={queryParams}
+          paginationKey={`r_${this.props.currentUser.uuid}_${id}`}
+          mapId={id}
+        />
       </Fieldset>
     )
   }

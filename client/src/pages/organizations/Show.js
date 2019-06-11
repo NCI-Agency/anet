@@ -343,6 +343,7 @@ class BaseOrganizationShow extends Page {
                 >
                   <ReportCollectionContainer
                     queryParams={reportQueryParams}
+                    paginationKey={`r_${this.props.match.params.uuid}`}
                     reportsFilter={
                       !isSuperUser ? null : (
                         <Button
