@@ -5,10 +5,10 @@ const initialState = {}
 const pages = (state = initialState, action) => {
   switch (action.type) {
     case SET_PAGINATION:
-      const { pageKey, pageNum } = action.payload
+      const { paginationKey, pageNum } = action.payload
       return {
         ...state,
-        [pageKey]: {
+        [paginationKey]: {
           pageNum
         }
       }

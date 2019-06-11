@@ -27,8 +27,8 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
   setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
   clearSearchQuery: () => dispatch(clearSearchQuery()),
-  setPagination: (pageKey, pageNum) =>
-    dispatch(setPagination(pageKey, pageNum)),
+  setPagination: (paginationKey, pageNum) =>
+    dispatch(setPagination(paginationKey, pageNum)),
   resetPages: () => dispatch(resetPages())
 })
 
