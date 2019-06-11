@@ -42,7 +42,8 @@ public class AnetEmailWorkerIT {
     emailServer = new FakeSmtpServer();
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
 
-    final AnetConfiguration config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
+    final AnetConfiguration config =
+        PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
     final ScheduledExecutorService scheduler =
         PowerMockito.mock(ScheduledExecutorService.class, Mockito.RETURNS_MOCKS);
 
