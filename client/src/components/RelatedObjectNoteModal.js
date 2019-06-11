@@ -17,7 +17,8 @@ class BaseRelatedObjectNoteModal extends Component {
     note: Model.notePropTypes,
     showModal: PropTypes.bool,
     onCancel: PropTypes.func.isRequired,
-    onSuccess: PropTypes.func.isRequired
+    onSuccess: PropTypes.func.isRequired,
+    questions: PropTypes.array
   }
   yupSchema = yup.object().shape({
     type: yup.string().required(),
@@ -26,36 +27,6 @@ class BaseRelatedObjectNoteModal extends Component {
   state = {
     error: null
   }
-
-  cooperativeButtons = [
-    {
-      value: "Yes",
-      label: "Yes"
-    },
-    {
-      value: "Sometimes",
-      label: "Sometimes"
-    },
-    {
-      value: "No",
-      label: "No"
-    }
-  ]
-
-  competentButtons = [
-    {
-      value: "Yes, do something",
-      label: "Yes, do something"
-    },
-    {
-      value: "Yes, do something else",
-      label: "Yes, do something else"
-    },
-    {
-      value: "No",
-      label: "No"
-    }
-  ]
 
   render() {
     const { showModal, note } = this.props
@@ -94,27 +65,21 @@ class BaseRelatedObjectNoteModal extends Component {
 
                     {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
                       <>
-                        <Field
-                          name="Q1"
-                          label="question 1?"
-                          component={FieldHelper.renderButtonToggleGroup}
-                          buttons={this.cooperativeButtons}
-                          onChange={value => {
-                            setFieldValue("Q1", value)
-                          }}
-                        />
-                        <br />
-                        <br />
-                        <Field
-                          name="Q2"
-                          label="question 2?"
-                          component={FieldHelper.renderButtonToggleGroup}
-                          buttons={this.competentButtons}
-                          onChange={value => {
-                            setFieldValue("Q2", value)
-                          }}
-                        />
-                        <br />
+                        {this.props.questions.map(question => (
+                          <>
+                            <Field
+                              name={question.id}
+                              label={question.label}
+                              component={FieldHelper.renderButtonToggleGroup}
+                              buttons={question.choice}
+                              onChange={value => {
+                                setFieldValue(question.id, value)
+                              }}
+                            />
+                            <br />
+                            <br />
+                          </>
+                        ))}
                       </>
                     )}
 

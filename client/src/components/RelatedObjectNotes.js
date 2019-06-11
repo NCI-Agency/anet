@@ -1,7 +1,7 @@
 import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
-import API from "api"
+import API, { Settings } from "api"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import LinkTo from "components/LinkTo"
@@ -136,20 +136,38 @@ class BaseRelatedObjectNotes extends Component {
     const noNotes = _isEmpty(notes)
     const nrNotes = noNotes ? 0 : notes.length
     const badgeLabel = nrNotes > 10 ? "10+" : null
+    const questions =
+      this.props.relatedObject &&
+      this.props.relatedObject.relatedObjectType === "people" &&
+      this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
+        ? Settings.fields.principal.person.assessment.questions.filter(
+          question =>
+            !question.test ||
+              RegExp(question.test.regex).test(
+                question.test.expression
+                  .split(".")
+                  .reduce(
+                    (cursor, accessor) => cursor && cursor[accessor],
+                    this.props.relatedObjectValue
+                  )
+              )
+        )
+        : []
     const assessments = notes.filter(
       note => note.type === NOTE_TYPE.PARTNER_ASSESSMENT
     )
-    const assessmentsSummary = assessments.reduce(
-      (counter, assessment) => {
-        const assessmentJson = JSON.parse(assessment.text)
-        counter.cooperative[assessmentJson.cooperative] =
-          ++counter.cooperative[assessmentJson.cooperative] || 1
-        counter.competent[assessmentJson.competent] =
-          ++counter.competent[assessmentJson.competent] || 1
-        return counter
-      },
-      { cooperative: {}, competent: {} }
-    )
+    const assessmentsSummary = assessments.reduce((counters, assessment) => {
+      const assessmentJson = JSON.parse(assessment.text)
+
+      questions.forEach(question => {
+        if (!counters[question.id]) counters[question.id] = {}
+        const counter = counters[question.id]
+        counter[assessmentJson[question.id]] =
+          ++counter[assessmentJson[question.id]] || 1
+      })
+      return counters
+    }, {})
+
     return this.state.hide ? (
       <div style={{ minWidth: 50, padding: 5, marginRight: 15 }}>
         <NotificationBadge
@@ -204,8 +222,7 @@ class BaseRelatedObjectNotes extends Component {
           >
             Post new note
           </Button>
-          {this.props.relatedObject.relatedObjectType === "people" &&
-            this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL && (
+          {questions.length > 0 && (
             <Button
               bsStyle="primary"
               style={{ margin: "5px" }}
@@ -216,7 +233,7 @@ class BaseRelatedObjectNotes extends Component {
                 )
               }
             >
-                Assess Person
+              Assess Person
             </Button>
           )}
         </div>
@@ -226,6 +243,7 @@ class BaseRelatedObjectNotes extends Component {
             type: this.state.noteType,
             noteRelatedObjects: [{ ...this.props.relatedObject }]
           }}
+          questions={questions}
           showModal={this.state.showRelatedObjectNoteModal === "new"}
           onCancel={this.cancelRelatedObjectNoteModal}
           onSuccess={this.hideNewRelatedObjectNoteModal}
@@ -236,7 +254,7 @@ class BaseRelatedObjectNotes extends Component {
           </div>
         )}
 
-        {assessments.length > 0 && (
+        {assessments.length > 0 && questions.length > 0 && (
           <Panel bsStyle="primary" style={{ width: "100%" }}>
             <Panel.Heading>
               Summary of <b>{assessments.length}</b> assessments for{" "}
@@ -244,21 +262,19 @@ class BaseRelatedObjectNotes extends Component {
               {this.props.relatedObjectValue.name}
             </Panel.Heading>
             <Panel.Body>
-              Partner is <u>cooperative</u>
-              <br />
-              {Object.keys(assessmentsSummary.cooperative).map(key => (
-                <span key={key}>
-                  {key} (<b>{assessmentsSummary.cooperative[key]}</b>){" "}
-                </span>
-              ))}
-              <br />
-              <br />
-              Partner is <u>competent</u>
-              <br />
-              {Object.keys(assessmentsSummary.competent).map(key => (
-                <span key={key}>
-                  {key} (<b>{assessmentsSummary.competent[key]}</b>){" "}
-                </span>
+              {questions.map(question => (
+                <React.Fragment key={question.id}>
+                  {question.label}
+                  <br />
+                  {question.choice.map(choice => (
+                    <span key={choice.value}>
+                      {choice.label} (
+                      <b>{assessmentsSummary[question.id][choice.value]}</b>){" "}
+                    </span>
+                  ))}
+                  <br />
+                  <br />
+                </React.Fragment>
               ))}
             </Panel.Body>
           </Panel>
@@ -360,7 +376,7 @@ class BaseRelatedObjectNotes extends Component {
                         {Object.keys(jsonFields)
                           .filter(field => field !== "text")
                           .map(field => (
-                            <p>
+                            <p key={field}>
                               <i>{field}</i>: <b>{jsonFields[field]}</b>
                             </p>
                           ))}

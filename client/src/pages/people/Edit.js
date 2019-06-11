@@ -37,6 +37,9 @@ class PersonEdit extends Page {
         biography, country, gender, endOfTourDate,
         position {
           uuid, name, type
+          organization {
+            uuid, shortName, identificationCode
+          }
         }
         ${GRAPHQL_NOTES_FIELDS}
       }

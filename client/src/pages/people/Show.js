@@ -92,7 +92,7 @@ class BasePersonShow extends Page {
           name,
           type,
           organization {
-            uuid, shortName
+            uuid, shortName, identificationCode
           },
           associatedPositions {
             uuid, name, type

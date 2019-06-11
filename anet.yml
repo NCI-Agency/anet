@@ -331,6 +331,44 @@ dictionary:
       person:
         name: Afghan Partner
         countries: [Afghanistan]
+        assessment:
+          questions:
+            - id: test1
+              test:
+                regex: "^(Z|z)"
+                expression: position.organization.identificationCode
+              label: Test question 1
+              choice:
+                - value: "1"
+                  label: one
+                - value: "2"
+                  label: two
+                - value: "3"
+                  label: three
+            - id: test2
+              test:
+                regex: "^(Z|z)"
+                expression: position.organization.identificationCode
+              label: Test question 2
+              choice:
+                - value: "3"
+                  label: three
+                - value: "4"
+                  label: four
+                - value: "5"
+                  label: five
+            - id: test3
+              test:
+                regex: "^(Z|z)"
+                expression: position.organization.identificationCode
+              label: Test question 3
+              choice:
+                - value: "1"
+                  label: one
+                - value: "2"
+                  label: two
+                - value: "3"
+                  label: three
 
       position:
         name: Afghan Tashkil
