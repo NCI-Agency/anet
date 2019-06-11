@@ -52,8 +52,8 @@ public class FakeSmtpServer {
    * @throws IOException If the request fails
    */
   public List<EmailResponse> requestEmailsFromServer(QueryFilter queryFilter) throws IOException {
-    String request = queryFilter.createFilteredServerQuery(httpIP, httpPort);
-    String response = sendServerRequest(request, "GET");
+    final String request = queryFilter.createFilteredServerQuery(httpIP, httpPort);
+    final String response = sendServerRequest(request, "GET");
     System.out.println(response);
     return parseServeResponse(response);
   }
@@ -62,13 +62,13 @@ public class FakeSmtpServer {
    * Clears all emails from the server.
    */
   public void clearEmailServer() throws IOException {
-    String request = String.format("http://%s:%s/api/emails", httpIP, httpPort);
+    final String request = String.format("http://%s:%s/api/emails", httpIP, httpPort);
     sendServerRequest(request, "DELETE");
   }
 
   private static List<EmailResponse> parseServeResponse(String serverResponse) {
-    JSONArray response = new JSONArray(serverResponse);
-    List<EmailResponse> emails = new ArrayList<EmailResponse>();
+    final JSONArray response = new JSONArray(serverResponse);
+    final List<EmailResponse> emails = new ArrayList<EmailResponse>();
 
     for (int i = 0; i < response.length(); i++) {
       emails.add(new EmailResponse(response.getJSONObject(i)));
@@ -78,11 +78,11 @@ public class FakeSmtpServer {
   }
 
   private static String sendServerRequest(String request, String requestType) throws IOException {
-    URL url = new URL(request);
-    HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+    final URL url = new URL(request);
+    final HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 
-    String userpass = smtpUsername + ":" + smtpPassword;
-    String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
+    final String userpass = smtpUsername + ":" + smtpPassword;
+    final String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
     httpConnection.setRequestProperty("Authorization", basicAuth);
 
     httpConnection.setDoOutput(true);
@@ -90,7 +90,7 @@ public class FakeSmtpServer {
     httpConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
     httpConnection.setRequestMethod(requestType);
     httpConnection.connect();
-    InputStream response = httpConnection.getInputStream();
+    final InputStream response = httpConnection.getInputStream();
     return IOUtils.toString(response, StandardCharsets.UTF_8.name());
   }
 
@@ -108,7 +108,7 @@ public class FakeSmtpServer {
    */
   public void sendEmail(String to, String from, String replyTo, String cc, String subject,
       String msg, Date date) throws MessagingException {
-    Properties properties = System.getProperties();
+    final Properties properties = System.getProperties();
 
     properties.setProperty("mail.smtp.host", smtpIP);
     properties.setProperty("mail.smtp.port", smtpPort);
@@ -116,7 +116,7 @@ public class FakeSmtpServer {
     properties.setProperty("mail.smtp.ssl.trust", "*");
     properties.setProperty("mail.smtp.starttls.enable", "true");
 
-    Session session = Session.getDefaultInstance(properties, new Authenticator() {
+    final Session session = Session.getDefaultInstance(properties, new Authenticator() {
 
       @Override
       protected PasswordAuthentication getPasswordAuthentication() {
@@ -125,7 +125,7 @@ public class FakeSmtpServer {
 
     });
 
-    Message message = new MimeMessage(session);
+    final Message message = new MimeMessage(session);
     message.setFrom(new InternetAddress(from));
     message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 
@@ -161,10 +161,10 @@ public class FakeSmtpServer {
     }
 
     public String createFilteredServerQuery(String serverHost, String serverPort) {
-      String fromFilter = this.from == null ? "" : "?from=" + this.from;
-      String toFilter = this.to == null ? "" : "?to=" + this.to;
-      String sinceFilter = this.since == null ? "" : "?since=" + this.since;
-      String untilFilter = this.until == null ? "" : "?until=" + this.until;
+      final String fromFilter = this.from == null ? "" : "?from=" + this.from;
+      final String toFilter = this.to == null ? "" : "?to=" + this.to;
+      final String sinceFilter = this.since == null ? "" : "?since=" + this.since;
+      final String untilFilter = this.until == null ? "" : "?until=" + this.until;
 
       return String.format("http://%s:%s/api/emails%s%s%s%s", serverHost, serverPort, fromFilter,
           toFilter, sinceFilter, untilFilter);

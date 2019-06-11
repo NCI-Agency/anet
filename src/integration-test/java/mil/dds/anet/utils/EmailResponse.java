@@ -68,7 +68,7 @@ public class EmailResponse {
 
     public ToFromData(JSONObject responseData) {
       this.values = new ArrayList<ValueData>();
-      JSONArray valueArray = responseData.optJSONArray("value");
+      final JSONArray valueArray = responseData.optJSONArray("value");
       for (int i = 0; valueArray != null && i < valueArray.length(); i++) {
         this.values.add(new ValueData(valueArray.getJSONObject(i)));
       }

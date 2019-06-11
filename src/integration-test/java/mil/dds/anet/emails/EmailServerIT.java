@@ -21,18 +21,18 @@ public class EmailServerIT {
    */
   @Test
   public void runTest() throws Exception {
-    FakeSmtpServer emailServer = new FakeSmtpServer();
+    final FakeSmtpServer emailServer = new FakeSmtpServer();
 
     emailServer.clearEmailServer();
 
     emailServer.sendEmail("to@example.com", "from@example.com", null, null, "Test subject",
         "Hello there!", null);
-    List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
+    final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
 
     assertEquals(1, emails.size());
 
     // Test first email
-    EmailResponse email1 = emails.get(0);
+    final EmailResponse email1 = emails.get(0);
     assertEquals("from@example.com", email1.from.text);
     assertEquals("to@example.com", email1.to.text);
     assertNull(email1.cc);

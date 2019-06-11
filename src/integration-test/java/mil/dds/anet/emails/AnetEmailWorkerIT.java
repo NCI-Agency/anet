@@ -29,10 +29,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
     AnetObjectEngine.class})
 public class AnetEmailWorkerIT {
 
-  AnetEmailWorker emailWorker;
-  EmailDao emailDao;
-  FakeSmtpServer emailServer;
-  AnetObjectEngine instance;
+  private AnetEmailWorker emailWorker;
+  private EmailDao emailDao;
+  private FakeSmtpServer emailServer;
+  private AnetObjectEngine instance;
 
   /**
    * Sets up the test.
@@ -40,10 +40,10 @@ public class AnetEmailWorkerIT {
   @Before
   public void setUp() {
     emailServer = new FakeSmtpServer();
-
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
-    AnetConfiguration config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
-    ScheduledExecutorService scheduler =
+
+    final AnetConfiguration config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
+    final ScheduledExecutorService scheduler =
         PowerMockito.mock(ScheduledExecutorService.class, Mockito.RETURNS_MOCKS);
 
     // Configuration
@@ -57,7 +57,7 @@ public class AnetEmailWorkerIT {
     when(config.getEmailFromAddr()).thenReturn("test_from_address@anet.com");
     when(config.getServerUrl()).thenReturn("localhost:1025");
 
-    SmtpConfiguration smtpConfig =
+    final SmtpConfiguration smtpConfig =
         PowerMockito.mock(SmtpConfiguration.class, Mockito.RETURNS_MOCKS);
     when(smtpConfig.getStartTls()).thenReturn(false);
     when(smtpConfig.getHostname()).thenReturn("localhost");
@@ -84,22 +84,22 @@ public class AnetEmailWorkerIT {
     // Setup
     emailServer.clearEmailServer();
 
-    List<String> toAddresses = Arrays.asList("test_to_address@anet.com");
-    AnetEmail testEmail = createTestEmail(1, toAddresses, "test_comment");
+    final List<String> toAddresses = Arrays.asList("test_to_address@anet.com");
+    final AnetEmail testEmail = createTestEmail(1, toAddresses, "test_comment");
 
     // Run
-    List<AnetEmail> emailsToReadyToSend = Arrays.asList(testEmail);
+    final List<AnetEmail> emailsToReadyToSend = Arrays.asList(testEmail);
     when(emailDao.getAll()).thenReturn(emailsToReadyToSend);
 
     emailWorker.run();
 
     // Verify
-    List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
+    final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
     assertEquals(1, emails.size());
   }
 
   private AnetEmail createTestEmail(int id, List<String> toAddresses, String comment) {
-    AnetEmail email = PowerMockito.mock(AnetEmail.class, Mockito.RETURNS_MOCKS);
+    final AnetEmail email = PowerMockito.mock(AnetEmail.class, Mockito.RETURNS_MOCKS);
     when(email.getId()).thenReturn(id);
     when(email.getToAddresses()).thenReturn(toAddresses);
     when(email.getCreatedAt()).thenReturn(Instant.now());
