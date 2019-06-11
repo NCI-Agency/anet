@@ -3,12 +3,8 @@ package mil.dds.anet.beans;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
-import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.UuidFetcher;
 
 public class Avatar extends AbstractAnetBean {
 
@@ -22,18 +18,6 @@ public class Avatar extends AbstractAnetBean {
 
   public void setImageData(String data) {
     this.imageData = data;
-  }
-
-  @GraphQLQuery(name = "person")
-  public CompletableFuture<Person> loadPerson(@GraphQLRootContext Map<String, Object> context) {
-    if (person.hasForeignObject()) {
-      return CompletableFuture.completedFuture(person.getForeignObject());
-    }
-    return new UuidFetcher<Person>().load(context, "people", person.getForeignUuid())
-        .thenApply(o -> {
-          person.setForeignObject(o);
-          return o;
-        });
   }
 
   @JsonIgnore

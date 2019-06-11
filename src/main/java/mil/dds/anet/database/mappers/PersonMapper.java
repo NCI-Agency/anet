@@ -44,6 +44,7 @@ public class PersonMapper implements RowMapper<Person> {
     a.setBiography(r.getString("people_biography"));
     a.setDomainUsername(r.getString("people_domainUsername"));
     a.setPendingVerification(r.getBoolean("people_pendingVerification"));
+    a.setAvatar(r.getString("people_avatar"));
 
     return a;
   }

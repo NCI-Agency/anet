@@ -183,14 +183,15 @@ class BasePersonForm extends Component {
               </Button>
             </React.Fragment>
           )
-          const userAvatar = values.avatarImage != null ? `data:image/jpeg;base64,${values.avatarImage}` : ''
+          const userAvatar = values.avatar != null ? `data:image/jpeg;base64,${values.avatar}` : ''
 
           return (
             <React.Fragment>
               <NavigationWarning isBlocking={dirty} />
               <Form className="form-horizontal" method="post">
                 <Messages error={this.state.error} />
-                <Fieldset title={this.props.title} action={action} />               
+                <Fieldset title={this.props.title} action={action} />        
+                <AvatarComponent src = {userAvatar} />       
                 <Fieldset>
                   <FormGroup>
                     <Col
@@ -224,8 +225,6 @@ class BasePersonForm extends Component {
                         />
                       </Col>
                     </Col>
-
-                    <AvatarComponent src = {userAvatar} />
                     
                     {edit && !canEditName && (
                       <React.Fragment>

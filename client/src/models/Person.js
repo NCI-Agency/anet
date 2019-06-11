@@ -160,7 +160,7 @@ export default class Person extends Model {
         .string()
         .nullable()
         .default(() => Person.STATUS.ACTIVE),
-      avatarImage: yup
+      avatar: yup
         .string()
         .nullable()
         .default(() => "")

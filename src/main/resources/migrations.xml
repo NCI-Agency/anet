@@ -2357,23 +2357,10 @@
 			referencedColumnNames="uuid" referencedTableName="positions" />
 	</changeSet>
 
-	<changeSet id="add_avatars" author="jose-west">
-		<createTable tableName="avatars">
-			<column name="uuid" type="${uuid_type}">
-				<constraints primaryKey="true" nullable="false" />
-			</column>
-			<column name="personUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
-			<column name="imageData" type="${long_text_type}" />
-			<column name="createdAt" type="datetime" />
-			<column name="updatedAt" type="datetime" />
-		</createTable>
-
-		<addForeignKeyConstraint
-			baseTableName="avatars" constraintName="FK_avatar_person" baseColumnNames="personUuid"
-			referencedTableName="people" referencedColumnNames="uuid"
-			onDelete="NO ACTION" onUpdate="NO ACTION" />
+	<changeSet id="add-avatars-to-People" author="jose-west">
+		<addColumn tableName="people">
+			<column name="avatar" type="${long_text_type}" />
+		</addColumn>
 	</changeSet>
 
 </databaseChangeLog>

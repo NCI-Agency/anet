@@ -51,6 +51,8 @@ public class Person extends AbstractAnetBean implements Principal {
 
   private List<PersonPositionHistory> previousPositions;
 
+  private String avatar;
+
   public Person() {
     this.pendingVerification = false; // Defaults
   }
@@ -232,20 +234,17 @@ public class Person extends AbstractAnetBean implements Principal {
     return AnetObjectEngine.getInstance().getReportDao().search(query);
   }
 
-  @GraphQLQuery(name = "avatarImage")
+  @GraphQLQuery(name = "avatar")
   public String getAvatar() throws IOException {
-    Avatar avatar = AnetObjectEngine.getInstance().getAvatarDao().getByUuid(uuid);
-
     // Load the default image
     byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
     String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
 
-    return avatar == null ? defaultAvatarData : avatar.getImageData();
+    return avatar == null ? defaultAvatarData : this.avatar;
   }
 
-  public void setAvatar(String avatarImage) {
-    Avatar avatar = AnetObjectEngine.getInstance().getAvatarDao().getByUuid(uuid);
-    avatar.setImageData(avatarImage);
+  public void setAvatar(String avatar) {
+    this.avatar = avatar;
   }
 
   @Override
