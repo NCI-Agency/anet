@@ -22,7 +22,7 @@ import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React from "react"
-import { ListGroup, ListGroupItem, Nav } from "react-bootstrap"
+import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
@@ -43,7 +43,7 @@ class BaseOrganizationShow extends Page {
   LongNameWithLabel = DictionaryField(Field)
   state = {
     organization: new Organization(),
-    reportsFilter: NO_REPORT_FILTER,
+    filterPendingApproval: false,
     tasks: null,
     tasksPageNum: 0,
     success: null,
@@ -113,18 +113,8 @@ class BaseOrganizationShow extends Page {
     )
   }
 
-  reportsFilterIsSet = () => {
-    return this.state.reportsFilter !== NO_REPORT_FILTER
-  }
-
   togglePendingApprovalFilter = () => {
-    let toggleToFilter = this.state.reportsFilter
-    if (toggleToFilter === Report.STATE.PENDING_APPROVAL) {
-      toggleToFilter = NO_REPORT_FILTER
-    } else {
-      toggleToFilter = Report.STATE.PENDING_APPROVAL
-    }
-    this.setState({ reportsFilter: toggleToFilter })
+    this.setState({ filterPendingApproval: !this.state.filterPendingApproval })
   }
 
   render() {
@@ -176,8 +166,8 @@ class BaseOrganizationShow extends Page {
     const reportQueryParams = {
       orgUuid: this.props.match.params.uuid
     }
-    if (this.reportsFilterIsSet()) {
-      reportQueryParams.state = this.state.reportsFilter
+    if (this.state.filterPendingApproval) {
+      reportQueryParams.state = Report.STATE.PENDING_APPROVAL
     }
     return (
       <Formik enableReinitialize initialValues={organization} {...myFormProps}>
@@ -351,7 +341,22 @@ class BaseOrganizationShow extends Page {
                   id="reports"
                   title={`Reports from ${organization.shortName}`}
                 >
-                  <ReportCollectionContainer queryParams={reportQueryParams} />
+                  <ReportCollectionContainer
+                    queryParams={reportQueryParams}
+                    reportsFilter={
+                      !isSuperUser ? null : (
+                        <Button
+                          value="toggle-filter"
+                          className="btn btn-sm"
+                          onClick={this.togglePendingApprovalFilter}
+                        >
+                          {this.state.filterPendingApproval
+                            ? "Show all reports"
+                            : "Show pending approval"}
+                        </Button>
+                      )
+                    }
+                  />
                 </Fieldset>
               </Form>
             </div>

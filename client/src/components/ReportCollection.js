@@ -95,7 +95,6 @@ export default class ReportCollection extends Component {
     }
     const reportsExist = _get(reports, "length", 0) > 0
     const showHeader = this.props.viewFormats.length > 1 || numPages > 1
-
     return (
       <div className="report-collection">
         <div>
@@ -136,9 +135,9 @@ export default class ReportCollection extends Component {
                 />
               )}
 
-              {this.props.isSuperUser && (
+              {this.props.reportsFilter && (
                 <div className="reports-filter">
-                  Filter: {this.renderToggleFilterButton(this.props)}
+                  Filter: {this.props.reportsFilter}
                 </div>
               )}
             </header>
@@ -175,22 +174,6 @@ export default class ReportCollection extends Component {
         {!reportsExist && <em>No reports found</em>}
       </div>
     )
-  }
-
-  renderToggleFilterButton(props) {
-    let showAll = "Show all reports"
-    let showPendingApproval = "Show pending approval"
-    let buttonText = props.filterIsSet ? showAll : showPendingApproval
-    let button = (
-      <Button
-        value="toggle-filter"
-        className="btn btn-sm"
-        onClick={props.setReportsFilter}
-      >
-        {buttonText}
-      </Button>
-    )
-    return button
   }
 
   renderTable(reports) {
