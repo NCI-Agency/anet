@@ -143,9 +143,6 @@ export default class Page extends Component {
   }
 
   render() {
-    if (this.state.isLoading) {
-      return null
-    }
     if (this.state.notFound) {
       let modelName = this.constructor.modelName
       let text = modelName
@@ -156,7 +153,7 @@ export default class Page extends Component {
       return (
         <NotFound text="There was an error processing this request. Please contact an administrator." />
       )
-    } else if (!this.state.isLoading) {
+    } else {
       return this.renderPage()
     }
   }
