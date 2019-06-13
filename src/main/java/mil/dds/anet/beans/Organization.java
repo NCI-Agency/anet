@@ -143,10 +143,11 @@ public class Organization extends AbstractAnetBean {
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForOrg(context, uuid).thenApply(o -> {
-    	planningApprovalSteps = o;
-      return o;
-    });
+    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForOrg(context, uuid)
+        .thenApply(o -> {
+          planningApprovalSteps = o;
+          return o;
+        });
   }
 
   @GraphQLIgnore

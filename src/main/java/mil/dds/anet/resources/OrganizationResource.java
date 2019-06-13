@@ -15,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -79,6 +80,14 @@ public class OrganizationResource {
       for (Task p : org.getTasks()) {
         engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(p),
             DaoUtils.getUuid(created));
+      }
+    }
+    if (org.getPlanningApprovalSteps() != null) {
+      // Create the planning approval steps
+      for (ApprovalStep step : org.getPlanningApprovalSteps()) {
+        validateApprovalStep(step);
+        step.setAdvisorOrganizationUuid(created.getUuid());
+        engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
     if (org.getApprovalSteps() != null) {
@@ -166,6 +175,35 @@ public class OrganizationResource {
   }
 
   private void doSuperUserUpdates(Organization org, Organization existing) {
+    if (org.getPlanningApprovalSteps() != null) {
+      logger.debug("Editing planning approval steps for {}", org);
+      for (ApprovalStep step : org.getPlanningApprovalSteps()) {
+        validateApprovalStep(step);
+        step.setAdvisorOrganizationUuid(org.getUuid());
+      }
+      List<ApprovalStep> existingSteps =
+          existing.loadPlanningApprovalSteps(engine.getContext()).join();
+
+      Utils.addRemoveElementsByUuid(existingSteps, org.getPlanningApprovalSteps(),
+          newStep -> engine.getApprovalStepDao().insert(newStep),
+          oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
+
+      for (int i = 0; i < org.getPlanningApprovalSteps().size(); i++) {
+        ApprovalStep curr = org.getPlanningApprovalSteps().get(i);
+        ApprovalStep next = (i == (org.getPlanningApprovalSteps().size() - 1)) ? null
+            : org.getPlanningApprovalSteps().get(i + 1);
+        curr.setNextStepUuid(DaoUtils.getUuid(next));
+        ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
+        // If this step didn't exist before, we still need to set the nextStepUuid on it, but
+        // don't need to do a deep update.
+        if (existingStep == null) {
+          engine.getApprovalStepDao().update(curr);
+        } else {
+          // Check for updates to name, nextStepUuid and approvers.
+          updateStep(curr, existingStep);
+        }
+      }
+    }
     if (org.getApprovalSteps() != null) {
       logger.debug("Editing approval steps for {}", org);
       for (ApprovalStep step : org.getApprovalSteps()) {
