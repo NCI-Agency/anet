@@ -13,6 +13,11 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class ApprovalStep extends AbstractAnetBean {
 
+  public static enum ApprovalStepType {
+    PLANNING_APPROVAL, REPORT_APPROVAL
+  }
+
+  ApprovalStepType type;
   List<Position> approvers;
   String nextStepUuid;
   String advisorOrganizationUuid;
@@ -67,6 +72,15 @@ public class ApprovalStep extends AbstractAnetBean {
     this.name = Utils.trimStringReturnNull(name);
   }
 
+  @GraphQLQuery(name = "type")
+  public ApprovalStepType getType() {
+    return type;
+  }
+
+  public void setType(ApprovalStepType type) {
+    this.type = type;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || o.getClass() != this.getClass()) {
@@ -74,13 +88,13 @@ public class ApprovalStep extends AbstractAnetBean {
     }
     ApprovalStep as = (ApprovalStep) o;
     return Objects.equals(uuid, as.getUuid()) && Objects.equals(name, as.getName())
-        && Objects.equals(nextStepUuid, as.getNextStepUuid())
+        && Objects.equals(nextStepUuid, as.getNextStepUuid()) && Objects.equals(type, as.getType())
         && Objects.equals(advisorOrganizationUuid, as.getAdvisorOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, approvers, name, nextStepUuid, advisorOrganizationUuid);
+    return Objects.hash(uuid, approvers, name, nextStepUuid, advisorOrganizationUuid, type);
   }
 
   @Override

@@ -2365,4 +2365,22 @@
 			referencedColumnNames="uuid" referencedTableName="positions" />
 	</changeSet>
 
+	<changeSet id="add-approval-steps-type-column" author="maradragan" dbms="mssql,postgresql">
+		<!-- Create a new type column for approval steps and fill it for the existing approval steps -->
+		<addColumn tableName="approvalsteps">
+			<column name="type" type="int" />
+		</addColumn>
+		<sql dbms="mssql">
+		    UPDATE approvalsteps SET type=1;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-approval-steps-type-notnull-constraint" author="maradragan" dbms="mssql,postgresql">
+		<addNotNullConstraint
+			columnDataType="int"
+			columnName="type"
+			tableName="approvalsteps"/>
+	</changeSet>
+
 </databaseChangeLog>
