@@ -35,6 +35,7 @@ build/
 bin/
 localSettings.gradle
 localTestSettings.gradle
+insertBaseData-psql.sql
 
 #webdriver-io local test files
 errorShots/

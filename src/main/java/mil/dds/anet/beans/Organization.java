@@ -13,7 +13,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.utils.BatchingUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -89,8 +89,7 @@ public class Organization extends AbstractAnetBean {
       return CompletableFuture.completedFuture(parentOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_ORGANIZATIONS, parentOrg.getForeignUuid())
-        .thenApply(o -> {
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, parentOrg.getForeignUuid()).thenApply(o -> {
           parentOrg.setForeignObject(o);
           return o;
         });

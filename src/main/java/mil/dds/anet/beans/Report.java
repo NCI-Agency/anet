@@ -17,8 +17,8 @@ import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person.Role;
-import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -79,7 +79,7 @@ public class Report extends AbstractAnetBean {
       return CompletableFuture.completedFuture(approvalStep.getForeignObject());
     }
     return new UuidFetcher<ApprovalStep>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_APPROVAL_STEPS, approvalStep.getForeignUuid())
+        .load(context, IdDataLoaderKey.APPROVAL_STEPS, approvalStep.getForeignUuid())
         .thenApply(o -> {
           approvalStep.setForeignObject(o);
           return o;
@@ -164,8 +164,7 @@ public class Report extends AbstractAnetBean {
       return CompletableFuture.completedFuture(location.getForeignObject());
     }
     return new UuidFetcher<Location>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_LOCATIONS, location.getForeignUuid())
-        .thenApply(o -> {
+        .load(context, IdDataLoaderKey.LOCATIONS, location.getForeignUuid()).thenApply(o -> {
           location.setForeignObject(o);
           return o;
         });
@@ -356,8 +355,7 @@ public class Report extends AbstractAnetBean {
     if (author.hasForeignObject()) {
       return CompletableFuture.completedFuture(author.getForeignObject());
     }
-    return new UuidFetcher<Person>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_PEOPLE, author.getForeignUuid())
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, author.getForeignUuid())
         .thenApply(o -> {
           author.setForeignObject(o);
           return o;
@@ -392,8 +390,7 @@ public class Report extends AbstractAnetBean {
       return CompletableFuture.completedFuture(advisorOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_ORGANIZATIONS, advisorOrg.getForeignUuid())
-        .thenApply(o -> {
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, advisorOrg.getForeignUuid()).thenApply(o -> {
           advisorOrg.setForeignObject(o);
           return o;
         });
@@ -427,7 +424,7 @@ public class Report extends AbstractAnetBean {
       return CompletableFuture.completedFuture(principalOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_ORGANIZATIONS, principalOrg.getForeignUuid())
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, principalOrg.getForeignUuid())
         .thenApply(o -> {
           principalOrg.setForeignObject(o);
           return o;

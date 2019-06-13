@@ -51,7 +51,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
+import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;

@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class DaoUtils {
 
   public enum DbType {
-    MSSQL("sqlserver"), SQLITE("sqlite"), POSTGRESQL("postgresql");
+    MSSQL("sqlserver"), POSTGRESQL("postgresql");
 
     private String jdbcTag;
 
@@ -121,45 +121,11 @@ public class DaoUtils {
     for (String field : fields) {
       final StringBuilder sb = new StringBuilder(String.format("\"%s\".\"%s\"", tableName, field));
       if (addAs) {
-        sb.append(String.format(" AS %s_%s", tableName, field));
+        sb.append(String.format(" AS \"%s_%s\"", tableName, field));
       }
       fieldAliases.add(sb.toString());
     }
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
-  }
-
-  public static String buildPagedGetAllSql(DbType databaseType, String entityTag, String tableName,
-      String fieldList) {
-    return buildPagedGetAllSql(databaseType, entityTag, tableName, fieldList, null);
-  }
-
-  public static String buildPagedGetAllSql(DbType databaseType, String entityTag, String tableName,
-      String fieldList, String orderBy) {
-    if (orderBy == null) {
-      orderBy = "\"createdAt\"";
-    }
-    StringBuilder sb = new StringBuilder("/* getAll%s */ SELECT %s ");
-    switch (databaseType) {
-      case MSSQL:
-        sb.append(", count(*) over() AS \"totalCount\" FROM %s ")
-            .append("ORDER BY %s ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
-        break;
-      case SQLITE:
-        sb.append("FROM %s ORDER BY %s ASC LIMIT :limit OFFSET :offset");
-        break;
-      case POSTGRESQL:
-        sb.append(", count(*) over() AS \"totalCount\" ")
-            .append("FROM %s ORDER BY %s ASC LIMIT :limit OFFSET :offset");
-        break;
-      default:
-        throw new RuntimeException();
-    }
-
-    return String.format(sb.toString(), entityTag, fieldList, tableName, orderBy);
-  }
-
-  public static String buildCountAllSql(String entityTag, String tableName) {
-    return String.format("/* countAll%s */ SELECT COUNT(1) from \"%s\"", entityTag, tableName);
   }
 
   public static Double getOptionalDouble(final ResultSet rs, final String columnName)

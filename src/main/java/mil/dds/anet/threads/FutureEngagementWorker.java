@@ -47,7 +47,8 @@ public class FutureEngagementWorker implements Runnable {
     Instant endOfToday = Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23)
         .withMinute(59).withSecond(59).withNano(999999999).toInstant();
     query.setEngagementDateEnd(endOfToday);
-    List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
+    List<Report> reports =
+        AnetObjectEngine.getInstance().getReportDao().search(query, null).getList();
 
     // send them all emails to let them know we updated their report.
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
