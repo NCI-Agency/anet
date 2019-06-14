@@ -35,7 +35,10 @@ class OrganizationEdit extends Page {
       organization(uuid:"${props.match.params.uuid}") {
         uuid, shortName, longName, status, identificationCode, type,
         parentOrg { uuid, shortName, longName, identificationCode }
-        approvalSteps { uuid, name
+        planningApprovalSteps { uuid, name, type
+          approvers { uuid, name, person { uuid, name, rank, role }}
+        },
+        approvalSteps { uuid, name, type
           approvers { uuid, name, person { uuid, name, rank, role }}
         },
         tasks { uuid, shortName, longName}

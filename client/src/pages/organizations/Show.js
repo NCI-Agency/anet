@@ -123,8 +123,11 @@ class BaseOrganizationShow extends Page {
             person { uuid, name, status, rank, role }
           }
         },
+        planningApprovalSteps { uuid, name, type
+          approvers { uuid, name, person { uuid, name, rank, role }}
+        },
         approvalSteps {
-          uuid, name, approvers { uuid, name, person { uuid, name, rank, role }}
+          uuid, name, type, approvers { uuid, name, person { uuid, name, rank, role }}
         }
         ${GRAPHQL_NOTES_FIELDS}
       }`)
