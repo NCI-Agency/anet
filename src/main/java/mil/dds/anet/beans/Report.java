@@ -72,6 +72,8 @@ public class Report extends AbstractAnetBean {
   private List<AuthorizationGroup> authorizationGroups;
   private List<ReportAction> workflow;
 
+  private Boolean isFutureEngagement;
+
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
       @GraphQLRootContext Map<String, Object> context) {
@@ -490,12 +492,24 @@ public class Report extends AbstractAnetBean {
         workflow = actions;
         return CompletableFuture.completedFuture(workflow);
       } else {
-        return getWorkflowForOrg(context, engine, getAdvisorOrgUuid()).thenCompose(steps -> {
+        CompletableFuture<List<ApprovalStep>> w;
+        // FIXME: change the way we check isFutureEngagement
+        if (loadIsFutureEngagement()) {
+          w = getPlanningWorkflowForOrg(context, engine, getAdvisorOrgUuid());
+        } else {
+          w = getWorkflowForOrg(context, engine, getAdvisorOrgUuid());
+        }
+        return w.thenCompose(steps -> {
           if (Utils.isEmptyOrNull(steps)) {
             final String defaultOrgUuid = engine.getDefaultOrgUuid();
             if (getAdvisorOrgUuid() == null
                 || !Objects.equals(getAdvisorOrgUuid(), defaultOrgUuid)) {
-              return getDefaultWorkflow(context, engine, defaultOrgUuid);
+              // FIXME: change the way we check isFutureEngagement
+              if (loadIsFutureEngagement()) {
+                return getDefaultPlanningWorkflow(context, engine, defaultOrgUuid);
+              } else {
+                return getDefaultWorkflow(context, engine, defaultOrgUuid);
+              }
             }
           }
           return CompletableFuture.completedFuture(steps);
@@ -542,6 +556,15 @@ public class Report extends AbstractAnetBean {
     return newActions;
   }
 
+  private CompletableFuture<List<ApprovalStep>> getPlanningWorkflowForOrg(
+      Map<String, Object> context, AnetObjectEngine engine, String aoUuid) {
+    if (aoUuid == null) {
+      return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
+    }
+
+    return engine.getPlanningApprovalStepsForOrg(context, aoUuid);
+  }
+
   private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context,
       AnetObjectEngine engine, String aoUuid) {
     if (aoUuid == null) {
@@ -549,6 +572,14 @@ public class Report extends AbstractAnetBean {
     }
 
     return engine.getApprovalStepsForOrg(context, aoUuid);
+  }
+
+  private CompletableFuture<List<ApprovalStep>> getDefaultPlanningWorkflow(
+      Map<String, Object> context, AnetObjectEngine engine, String defaultOrgUuid) {
+    if (defaultOrgUuid == null) {
+      throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
+    }
+    return getPlanningWorkflowForOrg(context, engine, defaultOrgUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getDefaultWorkflow(Map<String, Object> context,
@@ -631,6 +662,26 @@ public class Report extends AbstractAnetBean {
   @GraphQLIgnore
   public List<AuthorizationGroup> getAuthorizationGroups() {
     return authorizationGroups;
+  }
+
+  // Returns an instant representing the very end of today.
+  // Used to determine if a date is tomorrow or later.
+  private Instant tomorrow() {
+    return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59)
+        .withSecond(59).withNano(999999999).toInstant();
+  }
+
+  @GraphQLQuery(name = "isFutureEngagement")
+  public synchronized Boolean loadIsFutureEngagement() {
+    return engagementDate != null && engagementDate.isAfter(tomorrow());
+  }
+
+  public Boolean getIsFutureEngagement() {
+    return isFutureEngagement;
+  }
+
+  public void setIsFutureEngagement(Boolean isFutureEngagement) {
+    this.isFutureEngagement = isFutureEngagement;
   }
 
   @Override
