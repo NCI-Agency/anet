@@ -119,12 +119,6 @@ public class ReportResource {
         .withSecond(59).withNano(999999999).toInstant();
   }
 
-  // Helper method to determine if a report should be pushed into FUTURE state.
-  private boolean shouldBeFuture(Report r) {
-    return r.getEngagementDate() != null && r.getEngagementDate().isAfter(tomorrow())
-        && r.getCancelledReason() == null;
-  }
-
   @GraphQLMutation(name = "createReport")
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
@@ -155,10 +149,6 @@ public class ReportResource {
       } catch (InterruptedException | ExecutionException e) {
         throw new WebApplicationException("failed to load Organization for PrimaryPrincipal", e);
       }
-    }
-
-    if (shouldBeFuture(r)) {
-      r.setState(ReportState.FUTURE);
     }
 
     r.setReportText(Utils.sanitizeHtml(r.getReportText()));
@@ -230,10 +220,7 @@ public class ReportResource {
     r.setAuthorUuid(existing.getAuthorUuid());
     assertCanUpdateReport(r, editor);
 
-    // If this report is in draft and in the future, set state to Future.
-    if (ReportState.DRAFT.equals(r.getState()) && shouldBeFuture(r)) {
-      r.setState(ReportState.FUTURE);
-    } else if (ReportState.FUTURE.equals(r.getState())
+    if (ReportState.FUTURE.equals(r.getState())
         && (r.getEngagementDate() == null || r.getEngagementDate().isBefore(tomorrow()))) {
       // This catches a user editing the report to change date back to the past.
       r.setState(ReportState.DRAFT);
