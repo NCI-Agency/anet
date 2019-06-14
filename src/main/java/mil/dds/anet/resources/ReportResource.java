@@ -445,9 +445,6 @@ public class ReportResource {
 
     if (r.getEngagementDate() == null) {
       throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
-    } else if (r.getEngagementDate().isAfter(tomorrow()) && r.getCancelledReason() == null) {
-      throw new WebApplicationException(
-          "You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
     }
 
     final String orgUuid;
@@ -464,8 +461,13 @@ public class ReportResource {
       throw new WebApplicationException("failed to load Organization for Author", e);
     }
     List<ApprovalStep> steps = null;
+    Boolean isFutureEngagement = r.loadIsFutureEngagement();
     try {
-      steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+      if (isFutureEngagement) {
+        steps = engine.getPlanningApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+      } else {
+        steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+      }
       throwExceptionNoApprovalSteps(steps);
     } catch (InterruptedException | ExecutionException e) {
       throw new WebApplicationException("failed to load Organization for Author", e);
