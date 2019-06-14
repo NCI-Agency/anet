@@ -76,30 +76,38 @@ export default class Report extends Model {
       atmosphere: yup
         .string()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
-          cancelled
-            ? schema.nullable()
-            : schema.required(
-              `You must provide the overall ${
-                Settings.fields.report.atmosphere
-              } of the engagement`
-            )
+        .when(
+          ["cancelled", "engagementDate"],
+          (cancelled, engagementDate, schema) =>
+            cancelled
+              ? schema.nullable()
+              : !Report.isFuture(engagementDate)
+                ? schema.required(
+                  `You must provide the overall ${
+                    Settings.fields.report.atmosphere
+                  } of the engagement`
+                )
+                : schema.nullable()
         )
         .default(null)
         .label(Settings.fields.report.atmosphere),
       atmosphereDetails: yup
         .string()
         .nullable()
-        .when(["cancelled", "atmosphere"], (cancelled, atmosphere, schema) =>
-          cancelled
-            ? schema.nullable()
-            : atmosphere === Report.ATMOSPHERE.POSITIVE
+        .when(
+          ["cancelled", "atmosphere", "engagementDate"],
+          (cancelled, atmosphere, engagementDate, schema) =>
+            cancelled
               ? schema.nullable()
-              : schema.required(
-                `You must provide ${
-                  Settings.fields.report.atmosphereDetails
-                } if the engagement was not Positive`
-              )
+              : !Report.isFuture(engagementDate)
+                ? atmosphere === Report.ATMOSPHERE.POSITIVE
+                  ? schema.nullable()
+                  : schema.required(
+                    `You must provide ${
+                      Settings.fields.report.atmosphereDetails
+                    } if the engagement was not Positive`
+                  )
+                : schema.nullable()
         )
         .default("")
         .label(Settings.fields.report.atmosphereDetails),
@@ -204,25 +212,32 @@ export default class Report extends Model {
         .label(Settings.fields.report.reportText),
       nextSteps: yup
         .string()
-        .nullable()
-        .required(
-          `You must provide a brief summary of the ${
-            Settings.fields.report.nextSteps
-          }`
+        .when(["engagementDate"], (engagementDate, schema) =>
+          !Report.isFuture(engagementDate)
+            ? schema.required(
+              `You must provide a brief summary of the ${
+                Settings.fields.report.nextSteps
+              }`
+            )
+            : schema.nullable()
         )
         .default("")
         .label(Settings.fields.report.nextSteps),
       keyOutcomes: yup
         .string()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
-          cancelled
-            ? schema.nullable()
-            : schema.required(
-              `You must provide a brief summary of the ${
-                Settings.fields.report.keyOutcomes
-              }`
-            )
+        .when(
+          ["cancelled", "engagementDate"],
+          (cancelled, engagementDate, schema) =>
+            cancelled
+              ? schema.nullable()
+              : !Report.isFuture(engagementDate)
+                ? schema.required(
+                  `You must provide a brief summary of the ${
+                    Settings.fields.report.keyOutcomes
+                  }`
+                )
+                : schema.nullable()
         )
         .default("")
         .label(Settings.fields.report.keyOutcomes),
@@ -310,8 +325,12 @@ export default class Report extends Model {
   }
 
   static isFuture(engagementDate) {
-    return engagementDate &&
-      moment().endOf("day").isBefore(engagementDate)
+    return (
+      engagementDate &&
+      moment()
+        .endOf("day")
+        .isBefore(engagementDate)
+    )
   }
 
   isFuture() {

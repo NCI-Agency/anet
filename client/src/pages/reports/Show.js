@@ -224,6 +224,7 @@ class BaseReportShow extends Page {
                 )}
             </div>
           )
+
           return (
             <div className="report-show">
               {this.renderEmailModal(values, setFieldValue)}
@@ -238,6 +239,14 @@ class BaseReportShow extends Page {
                 }
               />
               <Messages success={this.state.success} error={this.state.error} />
+
+              {report.isFuture() && (
+                <Fieldset style={{ textAlign: "center" }}>
+                  <h4 className="text-success">
+                    This report is for an UPCOMING engagement.
+                  </h4>
+                </Fieldset>
+              )}
 
               {report.isPublished() && (
                 <Fieldset style={{ textAlign: "center" }}>
@@ -322,21 +331,6 @@ class BaseReportShow extends Page {
                       it immediately.
                     </p>
                   )}
-                </Fieldset>
-              )}
-
-              {report.isFuture() && (
-                <Fieldset style={{ textAlign: "center" }}>
-                  <h4 className="text-success">
-                    This report is for an UPCOMING engagement.
-                  </h4>
-                  <p>
-                    After your engagement has taken place, edit and submit this
-                    document as an engagement report.
-                  </p>
-                  <div style={{ textAlign: "left" }}>
-                    {this.renderValidationMessages()}
-                  </div>
                 </Fieldset>
               )}
 
