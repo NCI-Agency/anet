@@ -309,12 +309,13 @@ export default class Report extends Model {
     return Report.isCancelled(this.state)
   }
 
-  static isFuture(state) {
-    return state === Report.STATE.FUTURE
+  static isFuture(engagementDate) {
+    return engagementDate &&
+      moment().endOf("day").isBefore(engagementDate)
   }
 
   isFuture() {
-    return Report.isFuture(this.state)
+    return Report.isFuture(this.engagementDate)
   }
 
   static isApproved(state) {
@@ -326,7 +327,7 @@ export default class Report extends Model {
   }
 
   showWorkflow() {
-    return this.state && !this.isDraft() && !this.isFuture()
+    return this.state && !this.isDraft()
   }
 
   iconUrl() {
