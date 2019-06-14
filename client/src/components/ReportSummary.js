@@ -68,7 +68,7 @@ export default class ReportSummary extends Component {
         {report.isPending() && (
           <Row>
             <Col md={12}>
-              <ReportCompactWorkflow report={report} />
+              <ReportCompactWorkflow workflow={report.workflow} />
             </Col>
           </Row>
         )}

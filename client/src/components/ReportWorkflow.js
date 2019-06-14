@@ -144,10 +144,10 @@ const CompactReportAction = ({ action }) => {
   )
 }
 
-export const ReportFullWorkflow = ({ report }) => {
+export const ReportFullWorkflow = ({ workflow }) => {
   return (
     <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
-      {report.workflow.map(action => {
+      {workflow.map(action => {
         const key = action.step
           ? `${action.createdAt}-${action.step.uuid}`
           : action.createdAt
@@ -157,10 +157,10 @@ export const ReportFullWorkflow = ({ report }) => {
   )
 }
 
-export const ReportCompactWorkflow = ({ report }) => {
+export const ReportCompactWorkflow = ({ workflow }) => {
   return (
     <Fieldset className="workflow-fieldset compact" title="Workflow">
-      {report.workflow.map(action => {
+      {workflow.map(action => {
         const key = action.step
           ? `${action.createdAt}-${action.step.uuid}`
           : action.createdAt

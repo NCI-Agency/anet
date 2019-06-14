@@ -496,7 +496,7 @@ class BaseReportShow extends Page {
                 )}
 
                 {report.showWorkflow() && (
-                  <ReportFullWorkflow report={report} />
+                  <ReportFullWorkflow workflow={report.workflow} />
                 )}
 
                 {canSubmit && (
