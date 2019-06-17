@@ -150,9 +150,7 @@ const reportTour = (currentUser, history) => {
       },
       {
         title: Settings.fields.report.atmosphere,
-        content: `Select the ${
-          Settings.fields.report.atmosphere
-        } of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.`,
+        content: `Select the ${Settings.fields.report.atmosphere} of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.`,
         target: "#neutralAtmos",
         placement: "bottom"
       },
@@ -257,17 +255,22 @@ const orgTour = (currentUser, history) => {
         placement: "top"
       },
       {
-        title: "Approval process",
+        title: "Engagement planning approval process",
         content:
-          "Set up or update the approval process for reports authored in your organization by clicking \"Edit\" on the top of the page. We recommend having more than one approver in each step so that either person can approve the report. When a report has gone through every step in your approval chain, it will automatically go into that day's daily rollup. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you'll need to set up an approval chain for each sub-organization as well.",
+          'Set up or update the approval process for planning of future engagements authored in your organization by clicking "Edit" on the top of the page. We recommend having more than one approver in each step so that either person can approve the planning of the engagement. When a future engagement has gone through every step in your approval chain, it will automatically be published on ANET. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you\'ll need to set up an approval chain for each sub-organization as well.',
+        target: "#planningApprovals h2",
+        placement: "top"
+      },
+      {
+        title: "Report publication approval process",
+        content:
+          "Set up or update the approval process for publication of reports authored in your organization by clicking \"Edit\" on the top of the page. We recommend having more than one approver in each step so that either person can approve the report. When a report has gone through every step in your approval chain, it will automatically go into that day's daily rollup. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you'll need to set up an approval chain for each sub-organization as well.",
         target: "#approvals h2",
         placement: "top"
       },
       {
         title: taskShortLabelPlural,
-        content: `The ${
-          Settings.fields.task.longLabel
-        } that your organization is responsible for will be displayed in this section. If you need to make changes, or if ${taskShortLabelPlural} change, you can update that information by clicking on the ${taskShortLabelSingular}.`,
+        content: `The ${Settings.fields.task.longLabel} that your organization is responsible for will be displayed in this section. If you need to make changes, or if ${taskShortLabelPlural} change, you can update that information by clicking on the ${taskShortLabelSingular}.`,
         target: "#tasks h2",
         placement: "top"
       },
