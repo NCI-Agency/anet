@@ -57,6 +57,12 @@ class BaseReportShow extends Page {
     setMessages(props, this.state)
   }
 
+  get reportType() {
+    return this.state.report.isFuture()
+      ? "report over an upcoming engagement"
+      : "report over a past engagement"
+  }
+
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
@@ -239,18 +245,11 @@ class BaseReportShow extends Page {
                 }
               />
               <Messages success={this.state.success} error={this.state.error} />
-
-              {report.isFuture() && (
-                <Fieldset style={{ textAlign: "center" }}>
-                  <h4 className="text-success">
-                    This report is for an UPCOMING engagement.
-                  </h4>
-                </Fieldset>
-              )}
-
               {report.isPublished() && (
                 <Fieldset style={{ textAlign: "center" }}>
-                  <h4 className="text-danger">This report is PUBLISHED.</h4>
+                  <h4 className="text-danger">
+                    This {this.reportType} is PUBLISHED.
+                  </h4>
                   <p>
                     This report has been approved and published to the ANET
                     community on{" "}
@@ -264,7 +263,7 @@ class BaseReportShow extends Page {
               {report.isRejected() && (
                 <Fieldset style={{ textAlign: "center" }}>
                   <h4 className="text-danger">
-                    This report has CHANGES REQUESTED.
+                    This {this.reportType} has CHANGES REQUESTED.
                   </h4>
                   <p>
                     You can review the comments below, fix the report and
@@ -279,7 +278,7 @@ class BaseReportShow extends Page {
               {report.isDraft() && (
                 <Fieldset style={{ textAlign: "center" }}>
                   <h4 className="text-danger">
-                    This is a DRAFT report and hasn't been submitted.
+                    This is a DRAFT {this.reportType} and hasn't been submitted.
                   </h4>
                   <p>
                     You can review the draft below to make sure all the details
@@ -296,7 +295,7 @@ class BaseReportShow extends Page {
               {report.isPending() && (
                 <Fieldset style={{ textAlign: "center" }}>
                   <h4 className="text-danger">
-                    This report is PENDING approvals.
+                    This {this.reportType} is PENDING approvals.
                   </h4>
                   <p>
                     It won't be available in the ANET database until your{" "}
@@ -311,7 +310,9 @@ class BaseReportShow extends Page {
 
               {report.isApproved() && (
                 <Fieldset style={{ textAlign: "center" }}>
-                  <h4 className="text-danger">This report is APPROVED.</h4>
+                  <h4 className="text-danger">
+                    This {this.reportType} is APPROVED.
+                  </h4>
                   <p>
                     This report has been approved and will be automatically
                     published to the ANET community in{" "}
