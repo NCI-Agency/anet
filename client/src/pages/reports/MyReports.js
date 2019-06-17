@@ -14,6 +14,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Nav } from "react-bootstrap"
 import { connect } from "react-redux"
+import moment from "moment"
 
 class BaseMyReports extends Page {
   static propTypes = {
@@ -34,29 +35,38 @@ class BaseMyReports extends Page {
       cancelled: null
     }
     this.partFuncs = {
-      draft: this.getPart.bind(this, "draft", [
-        Report.STATE.DRAFT,
-        Report.STATE.REJECTED
-      ]),
-      future: this.getPart.bind(this, "future", [Report.STATE.FUTURE]),
-      pending: this.getPart.bind(this, "pending", [
-        Report.STATE.PENDING_APPROVAL
-      ]),
-      approved: this.getPart.bind(this, "approved", [Report.STATE.APPROVED]),
-      published: this.getPart.bind(this, "published", [Report.STATE.PUBLISHED]),
-      cancelled: this.getPart.bind(this, "cancelled", [Report.STATE.CANCELLED])
+      draft: this.getPart.bind(this, "draft", {
+        state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
+      }),
+      future: this.getPart.bind(this, "future", {
+        engagementDateStart: moment(Date.now())
+          .endOf("day")
+          .valueOf()
+      }),
+      pending: this.getPart.bind(this, "pending", {
+        state: [Report.STATE.PENDING_APPROVAL]
+      }),
+      approved: this.getPart.bind(this, "approved", {
+        state: [Report.STATE.APPROVED]
+      }),
+      published: this.getPart.bind(this, "published", {
+        state: [Report.STATE.PUBLISHED]
+      }),
+      cancelled: this.getPart.bind(this, "cancelled", {
+        state: [Report.STATE.CANCELLED]
+      })
     }
   }
 
   @autobind
-  getPart(partName, state, authorUuid, pageNum = 0) {
+  getPart(partName, queryParams, authorUuid, pageNum = 0) {
     const queryConstPart = {
       pageSize: 10,
       pageNum: pageNum,
-      authorUuid: authorUuid,
-      state: state
+      authorUuid: authorUuid
     }
-    const query = Object.assign({}, this.getSearchQuery(), queryConstPart)
+    let query = Object.assign({}, this.getSearchQuery(), queryConstPart)
+    Object.assign(query, queryParams)
     return new GQL.Part(/* GraphQL */ `
       ${partName}: reportList(query: $${partName}Query) {
         pageNum, pageSize, totalCount, list {
