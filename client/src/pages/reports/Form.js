@@ -162,15 +162,6 @@ class BaseReportForm extends Component {
     window.clearTimeout(this.autoSaveSettings.timeoutId)
   }
 
-  checkIsFutureEngagement(engagementDate) {
-    return (
-      engagementDate &&
-      moment()
-        .endOf("day")
-        .isBefore(engagementDate)
-    )
-  }
-
   render() {
     const { currentUser, edit, title, ...myFormProps } = this.props
     const { recents, tagSuggestions } = this.state
@@ -334,9 +325,7 @@ class BaseReportForm extends Component {
               </Button>
             </div>
           )
-          const isFutureEngagement = this.checkIsFutureEngagement(
-            values.engagementDate
-          )
+          const isFutureEngagement = Report.isFuture(values.engagementDate)
           return (
             <div className="report-form">
               <NavigationWarning isBlocking={dirty} />
@@ -929,7 +918,7 @@ class BaseReportForm extends Component {
       "showSensitiveInfo",
       "attendees"
     )
-    if (this.checkIsFutureEngagement(values.engagementDate)) {
+    if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
       // They might have been set before the report has been marked as future.
       report.atmosphere = null
