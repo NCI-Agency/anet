@@ -308,7 +308,7 @@ class BaseOrganizationForm extends Component {
 
                 {isAdvisorOrg && (
                   <div>
-                    <Fieldset title="Planning approval process">
+                    <Fieldset title="Engagement planning approval process">
                       <FieldArray
                         name="planningApprovalSteps"
                         render={arrayHelpers => (
@@ -388,7 +388,7 @@ class BaseOrganizationForm extends Component {
                 )}
                 {isAdvisorOrg && (
                   <div>
-                    <Fieldset title="Approval process">
+                    <Fieldset title="Report publication approval process">
                       <FieldArray
                         name="approvalSteps"
                         render={arrayHelpers => (

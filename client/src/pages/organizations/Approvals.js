@@ -11,7 +11,10 @@ export default class OrganizationApprovals extends Component {
 
     return (
       <div>
-        <Fieldset id="planningApprovals" title="Planning approval process">
+        <Fieldset
+          id="planningApprovals"
+          title="Engagement planning approval process"
+        >
           {planningApprovalSteps.map((step, idx) => (
             <Fieldset
               title={`Step ${idx + 1}: ${step.name}`}
@@ -47,10 +50,13 @@ export default class OrganizationApprovals extends Component {
           ))}
 
           {planningApprovalSteps.length === 0 && (
-            <em>This organization doesn't have any planning approval steps</em>
+            <em>
+              This organization doesn't have any engagement planning approval
+              steps
+            </em>
           )}
         </Fieldset>
-        <Fieldset id="approvals" title="Approval process">
+        <Fieldset id="approvals" title="Report publication approval process">
           {approvalSteps.map((step, idx) => (
             <Fieldset
               title={`Step ${idx + 1}: ${step.name}`}
@@ -86,7 +92,10 @@ export default class OrganizationApprovals extends Component {
           ))}
 
           {approvalSteps.length === 0 && (
-            <em>This organization doesn't have any approval steps</em>
+            <em>
+              This organization doesn't have any report publication approval
+              steps
+            </em>
           )}
         </Fieldset>
       </div>
