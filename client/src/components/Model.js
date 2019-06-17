@@ -98,9 +98,7 @@ export default class Model {
   static pathFor(instance, query) {
     if (!instance) {
       return console.error(
-        `You didn't pass anything to ${
-          this.name
-        }.pathFor. If you want a new route, you can pass null.`
+        `You didn't pass anything to ${this.name}.pathFor. If you want a new route, you can pass null.`
       )
     }
 

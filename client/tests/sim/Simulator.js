@@ -131,9 +131,7 @@ const simulate = async args => {
         const stats = run.statistics
         const mean = (stats.sum / stats.n / 1000).toFixed(1)
         const stddev = (Math.sqrt(stats.sumVar / stats.n) / 1000).toFixed(1)
-        return `Executed ${run.story.name} ${
-          stats.n
-        } times (mean: ${mean} s, stddev: ${stddev} s) `
+        return `Executed ${run.story.name} ${stats.n} times (mean: ${mean} s, stddev: ${stddev} s) `
       })
       .join("\n")
   )
