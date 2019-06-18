@@ -82,7 +82,7 @@
     "style-loader": "^0.23.1",
     "threads": "^0.12.0",
     "uuid": "^3.3.2",
-    "wdio-chromedriver-service": "^5.0.1",
+    "wdio-chromedriver-service": "^5.0.2",
     "webdriverio": "^5.8.3",
     "webpack": "^4.32.2",
     "webpack-cleanup-plugin": "^0.5.1",
