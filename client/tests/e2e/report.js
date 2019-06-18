@@ -615,7 +615,7 @@ test("Verify that validation and other reports/new interactions work", async t =
 
 function httpRequestSmtpServer(requestType) {
   return new Promise((resolve, reject) => {
-    var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
+    var XMLHttpRequest = require('xhr2')
     const xhttp = new XMLHttpRequest()
     const url = "http://localhost:1080/api/emails"
     xhttp.open(requestType, url)
