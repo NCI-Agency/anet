@@ -15,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -242,9 +243,11 @@ public class ReportDao extends AnetBaseDao<Report> {
   }
 
   public void updateToDraftState(Report r) {
-    getDbHandle().execute(
-        "/* UpdateFutureEngagement */ UPDATE reports SET state = ? " + "WHERE uuid = ?",
-        DaoUtils.getEnumId(ReportState.DRAFT), r.getUuid());
+    getDbHandle().createUpdate(
+        "/* UpdateFutureEngagementToDraft */ UPDATE reports SET state = :state , \"approvalStepUuid\" = NULL "
+            + "WHERE uuid = :reportUuid")
+        .bind("state", DaoUtils.getEnumId(ReportState.DRAFT)).bind("reportUuid", r.getUuid())
+        .execute();
   }
 
   public int addAttendeeToReport(ReportPerson rp, Report r) {
@@ -772,4 +775,60 @@ public class ReportDao extends AnetBaseDao<Report> {
     }
     return numRows;
   }
+
+  /*
+   * Retrieves the reports which used to be for upcoming engagements and need to get the draft state
+   * as the engagements have just become past engagements and therefore their report needs to go
+   * through the report approval chain before being published.
+   */
+  public List<Report> getFutureToPastReports(Instant end) {
+    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
+    StringBuilder sql = new StringBuilder();
+
+    sql.append("/* getFutureToPastReports */");
+    sql.append(" SELECT " + ReportDao.REPORT_FIELDS);
+    sql.append(" FROM reports");
+    // We are not interested in draft reports, as they will remain draft.
+    sql.append(
+        " WHERE reports.state IN ( :reportApproved, :reportPendingApproval, :reportPublished )");
+    // Get past reports relative to the endDate arg
+    sql.append(" AND reports.\"engagementDate\" <= :endDate");
+    sql.append(" AND");
+    sql.append(" ((");
+    // Get reports for engagements which just became past engagements during or
+    // after the planning approval process
+    sql.append("   reports.uuid IN (");
+    sql.append("     SELECT pr.uuid");
+    sql.append("     FROM (");
+    sql.append("       SELECT r.uuid, ra.\"approvalStepUuid\"");
+    sql.append("       FROM reports AS r");
+    sql.append(
+        "         CROSS APPLY (SELECT TOP (1) \"reportActions\".\"reportUuid\", \"reportActions\".\"approvalStepUuid\"");
+    sql.append("         FROM \"reportActions\"");
+    sql.append("         WHERE \"reportActions\".\"reportUuid\" = r.uuid");
+    sql.append("         AND \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
+    sql.append("         ORDER BY \"reportActions\".\"createdAt\" DESC) AS ra");
+    sql.append(
+        "       WHERE ra.\"approvalStepUuid\" IN ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\" WHERE \"approvalSteps\".type = :planningApprovalStepType)");
+    sql.append("     ) AS pr ");
+    sql.append("   )");
+    sql.append("  )");
+    sql.append("  OR");
+    // Also get reports pending approval when no approval action was taken yet
+    sql.append("  (");
+    sql.append("   reports.uuid NOT IN (");
+    sql.append(
+        "     SELECT \"reportActions\".\"reportUuid\" FROM \"reportActions\" WHERE \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
+    sql.append("   )");
+    sql.append("  )");
+    sql.append(" )");
+    DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
+    sqlArgs.put("reportApproved", ReportState.APPROVED.ordinal());
+    sqlArgs.put("reportPendingApproval", ReportState.PENDING_APPROVAL.ordinal());
+    sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
+    sqlArgs.put("planningApprovalStepType", ApprovalStepType.PLANNING_APPROVAL.ordinal());
+    return getDbHandle().createQuery(String.format(sql.toString())).bindMap(sqlArgs)
+        .map(new ReportMapper()).list();
+  }
+
 }

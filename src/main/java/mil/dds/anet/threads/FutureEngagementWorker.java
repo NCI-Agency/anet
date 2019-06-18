@@ -2,6 +2,7 @@ package mil.dds.anet.threads;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,17 +41,20 @@ public class FutureEngagementWorker implements Runnable {
   }
 
   private void runInternal() {
-    // Get a list of all FUTURE and engagementDate < today reports, and their authors
-    ReportSearchQuery query = new ReportSearchQuery();
-    query.setPageSize(0);
-    query.setState(Collections.singletonList(ReportState.FUTURE));
+    // Get a list of all reports related to upcoming engagements which have just
+    // become past engagements and need to change their report status to draft.
+    // When a report is for an engagement which just moved from future to past
+    // engagement, it needs to get the draft status again as the report author
+    // needs to fill in extra information after the engagement took place and
+    // afterwards this report needs to go through the approval process of past
+    // engagements.
     Instant endOfToday = Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23)
         .withMinute(59).withSecond(59).withNano(999999999).toInstant();
-    query.setEngagementDateEnd(endOfToday);
     List<Report> reports =
-        AnetObjectEngine.getInstance().getReportDao().search(query, null).getList();
+        AnetObjectEngine.getInstance().getReportDao().getFutureToPastReports(endOfToday);
 
-    // send them all emails to let them know we updated their report.
+    // update to draft state and send emails to the authors to let them know we updated their
+    // report.
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
     for (Report r : reports) {
       try {
