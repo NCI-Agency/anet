@@ -183,17 +183,16 @@ class BasePersonForm extends Component {
               </Button>
             </React.Fragment>
           )
-          const userAvatar = values.avatar != null ? `data:image/jpeg;base64,${values.avatar}` : ''
 
           return (
             <React.Fragment>
               <NavigationWarning isBlocking={dirty} />
               <Form className="form-horizontal" method="post">
                 <Messages error={this.state.error} />
-                <Fieldset title={this.props.title} action={action} />        
-                <AvatarComponent src = {userAvatar} />       
+                <Fieldset title={this.props.title} action={action} /> 
                 <Fieldset>
-                  <FormGroup>
+                  <AvatarComponent src= {values.avatar} values = {values} />
+                  <FormGroup>                    
                     <Col
                       sm={2}
                       componentClass={ControlLabel}
@@ -548,7 +547,7 @@ class BasePersonForm extends Component {
       const person = new Person({
         uuid: response[operation].uuid
           ? response[operation].uuid
-          : this.props.initialValues.uuid
+          : this.props.initialValues.uuid        
       })
       this.props.history.replace(Person.pathForEdit(person))
       this.props.history.push({
@@ -570,6 +569,7 @@ class BasePersonForm extends Component {
       { firstName: person.firstName, lastName: person.lastName },
       true
     )
+    person.avatar = values.avatar
     // Clean up person object for JSON response
     person = Object.without(person, "firstName", "lastName")
     const operation = edit ? "updatePerson" : "createPerson"

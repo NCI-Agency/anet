@@ -30,7 +30,8 @@ public class Person extends AbstractAnetBean implements Principal {
     ADVISOR, PRINCIPAL
   }
 
-  private static final String DEFAULT_AVATAR_PATH = "src/main/resources/assets/avatars/default_avatar.png";
+  private static final String DEFAULT_AVATAR_PATH =
+      "src/main/resources/assets/avatars/default_avatar.png";
 
   private String name;
   private PersonStatus status;
@@ -240,7 +241,7 @@ public class Person extends AbstractAnetBean implements Principal {
     byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
     String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
 
-    return avatar == null ? defaultAvatarData : this.avatar;
+    return avatar == null ? defaultAvatarData : avatar;
   }
 
   public void setAvatar(String avatar) {

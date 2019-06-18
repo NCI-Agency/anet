@@ -595,6 +595,15 @@ properties:
               type: object
               additionalProperties: true
 
+      avatar:
+        properties:
+          maxFileSize:
+            type: integer
+          height: 
+            type: integer
+          width:
+            type: integer    
+
   automaticallyInactivateUsers:
     type: object
     required: [emailRemindersDaysPrior]

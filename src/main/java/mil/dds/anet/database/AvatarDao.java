@@ -42,8 +42,7 @@ public class AvatarDao extends AnetBaseDao<Avatar> {
             + "VALUES (:uuid, :personUuid, :imageData, :createdAt, :updatedAt)")
         .bindBean(n).bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
-        .bind("personUuid", n.getPersonUuid())
-        .execute();
+        .bind("personUuid", n.getPersonUuid()).execute();
     return n;
   }
 

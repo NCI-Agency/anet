@@ -198,9 +198,9 @@ class BasePersonShow extends Page {
                 <Fieldset
                   title={`${person.rank} ${person.name}`}
                   action={action}
-                />
-                <Avatar />               
-                <Fieldset>                
+                />                              
+                <Fieldset> 
+                  <Avatar />                
                   <Field
                     name="rank"
                     label={Settings.fields.person.rank}
