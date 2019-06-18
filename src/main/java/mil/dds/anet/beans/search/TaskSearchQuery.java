@@ -3,11 +3,7 @@ package mil.dds.anet.beans.search;
 import java.time.Instant;
 import mil.dds.anet.beans.Task.TaskStatus;
 
-public class TaskSearchQuery extends AbstractSearchQuery {
-
-  public enum TaskSearchSortBy {
-    CREATED_AT, NAME, CATEGORY
-  }
+public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
   private String responsibleOrgUuid;
   private Boolean includeChildrenOrgs;
@@ -27,7 +23,9 @@ public class TaskSearchQuery extends AbstractSearchQuery {
   // Including the parent Task.
   private Boolean customFieldRef1Recursively;
 
-  private TaskSearchSortBy sortBy;
+  public TaskSearchQuery() {
+    super(TaskSearchSortBy.NAME);
+  }
 
   public String getResponsibleOrgUuid() {
     return responsibleOrgUuid;
@@ -123,14 +121,6 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 
   public void setCustomFieldRef1Recursively(Boolean customFieldRef1Recursively) {
     this.customFieldRef1Recursively = customFieldRef1Recursively;
-  }
-
-  public TaskSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(TaskSearchSortBy sortBy) {
-    this.sortBy = sortBy;
   }
 
 }

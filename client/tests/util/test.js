@@ -30,8 +30,8 @@ console.log(
       "..",
       "..",
       "..",
-      "insertSqlBaseData.sql"
-    )} on your SQLServer instance`
+      "insertBaseData-mssql.sql"
+    )} on your database instance`
   )
 )
 
