@@ -789,6 +789,8 @@ public class ReportDao extends AnetBaseDao<Report> {
     sql.append(" SELECT " + ReportDao.REPORT_FIELDS);
     sql.append(" FROM reports");
     // We are not interested in draft reports, as they will remain draft.
+    // We are not interested in cancelled reports, as they will remain cancelled.
+    // FIXME: what about reports rejected during the planning process?
     sql.append(
         " WHERE reports.state IN ( :reportApproved, :reportPendingApproval, :reportPublished )");
     // Get past reports relative to the endDate arg
@@ -814,14 +816,12 @@ public class ReportDao extends AnetBaseDao<Report> {
     sql.append("   )");
     sql.append("  )");
     sql.append("  OR");
-    // Also get reports pending approval when no approval action was taken yet
+    // Also get reports pending planning approval when the approval action was not taken yet
     sql.append("  (");
-    sql.append("   reports.uuid NOT IN (");
     sql.append(
-        "     SELECT \"reportActions\".\"reportUuid\" FROM \"reportActions\" WHERE \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
+        "   reports.\"approvalStepUuid\" IN ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\" WHERE \"approvalSteps\".type = :planningApprovalStepType)");
     sql.append("   )");
     sql.append("  )");
-    sql.append(" )");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("reportApproved", ReportState.APPROVED.ordinal());
     sqlArgs.put("reportPendingApproval", ReportState.PENDING_APPROVAL.ordinal());
