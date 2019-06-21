@@ -42,6 +42,9 @@ export const GQL_REPORT_FIELDS = /* GraphQL */ `
 export const GQL_BASIC_REPORT_FIELDS = /* GraphQL */ `
   uuid
   intent
+  primaryAdvisor { name }
+  principalOrg { shortName }
+  engagementDate, duration
   state
   location { uuid name lat lng }
 `
