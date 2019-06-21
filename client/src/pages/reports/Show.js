@@ -244,8 +244,10 @@ class BaseReportShow extends Page {
                   <h4 className="text-danger">This report is PUBLISHED.</h4>
                   <p>
                     This report has been approved and published to the ANET
-                    community on {moment(report.releasedAt).format(
-                      Settings.dateFormats.forms.displayShort.withTime)}
+                    community on{" "}
+                    {moment(report.releasedAt).format(
+                      Settings.dateFormats.forms.displayShort.withTime
+                    )}
                   </p>
                 </Fieldset>
               )}

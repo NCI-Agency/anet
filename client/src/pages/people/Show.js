@@ -291,9 +291,7 @@ class BasePersonShow extends Page {
                       queryParams={{
                         authorUuid: this.props.match.params.uuid
                       }}
-                      paginationKey={`r_authored_${
-                        this.props.match.params.uuid
-                      }`}
+                      paginationKey={`r_authored_${this.props.match.params.uuid}`}
                       mapId="reports-authored"
                     />
                   </Fieldset>

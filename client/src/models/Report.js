@@ -80,9 +80,7 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : schema.required(
-              `You must provide the overall ${
-                Settings.fields.report.atmosphere
-              } of the engagement`
+              `You must provide the overall ${Settings.fields.report.atmosphere} of the engagement`
             )
         )
         .default(null)
@@ -96,9 +94,7 @@ export default class Report extends Model {
             : atmosphere === Report.ATMOSPHERE.POSITIVE
               ? schema.nullable()
               : schema.required(
-                `You must provide ${
-                  Settings.fields.report.atmosphereDetails
-                } if the engagement was not Positive`
+                `You must provide ${Settings.fields.report.atmosphereDetails} if the engagement was not Positive`
               )
         )
         .default("")
@@ -167,9 +163,7 @@ export default class Report extends Model {
           function(tasks) {
             return _isEmpty(tasks)
               ? this.createError({
-                message: `You must provide at least one ${
-                  Settings.fields.task.shortLabel
-                }`
+                message: `You must provide at least one ${Settings.fields.task.shortLabel}`
               })
               : true
           }
@@ -192,9 +186,7 @@ export default class Report extends Model {
               function(reportText) {
                 return utils.isEmptyHtml(reportText)
                   ? this.createError({
-                    message: `You must provide the ${
-                      Settings.fields.report.reportText
-                    }`
+                    message: `You must provide the ${Settings.fields.report.reportText}`
                   })
                   : true
               }
@@ -206,9 +198,7 @@ export default class Report extends Model {
         .string()
         .nullable()
         .required(
-          `You must provide a brief summary of the ${
-            Settings.fields.report.nextSteps
-          }`
+          `You must provide a brief summary of the ${Settings.fields.report.nextSteps}`
         )
         .default("")
         .label(Settings.fields.report.nextSteps),
@@ -219,9 +209,7 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : schema.required(
-              `You must provide a brief summary of the ${
-                Settings.fields.report.keyOutcomes
-              }`
+              `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`
             )
         )
         .default("")
@@ -343,24 +331,16 @@ export default class Report extends Model {
     if (!primaryAttendee) {
       return `You must provide the primary ${roleName} for the Engagement`
     } else if (primaryAttendee.status !== Person.STATUS.ACTIVE) {
-      return `The primary ${roleName} - ${
-        primaryAttendee.name
-      } - needs to have an active profile`
+      return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
     } else if (
       primaryAttendee.endOfTourDate &&
       moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf("day"))
     ) {
-      return `The primary ${roleName}'s - ${
-        primaryAttendee.name
-      } - end of tour date has passed`
+      return `The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`
     } else if (!primaryAttendee.position) {
-      return `The primary ${roleName} - ${
-        primaryAttendee.name
-      } - needs to be assigned to a position`
+      return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
     } else if (primaryAttendee.position.status !== Position.STATUS.ACTIVE) {
-      return `The primary ${roleName} - ${
-        primaryAttendee.name
-      } - needs to be in an active position`
+      return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
     }
   }
 

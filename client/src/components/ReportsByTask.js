@@ -68,9 +68,7 @@ class ReportsByTask extends ReportsVisualisation {
       second: this.VISUALIZATIONS[2].id
     }
     this.DESCRIPTION = `The reports are grouped by ${this.taskShortLabel}.
-      In order to see the list of published reports for a ${
-  this.taskShortLabel
-},
+      In order to see the list of published reports for a ${this.taskShortLabel},
       click on the bar corresponding to the ${this.taskShortLabel}.`
 
     this.state = {
