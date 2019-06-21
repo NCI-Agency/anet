@@ -4344,18 +4344,18 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-codemirror-graphql@^0.7.1:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/codemirror-graphql/-/codemirror-graphql-0.7.1.tgz#64b995643d511b9aa8f85eeeb2feac7aeb4b94d4"
-  integrity sha512-HtHXMJAn6iGJYpijkzi3IlqWIdGrB6V0RqJ607yffJTCKk/OgaNtdLOb8hZJyEtHfkw7PZDaKybMAVCi6ScWSQ==
+codemirror-graphql@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/codemirror-graphql/-/codemirror-graphql-0.8.3.tgz#8de806d418f72121ccfd9820594aa306ac0d3366"
+  integrity sha512-ZipSnPXFKDMThfvfTKTAt1dQmuGctVNann8hTZg6017+vwOcGpIqCuQIZLRDw/Y3zZfCyydRARHgbSydSCXpow==
   dependencies:
     graphql-language-service-interface "^1.3.2"
     graphql-language-service-parser "^1.2.2"
 
-codemirror@^5.26.0:
-  version "5.45.0"
-  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.45.0.tgz#db5ebbb3bf44028c684053f3954d011efcec27ad"
-  integrity sha512-c19j644usCE8gQaXa0jqn2B/HN9MnB2u6qPIrrhrMkB+QAP42y8G4QnTwuwbVSoUS1jEl7JU9HZMGhCDL0nsAw==
+codemirror@^5.47.0:
+  version "5.48.0"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.48.0.tgz#66e6dae6ca79b955e34b322881ebb7b5512f3cc5"
+  integrity sha512-3Ter+tYtRlTNtxtYdYNPxGxBL/b3cMcvPdPm70gvmcOO2Rauv/fUEewWa0tT596Hosv6ea2mtpx28OXBy1mQCg==
 
 collection-visit@^1.0.0:
   version "1.0.0"
@@ -4604,7 +4604,7 @@ copy-descriptor@^0.1.0:
   resolved "https://registry.yarnpkg.com/copy-descriptor/-/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha1-Z29us8OZl8LuGsOpJP1hJHSPV40=
 
-copy-to-clipboard@^3.0.8:
+copy-to-clipboard@^3.0.8, copy-to-clipboard@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/copy-to-clipboard/-/copy-to-clipboard-3.2.0.tgz#d2724a3ccbfed89706fac8a894872c979ac74467"
   integrity sha512-eOZERzvCmxS8HWzugj4Uxl8OJxa7T2k1Gi0X5qavwydHIfuSHq2dTD09LOg/XyGq4Zpb5IsR/2OJ5lbOegz78w==
@@ -7300,13 +7300,14 @@ grapheme-splitter@^1.0.2:
   resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
-graphiql@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-0.12.0.tgz#a035c93a6e3c18850c2f450c039747b2ea3eb953"
-  integrity sha512-OM5dpcONLK1B2prez2WVTfohQlQKe4Fwv1YwNQYQhN+fFGEW87D5v5fN2M8ZebzxbZHqP12KkHicO3sv8k30TQ==
+graphiql@^0.13.2:
+  version "0.13.2"
+  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-0.13.2.tgz#cdd0f3eb656a82e9787531ae27433819ca455d58"
+  integrity sha512-4N2HmQQpUfApS1cxrTtoZ15tnR3EW88oUiqmza6GgNQYZZfDdBGphdQlBYsKcjAB/SnIOJort+RA1dB6kf4M7Q==
   dependencies:
-    codemirror "^5.26.0"
-    codemirror-graphql "^0.7.1"
+    codemirror "^5.47.0"
+    codemirror-graphql "^0.8.3"
+    copy-to-clipboard "^3.2.0"
     markdown-it "^8.4.0"
 
 graphql-cli-prepare@1.4.19:
