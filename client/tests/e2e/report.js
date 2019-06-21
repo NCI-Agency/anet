@@ -329,6 +329,9 @@ test("Publish report chain", async t => {
   await $$rollupDateRange[1].sendKeys(Key.TAB)
   await t.context.driver.sleep(longWaitMs) // wait for report collection to load
 
+  let $rollupTableTab = await $(".report-collection button[value='table']")
+  await $rollupTableTab.click()
+
   let $reportCollection = await $(".report-collection table")
   await t.context.driver.wait(until.elementIsVisible($reportCollection))
   let $approvedIntent = await $reportCollection.findElement(
