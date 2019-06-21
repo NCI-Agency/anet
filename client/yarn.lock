@@ -12102,10 +12102,10 @@ react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-mosaic-component@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/react-mosaic-component/-/react-mosaic-component-3.0.1.tgz#d6b48c88f10a34445d57126fdab0e7e0b3e8abaf"
-  integrity sha512-xeaM5+c3Wr44bRAtUhcxapK4U0RJOhstGu5YaJ0LomKUoMS4buKFWttTdR2V65mXaAo7/Yitw2aTUUG+5OvOaQ==
+react-mosaic-component@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-mosaic-component/-/react-mosaic-component-3.1.0.tgz#d801913fa4e13b18bac43f4b74482a60492eb323"
+  integrity sha512-LG7jc7ScM/ZzIlacj96nVahab0hNnBT2W9I59sjuK9HxTYAexfn6W3+aJaU0oknGPk3DsBCgscFCm/A2oN3nkw==
   dependencies:
     classnames "^2.2.6"
     immutability-helper "^3.0.1"
