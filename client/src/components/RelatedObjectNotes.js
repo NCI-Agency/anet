@@ -138,8 +138,9 @@ class BaseRelatedObjectNotes extends Component {
     const badgeLabel = nrNotes > 10 ? "10+" : null
     const questions =
       this.props.relatedObject &&
-      this.props.relatedObject.relatedObjectType === "people" &&
-      this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
+      Settings.fields.principal.person.assessment &&
+        this.props.relatedObject.relatedObjectType === "people" &&
+        this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
         ? Settings.fields.principal.person.assessment.questions.filter(
           question =>
             !question.test ||
