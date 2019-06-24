@@ -237,7 +237,7 @@ export default class ReportCollection extends Component {
           url: Report.pathFor(r),
           classNames: ["event-" + r.state.toLowerCase()],
           extendedProps: { ...r },
-          allDay: !!r.duration
+          allDay: r.duration === null
         }
       })
     } else {
