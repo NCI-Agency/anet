@@ -203,7 +203,8 @@ class BaseReportForm extends Component {
           values,
           touched,
           submitForm,
-          resetForm
+          resetForm,
+          setSubmitting
         }) => {
           const locationFilters = {
             activeLocations: {
@@ -327,7 +328,9 @@ class BaseReportForm extends Component {
               <Button
                 bsStyle="primary"
                 type="button"
-                onClick={() => this.onSubmit(values, { resetForm })}
+                onClick={() =>
+                  this.onSubmit(values, { resetForm, setSubmitting })
+                }
                 disabled={isSubmitting}
               >
                 {submitText}
