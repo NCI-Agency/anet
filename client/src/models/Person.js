@@ -98,9 +98,7 @@ export default class Person extends Model {
         .string()
         .nullable()
         .required(
-          `You must provide the ${
-            Settings.fields.person.rank
-          } (Military rank, CIV and CTR values are available)`
+          `You must provide the ${Settings.fields.person.rank} (Military rank, CIV and CTR values are available)`
         )
         .default("")
         .label(Settings.fields.person.rank),
@@ -133,9 +131,7 @@ export default class Person extends Model {
             if (Person.isNewUser({ status })) {
               schema = schema.test(
                 "end-of-tour-date",
-                `The ${
-                  Settings.fields.person.endOfTourDate
-                } date must be in the future`,
+                `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
                 endOfTourDate => endOfTourDate > Date.now()
               )
             }
