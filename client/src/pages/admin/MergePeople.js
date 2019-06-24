@@ -55,9 +55,7 @@ class MergePeople extends Page {
       })
       .test(
         "equal-roles",
-        `You can only merge people of the same Role (i.e. ${
-          Settings.fields.advisor.person.name
-        }/${Settings.fields.principal.person.name})`,
+        `You can only merge people of the same Role (i.e. ${Settings.fields.advisor.person.name}/${Settings.fields.principal.person.name})`,
         function(value) {
           const l = this.resolve(yup.ref("loser"))
           return value && value.role && l && l.role
