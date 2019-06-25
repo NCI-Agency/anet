@@ -36,6 +36,7 @@ import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.graphql.DateTimeMapper;
 import mil.dds.anet.graphql.OutputTransformers.JsonToXlsxTransformer;
 import mil.dds.anet.graphql.OutputTransformers.JsonToXmlTransformer;
+import mil.dds.anet.graphql.OutputTransformers.XsltXmlTransformer;
 import mil.dds.anet.utils.BatchingUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dataloader.DataLoaderRegistry;
@@ -67,8 +68,7 @@ public class GraphQlResource {
     public final String mediaType;
 
     public ResourceTransformer(String outputType, String mediaType) {
-      mediaType = outputType;
-	this.outputType = outputType;
+      this.outputType = outputType;
       this.mediaType = mediaType;
     }
   }
@@ -108,6 +108,18 @@ public class GraphQlResource {
       public ResponseBuilder apply(Map<String, Object> json) {
         return Response.ok(xlsxTransformer.apply(json), this.mediaType)
             .header("Content-Disposition", "attachment; filename=" + "anet_export.xslx");
+      }
+    });
+
+    resourceTransformers.add(new ResourceTransformer("nvg", MediaType.APPLICATION_XML) {
+      JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
+      XsltXmlTransformer xsltXmlTransformer =
+          new XsltXmlTransformer(GraphQlResource.class.getResourceAsStream("/nvg.xslt"));
+
+      @Override
+      public ResponseBuilder apply(Map<String, Object> json) {
+        return Response.ok(xsltXmlTransformer.apply(jsonToXmlTransformer.apply(json)),
+            this.mediaType);
       }
     });
 
