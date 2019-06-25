@@ -35,6 +35,13 @@ export default class Calendar extends Component {
           }
         }}
         allDayDefault={false}
+        eventTimeFormat={{
+          hour: "2-digit",
+          minute: "2-digit",
+          meridiem: false,
+          omitZeroMinute: false,
+          hour12: false
+        }}
         height="auto"
         ref={calendarComponentRef}
         events={events}
