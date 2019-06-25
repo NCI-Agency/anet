@@ -1,3 +1,4 @@
+import { Settings } from "api"
 import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Leaflet from "components/Leaflet"
@@ -237,7 +238,7 @@ export default class ReportCollection extends Component {
           url: Report.pathFor(r),
           classNames: ["event-" + r.state.toLowerCase()],
           extendedProps: { ...r },
-          allDay: r.duration === null
+          allDay: Settings.engagementsIncludeTimeAndDuration ? (r.duration === null) : true
         }
       })
     } else {
