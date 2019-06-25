@@ -26,3 +26,13 @@
   -webkit-box-shadow: unset;
           box-shadow: unset;
 }
+
+.fc-list-empty-wrap2 {
+  position: inherit;
+}
+.fc-list-empty {
+  padding: 8px 4px;
+  border-width: 1px 0 0;
+  border-color: #ccc;
+  margin-bottom: 10px;
+}
