@@ -42,6 +42,13 @@ export default class Calendar extends Component {
           omitZeroMinute: false,
           hour12: false
         }}
+        slotLabelFormat={{
+          hour: "2-digit",
+          minute: "2-digit",
+          meridiem: false,
+          omitZeroMinute: false,
+          hour12: false
+        }}
         height="auto" // assume a natural height, no scrollbars will be used
         aspectRatio={3} // ratio of width-to-height
         timeGridEventMinHeight={20}
