@@ -42,7 +42,8 @@ export default class Calendar extends Component {
           omitZeroMinute: false,
           hour12: false
         }}
-        height="auto"
+        height="auto" // assume a natural height, no scrollbars will be used
+        aspectRatio={3} // ratio of width-to-height
         ref={calendarComponentRef}
         events={events}
         eventRender={eventRender}
