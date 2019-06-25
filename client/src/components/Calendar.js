@@ -44,6 +44,7 @@ export default class Calendar extends Component {
         }}
         height="auto" // assume a natural height, no scrollbars will be used
         aspectRatio={3} // ratio of width-to-height
+        timeGridEventMinHeight={20}
         ref={calendarComponentRef}
         events={events}
         eventRender={eventRender}
