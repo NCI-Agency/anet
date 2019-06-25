@@ -64,8 +64,7 @@ export default class ReportCollection extends Component {
     }),
     goToPage: PropTypes.func,
     mapId: PropTypes.string,
-    viewFormats: PropTypes.arrayOf(PropTypes.string),
-    hideButtons: PropTypes.bool
+    viewFormats: PropTypes.arrayOf(PropTypes.string)
   }
 
   static defaultProps = {
@@ -238,7 +237,9 @@ export default class ReportCollection extends Component {
           url: Report.pathFor(r),
           classNames: ["event-" + r.state.toLowerCase()],
           extendedProps: { ...r },
-          allDay: Settings.engagementsIncludeTimeAndDuration ? (r.duration === null) : true
+          allDay: Settings.engagementsIncludeTimeAndDuration
+            ? r.duration === null
+            : true
         }
       })
     } else {
