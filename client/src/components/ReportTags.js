@@ -21,7 +21,7 @@ export default class ReportTags extends Component {
           remove: "reportTagRemove label-info"
         }}
         minQueryLength={1}
-        autocomplete
+        autocomplete={1}
         autofocus={false}
         handleFilterSuggestions={this.handleTagSuggestions}
         handleDelete={this.handleTagDelete}
