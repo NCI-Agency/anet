@@ -113,8 +113,20 @@ public class GraphQlResource {
 
     resourceTransformers.add(new ResourceTransformer("nvg", MediaType.APPLICATION_XML) {
       JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
-      XsltXmlTransformer xsltXmlTransformer =
-          new XsltXmlTransformer(GraphQlResource.class.getResourceAsStream("/nvg.xslt"));
+      XsltXmlTransformer xsltXmlTransformer = new XsltXmlTransformer(
+          GraphQlResource.class.getResourceAsStream("/stylesheets/nvg.xslt"));
+
+      @Override
+      public ResponseBuilder apply(Map<String, Object> json) {
+        return Response.ok(xsltXmlTransformer.apply(jsonToXmlTransformer.apply(json)),
+            this.mediaType);
+      }
+    });
+
+    resourceTransformers.add(new ResourceTransformer("kml", MediaType.APPLICATION_XML) {
+      JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
+      XsltXmlTransformer xsltXmlTransformer = new XsltXmlTransformer(
+          GraphQlResource.class.getResourceAsStream("/stylesheets/kml.xslt"));
 
       @Override
       public ResponseBuilder apply(Map<String, Object> json) {
