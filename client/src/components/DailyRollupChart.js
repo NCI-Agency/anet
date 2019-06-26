@@ -25,6 +25,8 @@ class DailyRollupChart extends Component {
     updateChart: true
   }
 
+  node = React.createRef()
+
   constructor(props) {
     super(props)
     this.createBarChart = this.createBarChart.bind(this)
@@ -52,12 +54,12 @@ class DailyRollupChart extends Component {
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
     let { width, onBarClick, barColors } = this.props
-    let chartBox = this.node.getBoundingClientRect()
+    let chartBox = this.node.current.getBoundingClientRect()
     let chartWidth = this.isNumeric(width)
       ? width - 30
       : chartBox.right - chartBox.left - 30
     let chartData = this.props.data
-    let chart = d3.select(this.node)
+    let chart = d3.select(this.node.current)
     let xLabels = [].concat.apply(
       [],
       chartData.map(d => d.published + d.cancelled)
@@ -216,7 +218,7 @@ class DailyRollupChart extends Component {
     return (
       <svg
         id={this.props.chartId}
-        ref={node => (this.node = node)}
+        ref={this.node}
         width={this.props.width}
         height={this.props.height}
       />
