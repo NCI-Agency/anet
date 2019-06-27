@@ -125,6 +125,8 @@ export default class AdvancedSelect extends Component {
   }
 
   latestRequest = null
+  overlayContainer = React.createRef()
+  overlayTarget = React.createRef()
 
   componentDidMount() {
     this.setState({
@@ -191,9 +193,7 @@ export default class AdvancedSelect extends Component {
           onChange={this.changeSearchTerms}
           onFocus={this.handleInputFocus}
           onBlur={this.handleInputBlur}
-          innerRef={el => {
-            this.overlayTarget = el
-          }}
+          innerRef={this.overlayTarget}
           extraColElem={renderExtraCol ? this.renderShortcutsTitle() : ""}
           addon={addon}
           extraAddon={extraAddon}
@@ -201,8 +201,8 @@ export default class AdvancedSelect extends Component {
         />
         <Overlay
           show={this.state.showOverlay}
-          container={this.overlayContainer}
-          target={this.overlayTarget}
+          container={this.overlayContainer.current}
+          target={this.overlayTarget.current}
           rootClose
           onHide={this.handleHideOverlay}
           placement="bottom"
@@ -282,11 +282,7 @@ export default class AdvancedSelect extends Component {
             </ContainerDimensions>
           </Popover>
         </Overlay>
-        <AdvancedSelectTarget
-          overlayRef={el => {
-            this.overlayContainer = el
-          }}
-        />
+        <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
           {vertical ? (
             <Col sm={12}>{renderSelectedWithDelete}</Col>

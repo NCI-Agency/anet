@@ -46,6 +46,8 @@ class BarChart extends Component {
     updateChart: true
   }
 
+  node = React.createRef()
+
   constructor(props) {
     super(props)
     this.createBarChart = this.createBarChart.bind(this)
@@ -139,8 +141,8 @@ class BarChart extends Component {
     // The bottom margin depends on the width of the x-axis labels.
     let marginBottom = maxXLabelWidth + MARGIN.bottom
 
-    let chart = d3.select(this.node)
-    let chartBox = this.node.getBoundingClientRect()
+    let chart = d3.select(this.node.current)
+    let chartBox = this.node.current.getBoundingClientRect()
     let chartWidth = this.isNumeric(this.props.width)
       ? this.props.width
       : chartBox.right - chartBox.left
@@ -219,7 +221,7 @@ class BarChart extends Component {
     return (
       <svg
         id={this.props.chartId}
-        ref={node => (this.node = node)}
+        ref={this.node}
         width={this.props.width}
         height={this.props.height}
       />

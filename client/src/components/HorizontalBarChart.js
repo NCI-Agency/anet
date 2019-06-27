@@ -83,6 +83,8 @@ class HorizontalBarChart extends Component {
     updateChart: true
   }
 
+  node = React.createRef()
+
   constructor(props) {
     super(props)
     this.createBarChart = this.createBarChart.bind(this)
@@ -109,7 +111,7 @@ class HorizontalBarChart extends Component {
       left: 0,
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
-    let chartBox = this.node.getBoundingClientRect()
+    let chartBox = this.node.current.getBoundingClientRect()
     let chartWidth = this.isNumeric(this.props.width)
       ? this.props.width
       : chartBox.right - chartBox.left
@@ -117,7 +119,7 @@ class HorizontalBarChart extends Component {
     let categoryLabels = this.props.data.categoryLabels
     let leavesLabels = this.props.data.leavesLabels
     let onBarClick = this.props.onBarClick
-    let chart = d3.select(this.node)
+    let chart = d3.select(this.node.current)
     let xLabels = [].concat.apply(
       [],
       chartData.map(d => d.values.map(d => d.value))
@@ -335,7 +337,7 @@ class HorizontalBarChart extends Component {
     return (
       <svg
         id={this.props.chartId}
-        ref={node => (this.node = node)}
+        ref={this.node}
         width={this.props.width}
         height={this.props.height}
       />
