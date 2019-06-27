@@ -8,9 +8,7 @@ class Page {
 
   _buildUrl(pathName, credentials) {
     const credSep = pathName.includes("?") ? "&" : "?"
-    return `${
-      browser.options.baseUrl
-    }${pathName}${credSep}user=${credentials}&pass=${credentials}`
+    return `${browser.options.baseUrl}${pathName}${credSep}user=${credentials}&pass=${credentials}`
   }
 
   _open(pathName, credentials) {

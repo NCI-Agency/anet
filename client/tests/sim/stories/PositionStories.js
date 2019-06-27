@@ -147,9 +147,7 @@ const _createPosition = async function(user) {
 
   if (!position.organization) {
     console.debug(
-      `Generated position ${
-        position.name.green
-      } without organization: cannot create`
+      `Generated position ${position.name.green} without organization: cannot create`
     )
     return "(nop)"
   }
@@ -514,9 +512,7 @@ const deletePersonFromPosition = async function(user) {
 
   if (position) {
     console.debug(
-      `Removing ${position.person.name.green} from position of ${
-        position.name.green
-      }`
+      `Removing ${position.person.name.green} from position of ${position.name.green}`
     )
     return (await runGQL(user, {
       query: `
@@ -586,9 +582,7 @@ const updateAssociatedPosition = async function(user) {
 
   if (principalPosition && advisorPosition) {
     console.debug(
-      `Associating advisor position ${advisorPosition.name.green} with ${
-        principalPosition.name.green
-      }`
+      `Associating advisor position ${advisorPosition.name.green} with ${principalPosition.name.green}`
     )
 
     // update the position associations

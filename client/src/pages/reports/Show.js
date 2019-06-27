@@ -62,7 +62,7 @@ class BaseReportShow extends Page {
       /* GraphQL */ `
       report(uuid:"${props.match.params.uuid}") {
         uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
-        keyOutcomes, reportText, nextSteps, cancelledReason
+        keyOutcomes, reportText, nextSteps, cancelledReason, releasedAt
 
         state
 

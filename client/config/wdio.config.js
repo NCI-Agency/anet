@@ -52,7 +52,7 @@ var config = {
       maxInstances: 5,
       //
       browserName: "chrome",
-      chromeOptions: {
+      "goog:chromeOptions": {
         // run in incognito mode
         // args: ['--incognito'],
         // Note: it is important to have a big window height as otherwise
@@ -167,12 +167,8 @@ var config = {
    * @param {Array.<Object>} capabilities list of capabilities details
    * @param {Array.<String>} specs List of spec file paths that are to be run
    */
-  beforeSession: function(config, capabilities, specs) {
-    var path = require("path")
-    var spec = specs[0]
-    var basename = path.basename(spec)
-    capabilities.name = basename
-  },
+  //beforeSession: function(config, capabilities, specs) {
+  //},
   /**
    * Gets executed before test execution begins. At this point you can access to all global
    * variables like `browser`. It is the perfect place to define custom commands.

@@ -178,9 +178,7 @@ class BaseTaskForm extends Component {
                   <AdvancedSingleSelect
                     fieldName="responsibleOrg"
                     fieldLabel={Settings.fields.task.responsibleOrg}
-                    placeholder={`Select a responsible organization for this ${
-                      Settings.fields.task.shortLabel
-                    }`}
+                    placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
                     value={values.responsibleOrg}
                     overlayColumns={["Name"]}
                     overlayRenderRow={OrganizationOverlayRow}
@@ -295,9 +293,7 @@ class BaseTaskForm extends Component {
                       {edit && (
                         <Field
                           name="assessment_customFieldEnum1"
-                          label={`Assessment of ${
-                            Settings.fields.task.customFieldEnum1.label
-                          }`}
+                          label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                           component={FieldHelper.renderSpecialField}
                           onChange={value =>
                             setFieldValue("assessment_customFieldEnum1", value)
