@@ -1,4 +1,4 @@
-package mil.dds.anet.emails;
+package mil.dds.anet.integrationTest.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -13,9 +13,9 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.integrationTest.utils.EmailResponse;
+import mil.dds.anet.integrationTest.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
-import mil.dds.anet.utils.EmailResponse;
-import mil.dds.anet.utils.FakeSmtpServer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +39,6 @@ public class AnetEmailWorkerIT {
    */
   @Before
   public void setUp() {
-    emailServer = new FakeSmtpServer();
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
 
     final AnetConfiguration config =
@@ -60,11 +59,13 @@ public class AnetEmailWorkerIT {
 
     final SmtpConfiguration smtpConfig =
         PowerMockito.mock(SmtpConfiguration.class, Mockito.RETURNS_MOCKS);
+    // FIXME: Hard-coded; get this from the config via a DropwizardAppRule
     when(smtpConfig.getStartTls()).thenReturn(false);
     when(smtpConfig.getHostname()).thenReturn("localhost");
-    when(smtpConfig.getPort()).thenReturn(1025);
+    when(smtpConfig.getPort()).thenReturn(1125);
     when(config.getSmtp()).thenReturn(smtpConfig);
 
+    emailServer = new FakeSmtpServer(config.getSmtp());
     emailWorker = new AnetEmailWorker(emailDao, config, scheduler);
 
     // Email engine

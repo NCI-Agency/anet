@@ -1,4 +1,4 @@
-package mil.dds.anet.utils;
+package mil.dds.anet.integrationTest.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +18,8 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
+import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 
@@ -25,14 +27,27 @@ import org.json.JSONArray;
  * This class provides a wrapper for the fake SMTP server's API.
  */
 public class FakeSmtpServer {
-  // TODO: Read settings from configuration (?)
-  private static final String smtpIP = "localhost";
-  private static final String smtpPort = "1025";
-  private static final String smtpUsername = "testAnet";
-  private static final String smtpPassword = "testAnet";
 
-  private static final String httpIP = "localhost";
-  private static final String httpPort = "1080";
+  private final String smtpIP;
+  private final String smtpPort;
+  private final String smtpUsername;
+  private final String smtpPassword;
+  private final String sslTrust;
+  private final String startTls;
+  private final String httpIP;
+  private final String httpPort;
+
+  public FakeSmtpServer(SmtpConfiguration smtpConfig) {
+    smtpIP = smtpConfig.getHostname();
+    smtpPort = Integer.toString(smtpConfig.getPort());
+    smtpUsername = smtpConfig.getUsername();
+    smtpPassword = smtpConfig.getPassword();
+    sslTrust = smtpConfig.getSslTrust();
+    startTls = Boolean.toString(smtpConfig.getStartTls());
+    httpIP = smtpConfig.getHostname();
+    // not in config
+    httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
+  }
 
   /**
    * Retrieves all emails from the server.
@@ -77,13 +92,16 @@ public class FakeSmtpServer {
     return emails;
   }
 
-  private static String sendServerRequest(String request, String requestType) throws IOException {
+  private String sendServerRequest(String request, String requestType) throws IOException {
     final URL url = new URL(request);
     final HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 
-    final String userpass = smtpUsername + ":" + smtpPassword;
-    final String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
-    httpConnection.setRequestProperty("Authorization", basicAuth);
+    if (!Utils.isEmptyOrNull(smtpUsername) || !Utils.isEmptyOrNull(smtpPassword)) {
+      final String userpass = smtpUsername + ":" + smtpPassword;
+      final String basicAuth =
+          "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
+      httpConnection.setRequestProperty("Authorization", basicAuth);
+    }
 
     httpConnection.setDoOutput(true);
     httpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -113,8 +131,8 @@ public class FakeSmtpServer {
     properties.setProperty("mail.smtp.host", smtpIP);
     properties.setProperty("mail.smtp.port", smtpPort);
     properties.setProperty("mail.smtp.auth", "false");
-    properties.setProperty("mail.smtp.ssl.trust", "*");
-    properties.setProperty("mail.smtp.starttls.enable", "true");
+    properties.setProperty("mail.smtp.ssl.trust", sslTrust);
+    properties.setProperty("mail.smtp.starttls.enable", startTls);
 
     final Session session = Session.getDefaultInstance(properties, new Authenticator() {
 

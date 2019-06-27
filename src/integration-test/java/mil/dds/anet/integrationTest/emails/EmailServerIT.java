@@ -1,10 +1,16 @@
-package mil.dds.anet.emails;
+package mil.dds.anet.integrationTest.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.List;
-import mil.dds.anet.utils.EmailResponse;
-import mil.dds.anet.utils.FakeSmtpServer;
+import mil.dds.anet.AnetApplication;
+import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
+import mil.dds.anet.integrationTest.utils.EmailResponse;
+import mil.dds.anet.integrationTest.utils.FakeSmtpServer;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 /**
@@ -14,6 +20,16 @@ import org.junit.Test;
  */
 public class EmailServerIT {
 
+  @ClassRule
+  public static final DropwizardAppRule<AnetConfiguration> RULE =
+      new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
+  private static SmtpConfiguration smtpConfig;
+
+  @BeforeClass
+  public static void setUpClass() {
+    smtpConfig = RULE.getConfiguration().getSmtp();
+  }
+
   /**
    * Test the basic functions of the fake SMTP email server.
    * 
@@ -21,7 +37,7 @@ public class EmailServerIT {
    */
   @Test
   public void runTest() throws Exception {
-    final FakeSmtpServer emailServer = new FakeSmtpServer();
+    final FakeSmtpServer emailServer = new FakeSmtpServer(smtpConfig);
 
     emailServer.clearEmailServer();
 
