@@ -617,7 +617,8 @@ function httpRequestSmtpServer(requestType) {
   return new Promise((resolve, reject) => {
     var XMLHttpRequest = require('xhr2')
     const xhttp = new XMLHttpRequest()
-    const url = "http://localhost:1080/api/emails"
+    // FIXME: Hard-coded URL
+    const url = "http://localhost:1180/api/emails"
     xhttp.open(requestType, url)
     xhttp.setRequestHeader(
       "Authorization",
