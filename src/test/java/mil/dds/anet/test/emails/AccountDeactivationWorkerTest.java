@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -33,6 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({AnetEmailWorker.class, AnetObjectEngine.class, AnetConfiguration.class,
     PersonDao.class, PositionDao.class, AccountDeactivationEmail.class,
     AccountDeactivationWarningEmail.class, Person.class})
+@PowerMockIgnore("javax.security.*")
 public class AccountDeactivationWorkerTest {
 
   private AnetConfiguration config;
@@ -171,7 +173,7 @@ public class AccountDeactivationWorkerTest {
     assertEquals(0, emails.size());
   }
 
-  private static Person createDummyPerson(Instant endOfTour, String email, PersonStatus status,
+  private Person createDummyPerson(Instant endOfTour, String email, PersonStatus status,
       String domainName, Position position) {
 
     final Person testPerson = PowerMockito.mock(Person.class);
