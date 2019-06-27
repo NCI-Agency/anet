@@ -14,13 +14,6 @@ sourceCompatibility = 1.8
 
 boolean isTestEnv = project.hasProperty("testEnv")
 
-// fake-smtp-server config
-String fakeSmtpContainerName = "fake-smtp-server"
-String fakeSmtpIp = "localhost"
-int fakeSmtpPort = 1025;
-String fakeSmtpHtmlIp = "localhost"
-int fakeSmtpHtmlPort = 1080;
-
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localSettings.gradle'
@@ -30,7 +23,7 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 
 // Configures the classpath and the source and resource directories of the integrationTest task.
 sourceSets {
-    // Declaring this source set creates compile time and runtime configurations for it.
+	// Declaring this source set creates compile time and runtime configurations for it.
 	integrationTest {
 		java {
 			compileClasspath += main.output + test.output
@@ -43,8 +36,8 @@ sourceSets {
 
 // Configures the compile and runtime configurations for our integration tests and includes the dependencies of the test task.
 configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
+	integrationTestCompile.extendsFrom testCompile
+	integrationTestRuntime.extendsFrom testRuntime
 }
 
 // Defaults for development variables
@@ -60,17 +53,17 @@ run.environment("ANET_DB_PORT", run.environment["ANET_DB_PORT"] ?: isMssql ? "14
 run.environment("ANET_DB_EXPOSED_PORT", run.environment["ANET_DB_EXPOSED_PORT"] ?: isMssql ? (isTestEnv ? "1434" : "1433") : (isTestEnv ? "5433" : "5432"))
 run.environment("ANET_PORT", run.environment["ANET_PORT"] ?: isTestEnv ? "8180" : "8080")
 run.environment("ANET_ADMIN_PORT", run.environment["ANET_ADMIN_PORT"] ?: isTestEnv ? "8181" : "8081")
-run.environment("ANET_SMTP_PORT", isTestEnv ? fakeSmtpPort : "25")
-run.environment("ANET_SMTP_DISABLE", isTestEnv ? "false" : "true")
-run.environment("ANET_SMTP_SSLTRUST", isTestEnv ? "localhost" : "")
-
-if (isTestEnv) {
-	run.environment("ANET_SMTP_SERVER", fakeSmtpIp)
-	run.environment("ANET_SMTP_USERNAME", "")
-	run.environment("ANET_SMTP_PASSWORD", "")
-}
+run.environment("ANET_SMTP_DISABLE", run.environment["ANET_SMTP_DISABLE"] ?: isTestEnv ? "false" : "true")
+run.environment("ANET_SMTP_SERVER", run.environment["ANET_SMTP_SERVER"] ?: "localhost")
+run.environment("ANET_SMTP_USERNAME", run.environment["ANET_SMTP_USERNAME"] ?: "")
+run.environment("ANET_SMTP_PASSWORD", run.environment["ANET_SMTP_PASSWORD"] ?: "")
+run.environment("ANET_SMTP_PORT", run.environment["ANET_SMTP_PORT"] ?: isTestEnv ? 1125 : 1025)
+run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "true")
+run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
+run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
+String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -123,9 +116,9 @@ dependencies {
 	testCompile 'org.apache.commons:commons-io:1.3.2'
 	
 	testCompile 'junit:junit:4.12'
-	testCompile 'org.powermock:powermock:1.6.5'
-	testCompile 'org.powermock:powermock-module-junit4:1.6.5'
-	testCompile 'org.powermock:powermock-api-mockito:1.6.5'
+	testCompile 'org.powermock:powermock-api-mockito2:2.0.2'
+	testCompile 'org.powermock:powermock-module-junit4:2.0.2'
+	testCompile 'org.powermock:powermock-module-junit4-rule:2.0.2'
 }
 
 jacoco {
@@ -382,13 +375,6 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	targetContainerId { dbContainerName }
 }
 
-task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "database container"
-	description = "Waiting until the " + dbContainerName + " DB has started."
-	targetContainerId { dbContainerName }
-	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
-}
-
 // fake-smtp-server tasks
 task dockerPullFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "fake-smtp-server container"
@@ -402,13 +388,8 @@ task dockerCreateFakeSmtpServer(dependsOn: dockerPullFakeSmtpServer, type: com.b
 	imageId = dockerPullFakeSmtpServer.getImageId()
 	containerName = fakeSmtpContainerName
 	description = "Creates a fake-smtp-server container named " + fakeSmtpContainerName + "."
-	withEnvVar('headers', 'true')
-	withEnvVar('smtp-ip', fakeSmtpIp)
-	withEnvVar('smtp-port', fakeSmtpPort)
-	withEnvVar('http-ip', fakeSmtpHtmlIp)
-	withEnvVar('http-port', fakeSmtpHtmlPort)
-	exposePorts("tcp", [fakeSmtpPort, fakeSmtpHtmlPort])
-	portBindings = [fakeSmtpPort + ":" + fakeSmtpPort, fakeSmtpHtmlPort + ":" + fakeSmtpHtmlPort]
+	exposePorts("tcp", [1025, 1080])
+	portBindings = [run.environment["ANET_SMTP_PORT"] + ":" + 1025, run.environment["ANET_SMTP_HTTP_PORT"] + ":" + 1080]
 }
 
 task dockerStartFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
@@ -423,22 +404,20 @@ task dockerStopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.D
 	targetContainerId { fakeSmtpContainerName }
 }
 
-task dockerRestartFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerRestartContainer) {
+task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
 	group = "fake-smtp-server container"
-	description = "Restarts " + fakeSmtpContainerName + " container."
+	description = "Removes " + fakeSmtpContainerName + " container."
 	targetContainerId { fakeSmtpContainerName }
 }
 
 // Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
 task integrationTest(type: Test) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
 
-    // If you want to ensure that integration tests are run every time when you invoke this task, uncomment the following line.
-    outputs.upToDateWhen { false }
+	// If you want to ensure that integration tests are run every time when you invoke this task, uncomment the following line.
+	outputs.upToDateWhen { false }
 	environment(run.environment)
-
-	dependsOn dbDrop, dbMigrate, dockerRestartFakeSmtpServer
 }
 
 classes.dependsOn buildClient
