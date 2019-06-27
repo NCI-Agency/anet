@@ -49,7 +49,7 @@ matrix:
 script:
   - ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
   - ./gradlew -PtestEnv dockerCreateDB dockerStartDB dbWait dbMigrate dbLoad
-  - ./gradlew -PtestEnv jar check test jacocoTestReport
+  - ./gradlew -PtestEnv jar check test integrationtest jacocoTestReport
   - |
     ./gradlew -PtestEnv run &
     SERVER_PID=$!
