@@ -70,16 +70,16 @@ class BaseNav extends Component {
     organizations: PropTypes.array,
     resetPages: PropTypes.func
   }
-
+  static defaultProps = {
+    appSettings: {},
+    organizations: []
+  }
   componentDidMount() {
     scrollSpy.update()
   }
 
   render() {
-    const { currentUser } = this.props
-    const { organizations } = this.props || []
-    const { appSettings } = this.props || {}
-    const { resetPages } = this.props
+    const { currentUser, organizations, appSettings, resetPages } = this.props
     const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
     const externalDocumentationUrlText =
       appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
