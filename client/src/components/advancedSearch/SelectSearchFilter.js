@@ -14,7 +14,7 @@ export default class SelectSearchFilter extends Component {
       PropTypes.string,
       PropTypes.shape({
         value: PropTypes.string,
-        toQuery: PropTypes.func
+        toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
       })
     ]),
     onChange: PropTypes.func,

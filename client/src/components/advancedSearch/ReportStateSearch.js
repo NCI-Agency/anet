@@ -35,8 +35,12 @@ export default class ReportStateSearch extends Component {
       PropTypes.string,
       PropTypes.shape({
         state: PropTypes.array,
+        toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
+      }),
+      PropTypes.shape({
+        state: PropTypes.array,
         cancelledReason: PropTypes.string,
-        toQuery: PropTypes.func
+        toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
       })
     ]),
     onChange: PropTypes.func,
