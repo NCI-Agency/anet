@@ -37,13 +37,13 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
 
   private final AnetConfiguration config;
 
-  public JsonToXlsxTransformer(AnetConfiguration config) {
+  public JsonToXlsxTransformer(final AnetConfiguration config) {
     this.config = config;
   }
 
 
   @Override
-  public StreamingOutput apply(Map<String, Object> json) {
+  public StreamingOutput apply(final Map<String, Object> json) {
     return new XssfWorkbookStreamingOutput(createWorkbook(json));
   }
 
@@ -55,7 +55,7 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
    */
   private XSSFWorkbook createWorkbook(final Map<String, Object> resultMap) {
 
-    XSSFWorkbook workbook = new XSSFWorkbook();
+    final XSSFWorkbook workbook = new XSSFWorkbook();
 
     for (Entry<String, Object> entry : resultMap.entrySet()) {
       if (entry.getValue() instanceof Map<?, ?>) {
@@ -99,18 +99,18 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
    */
   private void createSheet(final XSSFWorkbook workbook, final String name, final Map<?, ?> data) {
 
-    XSSFSheet sheet = workbook.createSheet(name);
+    final XSSFSheet sheet = workbook.createSheet(name);
 
     sheet.setDefaultColumnWidth(30);
 
-    XSSFFont headerFont = workbook.createFont();
+    final XSSFFont headerFont = workbook.createFont();
     headerFont.setFontHeightInPoints((short) 10);
     headerFont.setFontName("Arial");
     headerFont.setColor(IndexedColors.WHITE.getIndex());
     headerFont.setBold(true);
     headerFont.setItalic(false);
 
-    CellStyle headerStyle = workbook.createCellStyle();
+    final CellStyle headerStyle = workbook.createCellStyle();
     headerStyle.setFillBackgroundColor(IndexedColors.BLACK.getIndex());
     headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
     headerStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -122,7 +122,7 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
         .getFormat((String) config.getDictionaryEntry("dateFormats.excel"));
     dateStyle.setDataFormat(dateFormat);
 
-    XSSFRow header = sheet.createRow(0);
+    final XSSFRow header = sheet.createRow(0);
     header.setRowStyle(headerStyle);
 
     for (Entry<?, ?> entry : data.entrySet()) {
@@ -193,7 +193,7 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
     }
   }
 
-  private static Object getValueRepr(Object value) {
+  private static Object getValueRepr(final Object value) {
     if (value == null) {
       return null;
     } else if (value instanceof List) {
@@ -212,7 +212,7 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
     }
   }
 
-  private static Object getListValueAsString(List<?> value) {
+  private static Object getListValueAsString(final List<?> value) {
     final List<String> entriesAsString = new ArrayList<>();
     for (final Object entry : value) {
       final Object repr = getValueRepr(entry);

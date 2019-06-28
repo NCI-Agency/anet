@@ -7,7 +7,7 @@ import mil.dds.anet.utils.ResponseUtils;
 
 public class JsonToXmlTransformer implements Function<Map<String, Object>, String> {
   @Override
-  public String apply(Map<String, Object> json) {
+  public String apply(final Map<String, Object> json) {
     return ResponseUtils.toPrettyString($.toXml(json), 2);
   }
 }

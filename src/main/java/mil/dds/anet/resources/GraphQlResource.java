@@ -73,7 +73,6 @@ public class GraphQlResource {
     }
   }
 
-
   private static final ResourceTransformer jsonTransformer =
       new ResourceTransformer("json", MediaType.APPLICATION_JSON) {
         @Override
@@ -81,8 +80,6 @@ public class GraphQlResource {
           return Response.ok(json, this.mediaType);
         }
       };
-
-
 
   public GraphQlResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
       MetricRegistry metricRegistry, boolean developmentMode) {
@@ -93,43 +90,43 @@ public class GraphQlResource {
 
     resourceTransformers.add(GraphQlResource.jsonTransformer);
     resourceTransformers.add(new ResourceTransformer("xml", MediaType.APPLICATION_XML) {
-      JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
+      final JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
 
       @Override
-      public ResponseBuilder apply(Map<String, Object> json) {
+      public ResponseBuilder apply(final Map<String, Object> json) {
         return Response.ok(jsonToXmlTransformer.apply(json), this.mediaType);
       }
     });
 
     resourceTransformers.add(new ResourceTransformer("xlsx", MEDIATYPE_XLSX) {
-      JsonToXlsxTransformer xlsxTransformer = new JsonToXlsxTransformer(config);
+      final JsonToXlsxTransformer xlsxTransformer = new JsonToXlsxTransformer(config);
 
       @Override
-      public ResponseBuilder apply(Map<String, Object> json) {
+      public ResponseBuilder apply(final Map<String, Object> json) {
         return Response.ok(xlsxTransformer.apply(json), this.mediaType)
             .header("Content-Disposition", "attachment; filename=" + "anet_export.xslx");
       }
     });
 
     resourceTransformers.add(new ResourceTransformer("nvg", MediaType.APPLICATION_XML) {
-      JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
-      XsltXmlTransformer xsltXmlTransformer = new XsltXmlTransformer(
+      final JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
+      final XsltXmlTransformer xsltXmlTransformer = new XsltXmlTransformer(
           GraphQlResource.class.getResourceAsStream("/stylesheets/nvg.xslt"));
 
       @Override
-      public ResponseBuilder apply(Map<String, Object> json) {
+      public ResponseBuilder apply(final Map<String, Object> json) {
         return Response.ok(xsltXmlTransformer.apply(jsonToXmlTransformer.apply(json)),
             this.mediaType);
       }
     });
 
     resourceTransformers.add(new ResourceTransformer("kml", MediaType.APPLICATION_XML) {
-      JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
-      XsltXmlTransformer xsltXmlTransformer = new XsltXmlTransformer(
+      final JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
+      final XsltXmlTransformer xsltXmlTransformer = new XsltXmlTransformer(
           GraphQlResource.class.getResourceAsStream("/stylesheets/kml.xslt"));
 
       @Override
-      public ResponseBuilder apply(Map<String, Object> json) {
+      public ResponseBuilder apply(final Map<String, Object> json) {
         return Response.ok(xsltXmlTransformer.apply(jsonToXmlTransformer.apply(json)),
             this.mediaType);
       }
