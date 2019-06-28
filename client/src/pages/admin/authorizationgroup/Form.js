@@ -5,7 +5,8 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+
 import PositionTable from "components/PositionTable"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
@@ -17,13 +18,13 @@ import POSITIONS_ICON from "resources/positions.png"
 
 class AuthorizationGroupForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(AuthorizationGroup).isRequired,
     title: PropTypes.string,
-    edit: PropTypes.bool
+    edit: PropTypes.bool,
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new AuthorizationGroup(),
     title: "",
     edit: false
   }

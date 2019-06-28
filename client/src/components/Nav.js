@@ -17,7 +17,7 @@ import { ScrollLink, scrollSpy } from "react-scroll"
 import utils from "utils"
 
 export const AnchorNavItem = props => {
-  const { to, ...remainingProps } = props
+  const { to, children, ...remainingProps } = props
   const ScrollLinkNavItem = ScrollLink(NavItem)
   return (
     <ResponsiveLayoutContext.Consumer>
@@ -43,13 +43,23 @@ export const AnchorNavItem = props => {
     </ResponsiveLayoutContext.Consumer>
   )
 }
+AnchorNavItem.propTypes = {
+  to: PropTypes.string,
+  children: PropTypes.node
+}
 
-function SidebarLink({ linkTo, children, handleOnClick, id }) {
+const SidebarLink = ({ linkTo, children, handleOnClick, id }) => {
   return (
     <Link to={linkTo} onClick={handleOnClick}>
       <NavItem id={id}>{children}</NavItem>
     </Link>
   )
+}
+SidebarLink.propTypes = {
+  linkTo: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  children: PropTypes.node,
+  handleOnClick: PropTypes.func,
+  id: PropTypes.string
 }
 
 class BaseNav extends Component {

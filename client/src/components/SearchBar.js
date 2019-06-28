@@ -7,6 +7,7 @@ import {
 } from "actions"
 import autobind from "autobind-decorator"
 import AdvancedSearch from "components/AdvancedSearch"
+import { routerRelatedPropTypes } from "components/Page"
 import searchFilters from "components/SearchFilters"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -32,7 +33,8 @@ class SearchBar extends Component {
     }),
     searchObjectTypes: PropTypes.array,
     resetPages: PropTypes.func,
-    resetPagination: PropTypes.func
+    resetPagination: PropTypes.func,
+    ...routerRelatedPropTypes
   }
 
   constructor(props) {

@@ -32,6 +32,11 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   resetPages: () => dispatch(resetPages())
 })
 
+export const routerRelatedPropTypes = {
+  location: PropTypes.object,
+  history: PropTypes.object.isRequired
+}
+
 export const propTypes = {
   showLoading: PropTypes.func.isRequired,
   hideLoading: PropTypes.func.isRequired,
@@ -46,11 +51,12 @@ export const propTypes = {
   }),
   clearSearchQuery: PropTypes.func.isRequired,
   setPagination: PropTypes.func.isRequired,
-  resetPages: PropTypes.func.isRequired
+  resetPages: PropTypes.func.isRequired,
+  ...routerRelatedPropTypes
 }
 
 export const AnchorLink = function(props) {
-  const { to, ...remainingProps } = props
+  const { to, children, ...remainingProps } = props
   return (
     <Link
       to={to}
@@ -62,6 +68,10 @@ export const AnchorLink = function(props) {
       {props.children}
     </Link>
   )
+}
+AnchorLink.propTypes = {
+  to: PropTypes.string,
+  children: PropTypes.node
 }
 
 export function jumpToTop() {

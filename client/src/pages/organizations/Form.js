@@ -12,7 +12,8 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+
 import TaskTable from "components/TaskTable"
 import { Field, FieldArray, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
@@ -28,45 +29,52 @@ import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
-const ApproverTable = props => (
-  <Table striped condensed hover responsive>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Position</th>
-        <th />
-      </tr>
-    </thead>
-    <tbody>
-      {props.approvers.map((approver, approverIndex) => (
-        <tr key={approver.uuid}>
-          <td>
-            <LinkTo person={approver.person} target="_blank" />
-          </td>
-          <td>
-            <LinkTo position={approver} target="_blank" />
-          </td>
-          <td onClick={() => props.onDelete(approver)}>
-            <span style={{ cursor: "pointer" }}>
-              <img src={REMOVE_ICON} height={14} alt="Remove approver" />
-            </span>
-          </td>
+const ApproverTable = props => {
+  const { approvers, onDelete } = props
+  return (
+    <Table striped condensed hover responsive>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Position</th>
+          <th />
         </tr>
-      ))}
-    </tbody>
-  </Table>
-)
+      </thead>
+      <tbody>
+        {approvers.map((approver, approverIndex) => (
+          <tr key={approver.uuid}>
+            <td>
+              <LinkTo person={approver.person} target="_blank" />
+            </td>
+            <td>
+              <LinkTo position={approver} target="_blank" />
+            </td>
+            <td onClick={() => onDelete(approver)}>
+              <span style={{ cursor: "pointer" }}>
+                <img src={REMOVE_ICON} height={14} alt="Remove approver" />
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+}
+ApproverTable.propTypes = {
+  approvers: PropTypes.array,
+  onDelete: PropTypes.func
+}
 
 class BaseOrganizationForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(Organization).isRequired,
     title: PropTypes.string,
     edit: PropTypes.bool,
-    currentUser: PropTypes.instanceOf(Person)
+    currentUser: PropTypes.instanceOf(Person),
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new Organization(),
     title: "",
     edit: false
   }

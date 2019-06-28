@@ -1,9 +1,15 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import React, { Component } from "react"
+import PropTypes from "prop-types"
 import { Table } from "react-bootstrap"
+import { Organization } from "models"
 
 export default class OrganizationApprovals extends Component {
+  static propTypes = {
+    organization: PropTypes.instanceOf(Organization).isRequired
+  }
+
   render() {
     let org = this.props.organization
     let approvalSteps = org.approvalSteps

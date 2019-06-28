@@ -8,12 +8,16 @@ import utils from "utils"
 export default class TextInputFilter extends Component {
   static propTypes = {
     queryKey: PropTypes.string.isRequired,
-
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        value: PropTypes.string,
+        toQuery: PropTypes.func
+      })
+    ]),
+    onChange: PropTypes.func,
     // Passed by the SearchFilterDisplay row
     asFormField: PropTypes.bool
-    // Passed by the SearchFilter row
-    // value
-    // onChange
   }
 
   static defaultProps = {

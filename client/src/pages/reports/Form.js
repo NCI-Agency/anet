@@ -14,7 +14,8 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
@@ -37,15 +38,15 @@ import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 class BaseReportForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object,
+    initialValues: PropTypes.instanceOf(Report).isRequired,
     title: PropTypes.string,
     edit: PropTypes.bool,
     showSensitiveInfo: PropTypes.bool,
-    currentUser: PropTypes.instanceOf(Person)
+    currentUser: PropTypes.instanceOf(Person),
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new Report(),
     title: "",
     edit: false,
     showSensitiveInfo: false

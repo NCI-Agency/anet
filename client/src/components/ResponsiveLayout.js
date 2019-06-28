@@ -68,7 +68,8 @@ export const ResponsiveLayoutContext = React.createContext()
 class ResponsiveLayout extends Component {
   static propTypes = {
     pageProps: PropTypes.shape({
-      minimalHeader: PropTypes.bool
+      minimalHeader: PropTypes.bool,
+      useNavigation: PropTypes.bool
     }).isRequired,
     pageHistory: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired,

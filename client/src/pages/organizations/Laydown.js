@@ -3,7 +3,7 @@ import autobind from "autobind-decorator"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { Person, Position } from "models"
+import { Person, Position, Organization } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Table } from "react-bootstrap"
@@ -11,7 +11,7 @@ import { Element } from "react-scroll"
 
 class BaseOrganizationLaydown extends Component {
   static propTypes = {
-    organization: PropTypes.object.isRequired,
+    organization: PropTypes.instanceOf(Organization).isRequired,
     currentUser: PropTypes.instanceOf(Person)
   }
 

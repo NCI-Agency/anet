@@ -13,7 +13,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
@@ -30,14 +31,14 @@ import DictionaryField from "../../HOC/DictionaryField"
 
 class BaseTaskForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(Task).isRequired,
     title: PropTypes.string,
     edit: PropTypes.bool,
-    currentUser: PropTypes.instanceOf(Person)
+    currentUser: PropTypes.instanceOf(Person),
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new Task(),
     title: "",
     edit: false
   }

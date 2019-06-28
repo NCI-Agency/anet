@@ -9,7 +9,8 @@ export default class OptionListModal extends Component {
     title: PropTypes.string.isRequired,
     showModal: PropTypes.bool,
     onCancel: PropTypes.func.isRequired,
-    onSuccess: PropTypes.func.isRequired
+    onSuccess: PropTypes.func.isRequired,
+    children: PropTypes.node
   }
 
   constructor(props) {

@@ -10,13 +10,15 @@ export default class SelectSearchFilter extends Component {
     queryKey: PropTypes.string.isRequired,
     values: PropTypes.array.isRequired,
     labels: PropTypes.array,
-
-    // Passed by the SearchFilterDisplay row
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        value: PropTypes.string,
+        toQuery: PropTypes.func
+      })
+    ]),
+    onChange: PropTypes.func,
     asFormField: PropTypes.bool
-
-    // From SearchFilter row
-    // value
-    // onChange
   }
 
   static defaultProps = {

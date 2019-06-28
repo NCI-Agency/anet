@@ -4,6 +4,7 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, DropdownButton, MenuItem } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
+import { routerRelatedPropTypes } from "components/Page"
 
 const DEFAULT_ACTIONS = [Models.Report]
 
@@ -17,7 +18,8 @@ const ADMIN_ACTIONS = [
 
 class BaseCreateButton extends Component {
   static propTypes = {
-    currentUser: PropTypes.instanceOf(Models.Person)
+    currentUser: PropTypes.instanceOf(Models.Person),
+    ...routerRelatedPropTypes
   }
 
   render() {

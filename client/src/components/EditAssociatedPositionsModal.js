@@ -12,7 +12,7 @@ import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 
-const PositionTable = ({ associatedPositions, onDelete }) => (
+const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
   <Table striped condensed hover responsive>
     <thead>
       <tr>
@@ -48,6 +48,10 @@ const PositionTable = ({ associatedPositions, onDelete }) => (
     </tbody>
   </Table>
 )
+AssociatedPositionsTable.propTypes = {
+  onDelete: PropTypes.func,
+  associatedPositions: PropTypes.array
+}
 
 class BaseEditAssociatedPositionsModal extends Component {
   static propTypes = {
@@ -123,7 +127,7 @@ class BaseEditAssociatedPositionsModal extends Component {
                           placeholder={`Search for a ${assignedRole} position...`}
                           value={values.associatedPositions}
                           renderSelected={
-                            <PositionTable
+                            <AssociatedPositionsTable
                               associatedPositions={values.associatedPositions}
                             />
                           }

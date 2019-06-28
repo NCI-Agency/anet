@@ -4,7 +4,8 @@ import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location } from "models"
@@ -15,9 +16,10 @@ import { withRouter } from "react-router-dom"
 
 class LocationForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(Location).isRequired,
     title: PropTypes.string,
-    edit: PropTypes.bool
+    edit: PropTypes.bool,
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {

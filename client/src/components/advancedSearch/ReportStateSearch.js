@@ -31,6 +31,15 @@ const CANCELLATION_REASON_LABELS = {
 
 export default class ReportStateSearch extends Component {
   static propTypes = {
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        state: PropTypes.array,
+        cancelledReason: PropTypes.string,
+        toQuery: PropTypes.func
+      })
+    ]),
+    onChange: PropTypes.func,
     // Passed by the SearchFilterDisplay row
     asFormField: PropTypes.bool
   }
@@ -74,12 +83,9 @@ export default class ReportStateSearch extends Component {
       value.state.length === 1 && value.state[0] === Report.STATE.CANCELLED
     let stateDisplay = labels.join(" or ")
     if (onlyCancelled && value.cancelledReason) {
+      const reason = Report.CANCELLATION_REASON[value.cancelledReason]
       stateDisplay = stateDisplay.concat(" due to ")
-      stateDisplay = stateDisplay.concat(
-        CANCELLATION_REASON_LABELS[
-          Report.CANCELLATION_REASON[value.cancelledReason]
-        ]
-      )
+      stateDisplay = stateDisplay.concat(CANCELLATION_REASON_LABELS[reason])
     }
     return !this.props.asFormField ? (
       stateDisplay
