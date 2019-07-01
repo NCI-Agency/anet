@@ -1,5 +1,4 @@
 import {
-  clearSearchQuery,
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   setPageProps,
@@ -23,9 +22,7 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   hideLoading: () => dispatch(hideLoading()),
   setPageProps: pageProps => dispatch(setPageProps(pageProps)),
   setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
-  clearSearchQuery: () => dispatch(clearSearchQuery()),
-  setPagination: (pageKey, pageNum) =>
-    dispatch(setPagination(pageKey, pageNum))
+  setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum))
 })
 
 export const routerRelatedPropTypes = {
@@ -43,7 +40,6 @@ export const propTypes = {
     filters: PropTypes.any,
     objectType: PropTypes.string
   }),
-  clearSearchQuery: PropTypes.func.isRequired,
   setPagination: PropTypes.func.isRequired,
   ...routerRelatedPropTypes
 }

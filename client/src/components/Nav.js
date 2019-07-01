@@ -1,9 +1,10 @@
-import {
-  resetPages
-} from "actions"
+import { clearSearchQuery, resetPages } from "actions"
 import { Settings } from "api"
 import AppContext from "components/AppContext"
-import { mapDispatchToProps as pageMapDispatchToProps, propTypes as pagePropTypes } from "components/Page"
+import {
+  mapDispatchToProps as pageMapDispatchToProps,
+  propTypes as pagePropTypes
+} from "components/Page"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
@@ -71,6 +72,7 @@ class BaseNav extends Component {
     currentUser: PropTypes.instanceOf(Person),
     appSettings: PropTypes.object,
     organizations: PropTypes.array,
+    clearSearchQuery: PropTypes.func.isRequired,
     resetPages: PropTypes.func.isRequired
   }
   static defaultProps = {
@@ -215,6 +217,7 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = (dispatch, ownProps) => {
   const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
   return {
+    clearSearchQuery: () => dispatch(clearSearchQuery()),
     resetPages: () => dispatch(resetPages()),
     ...pageDispatchToProps
   }
