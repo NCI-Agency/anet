@@ -497,8 +497,6 @@ If desired, you can alse configure a local tiled imagery cache with a downloaded
 1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`. 
 ```yaml
 assets:
-  mappings:
-    /imagery: /imagery
   overrides:
     /imagery: imagery
 ```

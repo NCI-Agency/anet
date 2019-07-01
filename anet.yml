@@ -24,8 +24,6 @@ developmentMode: true
 redirectToHttps: false
 
 assets:
-  mappings:
-    /imagery: /imagery
   overrides:
     /imagery: imagery
 

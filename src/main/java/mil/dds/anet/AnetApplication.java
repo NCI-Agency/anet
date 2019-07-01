@@ -4,9 +4,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
-import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -125,7 +125,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     bootstrap.addCommand(new DatabaseScriptCommand());
 
     // Serve assets on /assets
-    bootstrap.addBundle(new AssetsBundle("/assets", "/assets", "index.html"));
+    bootstrap.addBundle(new ConfiguredAssetsBundle(ImmutableMap.<String, String>builder()
+        .put("/assets/", "/assets/").put("/imagery/", "/imagery/").build(), "index.html"));
 
     // Use Freemarker to handle rendering TEXT_HTML views.
     bootstrap.addBundle(new ViewBundle<AnetConfiguration>() {
@@ -141,9 +142,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
         .bundles(
             JdbiBundle.<AnetConfiguration>forDatabase((conf, env) -> conf.getDataSourceFactory()))
         .build());
-
-    // Add
-    bootstrap.addBundle(new ConfiguredAssetsBundle());
 
     metricRegistry = bootstrap.getMetricRegistry();
   }
