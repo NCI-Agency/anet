@@ -25,6 +25,7 @@ import SEARCH_ICON from "resources/search-alt.png"
 class SearchBar extends Component {
   static propTypes = {
     setSearchQuery: PropTypes.func.isRequired,
+    onSearchGoToSearchPage: PropTypes.bool,
     query: PropTypes.shape({
       text: PropTypes.string,
       filters: PropTypes.any,

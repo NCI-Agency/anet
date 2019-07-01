@@ -40,7 +40,6 @@ export const propTypes = {
   hideLoading: PropTypes.func.isRequired,
   setPageProps: PropTypes.func.isRequired,
   setSearchProps: PropTypes.func.isRequired,
-  onSearchGoToSearchPage: PropTypes.bool,
   searchQuery: PropTypes.shape({
     text: PropTypes.string,
     filters: PropTypes.any,
