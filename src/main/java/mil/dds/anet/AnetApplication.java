@@ -12,6 +12,7 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
+import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -125,7 +126,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
     // Serve assets on /assets
     bootstrap.addBundle(new AssetsBundle("/assets", "/assets", "index.html"));
-    bootstrap.addBundle(new AssetsBundle("/imagery", "/imagery", null, "imagery"));
 
     // Use Freemarker to handle rendering TEXT_HTML views.
     bootstrap.addBundle(new ViewBundle<AnetConfiguration>() {
@@ -141,6 +141,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
         .bundles(
             JdbiBundle.<AnetConfiguration>forDatabase((conf, env) -> conf.getDataSourceFactory()))
         .build());
+
+    // Add
+    bootstrap.addBundle(new ConfiguredAssetsBundle());
 
     metricRegistry = bootstrap.getMetricRegistry();
   }

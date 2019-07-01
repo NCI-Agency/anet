@@ -3,6 +3,8 @@ package mil.dds.anet.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.Configuration;
+import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
+import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import mil.dds.anet.utils.Utils;
 
-public class AnetConfiguration extends Configuration {
+public class AnetConfiguration extends Configuration implements AssetsBundleConfiguration {
 
   private boolean developmentMode;
   private boolean redirectToHttps = false;
@@ -24,6 +26,11 @@ public class AnetConfiguration extends Configuration {
 
   private boolean timeWaffleRequests;
 
+  @Valid
+  @NotNull
+  @JsonProperty
+  private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
+
   @NotNull
   private Map<String, String> waffleConfig = new HashMap<String, String>();
 
@@ -33,6 +40,11 @@ public class AnetConfiguration extends Configuration {
 
   @NotNull
   private Map<String, Map<String, String>> views = Collections.emptyMap();
+
+  @Override
+  public AssetsConfiguration getAssetsConfiguration() {
+    return assets;
+  }
 
   @JsonProperty("database")
   public void setDataSourceFactory(DataSourceFactory factory) {

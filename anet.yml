@@ -23,6 +23,12 @@ developmentMode: true
 # You will need to add an HTTP/80 adapter
 redirectToHttps: false
 
+assets:
+  mappings:
+    /imagery: /imagery
+  overrides:
+    /imagery: imagery
+
 # Settings for the SMTP server to send email 
 smtp:
   hostname: ${ANET_SMTP_SERVER}
@@ -378,6 +384,10 @@ dictionary:
         default: true
         type: tile
         url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
+      - name: OSM - local
+        default: true
+        type: tile
+        url: "/imagery/street/{z}/{x}/{y}.png"
       - name: World Imagery Tiles
         default: false
         type: tile
