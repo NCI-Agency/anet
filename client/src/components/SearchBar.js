@@ -1,5 +1,4 @@
 import {
-  resetPages,
   resetPagination,
   SEARCH_OBJECT_LABELS,
   SEARCH_OBJECT_TYPES,
@@ -32,7 +31,6 @@ class SearchBar extends Component {
       objectType: PropTypes.string
     }),
     searchObjectTypes: PropTypes.array,
-    resetPages: PropTypes.func,
     resetPagination: PropTypes.func,
     ...routerRelatedPropTypes
   }
@@ -177,7 +175,6 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   setSearchQuery: searchTerms => dispatch(setSearchQuery(searchTerms)),
-  resetPages: () => dispatch(resetPages()),
   resetPagination: () => dispatch(resetPagination())
 })
 
