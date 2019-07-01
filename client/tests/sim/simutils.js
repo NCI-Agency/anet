@@ -60,6 +60,7 @@ const fuzzy = {
  *
  * @returns A random variable with normal distribution
  */
+/* eslint-disable no-unused-vars */
 function randnBm() {
   var u = 0
   var v = 0
@@ -67,6 +68,7 @@ function randnBm() {
   while (v === 0) v = Math.random()
   return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Gives the probability function for a normal distribution with certain mean and standard deviation.

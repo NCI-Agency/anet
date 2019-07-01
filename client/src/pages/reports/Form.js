@@ -849,6 +849,8 @@ class BaseReportForm extends Component {
             this.autoSaveSettings.autoSaveTimeout.asMilliseconds()
           )
         })
+        /* eslint-disable handle-callback-err */
+
         .catch(error => {
           // Show an error message
           this.autoSaveSettings.autoSaveTimeout.add(
@@ -864,6 +866,7 @@ class BaseReportForm extends Component {
             this.autoSaveSettings.autoSaveTimeout.asMilliseconds()
           )
         })
+      /* eslint-enable handle-callback-err */
     }
   }
 
