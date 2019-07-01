@@ -51,7 +51,6 @@ export default class ReportCollection extends Component {
     goToPage: PropTypes.func,
     mapId: PropTypes.string,
     viewFormats: PropTypes.arrayOf(PropTypes.string),
-    hideButtons: PropTypes.bool,
     isSuperUser: PropTypes.bool
   }
 
