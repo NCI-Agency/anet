@@ -40,7 +40,10 @@ export const propTypes = {
     filters: PropTypes.any,
     objectType: PropTypes.string
   }),
+  /* eslint-disable react/no-unused-prop-types */
+  /* FIXME: refactor setting the pagination, maybe use a container component */
   setPagination: PropTypes.func.isRequired,
+  /* eslint-enable react/no-unused-prop-types */
   ...routerRelatedPropTypes
 }
 
