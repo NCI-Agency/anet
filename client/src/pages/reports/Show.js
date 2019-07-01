@@ -199,7 +199,8 @@ class BaseReportShow extends Page {
 
     // Anybody can email a report as long as it's not in draft.
     const canEmail = !report.isDraft()
-
+    const hasAuthorizationGroups =
+      report.authorizationGroups && report.authorizationGroups.length > 0
     return (
       <Formik
         enableReinitialize
@@ -483,12 +484,11 @@ class BaseReportShow extends Page {
                         __html: report.reportSensitiveInformation.text
                       }}
                     />
-                    {(report.authorizationGroups &&
-                        report.authorizationGroups.length > 0 && (
-                        <div>
+                    {(hasAuthorizationGroups && (
+                      <div>
                         <h5>Authorized groups:</h5>
                         <AuthorizationGroupTable
-                            authorizationGroups={values.authorizationGroups}
+                          authorizationGroups={values.authorizationGroups}
                         />
                       </div>
                     )) || <h5>No groups are authorized!</h5>}

@@ -234,28 +234,29 @@ class BaseInsightsShow extends Page {
       flex: "1 1 auto",
       height: "100%"
     }
-
+    const hasSearchCriteria =
+      _isEmpty(
+        this.insightDefaultQueryParams[this.props.match.params.insight]
+      ) || !_isEmpty(queryParams)
     return (
       <div style={flexStyle}>
         <Messages error={this.state.error} success={this.state.success} />
-        {_isEmpty(
-          this.insightDefaultQueryParams[this.props.match.params.insight]
-        ) || !_isEmpty(queryParams) ? (
+        {hasSearchCriteria ? (
           <Fieldset
-              id={this.props.match.params.insight}
-              title={insightConfig.title}
-              style={flexStyle}
-            >
-              <InsightComponent
+            id={this.props.match.params.insight}
+            title={insightConfig.title}
+            style={flexStyle}
+          >
+            <InsightComponent
               style={mosaicLayoutStyle}
               queryParams={queryParams}
-              />
-            </Fieldset>
-          ) : (
-            <Messages
-              error={{ message: "You did not enter any search criteria." }}
             />
-          )}
+          </Fieldset>
+        ) : (
+          <Messages
+            error={{ message: "You did not enter any search criteria." }}
+          />
+        )}
       </div>
     )
   }
