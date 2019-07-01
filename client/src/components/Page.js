@@ -5,8 +5,7 @@ import {
   resetPages,
   setPageProps,
   setPagination,
-  setSearchProps,
-  setSearchQuery
+  setSearchProps
 } from "actions"
 import autobind from "autobind-decorator"
 import { setMessages } from "components/Messages"
@@ -25,7 +24,6 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   hideLoading: () => dispatch(hideLoading()),
   setPageProps: pageProps => dispatch(setPageProps(pageProps)),
   setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
-  setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
   clearSearchQuery: () => dispatch(clearSearchQuery()),
   setPagination: (pageKey, pageNum) =>
     dispatch(setPagination(pageKey, pageNum)),
@@ -42,7 +40,6 @@ export const propTypes = {
   hideLoading: PropTypes.func.isRequired,
   setPageProps: PropTypes.func.isRequired,
   setSearchProps: PropTypes.func.isRequired,
-  setSearchQuery: PropTypes.func.isRequired,
   onSearchGoToSearchPage: PropTypes.bool,
   searchQuery: PropTypes.shape({
     text: PropTypes.string,

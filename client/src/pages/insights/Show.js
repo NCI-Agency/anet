@@ -2,7 +2,8 @@ import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   DEFAULT_SEARCH_QUERY,
-  SEARCH_OBJECT_TYPES
+  SEARCH_OBJECT_TYPES,
+  setSearchQuery
 } from "actions"
 import { Settings } from "api"
 import autobind from "autobind-decorator"
@@ -13,7 +14,7 @@ import Fieldset from "components/Fieldset"
 import FutureEngagementsByLocation from "components/FutureEngagementsByLocation"
 import Messages from "components/Messages"
 import Page, {
-  mapDispatchToProps,
+  mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
@@ -102,6 +103,7 @@ export const INSIGHT_DETAILS = {
 class BaseInsightsShow extends Page {
   static propTypes = {
     ...pagePropTypes,
+    setSearchQuery: PropTypes.func.isRequired,
     appSettings: PropTypes.object
   }
 
@@ -265,6 +267,13 @@ class BaseInsightsShow extends Page {
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  return {
+    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+    ...pageDispatchToProps
+  }
+}
 
 const InsightsShow = props => (
   <AppContext.Consumer>
