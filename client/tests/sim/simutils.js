@@ -60,7 +60,7 @@ const fuzzy = {
  *
  * @returns A random variable with normal distribution
  */
-function randn_bm() {
+function randnBm() {
   var u = 0
   var v = 0
   while (u === 0) u = Math.random() // Converting [0,1) to (0,1)
