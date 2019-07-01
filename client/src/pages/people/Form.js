@@ -96,6 +96,7 @@ class BasePersonForm extends Component {
         return []
     }
   }
+  confirmHasReplacementButton = React.createRef()
   state = {
     success: null,
     originalStatus: "",
@@ -217,7 +218,7 @@ class BasePersonForm extends Component {
                       </Col>
                     </Col>
 
-                    {edit && !canEditName && (
+                    {edit && (
                       <React.Fragment>
                         <TriggerableConfirm
                           onConfirm={() => {
@@ -238,9 +239,7 @@ class BasePersonForm extends Component {
                           bsStyle="warning"
                           buttonLabel="Reset account"
                           className="hidden"
-                          ref={confirmComponent =>
-                            (this.confirmHasReplacementButton = confirmComponent)
-                          }
+                          buttonRef={this.confirmHasReplacementButton}
                         />
                         <Button
                           id="wrongPerson"
@@ -603,7 +602,7 @@ class BasePersonForm extends Component {
         case "leftVacant":
         case "hasReplacement":
           // reset account?
-          this.confirmHasReplacementButton.buttonRef.props.onClick()
+          this.confirmHasReplacementButton.current.props.onClick()
           break
         default:
           // TODO: integrate action to email admin
