@@ -220,10 +220,6 @@ const createOrganization = async function(user, parentOrg, path) {
   //   })).data.createOrganization
 }
 
-const deleteOrganization = function(user) {
-  // todo
-}
-
 const organizationsBuildup = async function(user, number) {
   async function count() {
     return (await runGQL(user, {

@@ -1,11 +1,11 @@
 import API, { Settings } from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
-  TaskSimpleOverlayRow,
-  PositionOverlayRow
+  PositionOverlayRow,
+  TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
@@ -13,7 +13,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
@@ -22,22 +23,21 @@ import React, { Component } from "react"
 import { Button } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
-import PositionTable from "components/PositionTable"
-import POSITIONS_ICON from "resources/positions.png"
 import DictionaryField from "../../HOC/DictionaryField"
 
 class BaseTaskForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(Task).isRequired,
     title: PropTypes.string,
     edit: PropTypes.bool,
-    currentUser: PropTypes.instanceOf(Person)
+    currentUser: PropTypes.instanceOf(Person),
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new Task(),
     title: "",
     edit: false
   }
@@ -181,9 +181,7 @@ class BaseTaskForm extends Component {
                   <AdvancedSingleSelect
                     fieldName="responsibleOrg"
                     fieldLabel={Settings.fields.task.responsibleOrg}
-                    placeholder={`Select a responsible organization for this ${
-                      Settings.fields.task.shortLabel
-                    }`}
+                    placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
                     value={values.responsibleOrg}
                     overlayColumns={["Name"]}
                     overlayRenderRow={OrganizationOverlayRow}
@@ -298,9 +296,7 @@ class BaseTaskForm extends Component {
                       {edit && (
                         <Field
                           name="assessment_customFieldEnum1"
-                          label={`Assessment of ${
-                            Settings.fields.task.customFieldEnum1.label
-                          }`}
+                          label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                           component={FieldHelper.renderSpecialField}
                           onChange={value =>
                             setFieldValue("assessment_customFieldEnum1", value)

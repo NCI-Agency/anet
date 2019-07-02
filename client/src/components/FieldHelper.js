@@ -206,19 +206,6 @@ export const renderReadonlyField = ({
   )
 }
 
-export const renderValue = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
-}) => {
-  const id = field.id || field.name
-  return (
-    <FormControl.Static componentClass={"span"} id={id}>
-      {getHumanValue(field)}
-    </FormControl.Static>
-  )
-}
-
 export const renderSpecialField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.

@@ -7,7 +7,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.utils.BatchingUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -33,8 +33,7 @@ public class Comment extends AbstractAnetBean {
     if (author.hasForeignObject()) {
       return CompletableFuture.completedFuture(author.getForeignObject());
     }
-    return new UuidFetcher<Person>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_PEOPLE, author.getForeignUuid())
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, author.getForeignUuid())
         .thenApply(o -> {
           author.setForeignObject(o);
           return o;

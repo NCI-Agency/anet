@@ -6,7 +6,8 @@ import { Button, ButtonGroup } from "react-bootstrap"
 export default class ButtonToggleGroup extends Component {
   static propTypes = {
     value: PropTypes.string,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    children: PropTypes.node
   }
 
   render() {

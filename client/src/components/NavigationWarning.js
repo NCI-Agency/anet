@@ -1,4 +1,4 @@
-import autobind from "autobind-decorator"
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Prompt, withRouter } from "react-router-dom"
 
@@ -6,8 +6,11 @@ const LEAVE_WARNING =
   "Are you sure you wish to navigate away from the page? You will lose unsaved changes."
 
 class NavigationWarning extends Component {
-  @autobind
-  onBeforeUnloadListener(event) {
+  static propTypes = {
+    isBlocking: PropTypes.bool
+  }
+
+  onBeforeUnloadListener = event => {
     if (this.props.isBlocking) {
       event.returnValue = LEAVE_WARNING
       event.preventDefault()

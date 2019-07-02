@@ -11,7 +11,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.database.mappers.ApprovalStepMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
-import mil.dds.anet.utils.BatchingUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -19,14 +19,12 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 @InTransaction
 public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 
-  public ApprovalStepDao() {
-    super("ApprovalSteps", "approvalSteps", "*", null);
-  }
+  public static final String TABLE_NAME = "approvalSteps";
 
   public CompletableFuture<List<ApprovalStep>> getByAdvisorOrganizationUuid(
       Map<String, Object> context, String aoUuid) {
     return new ForeignKeyFetcher<ApprovalStep>().load(context,
-        BatchingUtils.DataLoaderKey.FK_ORGANIZATION_APPROVAL_STEPS, aoUuid);
+        FkDataLoaderKey.ORGANIZATION_APPROVAL_STEPS, aoUuid);
   }
 
   @Override
@@ -198,8 +196,8 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
    */
   public CompletableFuture<List<Position>> getApproversForStep(Map<String, Object> context,
       String approvalStepUuid) {
-    return new ForeignKeyFetcher<Position>().load(context,
-        BatchingUtils.DataLoaderKey.FK_APPROVAL_STEP_APPROVERS, approvalStepUuid);
+    return new ForeignKeyFetcher<Position>().load(context, FkDataLoaderKey.APPROVAL_STEP_APPROVERS,
+        approvalStepUuid);
   }
 
   public int addApprover(ApprovalStep step, String positionUuid) {

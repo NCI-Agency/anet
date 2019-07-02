@@ -13,14 +13,16 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.utils.BatchingUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
 public class Task extends AbstractAnetBean {
 
-  public static final String DUMMY_TASK_UUID = "-1"; // pseudo uuid to represent 'no task'
+  /** pseudo uuid to represent 'no task' */
+  @GraphQLIgnore
+  public static final String DUMMY_TASK_UUID = "-1";
 
   public enum TaskStatus {
     ACTIVE, INACTIVE
@@ -125,8 +127,7 @@ public class Task extends AbstractAnetBean {
       return CompletableFuture.completedFuture(customFieldRef1.getForeignObject());
     }
     return new UuidFetcher<Task>()
-        .load(context, BatchingUtils.DataLoaderKey.ID_TASKS, customFieldRef1.getForeignUuid())
-        .thenApply(o -> {
+        .load(context, IdDataLoaderKey.TASKS, customFieldRef1.getForeignUuid()).thenApply(o -> {
           customFieldRef1.setForeignObject(o);
           return o;
         });
@@ -168,8 +169,8 @@ public class Task extends AbstractAnetBean {
     if (responsibleOrg.hasForeignObject()) {
       return CompletableFuture.completedFuture(responsibleOrg.getForeignObject());
     }
-    return new UuidFetcher<Organization>().load(context,
-        BatchingUtils.DataLoaderKey.ID_ORGANIZATIONS, responsibleOrg.getForeignUuid())
+    return new UuidFetcher<Organization>()
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, responsibleOrg.getForeignUuid())
         .thenApply(o -> {
           responsibleOrg.setForeignObject(o);
           return o;
@@ -206,10 +207,7 @@ public class Task extends AbstractAnetBean {
       return CompletableFuture.completedFuture(reports);
     }
     return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid)
-        .thenApply(o -> {
-          reports = new AnetBeanList<Report>(o);
-          return reports;
-        });
+        .thenApply(o -> new AnetBeanList<Report>(o));
   }
 
   @GraphQLQuery(name = "responsiblePositions")

@@ -123,7 +123,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
-- **database**: The configuration for your database. ANET supports either sqlite for development, or Microsoft SQL Server for production.  Additonal Instructions can be found here instructions here: https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html for avaiable configuration options for the database connection. 
+- **database**: The configuration for your database. ANET supports either PostgreSQL or Microsoft SQL Server.  Additonal Instructions can be found here instructions here: https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.
@@ -508,27 +508,19 @@ and for WMTS-type providers:
 
 If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
 
-1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `maps`. Inside that, create a directory called `imagery`. 
-1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `maps/imagery/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
-1. Edit the `bin/anet.bat` (Windows), or `bin/anet` (Linux/Mac) file. Find the line that sets the `CLASSPATH` variable. (It's really long and lists a bunch of .jar files).  Right after that line, add the line: 
-
-Windows (bin/anet.bat):
+1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`. 
+```yaml
+assets:
+  overrides:
+    /imagery: imagery
 ```
-set CLASSPATH=%APP_HOME%\maps\;%CLASSPATH%
-
-```
-Linux/Mac (bin/anet): 
-```
-CLASSPATH=$APP_HOME/maps/:$CLASSPATH
-```
-
-This will put the imagery folder on the server's classpath.  ANET looks for a folder called imagery and will serve those tiles up on the `/imagery` path. 
+1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
 1. To use this new tile source, add under `baseLayers`:
 ```yaml
       - name: OSM
         default: true
         type: tile
-        url: "https://<your-anet-server-url>/imagery/{z}/{x}/{y}.png"
+        url: "/imagery/street/{z}/{x}/{y}.png"
 ```
 
-Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/0/0/0.png` and hopefully seeing a tile appear. 
+Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/street/0/0/0.png` and hopefully seeing a tile appear. 

@@ -8,7 +8,8 @@ import { WithContext as ReactTags } from "react-tag-input"
 export default class ReportTags extends Component {
   static propTypes = {
     value: PropTypes.array,
-    suggestions: PropTypes.array
+    suggestions: PropTypes.array,
+    onChange: PropTypes.func
   }
 
   render() {
@@ -21,7 +22,7 @@ export default class ReportTags extends Component {
           remove: "reportTagRemove label-info"
         }}
         minQueryLength={1}
-        autocomplete
+        autocomplete={1}
         autofocus={false}
         handleFilterSuggestions={this.handleTagSuggestions}
         handleDelete={this.handleTagDelete}

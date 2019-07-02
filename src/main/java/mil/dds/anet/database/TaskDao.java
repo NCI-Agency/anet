@@ -17,8 +17,8 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
-import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -28,9 +28,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 @InTransaction
 public class TaskDao extends AnetBaseDao<Task> {
 
-  public TaskDao() {
-    super("Tasks", "tasks", "*", null);
-  }
+  public static final String TABLE_NAME = "tasks";
 
   public Task getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
@@ -132,7 +130,7 @@ public class TaskDao extends AnetBaseDao<Task> {
   public CompletableFuture<List<Position>> getResponsiblePositionsForTask(
       Map<String, Object> context, String taskUuid) {
     return new ForeignKeyFetcher<Position>().load(context,
-        BatchingUtils.DataLoaderKey.FK_TASK_RESPONSIBLE_POSITIONS, taskUuid);
+        FkDataLoaderKey.TASK_RESPONSIBLE_POSITIONS, taskUuid);
   }
 
   public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {
@@ -194,8 +192,7 @@ public class TaskDao extends AnetBaseDao<Task> {
 
   public CompletableFuture<List<Report>> getReportsForTask(
       @GraphQLRootContext Map<String, Object> context, String taskUuid) {
-    return new ForeignKeyFetcher<Report>().load(context,
-        BatchingUtils.DataLoaderKey.FK_TASK_REPORTS, taskUuid);
+    return new ForeignKeyFetcher<Report>().load(context, FkDataLoaderKey.TASK_REPORTS, taskUuid);
   }
 
 }
