@@ -23,7 +23,7 @@ public abstract class AbstractSubscriptionUpdateSearcher
   @Override
   public AnetBeanList<SubscriptionUpdate> runSearch(SubscriptionUpdateSearchQuery query,
       Person user) {
-    buildQuery(query);
+    buildQuery(query, user);
     return qb.buildAndRun(getDbHandle(), query, new SubscriptionUpdateMapper());
   }
 
@@ -53,9 +53,8 @@ public abstract class AbstractSubscriptionUpdateSearcher
             getOrderBy(query.getSortOrder(), "\"subscriptionUpdates\"", "\"createdAt\""));
         break;
     }
-    qb.addAllOrderByClauses(
-        getOrderBy(SortOrder.ASC, "\"subscriptionUpdates\".\"updatedObjectType\"",
-            "\"subscriptionUpdates\".\"updatedObjectUuid\""));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "\"subscriptionUpdates\"",
+        "\"updatedObjectType\"", "\"updatedObjectUuid\""));
   }
 
 }

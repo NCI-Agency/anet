@@ -48,8 +48,8 @@ public abstract class AbstractSubscriptionSearcher extends
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "subscriptions", "\"createdAt\""));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "subscriptions.\"subscribedObjectType\"",
-        "subscriptions.\"subscribedObjectUuid\""));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "subscriptions", "\"subscribedObjectType\"",
+        "\"subscribedObjectUuid\""));
   }
 
 }
