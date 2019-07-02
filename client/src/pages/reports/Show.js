@@ -187,7 +187,8 @@ class BaseReportShow extends Page {
         Position.isEqual(member, currentUser.position)
       )
     const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
-    const canPublish = report.isApproved() && isAdmin
+    // Approved reports for not future engagements may be published by an admin user
+    const canPublish = !report.isFuture() && report.isApproved() && isAdmin
     // Warn admins when they try to approve their own report
     const warnApproveOwnReport = canApprove && isAuthor
 
