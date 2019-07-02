@@ -4,12 +4,9 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.security.Principal;
+import java.sql.Blob;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,9 +26,6 @@ public class Person extends AbstractAnetBean implements Principal {
   public static enum Role {
     ADVISOR, PRINCIPAL
   }
-
-  private static final String DEFAULT_AVATAR_PATH =
-      "src/main/resources/assets/avatars/default_avatar.png";
 
   private String name;
   private PersonStatus status;
@@ -236,12 +230,8 @@ public class Person extends AbstractAnetBean implements Principal {
   }
 
   @GraphQLQuery(name = "avatar")
-  public String getAvatar() throws IOException {
-    // Load the default image
-    byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
-    String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
-
-    return avatar == null ? defaultAvatarData : avatar;
+  public String getAvatar() {
+    return this.avatar;
   }
 
   public void setAvatar(String avatar) {

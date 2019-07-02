@@ -593,16 +593,7 @@ properties:
               type: string
             options:
               type: object
-              additionalProperties: true
-
-      avatar:
-        properties:
-          maxFileSize:
-            type: integer
-          height: 
-            type: integer
-          width:
-            type: integer    
+              additionalProperties: true   
 
   automaticallyInactivateUsers:
     type: object

@@ -159,11 +159,7 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE),
-      avatar: yup
-        .string()
-        .nullable()
-        .default(() => "")
+        .default(() => Person.STATUS.ACTIVE)
     })
     .concat(Model.yupSchema)
 

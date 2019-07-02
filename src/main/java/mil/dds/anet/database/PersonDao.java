@@ -1,5 +1,8 @@
 package mil.dds.anet.database;
 
+import java.lang.invoke.MethodHandles;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,8 @@ import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
@@ -26,6 +31,9 @@ public class PersonDao extends AnetBaseDao<Person> {
   private static String tableName = "people";
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
   public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(tableName, fields, false);
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public PersonDao() {
     super("People", tableName, PERSON_FIELDS, null);
@@ -82,7 +90,6 @@ public class PersonDao extends AnetBaseDao<Person> {
       sql.append(":endOfTourDate, ");
     }
     sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
-
     getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -97,7 +104,7 @@ public class PersonDao extends AnetBaseDao<Person> {
     StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, "
         + "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
-        + "avatar = :avatar, "
+        + "\"avatar\" = :avatar,"
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, ");
@@ -108,10 +115,18 @@ public class PersonDao extends AnetBaseDao<Person> {
       sql.append("\"endOfTourDate\" = :endOfTourDate ");
     }
     sql.append("WHERE uuid = :uuid");
+    Blob avatar = null;
+    try {
+      avatar = this.getDbHandle().getConnection().createBlob();
+      avatar.setBytes(1l, p.getAvatar().getBytes());
+    } catch (SQLException e) {
+      logger.error("Failed to update avatar: ", e);
+    }
+
     return getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus()))
+        .bind("status", DaoUtils.getEnumId(p.getStatus())).bind("avatar", avatar)
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
   }
 

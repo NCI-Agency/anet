@@ -24,6 +24,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 class BasePersonShow extends Page {
   static propTypes = {
@@ -168,8 +169,6 @@ class BasePersonShow extends Page {
             <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
           )
 
-          const Avatar = () => <img src={`data:image/jpeg;base64,${person.avatar}`} />
-
           return (
             <div>
               <div className="pull-right">
@@ -198,9 +197,13 @@ class BasePersonShow extends Page {
                 <Fieldset
                   title={`${person.rank} ${person.name}`}
                   action={action}
-                />                              
-                <Fieldset> 
-                  <Avatar />                
+                />
+                <Fieldset>
+                  <AvatarDisplayComponent
+                    avatar={person.avatar}
+                    height={200}
+                    width={200}
+                  />
                   <Field
                     name="rank"
                     label={Settings.fields.person.rank}

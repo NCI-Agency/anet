@@ -2359,7 +2359,7 @@
 
 	<changeSet id="add-avatars-to-People" author="jose-west">
 		<addColumn tableName="people">
-			<column name="avatar" type="${long_text_type}" />
+			<column name="avatar" type="blob"/>
 		</addColumn>
 	</changeSet>
 

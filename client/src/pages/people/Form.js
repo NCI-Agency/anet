@@ -10,7 +10,7 @@ import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
-import AvatarComponent from "components/AvatarComponent"
+import AvatarEditModal from "components/AvatarEditModal"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
@@ -27,6 +27,7 @@ import {
   Radio
 } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 class BasePersonForm extends Component {
   static propTypes = {
@@ -108,7 +109,12 @@ class BasePersonForm extends Component {
     originalStatus: "",
     showWrongPersonModal: false,
     wrongPersonOptionValue: null,
-    onSaveRedirectToHome: Person.isNewUser(this.props.initialValues) // redirect first time users to the homepage in order to be able to use onboarding
+    onSaveRedirectToHome: Person.isNewUser(this.props.initialValues), // redirect first time users to the homepage in order to be able to use onboarding
+    currentAvatar: this.props.initialValues.avatar
+  }
+
+  onAvatarUpdate = (updatedAvatar) => {
+    this.setState({ currentAvatar: updatedAvatar })
   }
 
   render() {
@@ -189,10 +195,20 @@ class BasePersonForm extends Component {
               <NavigationWarning isBlocking={dirty} />
               <Form className="form-horizontal" method="post">
                 <Messages error={this.state.error} />
-                <Fieldset title={this.props.title} action={action} /> 
+                <Fieldset title={this.props.title} action={action} />
                 <Fieldset>
-                  <AvatarComponent src= {values.avatar} values = {values} />
-                  <FormGroup>                    
+                  <AvatarDisplayComponent
+                    avatar={this.state.currentAvatar}
+                    height={200}
+                    width={200}
+                  />
+                  <AvatarEditModal
+                    title="Edit avatar"
+                    size="large"
+                    src={this.state.currentAvatar}
+                    onAvatarUpdate={this.onAvatarUpdate}
+                  />
+                  <FormGroup>
                     <Col
                       sm={2}
                       componentClass={ControlLabel}
@@ -224,7 +240,7 @@ class BasePersonForm extends Component {
                         />
                       </Col>
                     </Col>
-                    
+
                     {edit && !canEditName && (
                       <React.Fragment>
                         <TriggerableConfirm
@@ -401,9 +417,8 @@ class BasePersonForm extends Component {
                     </Field>
                   )}
                 </Fieldset>
-      
-              
-                <Fieldset title="Additional information">                  
+
+                <Fieldset title="Additional information">
                   <Field
                     name="emailAddress"
                     label={Settings.fields.person.emailAddress}
@@ -547,7 +562,7 @@ class BasePersonForm extends Component {
       const person = new Person({
         uuid: response[operation].uuid
           ? response[operation].uuid
-          : this.props.initialValues.uuid        
+          : this.props.initialValues.uuid
       })
       this.props.history.replace(Person.pathForEdit(person))
       this.props.history.push({
@@ -561,6 +576,7 @@ class BasePersonForm extends Component {
 
   save = (values, form) => {
     const { edit } = this.props
+    values.avatar = this.state.currentAvatar
     let person = new Person(values)
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
@@ -569,7 +585,6 @@ class BasePersonForm extends Component {
       { firstName: person.firstName, lastName: person.lastName },
       true
     )
-    person.avatar = values.avatar
     // Clean up person object for JSON response
     person = Object.without(person, "firstName", "lastName")
     const operation = edit ? "updatePerson" : "createPerson"

@@ -391,11 +391,7 @@ dictionary:
         url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
         options:
           layers: GEBCO_LATEST
-          format: "image/png"
-    avatar:
-      maxFileSize: 71680
-      height: 200
-      width: 200    
+          format: "image/png" 
 
   automaticallyInactivateUsers:
     emailRemindersDaysPrior: [15, 30, 45]
