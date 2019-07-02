@@ -1,6 +1,6 @@
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
-import PropTypes from "prop-types"
 
 class Toolbar extends Component {
   static propTypes = {

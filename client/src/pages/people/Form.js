@@ -8,7 +8,6 @@ import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop, routerRelatedPropTypes } from "components/Page"
-
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"

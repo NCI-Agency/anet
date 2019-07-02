@@ -6,7 +6,6 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, routerRelatedPropTypes } from "components/Page"
-
 import PositionTable from "components/PositionTable"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"

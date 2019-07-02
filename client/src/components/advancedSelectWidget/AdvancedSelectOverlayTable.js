@@ -1,9 +1,9 @@
 import Checkbox from "components/Checkbox"
 import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
+import PropTypes from "prop-types"
 import React from "react"
 import { Radio, Table } from "react-bootstrap"
-import PropTypes from "prop-types"
 
 const AdvancedSelectOverlayTable = ({
   fieldName,

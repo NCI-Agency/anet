@@ -1,9 +1,9 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import React, { Component } from "react"
-import PropTypes from "prop-types"
-import { Table } from "react-bootstrap"
 import { Organization } from "models"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { Table } from "react-bootstrap"
 
 export default class OrganizationApprovals extends Component {
   static propTypes = {

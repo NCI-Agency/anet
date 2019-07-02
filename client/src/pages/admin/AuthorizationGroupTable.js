@@ -1,6 +1,6 @@
-import PropTypes from "prop-types"
 import LinkTo from "components/LinkTo"
 import { AuthorizationGroup } from "models"
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Table } from "react-bootstrap"
 

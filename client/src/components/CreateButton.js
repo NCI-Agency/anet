@@ -1,10 +1,10 @@
 import AppContext from "components/AppContext"
+import { routerRelatedPropTypes } from "components/Page"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, DropdownButton, MenuItem } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
-import { routerRelatedPropTypes } from "components/Page"
 
 const DEFAULT_ACTIONS = [Models.Report]
 

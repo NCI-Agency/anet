@@ -5,7 +5,6 @@ import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, routerRelatedPropTypes } from "components/Page"
-
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location } from "models"

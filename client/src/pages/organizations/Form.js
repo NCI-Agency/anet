@@ -13,7 +13,6 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, routerRelatedPropTypes } from "components/Page"
-
 import TaskTable from "components/TaskTable"
 import { Field, FieldArray, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"

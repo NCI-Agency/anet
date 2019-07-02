@@ -1,6 +1,6 @@
-import PropTypes from "prop-types"
 import LinkTo from "components/LinkTo"
 import { Person } from "models"
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
