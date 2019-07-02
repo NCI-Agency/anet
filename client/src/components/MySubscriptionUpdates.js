@@ -127,9 +127,7 @@ class BaseMySubscriptionUpdates extends Component {
                       <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
                     )
                   }
-                  const key = `${subscriptionUpdate.createdAt}:${
-                    subscriptionUpdate.updatedObjectType
-                  }:${subscriptionUpdate.updatedObjectUuid}`
+                  const key = `${subscriptionUpdate.createdAt}:${subscriptionUpdate.updatedObjectType}:${subscriptionUpdate.updatedObjectUuid}`
                   return (
                     <tr key={key}>
                       <td>

@@ -226,13 +226,6 @@ class BaseReportShow extends Page {
                 )}
             </div>
           )
-          const subscriptionIcon =
-            report.isPublished() || report.isCancelled()
-              ? Page.getSubscriptionIcon(
-                report.isSubscribed,
-                this.toggleSubscription
-              )
-              : undefined
           return (
             <div className="report-show">
               {this.renderEmailModal(values, setFieldValue)}
