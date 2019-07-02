@@ -292,13 +292,13 @@ class Search extends Page {
                 />
               </Dropdown.Toggle>
               <Dropdown.Menu className="super-colors">
-                <MenuItem onClick={this.createExportResultsFuctionFor("xlsx")}>
+                <MenuItem onClick={this.createExportResultsFunctionFor("xlsx")}>
                   Excel (xlsx)
                 </MenuItem>
-                <MenuItem onClick={this.createExportResultsFuctionFor("kml")}>
+                <MenuItem onClick={this.createExportResultsFunctionFor("kml")}>
                   Google Earth (kml)
                 </MenuItem>
-                <MenuItem onClick={this.createExportResultsFuctionFor("nvg")}>
+                <MenuItem onClick={this.createExportResultsFunctionFor("nvg")}>
                   NATO Vector Graphics (nvg)
                 </MenuItem>
               </Dropdown.Menu>
@@ -660,7 +660,7 @@ class Search extends Page {
     this.setState({ showSaveSearch: false })
   }
 
-  createExportResultsFuctionFor = exportType => () =>
+  createExportResultsFunctionFor = exportType => () =>
     this._dataFetcher(
       this.props,
       parts =>

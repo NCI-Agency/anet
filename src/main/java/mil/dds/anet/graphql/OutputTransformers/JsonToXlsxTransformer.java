@@ -41,7 +41,6 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
     this.config = config;
   }
 
-
   @Override
   public StreamingOutput apply(final Map<String, Object> json) {
     return new XssfWorkbookStreamingOutput(createWorkbook(json));
