@@ -518,3 +518,18 @@ This will put the imagery folder on the server's classpath.  ANET looks for a fo
 ```
 
 Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/0/0/0.png` and hopefully seeing a tile appear. 
+
+# How to configure KML and NVG support
+
+Any system that can consume KML (Google Earth, Google Maps) through a service (a.k.a Network Link) can be configured to consume ANET data.
+
+For example to consume all published reports, use the following endpoint:
+
+```
+http://<your-anet-server>/graphql?query=query{reportList(query:{state:PUBLISHED}){list{uuid,intent,attendees{rank,name,role},primaryAdvisor{name},primaryPrincipal{name,position{organization{longName}}},location{lat,lng}}}}&output=kml
+```
+
+For the same data in NVG format, you can use
+```
+http://<your-anet-server>/graphql?query=query{reportList(query:{state:PUBLISHED}){list{uuid,intent,attendees{rank,name,role},primaryAdvisor{name},primaryPrincipal{name,position{organization{longName}}},location{lat,lng}}}}&output=nvg
+```
