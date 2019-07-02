@@ -13,6 +13,7 @@
                     </IconStyle>
                 </Style>
                 <xsl:apply-templates select="data/reportList/list/element[number(location/lat)=location/lat]"/>
+                <xsl:apply-templates select="data/REPORTS/list/element[number(location/lat)=location/lat]"/>
                 <ScreenOverlay>
                     <name>ANET Legend </name>
                     <Icon>

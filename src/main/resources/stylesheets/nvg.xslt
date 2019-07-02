@@ -4,6 +4,7 @@
     <xsl:template match="/">
         <nvg xmlns="http://tide.act.nato.int/schemas/2008/10/nvg" version="1.4.0" classification="NOT CLASSIFIED">
             <xsl:apply-templates select="data/reportList/list/element[number(location/lat)=location/lat]"/>
+            <xsl:apply-templates select="data/REPORTS/list/element[number(location/lat)=location/lat]"/>
         </nvg>
     </xsl:template>
 
