@@ -199,15 +199,9 @@ class BaseRelatedObjectNotes extends Component {
           let msg = ""
           if (isJson) {
             if (jsonFields.oldValue === jsonFields.newValue) {
-              msg = `Field <b>${
-                jsonFields.changedField
-              }</b> was unchanged (<em>'${jsonFields.oldValue}'</em>)`
+              msg = `Field <b>${jsonFields.changedField}</b> was unchanged (<em>'${jsonFields.oldValue}'</em>)`
             } else {
-              msg = `Field <b>${
-                jsonFields.changedField
-              }</b> was changed from <em>'${
-                jsonFields.oldValue
-              }'</em> to <em>'${jsonFields.newValue}'</em>`
+              msg = `Field <b>${jsonFields.changedField}</b> was changed from <em>'${jsonFields.oldValue}'</em> to <em>'${jsonFields.newValue}'</em>`
             }
           }
           return (

@@ -3,11 +3,7 @@ package mil.dds.anet.beans.search;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 
-public class OrganizationSearchQuery extends AbstractSearchQuery {
-
-  public enum OrganizationSearchSortBy {
-    CREATED_AT, NAME, TYPE
-  }
+public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSearchSortBy> {
 
   private OrganizationStatus status;
   private OrganizationType type;
@@ -19,7 +15,9 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
   // Including the parent Org.
   private Boolean parentOrgRecursively;
 
-  private OrganizationSearchSortBy sortBy;
+  public OrganizationSearchQuery() {
+    super(OrganizationSearchSortBy.NAME);
+  }
 
   public OrganizationStatus getStatus() {
     return status;
@@ -51,14 +49,6 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
 
   public void setParentOrgRecursively(Boolean parentOrgRecursively) {
     this.parentOrgRecursively = parentOrgRecursively;
-  }
-
-  public OrganizationSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(OrganizationSearchSortBy sortBy) {
-    this.sortBy = sortBy;
   }
 
 }

@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -215,18 +216,20 @@ public class Person extends AbstractAnetBean implements Principal {
 
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "authoredReports")
-  public AnetBeanList<Report> loadAuthoredReports(
+  public AnetBeanList<Report> loadAuthoredReports(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAuthorUuid(uuid);
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
+    return AnetObjectEngine.getInstance().getReportDao().search(query,
+        DaoUtils.getUserFromContext(context));
   }
 
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "attendedReports")
-  public AnetBeanList<Report> loadAttendedReports(
+  public AnetBeanList<Report> loadAttendedReports(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAttendeeUuid(uuid);
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
+    return AnetObjectEngine.getInstance().getReportDao().search(query,
+        DaoUtils.getUserFromContext(context));
   }
 
   @GraphQLQuery(name = "avatar")

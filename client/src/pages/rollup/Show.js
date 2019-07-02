@@ -687,9 +687,7 @@ class BaseRollupShow extends Page {
     `
     if (this.state.focusedOrg) {
       if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        graphQL += `, principalOrganizationUuid: "${
-          this.state.focusedOrg.uuid
-        }"`
+        graphQL += `, principalOrganizationUuid: "${this.state.focusedOrg.uuid}"`
       } else {
         graphQL += `, advisorOrganizationUuid: "${this.state.focusedOrg.uuid}"`
       }

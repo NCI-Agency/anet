@@ -53,6 +53,7 @@ export const PositionOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
       <LinkTo position={item} isLink={false} />
+      {item.code ? `, ${item.code}` : ""}
     </td>
     <td>
       <LinkTo organization={item.organization} isLink={false} />

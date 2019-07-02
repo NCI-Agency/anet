@@ -1,25 +1,69 @@
 package mil.dds.anet.search.pg;
 
 import com.google.inject.Injector;
+import mil.dds.anet.search.IAuthorizationGroupSearcher;
+import mil.dds.anet.search.ILocationSearcher;
+import mil.dds.anet.search.IOrganizationSearcher;
+import mil.dds.anet.search.IPersonSearcher;
+import mil.dds.anet.search.IPositionSearcher;
+import mil.dds.anet.search.IReportSearcher;
+import mil.dds.anet.search.ITagSearcher;
+import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.search.Searcher;
-import mil.dds.anet.search.sqlite.SqliteAuthorizationGroupSearcher;
-import mil.dds.anet.search.sqlite.SqliteLocationSearcher;
-import mil.dds.anet.search.sqlite.SqliteOrganizationSearcher;
-import mil.dds.anet.search.sqlite.SqlitePersonSearcher;
-import mil.dds.anet.search.sqlite.SqlitePositionSearcher;
-import mil.dds.anet.search.sqlite.SqliteTagSearcher;
-import mil.dds.anet.search.sqlite.SqliteTaskSearcher;
+import mil.dds.anet.search.pg.PostgresqlAuthorizationGroupSearcher;
+import mil.dds.anet.search.pg.PostgresqlLocationSearcher;
+import mil.dds.anet.search.pg.PostgresqlOrganizationSearcher;
+import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
+import mil.dds.anet.search.pg.PostgresqlPositionSearcher;
+import mil.dds.anet.search.pg.PostgresqlReportSearcher;
+import mil.dds.anet.search.pg.PostgresqlSearcher;
+import mil.dds.anet.search.pg.PostgresqlTagSearcher;
+import mil.dds.anet.search.pg.PostgresqlTaskSearcher;
 
 public class PostgresqlSearcher extends Searcher {
 
   public PostgresqlSearcher(Injector injector) {
-    super(injector.getInstance(PostgresqlReportSearcher.class),
-        injector.getInstance(SqlitePersonSearcher.class),
-        injector.getInstance(SqliteOrganizationSearcher.class),
-        injector.getInstance(SqlitePositionSearcher.class),
-        injector.getInstance(SqliteTaskSearcher.class),
-        injector.getInstance(SqliteLocationSearcher.class),
-        injector.getInstance(SqliteTagSearcher.class),
-        injector.getInstance(SqliteAuthorizationGroupSearcher.class));
+    super(injector);
   }
+
+  @Override
+  public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
+    return injector.getInstance(PostgresqlAuthorizationGroupSearcher.class);
+  }
+
+  @Override
+  public ILocationSearcher getLocationSearcher() {
+    return injector.getInstance(PostgresqlLocationSearcher.class);
+  }
+
+  @Override
+  public IOrganizationSearcher getOrganizationSearcher() {
+    return injector.getInstance(PostgresqlOrganizationSearcher.class);
+  }
+
+  @Override
+  public IPersonSearcher getPersonSearcher() {
+    return injector.getInstance(PostgresqlPersonSearcher.class);
+  }
+
+  @Override
+  public IPositionSearcher getPositionSearcher() {
+    return injector.getInstance(PostgresqlPositionSearcher.class);
+  }
+
+  @Override
+  public IReportSearcher getReportSearcher() {
+    return injector.getInstance(PostgresqlReportSearcher.class);
+  }
+
+  @Override
+  public ITagSearcher getTagSearcher() {
+    return injector.getInstance(PostgresqlTagSearcher.class);
+  }
+
+  @Override
+  public ITaskSearcher getTaskSearcher() {
+    return injector.getInstance(PostgresqlTaskSearcher.class);
+  }
+
 }

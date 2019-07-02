@@ -35,6 +35,8 @@ class SearchBar extends Component {
     resetPagination: PropTypes.func
   }
 
+  advancedSearchLink = React.createRef()
+
   constructor(props) {
     super(props)
     this.state = {
@@ -86,7 +88,7 @@ class SearchBar extends Component {
 
         <div
           className="add-search-filter"
-          ref={el => (this.advancedSearchLink = el)}
+          ref={this.advancedSearchLink}
           onClick={() =>
             this.setState({
               showAdvancedSearch: !this.state.showAdvancedSearch
@@ -125,7 +127,7 @@ class SearchBar extends Component {
           show={this.state.showAdvancedSearch}
           onHide={() => this.setState({ showAdvancedSearch: false })}
           placement="bottom"
-          target={this.advancedSearchLink}
+          target={this.advancedSearchLink.current}
           rootClose
         >
           <Popover id="advanced-search" placement="bottom" title="Filters">

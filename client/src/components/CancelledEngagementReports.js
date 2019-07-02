@@ -82,9 +82,7 @@ class CancelledEngagementReports extends ReportsVisualisation {
         second: this.VISUALIZATIONS[3].id
       }
     }
-    this.DESCRIPTION = `The reports are grouped by ${
-      this.advisorOrgLabel
-    } or reason for cancellation.
+    this.DESCRIPTION = `The reports are grouped by ${this.advisorOrgLabel} or reason for cancellation.
       In order to see the list of cancelled engagement reports for an organization or a reaons,
       click on the bar corresponding to the organization or the reason.`
 

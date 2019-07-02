@@ -150,9 +150,7 @@ const reportTour = (currentUser, history) => {
       },
       {
         title: Settings.fields.report.atmosphere,
-        content: `Select the ${
-          Settings.fields.report.atmosphere
-        } of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.`,
+        content: `Select the ${Settings.fields.report.atmosphere} of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.`,
         target: "#neutralAtmos",
         placement: "bottom"
       },
@@ -265,9 +263,7 @@ const orgTour = (currentUser, history) => {
       },
       {
         title: taskShortLabelPlural,
-        content: `The ${
-          Settings.fields.task.longLabel
-        } that your organization is responsible for will be displayed in this section. If you need to make changes, or if ${taskShortLabelPlural} change, you can update that information by clicking on the ${taskShortLabelSingular}.`,
+        content: `The ${Settings.fields.task.longLabel} that your organization is responsible for will be displayed in this section. If you need to make changes, or if ${taskShortLabelPlural} change, you can update that information by clicking on the ${taskShortLabelSingular}.`,
         target: "#tasks h2",
         placement: "top"
       },

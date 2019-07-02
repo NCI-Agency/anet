@@ -6,11 +6,7 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 
-public class ReportSearchQuery extends AbstractSearchQuery {
-
-  public enum ReportSearchSortBy {
-    CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT, UPDATED_AT
-  }
+public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
 
   String authorUuid;
   Instant engagementDateStart;
@@ -48,11 +44,8 @@ public class ReportSearchQuery extends AbstractSearchQuery {
   private List<String> authorizationGroupUuid;
   private Boolean sensitiveInfo;
 
-  private ReportSearchSortBy sortBy;
-
   public ReportSearchQuery() {
-    super();
-    this.sortBy = ReportSearchSortBy.CREATED_AT;
+    super(ReportSearchSortBy.CREATED_AT);
     this.setSortOrder(SortOrder.DESC);
   }
 
@@ -286,14 +279,6 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 
   public void setSensitiveInfo(Boolean sensitiveInfo) {
     this.sensitiveInfo = sensitiveInfo;
-  }
-
-  public ReportSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(ReportSearchSortBy sortBy) {
-    this.sortBy = sortBy;
   }
 
 }

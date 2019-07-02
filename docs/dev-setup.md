@@ -39,7 +39,7 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
    1. Run the project as a Java Application.  Open the Run Configuration and make sure:
       1. The main method is `mil.dds.anet.AnetApplication`
       1. Arguments includes `server anet.yml`
-      1. Environment variables include anything set in build.gradle or localSettings.gradle.  If you are using sqlite as your database, this will include: `ANET_DB_DRIVER=org.sqlite.JDBC`, `ANET_DB_URL=jdbc:sqlite:development.db`, `ANET_DB_DATE_STRING_FORMAT=yyyy-MM-dd hh:mm:ss.SSS Z"`, `ANET_DB_DATE_CLASS=text`
+      1. Environment variables include anything set in build.gradle or localSettings.gradle.
    1. Ensure there are no compile errors. If there are, you are probably missing dependencies or forgot to set environment variables in Eclipse. Try re-running `./gradlew eclipse` or checking the Eclipse run configuration vs gradle configs.
 1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/deptofdefense/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
    1. `emailFromAddr` - use your own email address for testing.
@@ -47,15 +47,9 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
 ## Java Backend
 
 ### Initial Setup
-1. You can either use SQLite or Microsoft SQL Server for your database. The former allows you to run entirely on your local machine and develop offline. The latter allows you to test on the same database and feature set that production will use. We do our best to support both but cannot guarantee that the SQLite code will exactly match the SQL Server.
-   - SQLite
-     - This is currently the default, so you don't need to do anything special
-     - To re-force gradle to use SQLite you can set the `DB_DRIVER` environment variable to `sqlite` (e.g. `export DB_DRIVER=sqlite`), or you can paste the following in your `localSettings.gradle` file:
-
-      ```java
-      run.environment("DB_DRIVER", "sqlite")
-      ```
+1. You can either use PostgreSQL or Microsoft SQL Server for your database. Both allow you to run entirely on your local machine and develop offline.
    - MSSQL
+     - This is currently the default, so you don't need to do anything special
      - Paste the following in your `localSettings.gradle` file (with the correct values):
 
       ```java
@@ -65,19 +59,23 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
       run.environment("ANET_DB_SERVER", "db server hostname")
       run.environment("ANET_DB_NAME","database name")
       ```
+   - PostgreSQL
+     - To re-force gradle to use PostgreSQL you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
+
+      ```java
+      run.environment("DB_DRIVER", "postgresql")
+      ```
 1. Pull the MSSQL Docker image: `./gradlew dockerPullDB`
 1. Create the MSSQL Docker container and the initial database: `./gradlew dockerCreateDB`
 1. Start the MSSQL Docker container: `./gradlew dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew dbMigrate` to build and migrate the database.
    - The database schema is stored in `src/main/resources/migrations.xml`.
 1. Seed the initial data:
-   - SQLite: `cat insertBaseData.sql | ./mssql2sqlite.sh | sqlite3 development.db`
-   - MSSQL: If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and run `insertBaseData.sql` through the GUI or run 'sqlcmd -S <servername> -U <username> -P <password> -d <database name> -i insertBaseData.sql'
+   - If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and load the data.
 1. Run `./gradlew build` to download all dependencies and build the project.
-   - Some tests will fail if you are using SQLite, because it has a bad implementation of some timezone stuff. You'll need to use MSSQL to see all the tests passing.
 
 ### The Base Data Set
-Provided with the ANET source code is the file `insertBaseData.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
+Provided with the ANET source code is the file `insertBaseData-mssql.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
 
 | User | username | organization | position | role |
 |------|----------|--------------|----------|------|
@@ -141,16 +139,16 @@ _Note_: You can run the backend with either `gradle` or with Eclipse. Eclipse do
    - Main Class: `mil.dds.anet.AnetApplication`
    - Program Arguments: `server anet.yml`
    - Environment Variables: These values are used in anet.yml. We set them through environment variables rather than checking them into the git repository to allow each developer to use different settings.
-     - SQLite:
-       - `ANET_DB_DATE_CLASS` : `text`
-       - `ANET_DB_DATE_STRING_FORMAT` : `yyyy-MM-dd hh:mm:ss`
-       - `ANET_DB_URL` : `jdbc:sqlite:development.db`
-       - `ANET_DB_DRIVER` : `org.sqlite.JDBC`
      - MSSQL:
        - `ANET_DB_URL` : `jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]`
        - `ANET_DB_USERNAME` : username to your db
        - `ANET_DB_PASSWORD` : password to your db
        - `ANET_DB_DRIVER` : `com.microsoft.sqlserver.jdbc.SQLServerDriver`
+     - PostgreSQL:
+       - `ANET_DB_URL` : `jdbc:postgresql://[psqlserver hostname]:5432/[dbName]`
+       - `ANET_DB_USERNAME` : username to your db
+       - `ANET_DB_PASSWORD` : password to your db
+       - `ANET_DB_DRIVER` : `org.postgresql.Driver`
 
 ### Server side tests
 1. Start with a clean test-database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`
@@ -161,7 +159,7 @@ _Note_: You can run the backend with either `gradle` or with Eclipse. Eclipse do
 Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
 This driver can either run the tests locally on your system, or remotely via [BrowserStack](https://www.browserstack.com/).
 
-The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
+The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-mssql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
 #### Prerequisites
 1. Start with a clean test-database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`

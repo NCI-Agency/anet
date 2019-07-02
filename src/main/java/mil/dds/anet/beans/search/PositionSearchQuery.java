@@ -4,11 +4,7 @@ import java.util.List;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 
-public class PositionSearchQuery extends AbstractSearchQuery {
-
-  public enum PositionSearchSortBy {
-    CREATED_AT, NAME, CODE
-  }
+public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortBy> {
 
   Boolean matchPersonName;
   String organizationUuid;
@@ -19,10 +15,8 @@ public class PositionSearchQuery extends AbstractSearchQuery {
   PositionStatus status;
   private String authorizationGroupUuid;
 
-  private PositionSearchSortBy sortBy;
-
   public PositionSearchQuery() {
-    super();
+    super(PositionSearchSortBy.NAME);
     this.matchPersonName = false;
   }
 
@@ -88,14 +82,6 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 
   public void setAuthorizationGroupUuid(String authorizationGroupUuid) {
     this.authorizationGroupUuid = authorizationGroupUuid;
-  }
-
-  public PositionSearchSortBy getSortBy() {
-    return sortBy;
-  }
-
-  public void setSortBy(PositionSearchSortBy sortBy) {
-    this.sortBy = sortBy;
   }
 
 }
