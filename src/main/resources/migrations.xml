@@ -2371,7 +2371,7 @@
 			<column name="type" type="int" />
 		</addColumn>
 		<sql dbms="mssql">
-		    UPDATE approvalsteps SET type=1;
+			UPDATE approvalsteps SET type=1;
 		</sql>
 		<!-- Rolling back is not useful -->
 	</changeSet>
@@ -2381,6 +2381,17 @@
 			columnDataType="int"
 			columnName="type"
 			tableName="approvalsteps"/>
+	</changeSet>
+
+	<changeSet id="move_future_to_draft" author="maradragan" dbms="mssql">
+		<sql>
+			UPDATE reports SET state=0 WHERE state=5;
+		</sql>
+		<rollback>
+			<sql>
+				UPDATE reports SET state=5 WHERE engagementDate > CURRENT_TIMESTAMP;
+			</sql>
+		</rollback>
 	</changeSet>
 
 </databaseChangeLog>
