@@ -252,7 +252,7 @@ task dbLoad_psql(dependsOn: "dbLoad_psql_createData", type: com.bmuschko.gradle.
 	group = "database"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
 	targetContainerId { dbContainerName }
-	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "/hostdata/insertBaseData-psql.sql"] ]
+	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "/hostdata/insertBaseData-psql.sql"] as String[] ]
 }
 
 task dbLoad_psql_createData(type: Exec) {
