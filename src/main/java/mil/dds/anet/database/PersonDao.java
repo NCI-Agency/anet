@@ -91,7 +91,8 @@ public class PersonDao extends AnetBaseDao<Person> {
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
-        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+        .bind("role", DaoUtils.getEnumId(p.getRole()))
+        .bind("avatar", this.convertToBlob(p.getAvatar())).execute();
     return p;
   }
 
@@ -104,6 +105,7 @@ public class PersonDao extends AnetBaseDao<Person> {
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, ");
+
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("\"endOfTourDate\" = CAST(:endOfTourDate AS datetime2) ");
@@ -111,19 +113,13 @@ public class PersonDao extends AnetBaseDao<Person> {
       sql.append("\"endOfTourDate\" = :endOfTourDate ");
     }
     sql.append("WHERE uuid = :uuid");
-    Blob avatar = null;
-    try {
-      avatar = this.getDbHandle().getConnection().createBlob();
-      avatar.setBytes(1l, p.getAvatar().getBytes());
-    } catch (SQLException e) {
-      logger.error("Failed to update avatar: ", e);
-    }
 
     return getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus())).bind("avatar", avatar)
-        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+        .bind("status", DaoUtils.getEnumId(p.getStatus()))
+        .bind("role", DaoUtils.getEnumId(p.getRole()))
+        .bind("avatar", this.convertToBlob(p.getAvatar())).execute();
   }
 
   @Override
@@ -237,6 +233,20 @@ public class PersonDao extends AnetBaseDao<Person> {
     return new ForeignKeyFetcher<PersonPositionHistory>()
         .load(context, FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY, personUuid)
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
+  }
+
+  private Blob convertToBlob(String value) {
+    Blob avatar = null;
+    try {
+      avatar = this.getDbHandle().getConnection().createBlob();
+      if (value != null) {
+        avatar.setBytes(1l, value.getBytes());
+      }
+    } catch (SQLException e) {
+      logger.error("Failed to update avatar: ", e);
+    }
+
+    return avatar;
   }
 
 }
