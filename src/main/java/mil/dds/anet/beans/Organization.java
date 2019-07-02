@@ -21,7 +21,8 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Organization extends AbstractAnetBean implements SubscribableObject {
 
-  // pseudo uuid to represent all/top-level organization(s)
+  /** pseudo uuid to represent all/top-level organization(s) */
+  @GraphQLIgnore
   public static final String DUMMY_ORG_UUID = "-1";
 
   public static enum OrganizationStatus {

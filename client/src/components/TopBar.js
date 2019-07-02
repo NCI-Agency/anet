@@ -24,7 +24,10 @@ class BaseTopBar extends Component {
     currentUser: PropTypes.instanceOf(Person),
     appSettings: PropTypes.object,
     topbarHeight: PropTypes.func.isRequired,
-    resetPages: PropTypes.func.isRequired
+    resetPages: PropTypes.func.isRequired,
+    minimalHeader: PropTypes.bool,
+    toggleMenuAction: PropTypes.func,
+    location: PropTypes.object
   }
 
   constructor(props) {

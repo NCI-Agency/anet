@@ -13,7 +13,7 @@ import PEOPLE_ICON from "resources/people.png"
 
 export default class AssignPersonModal extends Component {
   static propTypes = {
-    position: PropTypes.object.isRequired,
+    position: PropTypes.instanceOf(Position).isRequired,
     showModal: PropTypes.bool,
     onCancel: PropTypes.func.isRequired,
     onSuccess: PropTypes.func.isRequired

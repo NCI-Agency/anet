@@ -17,7 +17,9 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Task extends AbstractAnetBean implements SubscribableObject {
 
-  public static final String DUMMY_TASK_UUID = "-1"; // pseudo uuid to represent 'no task'
+  /** pseudo uuid to represent 'no task' */
+  @GraphQLIgnore
+  public static final String DUMMY_TASK_UUID = "-1";
 
   public enum TaskStatus {
     ACTIVE, INACTIVE

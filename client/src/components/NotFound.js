@@ -1,6 +1,11 @@
+import PropTypes from "prop-types"
 import React, { PureComponent } from "react"
 
 export default class NotFound extends PureComponent {
+  static propTypes = {
+    text: PropTypes.string
+  }
+
   componentDidMount() {
     document.getElementsByTagName("html")[0].classList.add("not-found")
   }

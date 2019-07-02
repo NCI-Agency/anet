@@ -20,6 +20,15 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 
+const Coordinate = ({ coord }) => {
+  const parsedCoord =
+    typeof coord === "number" ? Math.round(coord * 1000) / 1000 : "?"
+  return <span>{parsedCoord}</span>
+}
+Coordinate.propTypes = {
+  coord: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+}
+
 class BaseLocationShow extends Page {
   static propTypes = {
     ...pagePropTypes,
@@ -77,14 +86,6 @@ class BaseLocationShow extends Page {
     const { currentUser, ...myFormProps } = this.props
 
     const canEdit = currentUser.isSuperUser()
-
-    function Coordinate(props) {
-      const coord =
-        typeof props.coord === "number"
-          ? Math.round(props.coord * 1000) / 1000
-          : "?"
-      return <span>{coord}</span>
-    }
 
     return (
       <Formik enableReinitialize initialValues={location} {...myFormProps}>

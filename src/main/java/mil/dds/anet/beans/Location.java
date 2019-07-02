@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.utils.Utils;
@@ -7,7 +8,9 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Location extends AbstractAnetBean implements SubscribableObject {
 
-  public static final String DUMMY_LOCATION_UUID = "-1"; // pseudo uuid to represent 'no location'
+  /** pseudo uuid to represent 'no location' */
+  @GraphQLIgnore
+  public static final String DUMMY_LOCATION_UUID = "-1";
 
   public static enum LocationStatus {
     ACTIVE, INACTIVE

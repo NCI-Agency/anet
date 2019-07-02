@@ -1,4 +1,4 @@
-import { SEARCH_OBJECT_TYPES } from "actions"
+import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API, { Settings } from "api"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
@@ -8,7 +8,7 @@ import Messages from "components/Messages"
 import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import Page, {
   jumpToTop,
-  mapDispatchToProps,
+  mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
@@ -34,6 +34,7 @@ import { deserializeQueryParams } from "searchUtils"
 class BaseHome extends Page {
   static propTypes = {
     ...pagePropTypes,
+    setSearchQuery: PropTypes.func.isRequired,
     currentUser: PropTypes.instanceOf(Person)
   }
 
@@ -394,6 +395,14 @@ class BaseHome extends Page {
         this.setState({ success: null, error: error })
         jumpToTop()
       })
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  return {
+    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+    ...pageDispatchToProps
   }
 }
 

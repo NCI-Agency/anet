@@ -96,6 +96,16 @@ class BaseOrganizationTasks extends Component {
     )
   }
 }
+BaseOrganizationTasks.propTypes = {
+  organization: PropTypes.object.isRequired,
+  tasks: PropTypes.shape({
+    totalCount: PropTypes.number,
+    pageNum: PropTypes.number,
+    pageSize: PropTypes.number,
+    list: PropTypes.array.isRequired
+  }),
+  goToPage: PropTypes.func
+}
 
 const OrganizationTasks = props => (
   <AppContext.Consumer>

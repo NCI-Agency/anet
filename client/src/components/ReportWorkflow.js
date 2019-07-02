@@ -33,6 +33,9 @@ const ApprovalStepModalStatus = ({ action }) => {
   }
   return <span className="label pending">Pending</span>
 }
+ApprovalStepModalStatus.propTypes = {
+  action: PropTypes.object.isRequired
+}
 
 class ApprovalStepModal extends Component {
   static propTypes = {
@@ -91,6 +94,9 @@ const ActionStatus = ({ action }) => {
     <div className="action-status">{ACTION_TYPE_DETAILS[action.type].text}</div>
   )
 }
+ActionStatus.propTypes = {
+  action: PropTypes.object.isRequired
+}
 
 const ActionButton = ({ action }) => {
   const step = action.step
@@ -104,6 +110,9 @@ const ActionButton = ({ action }) => {
       </span>
     </Button>
   )
+}
+ActionButton.propTypes = {
+  action: PropTypes.object.isRequired
 }
 
 const ActionDetails = ({ action }) => {
@@ -125,6 +134,9 @@ const ActionDetails = ({ action }) => {
   }
   return null
 }
+ActionDetails.propTypes = {
+  action: PropTypes.object.isRequired
+}
 
 const ReportAction = ({ action }) => {
   return (
@@ -135,6 +147,9 @@ const ReportAction = ({ action }) => {
     </div>
   )
 }
+ReportAction.propTypes = {
+  action: PropTypes.object.isRequired
+}
 
 const CompactReportAction = ({ action }) => {
   return (
@@ -142,6 +157,9 @@ const CompactReportAction = ({ action }) => {
       <ActionButton action={action} />
     </div>
   )
+}
+CompactReportAction.propTypes = {
+  action: PropTypes.object.isRequired
 }
 
 export const ReportFullWorkflow = ({ report }) => {
@@ -156,6 +174,9 @@ export const ReportFullWorkflow = ({ report }) => {
     </Fieldset>
   )
 }
+ReportFullWorkflow.propTypes = {
+  report: PropTypes.object.isRequired
+}
 
 export const ReportCompactWorkflow = ({ report }) => {
   return (
@@ -168,4 +189,7 @@ export const ReportCompactWorkflow = ({ report }) => {
       })}
     </Fieldset>
   )
+}
+ReportCompactWorkflow.propTypes = {
+  report: PropTypes.object.isRequired
 }
