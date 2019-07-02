@@ -21,9 +21,13 @@ export default class TaskTable extends Component {
       list: PropTypes.array.isRequired
     }),
     goToPage: PropTypes.func,
-    optional: PropTypes.bool
+    optional: PropTypes.bool,
+    showOrganization: PropTypes.bool
   }
-
+  static defaultProps = {
+    showDelete: false,
+    showOrganization: false
+  }
   render() {
     let tasks
     let numPages = 0

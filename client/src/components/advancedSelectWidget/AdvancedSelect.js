@@ -25,6 +25,12 @@ const AdvancedSelectTarget = ({ overlayRef }) => (
     />
   </Row>
 )
+AdvancedSelectTarget.propTypes = {
+  overlayRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+  ])
+}
 
 const FilterList = props => {
   const { items, currentFilter, handleOnClick } = props
@@ -43,18 +49,19 @@ const FilterList = props => {
     </ul>
   )
 }
+FilterList.propTypes = {
+  items: PropTypes.object,
+  currentFilter: PropTypes.string,
+  handleOnClick: PropTypes.func
+}
 
 const SelectFilterInputField = props => {
-  const { items, className, handleOnChange } = props
+  const { items, handleOnChange } = props
   return (
     <React.Fragment>
       <p style={{ padding: "5px 0" }}>
         Filter:
-        <select
-          onChange={handleOnChange}
-          className={className}
-          style={{ marginLeft: "5px" }}
-        >
+        <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
           {Object.keys(items).map(filterType => (
             <option key={filterType} value={filterType}>
               {items[filterType].label}
@@ -65,11 +72,16 @@ const SelectFilterInputField = props => {
     </React.Fragment>
   )
 }
+SelectFilterInputField.propTypes = {
+  items: PropTypes.object,
+  handleOnChange: PropTypes.func
+}
 
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
   fieldLabel: PropTypes.string, // input field label
   placeholder: PropTypes.string, // input field placeholder
+  searchTerms: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
   overlayTableClassName: PropTypes.string,
@@ -100,7 +112,8 @@ export const propTypes = {
   extraAddon: PropTypes.object,
   handleAddItem: PropTypes.func,
   handleRemoveItem: PropTypes.func,
-  smallOverlay: PropTypes.bool // set to true if you want to display the filters on top
+  smallOverlay: PropTypes.bool, // set to true if you want to display the filters on top
+  vertical: PropTypes.bool
 }
 
 export default class AdvancedSelect extends Component {
@@ -171,7 +184,6 @@ export default class AdvancedSelect extends Component {
     } = this.props
     const {
       overlayTableClassName,
-      overlayTable,
       overlayColumns,
       overlayRenderRow,
       filterDefs,
@@ -222,11 +234,10 @@ export default class AdvancedSelect extends Component {
             <ContainerDimensions>
               {({ width }) => {
                 const hasLeftNav =
-                  width >= MOBILE_WIDTH &&
-                  Object.keys(this.props.filterDefs).length > 1
+                  width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
                 const hasTopNav =
                   (width < MOBILE_WIDTH || smallOverlay) &&
-                  Object.keys(this.props.filterDefs).length > 1
+                  Object.keys(filterDefs).length > 1
                 return (
                   <Row className="border-between">
                     {hasLeftNav && (

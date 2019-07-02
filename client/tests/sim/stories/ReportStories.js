@@ -8,9 +8,12 @@ const populateReport = async function(report, user) {
   const emptyArray = () => {
     return []
   }
+
+  /* eslint-disable no-unused-vars */
   const emptyObject = () => {
     return {}
   }
+  /* eslint-enable no-unused-vars */
 
   const activeLocations = (await runGQL(user, {
     query: `

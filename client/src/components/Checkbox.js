@@ -1,3 +1,4 @@
+import PropTypes from "prop-types"
 import React from "react"
 
 const Checkbox = props => {
@@ -14,6 +15,15 @@ const Checkbox = props => {
       </label>
     </div>
   )
+}
+Checkbox.propTypes = {
+  checked: PropTypes.bool,
+  onChange: PropTypes.func,
+  label: PropTypes.string
+}
+Checkbox.defaultProps = {
+  checked: false,
+  label: ""
 }
 
 export default Checkbox

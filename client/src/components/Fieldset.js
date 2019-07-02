@@ -5,6 +5,7 @@ import { Element } from "react-scroll"
 
 export default class Fieldset extends Component {
   static propTypes = {
+    id: PropTypes.string,
     title: PropTypes.node,
     action: PropTypes.node,
     style: PropTypes.object

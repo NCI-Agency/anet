@@ -4,7 +4,8 @@ import ReactDOM from "react-dom"
 
 export default class SubNav extends Component {
   static propTypes = {
-    subnavElemId: PropTypes.string.isRequired
+    subnavElemId: PropTypes.string.isRequired,
+    children: PropTypes.node
   }
 
   render() {

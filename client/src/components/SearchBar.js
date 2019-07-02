@@ -1,5 +1,4 @@
 import {
-  resetPages,
   resetPagination,
   SEARCH_OBJECT_LABELS,
   SEARCH_OBJECT_TYPES,
@@ -7,6 +6,7 @@ import {
 } from "actions"
 import autobind from "autobind-decorator"
 import AdvancedSearch from "components/AdvancedSearch"
+import { routerRelatedPropTypes } from "components/Page"
 import searchFilters from "components/SearchFilters"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -25,14 +25,15 @@ import SEARCH_ICON from "resources/search-alt.png"
 class SearchBar extends Component {
   static propTypes = {
     setSearchQuery: PropTypes.func.isRequired,
+    onSearchGoToSearchPage: PropTypes.bool,
     query: PropTypes.shape({
       text: PropTypes.string,
       filters: PropTypes.any,
       objectType: PropTypes.string
     }),
     searchObjectTypes: PropTypes.array,
-    resetPages: PropTypes.func,
-    resetPagination: PropTypes.func
+    resetPagination: PropTypes.func,
+    ...routerRelatedPropTypes
   }
 
   advancedSearchLink = React.createRef()
@@ -177,7 +178,6 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   setSearchQuery: searchTerms => dispatch(setSearchQuery(searchTerms)),
-  resetPages: () => dispatch(resetPages()),
   resetPagination: () => dispatch(resetPagination())
 })
 

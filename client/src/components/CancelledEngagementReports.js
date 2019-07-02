@@ -17,8 +17,6 @@ import { Overlay, Popover } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 
-const d3 = require("d3")
-
 const BarChartWithLoader = connect(
   null,
   mapDispatchToProps
