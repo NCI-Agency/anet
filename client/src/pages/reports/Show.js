@@ -59,8 +59,8 @@ class BaseReportShow extends Page {
 
   get reportType() {
     return this.state.report.isFuture()
-      ? "report over an upcoming engagement"
-      : "report over a past engagement"
+      ? "report about an upcoming engagement"
+      : "report about a past engagement"
   }
 
   fetchData(props) {
@@ -191,17 +191,17 @@ class BaseReportShow extends Page {
     // Warn admins when they try to approve their own report
     const warnApproveOwnReport = canApprove && isAuthor
 
-    // Authors can edit in draft mode (also future engagements) or rejected mode
-    let canEdit =
-      isAuthor && (report.isDraft() || report.isFuture() || report.isRejected())
-    // Approvers can edit.
+    // Authors can edit if report is not published
+    let canEdit = isAuthor && !report.isPublished()
+    // Approvers can edit
     canEdit = canEdit || canApprove
 
     // Only the author can submit when report is in draft or rejected AND author has a position
-    const hasAssignedPosition = currentUser.hasAssignedPosition()
     const hasActivePosition = currentUser.hasActivePosition()
     const canSubmit =
       isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
+
+    const hasAssignedPosition = currentUser.hasAssignedPosition()
 
     // Anybody can email a report as long as it's not in draft.
     const canEmail = !report.isDraft()

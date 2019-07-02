@@ -215,18 +215,18 @@ public class ReportResource {
     if (existing == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
+    // Certain properties may not be changed through an update request
     r.setState(existing.getState());
     r.setApprovalStepUuid(existing.getApprovalStepUuid());
     r.setAuthorUuid(existing.getAuthorUuid());
     assertCanUpdateReport(r, editor);
 
-    if (ReportState.FUTURE.equals(r.getState())
-        && (r.getEngagementDate() == null || r.getEngagementDate().isBefore(tomorrow()))) {
-      // This catches a user editing the report to change date back to the past.
+    boolean isAuthor = Objects.equals(r.getAuthorUuid(), editor.getUuid());
+    // State should not change when report is being edited by an approver
+    // State should change to draft when the report is being edited by its author
+    if (isAuthor) {
       r.setState(ReportState.DRAFT);
-    } else if (ReportState.FUTURE.equals(r.getState()) && r.getCancelledReason() != null) {
-      // Cancelled future engagements become draft.
-      r.setState(ReportState.DRAFT);
+      r.setApprovalStep(null);
     }
 
     // If there is a change to the primary advisor, change the advisor Org.
@@ -374,28 +374,30 @@ public class ReportResource {
 
   private void assertCanUpdateReport(Report report, Person editor) {
     String permError = "You do not have permission to edit this report. ";
+    boolean isAuthor = Objects.equals(report.getAuthorUuid(), editor.getUuid());
     switch (report.getState()) {
       case DRAFT:
       case REJECTED:
       case FUTURE:
+      case APPROVED:
+      case CANCELLED:
         // Must be the author
-        if (!Objects.equals(report.getAuthorUuid(), editor.getUuid())) {
+        if (!isAuthor) {
           throw new WebApplicationException(permError + "Must be the author of this report.",
               Status.FORBIDDEN);
         }
         break;
       case PENDING_APPROVAL:
-        // Only the approver
+        // Must be the author or the approver
         boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
             report.getApprovalStepUuid());
-        if (!canApprove) {
-          throw new WebApplicationException(permError + "Must be the current approver.",
+        if (!isAuthor && !canApprove) {
+          throw new WebApplicationException(
+              permError + "Must be the author of this report or the current approver.",
               Status.FORBIDDEN);
         }
         break;
-      case APPROVED:
       case PUBLISHED:
-      case CANCELLED:
         AnetAuditLogger.log(
             "attempt to edit published report {} by editor {} (uuid: {}) was forbidden",
             report.getUuid(), editor.getName(), editor.getUuid());
@@ -465,10 +467,12 @@ public class ReportResource {
     try {
       if (isFutureEngagement) {
         steps = engine.getPlanningApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+        throwExceptionNoPlanningApprovalSteps(steps);
       } else {
         steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+        throwExceptionNoApprovalSteps(steps);
       }
-      throwExceptionNoApprovalSteps(steps);
+
     } catch (InterruptedException | ExecutionException e) {
       throw new WebApplicationException("failed to load Organization for Author", e);
     }
@@ -504,13 +508,26 @@ public class ReportResource {
    */
   private void throwExceptionNoApprovalSteps(List<ApprovalStep> steps) {
     if (Utils.isEmptyOrNull(steps)) {
-      final String supportEmailAddr = (String) this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
       final String messageBody =
           "Advisor organization is missing a report approval chain. In order to have an approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
-      final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody
-          : String.format("%s at %s", messageBody, supportEmailAddr);
-      throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
+      throwException(messageBody);
     }
+  }
+
+
+  private void throwExceptionNoPlanningApprovalSteps(List<ApprovalStep> steps) {
+    if (Utils.isEmptyOrNull(steps)) {
+      final String messageBody =
+          "Advisor organization is missing a planning report approval chain. In order to have a planning approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
+      throwException(messageBody);
+    }
+  }
+
+  private void throwException(String messageBody) {
+    final String supportEmailAddr = (String) this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
+    final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody
+        : String.format("%s at %s", messageBody, supportEmailAddr);
+    throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
   }
 
   private void sendApprovalNeededEmail(Report r) {
