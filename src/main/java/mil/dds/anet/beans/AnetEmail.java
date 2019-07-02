@@ -1,10 +1,9 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-
-import io.leangen.graphql.annotations.GraphQLIgnore;
 import mil.dds.anet.emails.AnetEmailAction;
 
 public class AnetEmail {
