@@ -1,6 +1,7 @@
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import { routerRelatedPropTypes } from "components/Page"
 import searchFilters, {
   POSTITION_ORGANIZATION_FILTER_KEY,
   POSTITION_POSITION_TYPE_FILTER_KEY
@@ -56,7 +57,8 @@ class AdvancedSearch extends Component {
     }),
     onSearchGoToSearchPage: PropTypes.bool,
     searchObjectTypes: PropTypes.array,
-    text: PropTypes.string
+    text: PropTypes.string,
+    ...routerRelatedPropTypes
   }
 
   @autobind
@@ -123,7 +125,7 @@ class AdvancedSearch extends Component {
   }
 
   render() {
-    const { objectType, text, filters } = this.state
+    const { objectType, filters } = this.state
     // console.log("RENDER AdvancedSearch", objectType, text, filters)
     const filterDefs = this.state.objectType
       ? this.ALL_FILTERS[this.state.objectType].filters

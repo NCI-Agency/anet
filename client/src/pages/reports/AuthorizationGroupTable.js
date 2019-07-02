@@ -1,32 +1,41 @@
+import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
-const AuthorizationGroupTable = props => (
-  <Table striped condensed hover responsive>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        {props.showDelete && <th />}
-      </tr>
-    </thead>
-    <tbody>
-      {props.authorizationGroups.map((ag, agIndex) => (
-        <tr key={ag.uuid}>
-          <td>{ag.name}</td>
-          <td>{ag.description}</td>
-          {props.showDelete && (
-            <td onClick={() => props.onDelete(ag)}>
-              <span style={{ cursor: "pointer" }}>
-                <img src={REMOVE_ICON} height={14} alt="Remove group" />
-              </span>
-            </td>
-          )}
+const AuthorizationGroupTable = props => {
+  const { authorizationGroups, showDelete, onDelete } = props
+  return (
+    <Table striped condensed hover responsive>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          {showDelete && <th />}
         </tr>
-      ))}
-    </tbody>
-  </Table>
-)
+      </thead>
+      <tbody>
+        {authorizationGroups.map((ag, agIndex) => (
+          <tr key={ag.uuid}>
+            <td>{ag.name}</td>
+            <td>{ag.description}</td>
+            {showDelete && (
+              <td onClick={() => onDelete(ag)}>
+                <span style={{ cursor: "pointer" }}>
+                  <img src={REMOVE_ICON} height={14} alt="Remove group" />
+                </span>
+              </td>
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+}
+AuthorizationGroupTable.propTypes = {
+  authorizationGroups: PropTypes.array.isRequired,
+  showDelete: PropTypes.bool,
+  onDelete: PropTypes.func
+}
 
 export default AuthorizationGroupTable

@@ -1,4 +1,4 @@
-import { SEARCH_OBJECT_TYPES } from "actions"
+import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API, { Settings } from "api"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
@@ -9,7 +9,7 @@ import Messages, { setMessages } from "components/Messages"
 import Page, {
   AnchorLink,
   jumpToTop,
-  mapDispatchToProps,
+  mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -38,6 +38,7 @@ import AuthorizationGroupTable from "./AuthorizationGroupTable"
 class BaseReportShow extends Page {
   static propTypes = {
     ...pagePropTypes,
+    setSearchQuery: PropTypes.func.isRequired,
     currentUser: PropTypes.instanceOf(Person)
   }
 
@@ -199,7 +200,8 @@ class BaseReportShow extends Page {
 
     // Anybody can email a report as long as it's not in draft.
     const canEmail = !report.isDraft()
-
+    const hasAuthorizationGroups =
+      report.authorizationGroups && report.authorizationGroups.length > 0
     return (
       <Formik
         enableReinitialize
@@ -483,12 +485,11 @@ class BaseReportShow extends Page {
                         __html: report.reportSensitiveInformation.text
                       }}
                     />
-                    {(report.authorizationGroups &&
-                        report.authorizationGroups.length > 0 && (
-                        <div>
+                    {(hasAuthorizationGroups && (
+                      <div>
                         <h5>Authorized groups:</h5>
                         <AuthorizationGroupTable
-                            authorizationGroups={values.authorizationGroups}
+                          authorizationGroups={values.authorizationGroups}
                         />
                       </div>
                     )) || <h5>No groups are authorized!</h5>}
@@ -1118,6 +1119,14 @@ class BaseReportShow extends Page {
         </ul>
       </Alert>
     )
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  return {
+    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+    ...pageDispatchToProps
   }
 }
 

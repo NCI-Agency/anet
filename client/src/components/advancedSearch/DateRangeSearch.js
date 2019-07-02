@@ -39,10 +39,10 @@ const dateRangeValue = PropTypes.shape({
 
 export default class DateRangeSearch extends Component {
   static propTypes = {
+    queryKey: PropTypes.string.isRequired,
+    onChange: PropTypes.func,
     onlyBetween: PropTypes.bool,
     value: PropTypes.oneOfType([dateRangeValue, PropTypes.string]),
-
-    // Passed by the SearchFilterDisplay row
     asFormField: PropTypes.bool
   }
 

@@ -494,30 +494,22 @@ and for WMTS-type providers:
 
 If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
 
-1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `maps`. Inside that, create a directory called `imagery`. 
-1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `maps/imagery/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
-1. Edit the `bin/anet.bat` (Windows), or `bin/anet` (Linux/Mac) file. Find the line that sets the `CLASSPATH` variable. (It's really long and lists a bunch of .jar files).  Right after that line, add the line: 
-
-Windows (bin/anet.bat):
+1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`. 
+```yaml
+assets:
+  overrides:
+    /imagery: imagery
 ```
-set CLASSPATH=%APP_HOME%\maps\;%CLASSPATH%
-
-```
-Linux/Mac (bin/anet): 
-```
-CLASSPATH=$APP_HOME/maps/:$CLASSPATH
-```
-
-This will put the imagery folder on the server's classpath.  ANET looks for a folder called imagery and will serve those tiles up on the `/imagery` path. 
+1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
 1. To use this new tile source, add under `baseLayers`:
 ```yaml
       - name: OSM
         default: true
         type: tile
-        url: "https://<your-anet-server-url>/imagery/{z}/{x}/{y}.png"
+        url: "/imagery/street/{z}/{x}/{y}.png"
 ```
 
-Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/0/0/0.png` and hopefully seeing a tile appear. 
+Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/street/0/0/0.png` and hopefully seeing a tile appear.
 
 # How to configure KML and NVG support
 
