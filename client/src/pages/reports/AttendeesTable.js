@@ -1,5 +1,6 @@
 import LinkTo from "components/LinkTo"
 import { Person } from "models"
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
@@ -9,11 +10,18 @@ const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
 )
 
-const RemoveButton = props => (
-  <Button bsStyle="link" title={props.title} onClick={props.handleOnClick}>
-    <RemoveIcon />
-  </Button>
-)
+const RemoveButton = props => {
+  const { title, handleOnClick } = props
+  return (
+    <Button bsStyle="link" title={title} onClick={handleOnClick}>
+      <RemoveIcon />
+    </Button>
+  )
+}
+RemoveButton.propTypes = {
+  title: PropTypes.string,
+  handleOnClick: PropTypes.func
+}
 
 const AttendeeDividerRow = () => (
   <tr className="attendee-divider-row">
@@ -40,6 +48,10 @@ const TableHeader = props => {
     </thead>
   )
 }
+TableHeader.propTypes = {
+  showDelete: PropTypes.bool,
+  hide: PropTypes.bool
+}
 
 const TableBody = props => {
   const { attendees, handleAttendeeRow, role, enableDivider } = props
@@ -52,26 +64,55 @@ const TableBody = props => {
     </tbody>
   )
 }
+TableBody.propTypes = {
+  attendees: PropTypes.array,
+  handleAttendeeRow: PropTypes.func,
+  role: PropTypes.string,
+  enableDivider: PropTypes.bool
+}
 
-const TableContainer = props => (
-  <Table striped condensed hover responsive className={props.className}>
-    {props.children}
-  </Table>
-)
+const TableContainer = props => {
+  const { className, children } = props
+  return (
+    <Table striped condensed hover responsive className={className}>
+      {children}
+    </Table>
+  )
+}
+TableContainer.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node
+}
 
-const RadioButton = ({ person, disabled, handleOnChange }) => (
-  <Radio
-    name={`primaryAttendee${person.role}`}
-    className="primary"
-    checked={person.primary}
-    disabled={disabled}
-    onChange={() => !disabled && handleOnChange(person)}
-  >
-    {person.primary && <Label bsStyle="primary">Primary</Label>}
-  </Radio>
-)
+const RadioButton = props => {
+  const { person, disabled, handleOnChange } = props
+  return (
+    <Radio
+      name={`primaryAttendee${person.role}`}
+      className="primary"
+      checked={person.primary}
+      disabled={disabled}
+      onChange={() => !disabled && handleOnChange(person)}
+    >
+      {person.primary && <Label bsStyle="primary">Primary</Label>}
+    </Radio>
+  )
+}
+RadioButton.propTypes = {
+  person: PropTypes.object,
+  disabled: PropTypes.bool,
+  handleOnChange: PropTypes.func
+}
 
 export default class AttendeesTable extends Component {
+  static propTypes = {
+    attendees: PropTypes.array,
+    disabled: PropTypes.bool,
+    onChange: PropTypes.func,
+    showDelete: PropTypes.bool,
+    onDelete: PropTypes.func
+  }
+
   render() {
     const { attendees } = this.props
     return (

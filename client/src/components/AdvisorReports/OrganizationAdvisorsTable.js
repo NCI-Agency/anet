@@ -121,9 +121,12 @@ class OrganizationAdvisorsTable extends Component {
 }
 
 OrganizationAdvisorsTable.propTypes = {
+  data: PropTypes.array,
   columnGroups: PropTypes.array.isRequired,
   filterText: PropTypes.string,
   onRowSelection: PropTypes.func
 }
-
+OrganizationAdvisorsTable.defaultProps = {
+  data: []
+}
 export default OrganizationAdvisorsTable

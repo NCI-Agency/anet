@@ -60,7 +60,7 @@ test("Draft and submit a report", async t => {
     $principalPrimaryInput,
     $principalName,
     $principalPosition,
-    $principalLocation,
+    /* eslint-disable no-unused-vars */ $principalLocation /* eslint-enable no-unused-vars */,
     $principalOrg
   ] = await $$(".principalAttendeesTable tbody tr:last-child td")
 
@@ -194,10 +194,12 @@ test("Publish report chain", async t => {
   await t.context.get("/", "erin")
   let $homeTileErin = await $$(".home-tile")
   let [
-    $draftReportsErin,
+    /* eslint-disable no-unused-vars */ $draftReportsErin /* eslint-enable no-unused-vars */,
     $reportsPendingErin,
+    /* eslint-disable no-unused-vars */
     $orgReportsErin,
     $upcomingEngagementsErin
+    /* eslint-enable no-unused-vars */
   ] = $homeTileErin
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
   await $reportsPendingErin.click()
@@ -214,10 +216,12 @@ test("Publish report chain", async t => {
   await t.context.get("/", "jacob")
   let $homeTileJacob = await $$(".home-tile")
   let [
-    $draftReportsJacob,
+    /* eslint-disable no-unused-vars */ $draftReportsJacob /* eslint-enable no-unused-vars */,
     $reportsPendingJacob,
+    /* eslint-disable no-unused-vars */
     $orgReportsJacob,
     $upcomingEngagementsJacob
+    /* eslint-enable no-unused-vars */
   ] = $homeTileJacob
   await t.context.driver.wait(until.elementIsVisible($reportsPendingJacob))
   await $reportsPendingJacob.click()
@@ -241,10 +245,12 @@ test("Publish report chain", async t => {
   await t.context.get("/", "rebecca")
   let $homeTile = await $$(".home-tile")
   let [
-    $draftReports,
+    /* eslint-disable no-unused-vars */ $draftReports /* eslint-enable no-unused-vars */,
     $reportsPending,
+    /* eslint-disable no-unused-vars */
     $orgReports,
     $upcomingEngagements
+    /* eslint-enable no-unused-vars */
   ] = $homeTile
   await t.context.driver.wait(until.elementIsVisible($reportsPending))
   await $reportsPending.click()
@@ -266,11 +272,13 @@ test("Publish report chain", async t => {
   await t.context.get("/", "arthur")
   let $homeTileArthur = await $$(".home-tile")
   let [
+    /* eslint-disable no-unused-vars */
     $draftReportsArthur,
     $reportsPendingAll,
     $reportsPendingArthur,
     $upcomingEngagementsArthur,
     $reportsSensitiveInfo,
+    /* eslint-enable no-unused-vars */
     $approvedReports
   ] = $homeTileArthur
   await t.context.driver.wait(until.elementIsVisible($approvedReports))
@@ -574,7 +582,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     $advisorPrimaryCheckbox,
     $advisorName,
     $advisorPosition,
-    $advisorLocation,
+    /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,
     $advisorOrg
   ] = await $$(".advisorAttendeesTable tbody tr:first-child td")
 

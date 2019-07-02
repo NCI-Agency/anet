@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,18 +13,22 @@ public class AnetEmail {
   private Instant createdAt;
   private String comment;
 
+  @GraphQLIgnore
   public Integer getId() {
     return id;
   }
 
+  @GraphQLIgnore
   public void setId(Integer id) {
     this.id = id;
   }
 
+  @GraphQLIgnore
   public AnetEmailAction getAction() {
     return action;
   }
 
+  @GraphQLIgnore
   public void setAction(AnetEmailAction action) {
     this.action = action;
   }

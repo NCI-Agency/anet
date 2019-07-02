@@ -12,7 +12,8 @@ export default class TriggerableConfirm extends Component {
     confirmText: PropTypes.string,
     cancelText: PropTypes.string,
     bsStyle: PropTypes.string,
-    buttonLabel: PropTypes.string
+    buttonLabel: PropTypes.string,
+    buttonRef: PropTypes.object
   }
 
   render() {
@@ -24,6 +25,7 @@ export default class TriggerableConfirm extends Component {
       cancelText,
       bsStyle,
       buttonLabel,
+      buttonRef,
       ...otherProps
     } = this.props
 
@@ -37,11 +39,7 @@ export default class TriggerableConfirm extends Component {
         dialogClassName="react-confirm-bootstrap-modal"
         confirmBSStyle="primary"
       >
-        <Button
-          bsStyle={bsStyle}
-          {...otherProps}
-          ref={input => (this.buttonRef = input)}
-        >
+        <Button bsStyle={bsStyle} {...otherProps} ref={this.props.buttonRef}>
           {buttonLabel}
         </Button>
       </Confirm>
