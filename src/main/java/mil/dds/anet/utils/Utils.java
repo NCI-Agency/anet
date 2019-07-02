@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -335,5 +336,12 @@ public class Utils {
             && domainName.endsWith(wildcardDomain.substring(1)));
 
     return isWhitelistedEmail || isValidWildcardDomain;
+  }
+
+  // Returns an instant representing the very end of today.
+  // Used to determine if a date is tomorrow or later.
+  public static Instant endOfToday() {
+    return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59)
+        .withSecond(59).withNano(999999999).toInstant();
   }
 }

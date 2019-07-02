@@ -112,13 +112,6 @@ public class ReportResource {
     return r;
   }
 
-  // Returns an instant representing the very end of today.
-  // Used to determine if a date is tomorrow or later.
-  private Instant tomorrow() {
-    return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59)
-        .withSecond(59).withNano(999999999).toInstant();
-  }
-
   @GraphQLMutation(name = "createReport")
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
@@ -463,16 +456,14 @@ public class ReportResource {
       throw new WebApplicationException("failed to load Organization for Author", e);
     }
     List<ApprovalStep> steps = null;
-    Boolean isFutureEngagement = r.loadIsFutureEngagement();
     try {
-      if (isFutureEngagement) {
+      if (r.isFutureEngagement()) {
         steps = engine.getPlanningApprovalStepsForOrg(engine.getContext(), orgUuid).get();
         throwExceptionNoPlanningApprovalSteps(steps);
       } else {
         steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
         throwExceptionNoApprovalSteps(steps);
       }
-
     } catch (InterruptedException | ExecutionException e) {
       throw new WebApplicationException("failed to load Organization for Author", e);
     }
@@ -735,15 +726,15 @@ public class ReportResource {
     logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // Only admin may publish a report
-    if (!AuthUtils.isAdmin(user)) {
+    // Only admin may publish a report, and only for non future engagements
+    if (!AuthUtils.isAdmin(user) || r.isFutureEngagement()) {
       logger.info("User {} cannot publish report UUID {}", user.getUuid(), r.getUuid());
       throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
     }
 
     final int numRows = dao.publish(r, user);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
+      throw new WebApplicationException("Couldn't process report publication", Status.NOT_FOUND);
     }
 
     AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());

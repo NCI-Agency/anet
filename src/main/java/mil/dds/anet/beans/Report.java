@@ -72,8 +72,6 @@ public class Report extends AbstractAnetBean {
   private List<AuthorizationGroup> authorizationGroups;
   private List<ReportAction> workflow;
 
-  private Boolean isFutureEngagement;
-
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
       @GraphQLRootContext Map<String, Object> context) {
@@ -493,8 +491,7 @@ public class Report extends AbstractAnetBean {
         return CompletableFuture.completedFuture(workflow);
       } else {
         CompletableFuture<List<ApprovalStep>> w;
-        // FIXME: change the way we check isFutureEngagement
-        if (loadIsFutureEngagement()) {
+        if (isFutureEngagement()) {
           w = getPlanningWorkflowForOrg(context, engine, getAdvisorOrgUuid());
         } else {
           w = getWorkflowForOrg(context, engine, getAdvisorOrgUuid());
@@ -504,8 +501,7 @@ public class Report extends AbstractAnetBean {
             final String defaultOrgUuid = engine.getDefaultOrgUuid();
             if (getAdvisorOrgUuid() == null
                 || !Objects.equals(getAdvisorOrgUuid(), defaultOrgUuid)) {
-              // FIXME: change the way we check isFutureEngagement
-              if (loadIsFutureEngagement()) {
+              if (isFutureEngagement()) {
                 return getDefaultPlanningWorkflow(context, engine, defaultOrgUuid);
               } else {
                 return getDefaultWorkflow(context, engine, defaultOrgUuid);
@@ -664,24 +660,9 @@ public class Report extends AbstractAnetBean {
     return authorizationGroups;
   }
 
-  // Returns an instant representing the very end of today.
-  // Used to determine if a date is tomorrow or later.
-  private Instant tomorrow() {
-    return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59)
-        .withSecond(59).withNano(999999999).toInstant();
-  }
-
-  @GraphQLQuery(name = "isFutureEngagement")
-  public synchronized Boolean loadIsFutureEngagement() {
-    return engagementDate != null && engagementDate.isAfter(tomorrow());
-  }
-
-  public Boolean getIsFutureEngagement() {
-    return isFutureEngagement;
-  }
-
-  public void setIsFutureEngagement(Boolean isFutureEngagement) {
-    this.isFutureEngagement = isFutureEngagement;
+  @GraphQLIgnore
+  public boolean isFutureEngagement() {
+    return engagementDate != null && engagementDate.isAfter(Utils.endOfToday());
   }
 
   @Override
