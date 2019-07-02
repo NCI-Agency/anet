@@ -113,7 +113,7 @@ class BasePersonForm extends Component {
     currentAvatar: this.props.initialValues.avatar
   }
 
-  onAvatarUpdate = (updatedAvatar) => {
+  onAvatarUpdate = updatedAvatar => {
     this.setState({ currentAvatar: updatedAvatar })
   }
 

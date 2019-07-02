@@ -30,7 +30,7 @@ class AvatarEditModal extends Component {
     this.close()
   }
 
-  open = (e) => {
+  open = e => {
     e.preventDefault()
     this.setState({ showModal: true })
   }
