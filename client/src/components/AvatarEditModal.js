@@ -9,13 +9,6 @@ class AvatarEditModal extends Component {
       showModal: false,
       currentPreview: null
     }
-
-    this.avatarComponent = (
-      <AvatarComponent
-        src={props.src}
-        onChangePreview={this.updateAvatarPreview}
-      />
-    )
   }
 
   close = () => {
@@ -52,7 +45,12 @@ class AvatarEditModal extends Component {
           <Modal.Header closeButton>
             <Modal.Title>{this.props.title}</Modal.Title>
           </Modal.Header>
-          <Modal.Body>{this.avatarComponent}</Modal.Body>
+          <Modal.Body>
+            <AvatarComponent
+              src={this.props.src}
+              onChangePreview={this.updateAvatarPreview}
+            />
+          </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.save}>Save</Button>
           </Modal.Footer>
