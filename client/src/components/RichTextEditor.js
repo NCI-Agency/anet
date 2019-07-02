@@ -6,8 +6,6 @@ import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
 
 import Link from "components/editor/Link"
 import LinkSource from "components/editor/LinkSource"
-import ImageSource from "components/editor/ImageSource"
-import ImageBlock from "components/editor/ImageBlock"
 import linkifyPlugin from "components/editor/plugins/linkifyPlugin"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
 
@@ -50,21 +48,6 @@ const ENTITY_CONTROL = {
     whitelist: {
       href: "^(?![#/])"
     }
-  },
-  IMAGE: {
-    type: ENTITY_TYPE.IMAGE,
-    description: "Image",
-    icon: [
-      "M959.884 128c0.040 0.034 0.082 0.076 0.116 0.116v767.77c-0.034 0.040-0.076 0.082-0.116 0.116h-895.77c-0.040-0.034-0.082-0.076-0.114-0.116v-767.772c0.034-0.040 0.076-0.082 0.114-0.114h895.77zM960 64h-896c-35.2 0-64 28.8-64 64v768c0 35.2 28.8 64 64 64h896c35.2 0 64-28.8 64-64v-768c0-35.2-28.8-64-64-64v0z",
-      "M832 288c0 53.020-42.98 96-96 96s-96-42.98-96-96 42.98-96 96-96 96 42.98 96 96z",
-      "M896 832h-768v-128l224-384 256 320h64l224-192z"
-    ],
-    source: ImageSource,
-    block: ImageBlock,
-    attributes: ["src", "alt"],
-    whitelist: {
-      src: "^(?!(data:|file:))"
-    }
   }
 }
 
@@ -73,12 +56,6 @@ const importerConfig = {
     // a tags will become LINK entities, marked as mutable, with only the URL as data.
     if (nodeName === "a") {
       return createEntity(ENTITY_TYPE.LINK, "MUTABLE", { url: node.href })
-    }
-
-    if (nodeName === "img") {
-      return createEntity(ENTITY_TYPE.IMAGE, "IMMUTABLE", {
-        src: node.src
-      })
     }
 
     if (nodeName === "hr") {
@@ -119,10 +96,6 @@ const exporterConfig = {
       return <a href={entity.data.url}>{originalText}</a>
     }
 
-    if (entity.type === ENTITY_TYPE.IMAGE) {
-      return <img src={entity.data.src} alt={entity.data.alt} />
-    }
-
     if (entity.type === ENTITY_TYPE.HORIZONTAL_RULE) {
       return <hr />
     }
@@ -141,7 +114,7 @@ const RichTextEditor = ({ value, onChange }) => (
     ariaDescribedBy="rich-text-editor"
     blockTypes={BLOCK_TYPES}
     enableHorizontalRule
-    entityTypes={[ENTITY_CONTROL.LINK, ENTITY_CONTROL.IMAGE]}
+    entityTypes={[ENTITY_CONTROL.LINK]}
     inlineStyles={INLINE_STYLES}
     maxListNesting={4}
     onSave={raw => {
