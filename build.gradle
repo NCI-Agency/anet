@@ -53,12 +53,12 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.3.12'
 	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.3.12'
 	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.3.12'
-	compile 'ru.vyarus.guicey:guicey-jdbi3:0.6.0'
-	compile 'com.google.guava:guava:27.1-jre' // Pick the non-Android version of Guice
+	compile 'ru.vyarus.guicey:guicey-jdbi3:0.7.0'
+	compile 'com.google.guava:guava:28.0-jre' // Pick the non-Android version of Guice
 
 	// Supported databases:
-	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.2.1.jre8'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
+	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.2.2.jre8'
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.3' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
@@ -382,7 +382,7 @@ buildscript {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:4.6.2'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.23.0"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.23.1"
 	}
 }
 
@@ -402,6 +402,6 @@ allprojects {
 
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
-	version = '10.15.3'
+	version = '10.16.0'
 	download = true
 }
