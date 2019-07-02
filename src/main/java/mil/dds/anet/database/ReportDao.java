@@ -777,8 +777,8 @@ public class ReportDao extends AnetBaseDao<Report> {
   }
 
   /*
-   * Retrieves the reports which used to be for upcoming engagements and need to get the draft state
-   * as the engagements have just become past engagements and therefore their report needs to go
+   * Retrieves the reports which used to be for upcoming engagements and for which the engagements
+   * have just become past engagements. These reports need to get the draft state as they need to go
    * through the report approval chain before being published.
    */
   public List<Report> getFutureToPastReports(Instant end) {
@@ -790,15 +790,14 @@ public class ReportDao extends AnetBaseDao<Report> {
     sql.append(" FROM reports");
     // We are not interested in draft reports, as they will remain draft.
     // We are not interested in cancelled reports, as they will remain cancelled.
-    // FIXME: what about reports rejected during the planning process?
     sql.append(
-        " WHERE reports.state IN ( :reportApproved, :reportPendingApproval, :reportPublished )");
-    // Get past reports relative to the endDate arg
+        " WHERE reports.state IN ( :reportApproved, :reportRejected, :reportPendingApproval, :reportPublished )");
+    // Get past reports relative to the endDate argument
     sql.append(" AND reports.\"engagementDate\" <= :endDate");
     sql.append(" AND");
     sql.append(" ((");
     // Get reports for engagements which just became past engagements during or
-    // after the planning approval process
+    // after the planning approval process, but which are not in the report approval process yet
     sql.append("   reports.uuid IN (");
     sql.append("     SELECT pr.uuid");
     sql.append("     FROM (");
@@ -824,6 +823,7 @@ public class ReportDao extends AnetBaseDao<Report> {
     sql.append("  )");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("reportApproved", ReportState.APPROVED.ordinal());
+    sqlArgs.put("reportRejected", ReportState.REJECTED.ordinal());
     sqlArgs.put("reportPendingApproval", ReportState.PENDING_APPROVAL.ordinal());
     sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
     sqlArgs.put("planningApprovalStepType", ApprovalStepType.PLANNING_APPROVAL.ordinal());
