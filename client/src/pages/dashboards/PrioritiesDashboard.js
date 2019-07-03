@@ -31,23 +31,26 @@ class PrioritiesDashboard extends Page {
           responsibleOrg { uuid, shortName}
         }
       }`).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
-    GQL.run([tasksPart]).then(data => {
-      const tasks = data.taskList.list
-      this.setState({
-        tasks: tasks
-      })
-    })
+
+    const dashboardSettings = Settings.dashboards.find(
+      o => o.label === this.props.match.params.dashboard
+    )
+
+    fetch(dashboardSettings.data)
+      .then(response => response.json())
+      .then(dashboardData =>
+        GQL.run([tasksPart]).then(data => {
+          const tasks = data.taskList.list
+          this.setState({
+            tasks: tasks,
+            ...dashboardData
+          })
+        })
+      )
   }
 
   render() {
-    return (
-      <Kanban
-        {...{
-          ...Settings.dashboards[this.props.match.params.dashboard],
-          ...this.state
-        }}
-      />
-    )
+    return this.state.title ? <Kanban {...{ ...this.state }} /> : null
   }
 }
 

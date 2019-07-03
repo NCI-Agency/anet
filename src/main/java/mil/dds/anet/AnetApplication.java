@@ -126,7 +126,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
     // Serve assets on /assets
     bootstrap.addBundle(new ConfiguredAssetsBundle(ImmutableMap.<String, String>builder()
-        .put("/assets/", "/assets/").put("/imagery/", "/imagery/").build(), "index.html"));
+        .put("/assets/", "/assets/").put("/imagery/", "/imagery/").put("/data/", "/data/").build(), "index.html"));
 
     // Use Freemarker to handle rendering TEXT_HTML views.
     bootstrap.addBundle(new ViewBundle<AnetConfiguration>() {

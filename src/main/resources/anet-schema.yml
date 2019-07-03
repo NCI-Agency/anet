@@ -604,7 +604,20 @@ properties:
               type: object
               additionalProperties: true
   dashboards:
-    type: object
+    type: array
+    items:
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+        data:
+          type: string
+        type:
+          type: string
+          enum:
+            - kanban
+            - decisives
+
   decisives:
     type: array
 

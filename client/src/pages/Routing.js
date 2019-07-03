@@ -154,7 +154,7 @@ class BaseRouting extends Component {
           )}
         />
         <Route
-          path="/dashboards"
+          path="/dashboards/kanban"
           render={({ match: { url } }) => (
             <Switch>
               <Route
@@ -165,10 +165,13 @@ class BaseRouting extends Component {
           )}
         />
         <Route
-          path="/decisives"
+          path="/dashboards/decisives"
           render={({ match: { url } }) => (
             <Switch>
-              <Route path={`${url}/`} component={DecisivesDashboard} />
+              <Route
+                path={`${url}/:dashboard`}
+                component={DecisivesDashboard}
+              />
             </Switch>
           )}
         />

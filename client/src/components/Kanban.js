@@ -9,7 +9,6 @@ import Pie from "components/graphs/Pie"
 export default class Kanban extends React.Component {
   static propTypes = {
     tasks: PropTypes.array.isRequired,
-    title: PropTypes.string.isRequired,
     columns: PropTypes.array.isRequired
   }
 

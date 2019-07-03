@@ -1,13 +1,14 @@
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
-  SEARCH_OBJECT_TYPES
+  SEARCH_OBJECT_TYPES,
+  setSearchQuery
 } from "actions"
 import { Settings } from "api"
 import autobind from "autobind-decorator"
 import LinkTo from "components/LinkTo"
 import Page, {
-  mapDispatchToProps,
+  mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
 import GQL from "graphqlapi"
@@ -26,7 +27,10 @@ const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
 })
 
 class DecisivesDashboard extends Page {
-  static propTypes = { ...pagePropTypes }
+  static propTypes = {
+    ...pagePropTypes,
+    setSearchQuery: PropTypes.func.isRequired
+  }
 
   constructor(props) {
     super(props, DEFAULT_PAGE_PROPS, _SEARCH_PROPS)
@@ -183,27 +187,35 @@ class DecisivesDashboard extends Page {
         status: "ACTIVE"
       })
 
-    GQL.run([dataPart]).then(data => {
-      this.setState({
-        decisives:
-          Settings.decisives &&
-          Settings.decisives.map(decisive => {
-            return {
-              label: decisive.label,
-              positions: data.positionList.list.filter(item =>
-                decisive.positions.includes(item.uuid)
-              ),
-              tasks: data.taskList.list.filter(item =>
-                decisive.locations.includes(item.uuid)
-              ),
-              locations: data.locationList.list.filter(item =>
-                decisive.locations.includes(item.uuid)
-              )
-            }
-          }),
-        isLoading: !this.state.reports
-      })
-    })
+    const dashboardSettings = Settings.dashboards.find(
+      o => o.label === this.props.match.params.dashboard
+    )
+
+    fetch(dashboardSettings.data)
+      .then(response => response.json())
+      .then(dashboardData =>
+        GQL.run([dataPart]).then(data => {
+          this.setState({
+            decisives:
+              dashboardData &&
+              dashboardData.map(decisive => {
+                return {
+                  label: decisive.label,
+                  positions: data.positionList.list.filter(item =>
+                    decisive.positions.includes(item.uuid)
+                  ),
+                  tasks: data.taskList.list.filter(item =>
+                    decisive.locations.includes(item.uuid)
+                  ),
+                  locations: data.locationList.list.filter(item =>
+                    decisive.locations.includes(item.uuid)
+                  )
+                }
+              }),
+            isLoading: !this.state.reports
+          })
+        })
+      )
   }
 
   render() {
@@ -311,6 +323,14 @@ class StatsTable extends React.Component {
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  return {
+    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+    ...pageDispatchToProps
+  }
+}
 
 export default connect(
   mapStateToProps,
