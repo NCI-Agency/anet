@@ -5,7 +5,8 @@ import HorizontalBarChart from "components/HorizontalBarChart"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
-  FORMAT_TABLE
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
 } from "components/ReportCollection"
 import ReportsVisualisation, {
   propTypes as rvPropTypes
@@ -76,8 +77,8 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
 
     this.state = {
       graphData: {},
-      reports: {},
-      allReports: [],
+      reports: null,
+      allReports: null,
       reportsPageNum: 0,
       focusedSelection: "",
       graphPopover: null,
@@ -179,15 +180,18 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
   getReportCollection(id) {
     return (
       <Context.Consumer>
-        {context => (
-          <div className="scrollable">
-            <ReportCollection
-              paginatedReports={context.reports}
-              goToPage={this.goToReportsPage}
-              viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY]}
-            />
-          </div>
-        )}
+        {context =>
+          context.allReports === null ? null : (
+            <div className="scrollable">
+              <ReportCollection
+                reports={context.allReports}
+                paginatedReports={context.reports}
+                goToPage={this.goToReportsPage}
+                viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+              />
+            </div>
+          )
+        }
       </Context.Consumer>
     )
   }
@@ -196,21 +200,23 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
   getReportMap(id) {
     return (
       <Context.Consumer>
-        {context => (
-          <div className="non-scrollable">
-            <ContainerDimensions>
-              {({ width, height }) => (
-                <ReportCollection
-                  width={width}
-                  height={height}
-                  marginBottom={0}
-                  reports={context.allReports}
-                  viewFormats={[FORMAT_MAP]}
-                />
-              )}
-            </ContainerDimensions>
-          </div>
-        )}
+        {context =>
+          context.allReports === null ? null : (
+            <div className="non-scrollable">
+              <ContainerDimensions>
+                {({ width, height }) => (
+                  <ReportCollection
+                    width={width}
+                    height={height}
+                    marginBottom={0}
+                    reports={context.allReports}
+                    viewFormats={[FORMAT_MAP]}
+                  />
+                )}
+              </ContainerDimensions>
+            </div>
+          )
+        }
       </Context.Consumer>
     )
   }
