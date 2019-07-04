@@ -24,7 +24,8 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
+public class AuthorizationGroupDao
+    extends AnetBaseDao<AuthorizationGroup, AuthorizationGroupSearchQuery> {
 
   public static final String TABLE_NAME = "authorizationGroups";
 
@@ -123,6 +124,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
         FkDataLoaderKey.AUTHORIZATION_GROUP_POSITIONS, authorizationGroupUuid);
   }
 
+  @Override
   public AnetBeanList<AuthorizationGroup> search(AuthorizationGroupSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getAuthorizationGroupSearcher()
         .runSearch(query);

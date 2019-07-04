@@ -8,6 +8,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
@@ -19,7 +20,8 @@ import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveInformation> {
+public class ReportSensitiveInformationDao
+    extends AnetBaseDao<ReportSensitiveInformation, AbstractSearchQuery<?>> {
 
   private static final String[] fields = {"uuid", "text", "reportUuid", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "reportsSensitiveInformation";

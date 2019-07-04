@@ -26,7 +26,7 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class TaskDao extends AnetBaseDao<Task> {
+public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
 
   public static final String TABLE_NAME = "tasks";
 
@@ -147,6 +147,7 @@ public class TaskDao extends AnetBaseDao<Task> {
         .map(new TaskMapper()).list();
   }
 
+  @Override
   public AnetBeanList<Task> search(TaskSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);
   }

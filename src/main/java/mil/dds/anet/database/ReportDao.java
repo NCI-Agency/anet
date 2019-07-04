@@ -52,7 +52,7 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class ReportDao extends AnetBaseDao<Report> {
+public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   private static final String[] fields = {"uuid", "state", "createdAt", "updatedAt",
       "engagementDate", "duration", "locationUuid", "approvalStepUuid", "intent", "exsum",
@@ -337,6 +337,7 @@ public class ReportDao extends AnetBaseDao<Report> {
     return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
   }
 
+  @Override
   public AnetBeanList<Report> search(ReportSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query);
   }
