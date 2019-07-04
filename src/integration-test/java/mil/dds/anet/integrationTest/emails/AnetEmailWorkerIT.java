@@ -55,7 +55,6 @@ public class AnetEmailWorkerIT {
     when(config.getDictionaryEntry("fields")).thenReturn(new HashMap<String, Object>());
 
     when(config.getEmailFromAddr()).thenReturn("test_from_address@anet.com");
-    when(config.getServerUrl()).thenReturn("localhost:1025");
 
     final SmtpConfiguration smtpConfig =
         PowerMockito.mock(SmtpConfiguration.class, Mockito.RETURNS_MOCKS);

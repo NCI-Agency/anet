@@ -415,8 +415,6 @@ task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container
 task integrationTest(type: Test) {
 	testClassesDirs = sourceSets.integrationTest.output.classesDirs
 	classpath = sourceSets.integrationTest.runtimeClasspath
-
-	// If you want to ensure that integration tests are run every time when you invoke this task, uncomment the following line.
 	outputs.upToDateWhen { false }
 	environment(run.environment)
 }
