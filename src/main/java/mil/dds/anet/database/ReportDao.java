@@ -337,13 +337,8 @@ public class ReportDao extends AnetBaseDao<Report> {
     return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
   }
 
-  public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
-    return search(query, user, false);
-  }
-
-  public AnetBeanList<Report> search(ReportSearchQuery query, Person user, Boolean systemSearch) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, user,
-        systemSearch);
+  public AnetBeanList<Report> search(ReportSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query);
   }
 
   /*

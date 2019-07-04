@@ -50,7 +50,8 @@ public class ReportPublicationWorker implements Runnable {
     final ReportSearchQuery query = new ReportSearchQuery();
     query.setPageSize(0);
     query.setState(Collections.singletonList(ReportState.APPROVED));
-    final List<Report> reports = dao.search(query, null, true).getList();
+    query.setSystemSearch(true);
+    final List<Report> reports = dao.search(query).getList();
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
     for (final Report r : reports) {
       final List<ReportAction> workflow = r.loadWorkflow(context).join();

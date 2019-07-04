@@ -4,7 +4,6 @@ import java.util.Arrays;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
@@ -25,18 +24,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   }
 
   @Override
-  public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user,
-      boolean systemSearch) {
-    buildQuery(query, user, systemSearch);
+  public AnetBeanList<Report> runSearch(ReportSearchQuery query) {
+    buildQuery(query);
     return qb.buildAndRun(getDbHandle(), query, new ReportMapper());
   }
 
   @Override
   protected void buildQuery(ReportSearchQuery query) {
-    throw new UnsupportedOperationException();
-  }
-
-  protected void buildQuery(ReportSearchQuery query, Person user, boolean systemSearch) {
     qb.addFromClause("reports");
     qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
     qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
@@ -178,14 +172,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
               + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = ag.uuid"
               + " LEFT JOIN positions pos ON pos.uuid = agp.\"positionUuid\"");
       qb.addWhereClause("pos.\"currentPersonUuid\" = :userUuid");
-      qb.addSqlArg("userUuid", user.getUuid());
+      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
-    if (!systemSearch) {
+    if (!query.isSystemSearch()) {
       // Apply a filter to restrict access to other's draft, rejected or approved reports.
       // When the search is performed by the system (for instance by a worker, systemSearch = true)
       // do not apply this filter.
-      if (user == null) {
+      if (query.getUser() == null) {
         qb.addWhereClause("reports.state != :draftState");
         qb.addWhereClause("reports.state != :rejectedState");
         qb.addWhereClause("reports.state != :approvedState");
@@ -197,8 +191,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
             "((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorUuid\" = :userUuid))");
         qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-        qb.addSqlArg("userUuid", user.getUuid());
-        if (!AuthUtils.isAdmin(user)) {
+        qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+        if (!AuthUtils.isAdmin(query.getUser())) {
           // Admin users may access all approved reports, other users only owned approved reports
           qb.addWhereClause(
               "((reports.state != :approvedState) OR (reports.\"authorUuid\" = :userUuid))");
