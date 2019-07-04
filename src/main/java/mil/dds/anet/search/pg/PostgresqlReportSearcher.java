@@ -1,7 +1,6 @@
 package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -24,16 +23,15 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
-  protected void buildQuery(ReportSearchQuery query, Person user, boolean systemSearch) {
+  protected void buildQuery(ReportSearchQuery query) {
     qb.addSelectClause("reports.uuid");
-    super.buildQuery(query, user, systemSearch);
+    super.buildQuery(query);
   }
 
   @InTransaction
   @Override
-  public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user,
-      boolean systemSearch) {
-    buildQuery(query, user, systemSearch);
+  public AnetBeanList<Report> runSearch(ReportSearchQuery query) {
+    buildQuery(query);
     outerQb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
     if (query.getIncludeEngagementDayOfWeek()) {
       outerQb.addSelectClause(String.format(this.isoDowFormat, "reports.\"engagementDate\"")
@@ -47,7 +45,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
     final AnetBeanList<Report> result =
         outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
     for (final Report report : result.getList()) {
-      report.setUser(user);
+      report.setUser(query.getUser());
     }
     return result;
   }

@@ -1,7 +1,10 @@
 package mil.dds.anet.beans.search;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import java.time.Instant;
 import java.util.List;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
@@ -43,6 +46,9 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   private String attendeePositionUuid;
   private List<String> authorizationGroupUuid;
   private Boolean sensitiveInfo;
+  // internal search parameters:
+  private Person user;
+  private boolean systemSearch;
 
   public ReportSearchQuery() {
     super(ReportSearchSortBy.CREATED_AT);
@@ -279,6 +285,30 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
 
   public void setSensitiveInfo(Boolean sensitiveInfo) {
     this.sensitiveInfo = sensitiveInfo;
+  }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public Person getUser() {
+    return user;
+  }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public void setUser(Person user) {
+    this.user = user;
+  }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public boolean isSystemSearch() {
+    return systemSearch;
+  }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public void setSystemSearch(boolean systemSearch) {
+    this.systemSearch = systemSearch;
   }
 
 }
