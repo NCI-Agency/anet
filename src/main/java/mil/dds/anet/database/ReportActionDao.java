@@ -54,11 +54,6 @@ public class ReportActionDao extends AnetBaseDao<ReportAction, AbstractSearchQue
     throw new UnsupportedOperationException();
   }
 
-  @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
   static class ReportActionsBatcher extends ForeignKeyBatcher<ReportAction> {
     private static final String sql =
         "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "

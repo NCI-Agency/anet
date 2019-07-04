@@ -111,11 +111,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   }
 
   @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public AnetBeanList<Person> search(PersonSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
   }

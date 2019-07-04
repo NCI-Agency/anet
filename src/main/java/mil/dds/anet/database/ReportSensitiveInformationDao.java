@@ -105,11 +105,6 @@ public class ReportSensitiveInformationDao
     return numRows;
   }
 
-  @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
   public Object insertOrUpdate(ReportSensitiveInformation rsi, Person user, Report report) {
     return (DaoUtils.getUuid(rsi) == null) ? insert(rsi, user, report) : update(rsi, user, report);
   }

@@ -32,6 +32,10 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
     return deleteInternal(uuid);
   }
 
+  public int deleteInternal(String uuid) {
+    throw new UnsupportedOperationException();
+  }
+
   protected Handle getDbHandle() {
     return handle.get();
   }
