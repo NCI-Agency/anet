@@ -10,7 +10,7 @@ import { Settings } from "api"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 
-class PrioritiesDashboard extends Page {
+class KanbanDashboard extends Page {
   static propTypes = { ...pagePropTypes }
 
   constructor(props) {
@@ -57,4 +57,4 @@ class PrioritiesDashboard extends Page {
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(PrioritiesDashboard))
+)(withRouter(KanbanDashboard))
