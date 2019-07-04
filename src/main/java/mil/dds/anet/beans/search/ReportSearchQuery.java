@@ -8,6 +8,10 @@ import mil.dds.anet.beans.Report.ReportState;
 
 public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
 
+  public static enum EngagementStatus {
+    HAPPENED, FUTURE, CANCELLED
+  }
+
   String authorUuid;
   Instant engagementDateStart;
   Instant engagementDateEnd;
@@ -37,6 +41,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   String taskUuid;
   String pendingApprovalOf;
   List<ReportState> state;
+  List<EngagementStatus> engagementStatus;
   ReportCancelledReason cancelledReason;
   private String tagUuid;
   private String authorPositionUuid;
@@ -231,6 +236,14 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
 
   public void setState(List<ReportState> state) {
     this.state = state;
+  }
+
+  public List<EngagementStatus> getEngagementStatus() {
+    return engagementStatus;
+  }
+
+  public void setEngagementStatus(List<EngagementStatus> engagementStatus) {
+    this.engagementStatus = engagementStatus;
   }
 
   public ReportCancelledReason getCancelledReason() {

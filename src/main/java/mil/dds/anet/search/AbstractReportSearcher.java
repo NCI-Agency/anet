@@ -11,6 +11,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
@@ -124,7 +125,21 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     qb.addInClause("states", "reports.state", query.getState());
-
+    if (query.getEngagementStatus() != null) {
+      List<EngagementStatus> esValues = query.getEngagementStatus();
+      for (int i = 0; i < esValues.length; i++) {
+        if (esValue[i] === )
+        likeClauses.add(getLikeClause(fieldNames[i], paramName));
+        switch (dbType) {
+          case MSSQL:
+            return "DATEPART(week, %s)";
+          case POSTGRESQL:
+            return "EXTRACT(WEEK FROM %s)";
+          default:
+            throw new RuntimeException("No week format found for " + dbType);
+      }
+      
+    }
     if (query.getCancelledReason() != null) {
       if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
         qb.addWhereClause("reports.\"cancelledReason\" IS NULL");
