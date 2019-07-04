@@ -1,7 +1,6 @@
 import { Settings } from "api"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
-// import Calendar from 'components/Calendar'
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages, { setMessages } from "components/Messages"
@@ -129,7 +128,6 @@ class BaseTaskShow extends Page {
                   title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
                   action={action}
                 />
-                {/* <Calendar> </Calendar> */}
                 <Fieldset>
                   <this.ShortNameField
                     dictProps={Settings.fields.task.shortName}

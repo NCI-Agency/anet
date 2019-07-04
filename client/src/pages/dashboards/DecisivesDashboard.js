@@ -5,7 +5,6 @@ import {
   setSearchQuery
 } from "actions"
 import { Settings } from "api"
-import autobind from "autobind-decorator"
 import LinkTo from "components/LinkTo"
 import Page, {
   mapDispatchToProps as pageMapDispatchToProps,
@@ -57,15 +56,13 @@ class DecisivesDashboard extends Page {
     this.fetchStaticData()
   }
 
-  @autobind
-  deserializeCallback(objectType, filters, text) {
+  deserializeCallback = (objectType, filters, text) =>
     // We update the Redux state
     this.props.setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
     })
-  }
 
   fetchData(props) {
     const searchQuery = this.getSearchQuery()
