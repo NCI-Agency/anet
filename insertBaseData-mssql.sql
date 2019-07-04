@@ -390,59 +390,59 @@ INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
 	VALUES (lower(newid()), 'TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'9c982685-5946-4dad-a7ee-0f5a12f5e170', 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'General Hospital', 47.571772, -52.741935, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'0855fb0a-995e-4a79-a132-4024ee2983ff', 'General Hospital', 47.571772, -52.741935, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'95446f93-249b-4aa9-b98a-7bd2c4680718', 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Cabot Tower', 47.570010, -52.681770, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', 'Cabot Tower', 47.570010, -52.681770, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Fort Amherst', 47.563763, -52.680590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'c7a9f420-457a-490c-a810-b504c022cf1e', 'Fort Amherst', 47.563763, -52.680590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Harbour Grace Police Station', 47.705133, -53.214422, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'7339f9e3-99d1-497a-9e3b-1269c4c287fe', 'Harbour Grace Police Station', 47.705133, -53.214422, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'0585f158-5121-46a2-b099-799fe980aa9c', 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'053ab2ad-132a-4a62-8cbb-20827f50ec34', 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'6465dd40-9fec-41db-a3b9-652fa52c7d21', 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'2a59dd78-0c29-4b3f-bc94-7c98ff80b197', 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'18c9be38-bf68-40e2-80d8-aac47f5ff7cf', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'8a34768c-aa15-41e4-ab79-6cf2740d555e', 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'9f364c59-953e-4c17-919c-648ea3a74e36', 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'dfc3918d-c2e3-4308-b161-2445cde77b3f', 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'3652e114-ad16-43f0-b179-cc1bce6958d5', 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'5ac4078d-d445-416a-a93e-5941562359bb', 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'22b0137c-4d89-43eb-ac95-a9f68aba884f', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'60f4084f-3304-4cd5-89df-353edef07d18', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 INSERT INTO organizations (uuid, shortName, longName, type, createdAt, updatedAt)
@@ -455,21 +455,21 @@ INSERT INTO organizations (uuid, shortName, longName, type, parentOrgUuid, creat
 	(SELECT uuid from organizations where shortName = 'MoD'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Minister of Defense', 'MOD-FO-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'879121d2-d265-4d26-8a2b-bd073caa474e', 'Minister of Defense', 'MOD-FO-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Chief of Staff - MoD', 'MOD-FO-00002', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'1a45ccd6-40e3-4c51-baf5-15e7e9b8f03d', 'Chief of Staff - MoD', 'MOD-FO-00002', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Executive Assistant to the MoD', 'MOD-FO-00003', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'4be6baa5-c611-4c70-a2a8-c01bf9b7d2bc', 'Executive Assistant to the MoD', 'MOD-FO-00003', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Planning Captain', 'MOD-FO-00004', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'a9ab507e-cda9-469b-8d9e-b47445852af4', 'Planning Captain', 'MOD-FO-00004', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Director of Budgeting - MoD', 'MOD-Bud-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'61371573-eefc-4b85-81a0-27d6c0b78c58', 'Director of Budgeting - MoD', 'MOD-Bud-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Writer of Expenses - MoD', 'MOD-Bud-00002', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'c2e3fdff-2b36-4ef9-9790-afbca0c53f57', 'Writer of Expenses - MoD', 'MOD-Bud-00002', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Cost Adder - MoD', 'MOD-Bud-00003', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'c065c2b6-a04a-4ead-a3a2-5aabf921446d', 'Cost Adder - MoD', 'MOD-Bud-00003', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Chief of Police', 'MOI-Pol-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (N'731ee4f9-f21b-4166-b03d-d7ba5e7f735c', 'Chief of Police', 'MOI-Pol-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Steve into a Tashkil and associate with the EF 1 Advisor Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)

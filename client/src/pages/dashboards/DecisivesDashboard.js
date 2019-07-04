@@ -205,7 +205,7 @@ class DecisivesDashboard extends Page {
                     decisive.positions.includes(item.uuid)
                   ),
                   tasks: data.taskList.list.filter(item =>
-                    decisive.locations.includes(item.uuid)
+                    decisive.tasks.includes(item.uuid)
                   ),
                   locations: data.locationList.list.filter(item =>
                     decisive.locations.includes(item.uuid)
