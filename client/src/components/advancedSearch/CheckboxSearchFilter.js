@@ -6,13 +6,8 @@ import { Checkbox, FormGroup } from "react-bootstrap"
 export default class CheckboxSearchFilter extends Component {
   static propTypes = {
     queryKey: PropTypes.string.isRequired,
-
-    // Passed by the SearchFilterDisplay row
+    onChange: PropTypes.func,
     asFormField: PropTypes.bool
-
-    // From SearchFilter row
-    // value
-    // onChange
   }
 
   static defaultProps = {

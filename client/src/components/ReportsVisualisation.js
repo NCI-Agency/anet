@@ -220,3 +220,4 @@ export default class ReportsVisualisation extends Component {
     this.setState({ graphPopover: null, hoveredBar: null })
   }
 }
+ReportsVisualisation.propTypes = propTypes

@@ -10,7 +10,8 @@ export default class ConfirmDelete extends Component {
     objectType: PropTypes.string,
     objectDisplay: PropTypes.string,
     bsStyle: PropTypes.string,
-    buttonLabel: PropTypes.string
+    buttonLabel: PropTypes.string,
+    children: PropTypes.node
   }
 
   render() {

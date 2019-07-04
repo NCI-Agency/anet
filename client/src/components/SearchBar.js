@@ -1,5 +1,4 @@
 import {
-  resetPages,
   resetPagination,
   SEARCH_OBJECT_LABELS,
   SEARCH_OBJECT_TYPES,
@@ -7,6 +6,7 @@ import {
 } from "actions"
 import autobind from "autobind-decorator"
 import AdvancedSearch from "components/AdvancedSearch"
+import { routerRelatedPropTypes } from "components/Page"
 import searchFilters from "components/SearchFilters"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -25,15 +25,18 @@ import SEARCH_ICON from "resources/search-alt.png"
 class SearchBar extends Component {
   static propTypes = {
     setSearchQuery: PropTypes.func.isRequired,
+    onSearchGoToSearchPage: PropTypes.bool,
     query: PropTypes.shape({
       text: PropTypes.string,
       filters: PropTypes.any,
       objectType: PropTypes.string
     }),
     searchObjectTypes: PropTypes.array,
-    resetPages: PropTypes.func,
-    resetPagination: PropTypes.func
+    resetPagination: PropTypes.func,
+    ...routerRelatedPropTypes
   }
+
+  advancedSearchLink = React.createRef()
 
   constructor(props) {
     super(props)
@@ -86,7 +89,7 @@ class SearchBar extends Component {
 
         <div
           className="add-search-filter"
-          ref={el => (this.advancedSearchLink = el)}
+          ref={this.advancedSearchLink}
           onClick={() =>
             this.setState({
               showAdvancedSearch: !this.state.showAdvancedSearch
@@ -125,7 +128,7 @@ class SearchBar extends Component {
           show={this.state.showAdvancedSearch}
           onHide={() => this.setState({ showAdvancedSearch: false })}
           placement="bottom"
-          target={this.advancedSearchLink}
+          target={this.advancedSearchLink.current}
           rootClose
         >
           <Popover id="advanced-search" placement="bottom" title="Filters">
@@ -175,7 +178,6 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   setSearchQuery: searchTerms => dispatch(setSearchQuery(searchTerms)),
-  resetPages: () => dispatch(resetPages()),
   resetPagination: () => dispatch(resetPagination())
 })
 

@@ -1,5 +1,6 @@
 import autobind from "autobind-decorator"
 import AppContext from "components/AppContext"
+import { routerRelatedPropTypes } from "components/Page"
 import hopscotch from "hopscotch"
 import "hopscotch/dist/css/hopscotch.css"
 import { Person } from "models"
@@ -24,7 +25,8 @@ class BaseGuidedTour extends Component {
     autostart: PropTypes.bool,
     onEnd: PropTypes.func,
     title: PropTypes.string,
-    currentUser: PropTypes.instanceOf(Person)
+    currentUser: PropTypes.instanceOf(Person),
+    ...routerRelatedPropTypes
   }
 
   componentDidMount() {

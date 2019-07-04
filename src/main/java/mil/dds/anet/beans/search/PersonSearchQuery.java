@@ -28,6 +28,8 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
   public PersonSearchQuery() {
     super(PersonSearchSortBy.NAME);
     this.setPageSize(100);
+    // FIXME: Explicitly set sorting by name (ascending) to reinstate pre-SOUNDEX search behaviour.
+    this.setSortBy(PersonSearchSortBy.NAME);
   }
 
   public String getOrgUuid() {
