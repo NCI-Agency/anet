@@ -237,9 +237,8 @@ export default class ReportCollection extends Component {
           url: Report.pathFor(r),
           classNames: ["event-" + r.state.toLowerCase()],
           extendedProps: { ...r },
-          allDay: Settings.engagementsIncludeTimeAndDuration
-            ? r.duration === null
-            : true
+          allDay:
+            !Settings.engagementsIncludeTimeAndDuration || r.duration === null
         }
       })
     } else {
