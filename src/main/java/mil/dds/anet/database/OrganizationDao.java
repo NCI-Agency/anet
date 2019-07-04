@@ -22,7 +22,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class OrganizationDao extends AnetBaseDao<Organization> {
+public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearchQuery> {
 
   private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode",
       "type", "createdAt", "updatedAt", "parentOrgUuid"};
@@ -129,6 +129,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher().runSearch(query);
   }

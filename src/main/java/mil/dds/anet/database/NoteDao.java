@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -16,7 +17,7 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class NoteDao extends AnetBaseDao<Note> {
+public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "notes";
 

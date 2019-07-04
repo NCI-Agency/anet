@@ -12,7 +12,7 @@ import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class LocationDao extends AnetBaseDao<Location> {
+public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
 
   public static final String TABLE_NAME = "locations";
 
@@ -77,6 +77,7 @@ public class LocationDao extends AnetBaseDao<Location> {
         .bind("maxResults", maxResults).map(new LocationMapper()).list();
   }
 
+  @Override
   public AnetBeanList<Location> search(LocationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getLocationSearcher().runSearch(query);
   }

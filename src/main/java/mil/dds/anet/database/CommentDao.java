@@ -4,12 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.CommentMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class CommentDao extends AnetBaseDao<Comment> {
+public class CommentDao extends AnetBaseDao<Comment, AbstractSearchQuery<?>> {
 
   private static String[] fields =
       {"uuid", "createdAt", "updatedAt", "authorUuid", "reportUuid", "text"};

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class PersonDao extends AnetBaseDao<Person> {
+public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
       "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
@@ -127,6 +127,7 @@ public class PersonDao extends AnetBaseDao<Person> {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public AnetBeanList<Person> search(PersonSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
   }

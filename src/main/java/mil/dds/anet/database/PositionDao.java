@@ -28,7 +28,7 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class PositionDao extends AnetBaseDao<Position> {
+public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid"};
@@ -341,6 +341,7 @@ public class PositionDao extends AnetBaseDao<Position> {
         .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
   }
 
+  @Override
   public AnetBeanList<Position> search(PositionSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query);
   }
