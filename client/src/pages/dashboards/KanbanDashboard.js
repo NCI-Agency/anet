@@ -1,3 +1,5 @@
+import { Settings } from "api"
+import Kanban from "components/Kanban"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -5,8 +7,6 @@ import Page, {
 import GQL from "graphqlapi"
 import { Task } from "models"
 import React from "react"
-import Kanban from "components/Kanban"
-import { Settings } from "api"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 
