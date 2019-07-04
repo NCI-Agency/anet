@@ -53,11 +53,6 @@ public class TagDao extends AnetBaseDao<Tag, TagSearchQuery> {
   }
 
   @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public AnetBeanList<Tag> search(TagSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTagSearcher().runSearch(query);
   }

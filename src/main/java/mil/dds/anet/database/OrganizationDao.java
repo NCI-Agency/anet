@@ -125,11 +125,6 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
   }
 
   @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher().runSearch(query);
   }
