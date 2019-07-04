@@ -258,9 +258,17 @@ export const renderButtonToggleGroup = ({
         if (!button) {
           return null
         }
-        const { label, ...props } = button
+        let { label, color, style, ...props } = button
+        if (field.value === button.value && color) {
+          style = { ...style, backgroundColor: color }
+        }
         return (
-          <ToggleButton {...props} key={button.value} value={button.value}>
+          <ToggleButton
+            {...props}
+            key={button.value}
+            value={button.value}
+            style={style}
+          >
             {label}
           </ToggleButton>
         )
