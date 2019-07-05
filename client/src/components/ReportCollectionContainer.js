@@ -62,7 +62,7 @@ class ReportCollectionContainer extends Component {
           ? this.curPageNum
           : pageNum
         : 0,
-      pageSize: withPagination ? 1 : 0
+      pageSize: withPagination ? 10 : 0
     })
     return reportsQueryParams
   }
