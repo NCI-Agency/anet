@@ -89,7 +89,7 @@ export default class Page extends Component {
     this.state = {
       notFound: false,
       invalidRequest: false,
-      isLoading: false
+      isLoading: true
     }
 
     this.renderPage = this.render
@@ -145,6 +145,9 @@ export default class Page extends Component {
   }
 
   render() {
+    if (this.state.isLoading) {
+      return null
+    }
     if (this.state.notFound) {
       let modelName = this.constructor.modelName
       let text = modelName
