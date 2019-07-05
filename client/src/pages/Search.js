@@ -27,7 +27,6 @@ import {
   Badge,
   Button,
   Dropdown,
-  Glyphicon,
   MenuItem,
   Modal,
   Nav,
@@ -409,7 +408,6 @@ class Search extends Page {
 
   renderReports() {
     const { results } = this.state
-    const { pagination } = this.props
     const reports = results[SEARCH_OBJECT_TYPES.REPORTS]
     const allReports = results["all" + SEARCH_OBJECT_TYPES.REPORTS].list
     const goToPageNum = this.getPageNum(SEARCH_OBJECT_TYPES.REPORTS)
