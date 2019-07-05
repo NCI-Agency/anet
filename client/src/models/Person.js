@@ -49,8 +49,8 @@ export default class Person extends Model {
         .when("role", (role, schema) =>
           Person.isAdvisor({ role })
             ? schema.required(
-              `You must provide the ${Settings.fields.person.firstName}`
-            )
+                `You must provide the ${Settings.fields.person.firstName}`
+              )
             : schema.nullable()
         )
         .default("")
@@ -108,8 +108,8 @@ export default class Person extends Model {
         .when("role", (role, schema) =>
           Person.isAdvisor({ role })
             ? schema.required(
-              `You must provide the ${Settings.fields.person.gender}`
-            )
+                `You must provide the ${Settings.fields.person.gender}`
+              )
             : schema.nullable()
         )
         .default("")

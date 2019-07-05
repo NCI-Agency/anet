@@ -9,10 +9,10 @@ export default class PositionTypeSearchFilter extends SelectSearchFilter {
     const value =
       this.state.value.value === Position.TYPE.ADVISOR
         ? [
-          Position.TYPE.ADVISOR,
-          Position.TYPE.SUPER_USER,
-          Position.TYPE.ADMINISTRATOR
-        ]
+            Position.TYPE.ADVISOR,
+            Position.TYPE.SUPER_USER,
+            Position.TYPE.ADMINISTRATOR
+          ]
         : this.state.value.value
     return { [this.props.queryKey]: value }
   }

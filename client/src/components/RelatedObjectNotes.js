@@ -143,8 +143,8 @@ class BaseRelatedObjectNotes extends Component {
       this.props.relatedObject.relatedObjectType === "people" &&
       this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
         ? Settings.fields.principal.person.assessment.questions.filter(
-          question =>
-            !question.test ||
+            question =>
+              !question.test ||
               RegExp(question.test.regex).test(
                 question.test.expression
                   .split(".")
@@ -153,7 +153,7 @@ class BaseRelatedObjectNotes extends Component {
                     this.props.relatedObjectValue
                   )
               )
-        )
+          )
         : []
     const assessments = notes.filter(
       note => note.type === NOTE_TYPE.PARTNER_ASSESSMENT
@@ -273,11 +273,13 @@ class BaseRelatedObjectNotes extends Component {
                     <Pie
                       size={{ width: 70, height: 70 }}
                       data={assessmentsSummary[question.id]}
-                      label={"6"}
+                      label={Object.values(
+                        assessmentsSummary[question.id]
+                      ).reduce((acc, cur) => acc + cur, 0)}
                       segmentFill={entity => {
-                        const matching = question.choice.filter(choice => {
-                          return choice.value === entity.data.key
-                        })
+                        const matching = question.choice.filter(
+                          choice => choice.value === entity.data.key
+                        )
                         return matching.length > 0
                           ? matching[0].color
                           : "#bbbbbb"

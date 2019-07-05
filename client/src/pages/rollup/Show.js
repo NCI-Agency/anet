@@ -616,8 +616,8 @@ class BaseRollupShow extends Page {
               {this.state.focusedOrg
                 ? `Reports for ${this.state.focusedOrg.shortName}`
                 : `All reports by ${this.state.orgType
-                  .replace("_", " ")
-                  .toLowerCase()}`}
+                    .replace("_", " ")
+                    .toLowerCase()}`}
             </h5>
             <Field
               name="to"

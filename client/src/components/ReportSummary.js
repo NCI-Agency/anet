@@ -27,14 +27,14 @@ export default class ReportSummary extends Component {
             {/* If the parent does not fetch report.updatedAt, we will not display this
               so we do not get a broken view.
             */
-              report.updatedAt && (
-                <span>
+            report.updatedAt && (
+              <span>
                 : last saved at{" "}
-                  {moment(report.updatedAt).format(
-                    Settings.dateFormats.forms.displayShort.withTime
-                  )}
-                </span>
-              )}
+                {moment(report.updatedAt).format(
+                  Settings.dateFormats.forms.displayShort.withTime
+                )}
+              </span>
+            )}
           </p>
         )}
 

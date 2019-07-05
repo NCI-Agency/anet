@@ -116,8 +116,8 @@ class BaseOrganizationLaydown extends Component {
           {Position.map(positions, position =>
             position.associatedPositions.length
               ? Position.map(position.associatedPositions, (other, idx) =>
-                this.renderPositionRow(position, other, idx)
-              )
+                  this.renderPositionRow(position, other, idx)
+                )
               : this.renderPositionRow(position, null, 0)
           )}
         </tbody>

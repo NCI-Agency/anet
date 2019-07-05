@@ -204,7 +204,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
 
   let $bioTextArea = await $(".biography .public-DraftEditor-content")
   await t.context.driver.wait(
-    async() => {
+    async () => {
       let originalBioText = await $bioTextArea.getText()
       return originalBioText !== ""
     },
