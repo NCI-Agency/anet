@@ -54,6 +54,9 @@ class BaseTaskForm extends Component {
       label: "Inactive"
     }
   ]
+
+  ShortNameField = DictionaryField(Field)
+  LongNameField = DictionaryField(Field)
   TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
   TaskCustomField = DictionaryField(Field)
   PlannedCompletionField = DictionaryField(Field)
@@ -156,15 +159,15 @@ class BaseTaskForm extends Component {
               <Form className="form-horizontal" method="post">
                 <Fieldset title={title} action={action} />
                 <Fieldset>
-                  <Field
+                  <this.ShortNameField
+                    dictProps={Settings.fields.task.shortName}
                     name="shortName"
-                    label={Settings.fields.task.shortName}
                     component={FieldHelper.renderInputField}
                   />
 
-                  <Field
+                  <this.LongNameField
+                    dictProps={Settings.fields.task.longName}
                     name="longName"
-                    label={Settings.fields.task.longName}
                     component={FieldHelper.renderInputField}
                   />
 
@@ -353,7 +356,8 @@ class BaseTaskForm extends Component {
         buttons.push({
           id: key,
           value: key,
-          label: list[key]
+          label: list[key].label,
+          color: list[key].color
         })
       }
     }

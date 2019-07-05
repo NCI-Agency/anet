@@ -193,11 +193,10 @@ test("Publish report chain", async t => {
   ] = $homeTileErin
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
   await $reportsPendingErin.click()
-
   await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
   await assertElementNotPresent(
     t,
-    ".read-report-button",
+    ".report-collection",
     "Erin should not be allowed to approve her own reports",
     shortWaitMs
   )
@@ -215,14 +214,18 @@ test("Publish report chain", async t => {
   ] = $homeTileJacob
   await t.context.driver.wait(until.elementIsVisible($reportsPendingJacob))
   await $reportsPendingJacob.click()
-
   await t.context.driver.wait(until.stalenessOf($reportsPendingJacob))
-  let $firstReadReportButtonJacob = await $(".read-report-button")
-  await t.context.driver.wait(
-    until.elementIsEnabled($firstReadReportButtonJacob)
-  )
-  await $firstReadReportButtonJacob.click()
 
+  let $reportsPendingJacobSummaryTab = await $(
+    ".report-collection button[value='summary']"
+  )
+  await t.context.driver.wait(
+    until.elementIsEnabled($reportsPendingJacobSummaryTab)
+  )
+  await $reportsPendingJacobSummaryTab.click()
+
+  let $firstReadReportButtonJacob = await $(".read-report-button")
+  await $firstReadReportButtonJacob.click()
   await pageHelpers.assertReportShowStatusText(
     t,
     "This report is PENDING approvals."
@@ -244,8 +247,16 @@ test("Publish report chain", async t => {
   ] = $homeTile
   await t.context.driver.wait(until.elementIsVisible($reportsPending))
   await $reportsPending.click()
-
   await t.context.driver.wait(until.stalenessOf($reportsPending))
+
+  let $reportsPendingRebeccaSummaryTab = await $(
+    ".report-collection button[value='summary']"
+  )
+  await t.context.driver.wait(
+    until.elementIsEnabled($reportsPendingRebeccaSummaryTab)
+  )
+  await $reportsPendingRebeccaSummaryTab.click()
+
   let $firstReadReportButton = await $(".read-report-button")
   await t.context.driver.wait(until.elementIsEnabled($firstReadReportButton))
   await $firstReadReportButton.click()
@@ -273,8 +284,13 @@ test("Publish report chain", async t => {
   ] = $homeTileArthur
   await t.context.driver.wait(until.elementIsVisible($approvedReports))
   await $approvedReports.click()
-
   await t.context.driver.wait(until.stalenessOf($approvedReports))
+
+  let $reportsPendingArthurSummaryTab = await $(
+    ".report-collection button[value='summary']"
+  )
+  await $reportsPendingArthurSummaryTab.click()
+
   let $firstReadApprovedReportButton = await $(".read-report-button")
   await t.context.driver.wait(
     until.elementIsEnabled($firstReadApprovedReportButton)
@@ -320,6 +336,9 @@ test("Publish report chain", async t => {
   await $$rollupDateRange[0].sendKeys(Key.TAB)
   await $$rollupDateRange[1].sendKeys(Key.TAB)
   await t.context.driver.sleep(longWaitMs) // wait for report collection to load
+
+  let $rollupTableTab = await $(".report-collection button[value='table']")
+  await $rollupTableTab.click()
 
   let $reportCollection = await $(".report-collection table")
   await t.context.driver.wait(until.elementIsVisible($reportCollection))

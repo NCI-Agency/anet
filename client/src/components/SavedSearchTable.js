@@ -60,6 +60,8 @@ export default class SavedSearchTable extends Component {
   }
 
   render() {
-    return <ReportCollection reports={this.state.reports.list} />
+    return this.state.reports.list ? (
+      <ReportCollection reports={this.state.reports.list} />
+    ) : null
   }
 }
