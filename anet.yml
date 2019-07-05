@@ -351,10 +351,13 @@ dictionary:
               choice:
                 - value: "1"
                   label: one
+                  color: '#c2ffb3'
                 - value: "2"
                   label: two
+                  color: '#ffe396'
                 - value: "3"
                   label: three
+                  color: '#ff8279'
             - id: test2
               test:
                 regex: "^(Z|z)"
@@ -363,10 +366,13 @@ dictionary:
               choice:
                 - value: "3"
                   label: three
+                  color: '#ff8279'
                 - value: "4"
                   label: four
+                  color: '#ffe396'
                 - value: "5"
                   label: five
+                  color: '#c2ffb3'
             - id: test3
               test:
                 regex: "^(Z|z)"
@@ -375,10 +381,13 @@ dictionary:
               choice:
                 - value: "1"
                   label: one
+                  color: '#c2ffb3'
                 - value: "2"
                   label: two
+                  color: '#ff8279'
                 - value: "3"
                   label: three
+                  color: '#ff8279'
 
       position:
         name: Afghan Tashkil

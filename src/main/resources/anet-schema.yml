@@ -471,7 +471,8 @@ properties:
                                 type: string
                               label:
                                 type: string
-
+                              color:
+                                type: string
 
           position:
             type: object

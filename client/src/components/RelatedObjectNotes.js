@@ -18,6 +18,7 @@ import NotificationBadge from "react-notification-badge"
 import "./BlueprintOverrides.css"
 import { Button, Panel } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
+import Pie from "components/graphs/Pie"
 
 export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 
@@ -139,8 +140,8 @@ class BaseRelatedObjectNotes extends Component {
     const questions =
       this.props.relatedObject &&
       Settings.fields.principal.person.assessment &&
-        this.props.relatedObject.relatedObjectType === "people" &&
-        this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
+      this.props.relatedObject.relatedObjectType === "people" &&
+      this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
         ? Settings.fields.principal.person.assessment.questions.filter(
           question =>
             !question.test ||
@@ -163,8 +164,10 @@ class BaseRelatedObjectNotes extends Component {
       questions.forEach(question => {
         if (!counters[question.id]) counters[question.id] = {}
         const counter = counters[question.id]
-        counter[assessmentJson[question.id]] =
-          ++counter[assessmentJson[question.id]] || 1
+        if (assessmentJson[question.id]) {
+          counter[assessmentJson[question.id]] =
+            ++counter[assessmentJson[question.id]] || 1
+        }
       })
       return counters
     }, {})
@@ -262,20 +265,44 @@ class BaseRelatedObjectNotes extends Component {
               {this.props.relatedObjectValue.name}
             </Panel.Heading>
             <Panel.Body>
-              {questions.map(question => (
-                <React.Fragment key={question.id}>
-                  {question.label}
-                  <br />
-                  {question.choice.map(choice => (
-                    <span key={choice.value}>
-                      {choice.label} (
-                      <b>{assessmentsSummary[question.id][choice.value]}</b>){" "}
-                    </span>
-                  ))}
-                  <br />
-                  <br />
-                </React.Fragment>
-              ))}
+              {questions.map(question => {
+                return (
+                  <React.Fragment key={question.id}>
+                    {question.label}
+                    <br />
+                    <Pie
+                      size={{ width: 70, height: 70 }}
+                      data={assessmentsSummary[question.id]}
+                      label={"6"}
+                      segmentFill={entity => {
+                        const matching = question.choice.filter(choice => {
+                          return choice.value === entity.data.key
+                        })
+                        return matching.length > 0
+                          ? matching[0].color
+                          : "#bbbbbb"
+                      }}
+                      segmentLabel={d => d.data.value}
+                    />
+
+                    <br />
+                    {question.choice.map(choice => (
+                      <>
+                        <span
+                          key={choice.value}
+                          style={{ backgroundColor: choice.color }}
+                        >
+                          {choice.label} :
+                          <b>{assessmentsSummary[question.id][choice.value]}</b>
+                        </span>{" "}
+                        {"  "}
+                      </>
+                    ))}
+                    <br />
+                    <br />
+                  </React.Fragment>
+                )
+              })}
             </Panel.Body>
           </Panel>
         )}
