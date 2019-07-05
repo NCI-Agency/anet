@@ -29,8 +29,6 @@ import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
 
-const NO_REPORT_FILTER = "NO_FILTER"
-
 class BaseOrganizationShow extends Page {
   static propTypes = {
     ...pagePropTypes,

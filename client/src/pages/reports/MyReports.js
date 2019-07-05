@@ -1,4 +1,3 @@
-import autobind from "autobind-decorator"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import { AnchorNavItem } from "components/Nav"

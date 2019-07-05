@@ -26,10 +26,9 @@ const AdvancedSelectTarget = ({ overlayRef }) => (
   </Row>
 )
 AdvancedSelectTarget.propTypes = {
-  overlayRef: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
-  ])
+  overlayRef: PropTypes.shape({
+    current: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
+  })
 }
 
 const FilterList = props => {

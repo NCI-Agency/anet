@@ -20,6 +20,7 @@ class ReportCollectionContainer extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
     mapId: PropTypes.string,
+    pagination: PropTypes.object,
     paginationKey: PropTypes.string,
     setPagination: PropTypes.func.isRequired
   }
@@ -62,7 +63,7 @@ class ReportCollectionContainer extends Component {
           ? this.curPageNum
           : pageNum
         : 0,
-      pageSize: withPagination ? 1 : 0
+      pageSize: withPagination ? 10 : 0
     })
     return reportsQueryParams
   }
