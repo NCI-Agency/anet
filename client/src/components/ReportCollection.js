@@ -79,7 +79,7 @@ export default class ReportCollection extends Component {
     super(props)
 
     this.state = {
-      viewFormat: this.props.viewFormats[0]
+      viewFormat: this.props.viewFormats[1]
     }
   }
 
