@@ -10,7 +10,7 @@ public class AccountDeactivationEmail implements AnetEmailAction {
 
   @Override
   public String getTemplateName() {
-    return "/emails/accountDeactivation.tflh";
+    return "/emails/accountDeactivation.ftlh";
   }
 
   @Override
