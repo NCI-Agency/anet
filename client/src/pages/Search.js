@@ -302,7 +302,6 @@ class Search extends Page {
                   NATO Vector Graphics (nvg)
                 </MenuItem>
               </Dropdown.Menu>
-              `
             </Dropdown>
           )}
           {this.state.didSearch && (
