@@ -154,13 +154,16 @@ class Search extends Page {
     if (config.sortOrder) {
       subQuery.sortOrder = config.sortOrder
     }
+    const queryVarName = includeAll
+      ? searchType + "QueryAll"
+      : searchType + "Query"
     let gqlPart = new GQL.Part(/* GraphQL */ `
       ${
   includeAll ? config.listAllName : config.listName
-} (query:$${searchType}Query) {
+} (query:$${queryVarName}) {
         pageNum, pageSize, totalCount, list { ${config.fields} }
       }
-      `).addVariable(searchType + "Query", config.variableType, subQuery)
+      `).addVariable(queryVarName, config.variableType, subQuery)
     return gqlPart
   }
 
@@ -175,10 +178,12 @@ class Search extends Page {
         const goToPageNum = this.getPageNum(type, pageNum)
         return this.getSearchPart(type, query, goToPageNum, pageSize)
       })
-      // add query for all reports
-      parts.push(
-        this.getSearchPart(SEARCH_OBJECT_TYPES.REPORTS, query, 0, 0, true)
-      )
+      if (Object.keys(queryTypes).includes(SEARCH_OBJECT_TYPES.REPORTS)) {
+        // add query for all reports
+        parts.push(
+          this.getSearchPart(SEARCH_OBJECT_TYPES.REPORTS, query, 0, 0, true)
+        )
+      }
       return callback(parts)
     } else {
       this.setState({
