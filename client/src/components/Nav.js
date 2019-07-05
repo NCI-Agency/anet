@@ -93,6 +93,7 @@ class BaseNav extends Component {
     const inAdmin = path.indexOf("/admin") === 0
     const inOrg = path.indexOf("/organizations") === 0
     const inInsights = path.indexOf("/insights") === 0
+    const inDashboards = path.indexOf("/dashboards") === 0
 
     const myOrg = currentUser.position
       ? currentUser.position.organization
@@ -201,6 +202,20 @@ class BaseNav extends Component {
                 onClick={resetPages}
               >
                 <MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
+              </Link>
+            ))}
+          </NavDropdown>
+        )}
+
+        {Settings.dashboards && (
+          <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
+            {Settings.dashboards.map(dashboard => (
+              <Link
+                to={`/dashboards/${dashboard.type}/${dashboard.label}`}
+                key={dashboard.label}
+                onClick={resetPages}
+              >
+                <MenuItem>{dashboard.label}</MenuItem>
               </Link>
             ))}
           </NavDropdown>

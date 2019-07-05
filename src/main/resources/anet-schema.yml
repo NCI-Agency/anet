@@ -27,6 +27,10 @@ definitions:
         type: string
         title: The label for this field
         description: Used in the UI where a label for the field is shown.
+      color:
+        type: string
+        title: The color of the label, optional
+        description: Used in the UI where a label for the field is shown.
 
 # definition for fields that allow free-form entry
   inputField:
@@ -37,6 +41,10 @@ definitions:
           type: string
           title: The placeholder for this field
           description: Used in the UI where a placeholder for the field is shown (example input).
+        componentClass:
+          type: string
+          title: The bootstrap componet class
+          description: Used to determine how the user interface of this particular field looks.
 
 # definition for fields that present a choice to be selected from
   choiceField:
@@ -48,10 +56,13 @@ definitions:
           title: The placeholder for this field
           description: Used in the UI where a placeholder for the field is shown (example input).
           additionalProperties:
-            type: string
-          examples:
-            - black: Black
-              white: White
+            "$ref": "#/definitions/labeledField"
+          examples: 
+            - RED:
+                label: Red
+                color: "#FF0000"
+              WHITE:
+                label: White
       required: [enum]
 
 #########################################################
@@ -191,17 +202,15 @@ properties:
             description: Used in the UI where a short label for tasks is shown.
             examples: [Task]
           shortName:
-            type: string
-            examples: [Task number]
+            "$ref": "#/definitions/inputField"
           longLabel:
             type: string
             title: The long label for this field
             description: Used in the UI where a long label for tasks is shown.
             examples: [Tasks and Milestones]
           longName:
-            type: string
-            examples: [Tasks description]
-          projectedCompletion:
+            "$ref": "#/definitions/inputField"
+          projectedCompletion: 
             "$ref": "#/definitions/inputField"
           plannedCompletion:
             "$ref": "#/definitions/inputField"
@@ -594,7 +603,25 @@ properties:
             options:
               type: object
               additionalProperties: true
+  dashboards:
+    type: array
+    items:
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+        data:
+          type: string
+        type:
+          type: string
+          enum:
+            - kanban
+            - decisives
 
+  decisives:
+    type: array
+
+    
   automaticallyInactivateUsers:
     type: object
     required: [emailRemindersDaysPrior]

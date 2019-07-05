@@ -26,6 +26,7 @@ redirectToHttps: false
 assets:
   overrides:
     /imagery: imagery
+    /data: data
 
 # Settings for the SMTP server to send email 
 smtp:
@@ -197,13 +198,17 @@ dictionary:
 
     task:
       shortLabel: Effort / Task
-      shortName: Task number
+      shortName:
+        label: Effort number
+        placeholder: Enter an effort name, example....
+
       longLabel: Tasks and Milestones
-      longName: Task description
-      projectedCompletion:
-        label: Projected Completion
-      plannedCompletion:
-        label: Planned Completion
+      longName:
+        label: Task description
+        placeholder: Enter an effort description, example ....
+        componentClass: textarea
+        style:
+          height: 400px
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task
@@ -213,13 +218,15 @@ dictionary:
       customFieldEnum1:
         label: Project status
         enum:
-          OPEN: Open
-          CLOSED: Closed
-      customFieldEnum2:
-        label: Custom field enum 2
-        enum:
-          CUSTOMVALUE1: Custom value 1
-          CUSTOMVALUE2: Custom value 2
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
       responsibleOrg: Responsible organization
       responsiblePositions:
         label: Responsible positions
@@ -400,6 +407,17 @@ dictionary:
           layers: GEBCO_LATEST
           format: "image/png"
 
-  automaticallyInactivateUsers:
-    emailRemindersDaysPrior: [15, 30, 45]
-    ignoredDomainNames: []
+#  automaticallyInactivateUsers:
+#    emailRemindersDaysPrior: [15, 30, 45]
+#    ignoredDomainNames: []
+
+  dashboards:
+    - label: dashboard0
+      data: /data/dashboards/dashboard0.json
+      type: kanban
+    - label: dashboard1
+      data: /data/dashboards/dashboard1.json
+      type: kanban
+    - label: decisives
+      data: /data/dashboards/decisives.json
+      type: decisives
