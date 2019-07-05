@@ -8,12 +8,23 @@ import "@fullcalendar/daygrid/main.css"
 import "@fullcalendar/timegrid/main.css"
 import "@fullcalendar/list/main.css"
 import "./Calendar.css"
-
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 
 export default class Calendar extends Component {
+  static propTypes = {
+    events: PropTypes.array,
+    calendarComponentRef: PropTypes.shape({
+      current: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
+    })
+  }
+
+  static defaultProps = {
+    events: []
+  }
+
   render() {
-    const { events, calendarComponentRef, eventRender } = this.props
+    const { events, calendarComponentRef } = this.props
     return (
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -54,7 +65,6 @@ export default class Calendar extends Component {
         timeGridEventMinHeight={20}
         ref={calendarComponentRef}
         events={events}
-        eventRender={eventRender}
         eventOverlap
         eventLimit
         eventClick={eventInfo => {}}
