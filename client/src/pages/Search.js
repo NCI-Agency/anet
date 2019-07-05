@@ -22,7 +22,17 @@ import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React from "react"
-import { Alert, Badge, Button, Modal, Nav, Table } from "react-bootstrap"
+import {
+  Alert,
+  Badge,
+  Button,
+  Dropdown,
+  Glyphicon,
+  MenuItem,
+  Modal,
+  Nav,
+  Table
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -272,18 +282,27 @@ class Search extends Page {
         </SubNav>
         <div className="pull-right">
           {!noResults && (
-            <Button
-              onClick={this.exportSearchResults}
-              id="exportSearchResultsButton"
-              style={{ marginRight: 12 }}
-              title="Export search results"
-            >
-              <img
-                src={DOWNLOAD_ICON}
-                height={16}
-                alt="Export search results"
-              />
-            </Button>
+            <Dropdown id="dropdown-custom-1">
+              <Dropdown.Toggle>
+                Export{" "}
+                <img
+                  src={DOWNLOAD_ICON}
+                  height={16}
+                  alt="Export search results"
+                />
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="super-colors">
+                <MenuItem onClick={this.createExportResultsFunctionFor("xlsx")}>
+                  Excel (xlsx)
+                </MenuItem>
+                <MenuItem onClick={this.createExportResultsFunctionFor("kml")}>
+                  Google Earth (kml)
+                </MenuItem>
+                <MenuItem onClick={this.createExportResultsFunctionFor("nvg")}>
+                  NATO Vector Graphics (nvg)
+                </MenuItem>
+              </Dropdown.Menu>
+            </Dropdown>
           )}
           {this.state.didSearch && (
             <Button
@@ -640,17 +659,18 @@ class Search extends Page {
     this.setState({ showSaveSearch: false })
   }
 
-  _exportSearchResultsCallback = parts => {
-    GQL.runExport(parts, "xlsx")
-      .then(blob => {
-        FileSaver.saveAs(blob, "anet_export.xlsx")
-      })
-      .catch(error => this.setState({ error: error }))
-  }
-
-  exportSearchResults = () => {
-    this._dataFetcher(this.props, this._exportSearchResultsCallback, 0, 0)
-  }
+  createExportResultsFunctionFor = exportType => () =>
+    this._dataFetcher(
+      this.props,
+      parts =>
+        GQL.runExport(parts, exportType)
+          .then(blob => {
+            FileSaver.saveAs(blob, `anet_export.${exportType}`)
+          })
+          .catch(error => this.setState({ error: error })),
+      0,
+      0
+    )
 }
 
 const mapStateToProps = (state, ownProps) => ({
