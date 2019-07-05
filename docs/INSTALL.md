@@ -123,7 +123,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
-- **database**: The configuration for your database. ANET supports either sqlite for development, or Microsoft SQL Server for production.  Additonal Instructions can be found here instructions here: https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html for avaiable configuration options for the database connection. 
+- **database**: The configuration for your database. ANET supports either PostgreSQL or Microsoft SQL Server.  Additonal Instructions can be found here instructions here: https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.
@@ -199,9 +199,14 @@ dictionary:
 
     task:
       shortLabel: Task
-      shortName: Task number
+      shortName:
+        label: Task number
+        placeholder: Enter an effort name, example....
       longLabel: Tasks and Milestones
-      longName: Task description
+      longName:
+        label: Task description
+        placeholder: Enter an effort description, example ....
+        componentClass: textarea
       projectedCompletion:
         label: Projected Completion
       plannedCompletion:
@@ -215,13 +220,22 @@ dictionary:
       customFieldEnum1:
         label: Project status
         enum:
-          OPEN: Open
-          CLOSED: Closed
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
       customFieldEnum2:
         label: Custom field enum 2
         enum:
-          CUSTOMVALUE1: Custom value 1
-          CUSTOMVALUE2: Custom value 2
+          CUSTOMVALUE1:
+            label: Custom value 1
+          CUSTOMVALUE2:
+            label: Custom value 2
       responsibleOrg: Responsible organization
       responsiblePositions:
         label: Responsible positions
@@ -401,6 +415,17 @@ dictionary:
   automaticallyInactivateUsers:
     emailRemindersDaysPrior: [15, 30, 45]
     ignoredDomainNames: []
+
+  dashboards:
+    - label: dashboard0
+      data: /data/dashboards/dashboard0.json
+      type: kanban
+    - label: dashboard1
+      data: /data/dashboards/dashboard1.json
+      type: kanban
+    - label: decisives
+      data: /data/dashboards/decisives.json
+      type: decisives
 ```
 As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 
@@ -494,27 +519,110 @@ and for WMTS-type providers:
 
 If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
 
-1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `maps`. Inside that, create a directory called `imagery`. 
-1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `maps/imagery/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
-1. Edit the `bin/anet.bat` (Windows), or `bin/anet` (Linux/Mac) file. Find the line that sets the `CLASSPATH` variable. (It's really long and lists a bunch of .jar files).  Right after that line, add the line: 
-
-Windows (bin/anet.bat):
+1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`. 
+```yaml
+assets:
+  overrides:
+    /imagery: imagery
 ```
-set CLASSPATH=%APP_HOME%\maps\;%CLASSPATH%
-
-```
-Linux/Mac (bin/anet): 
-```
-CLASSPATH=$APP_HOME/maps/:$CLASSPATH
-```
-
-This will put the imagery folder on the server's classpath.  ANET looks for a folder called imagery and will serve those tiles up on the `/imagery` path. 
+1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
 1. To use this new tile source, add under `baseLayers`:
 ```yaml
       - name: OSM
         default: true
         type: tile
-        url: "https://<your-anet-server-url>/imagery/{z}/{x}/{y}.png"
+        url: "/imagery/street/{z}/{x}/{y}.png"
 ```
 
-Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/0/0/0.png` and hopefully seeing a tile appear. 
+Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/street/0/0/0.png` and hopefully seeing a tile appear. 
+
+# How to configure dashboards
+
+A system administrator can add an modify dashboards, by editing the following section in `anet.yml`
+
+```yaml
+  dashboards:
+    - label: dashboard0
+      data: /data/dashboards/dashboard0.json
+      type: kanban
+    - label: dashboard1
+      data: /data/dashboards/dashboard1.json
+      type: kanban
+    - label: decisives
+      data: /data/dashboards/decisives.json
+      type: decisives
+```
+
+For each dashboard, a `label` must be provided which determines how the dashboard appears in the navigation structure, `type` determines the type of the dashboad (currently only `kanban` and `decisives` are supported as types).
+The `data` property, points to a file containing the configuration of the dashboard. The location of this directory can be specified in the `assets` section of `anet.yml` - in the example below pointing to a directory named `data` relative to the anet working directory.
+
+Changing the content of dashboard files does not require an application restart, reloading the page in the browser will be sufficient for the dashboards to update.
+
+```yaml
+assets:
+  overrides:
+    /data: data
+```
+
+
+## Kanban dashboards data file
+
+```json
+{
+  "title": "Dashboard 0",
+  "columns": [
+    {
+      "name": "Priority 1",
+      "tasks": [
+        "1145e584-4485-4ce0-89c4-2fa2e1fe846a",
+        "fdf107e7-a88a-4dc4-b744-748e9aaffabc"
+      ]
+    },
+    {
+      "name": "Priority 2",
+      "tasks": [
+        "df920c99-10ea-44e8-940f-cb1d1cbd22da",
+        "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7",
+        "75d4009d-7c79-42e0-aa2f-d79d158ec8d6",
+        "2200a820-c4c7-4c9c-946c-f0c9c9e045c5"
+      ]
+    }
+  ]
+}
+```
+
+## Decisives dashboards data file
+
+```json
+[
+  {
+    "label": "Decisives 1",
+    "tasks": [
+      "1b5eb36b-456c-46b7-ae9e-1c89e9075292",
+      "7fdef880-1bf3-4e56-8476-79166324023f"
+    ],
+    "positions": [
+      "879121d2-d265-4d26-8a2b-bd073caa474e",
+      "1a45ccd6-40e3-4c51-baf5-15e7e9b8f03d"
+  ],
+    "locations": [
+      "cc49bb27-4d8f-47a8-a9ee-af2b68b992ac",
+      "8c138750-91ce-41bf-9b4c-9f0ddc73608b"
+    ]
+  },
+  {
+    "label": "Decisives 2",
+    "tasks": [
+      "df920c99-10ea-44e8-940f-cb1d1cbd22da",
+      "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7"
+      ],
+    "positions": [
+      "61371573-eefc-4b85-81a0-27d6c0b78c58"
+    ],
+    "locations": [
+      "5046a870-6c2a-40a7-9681-61a1d6eeaa07",
+      "9f364c59-953e-4c17-919c-648ea3a74e36"
+    ]
+  }
+]
+```

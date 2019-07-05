@@ -206,19 +206,6 @@ export const renderReadonlyField = ({
   )
 }
 
-export const renderValue = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
-}) => {
-  const id = field.id || field.name
-  return (
-    <FormControl.Static componentClass={"span"} id={id}>
-      {getHumanValue(field)}
-    </FormControl.Static>
-  )
-}
-
 export const renderSpecialField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
@@ -271,9 +258,17 @@ export const renderButtonToggleGroup = ({
         if (!button) {
           return null
         }
-        const { label, ...props } = button
+        let { label, color, style, ...props } = button
+        if (field.value === button.value && color) {
+          style = { ...style, backgroundColor: color }
+        }
         return (
-          <ToggleButton {...props} key={button.value} value={button.value}>
+          <ToggleButton
+            {...props}
+            key={button.value}
+            value={button.value}
+            style={style}
+          >
             {label}
           </ToggleButton>
         )

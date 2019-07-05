@@ -18,7 +18,7 @@ import "./RichTextEditor.css"
 class RichTextEditor extends Component {
   static propTypes = {
     value: PropTypes.string,
-    onChange: PropTypes.func.isRequired,
+    onChange: PropTypes.func,
     onHandleBlur: PropTypes.func,
     className: PropTypes.string
   }
@@ -252,8 +252,18 @@ const ReactImage = props => {
     .getData()
   return <img src={imageDataSrc(src)} height={height} width={width} alt={alt} />
 }
+ReactImage.propTypes = {
+  contentState: PropTypes.object,
+  entityKey: PropTypes.string
+}
 
 class StyleButton extends React.Component {
+  static propTypes = {
+    style: PropTypes.string,
+    active: PropTypes.bool,
+    onToggle: PropTypes.func,
+    label: PropTypes.string
+  }
   constructor() {
     super()
     this.onToggle = e => {
@@ -289,7 +299,7 @@ const BLOCK_TYPES = [
 ]
 
 const BlockStyleControls = props => {
-  const { editorState } = props
+  const { editorState, onToggle } = props
   const selection = editorState.getSelection()
   const blockType = editorState
     .getCurrentContent()
@@ -303,12 +313,16 @@ const BlockStyleControls = props => {
           key={type.label}
           active={type.style === blockType}
           label={type.label}
-          onToggle={props.onToggle}
+          onToggle={onToggle}
           style={type.style}
         />
       ))}
     </div>
   )
+}
+BlockStyleControls.propTypes = {
+  editorState: PropTypes.object,
+  onToggle: PropTypes.func
 }
 
 const INLINE_STYLES = [
@@ -318,7 +332,8 @@ const INLINE_STYLES = [
 ]
 
 const InlineStyleControls = props => {
-  const currentStyle = props.editorState.getCurrentInlineStyle()
+  const { editorState, onToggle } = props
+  const currentStyle = editorState.getCurrentInlineStyle()
 
   return (
     <div className="RichEditor-controls">
@@ -327,12 +342,16 @@ const InlineStyleControls = props => {
           key={type.label}
           active={currentStyle.has(type.style)}
           label={type.label}
-          onToggle={props.onToggle}
+          onToggle={onToggle}
           style={type.style}
         />
       ))}
     </div>
   )
+}
+InlineStyleControls.propTypes = {
+  editorState: PropTypes.object,
+  onToggle: PropTypes.func
 }
 
 export default RichTextEditor

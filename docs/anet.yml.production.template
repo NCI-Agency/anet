@@ -118,7 +118,6 @@ logging:
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-    "org.sqlite.JDBC" : INFO
     "io.dropwizard.assets.AssetsBundle" : INFO
     "io.dropwizard.assets.*" : INFO
     "waffle.servlet.NegotiateSecurityFilter" : INFO
@@ -184,9 +183,14 @@ dictionary:
 
     task:
       shortLabel: Task
-      shortName: Task number
+      shortName:
+        label: Task number
+        placeholder: Enter an effort name, example....
       longLabel: Tasks and Milestones
-      longName: Task description
+      longName:
+        label: Task description
+        placeholder: Enter an effort description, example ....
+        componentClass: textarea
       projectedCompletion:
         label: Projected Completion
       plannedCompletion:
@@ -200,13 +204,22 @@ dictionary:
       customFieldEnum1:
         label: Project status
         enum:
-          OPEN: Open
-          CLOSED: Closed
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
       customFieldEnum2:
         label: Custom field enum 2
         enum:
-          CUSTOMVALUE1: Custom value 1
-          CUSTOMVALUE2: Custom value 2
+          CUSTOMVALUE1:
+            label: Custom value 1
+          CUSTOMVALUE2:
+            label: Custom value 2
       responsibleOrg: Responsible organization
       responsiblePositions:
         label: Responsible positions

@@ -21,8 +21,8 @@ let capabilities = {
   // but that is so prone to unexpected failures as to be unusable.
   // So test with latest stable Chrome instead.
   browserName: "Chrome",
-  browser_version: "72.0",
-  chromeOptions: {
+  browser_version: "75.0",
+  "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: ["--start-maximized"]
   },
@@ -32,8 +32,6 @@ let capabilities = {
   project: "ANET",
   build: require("git-describe").gitDescribeSync(".", { match: "[0-9]*" })
     .semverString,
-  // Will be replaced for each test:
-  name: "frontend tests",
   // Credentials for BrowserStack:
   "browserstack.user": user,
   "browserstack.key": key,

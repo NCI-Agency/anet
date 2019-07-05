@@ -8,7 +8,7 @@ import React, { Component } from "react"
 import CALENDAR_ICON from "resources/calendar.png"
 import "./BlueprintOverrides.css"
 
-const CalendarIcon = id => (
+const CalendarIcon = inputRef => (
   <img
     src={CALENDAR_ICON}
     alt=""
@@ -16,9 +16,8 @@ const CalendarIcon = id => (
     height={24}
     style={{ verticalAlign: "middle" }}
     onClick={() => {
-      const element = document.getElementById(id)
-      if (element && element.focus) {
-        element.focus()
+      if (inputRef && inputRef.focus) {
+        inputRef.focus()
       }
     }}
   />
@@ -39,9 +38,11 @@ export default class CustomDateInput extends Component {
     withTime: false
   }
 
+  inputRef = React.createRef()
+
   render() {
     const { id, showIcon, withTime, value, onChange, onBlur } = this.props
-    const rightElement = showIcon && CalendarIcon(id)
+    const rightElement = showIcon && CalendarIcon(this.inputRef.current)
     const width = 8 + (showIcon ? 3 : 0) + (withTime ? 3 : 0)
     const style = { width: `${width}em`, fontSize: "1.1em" }
     const dateFormats = withTime
@@ -59,7 +60,12 @@ export default class CustomDateInput extends Component {
       }
     return (
       <DateInput
-        inputProps={{ id, style, onBlur }}
+        inputProps={{
+          id,
+          style,
+          onBlur,
+          inputRef: ref => (this.inputRef.current = ref)
+        }}
         rightElement={rightElement}
         value={value}
         onChange={onChange}

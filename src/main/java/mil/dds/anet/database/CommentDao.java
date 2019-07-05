@@ -13,12 +13,8 @@ public class CommentDao extends AnetBaseDao<Comment> {
 
   private static String[] fields =
       {"uuid", "createdAt", "updatedAt", "authorUuid", "reportUuid", "text"};
-  private static String tableName = "comments";
-  public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
-
-  public CommentDao() {
-    super("Comments", tableName, COMMENT_FIELDS, null);
-  }
+  public static String TABLE_NAME = "comments";
+  public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   public Comment getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);

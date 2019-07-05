@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
@@ -94,48 +93,6 @@ public class Utils {
     } else {
       return value;
     }
-  }
-
-
-  /**
-   * Converts a text search query into a SQL Server Full Text query. If the text ends with a * then
-   * we do a prefix match on the string else we do an inflectional match.
-   */
-  public static String getSqlServerFullTextQuery(String text) {
-    String cleanText = text.trim().replaceAll("[\"*]", "");
-    if (text.endsWith("*")) {
-      cleanText = "\"" + cleanText + "*\"";
-    } else {
-      cleanText = "FORMSOF(INFLECTIONAL, \"" + cleanText + "\")";
-    }
-    return cleanText;
-  }
-
-
-  /**
-   * Just remove the * at the end.
-   */
-  public static String getSqliteFullTextQuery(String text) {
-    return text.trim().replaceAll("[\"*]", "");
-  }
-
-  /**
-   * Prepares text to be used in a LIKE query in SQL. Removes the * at the end.
-   */
-  public static String prepForLikeQuery(String text) {
-    return text.trim().replaceAll("[\"*]", "");
-  }
-
-  public static List<String> addOrderBy(SortOrder sortOrder, String table, String... columns) {
-    final List<String> clauses = new ArrayList<>();
-    for (final String column : columns) {
-      if (table == null) {
-        clauses.add(String.format("%1$s %2$s", column, sortOrder));
-      } else {
-        clauses.add(String.format("%1$s.%2$s %3$s", table, column, sortOrder));
-      }
-    }
-    return clauses;
   }
 
   /**

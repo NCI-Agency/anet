@@ -23,6 +23,11 @@ developmentMode: true
 # You will need to add an HTTP/80 adapter
 redirectToHttps: false
 
+assets:
+  overrides:
+    /imagery: imagery
+    /data: data
+
 # Settings for the SMTP server to send email 
 smtp:
   hostname: ${ANET_SMTP_SERVER}
@@ -128,7 +133,6 @@ logging:
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-    "org.sqlite.JDBC" : INFO
     "io.dropwizard.assets.AssetsBundle" : TRACE
     "io.dropwizard.assets.*" : TRACE
     "waffle.servlet.NegotiateSecurityFilter" : TRACE
@@ -194,13 +198,17 @@ dictionary:
 
     task:
       shortLabel: Effort / Task
-      shortName: Task number
+      shortName:
+        label: Effort number
+        placeholder: Enter an effort name, example....
+
       longLabel: Tasks and Milestones
-      longName: Task description
-      projectedCompletion:
-        label: Projected Completion
-      plannedCompletion:
-        label: Planned Completion
+      longName:
+        label: Task description
+        placeholder: Enter an effort description, example ....
+        componentClass: textarea
+        style:
+          height: 400px
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task
@@ -210,13 +218,15 @@ dictionary:
       customFieldEnum1:
         label: Project status
         enum:
-          OPEN: Open
-          CLOSED: Closed
-      customFieldEnum2:
-        label: Custom field enum 2
-        enum:
-          CUSTOMVALUE1: Custom value 1
-          CUSTOMVALUE2: Custom value 2
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
       responsibleOrg: Responsible organization
       responsiblePositions:
         label: Responsible positions
@@ -417,6 +427,10 @@ dictionary:
         default: true
         type: tile
         url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
+      - name: OSM - local
+        default: true
+        type: tile
+        url: "/imagery/street/{z}/{x}/{y}.png"
       - name: World Imagery Tiles
         default: false
         type: tile
@@ -431,6 +445,17 @@ dictionary:
           layers: GEBCO_LATEST
           format: "image/png"
 
-  automaticallyInactivateUsers:
-    emailRemindersDaysPrior: [15, 30, 45]
-    ignoredDomainNames: []
+#  automaticallyInactivateUsers:
+#    emailRemindersDaysPrior: [15, 30, 45]
+#    ignoredDomainNames: []
+
+  dashboards:
+    - label: dashboard0
+      data: /data/dashboards/dashboard0.json
+      type: kanban
+    - label: dashboard1
+      data: /data/dashboards/dashboard1.json
+      type: kanban
+    - label: decisives
+      data: /data/dashboards/decisives.json
+      type: decisives

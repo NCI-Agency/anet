@@ -736,7 +736,7 @@
 			referencedColumnNames="id" referencedTableName="tags" />
 	</changeSet>
 
-	<changeSet id="add-banner-text" author="evdhoudt">
+	<changeSet id="add-banner-text" author="evdhoudt" dbms="mssql">
 		<insert tableName="adminSettings">
 			<column name="key" value="GENERAL_BANNER_TEXT" />
 		</insert>
@@ -747,7 +747,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="add-banner-text" author="evdhoudt">
+	<changeSet id="add-banner-text" author="evdhoudt" dbms="mssql">
 		<insert tableName="adminSettings">
 			<column name="key" value="GENERAL_BANNER_TEXT" />
 		</insert>
@@ -758,7 +758,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="add-banner-level" author="evdhoudt">
+	<changeSet id="add-banner-level" author="evdhoudt" dbms="mssql">
 		<insert tableName="adminSettings">
 			<column name="key" value="GENERAL_BANNER_LEVEL" />
 			<column name="value" value="notice" />
@@ -770,7 +770,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="add-banner-visibility" author="evdhoudt">
+	<changeSet id="add-banner-visibility" author="evdhoudt" dbms="mssql">
 		<insert tableName="adminSettings">
 			<column name="key" value="GENERAL_BANNER_VISIBILITY" />
 			<column name="value" value="1" />
@@ -782,7 +782,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="add_external_documentation_link_text" author="evdhoudt">
+	<changeSet id="add_external_documentation_link_text" author="evdhoudt" dbms="mssql">
 		<insert tableName="adminSettings">
 			<column name="key" value="EXTERNAL_DOCUMENTATION_LINK_TEXT" />
 			<column name="value" value="External documentation" />
@@ -1249,7 +1249,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="cleanup-map-layers-from-adminSettings" author="VassilIordanov">
+	<changeSet id="cleanup-map-layers-from-adminSettings" author="VassilIordanov" dbms="mssql">
 		<delete tableName="adminSettings">
 			<where>[key] = 'MAP_LAYERS'</where>
 		</delete>
@@ -2175,8 +2175,16 @@
 		<addColumn tableName="reports">
 			<column name="legacyId" type="int" />
 		</addColumn>
-		<sql>
+		<sql dbms="mssql">
 		    UPDATE reports SET legacyId=id;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-reports-legacyId-column-2" author="gjvoosten">
+		<!-- correct syntax -->
+		<sql dbms="postgresql,sqlite">
+		    UPDATE reports SET "legacyId"=id;
 		</sql>
 		<!-- Rolling back is not useful -->
 	</changeSet>
@@ -2269,6 +2277,12 @@
 			;
 		</sql>
 		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-assessment-to-Tasks" author="VassilIordanov">
+		<addColumn tableName="tasks">
+			<column name="assessment" type="${long_text_type}" />
+		</addColumn>
 	</changeSet>
 
 	<changeSet id="add-reports-duration-column" author="gjvoosten">

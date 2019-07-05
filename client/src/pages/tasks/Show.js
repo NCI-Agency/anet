@@ -31,12 +31,15 @@ class BaseTaskShow extends Page {
 
   static modelName = "Task"
 
+  ShortNameField = DictionaryField(Field)
+  LongNameField = DictionaryField(Field)
   TaskCustomFieldRef1 = DictionaryField(Field)
   TaskCustomField = DictionaryField(Field)
   PlannedCompletionField = DictionaryField(Field)
   ProjectedCompletionField = DictionaryField(Field)
   TaskCustomFieldEnum1 = DictionaryField(Field)
   TaskCustomFieldEnum2 = DictionaryField(Field)
+
   state = {
     task: new Task(),
     reportsPageNum: 0,
@@ -126,15 +129,16 @@ class BaseTaskShow extends Page {
                   action={action}
                 />
                 <Fieldset>
-                  <Field
+                  <this.ShortNameField
+                    dictProps={Settings.fields.task.shortName}
                     name="shortName"
-                    label={Settings.fields.task.shortName}
                     component={FieldHelper.renderReadonlyField}
                   />
 
+                  {/* TODO: replace with a generic component, but do not use componentClass textarea */}
                   <Field
                     name="longName"
-                    label={Settings.fields.task.longName}
+                    label={Settings.fields.task.longName.label}
                     component={FieldHelper.renderReadonlyField}
                   />
 

@@ -1,7 +1,15 @@
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Modal } from "react-bootstrap"
 
 class SimpleModal extends Component {
+  static propTypes = {
+    title: PropTypes.string.isRequired,
+    size: PropTypes.string,
+    onClickModalOpen: PropTypes.func.isRequired,
+    children: PropTypes.node
+  }
+
   constructor(props) {
     super(props)
     this.state = {

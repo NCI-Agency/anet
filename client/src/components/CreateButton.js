@@ -1,4 +1,5 @@
 import AppContext from "components/AppContext"
+import { routerRelatedPropTypes } from "components/Page"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -17,7 +18,8 @@ const ADMIN_ACTIONS = [
 
 class BaseCreateButton extends Component {
   static propTypes = {
-    currentUser: PropTypes.instanceOf(Models.Person)
+    currentUser: PropTypes.instanceOf(Models.Person),
+    ...routerRelatedPropTypes
   }
 
   render() {

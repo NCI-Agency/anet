@@ -7,7 +7,7 @@ import Messages from "components/Messages"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
@@ -29,16 +29,16 @@ import { withRouter } from "react-router-dom"
 
 class BasePersonForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(Person).isRequired,
     title: PropTypes.string,
     edit: PropTypes.bool,
     saveText: PropTypes.string,
     currentUser: PropTypes.instanceOf(Person),
-    loadAppData: PropTypes.func
+    loadAppData: PropTypes.func,
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new Person(),
     title: "",
     edit: false,
     saveText: "Save Person"
@@ -61,13 +61,7 @@ class BasePersonForm extends Component {
   roleButtons = [
     {
       id: "roleAdvisorButton",
-      title: `Super users cannot create ${
-        this.advisorSingular
-      } profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${
-        this.advisorPlural
-      } have the correct domain name associated with their profile, it is required that each new ${
-        this.advisorSingular
-      } individually logs into ANET and creates their own ANET profile.`,
+      title: `Super users cannot create ${this.advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${this.advisorPlural} have the correct domain name associated with their profile, it is required that each new ${this.advisorSingular} individually logs into ANET and creates their own ANET profile.`,
       value: Person.ROLE.ADVISOR,
       label: Settings.fields.advisor.person.name,
       disabled: true
@@ -102,6 +96,7 @@ class BasePersonForm extends Component {
         return []
     }
   }
+  confirmHasReplacementButton = React.createRef()
   state = {
     success: null,
     originalStatus: "",
@@ -223,7 +218,7 @@ class BasePersonForm extends Component {
                       </Col>
                     </Col>
 
-                    {edit && !canEditName && (
+                    {edit && (
                       <React.Fragment>
                         <TriggerableConfirm
                           onConfirm={() => {
@@ -244,9 +239,7 @@ class BasePersonForm extends Component {
                           bsStyle="warning"
                           buttonLabel="Reset account"
                           className="hidden"
-                          ref={confirmComponent =>
-                            (this.confirmHasReplacementButton = confirmComponent)
-                          }
+                          buttonRef={this.confirmHasReplacementButton}
                         />
                         <Button
                           id="wrongPerson"
@@ -609,7 +602,7 @@ class BasePersonForm extends Component {
         case "leftVacant":
         case "hasReplacement":
           // reset account?
-          this.confirmHasReplacementButton.buttonRef.props.onClick()
+          this.confirmHasReplacementButton.current.props.onClick()
           break
         default:
           // TODO: integrate action to email admin
