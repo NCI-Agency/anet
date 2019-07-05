@@ -1,4 +1,4 @@
-package mil.dds.anet.graphql.OutputTransformers;
+package mil.dds.anet.graphql.outputtransformers;
 
 import com.google.common.base.Joiner;
 import java.io.IOException;

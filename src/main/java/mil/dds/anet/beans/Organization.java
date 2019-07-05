@@ -20,7 +20,7 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Organization extends AbstractAnetBean {
 
-  /** pseudo uuid to represent all/top-level organization(s) */
+  /** Pseudo uuid to represent all/top-level organization(s). */
   @GraphQLIgnore
   public static final String DUMMY_ORG_UUID = "-1";
 

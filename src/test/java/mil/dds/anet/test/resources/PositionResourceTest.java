@@ -552,6 +552,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     try {
       Thread.sleep(10);
     } catch (InterruptedException ignore) {
+      // just continue
     }
 
     // Create a new position and move prin2 there on CREATE.
