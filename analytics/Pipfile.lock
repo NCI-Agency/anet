@@ -215,10 +215,10 @@
         },
         "nltk": {
             "hashes": [
-                "sha256:12d7129aea0972840419499411d3aa815c6ad66336a51131e120d35a25d953b2"
+                "sha256:764c20a5f8532a681c261af3c7d1a54768a35df6f3603df75e615cbd34e47cb5"
             ],
             "index": "pypi",
-            "version": "==3.4.3"
+            "version": "==3.4.4"
         },
         "nose": {
             "hashes": [
@@ -562,10 +562,10 @@
         },
         "tensorboardx": {
             "hashes": [
-                "sha256:c5881fb1c066385babb6bd7bc37be3e398e4679b2b8d95bcc8fd45c5d1fc1226",
-                "sha256:f920d43cbe24c631fff94c89aad8f4568fe310e11f889cce4aadfa1760ebb85c"
+                "sha256:13fe0abba27f407778a7321937190eedaf12bc8c544d9a4e294fcf0ba177fd76",
+                "sha256:f52e59b38b4cdf83384f3fce067bcaf2d2847619f9f533394df0de3b5a71ab8e"
             ],
-            "version": "==1.7"
+            "version": "==1.8"
         },
         "thinc": {
             "hashes": [
