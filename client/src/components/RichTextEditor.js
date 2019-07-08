@@ -112,7 +112,6 @@ class RichTextEditor extends Component {
         blocksFromHTML.entityMap
       )
     }
-    return ""
   }
 
   _setEditorStateFromHTML(html) {
