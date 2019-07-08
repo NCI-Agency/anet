@@ -2534,10 +2534,10 @@ aigle-core@^1.0.0:
   resolved "https://registry.yarnpkg.com/aigle-core/-/aigle-core-1.0.0.tgz#4066e0f9a5c60996d8377ed196a21fa17b6250ab"
   integrity sha1-QGbg+aXGCZbYN37RlqIfoXtiUKs=
 
-aigle@^1.14.0:
-  version "1.14.0"
-  resolved "https://registry.yarnpkg.com/aigle/-/aigle-1.14.0.tgz#1ed5664ec5e3d8fb18767ee66180fe2326b75d7e"
-  integrity sha512-A4EzoprcYQr+x4UV6mnCm/nqamWTBu4dtL/aEaFa+aKzxX42ry+4X6cAGQT8PBt2zNnAYyI3m0iQQHFVrSeveA==
+aigle@^1.14.1:
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/aigle/-/aigle-1.14.1.tgz#c6aa63a669ccee4f9d456c6b5a88a3dc19ab744f"
+  integrity sha512-bCmQ65CEebspmpbWFs6ab3S27TNyVH1b5MledX8KoiGxUhsJmPUUGpaoSijhwawNnq5Lt8jbcq7Z7gUAD0nuTw==
   dependencies:
     aigle-core "^1.0.0"
 
