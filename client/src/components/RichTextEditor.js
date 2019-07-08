@@ -31,11 +31,12 @@ class RichTextEditor extends Component {
         component: ReactImage
       }
     ])
-
+    const initialContentState = this._getContentStateFromHTML(this.props.value)
     this.state = {
-      editorState: EditorState.createEmpty(decorator),
-      decorator,
-      isLoaded: false
+      editorState: initialContentState
+        ? EditorState.createWithContent(initialContentState)
+        : EditorState.createEmpty(),
+      decorator
     }
     this.handleOnChangeHTML = this._handleOnChangeHTML.bind(this)
     this.handleKeyCommand = this._handleKeyCommand.bind(this)
@@ -43,7 +44,6 @@ class RichTextEditor extends Component {
     this.toggleBlockType = this._toggleBlockType.bind(this)
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this)
     this.setEditorStateFromHTML = this._setEditorStateFromHTML.bind(this)
-    this.initializeEditorState = this._initializeEditorState.bind(this)
 
     this.focus = () => this.refs.editor.focus()
     this.onChange = editorState => this.setState({ editorState })
@@ -52,23 +52,6 @@ class RichTextEditor extends Component {
       if (this.props.onHandleBlur) {
         this.props.onHandleBlur(editorState)
       }
-    }
-  }
-
-  componentDidUpdate() {
-    this.initializeEditorState()
-  }
-
-  componentDidMount() {
-    this.initializeEditorState()
-  }
-
-  _initializeEditorState() {
-    const { isLoaded } = this.state
-    const { value } = this.props
-    const valueString = value || ""
-    if (!isLoaded && valueString.length > 0) {
-      this.setState({ isLoaded: true }, this.setEditorStateFromHTML(value))
     }
   }
 
@@ -118,16 +101,22 @@ class RichTextEditor extends Component {
     this.pushEditorState(contentState)
   }
 
-  _setEditorStateFromHTML(html) {
-    const blocksFromHTML = convertFromHTML(html)
-    if (blocksFromHTML.contentBlocks === null) {
-      return
+  _getContentStateFromHTML(html) {
+    if (html) {
+      const blocksFromHTML = convertFromHTML(html)
+      if (blocksFromHTML.contentBlocks === null) {
+        return
+      }
+      return ContentState.createFromBlockArray(
+        blocksFromHTML.contentBlocks,
+        blocksFromHTML.entityMap
+      )
     }
-    const contentState = ContentState.createFromBlockArray(
-      blocksFromHTML.contentBlocks,
-      blocksFromHTML.entityMap
-    )
-    this.pushEditorState(contentState)
+    return ""
+  }
+
+  _setEditorStateFromHTML(html) {
+    this.pushEditorState(this._getContentStateFromHTML(html))
   }
 
   _handleKeyCommand(command, editorState) {
