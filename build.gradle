@@ -21,6 +21,25 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localTestSettings.gradle'
 }
 
+// Configures the classpath and the source and resource directories of the integrationTest task.
+sourceSets {
+	// Declaring this source set creates compile time and runtime configurations for it.
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources { 'src/integration-test/resources' }
+	}	
+}
+
+// Configures the compile and runtime configurations for our integration tests and includes the dependencies of the test task.
+configurations {
+	integrationTestCompile.extendsFrom testCompile
+	integrationTestRuntime.extendsFrom testRuntime
+}
+
 // Defaults for development variables
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "sqlserver")
 boolean isMssql = run.environment["DB_DRIVER"] == "sqlserver"
@@ -34,14 +53,24 @@ run.environment("ANET_DB_PORT", run.environment["ANET_DB_PORT"] ?: isMssql ? "14
 run.environment("ANET_DB_EXPOSED_PORT", run.environment["ANET_DB_EXPOSED_PORT"] ?: isMssql ? (isTestEnv ? "1434" : "1433") : (isTestEnv ? "5433" : "5432"))
 run.environment("ANET_PORT", run.environment["ANET_PORT"] ?: isTestEnv ? "8180" : "8080")
 run.environment("ANET_ADMIN_PORT", run.environment["ANET_ADMIN_PORT"] ?: isTestEnv ? "8181" : "8081")
+run.environment("ANET_SMTP_DISABLE", run.environment["ANET_SMTP_DISABLE"] ?: isTestEnv ? "false" : "true")
+run.environment("ANET_SMTP_SERVER", run.environment["ANET_SMTP_SERVER"] ?: "localhost")
+run.environment("ANET_SMTP_USERNAME", run.environment["ANET_SMTP_USERNAME"] ?: "")
+run.environment("ANET_SMTP_PASSWORD", run.environment["ANET_SMTP_PASSWORD"] ?: "")
+run.environment("ANET_SMTP_PORT", run.environment["ANET_SMTP_PORT"] ?: isTestEnv ? 1125 : 1025)
+run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "true")
+run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
+run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
+String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
 	maven { url "https://repo.spring.io/plugins-release" }
+	jcenter()
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -86,6 +115,11 @@ dependencies {
 	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.3.12'
 	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.3.12'
 	testCompile 'org.apache.commons:commons-io:1.3.2'
+	
+	testCompile 'junit:junit:4.12'
+	testCompile 'org.powermock:powermock-api-mockito2:2.0.2'
+	testCompile 'org.powermock:powermock-module-junit4:2.0.2'
+	testCompile 'org.powermock:powermock-module-junit4-rule:2.0.2'
 }
 
 jacoco {
@@ -340,6 +374,49 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	group = "database container"
 	description = "Removes " + dbContainerName + " container."
 	targetContainerId { dbContainerName }
+}
+
+// fake-smtp-server tasks
+task dockerPullFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	group = "fake-smtp-server container"
+	repository = "devoto13/fake-smtp-server"
+	description = "Pulls a docker image for the fake-smtp-server from " + repository + "."
+	tag = "0.1.0" // No 'latest' available yet
+}
+
+task dockerCreateFakeSmtpServer(dependsOn: dockerPullFakeSmtpServer, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	group = "fake-smtp-server container"
+	imageId = dockerPullFakeSmtpServer.getImageId()
+	containerName = fakeSmtpContainerName
+	description = "Creates a fake-smtp-server container named " + fakeSmtpContainerName + "."
+	exposePorts("tcp", [1025, 1080])
+	portBindings = [run.environment["ANET_SMTP_PORT"] + ":" + 1025, run.environment["ANET_SMTP_HTTP_PORT"] + ":" + 1080]
+}
+
+task dockerStartFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	group = "fake-smtp-server container"
+	description = "Starts " + fakeSmtpContainerName + " container."
+	targetContainerId { fakeSmtpContainerName }
+}
+
+task dockerStopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	group = "fake-smtp-server container"
+	description = "Stops " + fakeSmtpContainerName + " container."
+	targetContainerId { fakeSmtpContainerName }
+}
+
+task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	group = "fake-smtp-server container"
+	description = "Removes " + fakeSmtpContainerName + " container."
+	targetContainerId { fakeSmtpContainerName }
+}
+
+// Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
+task integrationTest(type: Test) {
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	outputs.upToDateWhen { false }
+	environment(run.environment)
 }
 
 classes.dependsOn buildClient

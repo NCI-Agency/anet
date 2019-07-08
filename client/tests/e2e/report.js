@@ -1,3 +1,4 @@
+let assert = require("assert")
 let _includes = require("lodash/includes")
 let moment = require("moment")
 let test = require("../util/test")
@@ -15,6 +16,8 @@ test("Draft and submit a report", async t => {
     until,
     shortWaitMs
   } = t.context
+
+  httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await pageHelpers.writeInForm("#intent", "meeting goal")
@@ -163,6 +166,10 @@ test("Draft and submit a report", async t => {
     "Report submitted",
     "Clicking the submit report button displays a message telling the user that the action was successful."
   )
+
+  var serverResponse = await httpRequestSmtpServer("GET")
+  var jsonRepsonse = JSON.parse(serverResponse)
+  await assert.equal(jsonRepsonse.length, 0) // Domain not in active users
 })
 
 test("Publish report chain", async t => {
@@ -180,6 +187,9 @@ test("Publish report chain", async t => {
     shortWaitMs,
     longWaitMs
   } = t.context
+
+  httpRequestSmtpServer("DELETE")
+
   // Try to have Erin approve her own report
   await t.context.get("/", "erin")
   let $homeTileErin = await $$(".home-tile")
@@ -351,6 +361,10 @@ test("Publish report chain", async t => {
     "meeting goal",
     "Daily rollup report list includes the recently approved report"
   )
+
+  var serverResponse = await httpRequestSmtpServer("GET")
+  var jsonRepsonse = JSON.parse(serverResponse)
+  await assert.equal(jsonRepsonse.length, 0) // Domains not in active users
 })
 
 test("Verify that validation and other reports/new interactions work", async t => {
@@ -365,6 +379,8 @@ test("Verify that validation and other reports/new interactions work", async t =
     shortWaitMs,
     By
   } = t.context
+
+  httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await assertElementText(
@@ -618,4 +634,30 @@ test("Verify that validation and other reports/new interactions work", async t =
     t,
     "This is a DRAFT report and hasn't been submitted."
   )
+
+  var serverResponse = await httpRequestSmtpServer("GET")
+  var jsonRepsonse = JSON.parse(serverResponse)
+  await assert.equal(jsonRepsonse.length, 0) // No email should be sent
 })
+
+function httpRequestSmtpServer(requestType) {
+  return new Promise((resolve, reject) => {
+    var XMLHttpRequest = require('xhr2')
+    const xhttp = new XMLHttpRequest()
+    // FIXME: Hard-coded URL
+    const url = "http://localhost:1180/api/emails"
+    xhttp.open(requestType, url)
+    xhttp.setRequestHeader(
+      "Authorization",
+      "Basic " + Buffer.from("testAnet" + ":" + "testAnet").toString("base64")
+    )
+    xhttp.send()
+    xhttp.onreadystatechange = e => {
+      if (xhttp.readyState === 4) {
+        if (xhttp.status === 200) {
+          resolve(xhttp.responseText)
+        }
+      }
+    }
+  })
+}

@@ -31,11 +31,12 @@ assets:
 # Settings for the SMTP server to send email 
 smtp:
   hostname: ${ANET_SMTP_SERVER}
-  port: 25
+  port: ${ANET_SMTP_PORT}
   username: ${ANET_SMTP_USERNAME}
   password: ${ANET_SMTP_PASSWORD}
-  startTls: true
-  disabled: true
+  sslTrust: ${ANET_SMTP_SSLTRUST}
+  startTls: ${ANET_SMTP_STARTTLS}
+  disabled: ${ANET_SMTP_DISABLE}
   nbOfHoursForStaleEmails: 72
 
 # The email address that all automated emails should come from. 
