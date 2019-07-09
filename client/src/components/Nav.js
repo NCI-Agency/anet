@@ -1,6 +1,10 @@
+import { clearSearchQuery, resetPages } from "actions"
 import { Settings } from "api"
 import AppContext from "components/AppContext"
-import { mapDispatchToProps, propTypes as pagePropTypes } from "components/Page"
+import {
+  mapDispatchToProps as pageMapDispatchToProps,
+  propTypes as pagePropTypes
+} from "components/Page"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
@@ -17,7 +21,7 @@ import { ScrollLink, scrollSpy } from "react-scroll"
 import utils from "utils"
 
 export const AnchorNavItem = props => {
-  const { to, ...remainingProps } = props
+  const { to, children, ...remainingProps } = props
   const ScrollLinkNavItem = ScrollLink(NavItem)
   return (
     <ResponsiveLayoutContext.Consumer>
@@ -43,13 +47,23 @@ export const AnchorNavItem = props => {
     </ResponsiveLayoutContext.Consumer>
   )
 }
+AnchorNavItem.propTypes = {
+  to: PropTypes.string,
+  children: PropTypes.node
+}
 
-function SidebarLink({ linkTo, children, handleOnClick, id }) {
+const SidebarLink = ({ linkTo, children, handleOnClick, id }) => {
   return (
     <Link to={linkTo} onClick={handleOnClick}>
       <NavItem id={id}>{children}</NavItem>
     </Link>
   )
+}
+SidebarLink.propTypes = {
+  linkTo: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  children: PropTypes.node,
+  handleOnClick: PropTypes.func,
+  id: PropTypes.string
 }
 
 class BaseNav extends Component {
@@ -58,18 +72,19 @@ class BaseNav extends Component {
     currentUser: PropTypes.instanceOf(Person),
     appSettings: PropTypes.object,
     organizations: PropTypes.array,
-    resetPages: PropTypes.func
+    clearSearchQuery: PropTypes.func.isRequired,
+    resetPages: PropTypes.func.isRequired
   }
-
+  static defaultProps = {
+    appSettings: {},
+    organizations: []
+  }
   componentDidMount() {
     scrollSpy.update()
   }
 
   render() {
-    const { currentUser } = this.props
-    const { organizations } = this.props || []
-    const { appSettings } = this.props || {}
-    const { resetPages } = this.props
+    const { currentUser, organizations, appSettings, resetPages } = this.props
     const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
     const externalDocumentationUrlText =
       appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
@@ -78,6 +93,7 @@ class BaseNav extends Component {
     const inAdmin = path.indexOf("/admin") === 0
     const inOrg = path.indexOf("/organizations") === 0
     const inInsights = path.indexOf("/insights") === 0
+    const inDashboards = path.indexOf("/dashboards") === 0
 
     const myOrg = currentUser.position
       ? currentUser.position.organization
@@ -190,6 +206,20 @@ class BaseNav extends Component {
             ))}
           </NavDropdown>
         )}
+
+        {Settings.dashboards && (
+          <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
+            {Settings.dashboards.map(dashboard => (
+              <Link
+                to={`/dashboards/${dashboard.type}/${dashboard.label}`}
+                key={dashboard.label}
+                onClick={resetPages}
+              >
+                <MenuItem>{dashboard.label}</MenuItem>
+              </Link>
+            ))}
+          </NavDropdown>
+        )}
       </BSNav>
     )
   }
@@ -198,6 +228,15 @@ class BaseNav extends Component {
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  return {
+    clearSearchQuery: () => dispatch(clearSearchQuery()),
+    resetPages: () => dispatch(resetPages()),
+    ...pageDispatchToProps
+  }
+}
 
 const Nav = props => (
   <AppContext.Consumer>

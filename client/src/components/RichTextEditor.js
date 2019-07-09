@@ -18,7 +18,7 @@ import "./RichTextEditor.css"
 class RichTextEditor extends Component {
   static propTypes = {
     value: PropTypes.string,
-    onChange: PropTypes.func.isRequired,
+    onChange: PropTypes.func,
     onHandleBlur: PropTypes.func,
     className: PropTypes.string
   }
@@ -31,11 +31,12 @@ class RichTextEditor extends Component {
         component: ReactImage
       }
     ])
-
+    const initialContentState = this._getContentStateFromHTML(this.props.value)
     this.state = {
-      editorState: EditorState.createEmpty(decorator),
-      decorator,
-      isLoaded: false
+      editorState: initialContentState
+        ? EditorState.createWithContent(initialContentState)
+        : EditorState.createEmpty(),
+      decorator
     }
     this.handleOnChangeHTML = this._handleOnChangeHTML.bind(this)
     this.handleKeyCommand = this._handleKeyCommand.bind(this)
@@ -43,7 +44,6 @@ class RichTextEditor extends Component {
     this.toggleBlockType = this._toggleBlockType.bind(this)
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this)
     this.setEditorStateFromHTML = this._setEditorStateFromHTML.bind(this)
-    this.initializeEditorState = this._initializeEditorState.bind(this)
 
     this.focus = () => this.refs.editor.focus()
     this.onChange = editorState => this.setState({ editorState })
@@ -52,23 +52,6 @@ class RichTextEditor extends Component {
       if (this.props.onHandleBlur) {
         this.props.onHandleBlur(editorState)
       }
-    }
-  }
-
-  componentDidUpdate() {
-    this.initializeEditorState()
-  }
-
-  componentDidMount() {
-    this.initializeEditorState()
-  }
-
-  _initializeEditorState() {
-    const { isLoaded } = this.state
-    const { value } = this.props
-    const valueString = value || ""
-    if (!isLoaded && valueString.length > 0) {
-      this.setState({ isLoaded: true }, this.setEditorStateFromHTML(value))
     }
   }
 
@@ -118,16 +101,21 @@ class RichTextEditor extends Component {
     this.pushEditorState(contentState)
   }
 
-  _setEditorStateFromHTML(html) {
-    const blocksFromHTML = convertFromHTML(html)
-    if (blocksFromHTML.contentBlocks === null) {
-      return
+  _getContentStateFromHTML(html) {
+    if (html) {
+      const blocksFromHTML = convertFromHTML(html)
+      if (blocksFromHTML.contentBlocks === null) {
+        return
+      }
+      return ContentState.createFromBlockArray(
+        blocksFromHTML.contentBlocks,
+        blocksFromHTML.entityMap
+      )
     }
-    const contentState = ContentState.createFromBlockArray(
-      blocksFromHTML.contentBlocks,
-      blocksFromHTML.entityMap
-    )
-    this.pushEditorState(contentState)
+  }
+
+  _setEditorStateFromHTML(html) {
+    this.pushEditorState(this._getContentStateFromHTML(html))
   }
 
   _handleKeyCommand(command, editorState) {
@@ -252,8 +240,18 @@ const ReactImage = props => {
     .getData()
   return <img src={imageDataSrc(src)} height={height} width={width} alt={alt} />
 }
+ReactImage.propTypes = {
+  contentState: PropTypes.object,
+  entityKey: PropTypes.string
+}
 
 class StyleButton extends React.Component {
+  static propTypes = {
+    style: PropTypes.string,
+    active: PropTypes.bool,
+    onToggle: PropTypes.func,
+    label: PropTypes.string
+  }
   constructor() {
     super()
     this.onToggle = e => {
@@ -289,7 +287,7 @@ const BLOCK_TYPES = [
 ]
 
 const BlockStyleControls = props => {
-  const { editorState } = props
+  const { editorState, onToggle } = props
   const selection = editorState.getSelection()
   const blockType = editorState
     .getCurrentContent()
@@ -303,12 +301,16 @@ const BlockStyleControls = props => {
           key={type.label}
           active={type.style === blockType}
           label={type.label}
-          onToggle={props.onToggle}
+          onToggle={onToggle}
           style={type.style}
         />
       ))}
     </div>
   )
+}
+BlockStyleControls.propTypes = {
+  editorState: PropTypes.object,
+  onToggle: PropTypes.func
 }
 
 const INLINE_STYLES = [
@@ -318,7 +320,8 @@ const INLINE_STYLES = [
 ]
 
 const InlineStyleControls = props => {
-  const currentStyle = props.editorState.getCurrentInlineStyle()
+  const { editorState, onToggle } = props
+  const currentStyle = editorState.getCurrentInlineStyle()
 
   return (
     <div className="RichEditor-controls">
@@ -327,12 +330,16 @@ const InlineStyleControls = props => {
           key={type.label}
           active={currentStyle.has(type.style)}
           label={type.label}
-          onToggle={props.onToggle}
+          onToggle={onToggle}
           style={type.style}
         />
       ))}
     </div>
   )
+}
+InlineStyleControls.propTypes = {
+  editorState: PropTypes.object,
+  onToggle: PropTypes.func
 }
 
 export default RichTextEditor

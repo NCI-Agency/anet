@@ -1,3 +1,4 @@
+import { Settings } from "api"
 import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Leaflet from "components/Leaflet"
@@ -6,11 +7,14 @@ import ReportTable from "components/ReportTable"
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import _get from "lodash/get"
-import { Location } from "models"
+import { Location, Person, Report } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
+import Calendar from "components/Calendar"
+import moment from "moment"
 
+export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
@@ -36,6 +40,16 @@ export const GQL_REPORT_FIELDS = /* GraphQL */ `
   updatedAt
 `
 
+export const GQL_BASIC_REPORT_FIELDS = /* GraphQL */ `
+  uuid
+  intent
+  primaryAdvisor { name }
+  principalOrg { shortName }
+  engagementDate, duration
+  state
+  location { uuid name lat lng }
+`
+
 export default class ReportCollection extends Component {
   static propTypes = {
     width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
@@ -51,36 +65,40 @@ export default class ReportCollection extends Component {
     goToPage: PropTypes.func,
     mapId: PropTypes.string,
     viewFormats: PropTypes.arrayOf(PropTypes.string),
-    hideButtons: PropTypes.bool
+    reportsFilter: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
   }
 
   static defaultProps = {
-    viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP]
+    viewFormats: [FORMAT_CALENDAR, FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP]
   }
+  static VIEW_FORMATS_WITH_PAGINATION = [FORMAT_SUMMARY, FORMAT_TABLE]
+
+  calendarComponentRef = React.createRef()
 
   constructor(props) {
     super(props)
 
     this.state = {
-      viewFormat: this.props.viewFormats[0]
+      viewFormat: this.props.viewFormats[1]
     }
   }
 
   render() {
-    var reports
-
-    if (this.props.paginatedReports) {
+    var reports = []
+    const viewWithPagination =
+      ReportCollection.VIEW_FORMATS_WITH_PAGINATION.includes(
+        this.state.viewFormat
+      ) && this.props.paginatedReports !== null
+    if (viewWithPagination) {
       var { pageSize, pageNum, totalCount } = this.props.paginatedReports
       var numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
       reports = this.props.paginatedReports.list
       pageNum++
-    } else {
+    } else if (this.props.reports) {
       reports = this.props.reports
     }
-
-    let reportsExist = _get(reports, "length", 0) > 0
+    const reportsExist = _get(reports, "length", 0) > 0
     const showHeader = this.props.viewFormats.length > 1 || numPages > 1
-
     return (
       <div className="report-collection">
         <div>
@@ -92,6 +110,9 @@ export default class ReportCollection extends Component {
                   onChange={this.changeViewFormat}
                   className="hide-for-print"
                 >
+                  {this.props.viewFormats.includes(FORMAT_CALENDAR) && (
+                    <Button value={FORMAT_CALENDAR}>Calendar</Button>
+                  )}
                   {this.props.viewFormats.includes(FORMAT_SUMMARY) && (
                     <Button value={FORMAT_SUMMARY}>Summary</Button>
                   )}
@@ -104,7 +125,7 @@ export default class ReportCollection extends Component {
                 </ButtonToggleGroup>
               )}
 
-              {numPages > 1 && (
+              {viewWithPagination && numPages > 1 && (
                 <UltimatePagination
                   className="pull-right"
                   currentPage={pageNum}
@@ -118,9 +139,9 @@ export default class ReportCollection extends Component {
                 />
               )}
 
-              {this.props.isSuperUser && (
+              {this.props.reportsFilter && (
                 <div className="reports-filter">
-                  Filter: {this.renderToggleFilterButton(this.props)}
+                  Filter: {this.props.reportsFilter}
                 </div>
               )}
             </header>
@@ -128,6 +149,8 @@ export default class ReportCollection extends Component {
 
           {reportsExist && (
             <div>
+              {this.state.viewFormat === FORMAT_CALENDAR &&
+                this.renderCalendar(reports)}
               {this.state.viewFormat === FORMAT_TABLE &&
                 this.renderTable(reports)}
               {this.state.viewFormat === FORMAT_SUMMARY &&
@@ -136,7 +159,7 @@ export default class ReportCollection extends Component {
             </div>
           )}
 
-          {numPages > 1 && (
+          {viewWithPagination && numPages > 1 && (
             <footer>
               <UltimatePagination
                 className="pull-right"
@@ -155,22 +178,6 @@ export default class ReportCollection extends Component {
         {!reportsExist && <em>No reports found</em>}
       </div>
     )
-  }
-
-  renderToggleFilterButton(props) {
-    let showAll = "Show all reports"
-    let showPendingApproval = "Show pending approval"
-    let buttonText = props.filterIsSet ? showAll : showPendingApproval
-    let button = (
-      <Button
-        value="toggle-filter"
-        className="btn btn-sm"
-        onClick={props.setReportsFilter}
-      >
-        {buttonText}
-      </Button>
-    )
-    return button
   }
 
   renderTable(reports) {
@@ -208,6 +215,43 @@ export default class ReportCollection extends Component {
         width={this.props.width}
         height={this.props.height}
         marginBottom={this.props.marginBottom}
+      />
+    )
+  }
+
+  getEvents = reports => {
+    if (reports) {
+      return reports.map(r => {
+        const who =
+          (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+        const where =
+          (r.principalOrg && r.principalOrg.shortName) ||
+          (r.location && r.location.name) ||
+          ""
+
+        return {
+          title: who + "@" + where,
+          start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
+          end: moment(r.engagementDate)
+            .add(r.duration, "minutes")
+            .format("YYYY-MM-DD HH:mm"),
+          url: Report.pathFor(r),
+          classNames: ["event-" + r.state.toLowerCase()],
+          extendedProps: { ...r },
+          allDay:
+            !Settings.engagementsIncludeTimeAndDuration || r.duration === null
+        }
+      })
+    } else {
+      return []
+    }
+  }
+
+  renderCalendar(reports) {
+    return (
+      <Calendar
+        events={this.getEvents(reports)}
+        calendarComponentRef={this.calendarComponentRef}
       />
     )
   }

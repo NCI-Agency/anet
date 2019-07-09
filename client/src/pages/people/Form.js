@@ -7,7 +7,7 @@ import Messages from "components/Messages"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import AvatarEditModal from "components/AvatarEditModal"
@@ -31,16 +31,16 @@ import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 class BasePersonForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(Person).isRequired,
     title: PropTypes.string,
     edit: PropTypes.bool,
     saveText: PropTypes.string,
     currentUser: PropTypes.instanceOf(Person),
-    loadAppData: PropTypes.func
+    loadAppData: PropTypes.func,
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new Person(),
     title: "",
     edit: false,
     saveText: "Save Person"

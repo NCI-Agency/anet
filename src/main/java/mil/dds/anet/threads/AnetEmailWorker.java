@@ -98,6 +98,7 @@ public class AnetEmailWorker implements Runnable {
 
     SmtpConfiguration smtpConfig = config.getSmtp();
     props = new Properties();
+    props.put("mail.smtp.ssl.trust", smtpConfig.getSslTrust());
     props.put("mail.smtp.starttls.enable", smtpConfig.getStartTls().toString());
     props.put("mail.smtp.host", smtpConfig.getHostname());
     props.put("mail.smtp.port", smtpConfig.getPort().toString());

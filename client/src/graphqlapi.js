@@ -22,6 +22,7 @@ const GQL = {
   _runCommon(parts, apiCall, output) {
     let query = parts.map(p => p.queryString).join(",\n")
     let variables = {}
+    let variableDef
     let variableDefs = []
     parts.forEach(part => {
       part.variables.forEach(variable => {
@@ -29,8 +30,9 @@ const GQL = {
         variableDefs.push(`$${variable.name}: ${variable.type}`)
       })
     })
-
-    let variableDef = "(" + variableDefs.join(", ") + ")"
+    if (variableDefs.length) {
+      variableDef = "(" + variableDefs.join(", ") + ")"
+    }
 
     return apiCall(query, variables, variableDef, output)
   },

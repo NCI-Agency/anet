@@ -18,15 +18,10 @@ export default class OrganizationFilter extends Component {
     // search query (ie authorUuid, organizationUuid, etc).
     queryKey: PropTypes.string.isRequired,
     queryIncludeChildOrgsKey: PropTypes.string.isRequired,
-
-    // Passed by the SearchFilter row
     value: PropTypes.any,
     onChange: PropTypes.func,
-
-    // Passed by the SearchFilterDisplay row
+    queryParams: PropTypes.object,
     asFormField: PropTypes.bool
-
-    // All other properties are passed directly to the AdvancedSingleSelect.
   }
 
   static defaultProps = {

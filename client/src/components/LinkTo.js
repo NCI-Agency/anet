@@ -86,9 +86,9 @@ export default class LinkTo extends Component {
     const modelFields = this.props[modelName]
     if (_isEmpty(modelFields)) return <span>{whenUnspecified}</span>
 
-    const modelClass = Models[modelName]
+    const ModelClass = Models[modelName]
     const isModel = typeof modelFields !== "string"
-    const modelInstance = new modelClass(isModel ? modelFields : {})
+    const modelInstance = new ModelClass(isModel ? modelFields : {})
     showIcon = showIcon && !button
     const modelIcon = showIcon && modelInstance.iconUrl()
 
@@ -102,8 +102,8 @@ export default class LinkTo extends Component {
       }
     } else {
       to = edit
-        ? modelClass.pathForEdit(modelInstance)
-        : modelClass.pathFor(modelInstance)
+        ? ModelClass.pathForEdit(modelInstance)
+        : ModelClass.pathFor(modelInstance)
     }
 
     componentProps = Object.without(componentProps, modelName)

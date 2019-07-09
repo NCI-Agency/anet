@@ -1,6 +1,7 @@
 import Checkbox from "components/Checkbox"
 import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
+import PropTypes from "prop-types"
 import React from "react"
 import { Radio, Table } from "react-bootstrap"
 
@@ -46,6 +47,21 @@ const AdvancedSelectOverlayTable = ({
     </Table>
   )
 }
+AdvancedSelectOverlayTable.propTypes = {
+  fieldName: PropTypes.string.isRequired,
+  objectType: PropTypes.func.isRequired,
+  items: PropTypes.array.isRequired,
+  selectedItems: PropTypes.array.isRequired,
+  handleAddItem: PropTypes.func,
+  handleRemoveItem: PropTypes.func,
+  columns: PropTypes.array.isRequired,
+  renderRow: PropTypes.func.isRequired,
+  selectItemComponent: PropTypes.element.isRequired,
+  tableClassName: PropTypes.string
+}
+AdvancedSelectOverlayTable.defaultProps = {
+  tableClassName: ""
+}
 
 const AdvancedSingleSelectOverlayTableBase = props => {
   const { selectedItems, ...otherProps } = props
@@ -56,6 +72,9 @@ const AdvancedSingleSelectOverlayTableBase = props => {
       selectItemComponent={<Radio />}
     />
   )
+}
+AdvancedSingleSelectOverlayTableBase.propTypes = {
+  selectedItems: PropTypes.oneOfType([PropTypes.object, PropTypes.array])
 }
 
 const AdvancedMultiSelectOverlayTableBase = props => {

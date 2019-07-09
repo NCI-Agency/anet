@@ -67,7 +67,7 @@ const taskFilters = props => {
       props: {
         queryKey: "projectStatus",
         values: Object.keys(customEnum1.enum),
-        labels: Object.values(customEnum1.enum)
+        labels: Object.values(customEnum1.enum).map(o => o.label)
       }
     }
   }

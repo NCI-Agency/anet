@@ -24,7 +24,7 @@ module.exports = merge(common.clientConfig, {
     port: process.env.DEV_PORT,
     proxy: [
       {
-        context: ["/graphql", "/api"],
+        context: ["/graphql", "/api", "/assets", "/imagery", "/data"],
         target: process.env.SERVER_URL
       }
     ]

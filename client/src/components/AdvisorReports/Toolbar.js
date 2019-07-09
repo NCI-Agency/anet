@@ -1,7 +1,13 @@
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
 
 class Toolbar extends Component {
+  static propTypes = {
+    onFilterTextInput: PropTypes.func.isRequired,
+    onExportButtonClick: PropTypes.func.isRequired
+  }
+
   constructor(props) {
     super(props)
     this.handleFilterTextInputChange = this.handleFilterTextInputChange.bind(
