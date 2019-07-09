@@ -23,6 +23,8 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.search.ReportSearchQuery;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderOptions;
@@ -250,12 +252,13 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.TASK_REPORTS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Report>>() {
+    dataLoaderRegistry.register(SqDataLoaderKey.REPORTS_SEARCH.toString(),
+        new DataLoader<>(new BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>() {
           @Override
-          public CompletionStage<List<List<Report>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(() -> engine.getTaskDao().getReports(foreignKeys),
-                dispatcherService);
+          public CompletionStage<List<List<Report>>> load(
+              List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getReportDao().getReports(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.TASK_RESPONSIBLE_POSITIONS.toString(),

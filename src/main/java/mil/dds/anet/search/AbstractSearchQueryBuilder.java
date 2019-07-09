@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.beans.search.BatchParams;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -114,6 +115,28 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   }
 
   public abstract String getFullTextQuery(String text);
+
+  /**
+   * Add a batched query clause for a many-to-many relation. E.g. if you want to batch getting
+   * reports for a task, you'd use
+   * <code>new BatchParams("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\"")</code> as
+   * the batchParams.
+   *
+   * Note that if you use this, your search query class must implement
+   * {@link AbstractSearchQuery#hashCode()}, {@link AbstractSearchQuery#equals(Object)} and
+   * {@link AbstractSearchQuery#clone()}.
+   *
+   * @param batchParams the parameters for the batch join/select/where clauses
+   */
+  public void addM2mBatchClause(BatchParams batchParams) {
+    addFromClause(String.format("LEFT JOIN %s ON %s.%s = %s.uuid", batchParams.getM2mTableName(),
+        batchParams.getM2mTableName(), batchParams.getM2mLeftKey(), batchParams.getTableName()));
+    addSelectClause(String.format("%s.%s AS \"batchUuid\"", batchParams.getM2mTableName(),
+        batchParams.getM2mRightKey()));
+    addWhereClause(String.format("%s.%s IN ( <batchUuids> )", batchParams.getM2mTableName(),
+        batchParams.getM2mRightKey()));
+    addListArg("batchUuids", batchParams.getBatchUuids());
+  }
 
   public final void addDateClause(String paramName, String fieldName, Comparison comp,
       Instant fieldValue) {

@@ -12,7 +12,9 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.BatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -202,12 +204,21 @@ public class Task extends AbstractAnetBean {
   public CompletableFuture<AnetBeanList<Report>> loadReports(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
-    // TODO: Use the query parameter
     if (reports != null) {
       return CompletableFuture.completedFuture(reports);
     }
-    return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid)
-        .thenApply(o -> new AnetBeanList<Report>(o));
+    if (query == null) {
+      query = new ReportSearchQuery();
+      query.setPageSize(0);
+    }
+    query.setBatchParams(
+        new BatchParams("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\""));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid, query)
+        .thenApply(o -> {
+          reports = new AnetBeanList<Report>(o);
+          return reports;
+        });
   }
 
   @GraphQLQuery(name = "responsiblePositions")

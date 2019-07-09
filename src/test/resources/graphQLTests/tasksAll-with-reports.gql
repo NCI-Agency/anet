@@ -1,0 +1,50 @@
+taskList(query: {pageSize: 0}) {
+  totalCount
+  list {
+    uuid
+    shortName
+    longName
+    draftReports: reports(query: {pageSize: 0, state: [DRAFT]}) {
+      totalCount
+      list {
+        uuid
+      }
+    }
+    pendingReports: reports(query: {pageSize: 0, state: [PENDING_APPROVAL]}) {
+      totalCount
+      list {
+        uuid
+      }
+    }
+    publishedReports: reports(query: {pageSize: 0, state: [PUBLISHED]}) {
+      totalCount
+      list {
+        uuid
+      }
+    }
+    rejectedReports: reports(query: {pageSize: 0, state: [REJECTED]}) {
+      totalCount
+      list {
+        uuid
+      }
+    }
+    cancelledReports: reports(query: {pageSize: 0, state: [CANCELLED]}) {
+      totalCount
+      list {
+        uuid
+      }
+    }
+    futureReports: reports(query: {pageSize: 0, state: [FUTURE]}) {
+      totalCount
+      list {
+        uuid
+      }
+    }
+    approvedReports: reports(query: {pageSize: 0, state: [APPROVED]}) {
+      totalCount
+      list {
+        uuid
+      }
+    }
+  }
+}

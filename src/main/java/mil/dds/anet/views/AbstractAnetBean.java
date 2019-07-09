@@ -1,5 +1,6 @@
 package mil.dds.anet.views;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -17,6 +18,7 @@ public abstract class AbstractAnetBean {
   protected Instant createdAt;
   protected Instant updatedAt;
   private List<Note> notes;
+  private String batchUuid;
 
   public AbstractAnetBean() {
     uuid = null;
@@ -65,6 +67,18 @@ public abstract class AbstractAnetBean {
 
   public void setNotes(List<Note> notes) {
     this.notes = notes;
+  }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public String getBatchUuid() {
+    return batchUuid;
+  }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public void setBatchUuid(String batchUuid) {
+    this.batchUuid = batchUuid;
   }
 
   /*

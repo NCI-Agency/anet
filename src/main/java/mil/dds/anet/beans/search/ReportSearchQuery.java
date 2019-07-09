@@ -3,7 +3,9 @@ package mil.dds.anet.beans.search;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
@@ -309,6 +311,68 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   @GraphQLIgnore
   public void setSystemSearch(boolean systemSearch) {
     this.systemSearch = systemSearch;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), authorUuid, engagementDateStart, engagementDateEnd,
+        engagementDayOfWeek, includeEngagementDayOfWeek, createdAtStart, createdAtEnd,
+        updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
+        advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
+        orgUuid, includeOrgChildren, locationUuid, taskUuid, pendingApprovalOf, state,
+        cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid, authorizationGroupUuid,
+        sensitiveInfo, user, systemSearch);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ReportSearchQuery)) {
+      return false;
+    }
+    final ReportSearchQuery other = (ReportSearchQuery) obj;
+    return super.equals(obj) && Objects.equals(getAuthorUuid(), other.getAuthorUuid())
+        && Objects.equals(getEngagementDateStart(), other.getEngagementDateStart())
+        && Objects.equals(getEngagementDateEnd(), other.getEngagementDateEnd())
+        && Objects.equals(getEngagementDayOfWeek(), other.getEngagementDayOfWeek())
+        && Objects.equals(getIncludeEngagementDayOfWeek(), other.getIncludeEngagementDayOfWeek())
+        && Objects.equals(getCreatedAtStart(), other.getCreatedAtStart())
+        && Objects.equals(getCreatedAtEnd(), other.getCreatedAtEnd())
+        && Objects.equals(getUpdatedAtStart(), other.getUpdatedAtStart())
+        && Objects.equals(getUpdatedAtEnd(), other.getUpdatedAtEnd())
+        && Objects.equals(getReleasedAtStart(), other.getReleasedAtStart())
+        && Objects.equals(getReleasedAtEnd(), other.getReleasedAtEnd())
+        && Objects.equals(getAttendeeUuid(), other.getAttendeeUuid())
+        && Objects.equals(getAtmosphere(), other.getAtmosphere())
+        && Objects.equals(getAdvisorOrgUuid(), other.getAdvisorOrgUuid())
+        && Objects.equals(getIncludeAdvisorOrgChildren(), other.getIncludeAdvisorOrgChildren())
+        && Objects.equals(getPrincipalOrgUuid(), other.getPrincipalOrgUuid())
+        && Objects.equals(getIncludePrincipalOrgChildren(), other.getIncludePrincipalOrgChildren())
+        && Objects.equals(getOrgUuid(), other.getOrgUuid())
+        && Objects.equals(getIncludeOrgChildren(), other.getIncludeOrgChildren())
+        && Objects.equals(getLocationUuid(), other.getLocationUuid())
+        && Objects.equals(getTaskUuid(), other.getTaskUuid())
+        && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())
+        && Objects.equals(getState(), other.getState())
+        && Objects.equals(getCancelledReason(), other.getCancelledReason())
+        && Objects.equals(getTagUuid(), other.getTagUuid())
+        && Objects.equals(getAuthorPositionUuid(), other.getAuthorPositionUuid())
+        && Objects.equals(getAttendeePositionUuid(), other.getAttendeePositionUuid())
+        && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
+        && Objects.equals(getSensitiveInfo(), other.getSensitiveInfo())
+        && Objects.equals(getUser(), other.getUser())
+        && Objects.equals(isSystemSearch(), other.isSystemSearch());
+  }
+
+  @Override
+  public Object clone() throws CloneNotSupportedException {
+    final ReportSearchQuery clone = (ReportSearchQuery) super.clone();
+    if (state != null) {
+      clone.setState(new ArrayList<>(state));
+    }
+    if (authorizationGroupUuid != null) {
+      clone.setAuthorizationGroupUuid(new ArrayList<>(authorizationGroupUuid));
+    }
+    return clone;
   }
 
 }
