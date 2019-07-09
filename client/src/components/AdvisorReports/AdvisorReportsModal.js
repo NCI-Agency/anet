@@ -48,8 +48,9 @@ class AdvisorReportsModal extends Component {
 }
 
 AdvisorReportsModal.propTypes = {
-  columnGroups: PropTypes.array,
-  name: PropTypes.string
+  columnGroups: PropTypes.array.isRequired,
+  name: PropTypes.string.isRequired,
+  uuid: PropTypes.string.isRequired
 }
 
 export default AdvisorReportsModal

@@ -196,14 +196,6 @@ class BaseRelatedObjectNotes extends Component {
           const isJson = note.type !== NOTE_TYPE.FREE_TEXT
           const jsonFields = isJson ? JSON.parse(note.text) : {}
           const noteText = isJson ? jsonFields.text : note.text
-          let msg = ""
-          if (isJson) {
-            if (jsonFields.oldValue === jsonFields.newValue) {
-              msg = `Field <b>${jsonFields.changedField}</b> was unchanged (<em>'${jsonFields.oldValue}'</em>)`
-            } else {
-              msg = `Field <b>${jsonFields.changedField}</b> was changed from <em>'${jsonFields.oldValue}'</em> to <em>'${jsonFields.newValue}'</em>`
-            }
-          }
           return (
             <div key={note.uuid} style={noteDivStyle}>
               <span style={{ float: "left" }}>

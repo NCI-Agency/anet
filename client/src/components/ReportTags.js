@@ -8,7 +8,8 @@ import { WithContext as ReactTags } from "react-tag-input"
 export default class ReportTags extends Component {
   static propTypes = {
     value: PropTypes.array,
-    suggestions: PropTypes.array
+    suggestions: PropTypes.array,
+    onChange: PropTypes.func
   }
 
   render() {

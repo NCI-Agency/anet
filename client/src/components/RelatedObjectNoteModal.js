@@ -1,19 +1,16 @@
 import API from "api"
-import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
 import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
-import { Person } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Modal } from "react-bootstrap"
 import * as yup from "yup"
 
-class BaseRelatedObjectNoteModal extends Component {
+export default class RelatedObjectNoteModal extends Component {
   static propTypes = {
-    currentUser: PropTypes.instanceOf(Person),
     note: Model.notePropTypes,
     showModal: PropTypes.bool,
     onCancel: PropTypes.func.isRequired,
@@ -127,16 +124,3 @@ class BaseRelatedObjectNoteModal extends Component {
     this.props.onCancel()
   }
 }
-
-const RelatedObjectNoteModal = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseRelatedObjectNoteModal
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
-
-export default RelatedObjectNoteModal

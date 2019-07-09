@@ -38,12 +38,12 @@ export default class Task extends Model {
         .string()
         .required()
         .default("")
-        .label(Settings.fields.task.shortName),
+        .label(Settings.fields.task.shortName.label),
       longName: yup
         .string()
         .required()
         .default("")
-        .label(Settings.fields.task.longName),
+        .label(Settings.fields.task.longName.label),
       category: yup
         .string()
         .nullable()
@@ -57,17 +57,17 @@ export default class Task extends Model {
         .object()
         .nullable()
         .default({})
-        .label(customFieldRef1.label),
+        .label(customFieldRef1 && customFieldRef1.label),
       customFieldEnum1: yup
         .string()
         .nullable()
         .default("")
-        .label(customFieldEnum1.label),
+        .label(customFieldEnum1 && customFieldEnum1.label),
       customFieldEnum2: yup
         .string()
         .nullable()
         .default("")
-        .label(customFieldEnum2.label),
+        .label(customFieldEnum2 && customFieldEnum2.label),
       customField: yup
         .string()
         .nullable()
@@ -76,11 +76,11 @@ export default class Task extends Model {
       projectedCompletion: yupDate
         .nullable()
         .default(null)
-        .label(projectedCompletion.label),
+        .label(projectedCompletion && projectedCompletion.label),
       plannedCompletion: yupDate
         .nullable()
         .default(null)
-        .label(plannedCompletion.label),
+        .label(plannedCompletion && plannedCompletion.label),
       status: yup
         .string()
         .required()

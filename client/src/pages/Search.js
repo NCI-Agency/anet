@@ -22,7 +22,16 @@ import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React from "react"
-import { Alert, Badge, Button, Modal, Nav, Table } from "react-bootstrap"
+import {
+  Alert,
+  Badge,
+  Button,
+  Dropdown,
+  MenuItem,
+  Modal,
+  Nav,
+  Table
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -37,6 +46,7 @@ import TASKS_ICON from "resources/tasks.png"
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
     listName: `${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
+    listAllName: `all${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
     sortBy: "ENGAGEMENT_DATE",
     sortOrder: "DESC",
     variableType: "ReportSearchQueryInput",
@@ -116,25 +126,22 @@ class Search extends Page {
     showSaveSearch: false
   }
 
-  getPaginatedNum = (part, pageNum = 0) => {
+  getPageNum = (type, pageNum = 0) => {
+    const { pagination } = this.props
+    const key = this.paginationKey(type)
+    const paginationInfo = pagination[key]
     let goToPageNum = pageNum
-    if (part !== undefined) {
-      goToPageNum = part.pageNum
+    if (paginationInfo !== undefined) {
+      goToPageNum = paginationInfo.pageNum
     }
     return goToPageNum
   }
 
-  getPaginated = type => {
-    const { pagination } = this.props
-    const pageLabel = this.pageLabel(type)
-    return pagination[pageLabel]
-  }
-
-  pageLabel = (type, prefix = this.componentPrefix) => {
+  paginationKey = (type, prefix = this.componentPrefix) => {
     return `${prefix}${type}`
   }
 
-  getSearchPart(type, query, pageNum = 0, pageSize = 10) {
+  getSearchPart(type, query, pageNum = 0, pageSize = 10, includeAll = false) {
     const searchType = SEARCH_OBJECT_TYPES[type]
     let subQuery = Object.assign({}, query)
     subQuery.pageNum = pageNum
@@ -146,11 +153,16 @@ class Search extends Page {
     if (config.sortOrder) {
       subQuery.sortOrder = config.sortOrder
     }
+    const queryVarName = includeAll
+      ? searchType + "QueryAll"
+      : searchType + "Query"
     let gqlPart = new GQL.Part(/* GraphQL */ `
-      ${config.listName} (query:$${searchType}Query) {
+      ${
+  includeAll ? config.listAllName : config.listName
+} (query:$${queryVarName}) {
         pageNum, pageSize, totalCount, list { ${config.fields} }
       }
-      `).addVariable(searchType + "Query", config.variableType, subQuery)
+      `).addVariable(queryVarName, config.variableType, subQuery)
     return gqlPart
   }
 
@@ -162,10 +174,15 @@ class Search extends Page {
     const query = this.getSearchQuery(props)
     if (!_isEmpty(query)) {
       const parts = Object.keys(queryTypes).map(type => {
-        const paginatedPart = this.getPaginated(type)
-        const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
+        const goToPageNum = this.getPageNum(type, pageNum)
         return this.getSearchPart(type, query, goToPageNum, pageSize)
       })
+      if (Object.keys(queryTypes).includes(SEARCH_OBJECT_TYPES.REPORTS)) {
+        // add query for all reports
+        parts.push(
+          this.getSearchPart(SEARCH_OBJECT_TYPES.REPORTS, query, 0, 0, true)
+        )
+      }
       return callback(parts)
     } else {
       this.setState({
@@ -272,18 +289,27 @@ class Search extends Page {
         </SubNav>
         <div className="pull-right">
           {!noResults && (
-            <Button
-              onClick={this.exportSearchResults}
-              id="exportSearchResultsButton"
-              style={{ marginRight: 12 }}
-              title="Export search results"
-            >
-              <img
-                src={DOWNLOAD_ICON}
-                height={16}
-                alt="Export search results"
-              />
-            </Button>
+            <Dropdown id="dropdown-custom-1">
+              <Dropdown.Toggle>
+                Export{" "}
+                <img
+                  src={DOWNLOAD_ICON}
+                  height={16}
+                  alt="Export search results"
+                />
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="super-colors">
+                <MenuItem onClick={this.createExportResultsFunctionFor("xlsx")}>
+                  Excel (xlsx)
+                </MenuItem>
+                <MenuItem onClick={this.createExportResultsFunctionFor("kml")}>
+                  Google Earth (kml)
+                </MenuItem>
+                <MenuItem onClick={this.createExportResultsFunctionFor("nvg")}>
+                  NATO Vector Graphics (nvg)
+                </MenuItem>
+              </Dropdown.Menu>
+            </Dropdown>
           )}
           {this.state.didSearch && (
             <Button
@@ -343,8 +369,7 @@ class Search extends Page {
 
   paginationFor = type => {
     const { pageSize, totalCount } = this.state.results[type]
-    const paginatedPart = this.getPaginated(type)
-    const goToPage = this.getPaginatedNum(paginatedPart)
+    const goToPage = this.getPageNum(type)
     const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
     if (numPages === 1) {
       return
@@ -375,7 +400,7 @@ class Search extends Page {
         let results = this.state.results // TODO: @nickjs this feels wrong, help!
         results[type] = data[type]
         this.setState({ results }, () =>
-          setPagination(this.pageLabel(type), pageNum)
+          setPagination(this.paginationKey(type), pageNum)
         )
       })
       .catch(error => this.setState({ error: error }))
@@ -383,15 +408,14 @@ class Search extends Page {
 
   renderReports() {
     const { results } = this.state
-    const { pagination } = this.props
     const reports = results[SEARCH_OBJECT_TYPES.REPORTS]
-    const paginatedPart =
-      pagination[this.pageLabel(SEARCH_OBJECT_TYPES.REPORTS)]
-    const goToPageNum = this.getPaginatedNum(paginatedPart)
+    const allReports = results["all" + SEARCH_OBJECT_TYPES.REPORTS].list
+    const goToPageNum = this.getPageNum(SEARCH_OBJECT_TYPES.REPORTS)
     const paginatedReports = Object.assign(reports, { pageNum: goToPageNum })
     return (
       <ReportCollection
         paginatedReports={paginatedReports}
+        reports={allReports}
         goToPage={value => this.goToPage(SEARCH_OBJECT_TYPES.REPORTS, value)}
       />
     )
@@ -640,17 +664,18 @@ class Search extends Page {
     this.setState({ showSaveSearch: false })
   }
 
-  _exportSearchResultsCallback = parts => {
-    GQL.runExport(parts, "xlsx")
-      .then(blob => {
-        FileSaver.saveAs(blob, "anet_export.xlsx")
-      })
-      .catch(error => this.setState({ error: error }))
-  }
-
-  exportSearchResults = () => {
-    this._dataFetcher(this.props, this._exportSearchResultsCallback, 0, 0)
-  }
+  createExportResultsFunctionFor = exportType => () =>
+    this._dataFetcher(
+      this.props,
+      parts =>
+        GQL.runExport(parts, exportType)
+          .then(blob => {
+            FileSaver.saveAs(blob, `anet_export.${exportType}`)
+          })
+          .catch(error => this.setState({ error: error })),
+      0,
+      0
+    )
 }
 
 const mapStateToProps = (state, ownProps) => ({

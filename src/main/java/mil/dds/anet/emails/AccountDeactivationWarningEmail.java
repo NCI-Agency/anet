@@ -17,7 +17,7 @@ public class AccountDeactivationWarningEmail implements AnetEmailAction {
 
   @Override
   public String getTemplateName() {
-    return "/emails/deactivationWarning.tflh";
+    return "/emails/deactivationWarning.ftlh";
   }
 
   @Override

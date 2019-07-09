@@ -543,6 +543,35 @@ table hr.attendee-divider {
 	padding-left: 1rem;
 }
 
+.fc-dayGrid-view .event-draft, .fc-timeGrid-view .event-draft {
+  background-color: #f3a537;
+  border-color: #f3a537;
+}
+.fc-dayGrid-view .event-cancelled, .fc-timeGrid-view .event-cancelled {
+  background-color: #EC971F;
+  border-color: #EC971F;
+}
+.fc-dayGrid-view .event-pending_approval, .fc-timeGrid-view .event-pending_approval {
+  background-color: #969696;
+  border-color: #969696;
+}
+.fc-dayGrid-view .event-rejected, .fc-timeGrid-view .event-rejected {
+  background-color: #c23030;
+  border-color: #c23030;
+}
+.fc-dayGrid-view .event-approved, .fc-timeGrid-view .event-approved {
+  background-color: #5cb85c;
+  border-color: #5cb85c;
+}
+.fc-dayGrid-view .event-published, .fc-timeGrid-view .event-published {
+  background-color: #2965CC;
+  border-color: #2965CC;
+}
+.fc-dayGrid-view .event-future, .fc-timeGrid-view .event-future {
+  background-color: #00998C;
+  border-color: #00998C;
+}
+
 .form-horizontal fieldset:last-child {
 	margin-bottom: 10px;
 }

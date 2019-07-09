@@ -14,7 +14,7 @@ import POSITIONS_ICON from "resources/positions.png"
 
 class BaseAssignPositionModal extends Component {
   static propTypes = {
-    person: PropTypes.object.isRequired,
+    person: PropTypes.instanceOf(Person).isRequired,
     showModal: PropTypes.bool,
     onCancel: PropTypes.func.isRequired,
     onSuccess: PropTypes.func.isRequired,

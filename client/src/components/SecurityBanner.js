@@ -18,14 +18,15 @@ const aCss = {
 
 class BaseSecurityBanner extends Component {
   static propTypes = {
-    location: PropTypes.object.isRequired,
     currentUser: PropTypes.instanceOf(Person),
     appSettings: PropTypes.object
   }
+  static defaultProps = {
+    appSettings: {}
+  }
 
   render() {
-    const { appSettings } = this.props || {}
-    const { currentUser } = this.props
+    const { appSettings, currentUser } = this.props
 
     return (
       <div
