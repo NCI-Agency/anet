@@ -54,7 +54,10 @@ const INLINE_STYLES = [
   { type: INLINE_STYLE.BOLD },
   { type: INLINE_STYLE.ITALIC },
   {
-    type: INLINE_STYLE.UNDERLINE
+    type: INLINE_STYLE.UNDERLINE,
+    icon: [
+      "m -110.45248,-36.817494 h 28.503379 v 25.631677 h -28.503379 z", "m 529.75865,840.37772 c 158.31765,0 286.98061,-119.02958 286.98061,-265.4935 V 220.89293 H 697.16399 v 353.99129 c 0,85.4004 -75.09325,154.8712 -167.40534,154.8712 -92.3121,0 -167.40535,-69.4708 -167.40535,-154.8712 V 220.89293 H 242.77804 v 353.99129 c 0,146.46392 128.66297,265.4935 286.98061,265.4935 z m -334.81072,88.49784 v 88.49774 h 669.62145 v -88.49774 z"
+    ]
   }
 ]
 
@@ -165,7 +168,6 @@ class RichTextEditor extends Component {
             onChange(toHTML(rawContent))
           }
         }}
-        //onBlur={() => onChange(toHTML(this.state.content))}
         plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
         rawContentState={value ? fromHTML(value) : null}
         showUndoControl
