@@ -104,6 +104,11 @@ public class DaoUtils {
     if (MapperUtils.containsColumnNamed(rs, updatedAtCol)) {
       bean.setUpdatedAt(getInstantAsLocalDateTime(rs, updatedAtCol));
     }
+
+    // Only present when batch searching
+    if (MapperUtils.containsColumnNamed(rs, "batchUuid")) {
+      bean.setBatchUuid(rs.getString("batchUuid"));
+    }
   }
 
   private static String getQualifiedFieldName(String tableName, String fieldName) {

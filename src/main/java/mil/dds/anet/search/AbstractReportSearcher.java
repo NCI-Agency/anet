@@ -39,6 +39,10 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       addTextQuery(query);
     }
 
+    if (query.isBatchParamsPresent()) {
+      qb.addM2mBatchClause(query.getBatchParams());
+    }
+
     qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
     qb.addDateClause("startDate", "reports.\"engagementDate\"", Comparison.AFTER,
         query.getEngagementDateStart());

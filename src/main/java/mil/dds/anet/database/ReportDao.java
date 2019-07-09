@@ -44,6 +44,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -732,6 +733,18 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     final ForeignKeyBatcher<Task> tasksBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(TasksBatcher.class);
     return tasksBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  static class ReportSearchBatcher extends SearchQueryBatcher<Report, ReportSearchQuery> {
+    public ReportSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getReportDao());
+    }
+  }
+
+  public List<List<Report>> getReports(List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
+    final ReportSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(ReportSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
   }
 
   private void sendReportPublishedEmail(Report r) {
