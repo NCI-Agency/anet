@@ -73,7 +73,7 @@ class TooltipEntity extends Component {
               <button
                 type="button"
                 className="Tooltip__button"
-                onClick={onEdit.bind(null, entityKey)}
+                onClick={e => onEdit(entityKey, e)}
               >
                 Edit
               </button>
@@ -81,7 +81,7 @@ class TooltipEntity extends Component {
               <button
                 type="button"
                 className="Tooltip__button"
-                onClick={onRemove.bind(null, entityKey)}
+                onClick={e => onRemove(entityKey)}
               >
                 Remove
               </button>
