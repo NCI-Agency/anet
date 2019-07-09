@@ -15,12 +15,6 @@ class LinkSource extends Component {
     this.state = {
       url: ""
     }
-
-    this.onKeyDown = this.onKeyDown.bind(this)
-    this.onRequestClose = this.onRequestClose.bind(this)
-    this.onAfterOpen = this.onAfterOpen.bind(this)
-    this.onConfirm = this.onConfirm.bind(this)
-    this.onChangeURL = this.onChangeURL.bind(this)
   }
 
   componentDidMount() {
@@ -32,7 +26,7 @@ class LinkSource extends Component {
   }
 
   /* :: onKeyDown: (e: Event) => void; */
-  onKeyDown(e) {
+  onKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault()
       e.stopPropagation()
@@ -41,7 +35,7 @@ class LinkSource extends Component {
   }
 
   /* :: onConfirm: (e: Event) => void; */
-  onConfirm(e) {
+  onConfirm = (e) => {
     const { editorState, entityType, onComplete } = this.props
     const { url } = this.state
 
@@ -82,7 +76,7 @@ class LinkSource extends Component {
   }
 
   /* :: onRequestClose: (e: SyntheticEvent<>) => void; */
-  onRequestClose(e) {
+  onRequestClose = (e) => {
     const { onClose } = this.props
     e.preventDefault()
 
@@ -90,7 +84,7 @@ class LinkSource extends Component {
   }
 
   /* :: onAfterOpen: () => void; */
-  onAfterOpen() {
+  onAfterOpen = () => {
     const input = this.inputRef
 
     if (input) {
@@ -100,7 +94,7 @@ class LinkSource extends Component {
   }
 
   /* :: onChangeURL: (e: Event) => void; */
-  onChangeURL(e) {
+  onChangeURL = (e) => {
     if (e.target instanceof HTMLInputElement) {
       const url = e.target.value
       this.setState({ url })
