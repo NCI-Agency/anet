@@ -1317,10 +1317,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@blueprintjs/core@^3.15.1", "@blueprintjs/core@^3.16.2":
-  version "3.16.2"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.16.2.tgz#c232e44f14d0352b90335c32ca0c2f5fea032517"
-  integrity sha512-u+mSITWaNDwbdaPrbKx9XyxGsF4725SCAidWjd367ysX7AxCo4PK4SsFQVfXNylXpVWHQhJZekuo7+hdksc9lA==
+"@blueprintjs/core@^3.15.1", "@blueprintjs/core@^3.17.1":
+  version "3.17.1"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.17.1.tgz#c6ea0df795e046848a16b3d9242225fef34091ee"
+  integrity sha512-VROTlhBaNaRN9kfscTQwZqRvGZmZYGfPkzcP8w50+wF/XMiK0xNEF4mRNQKXLNIduIZta5uPagZgIh68UG5dTg==
   dependencies:
     "@blueprintjs/icons" "^3.8.0"
     "@types/dom4" "^2.0.1"
