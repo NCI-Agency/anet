@@ -12,23 +12,23 @@ class LinkSource extends Component {
   constructor(props) {
     super(props)
 
-    const { entity } = this.props
-    const state = {
+    this.state = {
       url: ""
     }
-
-    if (entity) {
-      const data = entity.getData()
-      state.url = data.url
-    }
-
-    this.state = state
 
     this.onKeyDown = this.onKeyDown.bind(this)
     this.onRequestClose = this.onRequestClose.bind(this)
     this.onAfterOpen = this.onAfterOpen.bind(this)
     this.onConfirm = this.onConfirm.bind(this)
     this.onChangeURL = this.onChangeURL.bind(this)
+  }
+
+  componentDidMount() {
+    const { entity } = this.props
+    if (entity) {
+      const data = entity.getData()
+      this.setState({ url: data.url })
+    }
   }
 
   /* :: onKeyDown: (e: Event) => void; */
