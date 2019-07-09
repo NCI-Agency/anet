@@ -8,6 +8,8 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Table } from "react-bootstrap"
 import { Element } from "react-scroll"
+import OrganizationalChart from "components/graphs/OrganizationalChart"
+import ContainerDimensions from "react-container-dimensions"
 
 class BaseOrganizationLaydown extends Component {
   static propTypes = {
@@ -42,6 +44,33 @@ class BaseOrganizationLaydown extends Component {
 
     return (
       <Element name="laydown">
+        <Element
+          id="orgChart"
+          name="orgChart"
+          className="scroll-anchor-container"
+        >
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div>
+              <h2 className="legend">
+                <span className="title-text">Org Diagram</span>
+              </h2>
+            </div>
+            <div style={{ backgroundColor: "white" }}>
+              <ContainerDimensions>
+                {({ width, height }) => (
+                  <OrganizationalChart
+                    width={width}
+                    height={height}
+                    label="test"
+                    org={this.props.organization}
+                    size={{ width: "100%", height: 800 }}
+                  />
+                )}
+              </ContainerDimensions>
+            </div>
+          </div>
+        </Element>
+
         <Fieldset
           id="supportedPositions"
           title="Supported positions"
@@ -116,8 +145,8 @@ class BaseOrganizationLaydown extends Component {
           {Position.map(positions, position =>
             position.associatedPositions.length
               ? Position.map(position.associatedPositions, (other, idx) =>
-                  this.renderPositionRow(position, other, idx)
-                )
+                this.renderPositionRow(position, other, idx)
+              )
               : this.renderPositionRow(position, null, 0)
           )}
         </tbody>
