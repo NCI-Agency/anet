@@ -1,14 +1,9 @@
 // @flow
 import React, { Component } from "react"
 import ReactDOM from "react-dom"
+import PropTypes from "prop-types"
 
 class Portal extends Component {
-  constructor(props) {
-    super(props)
-
-    this.onCloseEvent = this.onCloseEvent.bind(this)
-  }
-
   componentDidMount() {
     const { onClose, closeOnClick, closeOnType, closeOnResize } = this.props
 
@@ -56,7 +51,7 @@ class Portal extends Component {
   }
 
   /* :: onCloseEvent: (e: Event) => void; */
-  onCloseEvent(e) {
+  onCloseEvent = e => {
     const { onClose } = this.props
 
     if (e.target instanceof Element && !this.portal.contains(e.target)) {
@@ -74,6 +69,14 @@ Portal.defaultProps = {
   closeOnClick: false,
   closeOnType: false,
   closeOnResize: false
+}
+
+Portal.propTypes = {
+  children: PropTypes.any,
+  onClose: PropTypes.func,
+  closeOnClick: PropTypes.bool,
+  closeOnType: PropTypes.bool,
+  closeOnResize: PropTypes.bool
 }
 
 export default Portal

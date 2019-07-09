@@ -1,6 +1,9 @@
 // @flow
 import React from "react"
+import PropTypes from "prop-types"
+
 import "./Tooltip.css"
+
 const TOP = "top"
 const LEFT = "left"
 const TOP_LEFT = "top-left"
@@ -44,3 +47,9 @@ const Tooltip = ({ target, children, direction }) => (
 )
 
 export default Tooltip
+
+Tooltip.propTypes = {
+  target: PropTypes.object,
+  children: PropTypes.any,
+  direction: PropTypes.string
+}
