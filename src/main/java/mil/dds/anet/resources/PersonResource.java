@@ -297,12 +297,7 @@ public class PersonResource {
       @GraphQLArgument(name = "size", defaultValue = "256") String size) {
     final String avatar = dao.getByUuid(personUuid).getAvatar();
     final int sizeInt = Integer.parseInt(size);
-
-    // No avatar, so use default
-    if (avatar == null) {
-      return avatar;
-    }
-
+     
     try {
       return Utils.resizeImageBase64(avatar, sizeInt, sizeInt, "png");
     } catch (IOException e) {

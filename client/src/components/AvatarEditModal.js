@@ -13,7 +13,6 @@ class AvatarEditModal extends Component {
   }
 
   static propTypes = {
-    src: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     size: PropTypes.string.isRequired,
     onAvatarUpdate: PropTypes.func.isRequired
@@ -28,7 +27,7 @@ class AvatarEditModal extends Component {
       "data:image/jpeg;base64,".length - 1
     )
     this.props.onAvatarUpdate(updatedAvatar)
-    this.close()
+    this.close
   }
 
   open = e => {

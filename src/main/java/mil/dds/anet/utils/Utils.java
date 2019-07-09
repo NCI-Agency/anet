@@ -359,6 +359,10 @@ public class Utils {
   public static String resizeImageBase64(String imageBase64, int width, int height,
       String imageFormatName) throws IOException {
 
+    if (imageBase64 == null || imageBase64.isEmpty()) {
+      return imageBase64;
+    }
+
     // From Base64-string to BufferedImage
     final BufferedImage imageBytes = convert(imageBase64);
 
