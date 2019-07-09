@@ -91,8 +91,8 @@
     "xhr2": "^0.2.0"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.16.2",
-    "@blueprintjs/datetime": "^3.9.0",
+    "@blueprintjs/core": "^3.17.1",
+    "@blueprintjs/datetime": "^3.11.0",
     "@fullcalendar/core": "^4.1.0",
     "@fullcalendar/daygrid": "^4.1.0",
     "@fullcalendar/interaction": "^4.1.0",
