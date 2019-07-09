@@ -77,11 +77,8 @@ export const PersonDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
       <td>
-          <ThumbnailDisplayComponent
-            personUuid={item.uuid}
-            thumbnailSize={32}
-          />
-        </td>
+        <ThumbnailDisplayComponent personUuid={item.uuid} size={32} />
+      </td>
     </td>
     <td>
       <LinkTo person={item} isLink={false} />

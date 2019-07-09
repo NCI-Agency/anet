@@ -142,13 +142,10 @@ export default class AttendeesTable extends Component {
 
   renderAttendeeRow = person => {
     const { disabled, showDelete, onDelete } = this.props
-    return (      
+    return (
       <tr key={person.uuid}>
-         <td>
-          <ThumbnailDisplayComponent
-            personUuid={person.uuid}
-            thumbnailSize={32}
-          />
+        <td>
+          <ThumbnailDisplayComponent personUuid={person.uuid} size={32} />
         </td>
         <td className="primary-attendee">
           <RadioButton

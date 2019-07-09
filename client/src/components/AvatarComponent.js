@@ -1,6 +1,7 @@
 import React from "react"
 import Avatar from "react-avatar-edit"
 import DEFAULT_AVATAR from "resources/default_avatar.png"
+import PropTypes from "prop-types"
 
 // More info about this component: https://github.com/kirill3333/react-avatar
 export default class AvatarComponent extends React.Component {
@@ -9,6 +10,13 @@ export default class AvatarComponent extends React.Component {
     this.state = {
       preview: null
     }
+  }
+
+  static propTypes = {
+    onChangePreview: PropTypes.func.isRequired,
+    src: PropTypes.string,
+    editCurrent: PropTypes.bool,
+    showPreview: PropTypes.bool
   }
 
   onClose = () => {
@@ -31,15 +39,19 @@ export default class AvatarComponent extends React.Component {
       )
     }
 
-    let image =
-      this.props.src == null || this.props.src === ""
-        ? DEFAULT_AVATAR
-        : "data:image/jpeg;base64," + this.props.src
+    let image = null
+
+    if (this.props.editCurrent) {
+      image =
+        this.props.src == null || this.props.src === ""
+          ? DEFAULT_AVATAR
+          : "data:image/jpeg;base64," + this.props.src
+    }
 
     return (
       <div style={{ display: "inline", margin: "auto" }}>
         <div style={{ float: "rigth" }}>
-          <Avatar onCrop={this.onCrop} onClose={this.onClose} />
+          <Avatar onCrop={this.onCrop} onClose={this.onClose} src={image} />
           {previewImage}
         </div>
       </div>

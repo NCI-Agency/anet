@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { Button, Modal } from "react-bootstrap"
 import AvatarComponent from "components/AvatarComponent"
+import PropTypes from "prop-types"
 
 class AvatarEditModal extends Component {
   constructor(props) {
@@ -9,6 +10,13 @@ class AvatarEditModal extends Component {
       showModal: false,
       currentPreview: null
     }
+  }
+
+  static propTypes = {
+    src: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    size: PropTypes.string.isRequired,
+    onAvatarUpdate: PropTypes.func.isRequired
   }
 
   close = () => {
@@ -46,10 +54,7 @@ class AvatarEditModal extends Component {
             <Modal.Title>{this.props.title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <AvatarComponent
-              src={this.props.src}
-              onChangePreview={this.updateAvatarPreview}
-            />
+            <AvatarComponent onChangePreview={this.updateAvatarPreview} />
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.save}>Save</Button>
