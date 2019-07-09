@@ -14,13 +14,10 @@ class TooltipEntity extends Component {
     this.state = {
       showTooltipAt: null
     }
-
-    this.openTooltip = this.openTooltip.bind(this)
-    this.closeTooltip = this.closeTooltip.bind(this)
   }
 
   /* :: openTooltip: (e: Event) => void; */
-  openTooltip(e) {
+  openTooltip = (e) => {
     const trigger = e.target
 
     if (trigger instanceof Element) {
@@ -29,7 +26,7 @@ class TooltipEntity extends Component {
   }
 
   /* :: closeTooltip: () => void; */
-  closeTooltip() {
+  closeTooltip = () => {
     this.setState({ showTooltipAt: null })
   }
 
