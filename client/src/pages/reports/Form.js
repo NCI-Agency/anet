@@ -549,6 +549,7 @@ class BaseReportForm extends Component {
                       />
                     }
                     overlayColumns={[
+                      "Avatar",
                       "Name",
                       "Position",
                       "Location",

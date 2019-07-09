@@ -39,7 +39,7 @@ export default class AvatarComponent extends React.Component {
     return (
       <div style={{ display: "inline", margin: "auto" }}>
         <div style={{ float: "rigth" }}>
-          <Avatar onCrop={this.onCrop} onClose={this.onClose} src={image} />
+          <Avatar onCrop={this.onCrop} onClose={this.onClose} />
           {previewImage}
         </div>
       </div>

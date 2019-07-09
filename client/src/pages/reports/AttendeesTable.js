@@ -4,6 +4,7 @@ import React, { Component } from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import "./AttendeesTable.css"
+import ThumbnailDisplayComponent from "components/ThumbnailDisplayComponent"
 
 const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
@@ -28,6 +29,7 @@ const TableHeader = props => {
   return (
     <thead>
       <tr>
+        <th className="col-xs-1">{!hide && ""}</th>
         <th className="col-xs-1" style={{ textAlign: "center" }}>
           {!hide && "Primary"}
         </th>
@@ -99,8 +101,14 @@ export default class AttendeesTable extends Component {
 
   renderAttendeeRow = person => {
     const { disabled, showDelete, onDelete } = this.props
-    return (
+    return (      
       <tr key={person.uuid}>
+         <td>
+          <ThumbnailDisplayComponent
+            personUuid={person.uuid}
+            thumbnailSize={32}
+          />
+        </td>
         <td className="primary-attendee">
           <RadioButton
             person={person}

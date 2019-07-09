@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.sql.Blob;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +94,7 @@ public class PersonDao extends AnetBaseDao<Person> {
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", this.convertToBlob(p.getAvatar())).execute();
+        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
     return p;
   }
 
@@ -119,7 +121,7 @@ public class PersonDao extends AnetBaseDao<Person> {
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", this.convertToBlob(p.getAvatar())).execute();
+        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
   }
 
   @Override
@@ -235,15 +237,18 @@ public class PersonDao extends AnetBaseDao<Person> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
-  private Blob convertToBlob(String value) {
+  private Blob convertImageToBlob(String value) {
     Blob avatar = null;
     try {
       avatar = this.getDbHandle().getConnection().createBlob();
+      value = Utils.resizeImageBase64(value, 256, 256, "png");
       if (value != null) {
         avatar.setBytes(1l, value.getBytes());
       }
     } catch (SQLException e) {
-      logger.error("Failed to update avatar: ", e);
+      logger.error("Failed to create a Blob: ", e);
+    } catch (IOException e) {
+      logger.error("Failed to resize avatar: ", e);
     }
 
     return avatar;

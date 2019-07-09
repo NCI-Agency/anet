@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
-import java.sql.Blob;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;

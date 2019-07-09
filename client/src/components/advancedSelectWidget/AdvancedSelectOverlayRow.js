@@ -1,5 +1,6 @@
 import React from "react"
 import LinkTo from "components/LinkTo"
+import ThumbnailDisplayComponent from "components/ThumbnailDisplayComponent"
 
 export const AuthorizationGroupOverlayRow = item => (
   <React.Fragment key={item.uuid}>
@@ -74,6 +75,14 @@ export const PersonSimpleOverlayRow = item => (
 
 export const PersonDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
+    <td>
+      <td>
+          <ThumbnailDisplayComponent
+            personUuid={item.uuid}
+            thumbnailSize={32}
+          />
+        </td>
+    </td>
     <td>
       <LinkTo person={item} isLink={false} />
     </td>

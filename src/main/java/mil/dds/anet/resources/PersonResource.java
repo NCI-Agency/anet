@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -289,5 +290,23 @@ public class PersonResource {
     final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody
         : String.format("%s at %s", messageBody, supportEmailAddr);
     return errorMessage;
+  }
+
+  @GraphQLQuery(name = "thumbnail")
+  public String createThumbnail(@GraphQLArgument(name = "uuid") String personUuid,
+      @GraphQLArgument(name = "size", defaultValue = "256") String size) {
+    final String avatar = dao.getByUuid(personUuid).getAvatar();
+    final int sizeInt = Integer.parseInt(size);
+
+    // No avatar, so use default
+    if (avatar == null) {
+      return avatar;
+    }
+
+    try {
+      return Utils.resizeImageBase64(avatar, sizeInt, sizeInt, "png");
+    } catch (IOException e) {
+      return null;
+    }
   }
 }
