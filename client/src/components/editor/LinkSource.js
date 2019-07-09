@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import PropTypes from "prop-types"
 
 import { RichUtils } from "draft-js"
-import { Modal } from "react-bootstrap"
+import { Button, Modal } from "react-bootstrap"
 
 import createEntity from "./utils/createEntity"
 
@@ -24,10 +24,20 @@ class LinkSource extends Component {
 
     this.state = state
 
+    this.onKeyDown = this.onKeyDown.bind(this)
     this.onRequestClose = this.onRequestClose.bind(this)
     this.onAfterOpen = this.onAfterOpen.bind(this)
     this.onConfirm = this.onConfirm.bind(this)
     this.onChangeURL = this.onChangeURL.bind(this)
+  }
+
+  /* :: onKeyDown: (e: Event) => void; */
+  onKeyDown(e) {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      e.stopPropagation()
+      this.onConfirm(e)
+    }
   }
 
   /* :: onConfirm: (e: Event) => void; */
@@ -110,23 +120,31 @@ class LinkSource extends Component {
           <Modal.Title>Enter a valid url</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form className="LinkSource">
+          <form className="LinkSource" onSubmit={this.onKeyDown}>
             <label className="form-field">
               <span className="form-field__label">Link URL</span>
-              <input
-                ref={inputRef => {
-                  this.inputRef = inputRef
-                }}
-                type="text"
-                onChange={this.onChangeURL}
-                value={url}
-                placeholder="www.example.com"
-              />
             </label>
 
-            <button type="button" onClick={this.onConfirm}>
+            <input
+              className="form-control"
+              ref={inputRef => {
+                this.inputRef = inputRef
+              }}
+              type="text"
+              onChange={this.onChangeURL}
+              onKeyDown={this.onKeyDown}
+              value={url}
+              placeholder="www.example.com"
+            />
+
+            <Button
+              style={{ margin: "1rem 0", width: "200px" }}
+              className="form-control"
+              bsStyle={"primary"}
+              onClick={this.onConfirm}
+            >
               Save
-            </button>
+            </Button>
           </form>
         </Modal.Body>
       </Modal>
