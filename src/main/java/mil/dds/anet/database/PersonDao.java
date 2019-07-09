@@ -237,13 +237,13 @@ public class PersonDao extends AnetBaseDao<Person> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
-  private Blob convertImageToBlob(String value) {
+  private Blob convertImageToBlob(String image) {
     Blob avatar = null;
     try {
       avatar = this.getDbHandle().getConnection().createBlob();
-      value = Utils.resizeImageBase64(value, 256, 256, "png");
-      if (value != null) {
-        avatar.setBytes(1l, value.getBytes());
+      if (image != null) {
+        String resizedImage = Utils.resizeImageBase64(image, 256, 256, "png");
+        avatar.setBytes(1l, resizedImage.getBytes());
       }
     } catch (SQLException e) {
       logger.error("Failed to create a Blob: ", e);
