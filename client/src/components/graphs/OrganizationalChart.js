@@ -58,7 +58,7 @@ export default class OrganizationalChart extends SVGCanvas {
 
     const tree = d3.tree().size(this.props.width, this.props.height)
 
-    tree.nodeSize([200, 150])
+    tree.nodeSize([250, 150])
 
     const root = d3.hierarchy(this.state.root, d =>
       this.state.orgs.filter(org =>
@@ -72,6 +72,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .enter()
       .append("path")
       .attr("class", "link")
+      .attr("stroke-opacity"," 0.3")
       .attr(
         "d",
         d3
@@ -97,10 +98,13 @@ export default class OrganizationalChart extends SVGCanvas {
       .append("a")
       .attr("href", d => `/organizations/${d.data.uuid}`)
       .append("text")
+      .attr("font-family","monospace")
       .attr("dy", 3)
       .attr("x", 8)
       .style("text-anchor", "start")
-      .text(d => `${d.data.shortName} (${d.data.longName})`)
+      .text(d => {
+        const result = `${d.data.shortName} (${d.data.longName})`
+        return result.length > 26 ? result.substring(0, 23) + "..." : result })
 
     const ggg = node.append("g")
     ggg
@@ -111,15 +115,17 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("href", d => `/positions/${d.uuid}`)
       .append("text")
       .attr("font-size", "9px")
+      .attr("font-family","monospace")
       .attr("dy", (d, i) => 20 + i * 11)
       .attr("x", 8)
       .style("text-anchor", "start")
       .text(
-        d =>
-          `${d.person ? d.person.rank : ""} ${
+        d => {
+          const result = `${d.person ? d.person.rank : ""} ${
             d.person ? d.person.name : "unfilled"
           }@${d.name}`
-      )
+          return result.length > 45 ? result.substring(0, 42) + "..." : result })
+
   }
 
   fetchData() {
