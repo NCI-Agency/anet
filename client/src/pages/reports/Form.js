@@ -683,6 +683,7 @@ class BaseReportForm extends Component {
 
                   <Button
                     className="center-block toggle-section-button"
+                    style={{ marginBottom: "1rem" }}
                     onClick={this.toggleReportText}
                     id="toggleSensitiveInfo"
                   >

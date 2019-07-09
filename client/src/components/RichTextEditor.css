@@ -1,5 +1,6 @@
 .Draftail-Editor .DraftEditor-root {
   font-size: 1.75rem;
+  min-height: 10rem;
 }
 
 .Draftail-ToolbarButton {
