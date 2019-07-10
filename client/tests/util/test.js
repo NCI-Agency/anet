@@ -71,7 +71,7 @@ test.beforeEach(t => {
   // This method is a helper so we don't have to keep repeating the hostname.
   // Passing the authentication through the querystring is a hack so we can
   // pass the information along via window.fetch.
-  t.context.get = async (pathname, userPw) => {
+  t.context.get = async(pathname, userPw) => {
     let credentials = userPw || "erin"
     let urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
     debugLog("Getting URL", urlToGet)
@@ -107,12 +107,12 @@ test.beforeEach(t => {
   }
 
   // For debugging purposes.
-  t.context.waitForever = async () => {
+  t.context.waitForever = async() => {
     console.log(chalk.red("Waiting forever so you can debug..."))
     await t.context.driver.wait(() => {})
   }
 
-  t.context.$ = async (cssSelector, timeoutMs) => {
+  t.context.$ = async(cssSelector, timeoutMs) => {
     debugLog(`Find element: $('${cssSelector}')`)
     let waitTimeoutMs = timeoutMs || longWaitMs
     let locator = By.css(cssSelector)
@@ -123,7 +123,7 @@ test.beforeEach(t => {
     )
     return t.context.driver.findElement(locator)
   }
-  t.context.$$ = async (cssSelector, timeoutMs) => {
+  t.context.$$ = async(cssSelector, timeoutMs) => {
     debugLog(`Find elements: $$('${cssSelector}')`)
     let waitTimeoutMs = timeoutMs || longWaitMs
     let locator = By.css(cssSelector)
@@ -136,7 +136,7 @@ test.beforeEach(t => {
   }
 
   // A helper method to combine waiting for an element to have rendered and then asserting on its contents.
-  t.context.assertElementText = async (t, $elem, expectedText, message) => {
+  t.context.assertElementText = async(t, $elem, expectedText, message) => {
     try {
       let untilCondition = _isRegExp(expectedText)
         ? until.elementTextMatches($elem, expectedText)
@@ -161,7 +161,7 @@ test.beforeEach(t => {
   t.context.assertElementTextIsInt = (t, $elem, message) =>
     t.context.assertElementText(t, $elem, /^\d+$/)
 
-  t.context.assertElementNotPresent = async (
+  t.context.assertElementNotPresent = async(
     t,
     cssSelector,
     message,
@@ -170,7 +170,7 @@ test.beforeEach(t => {
     let waitTimeoutMs = timeoutMs || longWaitMs
     try {
       await t.context.driver.wait(
-        async () => {
+        async() => {
           try {
             return !(await t.context.$(cssSelector, waitTimeoutMs))
           } catch (e) {
@@ -198,7 +198,7 @@ test.beforeEach(t => {
   }
 
   // A helper method to combine waiting for an element to have rendered and then asserting on its enabled status
-  t.context.assertElementEnabled = async (
+  t.context.assertElementEnabled = async(
     t,
     cssSelector,
     message,
@@ -218,7 +218,7 @@ test.beforeEach(t => {
   }
 
   // A helper method to combine waiting for an element to have rendered and then asserting it's disabled status
-  t.context.assertElementDisabled = async (
+  t.context.assertElementDisabled = async(
     t,
     cssSelector,
     message,
@@ -237,7 +237,7 @@ test.beforeEach(t => {
     t.is(await elem.isEnabled(), false, message)
   }
 
-  t.context.getCurrentPathname = async () => {
+  t.context.getCurrentPathname = async() => {
     let currentUrl = await t.context.driver.getCurrentUrl()
     return new URL(currentUrl).pathname
   }

@@ -276,12 +276,12 @@ class CancelledEngagementReports extends ReportsVisualisation {
   getReasonDisplayName(reason) {
     return reason
       ? reason
-          .replace("CANCELLED_", "")
-          .replace(/_/g, " ")
-          .toLocaleLowerCase()
-          .replace(/(\b\w)/gi, function(m) {
-            return m.toUpperCase()
-          })
+        .replace("CANCELLED_", "")
+        .replace(/_/g, " ")
+        .toLocaleLowerCase()
+        .replace(/(\b\w)/gi, function(m) {
+          return m.toUpperCase()
+        })
       : ""
   }
 

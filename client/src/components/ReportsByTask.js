@@ -220,7 +220,7 @@ class ReportsByTask extends ReportsVisualisation {
             d.uuid === noTask.uuid
               ? simplifiedValues.filter(item => item.tasks.length === 0).length
               : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
-                  .length
+                .length
           return r
         })
       }

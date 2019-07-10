@@ -143,8 +143,8 @@ class BaseRelatedObjectNotes extends Component {
       this.props.relatedObject.relatedObjectType === "people" &&
       this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
         ? Settings.fields.principal.person.assessment.questions.filter(
-            question =>
-              !question.test ||
+          question =>
+            !question.test ||
               RegExp(question.test.regex).test(
                 question.test.expression
                   .split(".")
@@ -153,7 +153,7 @@ class BaseRelatedObjectNotes extends Component {
                     this.props.relatedObjectValue
                   )
               )
-          )
+        )
         : []
     const assessments = notes.filter(
       note => note.type === NOTE_TYPE.PARTNER_ASSESSMENT

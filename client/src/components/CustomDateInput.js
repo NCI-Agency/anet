@@ -52,12 +52,12 @@ export default class CustomDateInput extends Component {
     const timePickerProps = !withTime
       ? {}
       : {
-          precision: TimePrecision.MINUTE,
-          selectAllOnFocus: true
-          // FIXME: clicking a time arrow immediately closes the dialog;
-          // see https://github.com/palantir/blueprint/issues/3474
-          // showArrowButtons: true
-        }
+        precision: TimePrecision.MINUTE,
+        selectAllOnFocus: true
+        // FIXME: clicking a time arrow immediately closes the dialog;
+        // see https://github.com/palantir/blueprint/issues/3474
+        // showArrowButtons: true
+      }
     return (
       <DateInput
         inputProps={{

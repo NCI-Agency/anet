@@ -116,9 +116,8 @@ export default class OrganizationalChart extends SVGCanvas {
 
     iconNodeG.each(function(d) {
       const positions = sortPositions(d.data.positions)
-      console.log(positions[0])
       const unitcode =
-        rankToUnit[positions.length > 0 && positions[0].person.rank]
+        rankToUnit[positions.length > 0 && positions[0].person && positions[0].person.rank]
       const sym = new Symbol(
         `S${
           d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"

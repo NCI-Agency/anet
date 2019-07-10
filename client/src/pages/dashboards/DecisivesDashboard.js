@@ -302,8 +302,8 @@ class StatsTable extends React.Component {
                 current > 1.3 * previous
                   ? "green"
                   : current < 0.7 * previous
-                  ? "red"
-                  : "white"
+                    ? "red"
+                    : "white"
               return (
                 <td bgcolor={color} key={item.uuid}>
                   {current}/{previous}
