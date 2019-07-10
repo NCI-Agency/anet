@@ -3,7 +3,6 @@ package mil.dds.anet.search.mssql;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.search.AbstractPositionSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 
@@ -11,13 +10,6 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
 
   public MssqlPositionSearcher() {
     super(new MssqlSearchQueryBuilder<Position, PositionSearchQuery>("MssqlPositionSearch"));
-  }
-
-  @Override
-  protected void buildQuery(PositionSearchQuery query) {
-    qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
-    super.buildQuery(query);
-    qb.addTotalCount();
   }
 
   @Override
@@ -44,20 +36,6 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     final String text = query.getText();
     qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
-  }
-
-  @Override
-  protected void addOrganizationUuidQuery(PositionSearchQuery query) {
-    if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-      qb.addWithClause("parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
-          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
-          + ")");
-      qb.addWhereClause("positions.organizationUuid IN (SELECT uuid FROM parent_orgs)");
-    } else {
-      qb.addWhereClause("positions.organizationUuid = :orgUuid");
-    }
-    qb.addSqlArg("orgUuid", query.getOrganizationUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {

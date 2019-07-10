@@ -4,6 +4,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -23,6 +24,8 @@ public abstract class AbstractOrganizationSearcher extends
   }
 
   protected void buildQuery(OrganizationSearchQuery query) {
+    qb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
+    qb.addTotalCount();
     qb.addFromClause("organizations");
 
     if (query.isTextPresent()) {
@@ -41,7 +44,20 @@ public abstract class AbstractOrganizationSearcher extends
 
   protected abstract void addTextQuery(OrganizationSearchQuery query);
 
-  protected abstract void addParentOrgUuidQuery(OrganizationSearchQuery query);
+  protected void addParentOrgUuidQuery(OrganizationSearchQuery query) {
+    if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
+      qb.addWithClause("parent_orgs(uuid) AS ("
+          + " SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid UNION ALL"
+          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid AND o.uuid != :parentOrgUuid"
+          + ")");
+      qb.addWhereClause("(organizations.\"parentOrgUuid\" IN (SELECT uuid FROM parent_orgs)"
+          + " OR organizations.uuid = :parentOrgUuid)");
+      qb.addSqlArg("parentOrgUuid", query.getParentOrgUuid());
+    } else {
+      qb.addEqualsClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",
+          query.getParentOrgUuid());
+    }
+  }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
       OrganizationSearchQuery query) {
