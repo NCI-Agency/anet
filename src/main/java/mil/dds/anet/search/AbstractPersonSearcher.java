@@ -4,6 +4,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 
@@ -21,6 +22,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   }
 
   protected void buildQuery(PersonSearchQuery query) {
+    qb.addSelectClause(PersonDao.PERSON_FIELDS);
+    qb.addTotalCount();
     qb.addFromClause("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null
@@ -44,7 +47,16 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
         query.getPendingVerification());
 
     if (query.getOrgUuid() != null) {
-      addOrgUuidQuery(query);
+      if (query.getIncludeChildOrgs()) {
+        qb.addWithClause("parent_orgs(uuid) AS ("
+            + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
+            + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
+            + ")");
+        qb.addWhereClause("positions.\"organizationUuid\" IN (SELECT uuid FROM parent_orgs)");
+        qb.addSqlArg("orgUuid", query.getOrgUuid());
+      } else {
+        qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
+      }
     }
 
     qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
@@ -53,8 +65,6 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   }
 
   protected abstract void addTextQuery(PersonSearchQuery query);
-
-  protected abstract void addOrgUuidQuery(PersonSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     switch (query.getSortBy()) {

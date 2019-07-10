@@ -28,36 +28,6 @@ public class MssqlTaskSearcher extends AbstractTaskSearcher {
   }
 
   @Override
-  protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
-    if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {
-      qb.addWithClause("parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
-          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
-          + ")");
-      qb.addWhereClause("tasks.organizationUuid IN (SELECT uuid FROM parent_orgs)");
-      qb.addSqlArg("orgUuid", query.getResponsibleOrgUuid());
-    } else {
-      qb.addEqualsClause("orgUuid", "tasks.organizationUuid", query.getResponsibleOrgUuid());
-    }
-  }
-
-  @Override
-  protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
-    if (Boolean.TRUE.equals(query.getCustomFieldRef1Recursively())) {
-      qb.addWithClause("parent_tasks(uuid) AS ("
-          + " SELECT uuid FROM tasks WHERE uuid = :customFieldRef1Uuid UNION ALL"
-          + " SELECT t.uuid FROM parent_tasks pt, tasks t WHERE t.customFieldRef1Uuid = pt.uuid AND t.uuid != :customFieldRef1Uuid"
-          + ")");
-      qb.addWhereClause("(tasks.customFieldRef1Uuid IN (SELECT uuid FROM parent_tasks)"
-          + " OR tasks.uuid = :customFieldRef1Uuid)");
-      qb.addSqlArg("customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
-    } else {
-      qb.addEqualsClause("customFieldRef1Uuid", "tasks.customFieldRef1Uuid",
-          query.getCustomFieldRef1Uuid());
-    }
-  }
-
-  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

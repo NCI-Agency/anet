@@ -4,17 +4,21 @@ import java.util.Arrays;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -23,14 +27,27 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     super(qb);
   }
 
-  @Override
-  public AnetBeanList<Report> runSearch(ReportSearchQuery query) {
+  @InTransaction
+  public AnetBeanList<Report> runSearch(
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
     buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new ReportMapper());
+    outerQb.addSelectClause("*");
+    outerQb.addTotalCount();
+    outerQb.addFromClause("( " + qb.build() + " ) l");
+    outerQb.addSqlArgs(qb.getSqlArgs());
+    outerQb.addListArgs(qb.getListArgs());
+    addOrderByClauses(outerQb, query);
+    final AnetBeanList<Report> result =
+        outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
+    for (final Report report : result.getList()) {
+      report.setUser(query.getUser());
+    }
+    return result;
   }
 
   @Override
   protected void buildQuery(ReportSearchQuery query) {
+    qb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
     qb.addFromClause("reports");
     qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
     qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
@@ -216,11 +233,82 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
   protected abstract void addOrgUuidQuery(ReportSearchQuery query);
 
+  protected void addOrgUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
+      ReportSearchQuery query) {
+    if (!query.getIncludeOrgChildren()) {
+      qb.addWhereClause(
+          "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
+    } else {
+      outerQb.addWithClause("parent_orgs(uuid) AS ("
+          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
+          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
+          + ")");
+      qb.addWhereClause("(reports.\"advisorOrganizationUuid\" IN (SELECT uuid FROM parent_orgs)"
+          + " OR reports.\"principalOrganizationUuid\" IN (SELECT uuid FROM parent_orgs))");
+    }
+    qb.addSqlArg("orgUuid", query.getOrgUuid());
+  }
+
   protected abstract void addAdvisorOrgUuidQuery(ReportSearchQuery query);
+
+  protected void addAdvisorOrgUuidQuery(
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
+    if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
+      qb.addWhereClause("reports.\"advisorOrganizationUuid\" IS NULL");
+    } else if (!query.getIncludeAdvisorOrgChildren()) {
+      qb.addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
+          query.getAdvisorOrgUuid());
+    } else {
+      outerQb.addWithClause("advisor_parent_orgs(uuid) AS ("
+          + " SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid UNION ALL"
+          + " SELECT o.uuid FROM advisor_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
+          + ")");
+      qb.addWhereClause(
+          "reports.\"advisorOrganizationUuid\" IN (SELECT uuid FROM advisor_parent_orgs)");
+      qb.addSqlArg("advisorOrgUuid", query.getAdvisorOrgUuid());
+    }
+  }
 
   protected abstract void addPrincipalOrgUuidQuery(ReportSearchQuery query);
 
-  protected abstract void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
-      ReportSearchQuery query);
+  protected void addPrincipalOrgUuidQuery(
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
+    if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
+      qb.addWhereClause("reports.\"principalOrganizationUuid\" IS NULL");
+    } else if (!query.getIncludePrincipalOrgChildren()) {
+      qb.addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
+          query.getPrincipalOrgUuid());
+    } else {
+      outerQb.addWithClause("principal_parent_orgs(uuid) AS ("
+          + " SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid UNION ALL"
+          + " SELECT o.uuid FROM principal_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
+          + ")");
+      qb.addWhereClause(
+          "reports.\"principalOrganizationUuid\" IN (SELECT uuid FROM principal_parent_orgs)");
+      qb.addSqlArg("principalOrgUuid", query.getPrincipalOrgUuid());
+    }
+  }
+
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
+    // Beware of the sort field names, they have to match what's in the selected fields of the inner
+    // query!
+    switch (query.getSortBy()) {
+      case CREATED_AT:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_createdAt\""));
+        break;
+      case RELEASED_AT:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_releasedAt\""));
+        break;
+      case UPDATED_AT:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_updatedAt\""));
+        break;
+      case ENGAGEMENT_DATE:
+      default:
+        qb.addAllOrderByClauses(
+            getOrderBy(query.getSortOrder(), null, "\"reports_engagementDate\""));
+        break;
+    }
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, null, "reports_uuid"));
+  }
 
 }
