@@ -8,7 +8,7 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Location extends AbstractAnetBean {
 
-  /** pseudo uuid to represent 'no location' */
+  /** Pseudo uuid to represent 'no location'. */
   @GraphQLIgnore
   public static final String DUMMY_LOCATION_UUID = "-1";
 

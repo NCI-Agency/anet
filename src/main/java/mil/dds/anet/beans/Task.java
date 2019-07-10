@@ -20,7 +20,7 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Task extends AbstractAnetBean {
 
-  /** pseudo uuid to represent 'no task' */
+  /** Pseudo uuid to represent 'no task'. */
   @GraphQLIgnore
   public static final String DUMMY_TASK_UUID = "-1";
 
