@@ -114,6 +114,7 @@
     "leaflet.markercluster": "^1.4.1",
     "locale-compare-polyfill": "^0.0.2",
     "lodash": "^4.17.11",
+    "milsymbol": "^2.0.0",
     "moment": "^2.24.0",
     "pluralize": "^8.0.0",
     "prop-types": "^15.7.2",

@@ -10236,6 +10236,11 @@ miller-rabin@^4.0.0:
     bn.js "^4.0.0"
     brorand "^1.0.1"
 
+milsymbol@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/milsymbol/-/milsymbol-2.0.0.tgz#7084027b7c19de0f087a26238a713b6db6def6ac"
+  integrity sha512-GcBFrcIUr8jScaZqZb0SI2W6AbnUrPCTHu2kqHxduQjN2DIN8q5pY6ksSWfnJ4HlcIAWQhyotbdPIr1bBxFbwQ==
+
 mime-db@1.40.0, "mime-db@>= 1.40.0 < 2":
   version "1.40.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.40.0.tgz#a65057e998db090f732a68f6c276d387d4126c32"
