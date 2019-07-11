@@ -354,21 +354,21 @@ public class Utils {
    * @param height The desired output height
    * @param imageFormatName The desired output format (png, jpg)
    * @return The resized image as a Base64 string
-   * @throws IOException When the conversion fails
+   * @throws Exception When the binary data cannot be converted to an image string representation
    */
   public static String resizeImageBase64(String imageBase64, int width, int height,
-      String imageFormatName) throws IOException {
-
-    if (imageBase64 == null || imageBase64.isEmpty()) {
-      return imageBase64;
-    }
+      String imageFormatName) throws Exception {
 
     // From Base64-string to BufferedImage
-    final BufferedImage imageBytes = convert(imageBase64);
+    final BufferedImage imageBinary = convert(imageBase64);
+
+    if (imageBinary == null) {
+      throw new Exception("Cannot interpret image binary data.");
+    }
 
     // Resizing
     final BufferedImage thumbnail =
-        Scalr.resize(imageBytes, Method.AUTOMATIC, Mode.AUTOMATIC, width, height);
+        Scalr.resize(imageBinary, Method.AUTOMATIC, Mode.AUTOMATIC, width, height);
 
     // From BufferedImage back to Base64-string
     return convert(thumbnail, imageFormatName);
@@ -381,7 +381,7 @@ public class Utils {
    * @return The BufferedImage object
    * @throws IOException When an error occurs while reading the string
    */
-  private static BufferedImage convert(String imageBase64) throws IOException {
+  public static BufferedImage convert(String imageBase64) throws IOException {
     final byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
     final ByteArrayInputStream is = new ByteArrayInputStream(imageBytes);
     return ImageIO.read(is);
@@ -395,7 +395,7 @@ public class Utils {
    * @return The image as Base64 string
    * @throws IOException When an error occurs while writing the string
    */
-  private static String convert(BufferedImage imageBytes, String imageFormatName)
+  public static String convert(BufferedImage imageBytes, String imageFormatName)
       throws IOException {
     final ByteArrayOutputStream os = new ByteArrayOutputStream();
     ImageIO.write(imageBytes, imageFormatName, os);

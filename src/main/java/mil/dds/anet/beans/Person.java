@@ -4,7 +4,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.io.IOException;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
@@ -236,7 +235,7 @@ public class Person extends AbstractAnetBean implements Principal {
   public String getAvatar(@GraphQLArgument(name = "size", defaultValue = "256") int size) {
     try {
       return Utils.resizeImageBase64(this.avatar, size, size, "png");
-    } catch (IOException e) {
+    } catch (Exception e) {
       return null;
     }
   }
@@ -261,7 +260,7 @@ public class Person extends AbstractAnetBean implements Principal {
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && (createdAt != null)
+        && Objects.equals(other.getAvatar(), avatar) && (createdAt != null)
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)
                 ? (updatedAt.equals(other.getUpdatedAt()))

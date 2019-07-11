@@ -1,9 +1,7 @@
 package mil.dds.anet.database;
 
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -245,10 +243,8 @@ public class PersonDao extends AnetBaseDao<Person> {
         String resizedImage = Utils.resizeImageBase64(image, 256, 256, "png");
         avatar.setBytes(1l, resizedImage.getBytes());
       }
-    } catch (SQLException e) {
-      logger.error("Failed to create a Blob: ", e);
-    } catch (IOException e) {
-      logger.error("Failed to resize avatar: ", e);
+    } catch (Exception e) {
+      logger.error("Failed to save avatar: ", e);
     }
 
     return avatar;
