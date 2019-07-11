@@ -57,6 +57,7 @@ test("Draft and submit a report", async t => {
   )
 
   let [
+    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $principalPrimaryInput,
     $principalName,
     $principalPosition,
@@ -598,6 +599,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   )
 
   let [
+    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $advisorPrimaryCheckbox,
     $advisorName,
     $advisorPosition,

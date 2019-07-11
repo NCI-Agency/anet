@@ -368,7 +368,7 @@ public class Utils {
 
     // Resizing
     final BufferedImage thumbnail =
-        Scalr.resize(imageBytes, Method.QUALITY, Mode.AUTOMATIC, width, height);
+        Scalr.resize(imageBytes, Method.AUTOMATIC, Mode.AUTOMATIC, width, height);
 
     // From BufferedImage back to Base64-string
     return convert(thumbnail, imageFormatName);
