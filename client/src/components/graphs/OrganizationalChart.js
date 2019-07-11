@@ -7,13 +7,15 @@ import Organization from "../../models/Organization"
 
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
-const sortPositions = (positions, truncateLimit) =>
-  [...positions].sort((p1, p2) =>
+const sortPositions = (positions, truncateLimit) => {
+  const allResults = [...positions].sort((p1, p2) =>
     ranks.indexOf(p1.person && p1.person.rank) <
     ranks.indexOf(p2.person && p2.person.rank)
       ? 1
       : -1
   )
+  return truncateLimit && truncateLimit < allResults.length ? allResults.slice(0,truncateLimit) : allResults
+}
 
 const rankToUnit = {
   "OF-9": "K",
@@ -145,7 +147,7 @@ export default class OrganizationalChart extends SVGCanvas {
     const positionsG = node.append("g")
     positionsG
       .selectAll("a")
-      .data(d => sortPositions(d.data.positions) || [])
+      .data(d => sortPositions(d.data.positions, 10) || [])
       .enter()
       .append("a")
       .attr("href", d => `/positions/${d.uuid}`)
