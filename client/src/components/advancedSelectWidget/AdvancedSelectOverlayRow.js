@@ -76,9 +76,7 @@ export const PersonSimpleOverlayRow = item => (
 export const PersonDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <td>
-        <AvatarDisplayComponent avatar={item.avatar} height={32} width={32} />
-      </td>
+      <AvatarDisplayComponent avatar={item.avatar} height={32} width={32} />
     </td>
     <td>
       <LinkTo person={item} isLink={false} />
