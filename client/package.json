@@ -119,7 +119,7 @@
     "leaflet-gesture-handling": "^1.1.8",
     "leaflet.markercluster": "^1.4.1",
     "locale-compare-polyfill": "^0.0.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "moment": "^2.24.0",
     "pluralize": "^8.0.0",
     "prop-types": "^15.7.2",
