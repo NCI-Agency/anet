@@ -83,7 +83,7 @@ public class SavedSearch extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o instanceof SavedSearch == false) {
+    if (!(o instanceof SavedSearch)) {
       return false;
     }
     SavedSearch other = (SavedSearch) o;

@@ -636,11 +636,11 @@ public class Report extends AbstractAnetBean {
   }
 
   @Override
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) {
+  public boolean equals(Object o) {
+    if (!(o instanceof Report)) {
       return false;
     }
-    Report r = (Report) other;
+    Report r = (Report) o;
     return Objects.equals(r.getUuid(), uuid) && Objects.equals(r.getState(), state)
         && Objects.equals(r.getApprovalStepUuid(), getApprovalStepUuid())
         && Objects.equals(r.getCreatedAt(), createdAt)
