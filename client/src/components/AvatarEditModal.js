@@ -27,7 +27,7 @@ class AvatarEditModal extends Component {
       "data:image/jpeg;base64,".length - 1
     )
     this.props.onAvatarUpdate(updatedAvatar)
-    this.close
+    this.close()
   }
 
   open = e => {

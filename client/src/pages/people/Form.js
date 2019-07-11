@@ -194,8 +194,8 @@ class BasePersonForm extends Component {
                 <Fieldset>
                   <AvatarDisplayComponent
                     avatar={this.state.currentAvatar}
-                    height={200}
-                    width={200}
+                    height={256}
+                    width={256}
                   />
                   <AvatarEditModal
                     title="Edit avatar"

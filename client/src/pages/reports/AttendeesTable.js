@@ -5,7 +5,7 @@ import React, { Component } from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import "./AttendeesTable.css"
-import ThumbnailDisplayComponent from "components/ThumbnailDisplayComponent"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
@@ -145,7 +145,11 @@ export default class AttendeesTable extends Component {
     return (
       <tr key={person.uuid}>
         <td>
-          <ThumbnailDisplayComponent personUuid={person.uuid} size={32} />
+          <AvatarDisplayComponent
+            avatar={person.avatar}
+            height={32}
+            width={32}
+          />
         </td>
         <td className="primary-attendee">
           <RadioButton

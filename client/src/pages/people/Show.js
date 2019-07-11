@@ -53,7 +53,7 @@ class BasePersonShow extends Page {
       person(uuid:"${props.match.params.uuid}") {
         uuid,
         name, rank, role, status, emailAddress, phoneNumber, domainUsername,
-        biography, country, gender, endOfTourDate, avatar,
+        biography, country, gender, endOfTourDate, avatar(size: 256),
         position {
           uuid,
           name,
@@ -158,8 +158,8 @@ class BasePersonShow extends Page {
                 <Fieldset>
                   <AvatarDisplayComponent
                     avatar={person.avatar}
-                    height={200}
-                    width={200}
+                    height={256}
+                    width={256}
                   />
                   <Field
                     name="rank"

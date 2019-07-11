@@ -291,17 +291,4 @@ public class PersonResource {
         : String.format("%s at %s", messageBody, supportEmailAddr);
     return errorMessage;
   }
-
-  @GraphQLQuery(name = "thumbnail")
-  public String createThumbnail(@GraphQLArgument(name = "uuid") String personUuid,
-      @GraphQLArgument(name = "size", defaultValue = "256") String size) {
-    final String avatar = dao.getByUuid(personUuid).getAvatar();
-    final int sizeInt = Integer.parseInt(size);
-     
-    try {
-      return Utils.resizeImageBase64(avatar, sizeInt, sizeInt, "png");
-    } catch (IOException e) {
-      return null;
-    }
-  }
 }

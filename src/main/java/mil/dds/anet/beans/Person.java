@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.io.IOException;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
@@ -232,6 +233,14 @@ public class Person extends AbstractAnetBean implements Principal {
   }
 
   @GraphQLQuery(name = "avatar")
+  public String getAvatar(@GraphQLArgument(name = "size", defaultValue = "256") int size) {
+    try {
+      return Utils.resizeImageBase64(this.avatar, size, size, "png");
+    } catch (IOException e) {
+      return null;
+    }
+  }
+
   public String getAvatar() {
     return this.avatar;
   }

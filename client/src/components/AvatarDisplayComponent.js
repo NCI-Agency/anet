@@ -4,9 +4,9 @@ import PropTypes from "prop-types"
 
 export default class AvatarDisplayComponent extends React.Component {
   static propTypes = {
-    avatar: PropTypes.string.isRequired,
-    height: PropTypes.string,
-    width: PropTypes.string
+    avatar: PropTypes.string,
+    height: PropTypes.number,
+    width: PropTypes.number
   }
 
   render() {
