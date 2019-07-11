@@ -14,5 +14,5 @@ organization(uuid:"${orgUuid}") {
 	approvalSteps {
 		uuid, name, approvers { uuid, name, person { uuid, name }}
 	},
+	notes { uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
 }
-
