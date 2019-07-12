@@ -138,7 +138,7 @@
     "react-tag-input": "^5.2.3",
     "react-toastify": "^5.3.1",
     "react-ultimate-pagination": "^1.2.0",
-    "redux": "^4.0.1",
+    "redux": "^4.0.4",
     "redux-persist": "^5.10.0",
     "whatwg-fetch": "^2.0.3",
     "yup": "^0.27.0"
