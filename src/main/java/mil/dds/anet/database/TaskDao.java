@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -177,10 +176,10 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
         .map(new TaskMapper()).list();
   }
 
-  public CompletableFuture<List<Report>> getReportsForTask(
-      @GraphQLRootContext Map<String, Object> context, String taskUuid, ReportSearchQuery query) {
-    return new SearchQueryFetcher<Report>().load(context, SqDataLoaderKey.REPORTS_SEARCH,
-        new ImmutablePair<>(taskUuid, query));
+  public CompletableFuture<List<Report>> getReportsForTask(Map<String, Object> context,
+      String taskUuid, ReportSearchQuery query) {
+    return new SearchQueryFetcher<Report, ReportSearchQuery>().load(context,
+        SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(taskUuid, query));
   }
 
 }

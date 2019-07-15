@@ -741,7 +741,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     }
   }
 
-  public List<List<Report>> getReports(List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
+  public List<List<Report>> getReportsBySearch(
+      List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
     final ReportSearchBatcher instance =
         AnetObjectEngine.getInstance().getInjector().getInstance(ReportSearchBatcher.class);
     return instance.getByForeignKeys(foreignKeys);

@@ -23,6 +23,7 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoader;
@@ -119,6 +120,16 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.ORGANIZATIONS_SEARCH.toString(), new DataLoader<>(
+        new BatchLoader<ImmutablePair<String, OrganizationSearchQuery>, List<Organization>>() {
+          @Override
+          public CompletionStage<List<List<Organization>>> load(
+              List<ImmutablePair<String, OrganizationSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getOrganizationDao().getOrganizationsBySearch(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ORGANIZATION_APPROVAL_STEPS.toString(),
         new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
           @Override
@@ -195,6 +206,15 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.REPORTS_SEARCH.toString(),
+        new DataLoader<>(new BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>() {
+          @Override
+          public CompletionStage<List<List<Report>>> load(
+              List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getReportDao().getReportsBySearch(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_REPORT_ACTIONS.toString(),
         new DataLoader<>(new BatchLoader<String, List<ReportAction>>() {
           @Override
@@ -250,15 +270,6 @@ public final class BatchingUtils {
           public CompletionStage<List<Task>> load(List<String> keys) {
             return CompletableFuture.supplyAsync(() -> engine.getTaskDao().getByIds(keys),
                 dispatcherService);
-          }
-        }, dataLoaderOptions));
-    dataLoaderRegistry.register(SqDataLoaderKey.REPORTS_SEARCH.toString(),
-        new DataLoader<>(new BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>() {
-          @Override
-          public CompletionStage<List<List<Report>>> load(
-              List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getReportDao().getReports(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.TASK_RESPONSIBLE_POSITIONS.toString(),

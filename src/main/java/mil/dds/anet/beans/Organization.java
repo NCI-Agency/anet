@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -158,16 +159,24 @@ public class Organization extends AbstractAnetBean {
     this.approvalSteps = steps;
   }
 
-  // TODO: batch load? (used in organizations/Show.js)
   @GraphQLQuery(name = "childrenOrgs")
-  public synchronized List<Organization> loadChildrenOrgs(
+  public CompletableFuture<List<Organization>> loadChildrenOrgs(
+      @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
-    if (childrenOrgs == null) {
-      query.setParentOrgUuid(uuid);
-      query.setParentOrgRecursively(false);
-      childrenOrgs = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+    if (childrenOrgs != null) {
+      return CompletableFuture.completedFuture(childrenOrgs);
     }
-    return childrenOrgs;
+    if (query == null) {
+      query = new OrganizationSearchQuery();
+      query.setPageSize(0);
+    }
+    // Note: no recursion, only direct children!
+    query.setBatchParams(new FkBatchParams("organizations", "\"parentOrgUuid\""));
+    return AnetObjectEngine.getInstance().getOrganizationDao().getChildrenOrgs(context, uuid, query)
+        .thenApply(o -> {
+          childrenOrgs = o;
+          return o;
+        });
   }
 
   // TODO: batch load? (used in App.js for me → position → organization)

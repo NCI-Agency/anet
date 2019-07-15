@@ -22,12 +22,12 @@ public class M2mBatchParams extends AbstractBatchParams {
   @Override
   public void addQuery(
       AbstractSearchQueryBuilder<? extends AbstractAnetBean, ? extends AbstractSearchQuery<?>> qb) {
-    qb.addFromClause(String.format("LEFT JOIN %s ON %s.%s = %s.uuid", getM2mTableName(),
-        getM2mTableName(), getM2mLeftKey(), getTableName()));
+    qb.addFromClause(String.format("LEFT JOIN %1$s ON %1$s.%2$s = %3$s.uuid", getM2mTableName(),
+        getM2mLeftKey(), getTableName()));
     qb.addSelectClause(
-        String.format("%s.%s AS \"batchUuid\"", getM2mTableName(), getM2mRightKey()));
+        String.format("%1$s.%2$s AS \"batchUuid\"", getM2mTableName(), getM2mRightKey()));
     qb.addWhereClause(
-        String.format("%s.%s IN ( <batchUuids> )", getM2mTableName(), getM2mRightKey()));
+        String.format("%1$s.%2$s IN ( <batchUuids> )", getM2mTableName(), getM2mRightKey()));
     qb.addListArg("batchUuids", getBatchUuids());
   }
 

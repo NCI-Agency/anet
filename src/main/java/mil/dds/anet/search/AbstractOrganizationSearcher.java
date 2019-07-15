@@ -32,6 +32,10 @@ public abstract class AbstractOrganizationSearcher extends
       addTextQuery(query);
     }
 
+    if (query.isBatchParamsPresent()) {
+      qb.addBatchClause(query.getBatchParams());
+    }
+
     qb.addEqualsClause("status", "organizations.status", query.getStatus());
     qb.addEqualsClause("type", "organizations.type", query.getType());
 
