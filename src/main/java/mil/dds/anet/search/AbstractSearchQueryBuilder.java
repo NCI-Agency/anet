@@ -40,6 +40,7 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   protected final List<String> withClauses;
   private final List<String> selectClauses;
   private final List<String> fromClauses;
+  private final List<String> additionalFromClauses;
   private final List<String> whereClauses;
   private final List<String> groupByClauses;
   private final List<String> orderByClauses;
@@ -53,6 +54,7 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     withClauses = new LinkedList<>();
     selectClauses = new LinkedList<>();
     fromClauses = new LinkedList<>();
+    additionalFromClauses = new LinkedList<>();
     whereClauses = new LinkedList<>();
     groupByClauses = new LinkedList<>();
     orderByClauses = new LinkedList<>();
@@ -96,6 +98,10 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
 
   public void addFromClause(String clause) {
     fromClauses.add(clause);
+  }
+
+  public void addAdditionalFromClause(String clause) {
+    additionalFromClauses.add(clause);
   }
 
   public void addWhereClause(String clause) {
@@ -198,10 +204,11 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     return String.format("%s %s :%s", fieldName, likeKeyword, paramName);
   }
 
-  public String build() {
+  public final String build() {
     addWithClauses();
     addSelectClauses();
     addFromClauses();
+    addAdditionalFromClauses();
     addWhereClauses();
     addGroupByClauses();
     addOrderByClauses();
@@ -228,9 +235,16 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   }
 
   protected void addFromClauses() {
-    if (!selectClauses.isEmpty()) {
+    if (!fromClauses.isEmpty()) {
       sql.append(" FROM ");
       sql.append(Joiner.on(" ").join(fromClauses));
+    }
+  }
+
+  protected void addAdditionalFromClauses() {
+    if (!additionalFromClauses.isEmpty()) {
+      sql.append(", ");
+      sql.append(Joiner.on(", ").join(additionalFromClauses));
     }
   }
 

@@ -46,12 +46,13 @@ public abstract class AbstractOrganizationSearcher extends
 
   protected void addParentOrgUuidQuery(OrganizationSearchQuery query) {
     if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
-      qb.addWithClause("parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid UNION ALL"
-          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid AND o.uuid != :parentOrgUuid"
-          + ")");
-      qb.addWhereClause("(organizations.\"parentOrgUuid\" IN (SELECT uuid FROM parent_orgs)"
-          + " OR organizations.uuid = :parentOrgUuid)");
+      qb.addWithClause("parent_orgs(uuid, \"parentOrgUuid\") AS ("
+          + " SELECT uuid, uuid as \"parentOrgUuid\" FROM organizations UNION ALL"
+          + " SELECT po.uuid, o.\"parentOrgUuid\" FROM organizations o INNER JOIN"
+          + " parent_orgs po ON o.uuid = po.\"parentOrgUuid\"" + ")");
+      qb.addAdditionalFromClause("parent_orgs");
+      qb.addWhereClause("(organizations.uuid = parent_orgs.uuid"
+          + " AND parent_orgs.\"parentOrgUuid\" = :parentOrgUuid)");
       qb.addSqlArg("parentOrgUuid", query.getParentOrgUuid());
     } else {
       qb.addEqualsClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",

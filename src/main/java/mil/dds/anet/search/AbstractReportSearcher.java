@@ -239,12 +239,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addWhereClause(
           "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
     } else {
-      outerQb.addWithClause("parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
-          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
-          + ")");
-      qb.addWhereClause("(reports.\"advisorOrganizationUuid\" IN (SELECT uuid FROM parent_orgs)"
-          + " OR reports.\"principalOrganizationUuid\" IN (SELECT uuid FROM parent_orgs))");
+      outerQb.addWithClause("parent_orgs(uuid, \"parentOrgUuid\") AS ("
+          + " SELECT uuid, uuid as \"parentOrgUuid\" FROM organizations UNION ALL"
+          + " SELECT po.uuid, o.\"parentOrgUuid\" FROM organizations o INNER JOIN"
+          + " parent_orgs po ON o.uuid = po.\"parentOrgUuid\"" + ")");
+      qb.addAdditionalFromClause("parent_orgs");
+      qb.addWhereClause("((reports.\"advisorOrganizationUuid\" = parent_orgs.uuid"
+          + " OR reports.\"principalOrganizationUuid\" = parent_orgs.uuid)"
+          + " AND parent_orgs.\"parentOrgUuid\" = :orgUuid)");
     }
     qb.addSqlArg("orgUuid", query.getOrgUuid());
   }
@@ -259,12 +261,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
           query.getAdvisorOrgUuid());
     } else {
-      outerQb.addWithClause("advisor_parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid UNION ALL"
-          + " SELECT o.uuid FROM advisor_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
-          + ")");
-      qb.addWhereClause(
-          "reports.\"advisorOrganizationUuid\" IN (SELECT uuid FROM advisor_parent_orgs)");
+      outerQb.addWithClause("advisor_parent_orgs(uuid, \"parentOrgUuid\") AS ("
+          + " SELECT uuid, uuid as \"parentOrgUuid\" FROM organizations UNION ALL"
+          + " SELECT po.uuid, o.\"parentOrgUuid\" FROM organizations o INNER JOIN"
+          + " advisor_parent_orgs po ON o.uuid = po.\"parentOrgUuid\"" + ")");
+      qb.addAdditionalFromClause("advisor_parent_orgs");
+      qb.addWhereClause("(reports.\"advisorOrganizationUuid\" = advisor_parent_orgs.uuid"
+          + " AND advisor_parent_orgs.\"parentOrgUuid\" = :advisorOrgUuid)");
       qb.addSqlArg("advisorOrgUuid", query.getAdvisorOrgUuid());
     }
   }
@@ -279,12 +282,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
           query.getPrincipalOrgUuid());
     } else {
-      outerQb.addWithClause("principal_parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid UNION ALL"
-          + " SELECT o.uuid FROM principal_parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid"
-          + ")");
-      qb.addWhereClause(
-          "reports.\"principalOrganizationUuid\" IN (SELECT uuid FROM principal_parent_orgs)");
+      outerQb.addWithClause("principal_parent_orgs(uuid, \"parentOrgUuid\") AS ("
+          + " SELECT uuid, uuid as \"parentOrgUuid\" FROM organizations UNION ALL"
+          + " SELECT po.uuid, o.\"parentOrgUuid\" FROM organizations o INNER JOIN"
+          + " principal_parent_orgs po ON o.uuid = po.\"parentOrgUuid\"" + ")");
+      qb.addAdditionalFromClause("principal_parent_orgs");
+      qb.addWhereClause("(reports.\"principalOrganizationUuid\" = principal_parent_orgs.uuid"
+          + " AND principal_parent_orgs.\"parentOrgUuid\" = :principalOrgUuid)");
       qb.addSqlArg("principalOrgUuid", query.getPrincipalOrgUuid());
     }
   }
