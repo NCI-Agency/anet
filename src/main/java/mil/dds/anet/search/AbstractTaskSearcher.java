@@ -60,14 +60,8 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
     if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {
-      qb.addWithClause("parent_orgs(uuid, \"parentOrgUuid\") AS ("
-          + " SELECT uuid, uuid as \"parentOrgUuid\" FROM organizations UNION ALL"
-          + " SELECT po.uuid, o.\"parentOrgUuid\" FROM organizations o INNER JOIN"
-          + " parent_orgs po ON o.uuid = po.\"parentOrgUuid\"" + ")");
-      qb.addAdditionalFromClause("parent_orgs");
-      qb.addWhereClause("(tasks.\"organizationUuid\" = parent_orgs.uuid"
-          + " AND parent_orgs.\"parentOrgUuid\" = :orgUuid)");
-      qb.addSqlArg("orgUuid", query.getResponsibleOrgUuid());
+      qb.addRecursiveClause(null, "tasks", "\"organizationUuid\"", "parent_orgs", "organizations",
+          "\"parentOrgUuid\"", "orgUuid", query.getResponsibleOrgUuid());
     } else {
       qb.addEqualsClause("orgUuid", "tasks.\"organizationUuid\"", query.getResponsibleOrgUuid());
     }
@@ -75,14 +69,9 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
     if (Boolean.TRUE.equals(query.getCustomFieldRef1Recursively())) {
-      qb.addWithClause("parent_tasks(uuid, \"parentTaskUuid\") AS ("
-          + " SELECT uuid, uuid as \"parentTaskUuid\" FROM tasks UNION ALL"
-          + " SELECT pt.uuid, t.\"customFieldRef1Uuid\" FROM tasks t INNER JOIN"
-          + " parent_tasks pt ON t.uuid = pt.\"parentTaskUuid\"" + ")");
-      qb.addAdditionalFromClause("parent_tasks");
-      qb.addWhereClause("(tasks.\"customFieldRef1Uuid\" = parent_tasks.uuid"
-          + " AND parent_tasks.\"parentTaskUuid\" = :customFieldRef1Uuid)");
-      qb.addSqlArg("customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
+      qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks",
+          "organizations", "\"parentOrgUuid\"", "customFieldRef1Uuid",
+          query.getCustomFieldRef1Uuid());
     } else {
       qb.addEqualsClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
           query.getCustomFieldRef1Uuid());

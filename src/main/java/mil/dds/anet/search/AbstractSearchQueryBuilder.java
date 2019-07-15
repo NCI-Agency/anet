@@ -194,6 +194,34 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     }
   }
 
+  public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
+      String foreignKey, String withTableName, String recursiveTableName,
+      String recursiveForeignKey, String paramName, String fieldValue) {
+    addRecursiveClause(outerQb, tableName, new String[] {foreignKey}, withTableName,
+        recursiveTableName, recursiveForeignKey, paramName, fieldValue);
+  }
+
+  public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
+      String[] foreignKeys, String withTableName, String recursiveTableName,
+      String recursiveForeignKey, String paramName, String fieldValue) {
+    if (outerQb == null) {
+      outerQb = this;
+    }
+    outerQb.addWithClause(String.format(
+        "%1$s(uuid, parent_uuid) AS (SELECT uuid, uuid as parent_uuid FROM %2$s UNION ALL"
+            + " SELECT pt.uuid, bt.%3$s FROM %2$s bt INNER JOIN"
+            + " %1$s pt ON bt.uuid = pt.parent_uuid)",
+        withTableName, recursiveTableName, recursiveForeignKey));
+    addAdditionalFromClause(withTableName);
+    final List<String> orClauses = new ArrayList<>();
+    for (final String foreignKey : foreignKeys) {
+      orClauses.add(String.format("%1$s.%2$s = %3$s.uuid", tableName, foreignKey, withTableName));
+    }
+    addWhereClause(String.format("( (%1$s) AND %2$s.parent_uuid = :%3$s )",
+        Joiner.on(" OR ").join(orClauses), withTableName, paramName));
+    addSqlArg(paramName, fieldValue);
+  }
+
   private final String getLikeClause(String fieldName, String paramName) {
     return String.format("%s %s :%s", fieldName, likeKeyword, paramName);
   }
