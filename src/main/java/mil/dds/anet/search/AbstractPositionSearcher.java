@@ -37,14 +37,8 @@ public abstract class AbstractPositionSearcher
 
     if (query.getOrganizationUuid() != null) {
       if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-        qb.addWithClause("parent_orgs(uuid, \"parentOrgUuid\") AS ("
-            + " SELECT uuid, uuid as \"parentOrgUuid\" FROM organizations UNION ALL"
-            + " SELECT po.uuid, o.\"parentOrgUuid\" FROM organizations o INNER JOIN"
-            + " parent_orgs po ON o.uuid = po.\"parentOrgUuid\"" + ")");
-        qb.addAdditionalFromClause("parent_orgs");
-        qb.addWhereClause("(positions.\"organizationUuid\" = parent_orgs.uuid"
-            + " AND parent_orgs.\"parentOrgUuid\" = :orgUuid)");
-        qb.addSqlArg("orgUuid", query.getOrganizationUuid());
+        qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid());
       } else {
         qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"",
             query.getOrganizationUuid());

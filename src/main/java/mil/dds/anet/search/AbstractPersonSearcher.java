@@ -48,14 +48,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     if (query.getOrgUuid() != null) {
       if (query.getIncludeChildOrgs()) {
-        qb.addWithClause("parent_orgs(uuid, \"parentOrgUuid\") AS ("
-            + " SELECT uuid, uuid as \"parentOrgUuid\" FROM organizations UNION ALL"
-            + " SELECT po.uuid, o.\"parentOrgUuid\" FROM organizations o INNER JOIN"
-            + " parent_orgs po ON o.uuid = po.\"parentOrgUuid\"" + ")");
-        qb.addAdditionalFromClause("parent_orgs");
-        qb.addWhereClause("(positions.\"organizationUuid\" = parent_orgs.uuid"
-            + " AND parent_orgs.\"parentOrgUuid\" = :orgUuid)");
-        qb.addSqlArg("orgUuid", query.getOrgUuid());
+        qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid());
       } else {
         qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
       }
