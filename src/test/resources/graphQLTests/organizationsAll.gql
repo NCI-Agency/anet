@@ -1,0 +1,17 @@
+organizationList(query: {pageSize: 0}) {
+  totalCount
+  list {
+    uuid
+    shortName
+    longName
+    activeChildren: childrenOrgs(query: {pageSize: 0, status: ACTIVE}) {
+      uuid
+    }
+    inactiveChildren: childrenOrgs(query: {pageSize: 0, status: INACTIVE}) {
+      uuid
+    }
+    activeChildrenCopy: childrenOrgs(query: {pageSize: 0, status: ACTIVE}) {
+      uuid
+    }
+  }
+}

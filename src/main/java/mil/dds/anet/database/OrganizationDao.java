@@ -14,8 +14,11 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
@@ -64,6 +67,20 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
     final ForeignKeyBatcher<Organization> personIdBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(OrganizationsBatcher.class);
     return personIdBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  static class OrganizationSearchBatcher
+      extends SearchQueryBatcher<Organization, OrganizationSearchQuery> {
+    public OrganizationSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getOrganizationDao());
+    }
+  }
+
+  public List<List<Organization>> getOrganizationsBySearch(
+      List<ImmutablePair<String, OrganizationSearchQuery>> foreignKeys) {
+    final OrganizationSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(OrganizationSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
   }
 
   public CompletableFuture<List<Organization>> getOrganizationsForPerson(
@@ -127,5 +144,11 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
   @Override
   public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher().runSearch(query);
+  }
+
+  public CompletableFuture<List<Organization>> getChildrenOrgs(Map<String, Object> context,
+      String orgUuid, OrganizationSearchQuery query) {
+    return new SearchQueryFetcher<Organization, OrganizationSearchQuery>().load(context,
+        SqDataLoaderKey.ORGANIZATIONS_SEARCH, new ImmutablePair<>(orgUuid, query));
   }
 }
