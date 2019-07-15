@@ -57,7 +57,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.isBatchParamsPresent()) {
-      qb.addM2mBatchClause(query.getBatchParams());
+      qb.addBatchClause(query.getBatchParams());
     }
 
     qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
