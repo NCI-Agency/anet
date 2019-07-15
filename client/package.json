@@ -35,7 +35,7 @@
     "aigle": "^1.14.1",
     "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.6.1",
-    "ava": "^2.1.0",
+    "ava": "^2.2.0",
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.6",
