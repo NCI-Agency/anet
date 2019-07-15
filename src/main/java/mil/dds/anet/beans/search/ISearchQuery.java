@@ -31,7 +31,7 @@ public interface ISearchQuery<T extends ISortBy> {
 
   boolean isBatchParamsPresent();
 
-  public BatchParams getBatchParams();
+  public AbstractBatchParams getBatchParams();
 
-  void setBatchParams(BatchParams batchParams);
+  void setBatchParams(AbstractBatchParams batchParams);
 }

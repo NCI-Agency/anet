@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.BatchParams;
+import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
@@ -212,7 +212,7 @@ public class Task extends AbstractAnetBean {
       query.setPageSize(0);
     }
     query.setBatchParams(
-        new BatchParams("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\""));
+        new M2mBatchParams("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
     return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid, query)
         .thenApply(o -> {
