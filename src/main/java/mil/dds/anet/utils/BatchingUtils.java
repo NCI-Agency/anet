@@ -24,6 +24,7 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoader;
@@ -169,6 +170,15 @@ public final class BatchingUtils {
           public CompletionStage<List<Position>> load(List<String> keys) {
             return CompletableFuture.supplyAsync(() -> engine.getPositionDao().getByIds(keys),
                 dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.POSITIONS_SEARCH.toString(), new DataLoader<>(
+        new BatchLoader<ImmutablePair<String, PositionSearchQuery>, List<Position>>() {
+          @Override
+          public CompletionStage<List<List<Position>>> load(
+              List<ImmutablePair<String, PositionSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getPositionDao().getPositionsBySearch(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_ASSOCIATED_POSITIONS.toString(),

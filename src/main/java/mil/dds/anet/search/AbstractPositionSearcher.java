@@ -2,6 +2,7 @@ package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.PositionDao;
@@ -33,10 +34,14 @@ public abstract class AbstractPositionSearcher
       addTextQuery(query);
     }
 
+    if (query.isBatchParamsPresent()) {
+      addBatchClause(query);
+    }
+
     qb.addInClause("types", "positions.type", query.getType());
 
     if (query.getOrganizationUuid() != null) {
-      if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
+      if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid());
       } else {
@@ -68,6 +73,11 @@ public abstract class AbstractPositionSearcher
   }
 
   protected abstract void addTextQuery(PositionSearchQuery query);
+
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(PositionSearchQuery query) {
+    qb.addBatchClause((AbstractBatchParams<Position, PositionSearchQuery>) query.getBatchParams());
+  }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {
     switch (query.getSortBy()) {

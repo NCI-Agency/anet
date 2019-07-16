@@ -127,16 +127,25 @@ public class Organization extends AbstractAnetBean {
     this.type = type;
   }
 
-  // TODO: batch load? (used in organizations/Show.js)
   @GraphQLQuery(name = "positions")
-  public synchronized List<Position> loadPositions() {
-    if (positions == null) {
-      final PositionSearchQuery query = new PositionSearchQuery();
-      query.setPageSize(0);
-      query.setOrganizationUuid(uuid);
-      positions = AnetObjectEngine.getInstance().getPositionDao().search(query).getList();
+  public CompletableFuture<List<Position>> loadPositions(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") PositionSearchQuery query) {
+    if (positions != null) {
+      return CompletableFuture.completedFuture(positions);
     }
-    return positions;
+    if (query == null) {
+      query = new PositionSearchQuery();
+      query.setPageSize(0);
+    }
+    // Note: no recursion, only direct children!
+    query.setBatchParams(
+        new FkBatchParams<Position, PositionSearchQuery>("positions", "\"organizationUuid\""));
+    return AnetObjectEngine.getInstance().getPositionDao()
+        .getPositionsBySearch(context, uuid, query).thenApply(o -> {
+          positions = o;
+          return o;
+        });
   }
 
   @GraphQLQuery(name = "approvalSteps")
