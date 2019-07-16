@@ -13,7 +13,7 @@ public class PostgresqlPositionSearcher extends AbstractPositionSearcher {
   @Override
   protected void addTextQuery(PositionSearchQuery query) {
     final String text = qb.getFullTextQuery(query.getText());
-    if (query.getMatchPersonName() != null && query.getMatchPersonName()) {
+    if (Boolean.TRUE.equals(query.getMatchPersonName())) {
       qb.addLikeClauses("text", new String[] {"positions.name", "positions.code", "people.name"},
           text);
     } else {

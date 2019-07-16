@@ -22,7 +22,10 @@ import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -123,6 +126,25 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     final ForeignKeyBatcher<Position> currentPositionForPersonBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(PositionsBatcher.class);
     return currentPositionForPersonBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  static class PositionSearchBatcher extends SearchQueryBatcher<Position, PositionSearchQuery> {
+    public PositionSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getPositionDao());
+    }
+  }
+
+  public List<List<Position>> getPositionsBySearch(
+      List<ImmutablePair<String, PositionSearchQuery>> foreignKeys) {
+    final PositionSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(PositionSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Position>> getPositionsBySearch(Map<String, Object> context,
+      String uuid, PositionSearchQuery query) {
+    return new SearchQueryFetcher<Position, PositionSearchQuery>().load(context,
+        SqDataLoaderKey.POSITIONS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
   /*
