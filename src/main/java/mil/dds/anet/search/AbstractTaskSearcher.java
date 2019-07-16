@@ -2,6 +2,7 @@ package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -32,6 +33,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addTextQuery(query);
     }
 
+    if (query.isBatchParamsPresent()) {
+      addBatchClause(query);
+    }
+
     if (query.getResponsibleOrgUuid() != null) {
       addResponsibleOrgUuidQuery(query);
     }
@@ -57,6 +62,11 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected abstract void addTextQuery(TaskSearchQuery query);
+
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(TaskSearchQuery query) {
+    qb.addBatchClause((AbstractBatchParams<Task, TaskSearchQuery>) query.getBatchParams());
+  }
 
   protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
     if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {

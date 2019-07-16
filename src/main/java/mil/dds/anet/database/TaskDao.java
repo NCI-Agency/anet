@@ -16,7 +16,10 @@ import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -63,6 +66,25 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
     final ForeignKeyBatcher<Position> responsiblePositionsBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(ResponsiblePositionsBatcher.class);
     return responsiblePositionsBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  static class TaskSearchBatcher extends SearchQueryBatcher<Task, TaskSearchQuery> {
+    public TaskSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getTaskDao());
+    }
+  }
+
+  public List<List<Task>> getTasksBySearch(
+      List<ImmutablePair<String, TaskSearchQuery>> foreignKeys) {
+    final TaskSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(TaskSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Task>> getTasksBySearch(Map<String, Object> context, String uuid,
+      TaskSearchQuery query) {
+    return new SearchQueryFetcher<Task, TaskSearchQuery>().load(context,
+        SqDataLoaderKey.TASKS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
   @Override

@@ -1,6 +1,7 @@
 package mil.dds.anet.beans.search;
 
 import java.time.Instant;
+import java.util.Objects;
 import mil.dds.anet.beans.Task.TaskStatus;
 
 public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
@@ -121,6 +122,35 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
   public void setCustomFieldRef1Recursively(Boolean customFieldRef1Recursively) {
     this.customFieldRef1Recursively = customFieldRef1Recursively;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), responsibleOrgUuid, includeChildrenOrgs, category, status,
+        plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
+        projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
+        customFieldRef1Recursively);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof TaskSearchQuery)) {
+      return false;
+    }
+    final TaskSearchQuery other = (TaskSearchQuery) obj;
+    return super.equals(obj)
+        && Objects.equals(getResponsibleOrgUuid(), other.getResponsibleOrgUuid())
+        && Objects.equals(getIncludeChildrenOrgs(), other.getIncludeChildrenOrgs())
+        && Objects.equals(getCategory(), other.getCategory())
+        && Objects.equals(getStatus(), other.getStatus())
+        && Objects.equals(getPlannedCompletionEnd(), other.getPlannedCompletionEnd())
+        && Objects.equals(getPlannedCompletionStart(), other.getPlannedCompletionStart())
+        && Objects.equals(getProjectedCompletionEnd(), other.getProjectedCompletionEnd())
+        && Objects.equals(getProjectedCompletionStart(), other.getProjectedCompletionStart())
+        && Objects.equals(getProjectStatus(), other.getProjectStatus())
+        && Objects.equals(getCustomField(), other.getCustomField())
+        && Objects.equals(getCustomFieldRef1Uuid(), other.getCustomFieldRef1Uuid())
+        && Objects.equals(getCustomFieldRef1Recursively(), other.getCustomFieldRef1Recursively());
   }
 
 }

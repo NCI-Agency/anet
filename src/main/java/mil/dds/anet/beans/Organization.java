@@ -211,16 +211,23 @@ public class Organization extends AbstractAnetBean {
         });
   }
 
-  // TODO: batch load? (used in organizations/Edit.js)
   @GraphQLQuery(name = "tasks")
-  public synchronized List<Task> loadTasks() {
-    if (tasks == null) {
-      final TaskSearchQuery query = new TaskSearchQuery();
-      query.setPageSize(0);
-      query.setResponsibleOrgUuid(uuid);
-      tasks = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+  public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (tasks != null) {
+      return CompletableFuture.completedFuture(tasks);
     }
-    return tasks;
+    if (query == null) {
+      query = new TaskSearchQuery();
+      query.setPageSize(0);
+    }
+    // Note: no recursion, only direct children!
+    query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"organizationUuid\""));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
+        .thenApply(o -> {
+          tasks = o;
+          return o;
+        });
   }
 
   @GraphQLIgnore
