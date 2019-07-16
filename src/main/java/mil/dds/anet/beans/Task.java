@@ -211,10 +211,10 @@ public class Task extends AbstractAnetBean {
       query = new ReportSearchQuery();
       query.setPageSize(0);
     }
-    query.setBatchParams(
-        new M2mBatchParams("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\""));
+    query.setBatchParams(new M2mBatchParams<Report, ReportSearchQuery>("reports", "\"reportTasks\"",
+        "\"reportUuid\"", "\"taskUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid, query)
+    return AnetObjectEngine.getInstance().getReportDao().getReportsBySearch(context, uuid, query)
         .thenApply(o -> {
           reports = new AnetBeanList<Report>(o);
           return reports;

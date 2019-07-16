@@ -30,6 +30,11 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
+  protected void addBatchClause(ReportSearchQuery query) {
+    addBatchClause(outerQb, query);
+  }
+
+  @Override
   protected void addIncludeEngagementDayOfWeekQuery(ReportSearchQuery query) {
     qb.addSelectClause(String.format(this.isoDowFormat, "reports.\"engagementDate\"")
         + " AS \"engagementDayOfWeek\"");

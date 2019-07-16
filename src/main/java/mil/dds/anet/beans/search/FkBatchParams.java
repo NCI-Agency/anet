@@ -4,7 +4,8 @@ import java.util.Objects;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class FkBatchParams extends AbstractBatchParams {
+public class FkBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
+    extends AbstractBatchParams<B, T> {
   private String tableName;
   private String foreignKey;
 
@@ -15,8 +16,8 @@ public class FkBatchParams extends AbstractBatchParams {
   }
 
   @Override
-  public void addQuery(
-      AbstractSearchQueryBuilder<? extends AbstractAnetBean, ? extends AbstractSearchQuery<?>> qb) {
+  public void addQuery(AbstractSearchQueryBuilder<B, T> outerQb,
+      AbstractSearchQueryBuilder<B, T> qb) {
     qb.addSelectClause(
         String.format("%1$s.%2$s AS \"batchUuid\"", getTableName(), getForeignKey()));
     qb.addWhereClause(
@@ -50,7 +51,7 @@ public class FkBatchParams extends AbstractBatchParams {
     if (!(obj instanceof FkBatchParams)) {
       return false;
     }
-    final FkBatchParams other = (FkBatchParams) obj;
+    final FkBatchParams<?, ?> other = (FkBatchParams<?, ?>) obj;
     return Objects.equals(tableName, other.getTableName())
         && Objects.equals(foreignKey, other.getForeignKey());
   }

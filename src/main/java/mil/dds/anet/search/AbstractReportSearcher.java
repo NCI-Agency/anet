@@ -10,6 +10,7 @@ import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PositionDao;
@@ -57,7 +58,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.isBatchParamsPresent()) {
-      qb.addBatchClause(query.getBatchParams());
+      addBatchClause(query);
     }
 
     qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
@@ -226,6 +227,15 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   }
 
   protected abstract void addTextQuery(ReportSearchQuery query);
+
+  protected abstract void addBatchClause(ReportSearchQuery query);
+
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
+      ReportSearchQuery query) {
+    qb.addBatchClause((AbstractBatchParams<Report, ReportSearchQuery>) query.getBatchParams(),
+        outerQb);
+  }
 
   protected abstract void addIncludeEngagementDayOfWeekQuery(ReportSearchQuery query);
 

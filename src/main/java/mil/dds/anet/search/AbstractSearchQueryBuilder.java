@@ -134,8 +134,13 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
    *
    * @param batchParams the parameters for the batch join/select/where clauses
    */
-  public void addBatchClause(AbstractBatchParams batchParams) {
-    batchParams.addQuery(this);
+  public void addBatchClause(AbstractBatchParams<B, T> batchParams) {
+    addBatchClause(batchParams, this);
+  }
+
+  public void addBatchClause(AbstractBatchParams<B, T> batchParams,
+      AbstractSearchQueryBuilder<B, T> outerQb) {
+    batchParams.addQuery(outerQb, this);
   }
 
   public final void addDateClause(String paramName, String fieldName, Comparison comp,
@@ -220,6 +225,28 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     addWhereClause(String.format("( (%1$s) AND %2$s.parent_uuid = :%3$s )",
         Joiner.on(" OR ").join(orClauses), withTableName, paramName));
     addSqlArg(paramName, fieldValue);
+  }
+
+  public final void addRecursiveBatchClause(AbstractSearchQueryBuilder<B, T> outerQb,
+      String tableName, String[] foreignKeys, String withTableName, String recursiveTableName,
+      String recursiveForeignKey, String paramName, List<String> fieldValues) {
+    if (outerQb == null) {
+      outerQb = this;
+    }
+    outerQb.addWithClause(String.format(
+        "%1$s(uuid, parent_uuid) AS (SELECT uuid, uuid as parent_uuid FROM %2$s UNION ALL"
+            + " SELECT pt.uuid, bt.%3$s FROM %2$s bt INNER JOIN"
+            + " %1$s pt ON bt.uuid = pt.parent_uuid)",
+        withTableName, recursiveTableName, recursiveForeignKey));
+    addAdditionalFromClause(withTableName);
+    addSelectClause(String.format("%1$s.parent_uuid AS \"batchUuid\"", withTableName));
+    final List<String> orClauses = new ArrayList<>();
+    for (final String foreignKey : foreignKeys) {
+      orClauses.add(String.format("%1$s.%2$s = %3$s.uuid", tableName, foreignKey, withTableName));
+    }
+    addWhereClause(String.format("( (%1$s) AND %2$s.parent_uuid IN ( <%3$s> ) )",
+        Joiner.on(" OR ").join(orClauses), withTableName, paramName));
+    addListArg(paramName, fieldValues);
   }
 
   private final String getLikeClause(String fieldName, String paramName) {

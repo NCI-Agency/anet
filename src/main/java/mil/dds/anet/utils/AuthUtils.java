@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -68,11 +69,11 @@ public class AuthUtils {
 
     // As a last check, load the descendant orgs.
     try {
-      Organization posOrg =
-          position.loadOrganization(AnetObjectEngine.getInstance().getContext()).get();
+      final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
+      Organization posOrg = position.loadOrganization(context).get();
       final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
       osQuery.setPageSize(0);
-      Optional<Organization> orgMatch = posOrg.loadDescendantOrgs(osQuery).stream()
+      Optional<Organization> orgMatch = posOrg.loadDescendantOrgs(context, osQuery).get().stream()
           .filter(o -> o.getUuid().equals(organizationUuid)).findFirst();
       return orgMatch.isPresent();
     } catch (InterruptedException | ExecutionException e) {

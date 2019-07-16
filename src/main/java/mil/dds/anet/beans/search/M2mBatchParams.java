@@ -4,7 +4,8 @@ import java.util.Objects;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class M2mBatchParams extends AbstractBatchParams {
+public class M2mBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
+    extends AbstractBatchParams<B, T> {
   private String tableName;
   private String m2mTableName;
   private String m2mLeftKey;
@@ -20,8 +21,8 @@ public class M2mBatchParams extends AbstractBatchParams {
   }
 
   @Override
-  public void addQuery(
-      AbstractSearchQueryBuilder<? extends AbstractAnetBean, ? extends AbstractSearchQuery<?>> qb) {
+  public void addQuery(AbstractSearchQueryBuilder<B, T> outerQb,
+      AbstractSearchQueryBuilder<B, T> qb) {
     qb.addFromClause(String.format("LEFT JOIN %1$s ON %1$s.%2$s = %3$s.uuid", getM2mTableName(),
         getM2mLeftKey(), getTableName()));
     qb.addSelectClause(
@@ -73,7 +74,7 @@ public class M2mBatchParams extends AbstractBatchParams {
     if (!(obj instanceof M2mBatchParams)) {
       return false;
     }
-    final M2mBatchParams other = (M2mBatchParams) obj;
+    final M2mBatchParams<?, ?> other = (M2mBatchParams<?, ?>) obj;
     return Objects.equals(tableName, other.getTableName())
         && Objects.equals(m2mTableName, other.getM2mTableName())
         && Objects.equals(m2mLeftKey, other.getM2mLeftKey())

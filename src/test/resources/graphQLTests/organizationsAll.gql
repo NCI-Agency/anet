@@ -4,6 +4,9 @@ organizationList(query: {pageSize: 0}) {
     uuid
     shortName
     longName
+    children: childrenOrgs(query: {pageSize: 0}) {
+      uuid
+    }
     activeChildren: childrenOrgs(query: {pageSize: 0, status: ACTIVE}) {
       uuid
     }
@@ -11,6 +14,18 @@ organizationList(query: {pageSize: 0}) {
       uuid
     }
     activeChildrenCopy: childrenOrgs(query: {pageSize: 0, status: ACTIVE}) {
+      uuid
+    }
+    descendants: descendantOrgs(query: {pageSize: 0}) {
+      uuid
+    }
+    activeDescendants: descendantOrgs(query: {pageSize: 0, status: ACTIVE}) {
+      uuid
+    }
+    inactiveDescendants: descendantOrgs(query: {pageSize: 0, status: INACTIVE}) {
+      uuid
+    }
+    activeDescendants: descendantOrgs(query: {pageSize: 0, status: ACTIVE}) {
       uuid
     }
   }
