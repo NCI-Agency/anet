@@ -113,6 +113,11 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   @JsonIgnore
   @GraphQLIgnore
   public void setBatchParams(AbstractBatchParams<?, ?> batchParams) {
+    if (batchParams != null) {
+      // batching, so no pagination!
+      setPageSize(0);
+      setPageNum(0);
+    }
     this.batchParams = Optional.ofNullable(batchParams);
   }
 

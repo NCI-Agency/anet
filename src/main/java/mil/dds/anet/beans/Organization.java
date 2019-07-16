@@ -136,7 +136,6 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new PositionSearchQuery();
-      query.setPageSize(0);
     }
     // Note: no recursion, only direct children!
     query.setBatchParams(
@@ -178,7 +177,6 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new OrganizationSearchQuery();
-      query.setPageSize(0);
     }
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<Organization, OrganizationSearchQuery>("organizations",
@@ -199,7 +197,6 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new OrganizationSearchQuery();
-      query.setPageSize(0);
     }
     // Note: recursion, includes transitive children!
     query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
@@ -219,7 +216,6 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new TaskSearchQuery();
-      query.setPageSize(0);
     }
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"organizationUuid\""));
