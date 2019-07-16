@@ -136,8 +136,8 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new PositionSearchQuery();
-      query.setPageSize(0);
     }
+    query.setPageSize(0); // batching!
     // Note: no recursion, only direct children!
     query.setBatchParams(
         new FkBatchParams<Position, PositionSearchQuery>("positions", "\"organizationUuid\""));
@@ -178,8 +178,8 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new OrganizationSearchQuery();
-      query.setPageSize(0);
     }
+    query.setPageSize(0); // batching!
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<Organization, OrganizationSearchQuery>("organizations",
         "\"parentOrgUuid\""));
@@ -199,8 +199,8 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new OrganizationSearchQuery();
-      query.setPageSize(0);
     }
+    query.setPageSize(0); // batching!
     // Note: recursion, includes transitive children!
     query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
         "organizations", "\"parentOrgUuid\"", "organizations", "\"parentOrgUuid\""));
@@ -219,8 +219,8 @@ public class Organization extends AbstractAnetBean {
     }
     if (query == null) {
       query = new TaskSearchQuery();
-      query.setPageSize(0);
     }
+    query.setPageSize(0); // batching!
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"organizationUuid\""));
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)

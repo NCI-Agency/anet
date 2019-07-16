@@ -4,26 +4,5 @@ taskList(query: {pageSize: 0}) {
     uuid
     shortName
     longName
-    draftReports: reports(query: {pageSize: 1, state: [DRAFT]}) {
-      totalCount
-    }
-    pendingReports: reports(query: {pageSize: 1, state: [PENDING_APPROVAL]}) {
-      totalCount
-    }
-    publishedReports: reports(query: {pageSize: 1, state: [PUBLISHED]}) {
-      totalCount
-    }
-    rejectedReports: reports(query: {pageSize: 1, state: [REJECTED]}) {
-      totalCount
-    }
-    cancelledReports: reports(query: {pageSize: 1, state: [CANCELLED]}) {
-      totalCount
-    }
-    futureReports: reports(query: {pageSize: 1, state: [FUTURE]}) {
-      totalCount
-    }
-    approvedReports: reports(query: {pageSize: 1, state: [APPROVED]}) {
-      totalCount
-    }
   }
 }

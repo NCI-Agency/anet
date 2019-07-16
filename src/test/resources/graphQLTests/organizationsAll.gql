@@ -4,28 +4,28 @@ organizationList(query: {pageSize: 0}) {
     uuid
     shortName
     longName
-    children: childrenOrgs(query: {pageSize: 0}) {
+    children: childrenOrgs {
       uuid
     }
-    activeChildren: childrenOrgs(query: {pageSize: 0, status: ACTIVE}) {
+    activeChildren: childrenOrgs(query: {status: ACTIVE}) {
       uuid
     }
-    inactiveChildren: childrenOrgs(query: {pageSize: 0, status: INACTIVE}) {
+    inactiveChildren: childrenOrgs(query: {status: INACTIVE}) {
       uuid
     }
-    activeChildrenCopy: childrenOrgs(query: {pageSize: 0, status: ACTIVE}) {
+    activeChildrenCopy: childrenOrgs(query: {status: ACTIVE}) {
       uuid
     }
-    descendants: descendantOrgs(query: {pageSize: 0}) {
+    descendants: descendantOrgs {
       uuid
     }
-    activeDescendants: descendantOrgs(query: {pageSize: 0, status: ACTIVE}) {
+    activeDescendants: descendantOrgs(query: {status: ACTIVE}) {
       uuid
     }
-    inactiveDescendants: descendantOrgs(query: {pageSize: 0, status: INACTIVE}) {
+    inactiveDescendants: descendantOrgs(query: {status: INACTIVE}) {
       uuid
     }
-    activeDescendants: descendantOrgs(query: {pageSize: 0, status: ACTIVE}) {
+    activeDescendants: descendantOrgs(query: {status: ACTIVE}) {
       uuid
     }
   }

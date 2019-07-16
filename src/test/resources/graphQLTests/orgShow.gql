@@ -2,7 +2,7 @@ organization(uuid:"${orgUuid}") {
 	uuid, shortName, longName, type
 	parentOrg { uuid, shortName, longName }
 	tasks { uuid, longName, shortName }
-	childrenOrgs(query: {pageSize: 0}) { uuid, shortName, longName },
+	childrenOrgs { uuid, shortName, longName },
 	positions {
 		uuid, name, code
 		person { uuid, name }

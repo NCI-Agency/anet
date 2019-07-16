@@ -209,8 +209,8 @@ public class Task extends AbstractAnetBean {
     }
     if (query == null) {
       query = new ReportSearchQuery();
-      query.setPageSize(0);
     }
+    query.setPageSize(0); // batching!
     query.setBatchParams(new M2mBatchParams<Report, ReportSearchQuery>("reports", "\"reportTasks\"",
         "\"reportUuid\"", "\"taskUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
