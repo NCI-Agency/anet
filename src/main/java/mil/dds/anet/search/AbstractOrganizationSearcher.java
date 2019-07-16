@@ -57,8 +57,8 @@ public abstract class AbstractOrganizationSearcher extends
 
   protected void addParentOrgUuidQuery(OrganizationSearchQuery query) {
     if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
-      qb.addRecursiveClause(null, "organizations", "\"parentOrgUuid\"", "parent_orgs",
-          "organizations", "\"parentOrgUuid\"", "parentOrgUuid", query.getParentOrgUuid());
+      qb.addRecursiveClause(null, "organizations", "\"uuid\"", "parent_orgs", "organizations",
+          "\"parentOrgUuid\"", "parentOrgUuid", query.getParentOrgUuid());
     } else {
       qb.addEqualsClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",
           query.getParentOrgUuid());
