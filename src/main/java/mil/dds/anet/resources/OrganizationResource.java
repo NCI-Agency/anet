@@ -156,7 +156,8 @@ public class OrganizationResource {
 
     if (org.getTasks() != null) {
       logger.debug("Editing tasks for {}", org);
-      Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
+      Utils.addRemoveElementsByUuid(existing.loadTasks(engine.getContext(), null).join(),
+          org.getTasks(),
           newTask -> engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(newTask),
               DaoUtils.getUuid(existing)),
           oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(oldTaskUuid, null));

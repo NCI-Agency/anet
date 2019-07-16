@@ -5,4 +5,5 @@ public enum SqDataLoaderKey {
   ORGANIZATIONS_SEARCH, // organizations through search
   POSITIONS_SEARCH, // positions through search
   REPORTS_SEARCH, // reports through search
+  TASKS_SEARCH, // tasks through search
 }
