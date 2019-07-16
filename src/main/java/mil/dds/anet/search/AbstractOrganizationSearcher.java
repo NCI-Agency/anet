@@ -2,6 +2,7 @@ package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
@@ -33,7 +34,7 @@ public abstract class AbstractOrganizationSearcher extends
     }
 
     if (query.isBatchParamsPresent()) {
-      qb.addBatchClause(query.getBatchParams());
+      addBatchClause(query);
     }
 
     qb.addEqualsClause("status", "organizations.status", query.getStatus());
@@ -47,6 +48,12 @@ public abstract class AbstractOrganizationSearcher extends
   }
 
   protected abstract void addTextQuery(OrganizationSearchQuery query);
+
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(OrganizationSearchQuery query) {
+    qb.addBatchClause(
+        (AbstractBatchParams<Organization, OrganizationSearchQuery>) query.getBatchParams());
+  }
 
   protected void addParentOrgUuidQuery(OrganizationSearchQuery query) {
     if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {

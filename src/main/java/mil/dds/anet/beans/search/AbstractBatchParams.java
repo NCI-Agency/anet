@@ -4,7 +4,8 @@ import java.util.List;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public abstract class AbstractBatchParams implements Cloneable {
+public abstract class AbstractBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
+    implements Cloneable {
   private List<String> batchUuids;
 
   public List<String> getBatchUuids() {
@@ -15,8 +16,8 @@ public abstract class AbstractBatchParams implements Cloneable {
     this.batchUuids = batchUuids;
   }
 
-  public abstract void addQuery(
-      AbstractSearchQueryBuilder<? extends AbstractAnetBean, ? extends AbstractSearchQuery<?>> qb);
+  public abstract void addQuery(AbstractSearchQueryBuilder<B, T> outerQb,
+      AbstractSearchQueryBuilder<B, T> qb);
 
   @Override
   // Note: batchUuids should *not* be part of the hashCode!
@@ -28,7 +29,7 @@ public abstract class AbstractBatchParams implements Cloneable {
 
   @Override
   public Object clone() throws CloneNotSupportedException {
-    final AbstractBatchParams clone = (AbstractBatchParams) super.clone();
+    final AbstractBatchParams<?, ?> clone = (AbstractBatchParams<?, ?>) super.clone();
     clone.setBatchUuids(null);
     return clone;
   }

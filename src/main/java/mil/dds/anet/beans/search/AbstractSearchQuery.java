@@ -21,7 +21,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   private Optional<Integer> pageSize = Optional.empty();
   private Optional<SortOrder> sortOrder = Optional.empty();
   private Optional<T> sortBy = Optional.empty();
-  private Optional<AbstractBatchParams> batchParams = Optional.empty();
+  private Optional<AbstractBatchParams<?, ?>> batchParams = Optional.empty();
 
   public AbstractSearchQuery(T defaultSortBy) {
     this.defaultSortBy = defaultSortBy;
@@ -105,14 +105,14 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   @Override
   @JsonIgnore
   @GraphQLIgnore
-  public AbstractBatchParams getBatchParams() {
+  public AbstractBatchParams<?, ?> getBatchParams() {
     return batchParams.orElse(null);
   }
 
   @Override
   @JsonIgnore
   @GraphQLIgnore
-  public void setBatchParams(AbstractBatchParams batchParams) {
+  public void setBatchParams(AbstractBatchParams<?, ?> batchParams) {
     this.batchParams = Optional.ofNullable(batchParams);
   }
 
@@ -141,7 +141,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
     @SuppressWarnings("unchecked")
     final AbstractSearchQuery<T> clone = (AbstractSearchQuery<T>) super.clone();
     if (isBatchParamsPresent()) {
-      clone.setBatchParams((AbstractBatchParams) getBatchParams().clone());
+      clone.setBatchParams((AbstractBatchParams<?, ?>) getBatchParams().clone());
     }
     return clone;
   }

@@ -13,6 +13,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -171,24 +172,34 @@ public class Organization extends AbstractAnetBean {
       query.setPageSize(0);
     }
     // Note: no recursion, only direct children!
-    query.setBatchParams(new FkBatchParams("organizations", "\"parentOrgUuid\""));
-    return AnetObjectEngine.getInstance().getOrganizationDao().getChildrenOrgs(context, uuid, query)
-        .thenApply(o -> {
+    query.setBatchParams(new FkBatchParams<Organization, OrganizationSearchQuery>("organizations",
+        "\"parentOrgUuid\""));
+    return AnetObjectEngine.getInstance().getOrganizationDao()
+        .getOrganizationsBySearch(context, uuid, query).thenApply(o -> {
           childrenOrgs = o;
           return o;
         });
   }
 
-  // TODO: batch load? (used in App.js for me → position → organization)
   @GraphQLQuery(name = "descendantOrgs")
-  public synchronized List<Organization> loadDescendantOrgs(
+  public CompletableFuture<List<Organization>> loadDescendantOrgs(
+      @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
-    if (descendants == null) {
-      query.setParentOrgUuid(uuid);
-      query.setParentOrgRecursively(true);
-      descendants = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+    if (descendants != null) {
+      return CompletableFuture.completedFuture(descendants);
     }
-    return descendants;
+    if (query == null) {
+      query = new OrganizationSearchQuery();
+      query.setPageSize(0);
+    }
+    // Note: recursion, includes transitive children!
+    query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
+        "organizations", "\"parentOrgUuid\"", "organizations", "\"parentOrgUuid\""));
+    return AnetObjectEngine.getInstance().getOrganizationDao()
+        .getOrganizationsBySearch(context, uuid, query).thenApply(o -> {
+          descendants = o;
+          return o;
+        });
   }
 
   // TODO: batch load? (used in organizations/Edit.js)

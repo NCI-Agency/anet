@@ -29,9 +29,9 @@ public interface ISearchQuery<T extends ISortBy> {
 
   public void setSortBy(T sortBy);
 
-  boolean isBatchParamsPresent();
+  public boolean isBatchParamsPresent();
 
-  public AbstractBatchParams getBatchParams();
+  public AbstractBatchParams<?, ?> getBatchParams();
 
-  void setBatchParams(AbstractBatchParams batchParams);
+  public void setBatchParams(AbstractBatchParams<?, ?> batchParams);
 }

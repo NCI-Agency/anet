@@ -8,20 +8,15 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
-import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import mil.dds.anet.views.SearchQueryFetcher;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -174,12 +169,6 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
         .map(new TaskMapper()).list();
-  }
-
-  public CompletableFuture<List<Report>> getReportsForTask(Map<String, Object> context,
-      String taskUuid, ReportSearchQuery query) {
-    return new SearchQueryFetcher<Report, ReportSearchQuery>().load(context,
-        SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(taskUuid, query));
   }
 
 }

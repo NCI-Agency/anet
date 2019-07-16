@@ -83,6 +83,12 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
     return instance.getByForeignKeys(foreignKeys);
   }
 
+  public CompletableFuture<List<Organization>> getOrganizationsBySearch(Map<String, Object> context,
+      String uuid, OrganizationSearchQuery query) {
+    return new SearchQueryFetcher<Organization, OrganizationSearchQuery>().load(context,
+        SqDataLoaderKey.ORGANIZATIONS_SEARCH, new ImmutablePair<>(uuid, query));
+  }
+
   public CompletableFuture<List<Organization>> getOrganizationsForPerson(
       Map<String, Object> context, String personUuid) {
     return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
@@ -144,11 +150,5 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
   @Override
   public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher().runSearch(query);
-  }
-
-  public CompletableFuture<List<Organization>> getChildrenOrgs(Map<String, Object> context,
-      String orgUuid, OrganizationSearchQuery query) {
-    return new SearchQueryFetcher<Organization, OrganizationSearchQuery>().load(context,
-        SqDataLoaderKey.ORGANIZATIONS_SEARCH, new ImmutablePair<>(orgUuid, query));
   }
 }

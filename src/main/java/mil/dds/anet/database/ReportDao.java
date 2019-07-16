@@ -42,8 +42,10 @@ import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
@@ -746,6 +748,12 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     final ReportSearchBatcher instance =
         AnetObjectEngine.getInstance().getInjector().getInstance(ReportSearchBatcher.class);
     return instance.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Report>> getReportsBySearch(Map<String, Object> context,
+      String uuid, ReportSearchQuery query) {
+    return new SearchQueryFetcher<Report, ReportSearchQuery>().load(context,
+        SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
   private void sendReportPublishedEmail(Report r) {
