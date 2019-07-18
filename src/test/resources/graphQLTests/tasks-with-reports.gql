@@ -5,28 +5,16 @@ taskList(query: {text: "1.1.", pageSize: 0}) {
     shortName
     longName
     pendingReports: reports(query: {state: [PENDING_APPROVAL]}) {
-      totalCount
-      list {
-        uuid
-      }
+      uuid
     }
     textReports: reports(query: {text: "meet"}) {
-      totalCount
-      list {
-        uuid
-      }
+      uuid
     }
     allReports: reports {
-      totalCount
-      list {
-        uuid
-      }
+      uuid
     }
     textReportsCopy: reports(query: {text: "meet"}) {
-      totalCount
-      list {
-        uuid
-      }
+      uuid
     }
   }
 }

@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
@@ -40,7 +39,7 @@ public class Task extends AbstractAnetBean {
   private String customFieldEnum1;
   private String customFieldEnum2;
 
-  private AnetBeanList<Report> reports;
+  private List<Report> reports;
 
   private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
 
@@ -201,7 +200,7 @@ public class Task extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "reports")
-  public CompletableFuture<AnetBeanList<Report>> loadReports(
+  public CompletableFuture<List<Report>> loadReports(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     if (reports != null) {
@@ -215,8 +214,8 @@ public class Task extends AbstractAnetBean {
     query.setUser(DaoUtils.getUserFromContext(context));
     return AnetObjectEngine.getInstance().getReportDao().getReportsBySearch(context, uuid, query)
         .thenApply(o -> {
-          reports = new AnetBeanList<Report>(o);
-          return reports;
+          reports = o;
+          return o;
         });
   }
 
