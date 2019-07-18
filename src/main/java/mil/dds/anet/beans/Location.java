@@ -59,7 +59,7 @@ public class Location extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof Location)) {
       return false;
     }
     Location l = (Location) o;

@@ -234,7 +234,7 @@ public class Task extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof Task)) {
       return false;
     }
     Task other = (Task) o;

@@ -231,7 +231,7 @@ public class Person extends AbstractAnetBean implements Principal {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || !(o instanceof Person)) {
+    if (!(o instanceof Person)) {
       return false;
     }
     Person other = (Person) o;

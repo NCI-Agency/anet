@@ -72,7 +72,7 @@ public class Comment extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof Comment)) {
       return false;
     }
     Comment c = (Comment) o;

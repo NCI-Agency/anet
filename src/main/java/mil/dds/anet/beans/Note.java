@@ -100,7 +100,7 @@ public class Note extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof Note)) {
       return false;
     }
     final Note n = (Note) o;

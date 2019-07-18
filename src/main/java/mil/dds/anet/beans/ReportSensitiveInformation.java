@@ -19,7 +19,7 @@ public class ReportSensitiveInformation extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof ReportSensitiveInformation)) {
       return false;
     }
     final ReportSensitiveInformation rsi = (ReportSensitiveInformation) o;

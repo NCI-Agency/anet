@@ -205,7 +205,7 @@ public class Organization extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof Organization)) {
       return false;
     }
     Organization other = (Organization) o;
