@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationTest.emails;
+package mil.dds.anet.integrationtest.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -7,8 +7,8 @@ import java.util.List;
 import mil.dds.anet.AnetApplication;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
-import mil.dds.anet.integrationTest.utils.EmailResponse;
-import mil.dds.anet.integrationTest.utils.FakeSmtpServer;
+import mil.dds.anet.integrationtest.utils.EmailResponse;
+import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
