@@ -130,7 +130,7 @@
     "react-container-dimensions": "^1.4.1",
     "react-dom": "^16.8.6",
     "react-mosaic-component": "^3.2.0",
-    "react-notification-badge": "^1.5.0",
+    "react-notification-badge": "^1.5.1",
     "react-redux": "^6.0.1",
     "react-redux-loading-bar": "^4.3.0",
     "react-router-bootstrap": "^0.25.0",
