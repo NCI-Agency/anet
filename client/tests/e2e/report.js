@@ -472,7 +472,6 @@ test("Verify that validation and other reports/new interactions work", async t =
   let dateTimeFormat = "DD-MM-YYYY HH:mm"
   let dateTimeValue = await $engagementDate.getAttribute("value")
   let expectedDateTime = moment()
-    .utc()
     .hour(23)
     .minute(45)
     .format(dateTimeFormat)
