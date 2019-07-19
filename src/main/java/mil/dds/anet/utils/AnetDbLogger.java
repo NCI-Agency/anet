@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
+import java.time.temporal.ChronoUnit;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -34,6 +35,6 @@ public class AnetDbLogger implements SqlLogger {
             .replace(CommentDao.COMMENT_FIELDS, " <COMMENT_FIELDS> ")
             .replaceAll("LEFT JOIN (CONTAINS|FREETEXT)TABLE[^=]*= (\\S+)\\.\\[Key\\]", "<$1_$2>")
             .replaceFirst("(EXP|ISNULL|CASE).* AS (search_rank)", "<$1>");
-    logger.debug(msg);
+    logger.debug("statement:[{}] took {} ms", msg, context.getElapsedTime(ChronoUnit.MILLIS));
   }
 }
