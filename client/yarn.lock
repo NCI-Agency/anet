@@ -13565,12 +13565,12 @@ safe-buffer@5.1.1:
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
   integrity sha512-kKvNJn6Mm93gAczWVJg7wH+wGYWNrDHdWvpUmHyEsgCtIwwo3bqPtV4tR5tuPaUhTOo/kvhVwd8XwwOllGYkbg==
 
-safe-buffer@5.1.2, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
+safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
   integrity sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==
 
-safe-buffer@^5.2.0:
+safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.2.0.tgz#b74daec49b1148f88c64b68d49b1e815c1f2f519"
   integrity sha512-fZEwUGbVl7kouZs1jCdMLdt95hdIv0ZeHg6L7qPeciMZhZ+/gdesW4wgTARkrFWEpspjEATAzUGPG8N2jJiwbg==
@@ -15424,10 +15424,10 @@ webdriver@^5.11.5:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@^5.11.5:
-  version "5.11.5"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.11.5.tgz#bdd497c063f6b90c2beb6c1a7711074b428dfbce"
-  integrity sha512-KGzUJIN31Y/O00E5Rx67jEOQAQoAA2oIghAtyBof7kmHvlNPtthQ2DWi837PMNAf51bRCMMXX2leMHK/HTO91w==
+webdriverio@^5.11.5, webdriverio@^5.11.6:
+  version "5.11.6"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.11.6.tgz#9db5b494ae180ce4a934e3d65b8354bc99f1e028"
+  integrity sha512-lQD+q75nCMKdYy9Is8sSz+XlThR3Ne96F2ltUpnP0Q4551QJgeNoWG26hNDAI+ZgL8VS63Jc1zYo36SXYcfskg==
   dependencies:
     "@wdio/config" "^5.11.0"
     "@wdio/logger" "^5.11.0"
