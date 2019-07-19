@@ -5009,7 +5009,7 @@ cosmiconfig@^4.0.0:
     parse-json "^4.0.0"
     require-from-string "^2.0.1"
 
-cosmiconfig@^5.2.0:
+cosmiconfig@^5.2.0, cosmiconfig@^5.2.1:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/cosmiconfig/-/cosmiconfig-5.2.1.tgz#040f726809c591e77a17c0a3626ca45b4f168b1a"
   integrity sha512-H65gsXo1SKjf8zmrJ67eJk8aIRKV5ff2D4uKZIBZShbhGSpEmsQOPW/SKMKYhSTrqR7ufy6RP69rPogdaPh/kA==
@@ -7785,10 +7785,10 @@ graphql-cli-prepare@1.4.19:
     graphql-static-binding "0.9.3"
     lodash "4.17.5"
 
-graphql-cli@^3.0.11:
-  version "3.0.11"
-  resolved "https://registry.yarnpkg.com/graphql-cli/-/graphql-cli-3.0.11.tgz#135d845c1cd7c2a2aac8be543de334543a0ff437"
-  integrity sha512-VK2lehlwL/PAA7aiUIouomV4ITIjjBA/Xxwr0AOvpAS0nE2q0STKBsGZ/ScMeS7Qv0bCyxKWXJ1dti8Hrfzd+Q==
+graphql-cli@^3.0.12:
+  version "3.0.12"
+  resolved "https://registry.yarnpkg.com/graphql-cli/-/graphql-cli-3.0.12.tgz#c387b49f420410798db6d2739187d2af609e5fea"
+  integrity sha512-+6MxnbXHaAcpF574KTmpkXJmwXQmtP8YVaTY3IKBgqHzL5PMmTrrFgbLUbwDVJDZ5sSr/kMZgZFMiAczMYtykw==
   dependencies:
     apollo-codegen "^0.20.2"
     chalk "^2.4.1"
@@ -7805,7 +7805,7 @@ graphql-cli@^3.0.11:
     graphql-config-extension-graphcool "1.0.11"
     graphql-config-extension-prisma "0.3.0"
     graphql-playground-middleware-express "1.7.12"
-    graphql-schema-linter "0.2.0"
+    graphql-schema-linter "0.2.1"
     inquirer "6.2.0"
     is-url-superb "2.0.0"
     js-yaml "^3.12.0"
@@ -7927,19 +7927,17 @@ graphql-request@^1.5.0:
   dependencies:
     cross-fetch "2.2.2"
 
-graphql-schema-linter@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/graphql-schema-linter/-/graphql-schema-linter-0.2.0.tgz#deacc9e1a887d49c63ee2b7b742ef17a575e7447"
-  integrity sha512-IXldy6nCmzAZgweBzQUGPLVO1aRLRy/n/jEm8h8pQHmMYoHv2hQgUcRQRaCbjcdNKYKToN1cfHvdgtGJ+DWSNQ==
+graphql-schema-linter@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/graphql-schema-linter/-/graphql-schema-linter-0.2.1.tgz#f4231ff6def031a83fa86c66a4f2b688a78f505f"
+  integrity sha512-Z0rKFkxvIXqktkd/4luMYgBXWZeVCp8VJysOKz3RtbcpqbiIpdwtH0J678xOQ+hJLwEfrdCrhKNxxvRpt6mCSg==
   dependencies:
     chalk "^2.0.1"
     columnify "^1.5.4"
     commander "^2.11.0"
-    cosmiconfig "^4.0.0"
-    figures "^2.0.0"
+    cosmiconfig "^5.2.1"
     glob "^7.1.2"
     graphql "^14.0.0"
-    lodash "^4.17.4"
 
 graphql-static-binding@0.9.3:
   version "0.9.3"
