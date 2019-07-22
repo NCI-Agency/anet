@@ -37,10 +37,10 @@ const TableHeader = props => {
   return (
     <thead>
       <tr>
-        <th className="col-xs-1">{!hide && ""}</th>
         <th className="col-xs-1" style={{ textAlign: "center" }}>
           {!hide && "Primary"}
         </th>
+        <th className="col-xs-1">{!hide && ""}</th>
         <th className="col-xs-3">{!hide && "Name"}</th>
         <th className="col-xs-3">{!hide && "Position"}</th>
         <th className="col-xs-2">{!hide && "Location"}</th>
@@ -144,18 +144,18 @@ export default class AttendeesTable extends Component {
     const { disabled, showDelete, onDelete } = this.props
     return (
       <tr key={person.uuid}>
-        <td>
-          <AvatarDisplayComponent
-            avatar={person.avatar}
-            height={32}
-            width={32}
-          />
-        </td>
         <td className="primary-attendee">
           <RadioButton
             person={person}
             handleOnChange={this.setPrimaryAttendee}
             disabled={disabled}
+          />
+        </td>
+        <td align="right">
+          <AvatarDisplayComponent
+            avatar={person.avatar}
+            height={32}
+            width={32}
           />
         </td>
         <td>
