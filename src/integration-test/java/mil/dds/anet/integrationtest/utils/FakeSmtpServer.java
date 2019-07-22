@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationTest.utils;
+package mil.dds.anet.integrationtest.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

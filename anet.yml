@@ -133,7 +133,7 @@ logging:
           currentLogFilename: ./logs/dbLog.log
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
-          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
+          logFormat: '%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}\t%p\t%m%n'
     "io.dropwizard.assets.AssetsBundle" : TRACE
     "io.dropwizard.assets.*" : TRACE
     "waffle.servlet.NegotiateSecurityFilter" : TRACE
