@@ -35,6 +35,6 @@ public class AnetDbLogger implements SqlLogger {
             .replace(CommentDao.COMMENT_FIELDS, " <COMMENT_FIELDS> ")
             .replaceAll("LEFT JOIN (CONTAINS|FREETEXT)TABLE[^=]*= (\\S+)\\.\\[Key\\]", "<$1_$2>")
             .replaceFirst("(EXP|ISNULL|CASE).* AS (search_rank)", "<$1>");
-    logger.debug("statement:[{}] took {} ms", msg, context.getElapsedTime(ChronoUnit.MILLIS));
+    logger.debug("{}\t{}", context.getElapsedTime(ChronoUnit.MILLIS), msg);
   }
 }
