@@ -18,7 +18,7 @@ public class MssqlTaskSearcher extends AbstractTaskSearcher {
     // possible score)
     // so we can sort on it (show the most relevant hits at the top).
     qb.addSelectClause("ISNULL(c_tasks.rank, 0)"
-        + " + CASE WHEN tasks.shortName LIKE :likeQuery THEN 1000 ELSE 0 END" + " AS search_rank");
+        + " + CASE WHEN tasks.shortName LIKE :likeQuery THEN 1000 ELSE 0 END AS search_rank");
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (tasks, (longName), :containsQuery) c_tasks"
         + " ON tasks.uuid = c_tasks.[Key]");
     qb.addWhereClause("(c_tasks.rank IS NOT NULL OR tasks.shortName LIKE :likeQuery)");

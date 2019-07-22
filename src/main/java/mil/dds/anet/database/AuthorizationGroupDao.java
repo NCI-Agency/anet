@@ -142,17 +142,17 @@ public class AuthorizationGroupDao
               + "WHERE reports.\"authorUuid\" = :authorUuid "
               + "AND \"authorizationGroups\".status = :activeStatus "
               + "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC" + ")";
+              + "ORDER BY MAX(reports.\"createdAt\") DESC)";
     } else {
       sql =
           "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".uuid IN ("
-              + "SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" " + "FROM reports "
+              + "SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" FROM reports "
               + "JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\" "
               + "JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid = \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
               + "WHERE reports.\"authorUuid\" = :authorUuid "
               + "AND \"authorizationGroups\".status = :activeStatus "
               + "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC " + "LIMIT :maxResults" + ")";
+              + "ORDER BY MAX(reports.\"createdAt\") DESC LIMIT :maxResults)";
     }
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults)

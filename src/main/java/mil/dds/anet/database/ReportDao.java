@@ -104,7 +104,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
         + "\"principalOrganizationUuid\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
-        + ":exsum, :reportText, :keyOutcomes, " + ":nextSteps, :authorUuid, ");
+        + ":exsum, :reportText, :keyOutcomes, :nextSteps, :authorUuid, ");
     if (DaoUtils.isMsSql()) {
       sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
     } else {
@@ -246,7 +246,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   public void updateToDraftState(Report r) {
     getDbHandle().execute(
-        "/* UpdateFutureEngagement */ UPDATE reports SET state = ? " + "WHERE uuid = ?",
+        "/* UpdateFutureEngagement */ UPDATE reports SET state = ? WHERE uuid = ?",
         DaoUtils.getEnumId(ReportState.DRAFT), r.getUuid());
   }
 
@@ -672,7 +672,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   static class SelfIdBatcher extends IdBatcher<Report> {
     private static final String sql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
-        + "FROM reports " + "WHERE reports.uuid IN ( <uuids> )";
+        + "FROM reports WHERE reports.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new ReportMapper());
@@ -707,7 +707,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   static class TagsBatcher extends ForeignKeyBatcher<Tag> {
     private static final String sql = "/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
         + "INNER JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid "
-        + "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> )" + "ORDER BY tags.name";
+        + "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> ) ORDER BY tags.name";
 
     public TagsBatcher() {
       super(sql, "foreignKeys", new TagMapper(), "reportUuid");

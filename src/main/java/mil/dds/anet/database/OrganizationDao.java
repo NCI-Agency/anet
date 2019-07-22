@@ -98,18 +98,18 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
   public List<Organization> getTopLevelOrgs(OrganizationType type) {
     return getDbHandle()
         .createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS + " FROM organizations "
-            + "WHERE \"parentOrgUuid\" IS NULL " + "AND status = :status " + "AND type = :type")
+            + "WHERE \"parentOrgUuid\" IS NULL AND status = :status AND type = :type")
         .bind("status", DaoUtils.getEnumId(OrganizationStatus.ACTIVE))
         .bind("type", DaoUtils.getEnumId(type)).map(new OrganizationMapper()).list();
   }
 
   public interface OrgListQueries {
     @RegisterRowMapper(OrganizationMapper.class)
-    @SqlQuery("SELECT uuid AS organizations_uuid" + ", uuid AS uuid"
+    @SqlQuery("SELECT uuid AS organizations_uuid, uuid AS uuid"
         + ", \"shortName\" AS \"organizations_shortName\""
-        + ", \"longName\" AS \"organizations_longName\"" + ", status AS organizations_status"
+        + ", \"longName\" AS \"organizations_longName\", status AS organizations_status"
         + ", \"identificationCode\" AS \"organizations_identificationCode\""
-        + ", type AS organizations_type" + ", \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
+        + ", type AS organizations_type, \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
         + ", \"createdAt\" AS \"organizations_createdAt\""
         + ", \"updatedAt\" AS \"organizations_updatedAt\""
         + " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")

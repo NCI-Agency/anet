@@ -178,15 +178,15 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
           "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
               + "SELECT TOP(:maxResults) \"reportTasks\".\"taskUuid\" "
               + "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
-              + "WHERE \"authorUuid\" = :authorUuid " + "GROUP BY \"taskUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC" + ")";
+              + "WHERE \"authorUuid\" = :authorUuid GROUP BY \"taskUuid\" "
+              + "ORDER BY MAX(reports.\"createdAt\") DESC)";
     } else {
       sql =
           "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
               + "SELECT \"reportTasks\".\"taskUuid\" "
               + "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
-              + "WHERE \"authorUuid\" = :authorUuid " + "GROUP BY \"taskUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC " + "LIMIT :maxResults" + ")";
+              + "WHERE \"authorUuid\" = :authorUuid GROUP BY \"taskUuid\" "
+              + "ORDER BY MAX(reports.\"createdAt\") DESC LIMIT :maxResults)";
     }
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))

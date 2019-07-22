@@ -146,15 +146,15 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
           + "FROM people WHERE people.uuid IN ( "
           + "SELECT top(:maxResults) \"reportPeople\".\"personUuid\" "
           + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid " + "AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" " + "ORDER BY MAX(reports.\"createdAt\") DESC" + ")";
+          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
+          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC)";
     } else {
       sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
-          + "FROM people WHERE people.uuid IN ( " + "SELECT \"reportPeople\".\"personUuid\" "
+          + "FROM people WHERE people.uuid IN ( SELECT \"reportPeople\".\"personUuid\" "
           + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid " + "AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" " + "ORDER BY MAX(reports.\"createdAt\") DESC "
-          + "LIMIT :maxResults" + ")";
+          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
+          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC "
+          + "LIMIT :maxResults)";
     }
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).map(new PersonMapper()).list();
@@ -165,7 +165,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
         + "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
         + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
-        + ")) OR (" + "\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
+        + ")) OR (\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
         + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
         + ")) OR ("
         + "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("

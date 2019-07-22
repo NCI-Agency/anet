@@ -55,16 +55,16 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
 
   @Override
   public int updateInternal(SavedSearch obj) {
-    return getDbHandle().createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
-        + "SET name = :name, \"objectType\" = :objectType, query = :query " + "WHERE uuid = :uuid")
+    return getDbHandle()
+        .createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
+            + "SET name = :name, \"objectType\" = :objectType, query = :query WHERE uuid = :uuid")
         .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
   }
 
   @Override
   public int deleteInternal(String uuid) {
     return getDbHandle()
-        .createUpdate(
-            "/* deleteSavedSearch */ DELETE FROM \"savedSearches\" " + "WHERE uuid = :uuid")
+        .createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" WHERE uuid = :uuid")
         .bind("uuid", uuid).execute();
   }
 

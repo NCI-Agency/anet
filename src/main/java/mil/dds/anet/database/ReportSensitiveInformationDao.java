@@ -91,7 +91,7 @@ public class ReportSensitiveInformationDao
     final int numRows;
     if (Utils.isEmptyHtml(rsi.getText())) {
       numRows = getDbHandle().createUpdate("/* deleteReportsSensitiveInformation */ DELETE FROM \""
-          + TABLE_NAME + "\"" + " WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
+          + TABLE_NAME + "\" WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
       AnetAuditLogger.log("Empty ReportSensitiveInformation {} deleted by {} ", rsi, user);
     } else {
       // Update relevant fields, but do not allow the reportUuid to be updated by the query!
@@ -149,10 +149,9 @@ public class ReportSensitiveInformationDao
         + " FROM reports r"
         + " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportUuid\" = r.uuid"
         + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\" "
-        + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" " + " WHERE r.uuid = :reportUuid"
-        + " AND (" + "   (r.\"authorUuid\" = :userUuid)" + "   OR"
-        + "   (p.\"currentPersonUuid\" = :userUuid)" + " )").bind("reportUuid", reportUuid)
-        .bind("userUuid", userUuid);
+        + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" WHERE r.uuid = :reportUuid"
+        + " AND ( (r.\"authorUuid\" = :userUuid) OR (p.\"currentPersonUuid\" = :userUuid) )")
+        .bind("reportUuid", reportUuid).bind("userUuid", userUuid);
     return (query.map(new MapMapper(false)).list().size() > 0);
   }
 

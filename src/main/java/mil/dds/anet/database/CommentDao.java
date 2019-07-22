@@ -23,7 +23,7 @@ public class CommentDao extends AnetBaseDao<Comment, AbstractSearchQuery<?>> {
 
   static class SelfIdBatcher extends IdBatcher<Comment> {
     private static final String sql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS
-        + "FROM comments " + "WHERE comments.uuid IN ( <uuids> )";
+        + "FROM comments WHERE comments.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new CommentMapper());

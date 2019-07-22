@@ -26,7 +26,7 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
         " LEFT JOIN CONTAINSTABLE (organizations, (longName), :containsQuery) c_organizations"
             + " ON organizations.uuid = c_organizations.[Key]");
     qb.addWhereClause(
-        "(c_organizations.rank IS NOT NULL" + " OR organizations.identificationCode LIKE :likeQuery"
+        "(c_organizations.rank IS NOT NULL OR organizations.identificationCode LIKE :likeQuery"
             + " OR organizations.shortName LIKE :likeQuery)");
     final String text = query.getText();
     qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));

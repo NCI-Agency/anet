@@ -82,7 +82,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   static class SelfIdBatcher extends IdBatcher<Position> {
     private static final String sql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
-        + "FROM positions " + "WHERE positions.uuid IN ( <uuids> )";
+        + "FROM positions WHERE positions.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new PositionMapper());
@@ -218,14 +218,14 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     String sql;
     if (DaoUtils.isMsSql()) {
       sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") " + "VALUES(null, "
+          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
           + "(SELECT TOP(1)\"personUuid\" FROM \"peoplePositions\" "
-          + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), " + ":createdAt)";
+          + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), :createdAt)";
     } else {
       sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") " + "VALUES(null, "
+          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
           + "(SELECT \"personUuid\" FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
-          + "ORDER BY \"createdAt\" DESC LIMIT 1), " + ":createdAt)";
+          + "ORDER BY \"createdAt\" DESC LIMIT 1), :createdAt)";
     }
     getDbHandle().createUpdate(sql).bind("positionUuid", positionUuid)
         .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
@@ -283,7 +283,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
             + "FROM \"peoplePositions\" "
             + "LEFT JOIN people ON \"peoplePositions\".\"personUuid\" = people.uuid "
             + "WHERE \"peoplePositions\".\"positionUuid\" = :positionUuid "
-            + "AND \"peoplePositions\".\"personUuid\" IS NOT NULL " + "ORDER BY \"createdAt\" DESC")
+            + "AND \"peoplePositions\".\"personUuid\" IS NOT NULL ORDER BY \"createdAt\" DESC")
         .bind("positionUuid", positionUuid).map(new PersonMapper()).list();
     // remove the last person, as that's the current position holder
     if (people.size() > 0) {
@@ -345,7 +345,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     Collections.sort(uuids);
     return getDbHandle()
         .createUpdate("/* deletePositionAssociation */ UPDATE \"positionRelationships\" "
-            + "SET deleted = :deleted, \"updatedAt\" = :updatedAt " + "WHERE ("
+            + "SET deleted = :deleted, \"updatedAt\" = :updatedAt WHERE ("
             + "  (\"positionUuid_a\" = :positionUuid_a AND \"positionUuid_b\" = :positionUuid_b)"
             + "OR "
             + "  (\"positionUuid_a\" = :positionUuid_b AND \"positionUuid_b\" = :positionUuid_a)"
@@ -359,7 +359,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   public List<Position> getEmptyPositions(PositionType type) {
     return getDbHandle()
         .createQuery("SELECT " + POSITIONS_FIELDS + " FROM positions "
-            + "WHERE \"currentPersonUuid\" IS NULL " + "AND positions.type = :type")
+            + "WHERE \"currentPersonUuid\" IS NULL AND positions.type = :type")
         .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
   }
 
@@ -385,7 +385,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   public Position getCurrentPositionForPerson(String personUuid) {
     List<Position> positions = getDbHandle()
         .createQuery("/* getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS
-            + " FROM positions " + "WHERE \"currentPersonUuid\" = :personUuid")
+            + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).list();
     if (positions.size() == 0) {
       return null;
@@ -429,7 +429,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         "JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = %1$s  AND pp.\"createdAt\" <= %2$s "
             + " LEFT JOIN \"peoplePositions\" maxPp ON"
             + "   maxPp.\"positionUuid\" = pp.\"positionUuid\" AND maxPp.\"createdAt\" > pp.\"createdAt\" AND maxPp.\"createdAt\" <= %2$s "
-            + " WHERE pp.\"positionUuid\" = :%3$s " + " AND maxPp.\"createdAt\" IS NULL ",
+            + " WHERE pp.\"positionUuid\" = :%3$s AND maxPp.\"createdAt\" IS NULL ",
         personJoinColumn, dateFilterColumn, placeholderName);
   }
 }
