@@ -72,8 +72,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(
-            getOrderBy(query.getSortOrder(), "tasks", "\"shortName\"", "\"longName\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "\"shortName\""));
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "tasks", "uuid"));
