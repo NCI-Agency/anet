@@ -57,8 +57,8 @@ test("Draft and submit a report", async t => {
   )
 
   let [
-    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $principalPrimaryInput,
+    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $principalName,
     $principalPosition,
     /* eslint-disable no-unused-vars */ $principalLocation /* eslint-enable no-unused-vars */,
