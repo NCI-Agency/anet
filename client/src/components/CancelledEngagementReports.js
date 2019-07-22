@@ -241,7 +241,7 @@ class CancelledEngagementReports extends ReportsVisualisation {
                 reports={context.allReports}
                 paginatedReports={context.reports}
                 goToPage={this.goToReportsPage}
-                viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+                viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY, FORMAT_CALENDAR]}
               />
             </div>
           )
