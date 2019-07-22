@@ -584,14 +584,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         "/* RollupQuery */ SELECT " + orgColumn + " as \"orgUuid\", state, count(*) AS count ");
     sql.append("FROM reports WHERE ");
 
-    // NOTE: more date-comparison work here that might be worth abstracting, but might not
-    // if (getDbType() != DaoUtils.DbType.SQLITE) {
     sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
         + "AND \"engagementDate\" > :engagementDateStart ");
-    // } else {
-    // sql.append("\"releasedAt\" >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) "
-    // + "AND \"engagementDate\" > DateTime(:engagementDateStart) ");
-    // }
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "engagementDateStart",
