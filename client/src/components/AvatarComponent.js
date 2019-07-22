@@ -1,6 +1,6 @@
 import React from "react"
 import Avatar from "react-avatar-edit"
-import DEFAULT_AVATAR from "resources/default_avatar.png"
+import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import PropTypes from "prop-types"
 
 // More info about this component: https://github.com/kirill3333/react-avatar

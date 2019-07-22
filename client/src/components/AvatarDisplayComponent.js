@@ -1,5 +1,5 @@
 import React from "react"
-import DEFAULT_AVATAR from "resources/default_avatar.png"
+import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import PropTypes from "prop-types"
 
 export default class AvatarDisplayComponent extends React.Component {
