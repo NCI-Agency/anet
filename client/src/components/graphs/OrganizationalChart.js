@@ -2,7 +2,8 @@ import API, { Settings } from "api"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import * as d3 from "d3"
 import PropTypes from "prop-types"
-import { Symbol, getColorMode } from "milsymbol"
+import { Symbol } from "milsymbol"
+import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import Organization from "../../models/Organization"
 
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
@@ -50,11 +51,10 @@ export default class OrganizationalChart extends SVGCanvas {
   componentDidMount() {
     this.canvas = this.svg.append("g")
 
-    this.zoom = d3.zoom().on("zoom", () => {
-      return this.canvas.attr("transform", d3.event.transform)
-    })
-
-    this.svg.call(this.zoom)
+    // this.zoom = d3.zoom().on("zoom", () => {
+    //   return this.canvas.attr("transform", d3.event.transform)
+    // })
+    // this.svg.call(this.zoom)
 
     this.link = this.canvas
       .append("g")
@@ -96,7 +96,7 @@ export default class OrganizationalChart extends SVGCanvas {
     )
 
     this.link
-      .selectAll(".path")
+      .selectAll("path")
       .data(tree(root).links())
       .enter()
       .append("path")
@@ -111,10 +111,11 @@ export default class OrganizationalChart extends SVGCanvas {
       )
 
     const node = this.node
-      .selectAll("g")
+      .selectAll("g.org")
       .data(root.descendants())
       .enter()
       .append("g")
+      .attr("class", "org")
       .attr("transform", d => `translate(${d.x},${d.y})`)
 
     const iconNodeG = node.append("g").attr("transform", "translate(-25,-25)")
@@ -141,7 +142,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("href", d => `/organizations/${d.data.uuid}`)
       .append("text")
       .attr("font-family", "monospace")
-      .attr("dy", -3)
+      .attr("dy", -6)
       .attr("x", 8)
       .style("text-anchor", "start")
       .text(d => {
@@ -151,23 +152,81 @@ export default class OrganizationalChart extends SVGCanvas {
         return result.length > 26 ? result.substring(0, 23) + "..." : result
       })
 
-    const positionsG = node.append("g")
-    positionsG
-      .selectAll("a")
-      .data(d => sortPositions(d.data.positions, 10) || [])
+    const headG = node
+      .selectAll("g.head")
+      .data(d => sortPositions(d.data.positions, 1) || [])
       .enter()
+      .append("g")
+      .attr("class", "head")
+      .attr("transform", "translate(13, -11)")
       .append("a")
       .attr("href", d => `/positions/${d.uuid}`)
+
+    headG
+      .append("image")
+      .attr("width", 26)
+      .attr("height", 26)
+      .attr("y", -15)
+      .attr(
+        "href",
+        d =>
+          d.person &&
+          (d.person.avatar
+            ? "data:image/jpeg;base64," + d.person.avatar
+            : DEFAULT_AVATAR)
+      )
+
+    headG
       .append("text")
+      .attr("x", 18)
+      .attr("y", -4)
+      .attr("font-size", "11px")
+      .attr("font-family", "monospace")
+      .attr("font-weight", "bold")
+      .style("text-anchor", "start")
+      .html((d, i) => {
+        const name = `${d.person ? d.person.rank : ""} ${
+          d.person ? d.person.name : "unfilled"
+        }`
+        return `<tspan x=28>${d.person ? d.person.rank : ""} ${
+          d.person ? d.person.name : "unfilled"
+        }</tspan><tspan x=28 dy=10>${d.name}</tspan>`
+      })
+
+    const positionsG = node
+      .selectAll("g.position")
+      .data(d => sortPositions(d.data.positions, 10).slice(1))
+      .enter()
+      .append("g")
+      .attr("class", "position")
+      .attr("transform", (d, i) => `translate(19,${12 + i * 11})`)
+      .append("a")
+      .attr("href", d => `/positions/${d.uuid}`)
+
+    positionsG
+      .append("image")
+      .attr("width", 13)
+      .attr("height", 13)
+      .attr("y", -10)
+      .attr(
+        "href",
+        d =>
+          d.person &&
+          (d.person.avatar
+            ? "data:image/jpeg;base64," + d.person.avatar
+            : DEFAULT_AVATAR)
+      )
+
+    positionsG
+      .append("text")
+      .attr("x", 18)
       .attr("font-size", "9px")
       .attr("font-family", "monospace")
-      .attr("dy", (d, i) => 5 + i * 11)
-      .attr("x", 28)
       .style("text-anchor", "start")
-      .text(d => {
+      .text((d, i) => {
         const result = `${d.person ? d.person.rank : ""} ${
           d.person ? d.person.name : "unfilled"
-        }@${d.name}`
+        } ${d.name}`
         return result.length > 45 ? result.substring(0, 42) + "..." : result
       })
 
@@ -177,8 +236,11 @@ export default class OrganizationalChart extends SVGCanvas {
 
     const bounds = this.calculateBounds(root)
 
-    const scale =
+    const scale = Math.min(
+      2,
       1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
+    )
+
     const translate = [
       fullWidth / 2 - scale * bounds.center[0],
       fullHeight / 2 - scale * bounds.center[1]
@@ -212,10 +274,13 @@ export default class OrganizationalChart extends SVGCanvas {
     return {
       box: boundingBox,
       size: [
-        boundingBox.xmax - boundingBox.xmin + this.state.nodeSize[0]*1.5,
+        boundingBox.xmax - boundingBox.xmin + this.state.nodeSize[0] * 1.5,
         boundingBox.ymax - boundingBox.ymin + this.state.nodeSize[1]
       ],
-      center: [(boundingBox.xmax + boundingBox.xmin + this.state.nodeSize[0]) / 2, (boundingBox.ymax + boundingBox.ymin) / 2]
+      center: [
+        (boundingBox.xmax + boundingBox.xmin + this.state.nodeSize[0]) / 2,
+        (boundingBox.ymax + boundingBox.ymin) / 2
+      ]
     }
   }
 
@@ -237,6 +302,7 @@ export default class OrganizationalChart extends SVGCanvas {
                   rank
                   name
                   uuid
+                  avatar(size:32)
                 }
               }
             childrenOrgs(query: {pageNum: 0, pageSize: 0}) {
@@ -258,6 +324,7 @@ export default class OrganizationalChart extends SVGCanvas {
                   rank
                   name
                   uuid
+                  avatar(size:32)
                 }
               }
         
