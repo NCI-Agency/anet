@@ -25,6 +25,12 @@ import React from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 
 class BasePersonShow extends Page {
   static propTypes = {
@@ -297,6 +303,12 @@ class BasePersonShow extends Page {
                       queryParams={{
                         authorUuid: this.props.match.params.uuid
                       }}
+                      viewFormats={[
+                        FORMAT_CALENDAR,
+                        FORMAT_SUMMARY,
+                        FORMAT_TABLE,
+                        FORMAT_MAP
+                      ]}
                       paginationKey={`r_authored_${this.props.match.params.uuid}`}
                       mapId="reports-authored"
                     />
