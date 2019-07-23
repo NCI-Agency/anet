@@ -131,7 +131,7 @@ public class ReportAction extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof ReportAction)) {
       return false;
     }
     ReportAction other = (ReportAction) o;

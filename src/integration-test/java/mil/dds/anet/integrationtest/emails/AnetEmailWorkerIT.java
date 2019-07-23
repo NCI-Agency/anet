@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationTest.emails;
+package mil.dds.anet.integrationtest.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -13,8 +13,8 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.EmailDao;
-import mil.dds.anet.integrationTest.utils.EmailResponse;
-import mil.dds.anet.integrationTest.utils.FakeSmtpServer;
+import mil.dds.anet.integrationtest.utils.EmailResponse;
+import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
 import org.junit.Before;
 import org.junit.Test;
