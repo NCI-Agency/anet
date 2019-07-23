@@ -375,7 +375,8 @@ export default class OrganizationalChart extends SVGCanvas {
     Promise.all([chartQuery]).then(values =>
       this.setState({
         root: values[0].organization,
-        orgs: values[0].organization.descendantOrgs
+        orgs: values[0].organization.descendantOrgs,
+        collapsed: values[0].organization.childrenOrgs.map( d => d.uuid)
       })
     )
   }
