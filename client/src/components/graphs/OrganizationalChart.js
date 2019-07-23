@@ -42,7 +42,8 @@ export default class OrganizationalChart extends SVGCanvas {
     this.state = {
       root: null,
       orgs: [],
-      nodeSize: [250, 150]
+      nodeSize: [200, 200],
+      collapsed: []
     }
 
     this.tree = d3.tree()
@@ -50,11 +51,6 @@ export default class OrganizationalChart extends SVGCanvas {
 
   componentDidMount() {
     this.canvas = this.svg.append("g")
-
-    // this.zoom = d3.zoom().on("zoom", () => {
-    //   return this.canvas.attr("transform", d3.event.transform)
-    // })
-    // this.svg.call(this.zoom)
 
     this.link = this.canvas
       .append("g")
@@ -90,15 +86,17 @@ export default class OrganizationalChart extends SVGCanvas {
     tree.nodeSize(this.state.nodeSize)
 
     const root = d3.hierarchy(this.state.root, d =>
-      this.state.orgs.filter(org =>
-        d.childrenOrgs.map(org => org.uuid).includes(org.uuid)
-      )
+        this.state.collapsed.includes(d.uuid) ? [] :
+          this.state.orgs.filter(org =>
+            d.childrenOrgs.map(org => org.uuid).includes(org.uuid)
+        )
     )
 
-    this.link
+    const linkSelect = this.link
       .selectAll("path")
       .data(tree(root).links())
-      .enter()
+
+    linkSelect.enter()
       .append("path")
       .attr("class", "link")
       .attr("stroke-opacity", " 0.3")
@@ -109,16 +107,47 @@ export default class OrganizationalChart extends SVGCanvas {
           .x(d => d.x)
           .y(d => d.y)
       )
+      
+      linkSelect.exit().remove()
 
-    const node = this.node
+      linkSelect
+      .attr(
+        "d",
+        d3
+          .linkVertical()
+          .x(d => d.x)
+          .y(d => d.y)
+      )
+
+      const nodeSelect = this.node
       .selectAll("g.org")
-      .data(root.descendants())
+      .data(root.descendants(), d => d.uuid)
+
+      const nodeEnter = nodeSelect
       .enter()
       .append("g")
       .attr("class", "org")
       .attr("transform", d => `translate(${d.x},${d.y})`)
+      .on("click", d => {
+        const index = this.state.collapsed.indexOf(d.data.uuid)
+        let newCollapsed = this.state.collapsed.slice()
+        if (index > -1) {
+          newCollapsed.splice(index, 1)
+        } else {
+          newCollapsed.push(d.data.uuid)  
+        }
+        this.setState({
+          collapsed: newCollapsed
+        })
+      })
 
-    const iconNodeG = node.append("g").attr("transform", "translate(-25,-25)")
+      nodeSelect.exit().remove()
+
+      nodeSelect
+      .attr("transform", d => `translate(${d.x},${d.y})`)
+
+
+    const iconNodeG = nodeEnter.append("g").attr("transform", "translate(-25,-25)")
 
     iconNodeG.each(function(d) {
       const positions = sortPositions(d.data.positions)
@@ -132,7 +161,7 @@ export default class OrganizationalChart extends SVGCanvas {
         `S${
           d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
         }GPU------${unitcode || "-"}`,
-        { size: 32 }
+        { size: 22 }
       )
       this.appendChild(sym.asDOM())
     })
@@ -141,24 +170,35 @@ export default class OrganizationalChart extends SVGCanvas {
       .append("a")
       .attr("href", d => `/organizations/${d.data.uuid}`)
       .append("text")
+      .attr("font-size", "20px")
       .attr("font-family", "monospace")
-      .attr("dy", -6)
-      .attr("x", 8)
-      .style("text-anchor", "start")
-      .text(d => {
-        const result = `${d.data.shortName}${d.data.longName ? " - " : ""}${
-          d.data.longName
-        }`
-        return result.length > 26 ? result.substring(0, 23) + "..." : result
-      })
+      .attr("font-weight", "bold")
+      .attr("dy", 22)
+      .attr("x", 38)
+      .text(d => 
+        d.data.shortName.length > 14 ? d.data.shortName.substring(0, 12) + ".." : d.data.shortName
+      )
 
-    const headG = node
+
+      iconNodeG
+      .append("a")
+      .attr("href", d => `/organizations/${d.data.uuid}`)
+      .append("text")
+      .attr("font-family", "monospace")
+      .attr("dy", 50)
+      .attr("x", -40)
+      .text(d => 
+        d.data.longName.length > 21 ? d.data.longName.substring(0, 18) + ".." : d.data.longName
+      )
+
+
+    const headG = nodeEnter
       .selectAll("g.head")
       .data(d => sortPositions(d.data.positions, 1) || [])
       .enter()
       .append("g")
       .attr("class", "head")
-      .attr("transform", "translate(13, -11)")
+      .attr("transform", "translate(-63, 45)")
       .append("a")
       .attr("href", d => `/positions/${d.uuid}`)
 
@@ -193,13 +233,13 @@ export default class OrganizationalChart extends SVGCanvas {
         }</tspan><tspan x=28 dy=10>${d.name}</tspan>`
       })
 
-    const positionsG = node
+    const positionsG = nodeEnter
       .selectAll("g.position")
       .data(d => sortPositions(d.data.positions, 10).slice(1))
       .enter()
       .append("g")
       .attr("class", "position")
-      .attr("transform", (d, i) => `translate(19,${12 + i * 11})`)
+      .attr("transform", (d, i) => `translate(-63,${67 + i * 11})`)
       .append("a")
       .attr("href", d => `/positions/${d.uuid}`)
 
@@ -227,7 +267,7 @@ export default class OrganizationalChart extends SVGCanvas {
         const result = `${d.person ? d.person.rank : ""} ${
           d.person ? d.person.name : "unfilled"
         } ${d.name}`
-        return result.length > 45 ? result.substring(0, 42) + "..." : result
+        return result.length > 31 ? result.substring(0, 28) + "..." : result
       })
 
     const parent = this.svg.node()
@@ -237,7 +277,7 @@ export default class OrganizationalChart extends SVGCanvas {
     const bounds = this.calculateBounds(root)
 
     const scale = Math.min(
-      2,
+      1.2,
       1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
     )
 
@@ -274,12 +314,12 @@ export default class OrganizationalChart extends SVGCanvas {
     return {
       box: boundingBox,
       size: [
-        boundingBox.xmax - boundingBox.xmin + this.state.nodeSize[0] * 1.5,
+        boundingBox.xmax - boundingBox.xmin + this.state.nodeSize[0] + 100,
         boundingBox.ymax - boundingBox.ymin + this.state.nodeSize[1]
       ],
       center: [
-        (boundingBox.xmax + boundingBox.xmin + this.state.nodeSize[0]) / 2,
-        (boundingBox.ymax + boundingBox.ymin) / 2
+        (boundingBox.xmax + boundingBox.xmin + this.state.nodeSize[0] - 50 ) / 2,
+        (boundingBox.ymax + boundingBox.ymin + this.state.nodeSize[1] - 50) / 2
       ]
     }
   }
@@ -305,15 +345,15 @@ export default class OrganizationalChart extends SVGCanvas {
                   avatar(size:32)
                 }
               }
-            childrenOrgs(query: {pageNum: 0, pageSize: 0}) {
+            childrenOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
               uuid
             }
-            descendantOrgs(query: {pageNum: 0, pageSize: 0}) {
+            descendantOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
               uuid
               shortName
               longName
               type
-              childrenOrgs(query: {pageNum: 0, pageSize: 0}) {
+              childrenOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
                 uuid
               }
               positions{
