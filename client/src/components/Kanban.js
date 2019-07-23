@@ -108,19 +108,16 @@ class Card extends React.Component {
 
   render() {
     const { open } = this.state
+    const { customFieldEnum1 } = this.props.task
+    const enumSettings = Settings.fields.task.customFieldEnum1.enum
     return (
       <Panel
         onClick={() => this.setState({ open: !open })}
         style={{
           backgroundColor:
-            this.props.task.customFieldEnum1 && // TODO: use optional chaining
-            Settings.fields.task.customFieldEnum1.enum[
-              this.props.task.customFieldEnum1
-            ] &&
-            (Settings.fields.task.customFieldEnum1.enum[
-              this.props.task.customFieldEnum1
-            ].color ||
-              "#f9f7f7"),
+            customFieldEnum1 && // TODO: use optional chaining
+            enumSettings[customFieldEnum1] &&
+            (enumSettings[customFieldEnum1].color || "#f9f7f7"),
           margin: "3px"
         }}
       >

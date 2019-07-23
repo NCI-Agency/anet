@@ -73,7 +73,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof AuthorizationGroup)) {
       return false;
     }
     AuthorizationGroup a = (AuthorizationGroup) o;

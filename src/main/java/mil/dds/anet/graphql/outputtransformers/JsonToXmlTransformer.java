@@ -1,4 +1,4 @@
-package mil.dds.anet.graphql.OutputTransformers;
+package mil.dds.anet.graphql.outputtransformers;
 
 import com.github.underscore.lodash.$;
 import java.util.Map;

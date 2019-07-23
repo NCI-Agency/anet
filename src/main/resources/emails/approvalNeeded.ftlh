@@ -22,7 +22,7 @@
 Dear ${approvalStepName},
 <br><br>
 <div>
-  <#assign reportAuthor = report.loadAuthor(context).get()>
+  <#assign reportAuthor = (report.loadAuthor(context).get())!>
   ${reportAuthor.name}'s report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is ready for your review.<br>
   Using <a href="${serverUrl}/reports/${report.uuid}" />this link</a>,
   you can either <em>Approve</em>, <em>Request changes to</em> or <em>Edit</em> the report.
@@ -39,7 +39,7 @@ Dear ${approvalStepName},
   <strong>Report number:</strong> #${(report.uuid)}
 </div>
 
-<#assign attendees = report.loadAttendees(context).get()>
+<#assign attendees = (report.loadAttendees(context).get())!>
 <div>
   <strong>Advisor organization:</strong> ${(report.loadAdvisorOrg(context).get().shortName)!}
 </div>
@@ -119,7 +119,7 @@ Dear ${approvalStepName},
   <strong>Engagement date and location:</strong> ${(engagementDateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
 </div>
 
-<#assign tasks = report.loadTasks(context).get()>
+<#assign tasks = (report.loadTasks(context).get())!>
 <#list tasks as task>
 <div class="row">
   <div class="col-xs-12">

@@ -11,7 +11,7 @@ import Page, {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection from "components/ReportCollection"
+import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
 import _escape from "lodash/escape"
@@ -19,6 +19,12 @@ import { Location, Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 
 const Coordinate = ({ coord }) => {
   const parsedCoord =
@@ -39,7 +45,6 @@ class BaseLocationShow extends Page {
 
   state = {
     location: new Location(),
-    reportsPageNum: 0,
     success: null,
     error: null
   }
@@ -49,40 +54,23 @@ class BaseLocationShow extends Page {
     setMessages(props, this.state)
   }
 
-  getReportQueryPart = locationUuid => {
-    return new GQL.Part(/* GraphQL */ `
-      reports: reportList(query: $reportsQuery) {
-        pageNum, pageSize, totalCount, list {
-          ${ReportCollection.GQL_REPORT_FIELDS}
-        }
-      }
-    `).addVariable("reportsQuery", "ReportSearchQueryInput", {
-      pageSize: 10,
-      pageNum: this.state.reportsPageNum,
-      locationUuid
-    })
-  }
-
   fetchData(props) {
-    const reportsQuery = this.getReportQueryPart(props.match.params.uuid)
-
-    const locationQuery = new GQL.Part(/* GraphQL */ `
+    const locationQueryPart = new GQL.Part(/* GraphQL */ `
       location(uuid:"${props.match.params.uuid}") {
         uuid, name, lat, lng, status
         ${GRAPHQL_NOTES_FIELDS}
       }
     `)
 
-    return GQL.run([reportsQuery, locationQuery]).then(data => {
+    return GQL.run([locationQueryPart]).then(data => {
       this.setState({
-        location: new Location(data.location),
-        reports: data.reports
+        location: new Location(data.location)
       })
     })
   }
 
   render() {
-    const { location, reports } = this.state
+    const { location } = this.state
     const { currentUser, ...myFormProps } = this.props
 
     const canEdit = currentUser.isSuperUser()
@@ -147,10 +135,16 @@ class BaseLocationShow extends Page {
               </Form>
 
               <Fieldset title={"Reports at this Location"}>
-                <ReportCollection
-                  paginatedReports={reports}
-                  goToPage={this.goToReportsPage}
+                <ReportCollectionContainer
+                  queryParams={{ locationUuid: this.props.match.params.uuid }}
+                  paginationKey={`r_${this.props.match.params.uuid}`}
                   mapId="reports"
+                  viewFormats={[
+                    FORMAT_CALENDAR,
+                    FORMAT_SUMMARY,
+                    FORMAT_TABLE,
+                    FORMAT_MAP
+                  ]}
                 />
               </Fieldset>
             </div>
@@ -158,15 +152,6 @@ class BaseLocationShow extends Page {
         }}
       </Formik>
     )
-  }
-
-  goToReportsPage = pageNum => {
-    this.setState({ reportsPageNum: pageNum }, () => {
-      const reportQueryPart = this.getReportQueryPart(this.state.location.uuid)
-      GQL.run([reportQueryPart]).then(data =>
-        this.setState({ reports: data.reports })
-      )
-    })
   }
 }
 

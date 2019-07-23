@@ -89,7 +89,7 @@ export default class Page extends Component {
     this.state = {
       notFound: false,
       invalidRequest: false,
-      isLoading: false
+      isLoading: true
     }
 
     this.renderPage = this.render
@@ -158,7 +158,7 @@ export default class Page extends Component {
       return (
         <NotFound text="There was an error processing this request. Please contact an administrator." />
       )
-    } else if (!this.state.isLoading) {
+    } else {
       return this.renderPage()
     }
   }

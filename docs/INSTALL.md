@@ -549,6 +549,7 @@ http://<your-anet-server>/graphql?query=query{reportList(query:{state:PUBLISHED}
 For the same data in NVG format, you can use
 ```
 http://<your-anet-server>/graphql?query=query{reportList(query:{state:PUBLISHED}){list{uuid,intent,attendees{rank,name,role},primaryAdvisor{name},primaryPrincipal{name,position{organization{longName}}},location{lat,lng}}}}&output=nvg
+```
 
 # How to configure dashboards
 

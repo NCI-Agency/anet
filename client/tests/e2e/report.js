@@ -1,3 +1,4 @@
+let assert = require("assert")
 let _includes = require("lodash/includes")
 let moment = require("moment")
 let test = require("../util/test")
@@ -15,6 +16,8 @@ test("Draft and submit a report", async t => {
     until,
     shortWaitMs
   } = t.context
+
+  httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await pageHelpers.writeInForm("#intent", "meeting goal")
@@ -55,6 +58,7 @@ test("Draft and submit a report", async t => {
 
   let [
     $principalPrimaryInput,
+    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $principalName,
     $principalPosition,
     /* eslint-disable no-unused-vars */ $principalLocation /* eslint-enable no-unused-vars */,
@@ -163,6 +167,10 @@ test("Draft and submit a report", async t => {
     "Report submitted",
     "Clicking the submit report button displays a message telling the user that the action was successful."
   )
+
+  var serverResponse = await httpRequestSmtpServer("GET")
+  var jsonResponse = JSON.parse(serverResponse)
+  await assert.strictEqual(jsonResponse.length, 0) // Domain not in active users
 })
 
 test("Publish report chain", async t => {
@@ -180,6 +188,9 @@ test("Publish report chain", async t => {
     shortWaitMs,
     longWaitMs
   } = t.context
+
+  httpRequestSmtpServer("DELETE")
+
   // Try to have Erin approve her own report
   await t.context.get("/", "erin")
   let $homeTileErin = await $$(".home-tile")
@@ -193,11 +204,10 @@ test("Publish report chain", async t => {
   ] = $homeTileErin
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
   await $reportsPendingErin.click()
-
   await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
   await assertElementNotPresent(
     t,
-    ".read-report-button",
+    ".report-collection",
     "Erin should not be allowed to approve her own reports",
     shortWaitMs
   )
@@ -215,14 +225,18 @@ test("Publish report chain", async t => {
   ] = $homeTileJacob
   await t.context.driver.wait(until.elementIsVisible($reportsPendingJacob))
   await $reportsPendingJacob.click()
-
   await t.context.driver.wait(until.stalenessOf($reportsPendingJacob))
-  let $firstReadReportButtonJacob = await $(".read-report-button")
-  await t.context.driver.wait(
-    until.elementIsEnabled($firstReadReportButtonJacob)
-  )
-  await $firstReadReportButtonJacob.click()
 
+  let $reportsPendingJacobSummaryTab = await $(
+    ".report-collection button[value='summary']"
+  )
+  await t.context.driver.wait(
+    until.elementIsEnabled($reportsPendingJacobSummaryTab)
+  )
+  await $reportsPendingJacobSummaryTab.click()
+
+  let $firstReadReportButtonJacob = await $(".read-report-button")
+  await $firstReadReportButtonJacob.click()
   await pageHelpers.assertReportShowStatusText(
     t,
     "This report is PENDING approvals."
@@ -244,8 +258,16 @@ test("Publish report chain", async t => {
   ] = $homeTile
   await t.context.driver.wait(until.elementIsVisible($reportsPending))
   await $reportsPending.click()
-
   await t.context.driver.wait(until.stalenessOf($reportsPending))
+
+  let $reportsPendingRebeccaSummaryTab = await $(
+    ".report-collection button[value='summary']"
+  )
+  await t.context.driver.wait(
+    until.elementIsEnabled($reportsPendingRebeccaSummaryTab)
+  )
+  await $reportsPendingRebeccaSummaryTab.click()
+
   let $firstReadReportButton = await $(".read-report-button")
   await t.context.driver.wait(until.elementIsEnabled($firstReadReportButton))
   await $firstReadReportButton.click()
@@ -273,8 +295,13 @@ test("Publish report chain", async t => {
   ] = $homeTileArthur
   await t.context.driver.wait(until.elementIsVisible($approvedReports))
   await $approvedReports.click()
-
   await t.context.driver.wait(until.stalenessOf($approvedReports))
+
+  let $reportsPendingArthurSummaryTab = await $(
+    ".report-collection button[value='summary']"
+  )
+  await $reportsPendingArthurSummaryTab.click()
+
   let $firstReadApprovedReportButton = await $(".read-report-button")
   await t.context.driver.wait(
     until.elementIsEnabled($firstReadApprovedReportButton)
@@ -321,6 +348,9 @@ test("Publish report chain", async t => {
   await $$rollupDateRange[1].sendKeys(Key.TAB)
   await t.context.driver.sleep(longWaitMs) // wait for report collection to load
 
+  let $rollupTableTab = await $(".report-collection button[value='table']")
+  await $rollupTableTab.click()
+
   let $reportCollection = await $(".report-collection table")
   await t.context.driver.wait(until.elementIsVisible($reportCollection))
   let $approvedIntent = await $reportCollection.findElement(
@@ -332,6 +362,10 @@ test("Publish report chain", async t => {
     "meeting goal",
     "Daily rollup report list includes the recently approved report"
   )
+
+  var serverResponse = await httpRequestSmtpServer("GET")
+  var jsonResponse = JSON.parse(serverResponse)
+  await assert.strictEqual(jsonResponse.length, 0) // Domains not in active users
 })
 
 test("Verify that validation and other reports/new interactions work", async t => {
@@ -346,6 +380,8 @@ test("Verify that validation and other reports/new interactions work", async t =
     shortWaitMs,
     By
   } = t.context
+
+  httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await assertElementText(
@@ -437,7 +473,6 @@ test("Verify that validation and other reports/new interactions work", async t =
   let dateTimeFormat = "DD-MM-YYYY HH:mm"
   let dateTimeValue = await $engagementDate.getAttribute("value")
   let expectedDateTime = moment()
-    .utc()
     .hour(23)
     .minute(45)
     .format(dateTimeFormat)
@@ -564,6 +599,7 @@ test("Verify that validation and other reports/new interactions work", async t =
 
   let [
     $advisorPrimaryCheckbox,
+    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $advisorName,
     $advisorPosition,
     /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,
@@ -599,4 +635,26 @@ test("Verify that validation and other reports/new interactions work", async t =
     t,
     "This is a DRAFT report and hasn't been submitted."
   )
+
+  var serverResponse = await httpRequestSmtpServer("GET")
+  var jsonResponse = JSON.parse(serverResponse)
+  await assert.strictEqual(jsonResponse.length, 0) // No email should be sent
 })
+
+function httpRequestSmtpServer(requestType) {
+  return new Promise((resolve, reject) => {
+    var XMLHttpRequest = require("xhr2")
+    const xhttp = new XMLHttpRequest()
+    // FIXME: Hard-coded URL
+    const url = "http://localhost:1180/api/emails"
+    xhttp.open(requestType, url)
+    xhttp.send()
+    xhttp.onreadystatechange = e => {
+      if (xhttp.readyState === 4) {
+        if (xhttp.status === 200) {
+          resolve(xhttp.responseText)
+        }
+      }
+    }
+  })
+}

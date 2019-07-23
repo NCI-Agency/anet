@@ -11,7 +11,7 @@ import Page, {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection from "components/ReportCollection"
+import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
 import { Person, Task } from "models"
@@ -42,7 +42,6 @@ class BaseTaskShow extends Page {
 
   state = {
     task: new Task(),
-    reportsPageNum: 0,
     success: null,
     error: null
   }
@@ -52,23 +51,7 @@ class BaseTaskShow extends Page {
     setMessages(props, this.state)
   }
 
-  getReportQueryPart(taskUuid) {
-    return new GQL.Part(/* GraphQL */ `
-      reports: reportList(query: $reportsQuery) {
-        pageNum, pageSize, totalCount, list {
-          ${ReportCollection.GQL_REPORT_FIELDS}
-        }
-      }
-    `).addVariable("reportsQuery", "ReportSearchQueryInput", {
-      pageSize: 10,
-      pageNum: this.state.reportsPageNum,
-      taskUuid
-    })
-  }
-
   fetchData(props) {
-    const reportsQuery = this.getReportQueryPart(props.match.params.uuid)
-
     const taskQuery = new GQL.Part(/* GraphQL */ `
       task(uuid:"${props.match.params.uuid}") {
         uuid, shortName, longName, status,
@@ -81,16 +64,15 @@ class BaseTaskShow extends Page {
       }
     `)
 
-    return GQL.run([reportsQuery, taskQuery]).then(data => {
+    return GQL.run([taskQuery]).then(data => {
       this.setState({
-        task: new Task(data.task),
-        reports: data.reports
+        task: new Task(data.task)
       })
     })
   }
 
   render() {
-    const { task, reports } = this.state
+    const { task } = this.state
     const { currentUser, ...myFormProps } = this.props
 
     // Admins can edit tasks or users in positions related to the task
@@ -242,9 +224,12 @@ class BaseTaskShow extends Page {
               <Fieldset
                 title={`Reports for this ${Settings.fields.task.shortLabel}`}
               >
-                <ReportCollection
-                  paginatedReports={reports}
-                  goToPage={this.goToReportsPage}
+                <ReportCollectionContainer
+                  queryParams={{
+                    taskUuid: this.props.match.params.uuid
+                  }}
+                  paginationKey={`r_${this.props.match.params.uuid}`}
+                  mapId="reports"
                 />
               </Fieldset>
             </div>
@@ -252,15 +237,6 @@ class BaseTaskShow extends Page {
         }}
       </Formik>
     )
-  }
-
-  goToReportsPage = pageNum => {
-    this.setState({ reportsPageNum: pageNum }, () => {
-      const reportQueryPart = this.getReportQueryPart(this.state.task.uuid)
-      GQL.run([reportQueryPart]).then(data =>
-        this.setState({ reports: data.reports })
-      )
-    })
   }
 }
 
