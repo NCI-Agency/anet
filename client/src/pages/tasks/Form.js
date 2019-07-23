@@ -301,7 +301,17 @@ class BaseTaskForm extends Component {
                           onChange={value =>
                             setFieldValue("assessment_customFieldEnum1", value)
                           }
-                          widget={<RichTextEditor className="textField" />}
+                          widget={
+                            <RichTextEditor
+                              className="textField"
+                              onHandleBlur={() =>
+                                setFieldTouched(
+                                  "assessment_customFieldEnum1",
+                                  true
+                                )
+                              }
+                            />
+                          }
                         />
                       )}
                     </React.Fragment>

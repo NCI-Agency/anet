@@ -706,7 +706,15 @@ class BaseReportForm extends Component {
                             )
                           }
                           widget={
-                            <RichTextEditor className="reportSensitiveInformationField" />
+                            <RichTextEditor
+                              className="reportSensitiveInformationField"
+                              onHandleBlur={() =>
+                                setFieldTouched(
+                                  "reportSensitiveInformation.text",
+                                  true
+                                )
+                              }
+                            />
                           }
                         />
                         <AdvancedMultiSelect
