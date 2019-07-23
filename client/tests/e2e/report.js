@@ -598,8 +598,8 @@ test("Verify that validation and other reports/new interactions work", async t =
   )
 
   let [
-    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $advisorPrimaryCheckbox,
+    /* eslint-disable no-unused-vars */ $principalAvatar /* eslint-enable no-unused-vars */,
     $advisorName,
     $advisorPosition,
     /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,
