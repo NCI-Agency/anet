@@ -145,6 +145,7 @@ class RichTextEditor extends Component {
       sideToolbarPlugin: createSideToolbarPlugin(),
       content: {}
     }
+    this.focus = () => this.refs.editor.focus()
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -152,53 +153,56 @@ class RichTextEditor extends Component {
   }
 
   render() {
-    const { value, onChange, onHandleBlur } = this.props
+    const { className, value, onChange, onHandleBlur } = this.props
     const { sideToolbarPlugin } = this.state
     const { SideToolbar } = sideToolbarPlugin
-
     return (
-      <DraftailEditor
-        id="rich-text"
-        ariaDescribedBy="rich-text-editor"
-        blockTypes={BLOCK_TYPES}
-        entityTypes={[ENTITY_CONTROL.LINK]}
-        inlineStyles={INLINE_STYLES}
-        maxListNesting={4}
-        onSave={rawContent => {
-          if (onHandleBlur) {
-            onChange(toHTML(rawContent))
-          }
-        }}
-        plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
-        rawContentState={value ? fromHTML(value) : null}
-        showUndoControl
-        showRedoControl
-        spellCheck
-        stripPastedStyles={false}
-        bottomToolbar={props => (
-          <React.Fragment>
-            <SideToolbar>
-              {externalProps => (
-                <React.Fragment>
-                  <HeadlineOneButton {...externalProps} />
-                  <HeadlineTwoButton {...externalProps} />
-                  <BlockquoteButton {...externalProps} />
-                  <ItalicButton {...externalProps} />
-                  <BoldButton {...externalProps} />
-                  <UnderlineButton {...externalProps} />
-                  <UnorderedListButton {...externalProps} />
-                  <OrderedListButton {...externalProps} />
-                </React.Fragment>
-              )}
-            </SideToolbar>
-          </React.Fragment>
-        )}
-      />
+      <div className={className} onClick={this.focus}>
+        <DraftailEditor
+          ref="editor"
+          id="rich-text"
+          ariaDescribedBy="rich-text-editor"
+          blockTypes={BLOCK_TYPES}
+          entityTypes={[ENTITY_CONTROL.LINK]}
+          inlineStyles={INLINE_STYLES}
+          maxListNesting={4}
+          onSave={rawContent => {
+            if (onHandleBlur) {
+              onChange(toHTML(rawContent))
+            }
+          }}
+          plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
+          rawContentState={value ? fromHTML(value) : null}
+          showUndoControl
+          showRedoControl
+          spellCheck
+          stripPastedStyles={false}
+          bottomToolbar={props => (
+            <React.Fragment>
+              <SideToolbar>
+                {externalProps => (
+                  <React.Fragment>
+                    <HeadlineOneButton {...externalProps} />
+                    <HeadlineTwoButton {...externalProps} />
+                    <BlockquoteButton {...externalProps} />
+                    <ItalicButton {...externalProps} />
+                    <BoldButton {...externalProps} />
+                    <UnderlineButton {...externalProps} />
+                    <UnorderedListButton {...externalProps} />
+                    <OrderedListButton {...externalProps} />
+                  </React.Fragment>
+                )}
+              </SideToolbar>
+            </React.Fragment>
+          )}
+        />
+      </div>
     )
   }
 }
 
 RichTextEditor.propTypes = {
+  className: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func
