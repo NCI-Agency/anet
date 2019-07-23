@@ -31,6 +31,8 @@
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
+    <!-- Non-Google: allow @SuppressWarnings("checkstyle:somecheck") in code -->
+    <module name="SuppressWarningsFilter"/>
 
     <module name="TreeWalker">
         <module name="OuterTypeFilename"/>
@@ -244,6 +246,8 @@
             <property name="minLineCount" value="2"/>
             <property name="allowedAnnotations" value="Override, Test"/>
             <property name="allowThrowsTagsForSubclasses" value="true"/>
+            <!-- Non-Google: allow missing Javadoc -->
+            <property name="allowMissingJavadoc" value="true"/>
         </module>
         <module name="MethodName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$"/>
@@ -257,5 +261,7 @@
             <property name="exceptionVariableName" value="expected"/>
         </module>
         <module name="CommentsIndentation"/>
+        <!-- Non-Google: allow @SuppressWarnings("checkstyle:somecheck") in code -->
+	<module name="SuppressWarningsHolder"/>
     </module>
 </module>

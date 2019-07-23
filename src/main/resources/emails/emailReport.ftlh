@@ -327,7 +327,7 @@ ${sender.name} sent you a report from ANET:
         <label for="author" class="col-sm-2 control-label">Report author</label>
         <div class="col-sm-7">
           <div id="author" class="form-control-static">
-            <#assign reportAuthor = report.loadAuthor(context).get()>
+            <#assign reportAuthor = (report.loadAuthor(context).get())!>
             <a href="/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
           </div>
         </div>
@@ -404,7 +404,7 @@ ${sender.name} sent you a report from ANET:
         </#macro>
 
         <tbody>
-          <#assign attendees = report.loadAttendees(context).get()>
+          <#assign attendees = (report.loadAttendees(context).get())!>
           <#list attendees as attendee>
             <#if attendee.role == "ADVISOR">
               <@renderAttendee attendee />
@@ -478,7 +478,7 @@ ${sender.name} sent you a report from ANET:
     </div>
   </#if>
 
-  <#assign workflow = report.loadWorkflow(context).get()>
+  <#assign workflow = (report.loadWorkflow(context).get())!>
   <#if workflow??>
     <div id="approvals">
       <h2 class="legend">

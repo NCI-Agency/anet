@@ -34,7 +34,7 @@ class BaseOnboardingEdit extends Page {
       person(uuid:"${props.currentUser.uuid}") {
         uuid,
         name, rank, role, emailAddress, phoneNumber, status
-        biography, country, gender, endOfTourDate, domainUsername
+        biography, country, gender, endOfTourDate, domainUsername, avatar(size: 256),
         position {
           uuid, name, type
         }

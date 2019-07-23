@@ -1,7 +1,12 @@
 package mil.dds.anet.utils;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,9 +18,13 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.views.AbstractAnetBean;
+import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Method;
+import org.imgscalr.Scalr.Mode;
 import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -335,5 +344,61 @@ public class Utils {
             && domainName.endsWith(wildcardDomain.substring(1)));
 
     return isWhitelistedEmail || isValidWildcardDomain;
+  }
+
+  /**
+   * Resizes an image
+   * 
+   * @param imageBase64 The image as a Base64 string
+   * @param width The desired output width
+   * @param height The desired output height
+   * @param imageFormatName The desired output format (png, jpg)
+   * @return The resized image as a Base64 string
+   * @throws Exception When the binary data cannot be converted to an image string representation
+   */
+  public static String resizeImageBase64(String imageBase64, int width, int height,
+      String imageFormatName) throws Exception {
+
+    // From Base64-string to BufferedImage
+    final BufferedImage imageBinary = convert(imageBase64);
+
+    if (imageBinary == null) {
+      throw new Exception("Cannot interpret image binary data.");
+    }
+
+    // Resizing
+    final BufferedImage thumbnail =
+        Scalr.resize(imageBinary, Method.AUTOMATIC, Mode.AUTOMATIC, width, height);
+
+    // From BufferedImage back to Base64-string
+    return convert(thumbnail, imageFormatName);
+  }
+
+  /**
+   * Converts an image represented as a Base64 string into a BufferedImage
+   * 
+   * @param imageBase64 The image as a Base64 string
+   * @return The BufferedImage object
+   * @throws IOException When an error occurs while reading the string
+   */
+  public static BufferedImage convert(String imageBase64) throws IOException {
+    final byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
+    final ByteArrayInputStream is = new ByteArrayInputStream(imageBytes);
+    return ImageIO.read(is);
+  }
+
+  /**
+   * Converts a BufferedImage representing an image into a Base64 string
+   * 
+   * @param imageBytes The image as bytes
+   * @param imageFormatName The desired output format
+   * @return The image as Base64 string
+   * @throws IOException When an error occurs while writing the string
+   */
+  public static String convert(BufferedImage imageBytes, String imageFormatName)
+      throws IOException {
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
+    ImageIO.write(imageBytes, imageFormatName, os);
+    return Base64.getEncoder().encodeToString(os.toByteArray());
   }
 }

@@ -30,7 +30,7 @@ public class Tag extends AbstractAnetBean {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof Tag)) {
       return false;
     }
     Tag t = (Tag) o;

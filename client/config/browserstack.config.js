@@ -13,6 +13,12 @@ let debug = config.has("browserstack_debug")
   ? config.get("browserstack_debug")
   : process.env.BROWSERSTACK_DEBUG
 
+// Note: if the official timezone is "America/New_York", BrowserStack uses just "New_York"!
+let moment = require("moment-timezone")
+let localTz = moment.tz.guess()
+let tzParts = localTz.split("/")
+let bsTz = tzParts[tzParts.length - 1]
+
 let capabilities = {
   maxInstances: 1,
   // Ideally, we'd like to test with:
@@ -32,6 +38,8 @@ let capabilities = {
   project: "ANET",
   build: require("git-describe").gitDescribeSync(".", { match: "[0-9]*" })
     .semverString,
+  // Use the local timezone on BrowserStack
+  "browserstack.timezone": bsTz,
   // Credentials for BrowserStack:
   "browserstack.user": user,
   "browserstack.key": key,
