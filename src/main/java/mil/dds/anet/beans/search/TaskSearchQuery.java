@@ -36,7 +36,7 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
     this.responsibleOrgUuid = responsibleOrgUuid;
   }
 
-  public Boolean getIncludeChildrenOrgs() {
+  public boolean getIncludeChildrenOrgs() {
     return Boolean.TRUE.equals(includeChildrenOrgs);
   }
 
@@ -116,8 +116,8 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
     this.customFieldRef1Uuid = customFieldRef1Uuid;
   }
 
-  public Boolean getCustomFieldRef1Recursively() {
-    return customFieldRef1Recursively;
+  public boolean getCustomFieldRef1Recursively() {
+    return Boolean.TRUE.equals(customFieldRef1Recursively);
   }
 
   public void setCustomFieldRef1Recursively(Boolean customFieldRef1Recursively) {

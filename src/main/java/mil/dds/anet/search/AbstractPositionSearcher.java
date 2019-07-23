@@ -26,7 +26,7 @@ public abstract class AbstractPositionSearcher
     qb.addTotalCount();
     qb.addFromClause("positions");
 
-    if (Boolean.TRUE.equals(query.getMatchPersonName())) {
+    if (query.getMatchPersonName()) {
       qb.addFromClause("LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid");
     }
 
@@ -41,7 +41,7 @@ public abstract class AbstractPositionSearcher
     qb.addInClause("types", "positions.type", query.getType());
 
     if (query.getOrganizationUuid() != null) {
-      if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {
+      if (query.getIncludeChildrenOrgs()) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid());
       } else {

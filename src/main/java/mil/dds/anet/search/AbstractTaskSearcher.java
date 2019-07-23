@@ -69,7 +69,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
-    if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {
+    if (query.getIncludeChildrenOrgs()) {
       qb.addRecursiveClause(null, "tasks", "\"organizationUuid\"", "parent_orgs", "organizations",
           "\"parentOrgUuid\"", "orgUuid", query.getResponsibleOrgUuid());
     } else {
@@ -78,7 +78,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
-    if (Boolean.TRUE.equals(query.getCustomFieldRef1Recursively())) {
+    if (query.getCustomFieldRef1Recursively()) {
       qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks",
           "organizations", "\"parentOrgUuid\"", "customFieldRef1Uuid",
           query.getCustomFieldRef1Uuid());

@@ -22,7 +22,7 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     this.matchPersonName = false;
   }
 
-  public Boolean getMatchPersonName() {
+  public boolean getMatchPersonName() {
     return Boolean.TRUE.equals(matchPersonName);
   }
 
@@ -38,8 +38,8 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     this.organizationUuid = orgUuid;
   }
 
-  public Boolean getIncludeChildrenOrgs() {
-    return includeChildrenOrgs;
+  public boolean getIncludeChildrenOrgs() {
+    return Boolean.TRUE.equals(includeChildrenOrgs);
   }
 
   public void setIncludeChildrenOrgs(Boolean includeChildrenOrgs) {

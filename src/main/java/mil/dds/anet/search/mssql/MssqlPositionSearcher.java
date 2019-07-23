@@ -20,13 +20,12 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     // See
     // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
     qb.addSelectClause("ISNULL(c_positions.rank, 0)"
-        + (Boolean.TRUE.equals(query.getMatchPersonName()) ? " + ISNULL(c_people.rank, 0)" : "")
-        + " AS search_rank");
+        + (query.getMatchPersonName() ? " + ISNULL(c_people.rank, 0)" : "") + " AS search_rank");
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (positions, (name), :containsQuery) c_positions"
         + " ON positions.uuid = c_positions.[Key]");
     final StringBuilder whereRank =
         new StringBuilder("(c_positions.rank IS NOT NULL OR positions.code LIKE :likeQuery");
-    if (Boolean.TRUE.equals(query.getMatchPersonName())) {
+    if (query.getMatchPersonName()) {
       qb.addFromClause("LEFT JOIN CONTAINSTABLE(people, (name), :containsQuery) c_people"
           + " ON people.uuid = c_people.[Key]");
       whereRank.append(" OR c_people.rank IS NOT NULL");

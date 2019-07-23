@@ -44,8 +44,8 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
     this.parentOrgUuid = parentOrgUuid;
   }
 
-  public Boolean getParentOrgRecursively() {
-    return parentOrgRecursively;
+  public boolean getParentOrgRecursively() {
+    return Boolean.TRUE.equals(parentOrgRecursively);
   }
 
   public void setParentOrgRecursively(Boolean parentOrgRecursively) {
