@@ -467,7 +467,12 @@ class BasePersonForm extends Component {
                     name="biography"
                     component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("biography", value)}
-                    widget={<RichTextEditor className="biography" />}
+                    widget={
+                      <RichTextEditor
+                        className="biography"
+                        onHandleBlur={() => setFieldTouched("biography", true)}
+                      />
+                    }
                   />
                 </Fieldset>
                 <div className="submit-buttons">
