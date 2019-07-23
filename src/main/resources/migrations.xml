@@ -2627,4 +2627,10 @@
 		<!-- tasks.shortName already has a unique constraint/index -->
 	</changeSet>
 
+	<changeSet id="add-avatars-to-People" author="jose-west">
+		<addColumn tableName="people">
+			<column name="avatar" type="blob"/>
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

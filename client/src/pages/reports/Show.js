@@ -85,7 +85,7 @@ class BaseReportShow extends Page {
         }
 
         attendees {
-          uuid, name, primary, rank, role, status, endOfTourDate
+          uuid, name, primary, rank, role, status, endOfTourDate, avatar(size: 32)
           position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
         }
         primaryAdvisor { uuid }

@@ -34,10 +34,10 @@ class ReportEdit extends Page {
       report(uuid:"${props.match.params.uuid}") {
         uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails, state
         keyOutcomes, reportText, nextSteps, cancelledReason,
-        author { uuid, name, rank, role },
+        author { uuid, name, rank, role, avatar(size: 32) },
         location { uuid, name },
         attendees {
-          uuid, name, rank, role, primary, status, endOfTourDate
+          uuid, name, rank, role, primary, status, endOfTourDate, avatar(size: 32)
           position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
         }
         tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }

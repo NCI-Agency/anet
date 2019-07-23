@@ -46,6 +46,8 @@ public class Person extends AbstractAnetBean implements Principal {
 
   private List<PersonPositionHistory> previousPositions;
 
+  private String avatar;
+
   public Person() {
     this.pendingVerification = false; // Defaults
   }
@@ -229,6 +231,23 @@ public class Person extends AbstractAnetBean implements Principal {
         DaoUtils.getUserFromContext(context));
   }
 
+  @GraphQLQuery(name = "avatar")
+  public String getAvatar(@GraphQLArgument(name = "size", defaultValue = "256") int size) {
+    try {
+      return Utils.resizeImageBase64(this.avatar, size, size, "png");
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public String getAvatar() {
+    return this.avatar;
+  }
+
+  public void setAvatar(String avatar) {
+    this.avatar = avatar;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Person)) {
@@ -241,7 +260,7 @@ public class Person extends AbstractAnetBean implements Principal {
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && (createdAt != null)
+        && Objects.equals(other.getAvatar(), avatar) && (createdAt != null)
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)
                 ? (updatedAt.equals(other.getUpdatedAt()))

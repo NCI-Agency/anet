@@ -24,6 +24,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import {
   FORMAT_MAP,
   FORMAT_SUMMARY,
@@ -58,7 +59,7 @@ class BasePersonShow extends Page {
       person(uuid:"${props.match.params.uuid}") {
         uuid,
         name, rank, role, status, emailAddress, phoneNumber, domainUsername,
-        biography, country, gender, endOfTourDate,
+        biography, country, gender, endOfTourDate, avatar(size: 256),
         position {
           uuid,
           name,
@@ -161,6 +162,11 @@ class BasePersonShow extends Page {
                   action={action}
                 />
                 <Fieldset>
+                  <AvatarDisplayComponent
+                    avatar={person.avatar}
+                    height={256}
+                    width={256}
+                  />
                   <Field
                     name="rank"
                     label={Settings.fields.person.rank}
