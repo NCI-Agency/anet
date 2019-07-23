@@ -557,6 +557,9 @@ class BasePersonForm extends Component {
           ? response[operation].uuid
           : this.props.initialValues.uuid
       })
+      if (Person.isEqual(this.props.currentUser, values)) {
+        this.props.loadAppData()
+      }
       this.props.history.replace(Person.pathForEdit(person))
       this.props.history.push({
         pathname: Person.pathFor(person),
