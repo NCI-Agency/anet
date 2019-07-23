@@ -14,7 +14,9 @@ const sortPositions = (positions, truncateLimit) => {
       ? 1
       : -1
   )
-  return truncateLimit && truncateLimit < allResults.length ? allResults.slice(0,truncateLimit) : allResults
+  return truncateLimit && truncateLimit < allResults.length
+    ? allResults.slice(0, truncateLimit)
+    : allResults
 }
 
 const rankToUnit = {
@@ -38,7 +40,8 @@ export default class OrganizationalChart extends SVGCanvas {
     super(props)
     this.state = {
       root: null,
-      orgs: []
+      orgs: [],
+      nodeSize: [250, 150]
     }
 
     this.tree = d3.tree()
@@ -47,11 +50,11 @@ export default class OrganizationalChart extends SVGCanvas {
   componentDidMount() {
     this.canvas = this.svg.append("g")
 
-    this.svg.call(
-      d3
-        .zoom()
-        .on("zoom", () => this.canvas.attr("transform", d3.event.transform))
-    )
+    this.zoom = d3.zoom().on("zoom", () => {
+      return this.canvas.attr("transform", d3.event.transform)
+    })
+
+    this.svg.call(this.zoom)
 
     this.link = this.canvas
       .append("g")
@@ -84,7 +87,7 @@ export default class OrganizationalChart extends SVGCanvas {
 
     const tree = d3.tree().size(this.props.width, this.props.height)
 
-    tree.nodeSize([250, 150])
+    tree.nodeSize(this.state.nodeSize)
 
     const root = d3.hierarchy(this.state.root, d =>
       this.state.orgs.filter(org =>
@@ -107,7 +110,7 @@ export default class OrganizationalChart extends SVGCanvas {
           .y(d => d.y)
       )
 
-    const node = this.link
+    const node = this.node
       .selectAll("g")
       .data(root.descendants())
       .enter()
@@ -119,7 +122,11 @@ export default class OrganizationalChart extends SVGCanvas {
     iconNodeG.each(function(d) {
       const positions = sortPositions(d.data.positions)
       const unitcode =
-        rankToUnit[positions.length > 0 && positions[0].person && positions[0].person.rank]
+        rankToUnit[
+          positions.length > 0 &&
+            positions[0].person &&
+            positions[0].person.rank
+        ]
       const sym = new Symbol(
         `S${
           d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
@@ -163,6 +170,53 @@ export default class OrganizationalChart extends SVGCanvas {
         }@${d.name}`
         return result.length > 45 ? result.substring(0, 42) + "..." : result
       })
+
+    const parent = this.svg.node()
+    const fullWidth = parent.clientWidth
+    const fullHeight = parent.clientHeight
+
+    const bounds = this.calculateBounds(root)
+
+    const scale =
+      1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
+    const translate = [
+      fullWidth / 2 - scale * bounds.center[0],
+      fullHeight / 2 - scale * bounds.center[1]
+    ]
+
+    this.canvas.attr(
+      "transform",
+      `translate(${fullWidth / 2 - scale * bounds.center[0]},${fullHeight / 2 -
+        scale * bounds.center[1]}) scale(${scale})`
+    )
+    this.svg.attr("height", scale * bounds.size[1] + 50)
+  }
+
+  calculateBounds(root) {
+    const boundingBox = root.descendants().reduce(
+      (box, node) => {
+        return {
+          xmin: Math.min(box.xmin, node.x),
+          xmax: Math.max(box.xmax, node.x),
+          ymin: Math.min(box.ymin, node.y),
+          ymax: Math.max(box.ymax, node.y)
+        }
+      },
+      {
+        xmin: Number.MAX_SAFE_INTEGER,
+        xmax: Number.MIN_SAFE_INTEGER,
+        ymin: Number.MAX_SAFE_INTEGER,
+        ymax: Number.MIN_SAFE_INTEGER
+      }
+    )
+    return {
+      box: boundingBox,
+      size: [
+        boundingBox.xmax - boundingBox.xmin + this.state.nodeSize[0]*1.5,
+        boundingBox.ymax - boundingBox.ymin + this.state.nodeSize[1]
+      ],
+      center: [(boundingBox.xmax + boundingBox.xmin + this.state.nodeSize[0]) / 2, (boundingBox.ymax + boundingBox.ymin) / 2]
+    }
   }
 
   fetchData() {
