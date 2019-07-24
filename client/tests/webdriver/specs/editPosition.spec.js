@@ -26,7 +26,7 @@ describe("Create position page", () => {
 
       EditPosition.organizationInput.click()
       EditPosition.organizationInput.setValue(PRINCIPAL_ORG)
-      EditPosition.orgAdvancedSelectFirstItem.waitForExist(1000, true) // element should *not* exist as no suggestion found
+      EditPosition.orgAdvancedSelectFirstItem.waitForExist(2000, true) // element should *not* exist as no suggestion found
 
       // Click outside the organization overlay to close the overlay
       EditPosition.typeAdvisorButton.click()
