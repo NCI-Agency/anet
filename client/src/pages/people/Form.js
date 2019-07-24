@@ -10,6 +10,7 @@ import OptionListModal from "components/OptionListModal"
 import { jumpToTop, routerRelatedPropTypes } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
+import AvatarEditModal from "components/AvatarEditModal"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
@@ -26,6 +27,7 @@ import {
   Radio
 } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 class BasePersonForm extends Component {
   static propTypes = {
@@ -102,7 +104,12 @@ class BasePersonForm extends Component {
     originalStatus: "",
     showWrongPersonModal: false,
     wrongPersonOptionValue: null,
-    onSaveRedirectToHome: Person.isNewUser(this.props.initialValues) // redirect first time users to the homepage in order to be able to use onboarding
+    onSaveRedirectToHome: Person.isNewUser(this.props.initialValues), // redirect first time users to the homepage in order to be able to use onboarding
+    currentAvatar: this.props.initialValues.avatar
+  }
+
+  onAvatarUpdate = updatedAvatar => {
+    this.setState({ currentAvatar: updatedAvatar })
   }
 
   render() {
@@ -185,6 +192,17 @@ class BasePersonForm extends Component {
                 <Messages error={this.state.error} />
                 <Fieldset title={this.props.title} action={action} />
                 <Fieldset>
+                  <AvatarDisplayComponent
+                    avatar={this.state.currentAvatar}
+                    height={256}
+                    width={256}
+                  />
+                  <AvatarEditModal
+                    title="Edit avatar"
+                    size="large"
+                    src={this.state.currentAvatar}
+                    onAvatarUpdate={this.onAvatarUpdate}
+                  />
                   <FormGroup>
                     <Col
                       sm={2}
@@ -544,6 +562,9 @@ class BasePersonForm extends Component {
           ? response[operation].uuid
           : this.props.initialValues.uuid
       })
+      if (Person.isEqual(this.props.currentUser, values)) {
+        this.props.loadAppData()
+      }
       this.props.history.replace(Person.pathForEdit(person))
       this.props.history.push({
         pathname: Person.pathFor(person),
@@ -556,6 +577,7 @@ class BasePersonForm extends Component {
 
   save = (values, form) => {
     const { edit } = this.props
+    values.avatar = this.state.currentAvatar
     let person = new Person(values)
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
