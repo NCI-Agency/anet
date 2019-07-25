@@ -1,11 +1,8 @@
 // @flow
 import React, { Component } from "react"
-import { EditorState } from "draft-js"
-
+import PropTypes from "prop-types"
 import Tooltip from "components/Tooltip"
 import Portal from "components/Portal"
-
-import { Icon } from "components/editor/Icon"
 
 // Constraints the maximum size of the tooltip.
 const OPTIONS_MAX_WIDTH = 300
@@ -100,6 +97,15 @@ class MediaBlock extends Component {
       </button>
     )
   }
+}
+
+MediaBlock.propTypes = {
+  blockProps: PropTypes.object.isRequired,
+  children: PropTypes.any.isRequired,
+  entityType: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool,
+  label: PropTypes.string,
+  src: PropTypes.string.isRequired
 }
 
 export default MediaBlock
