@@ -41,7 +41,14 @@ export default class RelatedObjectNoteModal extends Component {
           isInitialValid={() => this.yupSchema.isValidSync(note)}
           initialValues={note}
         >
-          {({ isSubmitting, isValid, setFieldValue, values, submitForm }) => {
+          {({
+            isSubmitting,
+            isValid,
+            setFieldValue,
+            setFieldTouched,
+            values,
+            submitForm
+          }) => {
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
             const jsonFields = isJson ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
@@ -59,7 +66,12 @@ export default class RelatedObjectNoteModal extends Component {
                     value={noteText}
                     component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("text", value)}
-                    widget={<RichTextEditor className="textField" />}
+                    widget={
+                      <RichTextEditor
+                        className="textField"
+                        onHandleBlur={() => setFieldTouched("text", true)}
+                      />
+                    }
                     vertical
                   />
                 </Modal.Body>
