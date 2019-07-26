@@ -2402,10 +2402,10 @@
   dependencies:
     "@wdio/config" "^5.11.0"
 
-"@wdio/reporter@^5.11.0":
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/@wdio/reporter/-/reporter-5.11.0.tgz#fc8574adb01b9e4aae48013a7d4b2908f46b8458"
-  integrity sha512-o3gvF+IFJyVPXg0zDdlye4F8KPAT2TfRnTHJ1Gq834Yhrju35Tmxk4W4ndmSegYiWF8Pq4b4UKdnWKHkhU1ltw==
+"@wdio/reporter@^5.11.7":
+  version "5.11.7"
+  resolved "https://registry.yarnpkg.com/@wdio/reporter/-/reporter-5.11.7.tgz#26fe999a09dde82c40bfea12d3cee495b5d4843e"
+  integrity sha512-FC3cbCPwKNLHoqdkti9802Q6D9kchqsQwghw5FwN5WKqK+Qk6GSUGckuZA0rY+oQe7rAJ83RfnaFP1PmwDw8xg==
   dependencies:
     fs-extra "^8.0.1"
 
@@ -2421,12 +2421,12 @@
     gaze "^1.1.2"
     webdriverio "^5.11.6"
 
-"@wdio/spec-reporter@^5.11.6":
-  version "5.11.6"
-  resolved "https://registry.yarnpkg.com/@wdio/spec-reporter/-/spec-reporter-5.11.6.tgz#d3cf32388b5cac4116f40978a45dcc7e2a3dd39f"
-  integrity sha512-ymJcJPG+t/nkWHmeCoVWOQ6rKNYORN89IAE29E36ciCGb9AGIUj/A5vo2b/W2KqSZua44sPjdBeB0q20XxJAow==
+"@wdio/spec-reporter@^5.11.7":
+  version "5.11.7"
+  resolved "https://registry.yarnpkg.com/@wdio/spec-reporter/-/spec-reporter-5.11.7.tgz#68218ea7a4add38eed8f37fdb765b0a7e0a7b8b9"
+  integrity sha512-JVz85bL26PJjhZsFQy2ynkMyB96r1Nw4o4lbLUmer0eYycVC25jjekFyp5XE6+NmGSY2PVVz1uWmDamFy5TLdA==
   dependencies:
-    "@wdio/reporter" "^5.11.0"
+    "@wdio/reporter" "^5.11.7"
     chalk "^2.3.2"
     pretty-ms "^5.0.0"
     table "^5.4.2"
@@ -14583,17 +14583,7 @@ synchronous-promise@^2.0.6:
   resolved "https://registry.yarnpkg.com/synchronous-promise/-/synchronous-promise-2.0.6.tgz#de76e0ea2b3558c1e673942e47e714a930fa64aa"
   integrity sha512-TyOuWLwkmtPL49LHCX1caIwHjRzcVd62+GF6h8W/jHOeZUFHpnd2XJDVuUlaTaLPH1nuu2M69mfHr5XbQJnf/g==
 
-table@^5.2.3:
-  version "5.2.3"
-  resolved "https://registry.yarnpkg.com/table/-/table-5.2.3.tgz#cde0cc6eb06751c009efab27e8c820ca5b67b7f2"
-  integrity sha512-N2RsDAMvDLvYwFcwbPyF3VmVSSkuF+G1e+8inhBLtHpvwXGw4QRPEZhihQNeEN0i1up6/f6ObCJXNdlRG3YVyQ==
-  dependencies:
-    ajv "^6.9.1"
-    lodash "^4.17.11"
-    slice-ansi "^2.1.0"
-    string-width "^3.0.0"
-
-table@^5.4.2:
+table@^5.2.3, table@^5.4.2:
   version "5.4.4"
   resolved "https://registry.yarnpkg.com/table/-/table-5.4.4.tgz#6e0f88fdae3692793d1077fd172a4667afe986a6"
   integrity sha512-IIfEAUx5QlODLblLrGTTLJA7Tk0iLSGBvgY8essPRVNGHAzThujww1YqHLs6h3HfTg55h++RzLHH5Xw/rfv+mg==
