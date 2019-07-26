@@ -1,0 +1,38 @@
+.fc-button,
+.fc-button-primary{
+    color: black;
+    background-color: white;
+    border-color: #ccc;
+}
+
+.fc-button-primary:disabled,
+.fc-button-primary:active,
+.fc-button-primary:not(:disabled).fc-button-active {
+  color: #fff;
+  opacity: unset;
+  background-color: #337ab7;
+  border-color: #ccc;
+}
+
+.fc-button:not(:disabled):hover {
+    color: black;
+    background-color: #ccc;
+    border-color: #ccc;
+  }
+
+.fc-button:focus,
+.fc-button-primary:not(:disabled):active:focus,
+.fc-button-primary:not(:disabled).fc-button-active:focus {
+  -webkit-box-shadow: unset;
+          box-shadow: unset;
+}
+
+.fc-list-empty-wrap2 {
+  position: inherit;
+}
+.fc-list-empty {
+  padding: 8px 4px;
+  border-width: 1px 0 0;
+  border-color: #ccc;
+  margin-bottom: 10px;
+}

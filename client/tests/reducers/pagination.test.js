@@ -12,7 +12,7 @@ describe("pagination reducer", () => {
       reducer(undefined, {
         type: types.SET_PAGINATION,
         payload: {
-          pageKey: REPORT_DRAFT,
+          paginationKey: REPORT_DRAFT,
           pageNum: 1
         }
       })
@@ -28,7 +28,7 @@ describe("pagination reducer", () => {
         {
           type: types.SET_PAGINATION,
           payload: {
-            pageKey: "REPORT_FUTURE",
+            paginationKey: "REPORT_FUTURE",
             pageNum: 2
           }
         }
@@ -47,7 +47,7 @@ describe("pagination reducer", () => {
         {
           type: types.SET_PAGINATION,
           payload: {
-            pageKey: "REPORT_DRAFT",
+            paginationKey: "REPORT_DRAFT",
             pageNum: 2
           }
         }

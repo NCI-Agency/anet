@@ -1,12 +1,9 @@
 import {
-  clearSearchQuery,
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
-  resetPages,
   setPageProps,
   setPagination,
-  setSearchProps,
-  setSearchQuery
+  setSearchProps
 } from "actions"
 import autobind from "autobind-decorator"
 import { setMessages } from "components/Messages"
@@ -25,32 +22,33 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   hideLoading: () => dispatch(hideLoading()),
   setPageProps: pageProps => dispatch(setPageProps(pageProps)),
   setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
-  setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
-  clearSearchQuery: () => dispatch(clearSearchQuery()),
-  setPagination: (pageKey, pageNum) =>
-    dispatch(setPagination(pageKey, pageNum)),
-  resetPages: () => dispatch(resetPages())
+  setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum))
 })
+
+export const routerRelatedPropTypes = {
+  location: PropTypes.object,
+  history: PropTypes.object.isRequired
+}
 
 export const propTypes = {
   showLoading: PropTypes.func.isRequired,
   hideLoading: PropTypes.func.isRequired,
   setPageProps: PropTypes.func.isRequired,
   setSearchProps: PropTypes.func.isRequired,
-  setSearchQuery: PropTypes.func.isRequired,
-  onSearchGoToSearchPage: PropTypes.bool,
   searchQuery: PropTypes.shape({
     text: PropTypes.string,
     filters: PropTypes.any,
     objectType: PropTypes.string
   }),
-  clearSearchQuery: PropTypes.func.isRequired,
+  /* eslint-disable react/no-unused-prop-types */
+  /* FIXME: refactor setting the pagination, maybe use a container component */
   setPagination: PropTypes.func.isRequired,
-  resetPages: PropTypes.func.isRequired
+  /* eslint-enable react/no-unused-prop-types */
+  ...routerRelatedPropTypes
 }
 
 export const AnchorLink = function(props) {
-  const { to, ...remainingProps } = props
+  const { to, children, ...remainingProps } = props
   return (
     <Link
       to={to}
@@ -62,6 +60,10 @@ export const AnchorLink = function(props) {
       {props.children}
     </Link>
   )
+}
+AnchorLink.propTypes = {
+  to: PropTypes.string,
+  children: PropTypes.node
 }
 
 export function jumpToTop() {
@@ -87,7 +89,7 @@ export default class Page extends Component {
     this.state = {
       notFound: false,
       invalidRequest: false,
-      isLoading: false
+      isLoading: true
     }
 
     this.renderPage = this.render
@@ -156,7 +158,7 @@ export default class Page extends Component {
       return (
         <NotFound text="There was an error processing this request. Please contact an administrator." />
       )
-    } else if (!this.state.isLoading) {
+    } else {
       return this.renderPage()
     }
   }

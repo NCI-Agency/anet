@@ -1,6 +1,5 @@
 import { Settings } from "api"
 import autobind from "autobind-decorator"
-import AppContext from "components/AppContext"
 import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
 import {
   EsriProvider,
@@ -59,13 +58,12 @@ const searchProvider =
   Settings.imagery.geoSearcher &&
   geoSearcherProviders[Settings.imagery.geoSearcher.provider]()
 
-class BaseLeaflet extends Component {
+export default class Leaflet extends Component {
   static propTypes = {
     width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     markers: PropTypes.array,
-    appSettings: PropTypes.object,
     mapId: PropTypes.string // pass this when you have more than one map on a page
   }
 
@@ -230,11 +228,3 @@ class BaseLeaflet extends Component {
     this.setState({ center: [center.lat, center.lng].join(",") })
   }
 }
-
-const Leaflet = props => (
-  <AppContext.Consumer>
-    {context => <BaseLeaflet appSettings={context.appSettings} {...props} />}
-  </AppContext.Consumer>
-)
-
-export default Leaflet

@@ -13,6 +13,12 @@ let debug = config.has("browserstack_debug")
   ? config.get("browserstack_debug")
   : process.env.BROWSERSTACK_DEBUG
 
+// Note: if the official timezone is "America/New_York", BrowserStack uses just "New_York"!
+let moment = require("moment-timezone")
+let localTz = moment.tz.guess()
+let tzParts = localTz.split("/")
+let bsTz = tzParts[tzParts.length - 1]
+
 let capabilities = {
   maxInstances: 1,
   // Ideally, we'd like to test with:
@@ -21,8 +27,8 @@ let capabilities = {
   // but that is so prone to unexpected failures as to be unusable.
   // So test with latest stable Chrome instead.
   browserName: "Chrome",
-  browser_version: "72.0",
-  chromeOptions: {
+  browser_version: "75.0",
+  "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: ["--start-maximized"]
   },
@@ -32,8 +38,8 @@ let capabilities = {
   project: "ANET",
   build: require("git-describe").gitDescribeSync(".", { match: "[0-9]*" })
     .semverString,
-  // Will be replaced for each test:
-  name: "frontend tests",
+  // Use the local timezone on BrowserStack
+  "browserstack.timezone": bsTz,
   // Credentials for BrowserStack:
   "browserstack.user": user,
   "browserstack.key": key,

@@ -289,6 +289,7 @@ public class PositionDao extends AnetBaseDao<Position> {
         + "  positions.uuid = \"positionRelationships\".\"positionUuid_b\""
         + "  AND \"positionRelationships\".\"positionUuid_a\" IN ( <foreignKeys> ) ))";
     private static final Map<String, Object> additionalParams = new HashMap<>();
+
     static {
       additionalParams.put("deleted", false);
     }

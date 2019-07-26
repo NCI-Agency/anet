@@ -16,6 +16,7 @@ class GraphiQL extends Page {
   }
 
   componentDidMount() {
+    super.componentDidMount()
     if (GraphiQLreq) {
       return
     }

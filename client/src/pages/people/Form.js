@@ -7,9 +7,10 @@ import Messages from "components/Messages"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
-import { jumpToTop } from "components/Page"
+import { jumpToTop, routerRelatedPropTypes } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
+import AvatarEditModal from "components/AvatarEditModal"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
@@ -26,19 +27,20 @@ import {
   Radio
 } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 class BasePersonForm extends Component {
   static propTypes = {
-    initialValues: PropTypes.object.isRequired,
+    initialValues: PropTypes.instanceOf(Person).isRequired,
     title: PropTypes.string,
     edit: PropTypes.bool,
     saveText: PropTypes.string,
     currentUser: PropTypes.instanceOf(Person),
-    loadAppData: PropTypes.func
+    loadAppData: PropTypes.func,
+    ...routerRelatedPropTypes
   }
 
   static defaultProps = {
-    initialValues: new Person(),
     title: "",
     edit: false,
     saveText: "Save Person"
@@ -96,12 +98,18 @@ class BasePersonForm extends Component {
         return []
     }
   }
+  confirmHasReplacementButton = React.createRef()
   state = {
     success: null,
     originalStatus: "",
     showWrongPersonModal: false,
     wrongPersonOptionValue: null,
-    onSaveRedirectToHome: Person.isNewUser(this.props.initialValues) // redirect first time users to the homepage in order to be able to use onboarding
+    onSaveRedirectToHome: Person.isNewUser(this.props.initialValues), // redirect first time users to the homepage in order to be able to use onboarding
+    currentAvatar: this.props.initialValues.avatar
+  }
+
+  onAvatarUpdate = updatedAvatar => {
+    this.setState({ currentAvatar: updatedAvatar })
   }
 
   render() {
@@ -184,6 +192,17 @@ class BasePersonForm extends Component {
                 <Messages error={this.state.error} />
                 <Fieldset title={this.props.title} action={action} />
                 <Fieldset>
+                  <AvatarDisplayComponent
+                    avatar={this.state.currentAvatar}
+                    height={256}
+                    width={256}
+                  />
+                  <AvatarEditModal
+                    title="Edit avatar"
+                    size="large"
+                    src={this.state.currentAvatar}
+                    onAvatarUpdate={this.onAvatarUpdate}
+                  />
                   <FormGroup>
                     <Col
                       sm={2}
@@ -217,7 +236,7 @@ class BasePersonForm extends Component {
                       </Col>
                     </Col>
 
-                    {edit && !canEditName && (
+                    {edit && (
                       <React.Fragment>
                         <TriggerableConfirm
                           onConfirm={() => {
@@ -238,9 +257,7 @@ class BasePersonForm extends Component {
                           bsStyle="warning"
                           buttonLabel="Reset account"
                           className="hidden"
-                          ref={confirmComponent =>
-                            (this.confirmHasReplacementButton = confirmComponent)
-                          }
+                          buttonRef={this.confirmHasReplacementButton}
                         />
                         <Button
                           id="wrongPerson"
@@ -468,7 +485,12 @@ class BasePersonForm extends Component {
                     name="biography"
                     component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("biography", value)}
-                    widget={<RichTextEditor className="biography" />}
+                    widget={
+                      <RichTextEditor
+                        className="biography"
+                        onHandleBlur={() => setFieldTouched("biography", true)}
+                      />
+                    }
                   />
                 </Fieldset>
                 <div className="submit-buttons">
@@ -540,6 +562,9 @@ class BasePersonForm extends Component {
           ? response[operation].uuid
           : this.props.initialValues.uuid
       })
+      if (Person.isEqual(this.props.currentUser, values)) {
+        this.props.loadAppData()
+      }
       this.props.history.replace(Person.pathForEdit(person))
       this.props.history.push({
         pathname: Person.pathFor(person),
@@ -552,6 +577,7 @@ class BasePersonForm extends Component {
 
   save = (values, form) => {
     const { edit } = this.props
+    values.avatar = this.state.currentAvatar
     let person = new Person(values)
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
@@ -603,7 +629,7 @@ class BasePersonForm extends Component {
         case "leftVacant":
         case "hasReplacement":
           // reset account?
-          this.confirmHasReplacementButton.buttonRef.props.onClick()
+          this.confirmHasReplacementButton.current.props.onClick()
           break
         default:
           // TODO: integrate action to email admin

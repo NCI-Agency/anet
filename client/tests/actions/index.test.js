@@ -4,11 +4,11 @@ import * as types from "../../src/constants/ActionTypes"
 describe("actions", () => {
   it("should create an action to set the pagination", () => {
     const pageNum = 1
-    const pageKey = "REPORT_DRAFT"
+    const paginationKey = "REPORT_DRAFT"
     const expectedAction = {
       type: types.SET_PAGINATION,
       payload: {
-        pageKey,
+        paginationKey,
         pageNum
       }
     }

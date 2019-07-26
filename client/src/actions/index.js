@@ -70,10 +70,10 @@ export const clearSearchQuery = () => ({
   type: "CLEAR_SEARCH_QUERY"
 })
 
-export const setPagination = (pageKey, pageNum) => ({
+export const setPagination = (paginationKey, pageNum) => ({
   type: types.SET_PAGINATION,
   payload: {
-    pageKey,
+    paginationKey,
     pageNum
   }
 })

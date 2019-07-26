@@ -8,6 +8,7 @@ import { fuzzy, identity, populate, runGQL, specialUser } from "../simutils"
  * @param {*} user The user to retrieve the information
  * @param {*} uuid The uuid of the position to retrieve
  */
+/* eslint-disable no-unused-vars */
 async function getPosition(user, uuid) {
   return (await runGQL(user, {
     query: `
@@ -61,6 +62,7 @@ async function getPosition(user, uuid) {
     variables: {}
   })).data.position
 }
+/* eslint-enable no-unused-vars */
 
 async function listOrganizations(user) {
   const result = await runGQL(user, {
@@ -172,6 +174,7 @@ const _createPosition = async function(user) {
  *
  * @param {*} user
  */
+/* eslint-disable no-unused-vars */
 const _deletePosition = async function(user) {
   const type = faker.random.arrayElement([
     Position.TYPE.ADVISOR,
@@ -217,6 +220,7 @@ const _deletePosition = async function(user) {
     return "(nop)"
   }
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Remove some random organization.

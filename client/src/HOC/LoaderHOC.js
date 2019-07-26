@@ -1,4 +1,5 @@
 import _isEmpty from "lodash/isEmpty"
+import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 import "./LoaderHOC.css"
@@ -10,6 +11,10 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
 
 const LoaderHOC = isLoading => dataPropName => WrappedComponent => {
   return class LoaderHOC extends Component {
+    static propTypes = {
+      loaderMessage: PropTypes.string
+    }
+
     isLoadingData(prop) {
       return prop || prop === undefined
     }

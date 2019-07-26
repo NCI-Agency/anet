@@ -14,7 +14,7 @@ import Page, {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection from "components/ReportCollection"
+import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
 import { Person, Position } from "models"
@@ -24,6 +24,13 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 
 class BasePersonShow extends Page {
   static propTypes = {
@@ -38,10 +45,6 @@ class BasePersonShow extends Page {
       uuid: this.props.match.params.uuid,
       previousPositions: []
     }),
-    authoredReports: null,
-    attendedReports: null,
-    authoredReportsPageNum: 0,
-    attendedReportsPageNum: 0,
     showAssignPositionModal: false,
     showAssociatedPositionsModal: false
   }
@@ -51,42 +54,12 @@ class BasePersonShow extends Page {
     setMessages(props, this.state)
   }
 
-  getAuthoredReportsPart(personUuid) {
-    let query = {
-      pageNum: this.state.authoredReportsPageNum,
-      pageSize: 10,
-      authorUuid: personUuid
-    }
-    let part = new GQL.Part(/* GraphQL */ `
-      authoredReports: reportList(query: $authorQuery) {
-        pageNum, pageSize, totalCount, list {
-          ${ReportCollection.GQL_REPORT_FIELDS}
-        }
-      }`).addVariable("authorQuery", "ReportSearchQueryInput", query)
-    return part
-  }
-
-  getAttendedReportsPart(personUuid) {
-    let query = {
-      pageNum: this.state.attendedReportsPageNum,
-      pageSize: 10,
-      attendeeUuid: personUuid
-    }
-    let part = new GQL.Part(/* GraphQL */ `
-      attendedReports: reportList(query: $attendeeQuery) {
-        pageNum, pageSize, totalCount, list {
-          ${ReportCollection.GQL_REPORT_FIELDS}
-        }
-      }`).addVariable("attendeeQuery", "ReportSearchQueryInput", query)
-    return part
-  }
-
   fetchData(props) {
     let personPart = new GQL.Part(/* GraphQL */ `
       person(uuid:"${props.match.params.uuid}") {
         uuid,
         name, rank, role, status, emailAddress, phoneNumber, domainUsername,
-        biography, country, gender, endOfTourDate,
+        biography, country, gender, endOfTourDate, avatar(size: 256),
         position {
           uuid,
           name,
@@ -103,25 +76,16 @@ class BasePersonShow extends Page {
         previousPositions { startTime, endTime, position { uuid, name }}
         ${GRAPHQL_NOTES_FIELDS}
     }`)
-    let authoredReportsPart = this.getAuthoredReportsPart(
-      props.match.params.uuid
-    )
-    let attendedReportsPart = this.getAttendedReportsPart(
-      props.match.params.uuid
-    )
 
-    return GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(
-      data =>
-        this.setState({
-          person: new Person(data.person),
-          authoredReports: data.authoredReports,
-          attendedReports: data.attendedReports
-        })
+    return GQL.run([personPart]).then(data =>
+      this.setState({
+        person: new Person(data.person)
+      })
     )
   }
 
   render() {
-    const { person, attendedReports, authoredReports } = this.state
+    const { person } = this.state
     const { currentUser, ...myFormProps } = this.props
     // The position for this person's counterparts
     const position = person.position
@@ -198,6 +162,11 @@ class BasePersonShow extends Page {
                   action={action}
                 />
                 <Fieldset>
+                  <AvatarDisplayComponent
+                    avatar={person.avatar}
+                    height={256}
+                    width={256}
+                  />
                   <Field
                     name="rank"
                     label={Settings.fields.person.rank}
@@ -328,28 +297,36 @@ class BasePersonShow extends Page {
                   )}
                 </Fieldset>
 
-                {person.isAdvisor() && authoredReports && (
+                {person.isAdvisor() && (
                   <Fieldset title="Reports authored" id="reports-authored">
-                    <ReportCollection
+                    <ReportCollectionContainer
+                      queryParams={{
+                        authorUuid: this.props.match.params.uuid
+                      }}
+                      viewFormats={[
+                        FORMAT_CALENDAR,
+                        FORMAT_SUMMARY,
+                        FORMAT_TABLE,
+                        FORMAT_MAP
+                      ]}
+                      paginationKey={`r_authored_${this.props.match.params.uuid}`}
                       mapId="reports-authored"
-                      paginatedReports={authoredReports}
-                      goToPage={this.goToAuthoredPage}
                     />
                   </Fieldset>
                 )}
 
-                {attendedReports && (
-                  <Fieldset
-                    title={`Reports attended by ${person.name}`}
-                    id="reports-attended"
-                  >
-                    <ReportCollection
-                      mapId="reports-attended"
-                      paginatedReports={attendedReports}
-                      goToPage={this.goToAttendedPage}
-                    />
-                  </Fieldset>
-                )}
+                <Fieldset
+                  title={`Reports attended by ${person.name}`}
+                  id="reports-attended"
+                >
+                  <ReportCollectionContainer
+                    queryParams={{
+                      attendeeUuid: this.props.match.params.uuid
+                    }}
+                    paginationKey={`r_attended_${this.props.match.params.uuid}`}
+                    mapId="reports-attended"
+                  />
+                </Fieldset>
 
                 <Fieldset title="Previous positions" id="previous-positions">
                   <Table>
@@ -490,24 +467,6 @@ class BasePersonShow extends Page {
     if (success) {
       this.fetchData(this.props)
     }
-  }
-
-  goToAuthoredPage = pageNum => {
-    this.setState({ authoredReportsPageNum: pageNum }, () => {
-      const part = this.getAuthoredReportsPart(this.state.person.uuid)
-      GQL.run([part]).then(data =>
-        this.setState({ authoredReports: data.authoredReports })
-      )
-    })
-  }
-
-  goToAttendedPage = pageNum => {
-    this.setState({ attendedReportsPageNum: pageNum }, () => {
-      const part = this.getAttendedReportsPart(this.state.person.uuid)
-      GQL.run([part]).then(data =>
-        this.setState({ attendedReports: data.attendedReports })
-      )
-    })
   }
 }
 

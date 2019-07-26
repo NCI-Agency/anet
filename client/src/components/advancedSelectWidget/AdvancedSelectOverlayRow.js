@@ -1,5 +1,6 @@
 import React from "react"
 import LinkTo from "components/LinkTo"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 export const AuthorizationGroupOverlayRow = item => (
   <React.Fragment key={item.uuid}>
@@ -53,6 +54,7 @@ export const PositionOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
       <LinkTo position={item} isLink={false} />
+      {item.code ? `, ${item.code}` : ""}
     </td>
     <td>
       <LinkTo organization={item.organization} isLink={false} />
@@ -73,6 +75,9 @@ export const PersonSimpleOverlayRow = item => (
 
 export const PersonDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
+    <td>
+      <AvatarDisplayComponent avatar={item.avatar} height={32} width={32} />
+    </td>
     <td>
       <LinkTo person={item} isLink={false} />
     </td>

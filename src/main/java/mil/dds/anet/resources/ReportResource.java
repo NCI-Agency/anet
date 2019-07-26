@@ -365,6 +365,7 @@ public class ReportResource {
     return existing;
   }
 
+  @SuppressWarnings("checkstyle:MissingSwitchDefault")
   private void assertCanUpdateReport(Report report, Person editor) {
     String permError = "You do not have permission to edit this report. ";
     boolean isAuthor = Objects.equals(report.getAuthorUuid(), editor.getUuid());

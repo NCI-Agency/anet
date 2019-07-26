@@ -13,17 +13,16 @@ export default class AdvancedSelectFilter extends Component {
     // The queryKey property tells this filter what property to set on the
     // search query (ie authorUuid, organizationUuid, etc).
     queryKey: PropTypes.string.isRequired,
-
-    // Passed by the SearchFilter row
+    objectType: PropTypes.func.isRequired,
+    value: PropTypes.any,
     onChange: PropTypes.func,
-
-    // Passed by the SearchFilterDisplay row
+    valueKey: PropTypes.string.isRequired,
+    fields: PropTypes.string,
     asFormField: PropTypes.bool
-
-    // All other properties are passed directly to the AdvancedSingleSelect
   }
 
   static defaultProps = {
+    fields: "",
     asFormField: true
   }
 

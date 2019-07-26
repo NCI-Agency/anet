@@ -22,7 +22,7 @@ public class ReportPerson extends Person {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof ReportPerson)) {
       return false;
     }
     ReportPerson rp = (ReportPerson) o;

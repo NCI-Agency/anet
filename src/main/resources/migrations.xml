@@ -2279,6 +2279,12 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
+	<changeSet id="add-assessment-to-Tasks" author="VassilIordanov">
+		<addColumn tableName="tasks">
+			<column name="assessment" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
+
 	<changeSet id="add-reports-duration-column" author="gjvoosten">
 		<addColumn tableName="reports">
 			<column name="duration" type="int" />
@@ -2392,6 +2398,268 @@
 				UPDATE reports SET state=5 WHERE engagementDate > CURRENT_TIMESTAMP;
 			</sql>
 		</rollback>
+	</changeSet>
+
+	<changeSet id="add-foreignKey-indexes" author="gjvoosten">
+		<createIndex
+			indexName="IDX_approvalSteps_advisorOrganizationUuid" tableName="approvalSteps">
+			<column name="advisorOrganizationUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_approvalSteps_nextStepUuid" tableName="approvalSteps">
+			<column name="nextStepUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_approvers_approvalStepUuid" tableName="approvers">
+			<column name="approvalStepUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_approvers_positionUuid" tableName="approvers">
+			<column name="positionUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_authorizationGroupPositions_authorizationGroupUuid" tableName="authorizationGroupPositions">
+			<column name="authorizationGroupUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_authorizationGroupPositions_positionUuid" tableName="authorizationGroupPositions">
+			<column name="positionUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_comments_authorUuid" tableName="comments">
+			<column name="authorUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_comments_reportUuid" tableName="comments">
+			<column name="reportUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_noteRelatedObjects_noteUuid" tableName="noteRelatedObjects">
+			<column name="noteUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_notes_authorUuid" tableName="notes">
+			<column name="authorUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_organizations_parentOrgUuid" tableName="organizations">
+			<column name="parentOrgUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_peoplePositions_personUuid" tableName="peoplePositions">
+			<column name="personUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_peoplePositions_positionUuid" tableName="peoplePositions">
+			<column name="positionUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positionRelationships_positionUuid_a" tableName="positionRelationships">
+			<column name="positionUuid_a"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positionRelationships_positionUuid_b" tableName="positionRelationships">
+			<column name="positionUuid_b"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positions_currentPersonUuid" tableName="positions">
+			<column name="currentPersonUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positions_locationUuid" tableName="positions">
+			<column name="locationUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positions_organizationUuid" tableName="positions">
+			<column name="organizationUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportActions_approvalStepUuid" tableName="reportActions">
+			<column name="approvalStepUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportActions_personUuid" tableName="reportActions">
+			<column name="personUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportActions_reportUuid" tableName="reportActions">
+			<column name="reportUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportAuthorizationGroups_authorizationGroupUuid" tableName="reportAuthorizationGroups">
+			<column name="authorizationGroupUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportAuthorizationGroups_reportUuid" tableName="reportAuthorizationGroups">
+			<column name="reportUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportPeople_personUuid" tableName="reportPeople">
+			<column name="personUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportPeople_reportUuid" tableName="reportPeople">
+			<column name="reportUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportTags_reportUuid" tableName="reportTags">
+			<column name="reportUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportTags_tagUuid" tableName="reportTags">
+			<column name="tagUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportTasks_reportUuid" tableName="reportTasks">
+			<column name="reportUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reportTasks_taskUuid" tableName="reportTasks">
+			<column name="taskUuid"/>
+		</createIndex>
+		<!-- reportsSensitiveInformation.reportUuid already has a unique constraint/index -->
+		<createIndex
+			indexName="IDX_reports_advisorOrganizationUuid" tableName="reports">
+			<column name="advisorOrganizationUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_approvalStepUuid" tableName="reports">
+			<column name="approvalStepUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_authorUuid" tableName="reports">
+			<column name="authorUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_locationUuid" tableName="reports">
+			<column name="locationUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_principalOrganizationUuid" tableName="reports">
+			<column name="principalOrganizationUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_savedSearches_ownerUuid" tableName="savedSearches">
+			<column name="ownerUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_taskResponsiblePositions_positionUuid" tableName="taskResponsiblePositions">
+			<column name="positionUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_taskResponsiblePositions_taskUuid" tableName="taskResponsiblePositions">
+			<column name="taskUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_tasks_customFieldRef1Uuid" tableName="tasks">
+			<column name="customFieldRef1Uuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_tasks_organizationUuid" tableName="tasks">
+			<column name="organizationUuid"/>
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="add-orderBy-indexes" author="gjvoosten">
+		<createIndex
+			indexName="IDX_authorizationGroups_createdAt" tableName="authorizationGroups">
+			<column name="createdAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_authorizationGroups_name" tableName="authorizationGroups">
+			<column name="name"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_locations_createdAt" tableName="locations">
+			<column name="createdAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_locations_name" tableName="locations">
+			<column name="name"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_organizations_createdAt" tableName="organizations">
+			<column name="createdAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_organizations_identificationCode" tableName="organizations">
+			<column name="identificationCode"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_organizations_longName" tableName="organizations">
+			<column name="longName"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_organizations_shortName" tableName="organizations">
+			<column name="shortName"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_organizations_type" tableName="organizations">
+			<column name="type"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_people_createdAt" tableName="people">
+			<column name="createdAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_people_name" tableName="people">
+			<column name="name"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_people_rank" tableName="people">
+			<column name="rank"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positions_code" tableName="positions">
+			<column name="code"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positions_createdAt" tableName="positions">
+			<column name="createdAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_positions_name" tableName="positions">
+			<column name="name"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_createdAt" tableName="reports">
+			<column name="createdAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_engagementDate" tableName="reports">
+			<column name="engagementDate"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_releasedAt" tableName="reports">
+			<column name="releasedAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_reports_updatedAt" tableName="reports">
+			<column name="updatedAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_tags_createdAt" tableName="tags">
+			<column name="createdAt"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_tags_name" tableName="tags">
+			<column name="name"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_tasks_category" tableName="tasks">
+			<column name="category"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_tasks_createdAt" tableName="tasks">
+			<column name="createdAt"/>
+		</createIndex>
+		<!-- tasks.shortName already has a unique constraint/index -->
+	</changeSet>
+
+	<changeSet id="add-avatars-to-People" author="jose-west">
+		<addColumn tableName="people">
+			<column name="avatar" type="blob"/>
+		</addColumn>
 	</changeSet>
 
 </databaseChangeLog>
