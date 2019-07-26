@@ -2431,10 +2431,10 @@
     pretty-ms "^5.0.0"
     table "^5.4.2"
 
-"@wdio/sync@^5.11.0":
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.11.0.tgz#aec0dfd75c8b1cc7a1de6276fa5fd66c9e8aad51"
-  integrity sha512-YRrdmLtJaRvJV4h9Bg33oI90g8qbPFechLBGjq4cPEohJa+gIS3vabcyjZ7kvHxEST+/ITieSV/CNXnGA7u44w==
+"@wdio/sync@^5.11.9":
+  version "5.11.9"
+  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.11.9.tgz#59f963aa6409a3f2df4fac7a81fb5737a1f8a3f1"
+  integrity sha512-kJr3OUfFh7BErMvR3GNXp92cMeNnIgm3/09Ve7xqsf1Ib/bpKPI9YDJSB9gU4MdOXB53J7JC0JKw7i5hg9JCHw==
   dependencies:
     "@wdio/config" "^5.11.0"
     "@wdio/logger" "^5.11.0"
