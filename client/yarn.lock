@@ -12508,10 +12508,10 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-avatar-edit@^0.8.2:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/react-avatar-edit/-/react-avatar-edit-0.8.2.tgz#b4e4cef5a541479852d9ca31b0f20bad9ddaa039"
-  integrity sha512-OdapI4djPUJDHszGf7WMcNo/K2jRDjbCFSvzA6yQfb4xxbGdQHtCYT0K2pMI+hcno31bzBxGUlO5NZEK7HfbOg==
+react-avatar-edit@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/react-avatar-edit/-/react-avatar-edit-0.8.3.tgz#0ebf21391328fc255429bdfbc782f795827109bf"
+  integrity sha512-QEedh6DjDCSI7AUsUHHtfhxApCWC5hJAoywxUA5PtUdw03iIjEurgVqPOIt1UBHhU/Zk/9amElRF3oepN9JZSg==
   dependencies:
     konva "2.5.1"
 
