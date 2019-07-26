@@ -1,6 +1,9 @@
 package mil.dds.anet.search;
 
+import com.google.common.base.Joiner;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Location;
@@ -125,21 +128,24 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     qb.addInClause("states", "reports.state", query.getState());
+
     if (query.getEngagementStatus() != null) {
+      final List<String> engagementStatusClauses = new ArrayList<>();
       List<EngagementStatus> esValues = query.getEngagementStatus();
-      for (int i = 0; i < esValues.length; i++) {
-        if (esValue[i] === )
-        likeClauses.add(getLikeClause(fieldNames[i], paramName));
-        switch (dbType) {
-          case MSSQL:
-            return "DATEPART(week, %s)";
-          case POSTGRESQL:
-            return "EXTRACT(WEEK FROM %s)";
-          default:
-            throw new RuntimeException("No week format found for " + dbType);
-      }
-      
+      esValues.stream().forEach(es -> {
+        switch (es) {
+          case HAPPENED:
+            engagementStatusClauses.add(" reports.\"engagementDate\" <= :endOfToday");
+          case FUTURE:
+            engagementStatusClauses.add(" reports.\"engagementDate\" > :endOfToday");
+          case CANCELLED:
+            engagementStatusClauses.add(" reports.state == :cancelledState");
+            qb.addSqlArg("cancelledState", DaoUtils.getEnumId(ReportState.CANCELLED));
+        }
+      });
+      qb.addWhereClause("(" + Joiner.on(" OR ").join(engagementStatusClauses) + ")");
     }
+
     if (query.getCancelledReason() != null) {
       if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
         qb.addWhereClause("reports.\"cancelledReason\" IS NULL");
