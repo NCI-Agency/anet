@@ -26,7 +26,7 @@ class LinkSource extends Component {
   }
 
   /* :: onKeyDown: (e: Event) => void; */
-  onKeyDown = (e) => {
+  onKeyDown = e => {
     if (e.key === "Enter") {
       e.preventDefault()
       e.stopPropagation()
@@ -35,7 +35,7 @@ class LinkSource extends Component {
   }
 
   /* :: onConfirm: (e: Event) => void; */
-  onConfirm = (e) => {
+  onConfirm = e => {
     const { editorState, entityType, onComplete } = this.props
     const { url } = this.state
 
@@ -76,7 +76,7 @@ class LinkSource extends Component {
   }
 
   /* :: onRequestClose: (e: SyntheticEvent<>) => void; */
-  onRequestClose = (e) => {
+  onRequestClose = e => {
     const { onClose } = this.props
     e.preventDefault()
 
@@ -94,7 +94,7 @@ class LinkSource extends Component {
   }
 
   /* :: onChangeURL: (e: Event) => void; */
-  onChangeURL = (e) => {
+  onChangeURL = e => {
     if (e.target instanceof HTMLInputElement) {
       const url = e.target.value
       this.setState({ url })
