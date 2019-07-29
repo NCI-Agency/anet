@@ -12,7 +12,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Nav } from "react-bootstrap"
 import { connect } from "react-redux"
-import moment from "moment"
 
 class BaseMyReports extends Page {
   static propTypes = {
@@ -28,9 +27,7 @@ class BaseMyReports extends Page {
         state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
       },
       future: {
-        engagementDateStart: moment(Date.now())
-          .endOf("day")
-          .valueOf()
+        engagementStatus: "FUTURE"
       },
       pending: {
         state: [Report.STATE.PENDING_APPROVAL]

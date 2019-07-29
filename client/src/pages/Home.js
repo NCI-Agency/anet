@@ -29,7 +29,6 @@ import {
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
-import moment from "moment"
 
 class BaseHome extends Page {
   static propTypes = {
@@ -165,9 +164,7 @@ class BaseHome extends Page {
         orgUuid: currentUser.position.organization.uuid,
         includeOrgChildren: false,
         state: [Report.STATE.PUBLISHED],
-        engagementDateStart: moment(Date.now())
-          .endOf("day")
-          .valueOf(),
+        engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,
         sortOrder: "ASC"
       }
     }
@@ -178,9 +175,7 @@ class BaseHome extends Page {
       title: "All upcoming engagements",
       query: {
         state: [Report.STATE.PUBLISHED],
-        engagementDateStart: moment(Date.now())
-          .endOf("day")
-          .valueOf(),
+        engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,
         sortOrder: "ASC"
       }
     }
