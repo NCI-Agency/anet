@@ -175,7 +175,7 @@ export const ReportFullWorkflow = ({ workflow }) => {
   )
 }
 ReportFullWorkflow.propTypes = {
-  report: PropTypes.object.isRequired
+  workflow: PropTypes.array.isRequired
 }
 
 export const ReportCompactWorkflow = ({ workflow }) => {
@@ -191,5 +191,5 @@ export const ReportCompactWorkflow = ({ workflow }) => {
   )
 }
 ReportCompactWorkflow.propTypes = {
-  report: PropTypes.object.isRequired
+  workflow: PropTypes.array.isRequired
 }
