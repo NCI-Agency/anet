@@ -6077,10 +6077,10 @@ dotenv@^8.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.0.0.tgz#ed310c165b4e8a97bb745b0a9d99c31bda566440"
   integrity sha512-30xVGqjLjiUOArT4+M5q9sYdvuR4riM6yK9wMcas9Vbp6zZa+ocC9dp6QoftuhTPhFAiLK/0C5Ni2nou/Bk8lg==
 
-draft-convert@^2.1.5:
-  version "2.1.5"
-  resolved "https://registry.yarnpkg.com/draft-convert/-/draft-convert-2.1.5.tgz#0769316f9223aa2ce34082e7a588f0b4fe78f9bb"
-  integrity sha512-lqOtYKHikOzhB9PLcUPJRE8wzk1PXyobgskMk/rzt0lKDBWfMXuLnDRAVWnNyqQKK57QMY8oRY3i3OqdPrYORg==
+draft-convert@^2.1.7:
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/draft-convert/-/draft-convert-2.1.7.tgz#297381c7c9b7887f17c089c668558549b24be61a"
+  integrity sha512-GzH9wN5TqdHnTnm9FLWDgO34JeGdIBk6n2PPugWgjlkBtTZaT8XPTDQlh/5zSVJj/LjAl6qZWXb/iCtOHmAdxA==
   dependencies:
     immutable "~3.7.4"
     invariant "^2.2.1"
