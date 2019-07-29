@@ -42,10 +42,7 @@ public class Organization extends AbstractAnetBean {
   OrganizationType type;
 
   /* The following are all Lazy Loaded */
-  List<Position> positions; /* Positions in this Org */
   List<ApprovalStep> approvalSteps; /* Approval process for this Org */
-  List<Organization> childrenOrgs; /* Immediate children */
-  List<Organization> descendants; /* All descendants (children of children..) */
   List<Task> tasks;
 
   @GraphQLQuery(name = "shortName")
@@ -131,20 +128,14 @@ public class Organization extends AbstractAnetBean {
   public CompletableFuture<List<Position>> loadPositions(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") PositionSearchQuery query) {
-    if (positions != null) {
-      return CompletableFuture.completedFuture(positions);
-    }
     if (query == null) {
       query = new PositionSearchQuery();
     }
     // Note: no recursion, only direct children!
     query.setBatchParams(
         new FkBatchParams<Position, PositionSearchQuery>("positions", "\"organizationUuid\""));
-    return AnetObjectEngine.getInstance().getPositionDao()
-        .getPositionsBySearch(context, uuid, query).thenApply(o -> {
-          positions = o;
-          return o;
-        });
+    return AnetObjectEngine.getInstance().getPositionDao().getPositionsBySearch(context, uuid,
+        query);
   }
 
   @GraphQLQuery(name = "approvalSteps")
@@ -172,51 +163,36 @@ public class Organization extends AbstractAnetBean {
   public CompletableFuture<List<Organization>> loadChildrenOrgs(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
-    if (childrenOrgs != null) {
-      return CompletableFuture.completedFuture(childrenOrgs);
-    }
     if (query == null) {
       query = new OrganizationSearchQuery();
     }
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<Organization, OrganizationSearchQuery>("organizations",
         "\"parentOrgUuid\""));
-    return AnetObjectEngine.getInstance().getOrganizationDao()
-        .getOrganizationsBySearch(context, uuid, query).thenApply(o -> {
-          childrenOrgs = o;
-          return o;
-        });
+    return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
+        uuid, query);
   }
 
   @GraphQLQuery(name = "descendantOrgs")
   public CompletableFuture<List<Organization>> loadDescendantOrgs(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
-    if (descendants != null) {
-      return CompletableFuture.completedFuture(descendants);
-    }
     if (query == null) {
       query = new OrganizationSearchQuery();
     }
     // Note: recursion, includes transitive children!
     query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
         "organizations", "\"parentOrgUuid\"", "organizations", "\"parentOrgUuid\""));
-    return AnetObjectEngine.getInstance().getOrganizationDao()
-        .getOrganizationsBySearch(context, uuid, query).thenApply(o -> {
-          descendants = o;
-          return o;
-        });
+    return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
+        uuid, query);
   }
 
   @GraphQLQuery(name = "tasks")
-  public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+  public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
     if (tasks != null) {
       return CompletableFuture.completedFuture(tasks);
     }
-    if (query == null) {
-      query = new TaskSearchQuery();
-    }
+    final TaskSearchQuery query = new TaskSearchQuery();
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"organizationUuid\""));
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)

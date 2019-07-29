@@ -135,7 +135,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Verify task was saved.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
         new TypeReference<GraphQlResponse<Organization>>() {});
-    final List<Task> tasks = updated.loadTasks(context, null).get();
+    final List<Task> tasks = updated.loadTasks(context).get();
     assertThat(tasks).isNotNull();
     assertThat(tasks.size()).isEqualTo(1);
     assertThat(tasks.get(0).getUuid()).isEqualTo(task.getUuid());

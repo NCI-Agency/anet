@@ -39,8 +39,6 @@ public class Task extends AbstractAnetBean {
   private String customFieldEnum1;
   private String customFieldEnum2;
 
-  private List<Report> reports;
-
   private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
 
   TaskStatus status;
@@ -203,20 +201,13 @@ public class Task extends AbstractAnetBean {
   public CompletableFuture<List<Report>> loadReports(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
-    if (reports != null) {
-      return CompletableFuture.completedFuture(reports);
-    }
     if (query == null) {
       query = new ReportSearchQuery();
     }
     query.setBatchParams(new M2mBatchParams<Report, ReportSearchQuery>("reports", "\"reportTasks\"",
         "\"reportUuid\"", "\"taskUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().getReportsBySearch(context, uuid, query)
-        .thenApply(o -> {
-          reports = o;
-          return o;
-        });
+    return AnetObjectEngine.getInstance().getReportDao().getReportsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "responsiblePositions")
