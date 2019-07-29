@@ -20,6 +20,7 @@ import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -135,11 +136,15 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       esValues.stream().forEach(es -> {
         switch (es) {
           case HAPPENED:
-            engagementStatusClauses.add(" reports.\"engagementDate\" <= :endOfToday");
+            engagementStatusClauses.add(" reports.\"engagementDate\" <= :endOfHappened");
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endOfHappened", Utils.endOfToday());
+            break;
           case FUTURE:
-            engagementStatusClauses.add(" reports.\"engagementDate\" > :endOfToday");
+            engagementStatusClauses.add(" reports.\"engagementDate\" > :startOfFuture");
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startOfFuture", Utils.endOfToday());
+            break;
           case CANCELLED:
-            engagementStatusClauses.add(" reports.state == :cancelledState");
+            engagementStatusClauses.add(" reports.state = :cancelledState");
             qb.addSqlArg("cancelledState", DaoUtils.getEnumId(ReportState.CANCELLED));
         }
       });

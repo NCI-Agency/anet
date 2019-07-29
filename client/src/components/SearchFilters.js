@@ -263,6 +263,13 @@ export default {
         State: {
           component: ReportStateSearch
         },
+        "Engagement Status": {
+          component: SelectSearchFilter,
+          props: {
+            queryKey: "engagementStatus",
+            values: ["HAPPENED", "FUTURE", "CANCELLED"]
+          }
+        },
         [Settings.fields.report.atmosphere]: {
           component: SelectSearchFilter,
           props: {
