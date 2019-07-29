@@ -316,16 +316,18 @@ class BaseReportShow extends Page {
                   <h4 className="text-danger">
                     This {this.reportType} is APPROVED.
                   </h4>
-                  <p>
-                    This report has been approved and will be automatically
-                    published to the ANET community in{" "}
-                    {moment(report.getReportApprovedAt())
-                      .add(
-                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
-                        "hours"
-                      )
-                      .toNow(true)}
-                  </p>
+                  {!report.isFuture() && (
+                    <p>
+                      This report has been approved and will be automatically
+                      published to the ANET community in{" "}
+                      {moment(report.getReportApprovedAt())
+                        .add(
+                          Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                          "hours"
+                        )
+                        .toNow(true)}
+                    </p>
+                  )}
                   {canPublish && (
                     <p>
                       You can also{" "}
