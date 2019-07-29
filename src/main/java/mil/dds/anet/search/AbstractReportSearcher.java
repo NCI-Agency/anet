@@ -18,7 +18,6 @@ import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
-import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
@@ -224,12 +223,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
         qb.addSqlArg("userUuid", user.getUuid());
-        if (!AuthUtils.isAdmin(user)) {
-          // Admin users may access all approved reports, other users only owned approved reports
-          qb.addWhereClause(
-              "((reports.state != :approvedState) OR (reports.\"authorUuid\" = :userUuid))");
-          qb.addSqlArg("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
-        }
       }
     }
 
