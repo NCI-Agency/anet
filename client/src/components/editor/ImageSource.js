@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-
+import PropTypes from "prop-types"
 import { AtomicBlockUtils, EditorState } from "draft-js"
 
 import { Modal } from "react-bootstrap"
@@ -130,6 +130,15 @@ class ImageSource extends Component {
       </Modal>
     )
   }
+}
+
+ImageSource.propTypes = {
+  editorState: PropTypes.object.isRequired,
+  entity: PropTypes.object.isRequired,
+  entityKey: PropTypes.string.isRequired,
+  entityType: PropTypes.object.isRequired,
+  onComplete: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired
 }
 
 export default ImageSource

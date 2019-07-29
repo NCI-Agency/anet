@@ -17,7 +17,7 @@ class TooltipEntity extends Component {
   }
 
   /* :: openTooltip: (e: Event) => void; */
-  openTooltip = (e) => {
+  openTooltip = e => {
     const trigger = e.target
 
     if (trigger instanceof Element) {
