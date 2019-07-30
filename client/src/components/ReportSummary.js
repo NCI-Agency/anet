@@ -53,7 +53,7 @@ export default class ReportSummary extends Component {
           </p>
         )}
 
-        {report.isPublished() && report.isFuture() && (
+        {report.isFuture() && (
           <p className="report-future">
             <strong>Upcoming Engagement</strong>
           </p>
