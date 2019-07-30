@@ -163,7 +163,7 @@ class BaseHome extends Page {
       query: {
         orgUuid: currentUser.position.organization.uuid,
         includeOrgChildren: false,
-        state: [Report.STATE.PUBLISHED],
+        state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
         engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,
         sortOrder: "ASC"
       }
@@ -174,7 +174,7 @@ class BaseHome extends Page {
     return {
       title: "All upcoming engagements",
       query: {
-        state: [Report.STATE.PUBLISHED],
+        state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
         engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,
         sortOrder: "ASC"
       }
