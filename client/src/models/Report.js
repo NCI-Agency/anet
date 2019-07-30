@@ -19,8 +19,7 @@ export default class Report extends Model {
     APPROVED: "APPROVED",
     PUBLISHED: "PUBLISHED",
     REJECTED: "REJECTED",
-    CANCELLED: "CANCELLED",
-    FUTURE: "FUTURE"
+    CANCELLED: "CANCELLED"
   }
 
   static ENGAGEMENT_STATUS = {
