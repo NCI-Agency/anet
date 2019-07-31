@@ -218,8 +218,8 @@ public class Person extends AbstractAnetBean implements Principal {
   public AnetBeanList<Report> loadAuthoredReports(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAuthorUuid(uuid);
-    return AnetObjectEngine.getInstance().getReportDao().search(query,
-        DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return AnetObjectEngine.getInstance().getReportDao().search(query);
   }
 
   // TODO: batch load? (used in admin/MergePeople.js)
@@ -227,8 +227,8 @@ public class Person extends AbstractAnetBean implements Principal {
   public AnetBeanList<Report> loadAttendedReports(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAttendeeUuid(uuid);
-    return AnetObjectEngine.getInstance().getReportDao().search(query,
-        DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return AnetObjectEngine.getInstance().getReportDao().search(query);
   }
 
   @GraphQLQuery(name = "avatar")

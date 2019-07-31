@@ -2,8 +2,10 @@ package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -23,10 +25,16 @@ public abstract class AbstractOrganizationSearcher extends
   }
 
   protected void buildQuery(OrganizationSearchQuery query) {
+    qb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
+    qb.addTotalCount();
     qb.addFromClause("organizations");
 
     if (query.isTextPresent()) {
       addTextQuery(query);
+    }
+
+    if (query.isBatchParamsPresent()) {
+      addBatchClause(query);
     }
 
     qb.addEqualsClause("status", "organizations.status", query.getStatus());
@@ -41,7 +49,21 @@ public abstract class AbstractOrganizationSearcher extends
 
   protected abstract void addTextQuery(OrganizationSearchQuery query);
 
-  protected abstract void addParentOrgUuidQuery(OrganizationSearchQuery query);
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(OrganizationSearchQuery query) {
+    qb.addBatchClause(
+        (AbstractBatchParams<Organization, OrganizationSearchQuery>) query.getBatchParams());
+  }
+
+  protected void addParentOrgUuidQuery(OrganizationSearchQuery query) {
+    if (query.getParentOrgRecursively()) {
+      qb.addRecursiveClause(null, "organizations", "\"uuid\"", "parent_orgs", "organizations",
+          "\"parentOrgUuid\"", "parentOrgUuid", query.getParentOrgUuid());
+    } else {
+      qb.addEqualsClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",
+          query.getParentOrgUuid());
+    }
+  }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
       OrganizationSearchQuery query) {
