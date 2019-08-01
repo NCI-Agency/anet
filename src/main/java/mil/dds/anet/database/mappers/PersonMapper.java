@@ -47,7 +47,7 @@ public class PersonMapper implements RowMapper<Person> {
     a.setPendingVerification(r.getBoolean("people_pendingVerification"));
     Blob avatarBlob = r.getBlob("people_avatar");
     String avatar =
-        avatarBlob == null ? null : new String(avatarBlob.getBytes(1l, (int) avatarBlob.length()));
+        avatarBlob == null ? null : new String(avatarBlob.getBytes(1L, (int) avatarBlob.length()));
     a.setAvatar(avatar);
 
     return a;
