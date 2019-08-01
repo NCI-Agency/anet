@@ -56,7 +56,7 @@ class App extends Page {
           location {uuid, name}
           associatedPositions {
             uuid, name,
-            person { uuid, name, rank,
+            person { uuid, name, rank, avatar(size: 32),
               position {
                 uuid, name, code, type
                 organization { uuid, shortName}

@@ -58,7 +58,7 @@ const SEARCH_CONFIG = {
     sortOrder: "ASC",
     variableType: "PersonSearchQueryInput",
     fields:
-      "uuid, name, rank, role, emailAddress, position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
+      "uuid, name, rank, role, emailAddress, avatar(size: 32), position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
   },
   [SEARCH_OBJECT_TYPES.POSITIONS]: {
     listName: `${SEARCH_OBJECT_TYPES.POSITIONS}: positionList`,
@@ -66,7 +66,7 @@ const SEARCH_CONFIG = {
     sortOrder: "ASC",
     variableType: "PositionSearchQueryInput",
     fields:
-      "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role }"
+      "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
   },
   [SEARCH_OBJECT_TYPES.TASKS]: {
     listName: `${SEARCH_OBJECT_TYPES.TASKS}: taskList`,

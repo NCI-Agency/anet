@@ -69,7 +69,7 @@ class BaseReportShow extends Page {
 
         location { uuid, name }
         author {
-          uuid, name, rank, role
+          uuid, name, rank, role, avatar(size: 32)
           position {
             organization {
               shortName, longName, identificationCode
@@ -77,7 +77,7 @@ class BaseReportShow extends Page {
                 uuid, name,
                 approvers {
                   uuid, name,
-                  person { uuid, name, rank, role }
+                  person { uuid, name, rank, role, avatar(size: 32) }
                 }
               }
             }
@@ -95,7 +95,7 @@ class BaseReportShow extends Page {
 
         comments {
           uuid, text, createdAt, updatedAt
-          author { uuid, name, rank, role }
+          author { uuid, name, rank, role, avatar(size: 32) }
         }
 
         principalOrg { uuid, shortName, longName, identificationCode, type }
@@ -104,9 +104,9 @@ class BaseReportShow extends Page {
         workflow {
           type, createdAt
           step { uuid , name
-            approvers { uuid, name, person { uuid, name, rank, role } }
+            approvers { uuid, name, person { uuid, name, rank, role, avatar(size: 32) } }
           },
-          person { uuid, name, rank, role }
+          person { uuid, name, rank, role, avatar(size: 32) }
         }
 
         approvalStep { name, approvers { uuid }, nextStepUuid }

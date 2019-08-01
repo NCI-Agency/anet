@@ -32,7 +32,7 @@ class AuthorizationGroupEdit extends Page {
       /* GraphQL */ `
         authorizationGroup(uuid:"${props.match.params.uuid}") {
         uuid, name, description
-        positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
+        positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) } }
         status
         ${GRAPHQL_NOTES_FIELDS}
       }

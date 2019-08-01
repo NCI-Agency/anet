@@ -33,9 +33,9 @@ class PositionEdit extends Page {
       position(uuid:"${props.match.params.uuid}") {
         uuid, name, code, status, type
         location { uuid, name },
-        associatedPositions { uuid, name, type, person { uuid, name, rank, role } },
+        associatedPositions { uuid, name, type, person { uuid, name, rank, role, avatar(size: 32) } },
         organization {uuid, shortName, longName, identificationCode, type},
-        person { uuid, name, rank, role }
+        person { uuid, name, rank, role, avatar(size: 32) }
         ${GRAPHQL_NOTES_FIELDS}
       }
     `

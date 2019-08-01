@@ -494,7 +494,7 @@ class BaseOrganizationForm extends Component {
             ],
             matchPersonName: true
           }}
-          fields="uuid, name, code, type, person { uuid, name, rank, role }"
+          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }"
           addon={POSITIONS_ICON}
         />
       </Fieldset>

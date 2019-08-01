@@ -59,7 +59,7 @@ class BaseTaskShow extends Page {
         plannedCompletion, projectedCompletion,
         responsibleOrg { uuid, shortName, longName, identificationCode },
         customFieldRef1 { uuid, shortName, longName },
-        responsiblePositions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
+        responsiblePositions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) } }
         ${GRAPHQL_NOTES_FIELDS}
       }
     `)

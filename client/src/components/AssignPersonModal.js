@@ -86,7 +86,7 @@ export default class AssignPersonModal extends Component {
                   objectType={Person}
                   valueKey="name"
                   fields={
-                    "uuid, name, rank, role, position { uuid, name, type }"
+                    "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
                   }
                   addon={PEOPLE_ICON}
                   vertical

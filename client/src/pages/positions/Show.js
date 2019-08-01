@@ -55,13 +55,13 @@ class BasePositionShow extends Page {
       position(uuid:"${props.match.params.uuid}") {
         uuid, name, type, status, code,
         organization { uuid, shortName, longName, identificationCode },
-        person { uuid, name, rank, role },
+        person { uuid, name, rank, role, avatar(size: 32) },
         associatedPositions {
           uuid, name, type
-          person { uuid, name, rank, role }
+          person { uuid, name, rank, role, avatar(size: 32) }
           organization { uuid, shortName }
         },
-        previousPeople { startTime, endTime, person { uuid, name, rank, role }}
+        previousPeople { startTime, endTime, person { uuid, name, rank, role, avatar(size: 32) }}
         location { uuid, name }
         ${GRAPHQL_NOTES_FIELDS}
       }

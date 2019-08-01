@@ -127,7 +127,7 @@ class BaseReportForm extends Component {
         list { uuid, name }
       }
       personRecents(maxResults:6) {
-        list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
+        list { uuid, name, rank, role, status, endOfTourDate, avatar(size: 32), position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
       }
       taskRecents(maxResults:6) {
         list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
