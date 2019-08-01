@@ -289,13 +289,20 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
-    // Verify that author can no longer edit the report
-    try {
-      graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput", returned,
-          new TypeReference<GraphQlResponse<Report>>() {});
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
-    }
+    // Verify that author can still edit the report
+    returned.setAtmosphereDetails("Eerybody was super nice! Again!");
+    final Report r2 = graphQLHelper.updateObject(author, "updateReport", "report", FIELDS,
+        "ReportInput", returned, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
+
+    // Have the author submit the report, again
+    submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
+        created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(submitted).isNotNull();
+
+    returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getUuid(),
+        new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}", new Object[] {
         returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author.getUuid()});
@@ -332,12 +339,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on Report status for who needs to approve
     List<ReportAction> workflow = returned.getWorkflow();
-    assertThat(workflow.size()).isEqualTo(3);
-    ReportAction reportAction = workflow.get(1);
+    assertThat(workflow.size()).isEqualTo(4);
+    ReportAction reportAction = workflow.get(2);
     assertThat(reportAction.getPerson()).isNull(); // Because this hasn't been approved yet.
     assertThat(reportAction.getCreatedAt()).isNull();
     assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-    reportAction = workflow.get(2);
+    reportAction = workflow.get(3);
     assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
     // Reject the report
@@ -396,12 +403,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // check on report status to see that it got approved.
     workflow = returned.getWorkflow();
     // there were 5 actions on the report: submit, reject, submit, approve, approve
-    assertThat(workflow.size()).isEqualTo(5);
-    reportAction = workflow.get(3);
+    assertThat(workflow.size()).isEqualTo(6);
+    reportAction = workflow.get(4);
     assertThat(reportAction.getPersonUuid()).isEqualTo(approver1.getUuid());
     assertThat(reportAction.getCreatedAt()).isNotNull();
     assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-    reportAction = workflow.get(4);
+    reportAction = workflow.get(5);
     assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
     // Admin can publish approved reports.
