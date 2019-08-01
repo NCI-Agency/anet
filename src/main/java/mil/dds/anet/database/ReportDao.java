@@ -806,33 +806,44 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         " WHERE reports.state IN ( :reportApproved, :reportRejected, :reportPendingApproval, :reportPublished )");
     // Get past reports relative to the endDate argument
     sql.append(" AND reports.\"engagementDate\" <= :endDate");
-    sql.append(" AND");
-    sql.append(" ((");
+    sql.append(" AND ((");
     // Get reports for engagements which just became past engagements during or
     // after the planning approval process, but which are not in the report approval process yet
     sql.append("   reports.uuid IN (");
     sql.append("     SELECT pr.uuid");
     sql.append("     FROM (");
     sql.append("       SELECT r.uuid, ra.\"approvalStepUuid\"");
-    sql.append("       FROM reports AS r");
-    sql.append(
-        "         CROSS APPLY (SELECT TOP (1) \"reportActions\".\"reportUuid\", \"reportActions\".\"approvalStepUuid\"");
+    sql.append("       FROM reports r");
+    // FIXME: Hard-coded MS SQL or PostgreSQL specific query stanza
+    if (DaoUtils.isMsSql()) {
+      sql.append("     CROSS APPLY (SELECT");
+      sql.append("       TOP (1)");
+    } else {
+      sql.append("     INNER JOIN LATERAL (SELECT"); // PostgreSQL
+    }
+    sql.append("           \"reportActions\".\"reportUuid\",");
+    sql.append("           \"reportActions\".\"approvalStepUuid\"");
     sql.append("         FROM \"reportActions\"");
     sql.append("         WHERE \"reportActions\".\"reportUuid\" = r.uuid");
     sql.append("         AND \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
-    sql.append("         ORDER BY \"reportActions\".\"createdAt\" DESC) AS ra");
-    sql.append(
-        "       WHERE ra.\"approvalStepUuid\" IN ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\" WHERE \"approvalSteps\".type = :planningApprovalStepType)");
-    sql.append("     ) AS pr ");
+    sql.append("         ORDER BY \"reportActions\".\"createdAt\" DESC");
+    if (DaoUtils.isMsSql()) {
+      sql.append("     ) ra");
+    } else {
+      sql.append("       LIMIT 1"); // PostgreSQL
+      sql.append("     ) ra ON TRUE");
+    }
+    sql.append("       WHERE ra.\"approvalStepUuid\" IN");
+    sql.append("         ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\"");
+    sql.append("           WHERE \"approvalSteps\".type = :planningApprovalStepType )");
+    sql.append("     ) pr");
     sql.append("   )");
-    sql.append("  )");
-    sql.append("  OR");
+    sql.append(" ) OR (");
     // Also get reports pending planning approval when the approval action was not taken yet
-    sql.append("  (");
-    sql.append(
-        "   reports.\"approvalStepUuid\" IN ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\" WHERE \"approvalSteps\".type = :planningApprovalStepType)");
-    sql.append("   )");
-    sql.append("  )");
+    sql.append("   reports.\"approvalStepUuid\" IN");
+    sql.append("     ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\"");
+    sql.append("       WHERE \"approvalSteps\".type = :planningApprovalStepType )");
+    sql.append(" ))");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("reportApproved", ReportState.APPROVED.ordinal());
     sqlArgs.put("reportRejected", ReportState.REJECTED.ordinal());
