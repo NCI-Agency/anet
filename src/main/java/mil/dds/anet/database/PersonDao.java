@@ -242,7 +242,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       avatar = this.getDbHandle().getConnection().createBlob();
       if (image != null) {
         String resizedImage = Utils.resizeImageBase64(image, 256, 256, "png");
-        avatar.setBytes(1l, resizedImage.getBytes());
+        avatar.setBytes(1L, resizedImage.getBytes());
       }
     } catch (Exception e) {
       logger.error("Failed to save avatar: ", e);
