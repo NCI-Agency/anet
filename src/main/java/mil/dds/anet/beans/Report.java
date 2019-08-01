@@ -26,7 +26,10 @@ import mil.dds.anet.views.UuidFetcher;
 public class Report extends AbstractAnetBean {
 
   public enum ReportState {
-    DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, FUTURE, APPROVED
+    DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, // -
+    @Deprecated
+    FUTURE, // Should no longer be used but remain in place to keep the correct values
+    APPROVED
   }
 
   public enum Atmosphere {

@@ -372,7 +372,6 @@ public class ReportResource {
     switch (report.getState()) {
       case DRAFT:
       case REJECTED:
-      case FUTURE:
       case APPROVED:
       case CANCELLED:
         // Must be the author
@@ -396,6 +395,8 @@ public class ReportResource {
             "attempt to edit published report {} by editor {} (uuid: {}) was forbidden",
             report.getUuid(), editor.getName(), editor.getUuid());
         throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
+      default:
+        throw new WebApplicationException("Unknown report state", Status.FORBIDDEN);
     }
   }
 
