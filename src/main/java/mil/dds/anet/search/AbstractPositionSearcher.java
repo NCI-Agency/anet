@@ -2,8 +2,10 @@ package mil.dds.anet.search;
 
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
 
 public abstract class AbstractPositionSearcher
@@ -20,9 +22,11 @@ public abstract class AbstractPositionSearcher
   }
 
   protected void buildQuery(PositionSearchQuery query) {
+    qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
+    qb.addTotalCount();
     qb.addFromClause("positions");
 
-    if (Boolean.TRUE.equals(query.getMatchPersonName())) {
+    if (query.getMatchPersonName()) {
       qb.addFromClause("LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid");
     }
 
@@ -30,10 +34,20 @@ public abstract class AbstractPositionSearcher
       addTextQuery(query);
     }
 
+    if (query.isBatchParamsPresent()) {
+      addBatchClause(query);
+    }
+
     qb.addInClause("types", "positions.type", query.getType());
 
     if (query.getOrganizationUuid() != null) {
-      addOrganizationUuidQuery(query);
+      if (query.getIncludeChildrenOrgs()) {
+        qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid());
+      } else {
+        qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"",
+            query.getOrganizationUuid());
+      }
     }
 
     if (query.getIsFilled() != null) {
@@ -60,7 +74,10 @@ public abstract class AbstractPositionSearcher
 
   protected abstract void addTextQuery(PositionSearchQuery query);
 
-  protected abstract void addOrganizationUuidQuery(PositionSearchQuery query);
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(PositionSearchQuery query) {
+    qb.addBatchClause((AbstractBatchParams<Position, PositionSearchQuery>) query.getBatchParams());
+  }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {
     switch (query.getSortBy()) {

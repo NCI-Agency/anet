@@ -50,4 +50,6 @@ report(uuid:"${reportUuid}") {
 
     tags { uuid, name, description }
 
+    notes { uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
+
 }

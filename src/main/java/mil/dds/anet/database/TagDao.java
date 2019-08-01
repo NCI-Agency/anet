@@ -11,7 +11,7 @@ import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class TagDao extends AnetBaseDao<Tag> {
+public class TagDao extends AnetBaseDao<Tag, TagSearchQuery> {
 
   public static final String TABLE_NAME = "tags";
 
@@ -53,10 +53,6 @@ public class TagDao extends AnetBaseDao<Tag> {
   }
 
   @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
   public AnetBeanList<Tag> search(TagSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTagSearcher().runSearch(query);
   }

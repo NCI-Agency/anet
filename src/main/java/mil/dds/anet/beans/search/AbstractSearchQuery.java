@@ -3,11 +3,12 @@ package mil.dds.anet.beans.search;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.leangen.graphql.annotations.GraphQLIgnore;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
 @JsonIgnoreProperties({"user", "pass"})
-public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQuery<T> {
+public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQuery<T>, Cloneable {
 
   protected final T defaultSortBy;
 
@@ -20,6 +21,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   private Optional<Integer> pageSize = Optional.empty();
   private Optional<SortOrder> sortOrder = Optional.empty();
   private Optional<T> sortBy = Optional.empty();
+  private Optional<AbstractBatchParams<?, ?>> batchParams = Optional.empty();
 
   public AbstractSearchQuery(T defaultSortBy) {
     this.defaultSortBy = defaultSortBy;
@@ -91,6 +93,62 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   @Override
   public void setSortBy(T sortBy) {
     this.sortBy = Optional.ofNullable(sortBy);
+  }
+
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public boolean isBatchParamsPresent() {
+    return batchParams.isPresent();
+  }
+
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public AbstractBatchParams<?, ?> getBatchParams() {
+    return batchParams.orElse(null);
+  }
+
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public void setBatchParams(AbstractBatchParams<?, ?> batchParams) {
+    if (batchParams != null) {
+      // batching, so no pagination!
+      setPageSize(0);
+      setPageNum(0);
+    }
+    this.batchParams = Optional.ofNullable(batchParams);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(text, pageNum, pageSize, sortOrder, sortBy, batchParams);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof AbstractSearchQuery)) {
+      return false;
+    }
+    @SuppressWarnings("unchecked")
+    final AbstractSearchQuery<T> other = (AbstractSearchQuery<T>) obj;
+    return Objects.equals(getText(), other.getText())
+        && Objects.equals(getPageNum(), other.getPageNum())
+        && Objects.equals(getPageSize(), other.getPageSize())
+        && Objects.equals(getSortOrder(), other.getSortOrder())
+        && Objects.equals(getSortBy(), other.getSortBy())
+        && Objects.equals(getBatchParams(), other.getBatchParams());
+  }
+
+  @Override
+  public Object clone() throws CloneNotSupportedException {
+    @SuppressWarnings("unchecked")
+    final AbstractSearchQuery<T> clone = (AbstractSearchQuery<T>) super.clone();
+    if (isBatchParamsPresent()) {
+      clone.setBatchParams((AbstractBatchParams<?, ?>) getBatchParams().clone());
+    }
+    return clone;
   }
 
 }

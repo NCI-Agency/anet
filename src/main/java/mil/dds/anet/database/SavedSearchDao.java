@@ -4,13 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.mappers.SavedSearchMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
+public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "savedSearches";
 
@@ -54,16 +55,16 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
   @Override
   public int updateInternal(SavedSearch obj) {
-    return getDbHandle().createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
-        + "SET name = :name, \"objectType\" = :objectType, query = :query " + "WHERE uuid = :uuid")
+    return getDbHandle()
+        .createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
+            + "SET name = :name, \"objectType\" = :objectType, query = :query WHERE uuid = :uuid")
         .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
   }
 
   @Override
   public int deleteInternal(String uuid) {
     return getDbHandle()
-        .createUpdate(
-            "/* deleteSavedSearch */ DELETE FROM \"savedSearches\" " + "WHERE uuid = :uuid")
+        .createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" WHERE uuid = :uuid")
         .bind("uuid", uuid).execute();
   }
 

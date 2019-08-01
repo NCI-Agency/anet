@@ -1,12 +1,12 @@
 package mil.dds.anet.views;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
@@ -17,6 +17,7 @@ public abstract class AbstractAnetBean {
   protected Instant createdAt;
   protected Instant updatedAt;
   private List<Note> notes;
+  private String batchUuid;
 
   public AbstractAnetBean() {
     uuid = null;
@@ -51,6 +52,9 @@ public abstract class AbstractAnetBean {
 
   @GraphQLQuery(name = "notes")
   public CompletableFuture<List<Note>> loadNotes(@GraphQLRootContext Map<String, Object> context) {
+    if (notes != null) {
+      return CompletableFuture.completedFuture(notes);
+    }
     return AnetObjectEngine.getInstance().getNoteDao().getNotesForRelatedObject(context, uuid)
         .thenApply(o -> {
           notes = o;
@@ -67,19 +71,16 @@ public abstract class AbstractAnetBean {
     this.notes = notes;
   }
 
-  /*
-   * Determines if two beans are "uuid" equal. That is they have the same uuid. (or are null)
-   */
-  public static boolean uuidEqual(AbstractAnetBean a, AbstractAnetBean b) {
-    if (a == null && b == null) {
-      return true;
-    }
-    if (a == null || b == null) {
-      return false;
-    }
-    if (a.getUuid() != null && b.getUuid() != null) {
-      return Objects.equals(a.getUuid(), b.getUuid());
-    }
-    return a.equals(b);
+  @JsonIgnore
+  @GraphQLIgnore
+  public String getBatchUuid() {
+    return batchUuid;
   }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public void setBatchUuid(String batchUuid) {
+    this.batchUuid = batchUuid;
+  }
+
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -39,6 +40,7 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   protected final List<String> withClauses;
   private final List<String> selectClauses;
   private final List<String> fromClauses;
+  private final List<String> additionalFromClauses;
   private final List<String> whereClauses;
   private final List<String> groupByClauses;
   private final List<String> orderByClauses;
@@ -52,6 +54,7 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     withClauses = new LinkedList<>();
     selectClauses = new LinkedList<>();
     fromClauses = new LinkedList<>();
+    additionalFromClauses = new LinkedList<>();
     whereClauses = new LinkedList<>();
     groupByClauses = new LinkedList<>();
     orderByClauses = new LinkedList<>();
@@ -97,6 +100,10 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     fromClauses.add(clause);
   }
 
+  public void addAdditionalFromClause(String clause) {
+    additionalFromClauses.add(clause);
+  }
+
   public void addWhereClause(String clause) {
     whereClauses.add(clause);
   }
@@ -114,6 +121,27 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   }
 
   public abstract String getFullTextQuery(String text);
+
+  /**
+   * Add a batched query clause. If you want to batch for a many-to-many relation, e.g. getting
+   * reports for a task, you'd use
+   * <code>new M2mBatchParams("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\"")</code>
+   * as the batchParams.
+   *
+   * Note that if you use this, your search query class must implement
+   * {@link AbstractSearchQuery#hashCode()}, {@link AbstractSearchQuery#equals(Object)} and
+   * {@link AbstractSearchQuery#clone()}.
+   *
+   * @param batchParams the parameters for the batch join/select/where clauses
+   */
+  public void addBatchClause(AbstractBatchParams<B, T> batchParams) {
+    addBatchClause(batchParams, this);
+  }
+
+  public void addBatchClause(AbstractBatchParams<B, T> batchParams,
+      AbstractSearchQueryBuilder<B, T> outerQb) {
+    batchParams.addQuery(outerQb, this);
+  }
 
   public final void addDateClause(String paramName, String fieldName, Comparison comp,
       Instant fieldValue) {
@@ -171,14 +199,65 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     }
   }
 
+  public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
+      String foreignKey, String withTableName, String recursiveTableName,
+      String recursiveForeignKey, String paramName, String fieldValue) {
+    addRecursiveClause(outerQb, tableName, new String[] {foreignKey}, withTableName,
+        recursiveTableName, recursiveForeignKey, paramName, fieldValue);
+  }
+
+  public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
+      String[] foreignKeys, String withTableName, String recursiveTableName,
+      String recursiveForeignKey, String paramName, String fieldValue) {
+    if (outerQb == null) {
+      outerQb = this;
+    }
+    outerQb.addWithClause(String.format(
+        "%1$s(uuid, parent_uuid) AS (SELECT uuid, uuid as parent_uuid FROM %2$s UNION ALL"
+            + " SELECT pt.uuid, bt.%3$s FROM %2$s bt INNER JOIN"
+            + " %1$s pt ON bt.uuid = pt.parent_uuid)",
+        withTableName, recursiveTableName, recursiveForeignKey));
+    addAdditionalFromClause(withTableName);
+    final List<String> orClauses = new ArrayList<>();
+    for (final String foreignKey : foreignKeys) {
+      orClauses.add(String.format("%1$s.%2$s = %3$s.uuid", tableName, foreignKey, withTableName));
+    }
+    addWhereClause(String.format("( (%1$s) AND %2$s.parent_uuid = :%3$s )",
+        Joiner.on(" OR ").join(orClauses), withTableName, paramName));
+    addSqlArg(paramName, fieldValue);
+  }
+
+  public final void addRecursiveBatchClause(AbstractSearchQueryBuilder<B, T> outerQb,
+      String tableName, String[] foreignKeys, String withTableName, String recursiveTableName,
+      String recursiveForeignKey, String paramName, List<String> fieldValues) {
+    if (outerQb == null) {
+      outerQb = this;
+    }
+    outerQb.addWithClause(String.format(
+        "%1$s(uuid, parent_uuid) AS (SELECT uuid, uuid as parent_uuid FROM %2$s UNION ALL"
+            + " SELECT pt.uuid, bt.%3$s FROM %2$s bt INNER JOIN"
+            + " %1$s pt ON bt.uuid = pt.parent_uuid)",
+        withTableName, recursiveTableName, recursiveForeignKey));
+    addAdditionalFromClause(withTableName);
+    addSelectClause(String.format("%1$s.parent_uuid AS \"batchUuid\"", withTableName));
+    final List<String> orClauses = new ArrayList<>();
+    for (final String foreignKey : foreignKeys) {
+      orClauses.add(String.format("%1$s.%2$s = %3$s.uuid", tableName, foreignKey, withTableName));
+    }
+    addWhereClause(String.format("( (%1$s) AND %2$s.parent_uuid IN ( <%3$s> ) )",
+        Joiner.on(" OR ").join(orClauses), withTableName, paramName));
+    addListArg(paramName, fieldValues);
+  }
+
   private final String getLikeClause(String fieldName, String paramName) {
     return String.format("%s %s :%s", fieldName, likeKeyword, paramName);
   }
 
-  public String build() {
+  public final String build() {
     addWithClauses();
     addSelectClauses();
     addFromClauses();
+    addAdditionalFromClauses();
     addWhereClauses();
     addGroupByClauses();
     addOrderByClauses();
@@ -205,9 +284,16 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   }
 
   protected void addFromClauses() {
-    if (!selectClauses.isEmpty()) {
+    if (!fromClauses.isEmpty()) {
       sql.append(" FROM ");
       sql.append(Joiner.on(" ").join(fromClauses));
+    }
+  }
+
+  protected void addAdditionalFromClauses() {
+    if (!additionalFromClauses.isEmpty()) {
+      sql.append(", ");
+      sql.append(Joiner.on(", ").join(additionalFromClauses));
     }
   }
 
