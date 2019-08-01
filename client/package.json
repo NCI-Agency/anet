@@ -93,7 +93,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.17.1",
-    "@blueprintjs/datetime": "^3.9.0",
+    "@blueprintjs/datetime": "^3.9.2",
     "@fullcalendar/core": "^4.2.0",
     "@fullcalendar/daygrid": "^4.2.0",
     "@fullcalendar/interaction": "^4.2.0",
