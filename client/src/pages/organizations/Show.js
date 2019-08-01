@@ -92,14 +92,14 @@ class BaseOrganizationShow extends Page {
         },
         positions {
           uuid, name, code, status, type,
-          person { uuid, name, status, rank, role }
+          person { uuid, name, status, rank, role, avatar(size: 32) }
           associatedPositions {
             uuid, name, type, code, status
-            person { uuid, name, status, rank, role }
+            person { uuid, name, status, rank, role, avatar(size: 32) }
           }
         },
         approvalSteps {
-          uuid, name, approvers { uuid, name, person { uuid, name, rank, role }}
+          uuid, name, approvers { uuid, name, person { uuid, name, rank, role, avatar(size: 32) }}
         }
         ${GRAPHQL_NOTES_FIELDS}
       }`)
