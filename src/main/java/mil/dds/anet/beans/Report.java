@@ -662,6 +662,7 @@ public class Report extends AbstractAnetBean {
     return authorizationGroups;
   }
 
+  @JsonIgnore
   @GraphQLIgnore
   public boolean isFutureEngagement() {
     return engagementDate != null && engagementDate.isAfter(Utils.endOfToday());
