@@ -356,7 +356,7 @@ public class Utils {
   }
 
   /**
-   * Resizes an image
+   * Resizes an image.
    * 
    * @param imageBase64 The image as a Base64 string
    * @param width The desired output width
@@ -384,7 +384,7 @@ public class Utils {
   }
 
   /**
-   * Converts an image represented as a Base64 string into a BufferedImage
+   * Converts an image represented as a Base64 string into a BufferedImage.
    * 
    * @param imageBase64 The image as a Base64 string
    * @return The BufferedImage object
@@ -397,7 +397,7 @@ public class Utils {
   }
 
   /**
-   * Converts a BufferedImage representing an image into a Base64 string
+   * Converts a BufferedImage representing an image into a Base64 string.
    * 
    * @param imageBytes The image as bytes
    * @param imageFormatName The desired output format

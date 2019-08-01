@@ -11,6 +11,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.ApprovalStepMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -20,7 +21,7 @@ import org.jdbi.v3.core.mapper.MapMapper;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
+public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "approvalSteps";
 

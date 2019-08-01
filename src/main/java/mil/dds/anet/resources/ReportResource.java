@@ -830,7 +830,8 @@ public class ReportResource {
   @GraphQLQuery(name = "reportList")
   public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
-    return dao.search(query, DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return dao.search(query);
   }
 
   /**

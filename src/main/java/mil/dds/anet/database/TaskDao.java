@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -9,24 +8,25 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.PositionMapper;
-import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class TaskDao extends AnetBaseDao<Task> {
+public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
 
   public static final String TABLE_NAME = "tasks";
 
@@ -66,6 +66,25 @@ public class TaskDao extends AnetBaseDao<Task> {
     final ForeignKeyBatcher<Position> responsiblePositionsBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(ResponsiblePositionsBatcher.class);
     return responsiblePositionsBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  static class TaskSearchBatcher extends SearchQueryBatcher<Task, TaskSearchQuery> {
+    public TaskSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getTaskDao());
+    }
+  }
+
+  public List<List<Task>> getTasksBySearch(
+      List<ImmutablePair<String, TaskSearchQuery>> foreignKeys) {
+    final TaskSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(TaskSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Task>> getTasksBySearch(Map<String, Object> context, String uuid,
+      TaskSearchQuery query) {
+    return new SearchQueryFetcher<Task, TaskSearchQuery>().load(context,
+        SqDataLoaderKey.TASKS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
   @Override
@@ -147,6 +166,7 @@ public class TaskDao extends AnetBaseDao<Task> {
         .map(new TaskMapper()).list();
   }
 
+  @Override
   public AnetBeanList<Task> search(TaskSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);
   }
@@ -158,41 +178,19 @@ public class TaskDao extends AnetBaseDao<Task> {
           "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
               + "SELECT TOP(:maxResults) \"reportTasks\".\"taskUuid\" "
               + "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
-              + "WHERE \"authorUuid\" = :authorUuid " + "GROUP BY \"taskUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC" + ")";
+              + "WHERE \"authorUuid\" = :authorUuid GROUP BY \"taskUuid\" "
+              + "ORDER BY MAX(reports.\"createdAt\") DESC)";
     } else {
       sql =
           "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
               + "SELECT \"reportTasks\".\"taskUuid\" "
               + "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
-              + "WHERE \"authorUuid\" = :authorUuid " + "GROUP BY \"taskUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC " + "LIMIT :maxResults" + ")";
+              + "WHERE \"authorUuid\" = :authorUuid GROUP BY \"taskUuid\" "
+              + "ORDER BY MAX(reports.\"createdAt\") DESC LIMIT :maxResults)";
     }
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
         .map(new TaskMapper()).list();
-  }
-
-  static class ReportsBatcher extends ForeignKeyBatcher<Report> {
-    private static final String sql = "/* batch.getReportsForTasks */ SELECT "
-        + ReportDao.REPORT_FIELDS + ", reportUuid, taskUuid FROM reports, \"reportTasks\" "
-        + "WHERE \"reportTasks\".\"taskUuid\" IN ( <foreignKeys> ) "
-        + "AND \"reportTasks\".\"reportUuid\" = reports.uuid";
-
-    public ReportsBatcher() {
-      super(sql, "foreignKeys", new ReportMapper(), "taskUuid");
-    }
-  }
-
-  public List<List<Report>> getReports(List<String> foreignKeys) {
-    final ForeignKeyBatcher<Report> tasksBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(ReportsBatcher.class);
-    return tasksBatcher.getByForeignKeys(foreignKeys);
-  }
-
-  public CompletableFuture<List<Report>> getReportsForTask(
-      @GraphQLRootContext Map<String, Object> context, String taskUuid) {
-    return new ForeignKeyFetcher<Report>().load(context, FkDataLoaderKey.TASK_REPORTS, taskUuid);
   }
 
 }
