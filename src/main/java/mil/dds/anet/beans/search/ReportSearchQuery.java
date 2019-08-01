@@ -333,8 +333,8 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
         orgUuid, includeOrgChildren, locationUuid, taskUuid, pendingApprovalOf, state,
-        cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid, authorizationGroupUuid,
-        sensitiveInfo, user, systemSearch);
+        engagementStatus, cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid,
+        authorizationGroupUuid, sensitiveInfo, user, systemSearch);
   }
 
   @Override
@@ -366,6 +366,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getTaskUuid(), other.getTaskUuid())
         && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())
         && Objects.equals(getState(), other.getState())
+        && Objects.equals(getEngagementStatus(), other.getEngagementStatus())
         && Objects.equals(getCancelledReason(), other.getCancelledReason())
         && Objects.equals(getTagUuid(), other.getTagUuid())
         && Objects.equals(getAuthorPositionUuid(), other.getAuthorPositionUuid())
@@ -381,6 +382,9 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     final ReportSearchQuery clone = (ReportSearchQuery) super.clone();
     if (state != null) {
       clone.setState(new ArrayList<>(state));
+    }
+    if (engagementStatus != null) {
+      clone.setEngagementStatus(new ArrayList<>(engagementStatus));
     }
     if (authorizationGroupUuid != null) {
       clone.setAuthorizationGroupUuid(new ArrayList<>(authorizationGroupUuid));
