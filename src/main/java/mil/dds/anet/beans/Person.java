@@ -46,6 +46,8 @@ public class Person extends AbstractAnetBean implements Principal, SubscribableO
 
   private List<PersonPositionHistory> previousPositions;
 
+  private String avatar;
+
   public Person() {
     this.pendingVerification = false; // Defaults
   }
@@ -216,8 +218,8 @@ public class Person extends AbstractAnetBean implements Principal, SubscribableO
   public AnetBeanList<Report> loadAuthoredReports(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAuthorUuid(uuid);
-    return AnetObjectEngine.getInstance().getReportDao().search(query,
-        DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return AnetObjectEngine.getInstance().getReportDao().search(query);
   }
 
   // TODO: batch load? (used in admin/MergePeople.js)
@@ -225,13 +227,30 @@ public class Person extends AbstractAnetBean implements Principal, SubscribableO
   public AnetBeanList<Report> loadAttendedReports(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAttendeeUuid(uuid);
-    return AnetObjectEngine.getInstance().getReportDao().search(query,
-        DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return AnetObjectEngine.getInstance().getReportDao().search(query);
+  }
+
+  @GraphQLQuery(name = "avatar")
+  public String getAvatar(@GraphQLArgument(name = "size", defaultValue = "256") int size) {
+    try {
+      return Utils.resizeImageBase64(this.avatar, size, size, "png");
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public String getAvatar() {
+    return this.avatar;
+  }
+
+  public void setAvatar(String avatar) {
+    this.avatar = avatar;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || !(o instanceof Person)) {
+    if (!(o instanceof Person)) {
       return false;
     }
     Person other = (Person) o;
@@ -241,7 +260,7 @@ public class Person extends AbstractAnetBean implements Principal, SubscribableO
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && (createdAt != null)
+        && Objects.equals(other.getAvatar(), avatar) && (createdAt != null)
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)
                 ? (updatedAt.equals(other.getUpdatedAt()))

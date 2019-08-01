@@ -5,18 +5,22 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -25,25 +29,36 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     super(qb);
   }
 
-  @Override
-  public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user,
-      boolean systemSearch) {
-    buildQuery(query, user, systemSearch);
-    return qb.buildAndRun(getDbHandle(), query, new ReportMapper());
+  @InTransaction
+  public AnetBeanList<Report> runSearch(
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
+    buildQuery(query);
+    outerQb.addSelectClause("*");
+    outerQb.addTotalCount();
+    outerQb.addFromClause("( " + qb.build() + " ) l");
+    outerQb.addSqlArgs(qb.getSqlArgs());
+    outerQb.addListArgs(qb.getListArgs());
+    addOrderByClauses(outerQb, query);
+    final AnetBeanList<Report> result =
+        outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
+    for (final Report report : result.getList()) {
+      report.setUser(query.getUser());
+    }
+    return result;
   }
 
-  @Override
-  protected final void buildQuery(ReportSearchQuery query) {
-    throw new UnsupportedOperationException();
-  }
-
-  protected void buildQuery(ReportSearchQuery query, Person user, boolean systemSearch) {
+  protected void buildQuery(ReportSearchQuery query) {
+    qb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
     qb.addFromClause("reports");
     qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
     qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
 
     if (query.isTextPresent()) {
       addTextQuery(query);
+    }
+
+    if (query.isBatchParamsPresent()) {
+      addBatchClause(query);
     }
 
     if (user != null && query.getSubscribed()) {
@@ -184,14 +199,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
               + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = ag.uuid"
               + " LEFT JOIN positions pos ON pos.uuid = agp.\"positionUuid\"");
       qb.addWhereClause("pos.\"currentPersonUuid\" = :userUuid");
-      qb.addSqlArg("userUuid", user.getUuid());
+      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
-    if (!systemSearch) {
+    if (!query.isSystemSearch()) {
       // Apply a filter to restrict access to other's draft, rejected or approved reports.
       // When the search is performed by the system (for instance by a worker, systemSearch = true)
       // do not apply this filter.
-      if (user == null) {
+      if (query.getUser() == null) {
         qb.addWhereClause("reports.state != :draftState");
         qb.addWhereClause("reports.state != :rejectedState");
         qb.addWhereClause("reports.state != :approvedState");
@@ -203,8 +218,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
             "((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorUuid\" = :userUuid))");
         qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-        qb.addSqlArg("userUuid", user.getUuid());
-        if (!AuthUtils.isAdmin(user)) {
+        qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+        if (!AuthUtils.isAdmin(query.getUser())) {
           // Admin users may access all approved reports, other users only owned approved reports
           qb.addWhereClause(
               "((reports.state != :approvedState) OR (reports.\"authorUuid\" = :userUuid))");
@@ -218,17 +233,86 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
   protected abstract void addTextQuery(ReportSearchQuery query);
 
+  protected abstract void addBatchClause(ReportSearchQuery query);
+
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
+      ReportSearchQuery query) {
+    qb.addBatchClause((AbstractBatchParams<Report, ReportSearchQuery>) query.getBatchParams(),
+        outerQb);
+  }
+
   protected abstract void addIncludeEngagementDayOfWeekQuery(ReportSearchQuery query);
 
   protected abstract void addEngagementDayOfWeekQuery(ReportSearchQuery query);
 
   protected abstract void addOrgUuidQuery(ReportSearchQuery query);
 
+  protected void addOrgUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
+      ReportSearchQuery query) {
+    if (!query.getIncludeOrgChildren()) {
+      qb.addWhereClause(
+          "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
+      qb.addSqlArg("orgUuid", query.getOrgUuid());
+    } else {
+      qb.addRecursiveClause(outerQb, "reports",
+          new String[] {"\"advisorOrganizationUuid\"", "\"principalOrganizationUuid\""},
+          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid());
+    }
+  }
+
   protected abstract void addAdvisorOrgUuidQuery(ReportSearchQuery query);
+
+  protected void addAdvisorOrgUuidQuery(
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
+    if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
+      qb.addWhereClause("reports.\"advisorOrganizationUuid\" IS NULL");
+    } else if (!query.getIncludeAdvisorOrgChildren()) {
+      qb.addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
+          query.getAdvisorOrgUuid());
+    } else {
+      qb.addRecursiveClause(outerQb, "reports", "\"advisorOrganizationUuid\"",
+          "advisor_parent_orgs", "organizations", "\"parentOrgUuid\"", "advisorOrganizationUuid",
+          query.getAdvisorOrgUuid());
+    }
+  }
 
   protected abstract void addPrincipalOrgUuidQuery(ReportSearchQuery query);
 
-  protected abstract void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
-      ReportSearchQuery query);
+  protected void addPrincipalOrgUuidQuery(
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
+    if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
+      qb.addWhereClause("reports.\"principalOrganizationUuid\" IS NULL");
+    } else if (!query.getIncludePrincipalOrgChildren()) {
+      qb.addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
+          query.getPrincipalOrgUuid());
+    } else {
+      qb.addRecursiveClause(outerQb, "reports", "\"principalOrganizationUuid\"",
+          "principal_parent_orgs", "organizations", "\"parentOrgUuid\"",
+          "principalOrganizationUuid", query.getPrincipalOrgUuid());
+    }
+  }
+
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
+    // Beware of the sort field names, they have to match what's in the selected fields of the inner
+    // query!
+    switch (query.getSortBy()) {
+      case CREATED_AT:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_createdAt\""));
+        break;
+      case RELEASED_AT:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_releasedAt\""));
+        break;
+      case UPDATED_AT:
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_updatedAt\""));
+        break;
+      case ENGAGEMENT_DATE:
+      default:
+        qb.addAllOrderByClauses(
+            getOrderBy(query.getSortOrder(), null, "\"reports_engagementDate\""));
+        break;
+    }
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, null, "reports_uuid"));
+  }
 
 }

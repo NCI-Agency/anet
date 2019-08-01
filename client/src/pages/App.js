@@ -44,12 +44,12 @@ class App extends Page {
     return API.query(
       /* GraphQL */ `
       me {
-        uuid, name, rank, role, emailAddress, status
+        uuid, name, rank, role, emailAddress, status, avatar(size: 32)
         position {
           uuid, name, code, type, status, isApprover
           organization {
             uuid, shortName,
-            descendantOrgs (query: { pageSize: 0 }) {
+            descendantOrgs {
               uuid
             }
           }

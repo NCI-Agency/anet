@@ -1,15 +1,28 @@
 package mil.dds.anet.test.beans;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.Objects;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.junit.Test;
 
 public class PersonTest extends BeanTester<Person> {
+
+  // 200 x 200 avatar
+  private static final String DEFAULT_AVATAR_PATH = "src/test/resources/assets/default_avatar.png";
 
   public static Person getJackJacksonStub() {
     final Person person = new Person();
@@ -50,6 +63,40 @@ public class PersonTest extends BeanTester<Person> {
   @Test
   public void deserializesFromJson() throws Exception {
     deserializesFromJson(getJackJacksonStub(), "testJson/people/jack.json");
+  }
+
+  @Test
+  public void testAvatarResizingNoAvatar() {
+    Person person = new Person();
+    person.setAvatar(null);
+    assertNull(person.getAvatar(32));
+  }
+
+  @Test
+  public void testAvatarResizingMalformedData() {
+    Person person = new Person();
+    person.setAvatar("malformedImageData");
+    assertNull(person.getAvatar(32));
+  }
+
+  @Test
+  public void testAvatarResizing() throws IOException {
+    Person person = new Person();
+    byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
+    String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
+    person.setAvatar(defaultAvatarData);
+
+    BufferedImage imageBinary = Utils.convert(person.getAvatar());
+    assertNotSame(32, imageBinary.getWidth());
+    assertNotSame(32, imageBinary.getHeight());
+
+    String resizedAvatar = person.getAvatar(32);
+
+    assertNotNull(resizedAvatar);
+    imageBinary = Utils.convert(resizedAvatar);
+
+    assertEquals(32, imageBinary.getWidth());
+    assertEquals(32, imageBinary.getHeight());
   }
 
   public static Person getRogerRogwell() {
@@ -189,6 +236,9 @@ public class PersonTest extends BeanTester<Person> {
     } else if (!Objects.equals(a.getUpdatedAt(), b.getUpdatedAt())) {
       System.out.println(
           String.format("Unequal because updatedAt %s != %s", a.getUpdatedAt(), b.getCreatedAt()));
+    } else if (!Objects.equals(a.getAvatar(), b.getAvatar())) {
+      System.out
+          .println(String.format("Unequal because avatar %s != %s", a.getAvatar(), b.getAvatar()));
     }
 
     if (a.equals(b)) {

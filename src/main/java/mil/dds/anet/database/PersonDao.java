@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import java.lang.invoke.MethodHandles;
+import java.sql.Blob;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -14,18 +16,24 @@ import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class PersonDao extends AnetSubscribableObjectDao<Person> {
+public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
       "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
-      "pendingVerification", "createdAt", "updatedAt"};
+      "pendingVerification", "createdAt", "updatedAt", "avatar"};
   public static String TABLE_NAME = "people";
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public Person getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
@@ -68,9 +76,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
     StringBuilder sql = new StringBuilder();
     sql.append("/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-        + "gender, country, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
+        + "gender, country, avatar, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
-        + ":gender, :country, ");
+        + ":gender, :country, :avatar, ");
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("CAST(:endOfTourDate AS datetime2), ");
@@ -78,13 +86,13 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
       sql.append(":endOfTourDate, ");
     }
     sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
-
     getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
-        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+        .bind("role", DaoUtils.getEnumId(p.getRole()))
+        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
     return p;
   }
 
@@ -93,9 +101,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
     StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, "
         + "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
+        + "\"avatar\" = :avatar,"
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, ");
+
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("\"endOfTourDate\" = CAST(:endOfTourDate AS datetime2) ");
@@ -103,20 +113,18 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
       sql.append("\"endOfTourDate\" = :endOfTourDate ");
     }
     sql.append("WHERE uuid = :uuid");
+
     return getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
-        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+        .bind("role", DaoUtils.getEnumId(p.getRole()))
+        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
   }
 
   @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
-  public AnetBeanList<Person> search(PersonSearchQuery query, Person user) {
-    return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query, user);
+  public AnetBeanList<Person> search(PersonSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
   }
 
   public List<Person> findByDomainUsername(String domainUsername) {
@@ -138,15 +146,15 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
           + "FROM people WHERE people.uuid IN ( "
           + "SELECT top(:maxResults) \"reportPeople\".\"personUuid\" "
           + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid " + "AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" " + "ORDER BY MAX(reports.\"createdAt\") DESC" + ")";
+          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
+          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC)";
     } else {
       sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
-          + "FROM people WHERE people.uuid IN ( " + "SELECT \"reportPeople\".\"personUuid\" "
+          + "FROM people WHERE people.uuid IN ( SELECT \"reportPeople\".\"personUuid\" "
           + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid " + "AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" " + "ORDER BY MAX(reports.\"createdAt\") DESC "
-          + "LIMIT :maxResults" + ")";
+          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
+          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC "
+          + "LIMIT :maxResults)";
     }
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).map(new PersonMapper()).list();
@@ -157,7 +165,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
     getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
         + "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
         + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
-        + ")) OR (" + "\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
+        + ")) OR (\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
         + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
         + ")) OR ("
         + "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("
@@ -227,4 +235,20 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
   public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid");
   }
+
+  private Blob convertImageToBlob(String image) {
+    Blob avatar = null;
+    try {
+      avatar = this.getDbHandle().getConnection().createBlob();
+      if (image != null) {
+        String resizedImage = Utils.resizeImageBase64(image, 256, 256, "png");
+        avatar.setBytes(1l, resizedImage.getBytes());
+      }
+    } catch (Exception e) {
+      logger.error("Failed to save avatar: ", e);
+    }
+
+    return avatar;
+  }
+
 }

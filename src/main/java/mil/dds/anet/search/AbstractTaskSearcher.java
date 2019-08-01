@@ -4,6 +4,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -38,6 +39,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addTextQuery(query);
     }
 
+    if (query.isBatchParamsPresent()) {
+      addBatchClause(query);
+    }
+
     if (user != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
           AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
@@ -69,9 +74,30 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   protected abstract void addTextQuery(TaskSearchQuery query);
 
-  protected abstract void addResponsibleOrgUuidQuery(TaskSearchQuery query);
+  @SuppressWarnings("unchecked")
+  protected void addBatchClause(TaskSearchQuery query) {
+    qb.addBatchClause((AbstractBatchParams<Task, TaskSearchQuery>) query.getBatchParams());
+  }
 
-  protected abstract void addCustomFieldRef1UuidQuery(TaskSearchQuery query);
+  protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
+    if (query.getIncludeChildrenOrgs()) {
+      qb.addRecursiveClause(null, "tasks", "\"organizationUuid\"", "parent_orgs", "organizations",
+          "\"parentOrgUuid\"", "orgUuid", query.getResponsibleOrgUuid());
+    } else {
+      qb.addEqualsClause("orgUuid", "tasks.\"organizationUuid\"", query.getResponsibleOrgUuid());
+    }
+  }
+
+  protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
+    if (query.getCustomFieldRef1Recursively()) {
+      qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks",
+          "organizations", "\"parentOrgUuid\"", "customFieldRef1Uuid",
+          query.getCustomFieldRef1Uuid());
+    } else {
+      qb.addEqualsClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
+          query.getCustomFieldRef1Uuid());
+    }
+  }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {
     switch (query.getSortBy()) {
@@ -83,8 +109,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(
-            getOrderBy(query.getSortOrder(), "tasks", "\"shortName\"", "\"longName\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "\"shortName\""));
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "tasks", "uuid"));

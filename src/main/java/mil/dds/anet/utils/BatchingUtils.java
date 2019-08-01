@@ -24,6 +24,11 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderOptions;
@@ -118,6 +123,16 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.ORGANIZATIONS_SEARCH.toString(), new DataLoader<>(
+        new BatchLoader<ImmutablePair<String, OrganizationSearchQuery>, List<Organization>>() {
+          @Override
+          public CompletionStage<List<List<Organization>>> load(
+              List<ImmutablePair<String, OrganizationSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getOrganizationDao().getOrganizationsBySearch(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ORGANIZATION_APPROVAL_STEPS.toString(),
         new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
           @Override
@@ -159,6 +174,15 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.POSITIONS_SEARCH.toString(), new DataLoader<>(
+        new BatchLoader<ImmutablePair<String, PositionSearchQuery>, List<Position>>() {
+          @Override
+          public CompletionStage<List<List<Position>>> load(
+              List<ImmutablePair<String, PositionSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getPositionDao().getPositionsBySearch(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_ASSOCIATED_POSITIONS.toString(),
         new DataLoader<>(new BatchLoader<String, List<Position>>() {
           @Override
@@ -192,6 +216,15 @@ public final class BatchingUtils {
           public CompletionStage<List<Report>> load(List<String> keys) {
             return CompletableFuture.supplyAsync(() -> engine.getReportDao().getByIds(keys),
                 dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.REPORTS_SEARCH.toString(),
+        new DataLoader<>(new BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>() {
+          @Override
+          public CompletionStage<List<List<Report>>> load(
+              List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getReportDao().getReportsBySearch(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_REPORT_ACTIONS.toString(),
@@ -259,12 +292,13 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.TASK_REPORTS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Report>>() {
+    dataLoaderRegistry.register(SqDataLoaderKey.TASKS_SEARCH.toString(),
+        new DataLoader<>(new BatchLoader<ImmutablePair<String, TaskSearchQuery>, List<Task>>() {
           @Override
-          public CompletionStage<List<List<Report>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(() -> engine.getTaskDao().getReports(foreignKeys),
-                dispatcherService);
+          public CompletionStage<List<List<Task>>> load(
+              List<ImmutablePair<String, TaskSearchQuery>> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getTaskDao().getTasksBySearch(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.TASK_RESPONSIBLE_POSITIONS.toString(),

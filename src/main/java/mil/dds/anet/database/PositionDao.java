@@ -22,13 +22,16 @@ import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class PositionDao extends AnetSubscribableObjectDao<Position> {
+public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid"};
@@ -79,7 +82,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
 
   static class SelfIdBatcher extends IdBatcher<Position> {
     private static final String sql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
-        + "FROM positions " + "WHERE positions.uuid IN ( <uuids> )";
+        + "FROM positions WHERE positions.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new PositionMapper());
@@ -123,6 +126,25 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
     final ForeignKeyBatcher<Position> currentPositionForPersonBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(PositionsBatcher.class);
     return currentPositionForPersonBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  static class PositionSearchBatcher extends SearchQueryBatcher<Position, PositionSearchQuery> {
+    public PositionSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getPositionDao());
+    }
+  }
+
+  public List<List<Position>> getPositionsBySearch(
+      List<ImmutablePair<String, PositionSearchQuery>> foreignKeys) {
+    final PositionSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(PositionSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Position>> getPositionsBySearch(Map<String, Object> context,
+      String uuid, PositionSearchQuery query) {
+    return new SearchQueryFetcher<Position, PositionSearchQuery>().load(context,
+        SqDataLoaderKey.POSITIONS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
   /*
@@ -196,14 +218,14 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
     String sql;
     if (DaoUtils.isMsSql()) {
       sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") " + "VALUES(null, "
+          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
           + "(SELECT TOP(1)\"personUuid\" FROM \"peoplePositions\" "
-          + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), " + ":createdAt)";
+          + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), :createdAt)";
     } else {
       sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") " + "VALUES(null, "
+          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
           + "(SELECT \"personUuid\" FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
-          + "ORDER BY \"createdAt\" DESC LIMIT 1), " + ":createdAt)";
+          + "ORDER BY \"createdAt\" DESC LIMIT 1), :createdAt)";
     }
     getDbHandle().createUpdate(sql).bind("positionUuid", positionUuid)
         .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
@@ -261,7 +283,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
             + "FROM \"peoplePositions\" "
             + "LEFT JOIN people ON \"peoplePositions\".\"personUuid\" = people.uuid "
             + "WHERE \"peoplePositions\".\"positionUuid\" = :positionUuid "
-            + "AND \"peoplePositions\".\"personUuid\" IS NOT NULL " + "ORDER BY \"createdAt\" DESC")
+            + "AND \"peoplePositions\".\"personUuid\" IS NOT NULL ORDER BY \"createdAt\" DESC")
         .bind("positionUuid", positionUuid).map(new PersonMapper()).list();
     // remove the last person, as that's the current position holder
     if (people.size() > 0) {
@@ -289,6 +311,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
         + "  positions.uuid = \"positionRelationships\".\"positionUuid_b\""
         + "  AND \"positionRelationships\".\"positionUuid_a\" IN ( <foreignKeys> ) ))";
     private static final Map<String, Object> additionalParams = new HashMap<>();
+
     static {
       additionalParams.put("deleted", false);
     }
@@ -322,7 +345,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
     Collections.sort(uuids);
     return getDbHandle()
         .createUpdate("/* deletePositionAssociation */ UPDATE \"positionRelationships\" "
-            + "SET deleted = :deleted, \"updatedAt\" = :updatedAt " + "WHERE ("
+            + "SET deleted = :deleted, \"updatedAt\" = :updatedAt WHERE ("
             + "  (\"positionUuid_a\" = :positionUuid_a AND \"positionUuid_b\" = :positionUuid_b)"
             + "OR "
             + "  (\"positionUuid_a\" = :positionUuid_b AND \"positionUuid_b\" = :positionUuid_a)"
@@ -336,13 +359,13 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
   public List<Position> getEmptyPositions(PositionType type) {
     return getDbHandle()
         .createQuery("SELECT " + POSITIONS_FIELDS + " FROM positions "
-            + "WHERE \"currentPersonUuid\" IS NULL " + "AND positions.type = :type")
+            + "WHERE \"currentPersonUuid\" IS NULL AND positions.type = :type")
         .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
   }
 
-  public AnetBeanList<Position> search(PositionSearchQuery query, Person user) {
-    return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query,
-        user);
+  @Override
+  public AnetBeanList<Position> search(PositionSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query);
   }
 
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
@@ -362,7 +385,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
   public Position getCurrentPositionForPerson(String personUuid) {
     List<Position> positions = getDbHandle()
         .createQuery("/* getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS
-            + " FROM positions " + "WHERE \"currentPersonUuid\" = :personUuid")
+            + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).list();
     if (positions.size() == 0) {
       return null;
@@ -411,7 +434,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
         "JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = %1$s  AND pp.\"createdAt\" <= %2$s "
             + " LEFT JOIN \"peoplePositions\" maxPp ON"
             + "   maxPp.\"positionUuid\" = pp.\"positionUuid\" AND maxPp.\"createdAt\" > pp.\"createdAt\" AND maxPp.\"createdAt\" <= %2$s "
-            + " WHERE pp.\"positionUuid\" = :%3$s " + " AND maxPp.\"createdAt\" IS NULL ",
+            + " WHERE pp.\"positionUuid\" = :%3$s AND maxPp.\"createdAt\" IS NULL ",
         personJoinColumn, dateFilterColumn, placeholderName);
   }
 

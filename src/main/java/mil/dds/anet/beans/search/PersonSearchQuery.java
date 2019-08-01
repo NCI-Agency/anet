@@ -88,7 +88,7 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     this.locationUuid = locationUuid;
   }
 
-  public Boolean getMatchPositionName() {
+  public boolean getMatchPositionName() {
     return Boolean.TRUE.equals(matchPositionName);
   }
 

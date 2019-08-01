@@ -31,11 +31,12 @@ assets:
 # Settings for the SMTP server to send email 
 smtp:
   hostname: ${ANET_SMTP_SERVER}
-  port: 25
+  port: ${ANET_SMTP_PORT}
   username: ${ANET_SMTP_USERNAME}
   password: ${ANET_SMTP_PASSWORD}
-  startTls: true
-  disabled: true
+  sslTrust: ${ANET_SMTP_SSLTRUST}
+  startTls: ${ANET_SMTP_STARTTLS}
+  disabled: ${ANET_SMTP_DISABLE}
   nbOfHoursForStaleEmails: 72
 
 # The email address that all automated emails should come from. 
@@ -132,7 +133,7 @@ logging:
           currentLogFilename: ./logs/dbLog.log
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
-          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
+          logFormat: '%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}\t%p\t%m%n'
     "io.dropwizard.assets.AssetsBundle" : TRACE
     "io.dropwizard.assets.*" : TRACE
     "waffle.servlet.NegotiateSecurityFilter" : TRACE
@@ -405,7 +406,7 @@ dictionary:
         url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
         options:
           layers: GEBCO_LATEST
-          format: "image/png"
+          format: "image/png" 
 
 #  automaticallyInactivateUsers:
 #    emailRemindersDaysPrior: [15, 30, 45]

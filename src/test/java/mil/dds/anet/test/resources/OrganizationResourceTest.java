@@ -135,9 +135,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Verify task was saved.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
         new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(updated.loadTasks(context)).isNotNull();
-    assertThat(updated.loadTasks(context).size()).isEqualTo(1);
-    assertThat(updated.loadTasks(context).get(0).getUuid()).isEqualTo(task.getUuid());
+    final List<Task> tasks = updated.loadTasks(context).get();
+    assertThat(tasks).isNotNull();
+    assertThat(tasks.size()).isEqualTo(1);
+    assertThat(tasks.get(0).getUuid()).isEqualTo(task.getUuid());
 
     // Change the approval steps.
     step1.setApprovers(ImmutableList.of(admin.loadPosition()));

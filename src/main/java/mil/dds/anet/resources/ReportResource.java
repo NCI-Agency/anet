@@ -385,6 +385,7 @@ public class ReportResource {
     return existing;
   }
 
+  @SuppressWarnings("checkstyle:MissingSwitchDefault")
   private void assertCanUpdateReport(Report report, Person editor) {
     String permError = "You do not have permission to edit this report. ";
     switch (report.getState()) {
@@ -832,7 +833,8 @@ public class ReportResource {
   @GraphQLQuery(name = "reportList")
   public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
-    return dao.search(query, DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return dao.search(query);
   }
 
   /**

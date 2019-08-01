@@ -14,13 +14,6 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
   }
 
   @Override
-  protected void buildQuery(PersonSearchQuery query, Person user) {
-    qb.addSelectClause(PersonDao.PERSON_FIELDS);
-    super.buildQuery(query, user);
-    qb.addTotalCount();
-  }
-
-  @Override
   protected void addTextQuery(PersonSearchQuery query) {
     final boolean doSoundex = !query.isSortByPresent();
     final String text = query.getText();
@@ -59,20 +52,6 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
       qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
       qb.addSqlArg("freetextQuery", text);
     }
-  }
-
-  @Override
-  protected void addOrgUuidQuery(PersonSearchQuery query) {
-    if (!query.getIncludeChildOrgs()) {
-      qb.addWhereClause("positions.organizationUuid = :orgUuid");
-    } else {
-      qb.addWithClause("parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
-          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
-          + ")");
-      qb.addWhereClause("positions.organizationUuid IN (SELECT uuid FROM parent_orgs)");
-    }
-    qb.addSqlArg("orgUuid", query.getOrgUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {

@@ -34,9 +34,9 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.graphql.DateTimeMapper;
-import mil.dds.anet.graphql.OutputTransformers.JsonToXlsxTransformer;
-import mil.dds.anet.graphql.OutputTransformers.JsonToXmlTransformer;
-import mil.dds.anet.graphql.OutputTransformers.XsltXmlTransformer;
+import mil.dds.anet.graphql.outputtransformers.JsonToXlsxTransformer;
+import mil.dds.anet.graphql.outputtransformers.JsonToXmlTransformer;
+import mil.dds.anet.graphql.outputtransformers.XsltXmlTransformer;
 import mil.dds.anet.utils.BatchingUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dataloader.DataLoaderRegistry;
@@ -228,6 +228,7 @@ public class GraphQlResource {
           Thread.yield();
           Thread.sleep(50);
         } catch (InterruptedException ignored) {
+          // just retry
         }
 
         // Dispatch all our data loaders until the request is done;

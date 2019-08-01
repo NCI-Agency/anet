@@ -19,7 +19,7 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-<#assign reportAuthor = report.loadAuthor(context).get()>
+<#assign reportAuthor = (report.loadAuthor(context).get())!>
 Hi ${reportAuthor.name},
 
 <p>${editor.name} edited your report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>. To review the changes, <a href="${serverUrl}/reports/${report.uuid}">click here</a>.</p>

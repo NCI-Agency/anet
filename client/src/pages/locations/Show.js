@@ -19,6 +19,12 @@ import { Location, Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 
 const Coordinate = ({ coord }) => {
   const parsedCoord =
@@ -144,6 +150,12 @@ class BaseLocationShow extends Page {
                   queryParams={{ locationUuid: this.props.match.params.uuid }}
                   paginationKey={`r_${this.props.match.params.uuid}`}
                   mapId="reports"
+                  viewFormats={[
+                    FORMAT_CALENDAR,
+                    FORMAT_SUMMARY,
+                    FORMAT_TABLE,
+                    FORMAT_MAP
+                  ]}
                 />
               </Fieldset>
             </div>

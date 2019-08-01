@@ -29,5 +29,6 @@ person(uuid:"${personUuid}") {
             name
         }
     }}
-
+    previousPositions { startTime, endTime, position { uuid, name } }
+    notes { uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
 }

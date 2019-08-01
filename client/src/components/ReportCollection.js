@@ -69,7 +69,7 @@ export default class ReportCollection extends Component {
   }
 
   static defaultProps = {
-    viewFormats: [FORMAT_CALENDAR, FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP]
+    viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_CALENDAR, FORMAT_MAP]
   }
   static VIEW_FORMATS_WITH_PAGINATION = [FORMAT_SUMMARY, FORMAT_TABLE]
 
@@ -79,7 +79,7 @@ export default class ReportCollection extends Component {
     super(props)
 
     this.state = {
-      viewFormat: this.props.viewFormats[1]
+      viewFormat: this.props.viewFormats[0]
     }
   }
 
@@ -110,14 +110,14 @@ export default class ReportCollection extends Component {
                   onChange={this.changeViewFormat}
                   className="hide-for-print"
                 >
-                  {this.props.viewFormats.includes(FORMAT_CALENDAR) && (
-                    <Button value={FORMAT_CALENDAR}>Calendar</Button>
+                  {this.props.viewFormats.includes(FORMAT_TABLE) && (
+                    <Button value={FORMAT_TABLE}>Table</Button>
                   )}
                   {this.props.viewFormats.includes(FORMAT_SUMMARY) && (
                     <Button value={FORMAT_SUMMARY}>Summary</Button>
                   )}
-                  {this.props.viewFormats.includes(FORMAT_TABLE) && (
-                    <Button value={FORMAT_TABLE}>Table</Button>
+                  {this.props.viewFormats.includes(FORMAT_CALENDAR) && (
+                    <Button value={FORMAT_CALENDAR}>Calendar</Button>
                   )}
                   {this.props.viewFormats.includes(FORMAT_MAP) && (
                     <Button value={FORMAT_MAP}>Map</Button>

@@ -215,6 +215,8 @@ async function validateUserCanEditUserForCurrentPage(t) {
 
   let fakeBioText = `fake bio ${uuidv4()} `
   await $bioTextArea.sendKeys(fakeBioText)
+  // wait for component to update (internal) state
+  await t.context.driver.sleep(shortWaitMs)
 
   await t.context.pageHelpers.clickFormBottomSubmit()
   await t.context.driver.sleep(shortWaitMs) // wait for transition

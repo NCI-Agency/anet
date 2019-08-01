@@ -1,357 +1,211 @@
-import classNames from "classnames"
-import { convertToHTML } from "draft-convert"
-import {
-  CompositeDecorator,
-  ContentState,
-  convertFromHTML,
-  Editor,
-  EditorState,
-  getDefaultKeyBinding,
-  Modifier,
-  RichUtils
-} from "draft-js"
-import "draft-js/dist/Draft.css"
-import PropTypes from "prop-types"
 import React, { Component } from "react"
-import "./RichTextEditor.css"
+import PropTypes from "prop-types"
+import _isEqual from "lodash/isEqual"
+import { convertFromHTML, convertToHTML } from "draft-convert"
+import { convertToRaw, convertFromRaw } from "draft-js"
+import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+
+import Link from "components/editor/Link"
+import LinkSource from "components/editor/LinkSource"
+import linkifyPlugin from "components/editor/plugins/linkifyPlugin"
+
+import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
+import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
+
+import "draft-js/dist/Draft.css"
+import "draftail/dist/draftail.css"
+import "draft-js-side-toolbar-plugin/lib/plugin.css"
+import "components/RichTextEditor.css"
+
+import {
+  ItalicButton,
+  BoldButton,
+  UnderlineButton,
+  HeadlineOneButton,
+  HeadlineTwoButton,
+  UnorderedListButton,
+  OrderedListButton,
+  BlockquoteButton
+} from "draft-js-buttons"
+
+const linkify = linkifyPlugin()
+const newlinePlugin = createNewlinePlugin()
+
+const BLOCK_TYPES = [
+  { type: BLOCK_TYPE.HEADER_ONE },
+  { type: BLOCK_TYPE.HEADER_TWO },
+  { type: BLOCK_TYPE.HEADER_THREE },
+  { type: BLOCK_TYPE.BLOCKQUOTE },
+  {
+    type: BLOCK_TYPE.UNORDERED_LIST_ITEM,
+    icon: [
+      "m 96,107.19101 a 96,93.417462 0 1 0 96,93.41746 96,93.417462 0 0 0 -96,-93.41746 z m 0,311.39154 A 96,93.417462 0 1 0 192,512 96,93.417462 0 0 0 96,418.58255 Z m 0,311.39152 a 96,93.417462 0 1 0 96,93.41747 96,93.417462 0 0 0 -96,-93.41747 z m 896,31.13916 H 352 a 32,31.139153 0 0 0 -32,31.13915 v 62.27831 a 32,31.139153 0 0 0 32,31.13914 h 640 a 32,31.139153 0 0 0 32,-31.13914 v -62.27831 a 32,31.139153 0 0 0 -32,-31.13915 z m 0,-622.78306 H 352 a 32,31.139153 0 0 0 -32,31.13915 v 62.2783 a 32,31.139153 0 0 0 32,31.13916 h 640 a 32,31.139153 0 0 0 32,-31.13916 v -62.2783 a 32,31.139153 0 0 0 -32,-31.13915 z m 0,311.39153 H 352 a 32,31.139153 0 0 0 -32,31.13915 v 62.27831 a 32,31.139153 0 0 0 32,31.13915 h 640 a 32,31.139153 0 0 0 32,-31.13915 V 480.86085 A 32,31.139153 0 0 0 992,449.7217 Z"
+    ]
+  },
+  {
+    type: BLOCK_TYPE.ORDERED_LIST_ITEM,
+    icon: [
+      "m 123.54,843.67568 35,-46.07064 a 39.84,45.544767 0 0 0 10.14,-32.4438 v -7.56793 C 168.68,740.78839 161,731.64286 146,731.64286 H 32 a 16,18.291072 0 0 0 -16,18.29106 v 36.58216 a 16,18.291072 0 0 0 16,18.29106 h 45.66 a 314.82,359.89971 0 0 0 -22,28.14539 l -11.22,16.00468 c -8,11.59196 -10.5,23.16107 -5.6,34.02139 l 2.1,4.41272 c 6,13.16958 12.58,18.01671 24.5,18.01671 h 9.46 c 20.66,0 31.88,5.57879 31.88,20.78323 0,10.79175 -8.4,18.79409 -28.72,18.79409 a 83.08,94.976387 0 0 1 -30.94,-7.13353 c -12.98,-8.87118 -23.48,-8.00234 -31.2,7.13353 L 4.74,966.27156 c -7.44,14.01554 -6.38,26.79643 5.26,36.44494 15.42,10.7232 40.76,21.5835 74,21.5835 68.32,0 97,-52.01524 97,-100.87526 -0.06,-32.87821 -18.24,-68.04278 -57.46,-79.74906 z M 992,438.98572 H 352 a 32,36.582142 0 0 0 -32,36.58214 v 73.16428 a 32,36.582142 0 0 0 32,36.58215 h 640 a 32,36.582142 0 0 0 32,-36.58215 V 475.56786 A 32,36.582142 0 0 0 992,438.98572 Z M 992,73.16428 H 352 a 32,36.582142 0 0 0 -32,36.58214 v 73.1643 a 32,36.582142 0 0 0 32,36.58214 h 640 a 32,36.582142 0 0 0 32,-36.58214 v -73.1643 A 32,36.582142 0 0 0 992,73.16428 Z m 0,731.64286 H 352 a 32,36.582142 0 0 0 -32,36.58214 v 73.1643 a 32,36.582142 0 0 0 32,36.58214 h 640 a 32,36.582142 0 0 0 32,-36.58214 v -73.1643 a 32,36.582142 0 0 0 -32,-36.58214 z m -960,-512.15 h 128 a 16,18.291072 0 0 0 16,-18.29106 V 237.78392 A 16,18.291072 0 0 0 160,219.49286 H 128 V 18.29108 A 16,18.291072 0 0 0 112,0 H 64 A 16,18.291072 0 0 0 49.72,10.10583 l -16,36.58214 A 16,18.291072 0 0 0 48,73.16428 H 64 V 219.49286 H 32 a 16,18.291072 0 0 0 -16,18.29106 v 36.58216 a 16,18.291072 0 0 0 16,18.29106 z M 24.18,658.47858 H 160 A 16,18.291072 0 0 0 176,640.1875 V 603.60536 A 16,18.291072 0 0 0 160,585.31429 H 82.64 c 6.58,-23.5269 96.68,-42.70966 96.68,-129.04351 0,-66.44231 -50,-90.44936 -88.94,-90.44936 -42.72,0 -67.6,22.86386 -80.92,42.86971 -8.74,12.78089 -6,24.7844 5.6,35.14172 l 17.16,15.73032 c 11.22,10.42591 22,5.64737 32.24,-5.57878 a 26.88,30.729 0 0 1 18.92,-8.77971 c 6.66,0 18.56,3.56676 18.56,20.00586 C 102,494.29334 0,515.14516 0,623.24539 v 9.14554 c 0,16.9421 10.16,26.08765 24.18,26.08765 z"
+    ]
+  }
+]
+
+const INLINE_STYLES = [
+  { type: INLINE_STYLE.BOLD },
+  { type: INLINE_STYLE.ITALIC },
+  {
+    type: INLINE_STYLE.UNDERLINE,
+    icon: [
+      "m -110.45248,-36.817494 h 28.503379 v 25.631677 h -28.503379 z",
+      "m 529.75865,840.37772 c 158.31765,0 286.98061,-119.02958 286.98061,-265.4935 V 220.89293 H 697.16399 v 353.99129 c 0,85.4004 -75.09325,154.8712 -167.40534,154.8712 -92.3121,0 -167.40535,-69.4708 -167.40535,-154.8712 V 220.89293 H 242.77804 v 353.99129 c 0,146.46392 128.66297,265.4935 286.98061,265.4935 z m -334.81072,88.49784 v 88.49774 h 669.62145 v -88.49774 z"
+    ]
+  }
+]
+
+const ENTITY_CONTROL = {
+  LINK: {
+    type: ENTITY_TYPE.LINK,
+    description: "Link",
+    label: "Add link",
+    icon: [
+      "M440.236 635.766c-13.31 0-26.616-5.076-36.77-15.23-95.134-95.136-95.134-249.934 0-345.070l192-192c46.088-46.086 107.36-71.466 172.534-71.466s126.448 25.38 172.536 71.464c95.132 95.136 95.132 249.934 0 345.070l-87.766 87.766c-20.308 20.308-53.23 20.308-73.54 0-20.306-20.306-20.306-53.232 0-73.54l87.766-87.766c54.584-54.586 54.584-143.404 0-197.99-26.442-26.442-61.6-41.004-98.996-41.004s-72.552 14.562-98.996 41.006l-192 191.998c-54.586 54.586-54.586 143.406 0 197.992 20.308 20.306 20.306 53.232 0 73.54-10.15 10.152-23.462 15.23-36.768 15.23z",
+      "M256 1012c-65.176 0-126.45-25.38-172.534-71.464-95.134-95.136-95.134-249.934 0-345.070l87.764-87.764c20.308-20.306 53.234-20.306 73.54 0 20.308 20.306 20.308 53.232 0 73.54l-87.764 87.764c-54.586 54.586-54.586 143.406 0 197.992 26.44 26.44 61.598 41.002 98.994 41.002s72.552-14.562 98.998-41.006l192-191.998c54.584-54.586 54.584-143.406 0-197.992-20.308-20.308-20.306-53.232 0-73.54 20.306-20.306 53.232-20.306 73.54 0.002 95.132 95.134 95.132 249.932 0.002 345.068l-192.002 192c-46.090 46.088-107.364 71.466-172.538 71.466z"
+    ],
+    source: LinkSource,
+    decorator: Link,
+    attributes: ["url"],
+    whitelist: {
+      href: "^(?![#/])"
+    }
+  }
+}
+
+const importerConfig = {
+  htmlToEntity: (nodeName, node, createEntity) => {
+    // a tags will become LINK entities, marked as mutable, with only the URL as data.
+    if (nodeName === "a") {
+      return createEntity(ENTITY_TYPE.LINK, "MUTABLE", { url: node.href })
+    }
+
+    if (nodeName === "hr") {
+      return createEntity(ENTITY_TYPE.HORIZONTAL_RULE, "IMMUTABLE", {})
+    }
+
+    return null
+  },
+  htmlToBlock: nodeName => {
+    if (nodeName === "hr" || nodeName === "img") {
+      // "atomic" blocks is how Draft.js structures block-level entities.
+      return "atomic"
+    }
+
+    return null
+  }
+}
+
+const exporterConfig = {
+  blockToHTML: block => {
+    if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
+      return <blockquote />
+    }
+
+    // Discard atomic blocks, as they get converted based on their entity.
+    if (block.type === BLOCK_TYPE.ATOMIC) {
+      return {
+        start: "",
+        end: ""
+      }
+    }
+
+    return null
+  },
+
+  entityToHTML: (entity, originalText) => {
+    if (entity.type === ENTITY_TYPE.LINK) {
+      return <a href={entity.data.url}>{originalText}</a>
+    }
+
+    if (entity.type === ENTITY_TYPE.HORIZONTAL_RULE) {
+      return <hr />
+    }
+
+    return originalText
+  }
+}
+
+const fromHTML = html => convertToRaw(convertFromHTML(importerConfig)(html))
+const toHTML = raw =>
+  raw ? convertToHTML(exporterConfig)(convertFromRaw(raw)) : ""
 
 class RichTextEditor extends Component {
-  static propTypes = {
-    value: PropTypes.string,
-    onChange: PropTypes.func,
-    onHandleBlur: PropTypes.func,
-    className: PropTypes.string
-  }
-
   constructor(props) {
     super(props)
-    const decorator = new CompositeDecorator([
-      {
-        strategy: findImageEntities,
-        component: ReactImage
-      }
-    ])
 
     this.state = {
-      editorState: EditorState.createEmpty(decorator),
-      decorator,
-      isLoaded: false
+      sideToolbarPlugin: createSideToolbarPlugin(),
+      content: {}
     }
-    this.handleOnChangeHTML = this._handleOnChangeHTML.bind(this)
-    this.handleKeyCommand = this._handleKeyCommand.bind(this)
-    this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this)
-    this.toggleBlockType = this._toggleBlockType.bind(this)
-    this.toggleInlineStyle = this._toggleInlineStyle.bind(this)
-    this.setEditorStateFromHTML = this._setEditorStateFromHTML.bind(this)
-    this.initializeEditorState = this._initializeEditorState.bind(this)
-
     this.focus = () => this.refs.editor.focus()
-    this.onChange = editorState => this.setState({ editorState })
-    this.onBlur = editorState => {
-      this.handleOnChangeHTML(editorState)
-      if (this.props.onHandleBlur) {
-        this.props.onHandleBlur(editorState)
-      }
-    }
   }
 
-  componentDidUpdate() {
-    this.initializeEditorState()
-  }
-
-  componentDidMount() {
-    this.initializeEditorState()
-  }
-
-  _initializeEditorState() {
-    const { isLoaded } = this.state
-    const { value } = this.props
-    const valueString = value || ""
-    if (!isLoaded && valueString.length > 0) {
-      this.setState({ isLoaded: true }, this.setEditorStateFromHTML(value))
-    }
-  }
-
-  _handleOnChangeHTML() {
-    const { editorState } = this.state
-    const html = convertToHTML({
-      entityToHTML: (entity, originalText) => {
-        if (entity.type === "IMAGE") {
-          const { src, width, height, alt } = entity.data
-          return (
-            <img
-              src={imageDataSrc(src)}
-              width={width}
-              height={height}
-              alt={alt}
-            />
-          )
-        }
-        return originalText
-      }
-    })(editorState.getCurrentContent())
-    this.props.onChange(html)
-  }
-
-  pushEditorState = contentState => {
-    const { editorState } = this.state
-    const newState = Modifier.replaceWithFragment(
-      editorState.getCurrentContent(),
-      editorState.getSelection(),
-      contentState.getBlockMap()
-    )
-    this.onChange(EditorState.push(editorState, newState, "insert-fragment"))
-  }
-
-  handlePastedText = (text, html) => {
-    const htmlRegex = new RegExp(/<[a-z][\s\S]*>/i)
-    if (htmlRegex.test(html)) {
-      this.setEditorStateFromHTML(html)
-    } else {
-      this.setEditorStateFromText(text)
-    }
-    return true
-  }
-
-  setEditorStateFromText(text) {
-    const contentState = ContentState.createFromText(text)
-    this.pushEditorState(contentState)
-  }
-
-  _setEditorStateFromHTML(html) {
-    const blocksFromHTML = convertFromHTML(html)
-    if (blocksFromHTML.contentBlocks === null) {
-      return
-    }
-    const contentState = ContentState.createFromBlockArray(
-      blocksFromHTML.contentBlocks,
-      blocksFromHTML.entityMap
-    )
-    this.pushEditorState(contentState)
-  }
-
-  _handleKeyCommand(command, editorState) {
-    const newState = RichUtils.handleKeyCommand(editorState, command)
-    if (newState) {
-      this.onChange(newState)
-      return true
-    }
-    return false
-  }
-
-  _mapKeyToEditorCommand(e) {
-    if (e.keyCode === 9 /* TAB */) {
-      const newEditorState = RichUtils.onTab(
-        e,
-        this.state.editorState,
-        4 /* maxDepth */
-      )
-      if (newEditorState !== this.state.editorState) {
-        this.onChange(newEditorState)
-      }
-      return
-    }
-    return getDefaultKeyBinding(e)
-  }
-
-  _toggleBlockType(blockType) {
-    this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
-  }
-
-  _toggleInlineStyle(inlineStyle) {
-    this.onChange(
-      RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
-    )
+  shouldComponentUpdate(nextProps, nextState) {
+    return !_isEqual(this.state.content, nextState.content)
   }
 
   render() {
-    const { editorState } = this.state
-
-    // If the user changes block type before entering any text, we can
-    // either style the placeholder or hide it. Let's just hide it now.
-    let className = "RichEditor-editor"
-    var contentState = editorState.getCurrentContent()
-    if (!contentState.hasText()) {
-      if (
-        contentState
-          .getBlockMap()
-          .first()
-          .getType() !== "unstyled"
-      ) {
-        className += " RichEditor-hidePlaceholder"
-      }
-    }
-
+    const { className, value, onChange, onHandleBlur } = this.props
+    const { sideToolbarPlugin } = this.state
+    const { SideToolbar } = sideToolbarPlugin
     return (
-      <div className={classNames("RichEditor-root", this.props.className)}>
-        <BlockStyleControls
-          editorState={editorState}
-          onToggle={this.toggleBlockType}
+      <div className={className} onClick={this.focus}>
+        <DraftailEditor
+          ref="editor"
+          id="rich-text"
+          ariaDescribedBy="rich-text-editor"
+          blockTypes={BLOCK_TYPES}
+          entityTypes={[ENTITY_CONTROL.LINK]}
+          inlineStyles={INLINE_STYLES}
+          maxListNesting={4}
+          onSave={rawContent => {
+            if (onHandleBlur) {
+              onChange(toHTML(rawContent))
+            }
+          }}
+          plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
+          rawContentState={value ? fromHTML(value) : null}
+          showUndoControl
+          showRedoControl
+          spellCheck
+          stripPastedStyles={false}
+          bottomToolbar={props => (
+            <React.Fragment>
+              <SideToolbar>
+                {externalProps => (
+                  <React.Fragment>
+                    <HeadlineOneButton {...externalProps} />
+                    <HeadlineTwoButton {...externalProps} />
+                    <BlockquoteButton {...externalProps} />
+                    <ItalicButton {...externalProps} />
+                    <BoldButton {...externalProps} />
+                    <UnderlineButton {...externalProps} />
+                    <UnorderedListButton {...externalProps} />
+                    <OrderedListButton {...externalProps} />
+                  </React.Fragment>
+                )}
+              </SideToolbar>
+            </React.Fragment>
+          )}
         />
-        <InlineStyleControls
-          editorState={editorState}
-          onToggle={this.toggleInlineStyle}
-        />
-        <div className={className} onClick={this.focus}>
-          <Editor
-            blockStyleFn={getBlockStyle}
-            editorState={editorState}
-            handlePastedText={this.handlePastedText}
-            handleKeyCommand={this.handleKeyCommand}
-            keyBindingFn={this.mapKeyToEditorCommand}
-            onChange={this.onChange}
-            onBlur={this.onBlur}
-            placeholder="..."
-            ref="editor"
-            spellCheck
-          />
-        </div>
       </div>
     )
   }
 }
 
-// Custom overrides for "code" style.
-function getBlockStyle(block) {
-  switch (block.getType()) {
-    case "blockquote":
-      return "RichEditor-blockquote"
-    default:
-      return null
-  }
-}
-
-function findImageEntities(contentBlock, callback, contentState) {
-  contentBlock.findEntityRanges(character => {
-    const entityKey = character.getEntity()
-    return (
-      entityKey !== null &&
-      contentState.getEntity(entityKey).getType() === "IMAGE"
-    )
-  }, callback)
-}
-
-function imageDataSrc(src) {
-  const canvas = document.createElement("canvas")
-  const image = new Image()
-  image.onload = function() {
-    const ctx = canvas.getContext("2d")
-    canvas.width = image.naturalWidth
-    canvas.height = image.naturalHeight
-    ctx.drawImage(image, 0, 0)
-  }
-  image.crossOrigin = "Anonymous"
-  image.src = src
-  // Convert to in-line data
-  return !src.startsWith("data:") ? canvas.toDataURL("image/jpeg") : src
-}
-
-const ReactImage = props => {
-  const { height, src, width, alt } = props.contentState
-    .getEntity(props.entityKey)
-    .getData()
-  return <img src={imageDataSrc(src)} height={height} width={width} alt={alt} />
-}
-ReactImage.propTypes = {
-  contentState: PropTypes.object,
-  entityKey: PropTypes.string
-}
-
-class StyleButton extends React.Component {
-  static propTypes = {
-    style: PropTypes.string,
-    active: PropTypes.bool,
-    onToggle: PropTypes.func,
-    label: PropTypes.string
-  }
-  constructor() {
-    super()
-    this.onToggle = e => {
-      e.preventDefault()
-      this.props.onToggle(this.props.style)
-    }
-  }
-
-  render() {
-    let className = "RichEditor-styleButton"
-    if (this.props.active) {
-      className += " RichEditor-activeButton"
-    }
-
-    return (
-      <span className={className} onMouseDown={this.onToggle}>
-        {this.props.label}
-      </span>
-    )
-  }
-}
-
-const BLOCK_TYPES = [
-  { label: "H1", style: "header-one" },
-  { label: "H2", style: "header-two" },
-  { label: "H3", style: "header-three" },
-  { label: "H4", style: "header-four" },
-  { label: "H5", style: "header-five" },
-  { label: "H6", style: "header-six" },
-  { label: "Blockquote", style: "blockquote" },
-  { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" }
-]
-
-const BlockStyleControls = props => {
-  const { editorState, onToggle } = props
-  const selection = editorState.getSelection()
-  const blockType = editorState
-    .getCurrentContent()
-    .getBlockForKey(selection.getStartKey())
-    .getType()
-
-  return (
-    <div className="RichEditor-controls">
-      {BLOCK_TYPES.map(type => (
-        <StyleButton
-          key={type.label}
-          active={type.style === blockType}
-          label={type.label}
-          onToggle={onToggle}
-          style={type.style}
-        />
-      ))}
-    </div>
-  )
-}
-BlockStyleControls.propTypes = {
-  editorState: PropTypes.object,
-  onToggle: PropTypes.func
-}
-
-const INLINE_STYLES = [
-  { label: "Bold", style: "BOLD" },
-  { label: "Italic", style: "ITALIC" },
-  { label: "Underline", style: "UNDERLINE" }
-]
-
-const InlineStyleControls = props => {
-  const { editorState, onToggle } = props
-  const currentStyle = editorState.getCurrentInlineStyle()
-
-  return (
-    <div className="RichEditor-controls">
-      {INLINE_STYLES.map(type => (
-        <StyleButton
-          key={type.label}
-          active={currentStyle.has(type.style)}
-          label={type.label}
-          onToggle={onToggle}
-          style={type.style}
-        />
-      ))}
-    </div>
-  )
-}
-InlineStyleControls.propTypes = {
-  editorState: PropTypes.object,
-  onToggle: PropTypes.func
+RichTextEditor.propTypes = {
+  className: PropTypes.string,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  onHandleBlur: PropTypes.func
 }
 
 export default RichTextEditor

@@ -5,6 +5,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 
@@ -21,12 +22,9 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     return qb.buildAndRun(getDbHandle(), query, new PersonMapper());
   }
 
-  @Override
-  protected final void buildQuery(PersonSearchQuery query) {
-    throw new UnsupportedOperationException();
-  }
-
-  protected void buildQuery(PersonSearchQuery query, Person user) {
+  protected void buildQuery(PersonSearchQuery query) {
+    qb.addSelectClause(PersonDao.PERSON_FIELDS);
+    qb.addTotalCount();
     qb.addFromClause("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null
@@ -55,7 +53,12 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
         query.getPendingVerification());
 
     if (query.getOrgUuid() != null) {
-      addOrgUuidQuery(query);
+      if (query.getIncludeChildOrgs()) {
+        qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid());
+      } else {
+        qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
+      }
     }
 
     qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
@@ -64,8 +67,6 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   }
 
   protected abstract void addTextQuery(PersonSearchQuery query);
-
-  protected abstract void addOrgUuidQuery(PersonSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     switch (query.getSortBy()) {

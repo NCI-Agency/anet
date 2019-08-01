@@ -24,6 +24,12 @@ import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
+import {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
@@ -81,7 +87,7 @@ class BaseOrganizationShow extends Page {
       organization(uuid:"${props.match.params.uuid}") {
         uuid, shortName, longName, status, isSubscribed, updatedAt, identificationCode, type
         parentOrg { uuid, shortName, longName, identificationCode }
-        childrenOrgs(query: { pageSize: 0 }) {
+        childrenOrgs {
           uuid, shortName, longName, identificationCode
         },
         positions {
@@ -350,6 +356,12 @@ class BaseOrganizationShow extends Page {
                   <ReportCollectionContainer
                     queryParams={reportQueryParams}
                     paginationKey={`r_${this.props.match.params.uuid}`}
+                    viewFormats={[
+                      FORMAT_CALENDAR,
+                      FORMAT_SUMMARY,
+                      FORMAT_TABLE,
+                      FORMAT_MAP
+                    ]}
                     reportsFilter={
                       !isSuperUser ? null : (
                         <Button

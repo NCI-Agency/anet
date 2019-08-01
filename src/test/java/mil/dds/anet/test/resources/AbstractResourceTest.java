@@ -69,8 +69,8 @@ public abstract class AbstractResourceTest {
   public static Person findOrPutPersonInDb(Person stub) {
     final String fields =
         "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
-            + " position {" + "   uuid name type status "
-            + "   organization { uuid shortName parentOrg { uuid shortName } }" + " }";
+            + " position { uuid name type status "
+            + "   organization { uuid shortName parentOrg { uuid shortName } } }";
     if (stub.getDomainUsername() != null) {
       try {
         final Person user = graphQLHelper.getObject(stub, "me", fields,

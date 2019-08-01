@@ -43,8 +43,11 @@ import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -53,7 +56,7 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class ReportDao extends AnetSubscribableObjectDao<Report> {
+public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQuery> {
 
   private static final String[] fields = {"uuid", "state", "createdAt", "updatedAt",
       "engagementDate", "duration", "locationUuid", "approvalStepUuid", "intent", "exsum",
@@ -102,7 +105,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
         + "\"principalOrganizationUuid\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
-        + ":exsum, :reportText, :keyOutcomes, " + ":nextSteps, :authorUuid, ");
+        + ":exsum, :reportText, :keyOutcomes, :nextSteps, :authorUuid, ");
     if (DaoUtils.isMsSql()) {
       sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
     } else {
@@ -254,7 +257,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 
   public void updateToDraftState(Report r) {
     getDbHandle().execute(
-        "/* UpdateFutureEngagement */ UPDATE reports SET state = ? " + "WHERE uuid = ?",
+        "/* UpdateFutureEngagement */ UPDATE reports SET state = ? WHERE uuid = ?",
         DaoUtils.getEnumId(ReportState.DRAFT), r.getUuid());
   }
 
@@ -348,13 +351,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
     return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
   }
 
-  public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
-    return search(query, user, false);
-  }
-
-  public AnetBeanList<Report> search(ReportSearchQuery query, Person user, Boolean systemSearch) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query, user,
-        systemSearch);
+  @Override
+  public AnetBeanList<Report> search(ReportSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query);
   }
 
   @Override
@@ -604,14 +603,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
         "/* RollupQuery */ SELECT " + orgColumn + " as \"orgUuid\", state, count(*) AS count ");
     sql.append("FROM reports WHERE ");
 
-    // NOTE: more date-comparison work here that might be worth abstracting, but might not
-    // if (getDbType() != DaoUtils.DbType.SQLITE) {
     sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
         + "AND \"engagementDate\" > :engagementDateStart ");
-    // } else {
-    // sql.append("\"releasedAt\" >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) "
-    // + "AND \"engagementDate\" > DateTime(:engagementDateStart) ");
-    // }
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "engagementDateStart",
@@ -692,7 +685,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 
   static class SelfIdBatcher extends IdBatcher<Report> {
     private static final String sql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
-        + "FROM reports " + "WHERE reports.uuid IN ( <uuids> )";
+        + "FROM reports WHERE reports.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new ReportMapper());
@@ -727,7 +720,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
   static class TagsBatcher extends ForeignKeyBatcher<Tag> {
     private static final String sql = "/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
         + "INNER JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid "
-        + "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> )" + "ORDER BY tags.name";
+        + "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> ) ORDER BY tags.name";
 
     public TagsBatcher() {
       super(sql, "foreignKeys", new TagMapper(), "reportUuid");
@@ -755,6 +748,25 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
     final ForeignKeyBatcher<Task> tasksBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(TasksBatcher.class);
     return tasksBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  static class ReportSearchBatcher extends SearchQueryBatcher<Report, ReportSearchQuery> {
+    public ReportSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getReportDao());
+    }
+  }
+
+  public List<List<Report>> getReportsBySearch(
+      List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
+    final ReportSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(ReportSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Report>> getReportsBySearch(Map<String, Object> context,
+      String uuid, ReportSearchQuery query) {
+    return new SearchQueryFetcher<Report, ReportSearchQuery>().load(context,
+        SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
   private void sendReportPublishedEmail(Report r) {

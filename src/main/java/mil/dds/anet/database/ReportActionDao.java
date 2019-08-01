@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ReportAction;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
@@ -12,7 +13,7 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class ReportActionDao extends AnetBaseDao<ReportAction> {
+public class ReportActionDao extends AnetBaseDao<ReportAction, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "reportActions";
 
@@ -50,11 +51,6 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
   @Override
   public int updateInternal(ReportAction obj) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public int deleteInternal(String uuid) {
     throw new UnsupportedOperationException();
   }
 

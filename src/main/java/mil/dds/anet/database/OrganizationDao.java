@@ -15,15 +15,19 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
+public class OrganizationDao
+    extends AnetSubscribableObjectDao<Organization, OrganizationSearchQuery> {
 
   private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode",
       "type", "createdAt", "updatedAt", "parentOrgUuid"};
@@ -67,6 +71,26 @@ public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
     return personIdBatcher.getByForeignKeys(foreignKeys);
   }
 
+  static class OrganizationSearchBatcher
+      extends SearchQueryBatcher<Organization, OrganizationSearchQuery> {
+    public OrganizationSearchBatcher() {
+      super(AnetObjectEngine.getInstance().getOrganizationDao());
+    }
+  }
+
+  public List<List<Organization>> getOrganizationsBySearch(
+      List<ImmutablePair<String, OrganizationSearchQuery>> foreignKeys) {
+    final OrganizationSearchBatcher instance =
+        AnetObjectEngine.getInstance().getInjector().getInstance(OrganizationSearchBatcher.class);
+    return instance.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Organization>> getOrganizationsBySearch(Map<String, Object> context,
+      String uuid, OrganizationSearchQuery query) {
+    return new SearchQueryFetcher<Organization, OrganizationSearchQuery>().load(context,
+        SqDataLoaderKey.ORGANIZATIONS_SEARCH, new ImmutablePair<>(uuid, query));
+  }
+
   public CompletableFuture<List<Organization>> getOrganizationsForPerson(
       Map<String, Object> context, String personUuid) {
     return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
@@ -76,18 +100,18 @@ public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
   public List<Organization> getTopLevelOrgs(OrganizationType type) {
     return getDbHandle()
         .createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS + " FROM organizations "
-            + "WHERE \"parentOrgUuid\" IS NULL " + "AND status = :status " + "AND type = :type")
+            + "WHERE \"parentOrgUuid\" IS NULL AND status = :status AND type = :type")
         .bind("status", DaoUtils.getEnumId(OrganizationStatus.ACTIVE))
         .bind("type", DaoUtils.getEnumId(type)).map(new OrganizationMapper()).list();
   }
 
   public interface OrgListQueries {
     @RegisterRowMapper(OrganizationMapper.class)
-    @SqlQuery("SELECT uuid AS organizations_uuid" + ", uuid AS uuid"
+    @SqlQuery("SELECT uuid AS organizations_uuid, uuid AS uuid"
         + ", \"shortName\" AS \"organizations_shortName\""
-        + ", \"longName\" AS \"organizations_longName\"" + ", status AS organizations_status"
+        + ", \"longName\" AS \"organizations_longName\", status AS organizations_status"
         + ", \"identificationCode\" AS \"organizations_identificationCode\""
-        + ", type AS organizations_type" + ", \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
+        + ", type AS organizations_type, \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
         + ", \"createdAt\" AS \"organizations_createdAt\""
         + ", \"updatedAt\" AS \"organizations_updatedAt\""
         + " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
@@ -126,13 +150,8 @@ public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
   }
 
   @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
-  public AnetBeanList<Organization> search(OrganizationSearchQuery query, Person user) {
-    return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher().runSearch(query,
-        user);
+  public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher().runSearch(query);
   }
 
   @Override

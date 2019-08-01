@@ -34,7 +34,9 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
   }
 
   public enum ReportCancelledReason {
-    CANCELLED_BY_ADVISOR, CANCELLED_BY_PRINCIPAL, CANCELLED_DUE_TO_TRANSPORTATION, CANCELLED_DUE_TO_FORCE_PROTECTION, CANCELLED_DUE_TO_ROUTES, CANCELLED_DUE_TO_THREAT, NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS
+    CANCELLED_BY_ADVISOR, CANCELLED_BY_PRINCIPAL, CANCELLED_DUE_TO_TRANSPORTATION,
+    CANCELLED_DUE_TO_FORCE_PROTECTION, CANCELLED_DUE_TO_ROUTES, CANCELLED_DUE_TO_THREAT,
+    NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS
   }
 
   private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
@@ -634,11 +636,11 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
   }
 
   @Override
-  public boolean equals(Object other) {
-    if (other == null || other.getClass() != this.getClass()) {
+  public boolean equals(Object o) {
+    if (!(o instanceof Report)) {
       return false;
     }
-    Report r = (Report) other;
+    Report r = (Report) o;
     return Objects.equals(r.getUuid(), uuid) && Objects.equals(r.getState(), state)
         && Objects.equals(r.getApprovalStepUuid(), getApprovalStepUuid())
         && Objects.equals(r.getCreatedAt(), createdAt)

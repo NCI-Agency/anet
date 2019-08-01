@@ -5,6 +5,7 @@ import React, { Component } from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import "./AttendeesTable.css"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
@@ -39,6 +40,7 @@ const TableHeader = props => {
         <th className="col-xs-1" style={{ textAlign: "center" }}>
           {!hide && "Primary"}
         </th>
+        <th className="col-xs-1">{!hide && ""}</th>
         <th className="col-xs-3">{!hide && "Name"}</th>
         <th className="col-xs-3">{!hide && "Position"}</th>
         <th className="col-xs-2">{!hide && "Location"}</th>
@@ -147,6 +149,13 @@ export default class AttendeesTable extends Component {
             person={person}
             handleOnChange={this.setPrimaryAttendee}
             disabled={disabled}
+          />
+        </td>
+        <td align="right">
+          <AvatarDisplayComponent
+            avatar={person.avatar}
+            height={32}
+            width={32}
           />
         </td>
         <td>

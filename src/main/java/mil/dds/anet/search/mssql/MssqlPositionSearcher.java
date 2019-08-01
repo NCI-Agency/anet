@@ -4,7 +4,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.search.AbstractPositionSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 
@@ -15,13 +14,6 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
   }
 
   @Override
-  protected void buildQuery(PositionSearchQuery query, Person user) {
-    qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
-    super.buildQuery(query, user);
-    qb.addTotalCount();
-  }
-
-  @Override
   protected void addTextQuery(PositionSearchQuery query) {
     // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
     // so we can sort on it (show the most relevant hits at the top).
@@ -29,13 +21,12 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     // See
     // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
     qb.addSelectClause("ISNULL(c_positions.rank, 0)"
-        + (Boolean.TRUE.equals(query.getMatchPersonName()) ? " + ISNULL(c_people.rank, 0)" : "")
-        + " AS search_rank");
+        + (query.getMatchPersonName() ? " + ISNULL(c_people.rank, 0)" : "") + " AS search_rank");
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (positions, (name), :containsQuery) c_positions"
         + " ON positions.uuid = c_positions.[Key]");
     final StringBuilder whereRank =
         new StringBuilder("(c_positions.rank IS NOT NULL OR positions.code LIKE :likeQuery");
-    if (Boolean.TRUE.equals(query.getMatchPersonName())) {
+    if (query.getMatchPersonName()) {
       qb.addFromClause("LEFT JOIN CONTAINSTABLE(people, (name), :containsQuery) c_people"
           + " ON people.uuid = c_people.[Key]");
       whereRank.append(" OR c_people.rank IS NOT NULL");
@@ -45,20 +36,6 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     final String text = query.getText();
     qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
-  }
-
-  @Override
-  protected void addOrganizationUuidQuery(PositionSearchQuery query) {
-    if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-      qb.addWithClause("parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
-          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
-          + ")");
-      qb.addWhereClause("positions.organizationUuid IN (SELECT uuid FROM parent_orgs)");
-    } else {
-      qb.addWhereClause("positions.organizationUuid = :orgUuid");
-    }
-    qb.addSqlArg("orgUuid", query.getOrganizationUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {

@@ -227,7 +227,7 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || o.getClass() != this.getClass()) {
+    if (!(o instanceof Position)) {
       return false;
     }
     Position other = (Position) o;
