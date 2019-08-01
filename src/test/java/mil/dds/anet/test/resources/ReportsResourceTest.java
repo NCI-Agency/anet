@@ -24,6 +24,7 @@ import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -196,6 +197,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final List<ApprovalStep> approvalSteps = new ArrayList<>();
     final ApprovalStep approval = new ApprovalStep();
     approval.setName("Test Group for Approving");
+    approval.setType(ApprovalStepType.REPORT_APPROVAL);
     approval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
     approval.setApprovers(ImmutableList.of(approver1Pos));
     approvalSteps.add(approval);
@@ -203,6 +205,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Adding a new approval step to an AO automatically puts it at the end of the approval process.
     final ApprovalStep releaseApproval = new ApprovalStep();
     releaseApproval.setName("Test Group of Releasers");
+    releaseApproval.setType(ApprovalStepType.REPORT_APPROVAL);
     releaseApproval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
     releaseApproval.setApprovers(ImmutableList.of(approver2Pos));
     approvalSteps.add(releaseApproval);
