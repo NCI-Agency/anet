@@ -15,7 +15,6 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;

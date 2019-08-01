@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Map;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.SubscribableObject;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & SubscribableObject>
-    extends AnetBaseDao<T> {
+public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & SubscribableObject, S extends AbstractSearchQuery<?>>
+    extends AnetBaseDao<T, S> {
 
   public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
 

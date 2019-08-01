@@ -6,7 +6,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
@@ -48,8 +47,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   private String attendeePositionUuid;
   private List<String> authorizationGroupUuid;
   private Boolean sensitiveInfo;
-  // internal search parameters:
-  private Person user;
+  // internal search parameter:
   private boolean systemSearch;
 
   public ReportSearchQuery() {
@@ -291,18 +289,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
 
   @JsonIgnore
   @GraphQLIgnore
-  public Person getUser() {
-    return user;
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
-  public void setUser(Person user) {
-    this.user = user;
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
   public boolean isSystemSearch() {
     return systemSearch;
   }
@@ -321,7 +307,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
         orgUuid, includeOrgChildren, locationUuid, taskUuid, pendingApprovalOf, state,
         cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid, authorizationGroupUuid,
-        sensitiveInfo, user, systemSearch);
+        sensitiveInfo, systemSearch);
   }
 
   @Override
@@ -359,7 +345,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getAttendeePositionUuid(), other.getAttendeePositionUuid())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
         && Objects.equals(getSensitiveInfo(), other.getSensitiveInfo())
-        && Objects.equals(getUser(), other.getUser())
         && Objects.equals(isSystemSearch(), other.isSystemSearch());
   }
 

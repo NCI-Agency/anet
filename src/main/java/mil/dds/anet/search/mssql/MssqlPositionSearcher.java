@@ -1,6 +1,5 @@
 package mil.dds.anet.search.mssql;
 
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;

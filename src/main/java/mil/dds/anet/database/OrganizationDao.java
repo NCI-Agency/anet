@@ -9,7 +9,6 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;

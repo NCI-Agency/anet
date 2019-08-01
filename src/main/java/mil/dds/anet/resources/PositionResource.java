@@ -196,7 +196,8 @@ public class PositionResource {
   @GraphQLQuery(name = "positionList")
   public AnetBeanList<Position> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") PositionSearchQuery query) {
-    return dao.search(query, DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return dao.search(query);
   }
 
   @GraphQLMutation(name = "deletePosition")

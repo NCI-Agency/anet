@@ -38,7 +38,8 @@ public class LocationResource {
   @GraphQLQuery(name = "locationList")
   public AnetBeanList<Location> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") LocationSearchQuery query) {
-    return dao.search(query, DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return dao.search(query);
   }
 
   @GraphQLMutation(name = "createLocation")

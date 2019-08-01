@@ -1,6 +1,5 @@
 package mil.dds.anet.search.pg;
 
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.search.AbstractPositionSearcher;

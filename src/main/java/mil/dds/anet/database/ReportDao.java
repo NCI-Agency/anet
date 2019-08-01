@@ -444,7 +444,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       query.setParentOrgUuid(parentOrgUuid);
       query.setParentOrgRecursively(true);
       query.setPageSize(0);
-      orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query, null).getList();
+      orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =
           orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();
       if (parentOrg.isPresent() == false) {

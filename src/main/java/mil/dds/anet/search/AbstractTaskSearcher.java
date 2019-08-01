@@ -1,7 +1,6 @@
 package mil.dds.anet.search;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -20,17 +19,12 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   @InTransaction
   @Override
-  public AnetBeanList<Task> runSearch(TaskSearchQuery query, Person user) {
-    buildQuery(query, user);
+  public AnetBeanList<Task> runSearch(TaskSearchQuery query) {
+    buildQuery(query);
     return qb.buildAndRun(getDbHandle(), query, new TaskMapper());
   }
 
-  @Override
-  protected final void buildQuery(TaskSearchQuery query) {
-    throw new UnsupportedOperationException();
-  }
-
-  protected void buildQuery(TaskSearchQuery query, Person user) {
+  protected void buildQuery(TaskSearchQuery query) {
     qb.addSelectClause("tasks.*");
     qb.addTotalCount();
     qb.addFromClause("tasks");
@@ -43,8 +37,8 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addBatchClause(query);
     }
 
-    if (user != null && query.getSubscribed()) {
-      qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
           AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
     }
 

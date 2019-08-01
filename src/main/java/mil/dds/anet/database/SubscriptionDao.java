@@ -14,6 +14,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class SubscriptionDao extends AnetBaseDao<Subscription> {
+public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQuery<?>> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

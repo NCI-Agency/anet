@@ -61,8 +61,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       addBatchClause(query);
     }
 
-    if (user != null && query.getSubscribed()) {
-      qb.addWhereClause(Searcher.getSubscriptionReferences(user, qb.getSqlArgs(),
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
           AnetObjectEngine.getInstance().getReportDao().getSubscriptionUpdate(null)));
     }
 

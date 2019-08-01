@@ -256,7 +256,7 @@ public class AnetObjectEngine {
     OrganizationSearchQuery orgQuery = new OrganizationSearchQuery();
     orgQuery.setPageSize(0);
     orgQuery.setType(orgType);
-    List<Organization> orgs = getOrganizationDao().search(orgQuery, null).getList();
+    List<Organization> orgs = getOrganizationDao().search(orgQuery).getList();
 
     return Utils.buildParentOrgMapping(orgs, null);
   }
@@ -272,7 +272,7 @@ public class AnetObjectEngine {
     query.setParentOrgRecursively(true);
     query.setPageSize(0);
     final List<Organization> orgList =
-        AnetObjectEngine.getInstance().getOrganizationDao().search(query, null).getList();
+        AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
     return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
   }
 
@@ -286,8 +286,7 @@ public class AnetObjectEngine {
     query.setCustomFieldRef1Uuid(parentTaskUuid);
     query.setCustomFieldRef1Recursively(true);
     query.setPageSize(0);
-    final List<Task> taskList =
-        AnetObjectEngine.getInstance().getTaskDao().search(query, null).getList();
+    final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
   }
 
