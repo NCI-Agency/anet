@@ -1,0 +1,12 @@
+authorizationGroupList(query:{pageSize:0}) {
+	totalCount
+	list {
+	  uuid
+	  name
+	  description
+	  status
+	  positions {
+	    uuid
+	  }
+	}
+}

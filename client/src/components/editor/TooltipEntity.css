@@ -1,0 +1,17 @@
+.TooltipEntity {
+  cursor: pointer;
+}
+.TooltipEntity__icon {
+  color: teal;
+  margin-right: 0.2em;
+  width: 1em;
+  height: 1em;
+}
+.TooltipEntity__text {
+  border-bottom: 1px dotted teal;
+}
+
+.Tooltip__link {
+  color: #fff;
+  padding: 3px;
+}

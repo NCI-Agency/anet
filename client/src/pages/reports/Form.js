@@ -684,6 +684,7 @@ class BaseReportForm extends Component {
 
                   <Button
                     className="center-block toggle-section-button"
+                    style={{ marginBottom: "1rem" }}
                     onClick={this.toggleReportText}
                     id="toggleSensitiveInfo"
                   >
@@ -706,7 +707,15 @@ class BaseReportForm extends Component {
                             )
                           }
                           widget={
-                            <RichTextEditor className="reportSensitiveInformationField" />
+                            <RichTextEditor
+                              className="reportSensitiveInformationField"
+                              onHandleBlur={() =>
+                                setFieldTouched(
+                                  "reportSensitiveInformation.text",
+                                  true
+                                )
+                              }
+                            />
                           }
                         />
                         <AdvancedMultiSelect

@@ -8,6 +8,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
+import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
@@ -19,7 +20,8 @@ import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveInformation> {
+public class ReportSensitiveInformationDao
+    extends AnetBaseDao<ReportSensitiveInformation, AbstractSearchQuery<?>> {
 
   private static final String[] fields = {"uuid", "text", "reportUuid", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "reportsSensitiveInformation";
@@ -89,7 +91,7 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
     final int numRows;
     if (Utils.isEmptyHtml(rsi.getText())) {
       numRows = getDbHandle().createUpdate("/* deleteReportsSensitiveInformation */ DELETE FROM \""
-          + TABLE_NAME + "\"" + " WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
+          + TABLE_NAME + "\" WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
       AnetAuditLogger.log("Empty ReportSensitiveInformation {} deleted by {} ", rsi, user);
     } else {
       // Update relevant fields, but do not allow the reportUuid to be updated by the query!
@@ -101,11 +103,6 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
       AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
     }
     return numRows;
-  }
-
-  @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
   }
 
   public Object insertOrUpdate(ReportSensitiveInformation rsi, Person user, Report report) {
@@ -152,10 +149,9 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
         + " FROM reports r"
         + " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportUuid\" = r.uuid"
         + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\" "
-        + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" " + " WHERE r.uuid = :reportUuid"
-        + " AND (" + "   (r.\"authorUuid\" = :userUuid)" + "   OR"
-        + "   (p.\"currentPersonUuid\" = :userUuid)" + " )").bind("reportUuid", reportUuid)
-        .bind("userUuid", userUuid);
+        + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" WHERE r.uuid = :reportUuid"
+        + " AND ( (r.\"authorUuid\" = :userUuid) OR (p.\"currentPersonUuid\" = :userUuid) )")
+        .bind("reportUuid", reportUuid).bind("userUuid", userUuid);
     return (query.map(new MapMapper(false)).list().size() > 0);
   }
 
