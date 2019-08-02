@@ -184,7 +184,8 @@ class BaseRelatedObjectNotes extends Component {
           flexDirection: "column",
           alignItems: "flex-end",
           padding: 5,
-          height: "100%"
+          height: "100%",
+          overflowX: "hidden"
         }}
       >
         <div
@@ -306,14 +307,12 @@ class BaseRelatedObjectNotes extends Component {
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            overflow: "auto"
+            flexDirection: "column"
           }}
         >
           {notes.map(note => {
             const updatedAt = moment(note.updatedAt).fromNow()
             const byMe = Person.isEqual(currentUser, note.author)
-            const author = byMe ? "me" : <LinkTo person={note.author} />
             const canEdit = byMe || currentUser.isAdmin()
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
             const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
@@ -327,15 +326,18 @@ class BaseRelatedObjectNotes extends Component {
                 <Panel.Heading
                   style={{
                     padding: "1px 1px",
-                    textAlign: "right",
                     borderTopLeftRadius: "15px",
                     borderTopRightRadius: "15px",
                     paddingRight: "10px",
                     paddingLeft: "10px",
-                    whiteSpace: "nowrap"
+                    // whiteSpace: "nowrap", TODO: disabled for now as not working well in IE11
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "flex-end"
                   }}
                 >
-                  <i>{updatedAt}</i> by <b>{author}</b>
+                  <i>{updatedAt}</i>{" "}
+                  <LinkTo style={{ color: "white" }} person={note.author} />
                   {canEdit && (
                     <>
                       <Button
