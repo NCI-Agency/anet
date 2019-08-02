@@ -377,9 +377,6 @@ class BaseOrganizationShow extends Page {
     )
   }
 
-  handleViewRender = (a, b) => {
-    console.log("handleviewrender", a.view.activeStart)
-  }
   orgLabel = organization => {
     return `r_${organization.uuid}`
   }

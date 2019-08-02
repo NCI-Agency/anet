@@ -1,18 +1,20 @@
 import { Settings } from "api"
 import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import Calendar from "components/Calendar"
 import Leaflet from "components/Leaflet"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import _get from "lodash/get"
+import _isEqualWith from "lodash/isEqualWith"
 import { Location, Person, Report } from "models"
+import moment from "moment"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
-import Calendar from "components/Calendar"
-import moment from "moment"
+import utils from "utils"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
@@ -56,6 +58,7 @@ export default class ReportCollection extends Component {
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     reports: PropTypes.array,
+    getReportsQueryForCalendar: PropTypes.func,
     paginatedReports: PropTypes.shape({
       totalCount: PropTypes.number,
       pageNum: PropTypes.number,
@@ -83,6 +86,19 @@ export default class ReportCollection extends Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    // FIXME: Re-load calendar data if props have changed; needs better solution
+    if (!_isEqualWith(this.props, prevProps, utils.treatFunctionsAsEqual)) {
+      if (this.calendarComponentRef.current) {
+        const calendarApi = this.calendarComponentRef.current.getApi()
+        const eventSources = calendarApi.getEventSources()
+        if (eventSources && !eventSources[0].isFetching) {
+          eventSources[0].refetch()
+        }
+      }
+    }
+  }
+
   render() {
     var reports = []
     const viewWithPagination =
@@ -97,14 +113,13 @@ export default class ReportCollection extends Component {
     } else if (this.props.reports) {
       reports = this.props.reports
     }
-    const reportsExist = _get(reports, "length", 0) > 0
     const showHeader = this.props.viewFormats.length > 1 || numPages > 1
     return (
       <div className="report-collection">
         <div>
           {showHeader && (
             <header>
-              {reportsExist && this.props.viewFormats.length > 1 && (
+              {this.props.viewFormats.length > 1 && (
                 <ButtonToggleGroup
                   value={this.state.viewFormat}
                   onChange={this.changeViewFormat}
@@ -147,17 +162,15 @@ export default class ReportCollection extends Component {
             </header>
           )}
 
-          {reportsExist && (
-            <div>
-              {this.state.viewFormat === FORMAT_CALENDAR &&
-                this.renderCalendar(reports)}
-              {this.state.viewFormat === FORMAT_TABLE &&
-                this.renderTable(reports)}
-              {this.state.viewFormat === FORMAT_SUMMARY &&
-                this.renderSummary(reports)}
-              {this.state.viewFormat === FORMAT_MAP && this.renderMap(reports)}
-            </div>
-          )}
+          <div>
+            {this.state.viewFormat === FORMAT_CALENDAR &&
+              this.renderCalendar(reports)}
+            {this.state.viewFormat === FORMAT_TABLE &&
+              this.renderTable(reports)}
+            {this.state.viewFormat === FORMAT_SUMMARY &&
+              this.renderSummary(reports)}
+            {this.state.viewFormat === FORMAT_MAP && this.renderMap(reports)}
+          </div>
 
           {viewWithPagination && numPages > 1 && (
             <footer>
@@ -175,52 +188,75 @@ export default class ReportCollection extends Component {
             </footer>
           )}
         </div>
-        {!reportsExist && <em>No reports found</em>}
       </div>
     )
   }
 
   renderTable(reports) {
-    return <ReportTable showAuthors reports={reports} />
-  }
-
-  renderSummary(reports) {
+    const hasReports = _get(reports, "length", 0)
     return (
-      <div>
-        {reports.map(report => (
-          <ReportSummary report={report} key={report.uuid} />
-        ))}
-      </div>
+      <React.Fragment>
+        {(hasReports && <ReportTable showAuthors reports={reports} />) || (
+          <em>No reports found</em>
+        )}
+      </React.Fragment>
     )
   }
 
-  renderMap(reports) {
-    let markers = []
-    reports.forEach(report => {
-      if (Location.hasCoordinates(report.location)) {
-        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
-        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
-        markers.push({
-          id: report.uuid,
-          lat: report.location.lat,
-          lng: report.location.lng,
-          name: label
-        })
-      }
-    })
+  renderSummary(reports) {
+    const hasReports = _get(reports, "length", 0)
     return (
-      <Leaflet
-        markers={markers}
-        mapId={this.props.mapId}
-        width={this.props.width}
-        height={this.props.height}
-        marginBottom={this.props.marginBottom}
-      />
+      <React.Fragment>
+        {(hasReports &&
+          reports.map(report => (
+            <ReportSummary report={report} key={report.uuid} />
+          ))) || <em>No reports found</em>}
+      </React.Fragment>
+    )
+  }
+
+  getMarkers = reports => {
+    if (!reports) {
+      return []
+    } else {
+      let markers = []
+      reports.forEach(report => {
+        if (Location.hasCoordinates(report.location)) {
+          let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
+          label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
+          markers.push({
+            id: report.uuid,
+            lat: report.location.lat,
+            lng: report.location.lng,
+            name: label
+          })
+        }
+      })
+      return markers
+    }
+  }
+
+  renderMap(reports) {
+    const hasReports = _get(reports, "length", 0)
+    return (
+      <React.Fragment>
+        {(hasReports && (
+          <Leaflet
+            markers={this.getMarkers(reports)}
+            mapId={this.props.mapId}
+            width={this.props.width}
+            height={this.props.height}
+            marginBottom={this.props.marginBottom}
+          />
+        )) || <em>No reports found</em>}
+      </React.Fragment>
     )
   }
 
   getEvents = reports => {
-    if (reports) {
+    if (!reports) {
+      return []
+    } else {
       return reports.map(r => {
         const who =
           (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
@@ -242,15 +278,29 @@ export default class ReportCollection extends Component {
             !Settings.engagementsIncludeTimeAndDuration || r.duration === null
         }
       })
-    } else {
-      return []
     }
+  }
+
+  fetchReportsForCalendar = (fetchInfo, successCallback, failureCallback) => {
+    this.props
+      .getReportsQueryForCalendar(fetchInfo)
+      .then(data => {
+        for (var prop in data) {
+          successCallback(this.getEvents(data[prop].list))
+          break
+        }
+      })
+      .catch(failureCallback)
   }
 
   renderCalendar(reports) {
     return (
       <Calendar
-        events={this.getEvents(reports)}
+        events={
+          this.props.getReportsQueryForCalendar
+            ? this.fetchReportsForCalendar
+            : this.getEvents(reports)
+        }
         calendarComponentRef={this.calendarComponentRef}
       />
     )

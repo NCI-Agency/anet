@@ -1,19 +1,19 @@
-import FullCalendar from "@fullcalendar/react"
-import dayGridPlugin from "@fullcalendar/daygrid"
-import timeGridPlugin from "@fullcalendar/timegrid"
-import listPlugin from "@fullcalendar/list"
-import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
 import "@fullcalendar/core/main.css"
+import dayGridPlugin from "@fullcalendar/daygrid"
 import "@fullcalendar/daygrid/main.css"
-import "@fullcalendar/timegrid/main.css"
+import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
+import listPlugin from "@fullcalendar/list"
 import "@fullcalendar/list/main.css"
-import "./Calendar.css"
+import FullCalendar from "@fullcalendar/react"
+import timeGridPlugin from "@fullcalendar/timegrid"
+import "@fullcalendar/timegrid/main.css"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
+import "./Calendar.css"
 
 export default class Calendar extends Component {
   static propTypes = {
-    events: PropTypes.array,
+    events: PropTypes.oneOfType([PropTypes.func, PropTypes.array]),
     calendarComponentRef: PropTypes.shape({
       current: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
     })
@@ -69,7 +69,7 @@ export default class Calendar extends Component {
         eventLimit
         eventClick={eventInfo => {}}
         dateClick={info => {
-          let calendarApi = calendarComponentRef.current.getApi()
+          const calendarApi = calendarComponentRef.current.getApi()
           calendarApi.changeView("listDay", info.dateStr) // call a method on the Calendar object
         }}
       />

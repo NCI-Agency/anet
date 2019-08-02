@@ -300,6 +300,17 @@ class BaseRollupShow extends Page {
     )
   }
 
+  getReportsQueryForCalendar = fetchInfo => {
+    return this.runReportsQuery(
+      {
+        ...this.reportsQueryParams(true),
+        engagementDateStart: fetchInfo.start,
+        engagementDateEnd: fetchInfo.end
+      },
+      true
+    )
+  }
+
   @autobind
   fetchChartData(chartQuery) {
     return Promise.all([chartQuery]).then(values => {
@@ -403,7 +414,7 @@ class BaseRollupShow extends Page {
           <div className="scrollable">
             <ReportCollection
               paginatedReports={context.reports}
-              reports={context.allReports}
+              getReportsQueryForCalendar={this.getReportsQueryForCalendar}
               goToPage={this.goToReportsPage}
               viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
             />
