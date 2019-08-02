@@ -7,6 +7,7 @@ import ConfirmDelete from "components/ConfirmDelete"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
+import { JSONPath } from "jsonpath-plus"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Person } from "models"
@@ -143,17 +144,10 @@ class BaseRelatedObjectNotes extends Component {
       this.props.relatedObject.relatedObjectType === "people" &&
       this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
         ? Settings.fields.principal.person.assessment.questions.filter(
-            question =>
-              !question.test ||
-              RegExp(question.test.regex).test(
-                question.test.expression
-                  .split(".")
-                  .reduce(
-                    (cursor, accessor) => cursor && cursor[accessor],
-                    this.props.relatedObjectValue
-                  )
-              )
-          )
+          question =>
+            !question.test ||
+              !_isEmpty(JSONPath(question.test, this.props.relatedObjectValue))
+        )
         : []
     const assessments = notes.filter(
       note => note.type === NOTE_TYPE.PARTNER_ASSESSMENT

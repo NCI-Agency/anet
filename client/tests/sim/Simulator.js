@@ -137,7 +137,7 @@ const simulate = async args => {
   )
 }
 
-;(async () => {
+;(async() => {
   try {
     await simulate(process.argv.slice(3))
   } catch (e) {

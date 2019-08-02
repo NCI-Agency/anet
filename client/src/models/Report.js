@@ -80,8 +80,8 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : schema.required(
-                `You must provide the overall ${Settings.fields.report.atmosphere} of the engagement`
-              )
+              `You must provide the overall ${Settings.fields.report.atmosphere} of the engagement`
+            )
         )
         .default(null)
         .label(Settings.fields.report.atmosphere),
@@ -92,8 +92,8 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : atmosphere === Report.ATMOSPHERE.POSITIVE
-            ? schema.nullable()
-            : schema.required(
+              ? schema.nullable()
+              : schema.required(
                 `You must provide ${Settings.fields.report.atmosphereDetails} if the engagement was not Positive`
               )
         )
@@ -132,17 +132,17 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : schema.test(
-                "primary-advisor",
-                "primary advisor error",
-                // can't use arrow function here because of binding to 'this'
-                function(attendees) {
-                  const err = Report.checkPrimaryAttendee(
-                    attendees,
-                    Person.ROLE.ADVISOR
-                  )
-                  return err ? this.createError({ message: err }) : true
-                }
-              )
+              "primary-advisor",
+              "primary advisor error",
+              // can't use arrow function here because of binding to 'this'
+              function(attendees) {
+                const err = Report.checkPrimaryAttendee(
+                  attendees,
+                  Person.ROLE.ADVISOR
+                )
+                return err ? this.createError({ message: err }) : true
+              }
+            )
         )
         .default([]),
       principalOrg: yup
@@ -163,8 +163,8 @@ export default class Report extends Model {
           function(tasks) {
             return _isEmpty(tasks)
               ? this.createError({
-                  message: `You must provide at least one ${Settings.fields.task.shortLabel}`
-                })
+                message: `You must provide at least one ${Settings.fields.task.shortLabel}`
+              })
               : true
           }
         )
@@ -180,17 +180,17 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : schema.test(
-                "reportText",
-                "reportText error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportText) {
-                  return utils.isEmptyHtml(reportText)
-                    ? this.createError({
-                        message: `You must provide the ${Settings.fields.report.reportText}`
-                      })
-                    : true
-                }
-              )
+              "reportText",
+              "reportText error",
+              // can't use arrow function here because of binding to 'this'
+              function(reportText) {
+                return utils.isEmptyHtml(reportText)
+                  ? this.createError({
+                    message: `You must provide the ${Settings.fields.report.reportText}`
+                  })
+                  : true
+              }
+            )
         )
         .default("")
         .label(Settings.fields.report.reportText),
@@ -209,8 +209,8 @@ export default class Report extends Model {
           cancelled
             ? schema.nullable()
             : schema.required(
-                `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`
-              )
+              `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`
+            )
         )
         .default("")
         .label(Settings.fields.report.keyOutcomes),
