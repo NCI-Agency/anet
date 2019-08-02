@@ -1,14 +1,13 @@
 import { setPagination } from "actions"
+import API from "api"
+import ReportCollection, {
+  GQL_BASIC_REPORT_FIELDS,
+  GQL_REPORT_FIELDS
+} from "components/ReportCollection"
+import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import ReportCollection, {
-  GQL_REPORT_FIELDS,
-  GQL_BASIC_REPORT_FIELDS
-} from "components/ReportCollection"
-
-import API from "api"
 import { connect } from "react-redux"
-import _isEqualWith from "lodash/isEqualWith"
 import utils from "utils"
 
 export const FORMAT_CALENDAR = "calendar"
@@ -116,14 +115,26 @@ class ReportCollectionContainer extends Component {
     })
   }
 
+  getReportsQueryForCalendar = fetchInfo => {
+    return this.getReportsQuery(
+      {
+        ...this.reportsQueryParams(false),
+        engagementDateStart: fetchInfo.start,
+        engagementDateEnd: fetchInfo.end
+      },
+      GQL_BASIC_REPORT_FIELDS
+    )
+  }
+
   render() {
     const { curPageReports, allReports } = this.state
     const { queryParams, ...othersProps } = this.props
     return (
-      (curPageReports !== null || allReports !== null) && (
+      (curPageReports || allReports) && (
         <ReportCollection
           paginatedReports={curPageReports}
           reports={allReports}
+          getReportsQueryForCalendar={this.getReportsQueryForCalendar}
           goToPage={this.goToReportsPage}
           {...othersProps}
         />

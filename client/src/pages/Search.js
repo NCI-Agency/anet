@@ -205,6 +205,22 @@ class Search extends Page {
       .catch(error => this.setState({ error: error, didSearch: true }))
   }
 
+  getReportsQueryForCalendar = fetchInfo => {
+    return GQL.run([
+      this.getSearchPart(
+        SEARCH_OBJECT_TYPES.REPORTS,
+        {
+          ...this.getSearchQuery(this.props),
+          engagementDateStart: fetchInfo.start,
+          engagementDateEnd: fetchInfo.end
+        },
+        0,
+        0,
+        true
+      )
+    ])
+  }
+
   fetchData(props) {
     return this._dataFetcher(props, this._fetchDataCallback)
   }
@@ -416,6 +432,7 @@ class Search extends Page {
       <ReportCollection
         paginatedReports={paginatedReports}
         reports={allReports}
+        getReportsQueryForCalendar={this.getReportsQueryForCalendar}
         goToPage={value => this.goToPage(SEARCH_OBJECT_TYPES.REPORTS, value)}
       />
     )
