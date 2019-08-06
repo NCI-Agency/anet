@@ -11,6 +11,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.BoundingBox;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PositionDao;
@@ -129,6 +130,16 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       } else {
         qb.addEqualsClause("locationUuid", "reports.\"locationUuid\"", query.getLocationUuid());
       }
+    }
+
+    final BoundingBox bbox = query.getBoundingBox();
+    if (bbox != null) {
+      qb.addWhereClause("reports.\"locationUuid\" IN (SELECT uuid FROM locations"
+          + " WHERE lng BETWEEN :minLng AND :maxLng AND lat BETWEEN :minLat AND :maxLat)");
+      qb.addSqlArg("minLng", bbox.getMinLng());
+      qb.addSqlArg("maxLng", bbox.getMaxLng());
+      qb.addSqlArg("minLat", bbox.getMinLat());
+      qb.addSqlArg("maxLat", bbox.getMaxLat());
     }
 
     if (query.getPendingApprovalOf() != null) {

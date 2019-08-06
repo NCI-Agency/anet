@@ -48,6 +48,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   private String attendeePositionUuid;
   private List<String> authorizationGroupUuid;
   private Boolean sensitiveInfo;
+  private BoundingBox boundingBox;
   // internal search parameters:
   private Person user;
   private boolean systemSearch;
@@ -289,6 +290,14 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     this.sensitiveInfo = sensitiveInfo;
   }
 
+  public BoundingBox getBoundingBox() {
+    return boundingBox;
+  }
+
+  public void setBoundingBox(BoundingBox boundingBox) {
+    this.boundingBox = boundingBox;
+  }
+
   @JsonIgnore
   @GraphQLIgnore
   public Person getUser() {
@@ -321,7 +330,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
         orgUuid, includeOrgChildren, locationUuid, taskUuid, pendingApprovalOf, state,
         cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid, authorizationGroupUuid,
-        sensitiveInfo, user, systemSearch);
+        sensitiveInfo, boundingBox, user, systemSearch);
   }
 
   @Override
@@ -359,6 +368,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getAttendeePositionUuid(), other.getAttendeePositionUuid())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
         && Objects.equals(getSensitiveInfo(), other.getSensitiveInfo())
+        && Objects.equals(getBoundingBox(), other.getBoundingBox())
         && Objects.equals(getUser(), other.getUser())
         && Objects.equals(isSystemSearch(), other.isSystemSearch());
   }
@@ -371,6 +381,9 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     }
     if (authorizationGroupUuid != null) {
       clone.setAuthorizationGroupUuid(new ArrayList<>(authorizationGroupUuid));
+    }
+    if (getBoundingBox() != null) {
+      clone.setBoundingBox((BoundingBox) boundingBox.clone());
     }
     return clone;
   }
