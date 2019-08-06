@@ -444,6 +444,9 @@ INSERT INTO locations (uuid, name, createdAt, updatedAt)
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
 	VALUES (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+UPDATE locations
+  SET geo = geography::Point(lat, lng, 4326)
+  WHERE lat IS NOT NULL AND lng IS NOT NULL;
 
 INSERT INTO organizations (uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'MoD', 'Ministry of Defense', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

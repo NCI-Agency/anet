@@ -2633,4 +2633,31 @@
 		</addColumn>
 	</changeSet>
 
+  <changeSet id="add-geography-to-locations" author="gjvoosten">
+    <addColumn tableName="locations">
+      <column name="geo" type="geography"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="add-spatial-index-to-locations" author="gjvoosten">
+    <sql>
+      CREATE SPATIAL INDEX SP_locations_geo
+      ON locations(geo);
+    </sql>
+    <rollback>
+      <sql>
+        DROP INDEX SP_locations_geo ON locations;
+      </sql>
+    </rollback>
+  </changeSet>
+
+  <changeSet id="set-locations-geography" author="gjvoosten">
+    <sql>
+      UPDATE locations
+      SET geo = geography::Point(lat, lng, 4326)
+      WHERE lat IS NOT NULL AND lng IS NOT NULL;
+    </sql>
+    <!-- Rolling back is not useful -->
+  </changeSet>
+
 </databaseChangeLog>

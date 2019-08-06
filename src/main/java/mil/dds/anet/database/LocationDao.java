@@ -39,8 +39,9 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
   @Override
   public Location insertInternal(Location l) {
     getDbHandle().createUpdate(
-        "/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", \"updatedAt\") "
-            + "VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, :updatedAt)")
+        "/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, geo, \"createdAt\", \"updatedAt\") "
+            + "VALUES (:uuid, :name, :status, :lat, :lng, " + getGeoParam(l)
+            + ", :createdAt, :updatedAt)")
         .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
@@ -49,8 +50,10 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
 
   @Override
   public int updateInternal(Location l) {
-    return getDbHandle().createUpdate("/* updateLocation */ UPDATE locations "
-        + "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+    return getDbHandle()
+        .createUpdate("/* updateLocation */ UPDATE locations "
+            + "SET name = :name, status = :status, lat = :lat, lng = :lng, geo = " + getGeoParam(l)
+            + ", \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
         .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
   }
@@ -80,6 +83,11 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
   @Override
   public AnetBeanList<Location> search(LocationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getLocationSearcher().runSearch(query);
+  }
+
+  private String getGeoParam(Location l) {
+    return (l.getLat() == null || l.getLng() == null) ? "geography::[Null]"
+        : "geography::Point(:lat, :lng, 4326)";
   }
 
   // TODO: Don't delete any location if any references exist.
