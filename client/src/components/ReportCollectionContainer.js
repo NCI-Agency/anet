@@ -18,6 +18,8 @@ export const FORMAT_MAP = "map"
 class ReportCollectionContainer extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
+    calendarKey: PropTypes.string,
+    mapKey: PropTypes.string,
     mapId: PropTypes.string,
     pagination: PropTypes.object,
     paginationKey: PropTypes.string,
@@ -25,8 +27,7 @@ class ReportCollectionContainer extends Component {
   }
 
   state = {
-    curPageReports: null,
-    allReports: null
+    curPageReports: null
   }
 
   get curPageNum() {
@@ -37,7 +38,7 @@ class ReportCollectionContainer extends Component {
   }
 
   componentDidMount() {
-    this.fetchReportData(true)
+    this.fetchReportData()
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -49,7 +50,7 @@ class ReportCollectionContainer extends Component {
         utils.treatFunctionsAsEqual
       )
     ) {
-      this.fetchReportData(true)
+      this.fetchReportData()
     }
   }
 
@@ -80,7 +81,7 @@ class ReportCollectionContainer extends Component {
     )
   }
 
-  fetchReportData(includeAll, pageNum) {
+  fetchReportData(pageNum) {
     // Query used by the paginated views
     const queries = [
       this.getReportsQuery(
@@ -88,23 +89,9 @@ class ReportCollectionContainer extends Component {
         GQL_REPORT_FIELDS
       )
     ]
-    if (includeAll) {
-      // Query used by the map and calendar views
-      queries.push(
-        this.getReportsQuery(
-          this.reportsQueryParams(false),
-          GQL_BASIC_REPORT_FIELDS
-        )
-      )
-    }
     return Promise.all(queries).then(values => {
       const stateUpdate = {
         curPageReports: values[0].reportList
-      }
-      if (includeAll) {
-        Object.assign(stateUpdate, {
-          allReports: values[1].reportList.list
-        })
       }
       this.setState(stateUpdate, () =>
         this.props.setPagination(
@@ -113,6 +100,21 @@ class ReportCollectionContainer extends Component {
         )
       )
     })
+  }
+
+  getReportsQueryForMap = fetchInfo => {
+    return this.getReportsQuery(
+      {
+        ...this.reportsQueryParams(false),
+        boundingBox: {
+          minLng: fetchInfo.minLng,
+          minLat: fetchInfo.minLat,
+          maxLng: fetchInfo.maxLng,
+          maxLat: fetchInfo.maxLat
+        }
+      },
+      GQL_BASIC_REPORT_FIELDS
+    )
   }
 
   getReportsQueryForCalendar = fetchInfo => {
@@ -127,14 +129,16 @@ class ReportCollectionContainer extends Component {
   }
 
   render() {
-    const { curPageReports, allReports } = this.state
+    const { curPageReports } = this.state
     const { queryParams, ...othersProps } = this.props
     return (
-      (curPageReports || allReports) && (
+      curPageReports && (
         <ReportCollection
           paginatedReports={curPageReports}
-          reports={allReports}
+          calendarKey={this.props.calendarKey}
           getReportsQueryForCalendar={this.getReportsQueryForCalendar}
+          mapKey={this.props.mapKey}
+          getReportsQueryForMap={this.getReportsQueryForMap}
           goToPage={this.goToReportsPage}
           {...othersProps}
         />
@@ -143,7 +147,7 @@ class ReportCollectionContainer extends Component {
   }
 
   goToReportsPage = newPageNum => {
-    this.fetchReportData(false, newPageNum)
+    this.fetchReportData(newPageNum)
   }
 }
 

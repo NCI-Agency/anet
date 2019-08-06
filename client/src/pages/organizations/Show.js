@@ -117,6 +117,8 @@ class BaseOrganizationShow extends Page {
     )
   }
 
+  getSelectedFocus = () => "" + this.state.filterPendingApproval
+
   togglePendingApprovalFilter = () => {
     this.setState({ filterPendingApproval: !this.state.filterPendingApproval })
   }
@@ -347,6 +349,8 @@ class BaseOrganizationShow extends Page {
                 >
                   <ReportCollectionContainer
                     queryParams={reportQueryParams}
+                    mapKey={this.getSelectedFocus()}
+                    calendarKey={this.getSelectedFocus()}
                     paginationKey={`r_${this.props.match.params.uuid}`}
                     viewFormats={[
                       FORMAT_CALENDAR,
