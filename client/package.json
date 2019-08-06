@@ -59,6 +59,7 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-react-hooks": "^1.6.1",
     "eslint-plugin-standard": "^4.0.0",
     "faker": "^4.1.0",
     "file-loader": "^4.1.0",
@@ -244,6 +245,7 @@
       "node",
       "promise",
       "react",
+      "react-hooks",
       "standard"
     ],
     "rules": {
@@ -311,6 +313,8 @@
           "avoidEscape": true
         }
       ],
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/rules-of-hooks": "error",
       "react/jsx-boolean-value": "warn",
       "react/jsx-curly-spacing": "warn",
       "react/jsx-equals-spacing": "warn",
