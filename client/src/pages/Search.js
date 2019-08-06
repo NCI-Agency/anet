@@ -46,7 +46,6 @@ import TASKS_ICON from "resources/tasks.png"
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
     listName: `${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
-    listAllName: `all${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
     sortBy: "ENGAGEMENT_DATE",
     sortOrder: "DESC",
     variableType: "ReportSearchQueryInput",
@@ -141,7 +140,7 @@ class Search extends Page {
     return `${prefix}${type}`
   }
 
-  getSearchPart(type, query, pageNum = 0, pageSize = 10, includeAll = false) {
+  getSearchPart(type, query, pageNum = 0, pageSize = 10) {
     const searchType = SEARCH_OBJECT_TYPES[type]
     let subQuery = Object.assign({}, query)
     subQuery.pageNum = pageNum
@@ -153,13 +152,9 @@ class Search extends Page {
     if (config.sortOrder) {
       subQuery.sortOrder = config.sortOrder
     }
-    const queryVarName = includeAll
-      ? searchType + "QueryAll"
-      : searchType + "Query"
+    const queryVarName = searchType + "Query"
     let gqlPart = new GQL.Part(/* GraphQL */ `
-      ${
-  includeAll ? config.listAllName : config.listName
-} (query:$${queryVarName}) {
+      ${config.listName} (query:$${queryVarName}) {
         pageNum, pageSize, totalCount, list { ${config.fields} }
       }
       `).addVariable(queryVarName, config.variableType, subQuery)
@@ -177,12 +172,6 @@ class Search extends Page {
         const goToPageNum = this.getPageNum(type, pageNum)
         return this.getSearchPart(type, query, goToPageNum, pageSize)
       })
-      if (Object.keys(queryTypes).includes(SEARCH_OBJECT_TYPES.REPORTS)) {
-        // add query for all reports
-        parts.push(
-          this.getSearchPart(SEARCH_OBJECT_TYPES.REPORTS, query, 0, 0, true)
-        )
-      }
       return callback(parts)
     } else {
       this.setState({
@@ -213,6 +202,26 @@ class Search extends Page {
           ...this.getSearchQuery(this.props),
           engagementDateStart: fetchInfo.start,
           engagementDateEnd: fetchInfo.end
+        },
+        0,
+        0,
+        true
+      )
+    ])
+  }
+
+  getReportsQueryForMap = fetchInfo => {
+    return GQL.run([
+      this.getSearchPart(
+        SEARCH_OBJECT_TYPES.REPORTS,
+        {
+          ...this.getSearchQuery(this.props),
+          boundingBox: {
+            minLng: fetchInfo.minLng,
+            minLat: fetchInfo.minLat,
+            maxLng: fetchInfo.maxLng,
+            maxLat: fetchInfo.maxLat
+          }
         },
         0,
         0,
@@ -425,14 +434,13 @@ class Search extends Page {
   renderReports() {
     const { results } = this.state
     const reports = results[SEARCH_OBJECT_TYPES.REPORTS]
-    const allReports = results["all" + SEARCH_OBJECT_TYPES.REPORTS].list
     const goToPageNum = this.getPageNum(SEARCH_OBJECT_TYPES.REPORTS)
     const paginatedReports = Object.assign(reports, { pageNum: goToPageNum })
     return (
       <ReportCollection
         paginatedReports={paginatedReports}
-        reports={allReports}
         getReportsQueryForCalendar={this.getReportsQueryForCalendar}
+        getReportsQueryForMap={this.getReportsQueryForMap}
         goToPage={value => this.goToPage(SEARCH_OBJECT_TYPES.REPORTS, value)}
       />
     )

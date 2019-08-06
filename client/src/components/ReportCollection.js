@@ -2,19 +2,16 @@ import { Settings } from "api"
 import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Calendar from "components/Calendar"
-import Leaflet from "components/Leaflet"
+import Map from "components/Map"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
 import UltimatePagination from "components/UltimatePagination"
-import _escape from "lodash/escape"
 import _get from "lodash/get"
-import _isEqualWith from "lodash/isEqualWith"
-import { Location, Person, Report } from "models"
+import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
-import utils from "utils"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
@@ -58,7 +55,10 @@ export default class ReportCollection extends Component {
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     reports: PropTypes.array,
+    calendarKey: PropTypes.string,
     getReportsQueryForCalendar: PropTypes.func,
+    mapKey: PropTypes.string,
+    getReportsQueryForMap: PropTypes.func,
     paginatedReports: PropTypes.shape({
       totalCount: PropTypes.number,
       pageNum: PropTypes.number,
@@ -83,19 +83,6 @@ export default class ReportCollection extends Component {
 
     this.state = {
       viewFormat: this.props.viewFormats[0]
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    // FIXME: Re-load calendar data if props have changed; needs better solution
-    if (!_isEqualWith(this.props, prevProps, utils.treatFunctionsAsEqual)) {
-      if (this.calendarComponentRef.current) {
-        const calendarApi = this.calendarComponentRef.current.getApi()
-        const eventSources = calendarApi.getEventSources()
-        if (eventSources && !eventSources[0].isFetching) {
-          eventSources[0].refetch()
-        }
-      }
     }
   }
 
@@ -215,41 +202,17 @@ export default class ReportCollection extends Component {
     )
   }
 
-  getMarkers = reports => {
-    if (!reports) {
-      return []
-    } else {
-      let markers = []
-      reports.forEach(report => {
-        if (Location.hasCoordinates(report.location)) {
-          let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
-          label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
-          markers.push({
-            id: report.uuid,
-            lat: report.location.lat,
-            lng: report.location.lng,
-            name: label
-          })
-        }
-      })
-      return markers
-    }
-  }
-
   renderMap(reports) {
-    const hasReports = _get(reports, "length", 0)
     return (
-      <React.Fragment>
-        {(hasReports && (
-          <Leaflet
-            markers={this.getMarkers(reports)}
-            mapId={this.props.mapId}
-            width={this.props.width}
-            height={this.props.height}
-            marginBottom={this.props.marginBottom}
-          />
-        )) || <em>No reports found</em>}
-      </React.Fragment>
+      <Map
+        key={this.props.mapKey}
+        reports={reports}
+        getReportsQuery={this.props.getReportsQueryForMap}
+        mapId={this.props.mapId}
+        width={this.props.width}
+        height={this.props.height}
+        marginBottom={this.props.marginBottom}
+      />
     )
   }
 
@@ -296,6 +259,7 @@ export default class ReportCollection extends Component {
   renderCalendar(reports) {
     return (
       <Calendar
+        key={this.props.calendarKey}
         events={
           this.props.getReportsQueryForCalendar
             ? this.fetchReportsForCalendar

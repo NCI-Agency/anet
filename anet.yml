@@ -381,6 +381,8 @@ dictionary:
         location: [34.52, 69.16]
         zoomLevel: 10
       leafletOptions:
+        # Restrict view to the world
+        maxBounds: [[-90, -180], [90, 180]]
         attributionControl: false
     geoSearcher:
       provider: ESRI

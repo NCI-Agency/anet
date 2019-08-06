@@ -64,6 +64,7 @@ export default class Leaflet extends Component {
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     markers: PropTypes.array,
+    updateCallback: PropTypes.func,
     mapId: PropTypes.string // pass this when you have more than one map on a page
   }
 
@@ -78,7 +79,6 @@ export default class Leaflet extends Component {
 
     this.state = {
       map: null,
-      center: null,
       markerLayer: null
     }
 
@@ -108,20 +108,20 @@ export default class Leaflet extends Component {
         crs: CRS[Settings.imagery.mapOptions.crs]
       }
     )
-    const map = new Map(this.mapId, mapOptions).setView(
+    const map = new Map(this.mapId, mapOptions)
+    map.on("moveend", this.onMoveEnd)
+    map.setView(
       Settings.imagery.mapOptions.homeView.location,
       Settings.imagery.mapOptions.homeView.zoomLevel
     )
+
     if (searchProvider) {
       new GeoSearchControl({ provider: searchProvider }).addTo(map)
     }
 
     const layerControl = new Control.Layers({}, {}, { collapsed: false })
-
     layerControl.addTo(map)
     this.addLayers(map, layerControl)
-
-    map.on("moveend", this.moveEnd)
 
     const markerLayer = new MarkerClusterGroup().addTo(map)
     this.setState({ map, markerLayer })
@@ -182,7 +182,7 @@ export default class Leaflet extends Component {
       markerLayer.removeLayer(ml)
     })
 
-    if (newMarkers.length > 0) {
+    if (newMarkers.length > 0 && !this.props.updateCallback) {
       if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
         this.state.map.fitBounds(markerLayer.getBounds(), { maxZoom: 15 })
       }
@@ -221,10 +221,22 @@ export default class Leaflet extends Component {
     return <div id={this.mapId} style={style} />
   }
 
-  @autobind
-  moveEnd(event) {
-    const center = this.state.map.getCenter()
-
-    this.setState({ center: [center.lat, center.lng].join(",") })
+  onMoveEnd = event => {
+    if (this.props.updateCallback) {
+      const mapBounds = event.target.getBounds()
+      const bounds = {
+        minLng: mapBounds._southWest.lng,
+        minLat: mapBounds._southWest.lat,
+        maxLng: mapBounds._northEast.lng,
+        maxLat: mapBounds._northEast.lat
+      }
+      // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
+      if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
+        this.props.updateCallback({
+          zoom: event.target.getZoom(),
+          ...bounds
+        })
+      }
+    }
   }
 }

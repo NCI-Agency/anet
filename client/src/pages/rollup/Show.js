@@ -189,30 +189,22 @@ class BaseRollupShow extends Page {
     Promise.all([
       // Query used by the chart
       this.fetchChartData(this.runChartQuery(...this.chartQueryParams())),
-      this.fetchReportData(true)
+      // Query used by the paginated reports
+      this.fetchReportData()
     ])
       .then(() => this.props.hideLoading())
       .catch(error => this.setState({ error }, this.props.hideLoading))
   }
 
-  fetchReportData(includeAll) {
+  fetchReportData() {
     // Query used by the reports collection
     const queries = [
       this.runReportsQuery(this.reportsQueryParams(false), false)
     ]
-    if (includeAll) {
-      // Query used by the map
-      queries.push(this.runReportsQuery(this.reportsQueryParams(true), true))
-    }
     return Promise.all(queries).then(values => {
       const stateUpdate = {
         updateChart: false, // only update the report list
         reports: values[0].reportList
-      }
-      if (includeAll) {
-        Object.assign(stateUpdate, {
-          allReports: values[1].reportList.list
-        })
       }
       this.setState(stateUpdate)
     })
@@ -287,16 +279,31 @@ class BaseRollupShow extends Page {
     return reportsQueryParams
   }
 
-  runReportsQuery = (reportsQueryParams, includeAll) => {
+  runReportsQuery = (reportsQueryParams, basic) => {
     return API.query(
       /* GraphQL */ `
       reportList(query:$reportsQueryParams) {
         pageNum, pageSize, totalCount, list {
-          ${includeAll ? GQL_BASIC_REPORT_FIELDS : GQL_REPORT_FIELDS}
+          ${basic ? GQL_BASIC_REPORT_FIELDS : GQL_REPORT_FIELDS}
         }
       }`,
       { reportsQueryParams },
       "($reportsQueryParams: ReportSearchQueryInput)"
+    )
+  }
+
+  getReportsQueryForMap = fetchInfo => {
+    return this.runReportsQuery(
+      {
+        ...this.reportsQueryParams(true),
+        boundingBox: {
+          minLng: fetchInfo.minLng,
+          minLat: fetchInfo.minLat,
+          maxLng: fetchInfo.maxLng,
+          maxLat: fetchInfo.maxLat
+        }
+      },
+      true
     )
   }
 
@@ -414,6 +421,7 @@ class BaseRollupShow extends Page {
           <div className="scrollable">
             <ReportCollection
               paginatedReports={context.reports}
+              calendarKey={this.getSelectedFocus()}
               getReportsQueryForCalendar={this.getReportsQueryForCalendar}
               goToPage={this.goToReportsPage}
               viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
@@ -424,26 +432,28 @@ class BaseRollupShow extends Page {
     )
   }
 
+  getSelectedFocus = () =>
+    this.state.orgType +
+    "-" +
+    (this.state.focusedOrg ? this.state.focusedOrg.uuid : "")
+
   @autobind
   getReportMap(id) {
     return (
-      <Context.Consumer>
-        {context => (
-          <div className="non-scrollable">
-            <ContainerDimensions>
-              {({ width, height }) => (
-                <ReportCollection
-                  width={width}
-                  height={height}
-                  marginBottom={0}
-                  reports={context.allReports}
-                  viewFormats={[FORMAT_MAP]}
-                />
-              )}
-            </ContainerDimensions>
-          </div>
-        )}
-      </Context.Consumer>
+      <div className="non-scrollable">
+        <ContainerDimensions>
+          {({ width, height }) => (
+            <ReportCollection
+              width={width}
+              height={height}
+              marginBottom={0}
+              mapKey={this.getSelectedFocus()}
+              getReportsQueryForMap={this.getReportsQueryForMap}
+              viewFormats={[FORMAT_MAP]}
+            />
+          )}
+        </ContainerDimensions>
+      </div>
     )
   }
 
@@ -564,7 +574,7 @@ class BaseRollupShow extends Page {
   @autobind
   goToReportsPage(newPage) {
     this.setState({ updateChart: false, reportsPageNum: newPage }, () =>
-      this.fetchReportData(false)
+      this.fetchReportData()
     )
   }
 
