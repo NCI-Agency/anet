@@ -11,6 +11,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.BoundingBox;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PositionDao;
@@ -129,6 +130,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       } else {
         qb.addEqualsClause("locationUuid", "reports.\"locationUuid\"", query.getLocationUuid());
       }
+    }
+
+    final BoundingBox bbox = query.getBoundingBox();
+    if (bbox != null) {
+      qb.addWhereClause("reports.\"locationUuid\" IN (" + "SELECT uuid FROM locations "
+          + "WHERE geography::STPolyFromText(:polygon, 4326).STIntersects(geo) = 1" + ")");
+      qb.addSqlArg("polygon",
+          getPolygon(bbox.getMinLng(), bbox.getMinLat(), bbox.getMaxLng(), bbox.getMaxLat()));
     }
 
     if (query.getPendingApprovalOf() != null) {
@@ -308,6 +317,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         break;
     }
     qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, null, "reports_uuid"));
+  }
+
+  private String getPolygon(double minLng, double minLat, double maxLng, double maxLat) {
+    final String polygonFormat = "POLYGON((%1$.10f %2$.10f, %3$.10f %2$.10f,"
+        + " %3$.10f %4$.10f, %1$.10f %4$.10f, %1$.10f %2$.10f))";
+    return String.format(polygonFormat, minLng, minLat, maxLng, maxLat);
   }
 
 }

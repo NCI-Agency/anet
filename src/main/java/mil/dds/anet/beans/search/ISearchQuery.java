@@ -34,4 +34,8 @@ public interface ISearchQuery<T extends ISortBy> {
   public AbstractBatchParams<?, ?> getBatchParams();
 
   public void setBatchParams(AbstractBatchParams<?, ?> batchParams);
+
+  public BoundingBox getBoundingBox();
+
+  public void setBoundingBox(BoundingBox boundingBox);
 }

@@ -22,6 +22,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   private Optional<SortOrder> sortOrder = Optional.empty();
   private Optional<T> sortBy = Optional.empty();
   private Optional<AbstractBatchParams<?, ?>> batchParams = Optional.empty();
+  private BoundingBox boundingBox;
 
   public AbstractSearchQuery(T defaultSortBy) {
     this.defaultSortBy = defaultSortBy;
@@ -121,9 +122,17 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
     this.batchParams = Optional.ofNullable(batchParams);
   }
 
+  public BoundingBox getBoundingBox() {
+    return boundingBox;
+  }
+
+  public void setBoundingBox(BoundingBox boundingBox) {
+    this.boundingBox = boundingBox;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(text, pageNum, pageSize, sortOrder, sortBy, batchParams);
+    return Objects.hash(text, pageNum, pageSize, sortOrder, sortBy, batchParams, boundingBox);
   }
 
   @Override
@@ -138,7 +147,8 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
         && Objects.equals(getPageSize(), other.getPageSize())
         && Objects.equals(getSortOrder(), other.getSortOrder())
         && Objects.equals(getSortBy(), other.getSortBy())
-        && Objects.equals(getBatchParams(), other.getBatchParams());
+        && Objects.equals(getBatchParams(), other.getBatchParams())
+        && Objects.equals(getBoundingBox(), other.getBoundingBox());
   }
 
   @Override
@@ -147,6 +157,9 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
     final AbstractSearchQuery<T> clone = (AbstractSearchQuery<T>) super.clone();
     if (isBatchParamsPresent()) {
       clone.setBatchParams((AbstractBatchParams<?, ?>) getBatchParams().clone());
+    }
+    if (getBoundingBox() != null) {
+      clone.setBoundingBox((BoundingBox) boundingBox.clone());
     }
     return clone;
   }
