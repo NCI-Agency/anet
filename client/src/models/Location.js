@@ -28,11 +28,17 @@ export default class Location extends Model {
       lat: yup
         .number()
         .nullable()
-        .default(null),
+        .moreThan(-90)
+        .lessThan(90)
+        .default(null)
+        .label("Latitude"),
       lng: yup
         .number()
         .nullable()
+        .moreThan(-180)
+        .lessThan(180)
         .default(null)
+        .label("Longitude")
     })
     .concat(Model.yupSchema)
 

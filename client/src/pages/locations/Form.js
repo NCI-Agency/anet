@@ -96,10 +96,25 @@ class LocationForm extends Component {
               </Button>
             </div>
           )
+          let coordError
+          if (errors.lat || errors.lng) {
+            const messages = []
+            if (errors.lat) {
+              messages.push(errors.lat)
+            }
+            if (errors.lng) {
+              messages.push(errors.lng)
+            }
+            coordError = {
+              statusText: "Invalid location coordinates",
+              message: messages.join(", ")
+            }
+          }
           return (
             <div>
               <NavigationWarning isBlocking={dirty} />
               <Messages error={this.state.error} />
+              <Messages error={coordError} />
               <Form className="form-horizontal" method="post">
                 <Fieldset title={title} action={action} />
                 <Fieldset>
