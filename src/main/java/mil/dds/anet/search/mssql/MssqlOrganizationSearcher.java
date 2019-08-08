@@ -15,13 +15,15 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
 
   @Override
   protected void addTextQuery(OrganizationSearchQuery query) {
-    // If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest
-    // possible score)
-    // so we can sort on it (show the most relevant hits at the top).
-    qb.addSelectClause("ISNULL(c_organizations.rank, 0)"
-        + " + CASE WHEN organizations.shortName LIKE :likeQuery THEN 1000 ELSE 0 END"
-        + " + CASE WHEN organizations.identificationCode LIKE :likeQuery THEN 1000 ELSE 0 END"
-        + " AS search_rank");
+    if (!query.isSortByPresent()) {
+      // If we're doing a full-text search without an explicit sort order, add a pseudo-rank (giving
+      // LIKE matches the highest possible score) so we can sort on it (show the most relevant hits
+      // at the top).
+      qb.addSelectClause("ISNULL(c_organizations.rank, 0)"
+          + " + CASE WHEN organizations.shortName LIKE :likeQuery THEN 1000 ELSE 0 END"
+          + " + CASE WHEN organizations.identificationCode LIKE :likeQuery THEN 1000 ELSE 0 END"
+          + " AS search_rank");
+    }
     qb.addFromClause(
         " LEFT JOIN CONTAINSTABLE (organizations, (longName), :containsQuery) c_organizations"
             + " ON organizations.uuid = c_organizations.[Key]");
