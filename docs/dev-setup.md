@@ -160,7 +160,7 @@ The tests are reliant on the data looking pretty similar to what you'd get after
 
 #### Prerequisites
 1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
-1. Run your _development_ server with a fake SMTP container: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
+1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
 
 Run `yarn run lint-fix` to automatically fix some kinds of lint errors.
