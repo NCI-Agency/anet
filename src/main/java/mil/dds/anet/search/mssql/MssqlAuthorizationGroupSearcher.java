@@ -15,14 +15,15 @@ public class MssqlAuthorizationGroupSearcher extends AbstractAuthorizationGroupS
 
   @Override
   protected void addTextQuery(AuthorizationGroupSearchQuery query) {
-    // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
-    // so we can sort on it (show the most relevant hits at the top).
-    // Note that summing up independent ranks is not ideal, but it's the best we can do now.
-    // See
-    // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
-    qb.addSelectClause(
-        "ISNULL(c_authorizationGroups.rank, 0) + ISNULL(f_authorizationGroups.rank, 0)"
-            + " AS search_rank");
+    if (!query.isSortByPresent()) {
+      // If we're doing a full-text search without an explicit sort order, add a pseudo-rank (the
+      // sum of all search ranks) so we can sort on it (show the most relevant hits at the top).
+      // Note that summing up independent ranks is not ideal, but it's the best we can do now. See
+      // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
+      qb.addSelectClause(
+          "ISNULL(c_authorizationGroups.rank, 0) + ISNULL(f_authorizationGroups.rank, 0)"
+              + " AS search_rank");
+    }
     qb.addFromClause(
         "LEFT JOIN CONTAINSTABLE (authorizationGroups, (name, description), :containsQuery) c_authorizationGroups"
             + " ON authorizationGroups.uuid = c_authorizationGroups.[Key]"
