@@ -55,8 +55,10 @@ public class FakeSmtpServer {
     httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
 
     // Read from test config
-    waitBeforeActionMs = Integer.parseInt(AnetITConfiguration.getConfiguration().get("emailWaitBeforeAction").toString());
-    maxRetriesClear = Integer.parseInt(AnetITConfiguration.getConfiguration().get("emailMaxWaitRetriesOnClear").toString());
+    waitBeforeActionMs = Integer
+        .parseInt(AnetITConfiguration.getConfiguration().get("emailWaitBeforeAction").toString());
+    maxRetriesClear = Integer.parseInt(
+        AnetITConfiguration.getConfiguration().get("emailMaxWaitRetriesOnClear").toString());
 
     clearEmailServer();
   }
@@ -65,7 +67,7 @@ public class FakeSmtpServer {
    * Retrieves all emails from the server.
    * 
    * @return All emails from the server
-   * @throws IOException          If the request fails
+   * @throws IOException If the request fails
    * @throws InterruptedException If the wait timer fails
    */
   public List<EmailResponse> requestAllEmailsFromServer() throws IOException, InterruptedException {
@@ -79,7 +81,7 @@ public class FakeSmtpServer {
    * 
    * @param queryFilter The filter to use
    * @return All filtered emails from the server
-   * @throws IOException          If the request fails
+   * @throws IOException If the request fails
    * @throws InterruptedException If the wait timer fails
    */
   public List<EmailResponse> requestEmailsFromServer(QueryFilter queryFilter)
@@ -104,12 +106,12 @@ public class FakeSmtpServer {
 
     sendServerRequest(request, "DELETE");
 
-    for (int i = 0; i < maxRetriesClear; i++) {     
+    for (int i = 0; i < maxRetriesClear; i++) {
       if (i == maxRetriesClear) {
         throw new Exception("Email server not responding");
       } else if (requestAllEmailsFromServer().size() == 0) {
         break;
-      } 
+      }
     }
   }
 
@@ -147,13 +149,13 @@ public class FakeSmtpServer {
   /**
    * Sends an email to the server Warning: The server does not support the BCC field.
    * 
-   * @param to      'To' address
-   * @param from    'From' address
+   * @param to 'To' address
+   * @param from 'From' address
    * @param replyTo 'ReplyTo' address
-   * @param cc      'CC' address
+   * @param cc 'CC' address
    * @param subject Email's subject
-   * @param msg     Email's message
-   * @param date    (Optional) Email's date
+   * @param msg Email's message
+   * @param date (Optional) Email's date
    * @throws MessagingException If formatting/sending the email fails
    */
   public void sendEmail(String to, String from, String replyTo, String cc, String subject,

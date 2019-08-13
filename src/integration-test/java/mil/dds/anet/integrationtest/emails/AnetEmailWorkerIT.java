@@ -42,7 +42,8 @@ public class AnetEmailWorkerIT {
    */
   @Before
   public void setUp() throws Exception {
-    assumeTrue(Boolean.parseBoolean(AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+    assumeTrue(Boolean.parseBoolean(
+        AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
 
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
 

@@ -35,7 +35,8 @@ public class EmailServerIT {
 
   @Before
   public void setup() throws Exception {
-    assumeTrue(Boolean.parseBoolean(AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+    assumeTrue(Boolean.parseBoolean(
+        AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
   }
 
   /**
