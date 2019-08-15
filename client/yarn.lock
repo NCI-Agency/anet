@@ -2356,12 +2356,12 @@
     yargs "^13.2.4"
     yarn-install "^1.0.0"
 
-"@wdio/config@^5.11.0":
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.11.0.tgz#ed565abac5aed9fad0d9ef331f2dbd197a7727ad"
-  integrity sha512-FvEQnx7eHHUG3sEJw+vN9NBnnwLvY7b1V74fhbDYoPO0+jHQwz9fjbs2/4IpUi9vz7UPYE2JGiEDQGHcaQUAqg==
+"@wdio/config@^5.11.0", "@wdio/config@^5.12.1":
+  version "5.12.1"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.12.1.tgz#e7a1158302d49378de0b47d465dc441525590148"
+  integrity sha512-8pZOA0yInNlztcixftf9U4Cc/GSC5b8X2VfWhdhlr0IWekJ5HJ4l6UsLaIRaxGjIHsRsv4Zt2/dc52Q4f3SVrw==
   dependencies:
-    "@wdio/logger" "^5.11.0"
+    "@wdio/logger" "^5.12.1"
     deepmerge "^4.0.0"
     glob "^7.1.2"
 
@@ -2376,10 +2376,10 @@
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
-"@wdio/logger@^5.11.0":
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.11.0.tgz#1f74698675c54ffb2114fe4ab945b9a0c1663133"
-  integrity sha512-oxSFt1PGX8DZcQdpURU/0eF/pisI7x84bNegk3taJ1EZ2Bti7/r7OqjMlLc+VDpr19ro1ytg2WNNTl+FD5vWXg==
+"@wdio/logger@^5.11.0", "@wdio/logger@^5.12.1":
+  version "5.12.1"
+  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.12.1.tgz#1f753b0fa0c1dae455c2a485553890661150fc01"
+  integrity sha512-KUmdS0Scj0T5UQGtcWFiQRqc0NpFLQ/vSvRxlDzzkoeGwwPINqTRkLT103KL7Lyitlm9uLfaFfYc2KSzynTung==
   dependencies:
     chalk "^2.3.0"
     loglevel "^1.6.0"
@@ -2431,21 +2431,21 @@
     pretty-ms "^5.0.0"
     table "^5.4.2"
 
-"@wdio/sync@^5.11.13":
-  version "5.11.13"
-  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.11.13.tgz#ad9a2b15bf8407f438f80cd05a3c8dbbcd806745"
-  integrity sha512-rLq+xnRfNr8QhI5kiCSeJIc5JQpPJ4voOad13HG5CYkwROIvNeKBAoukMKm0PUbNzTTNxC2NXoPXaKYbOINYVg==
+"@wdio/sync@^5.12.1":
+  version "5.12.1"
+  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.12.1.tgz#a654e37252caf26cf235efc22f69cb705c200179"
+  integrity sha512-a2DvrHUA1xSAZcUx0UGQdU4VlCNpBp2vBLq89ppVu0+Sz2Cyr07dQZyIixDRUmmBDE9JH+DBtKykJiojg7W3+A==
   dependencies:
-    "@wdio/config" "^5.11.0"
-    "@wdio/logger" "^5.11.0"
-    fibers "^4.0.0"
+    "@wdio/config" "^5.12.1"
+    "@wdio/logger" "^5.12.1"
+    "@wdio/utils" "^5.12.1"
 
-"@wdio/utils@^5.11.1":
-  version "5.11.1"
-  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-5.11.1.tgz#d5e409e213fd3c9046dda73c275c1c12008ee2f4"
-  integrity sha512-Nyctrh53kjIv590NafjEJl5nuEOMkPlMLAwm/vJMwNqe5tOa6idrf/cPLE1CLeIs4wkSmjuSk6wfZTak0JqGHw==
+"@wdio/utils@^5.11.1", "@wdio/utils@^5.12.1":
+  version "5.12.1"
+  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-5.12.1.tgz#077602989a0060198ea7ec0a13c3b69c76221115"
+  integrity sha512-LrUPEdINyWHrPYY3mXfsrEzEtgB+xXvIKPj6y9P3sVk90cw6FUHHbkZOiMiBkcPaCmIyf8bFwQCiLHxIQzhHiQ==
   dependencies:
-    "@wdio/logger" "^5.11.0"
+    "@wdio/logger" "^5.12.1"
     deepmerge "^4.0.0"
 
 "@webassemblyjs/ast@1.8.5":
@@ -5827,7 +5827,7 @@ detect-file@^1.0.0:
   resolved "https://registry.yarnpkg.com/detect-file/-/detect-file-1.0.0.tgz#f0d66d03672a825cb1b73bdb3fe62310c8e552b7"
   integrity sha1-8NZtA2cqglyxtzvbP+YjEMjlUrc=
 
-detect-libc@^1.0.2, detect-libc@^1.0.3:
+detect-libc@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
@@ -7062,13 +7062,6 @@ fd-slicer@~1.0.1:
   integrity sha1-i1vL2ewyfFBBv5qwI/1nUPEXfmU=
   dependencies:
     pend "~1.2.0"
-
-fibers@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/fibers/-/fibers-4.0.1.tgz#34fe8a8d010db7f9096adb2558a45bbc1d03fe45"
-  integrity sha512-H79EJn7DMWXk48ygmC82bMP8KNcFBZF1CPfwBpYF6cO85hGWoIrlu7eyX9ayxfjP9Nsl0JXxdI6fpYU4DWVw2w==
-  dependencies:
-    detect-libc "^1.0.3"
 
 figgy-pudding@^3.5.1:
   version "3.5.1"
