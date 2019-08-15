@@ -98,7 +98,7 @@
     "@fullcalendar/daygrid": "^4.2.0",
     "@fullcalendar/interaction": "^4.2.0",
     "@fullcalendar/list": "^4.2.0",
-    "@fullcalendar/react": "^4.2.0",
+    "@fullcalendar/react": "^4.3.0",
     "@fullcalendar/timegrid": "^4.2.0",
     "bootstrap": "^3.4.1",
     "change-case": "^3.1.0",

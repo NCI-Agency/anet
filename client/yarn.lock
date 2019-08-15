@@ -1491,10 +1491,10 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.2.tgz#63985d3d8b02530e0869962f4da09142ee8e200e"
   integrity sha512-n/VQ4mbfr81aqkx/XmVicOLjviMuy02eenSdJY33SVA7S2J42EU0P1H0mOogfYedb3wXA0d/LVtBrgTSm04WEA==
 
-"@fullcalendar/core@^4.2.0", "@fullcalendar/core@~4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/core/-/core-4.2.0.tgz#16716d6617137e54fceeb03c72f5124c92b86e58"
-  integrity sha512-4kd5OGHxjMtwI0gUHKwAYzmR0Z79Qf8y0ARx2Ruh20JdVy3Tznn6oKwdpkUbaXWrLXNDoXYRkBiFCIgC27VNCw==
+"@fullcalendar/core@^4.2.0", "@fullcalendar/core@~4.3.0":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/core/-/core-4.3.1.tgz#a061c6d2e998d4155439dbc8aefdfe01cdf648d8"
+  integrity sha512-Eh+p/wpMkWGu26f8NpfQK9ecQMoZxX/aopv+0+4/CH+Ip0paP6iEc40JYgTz7RFl0bFqV1dvwyGyUZ4+9ZeySA==
 
 "@fullcalendar/daygrid@^4.2.0", "@fullcalendar/daygrid@~4.2.0":
   version "4.2.0"
@@ -1511,12 +1511,12 @@
   resolved "https://registry.yarnpkg.com/@fullcalendar/list/-/list-4.2.0.tgz#8eac663750af2bd0d7e64c399ab550e049283890"
   integrity sha512-LJuwUoxLSnVti9NNT0ZG6eztoTkFl4h1/c+BwSUAcovPNAxTfVAbaV3rot+AlHz53d/QX03X1GXSNhRpUWJEBA==
 
-"@fullcalendar/react@^4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/react/-/react-4.2.0.tgz#c1044e5f0cff4336ff1b61f105b3a006aa2d15ad"
-  integrity sha512-sZk1v5TSISYYTwCmJ9unGXZQVEy61K4KEFnKZebukhxUrITMkoNVw/nsLZhz8QMJV9rIMaOHqP3KJQtVMp/H3Q==
+"@fullcalendar/react@^4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/react/-/react-4.3.0.tgz#db00bb0486daacdf139923e71d909cd1a572c23a"
+  integrity sha512-nNSrStb0YLYPeHySrWlQrRrP7CX922tkAKJWkTtdCnIljYnRjdU0B75XMmt1VH1EpVPY1JPCkMBsWPZF2mcfag==
   dependencies:
-    "@fullcalendar/core" "~4.2.0"
+    "@fullcalendar/core" "~4.3.0"
     fast-deep-equal "^2.0.1"
 
 "@fullcalendar/timegrid@^4.2.0":
