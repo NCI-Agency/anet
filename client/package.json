@@ -93,6 +93,7 @@
     "xhr2": "^0.2.0"
   },
   "dependencies": {
+    "@apollo/react-hooks": "^3.0.1",
     "@blueprintjs/core": "^3.18.0",
     "@blueprintjs/datetime": "^3.9.0",
     "@fullcalendar/core": "^4.3.1",
@@ -101,6 +102,7 @@
     "@fullcalendar/list": "^4.3.0",
     "@fullcalendar/react": "^4.3.0",
     "@fullcalendar/timegrid": "^4.3.0",
+    "apollo-boost": "^0.4.4",
     "bootstrap": "^3.4.1",
     "change-case": "^3.1.0",
     "classnames": "^2.2.6",
