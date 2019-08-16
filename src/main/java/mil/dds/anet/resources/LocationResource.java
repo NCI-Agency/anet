@@ -30,7 +30,7 @@ public class LocationResource {
   public Location getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Location loc = dao.getByUuid(uuid);
     if (loc == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Location not found", Status.NOT_FOUND);
     }
     return loc;
   }

@@ -38,7 +38,7 @@ public class PositionResource {
   public Position getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Position p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Position not found", Status.NOT_FOUND);
     }
     return p;
   }

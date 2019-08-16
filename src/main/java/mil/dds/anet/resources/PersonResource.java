@@ -44,7 +44,7 @@ public class PersonResource {
   public Person getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Person p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException("No such person", Status.NOT_FOUND);
+      throw new WebApplicationException("Person not found", Status.NOT_FOUND);
     }
     return p;
   }

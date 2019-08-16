@@ -171,6 +171,10 @@ const BaseAPI = {
     // When the result returns a list of errors we only show the first one
     if (!_isEmpty(response.graphQLErrors)) {
       response.error = response.graphQLErrors[0].message
+      if (response.error.endsWith(" not found")) {
+        // Unfortunately, with GraphQL errors Apollo Client doesn't provide the HTTP statusCode
+        response.status = 404
+      }
     } else if (response.networkError) {
       if (response.networkError.response) {
         response.status = response.networkError.response.status
