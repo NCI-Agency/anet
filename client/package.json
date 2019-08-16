@@ -104,7 +104,7 @@
     "bootstrap": "^3.4.1",
     "change-case": "^3.1.0",
     "classnames": "^2.2.6",
-    "core-js": "^3.1.4",
+    "core-js": "^3.2.1",
     "create-react-class": "^15.6.3",
     "d3": "^5.9.7",
     "draft-convert": "^2.1.8",
