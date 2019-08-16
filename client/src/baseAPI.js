@@ -1,4 +1,42 @@
 import querystring from "querystring"
+import ApolloClient, { gql } from "apollo-boost"
+import { InMemoryCache } from "apollo-cache-inmemory"
+import _isEmpty from "lodash/isEmpty"
+
+const useApollo = true
+const client = new ApolloClient({
+  uri: "/graphql",
+  cache: new InMemoryCache({
+    addTypename: false,
+    dataIdFromObject: object => object.uuid || null
+  }),
+  fetchOptions: {
+    credentials: "same-origin"
+  },
+  request: operation => {
+    let headers = {
+      accept: "application/json"
+    }
+    const authHeader = BaseAPI._getAuthHeader()
+    if (authHeader) {
+      headers[authHeader[0]] = authHeader[1]
+    }
+    operation.setContext({ headers })
+  }
+})
+// Have to initialise this after creating the client
+// (see https://github.com/apollographql/apollo-client/issues/3900)
+client.defaultOptions = {
+  query: {
+    fetchPolicy: "no-cache"
+  },
+  watchQuery: {
+    fetchPolicy: "no-cache"
+  },
+  mutate: {
+    fetchPolicy: "no-cache"
+  }
+}
 
 const BaseAPI = {
   _fetch(pathName, params, accept) {
@@ -58,15 +96,28 @@ const BaseAPI = {
   },
 
   _queryCommon(query, variables, variableDef, output, isMutation, params) {
+    return BaseAPI._send(
+      "/graphql",
+      BaseAPI._buildGraphQl(query, variables, variableDef, output, isMutation),
+      params
+    )
+  },
+
+  _buildGraphQl(query, variables, variableDef, output, isMutation) {
     variables = variables || {}
     variableDef = variableDef || ""
     const queryType = isMutation ? "mutation" : "query"
     query = queryType + " " + variableDef + " { " + query + " }"
     output = output || ""
-    return BaseAPI._send("/graphql", { query, variables, output }, params)
+    return { query, variables, output }
   },
 
   mutation(query, variables, variableDef, params) {
+    const f = useApollo ? BaseAPI.mutationApollo : BaseAPI.mutationOld
+    return f(query, variables, variableDef, params)
+  },
+
+  mutationOld(query, variables, variableDef, params) {
     return BaseAPI._queryCommon(
       query,
       variables,
@@ -78,6 +129,11 @@ const BaseAPI = {
   },
 
   query(query, variables, variableDef, params) {
+    const f = useApollo ? BaseAPI.queryApollo : BaseAPI.queryOld
+    return f(query, variables, variableDef, params)
+  },
+
+  queryOld(query, variables, variableDef, params) {
     return BaseAPI._queryCommon(
       query,
       variables,
@@ -105,6 +161,84 @@ const BaseAPI = {
     BaseAPI._send("/api/logging/log", [
       { severity: severity, url: url, lineNr: lineNr, message: message }
     ])
+  },
+
+  _handleSuccess(response) {
+    return response.data
+  },
+
+  _handleError(response) {
+    // When the result returns a list of errors we only show the first one
+    if (!_isEmpty(response.graphQLErrors)) {
+      response.error = response.graphQLErrors[0].message
+    } else if (response.networkError) {
+      if (response.networkError.response) {
+        response.status = response.networkError.response.status
+        response.statusText = response.networkError.response.statusText
+      } else {
+        response.status = response.networkError.statusCode
+        response.statusText = response.networkError.name
+      }
+      if (
+        response.networkError.result &&
+        !_isEmpty(response.networkError.result.errors)
+      ) {
+        response.message = response.networkError.result.errors[0].message
+      } else if (response.status === 500) {
+        response.message =
+          "An Error occured! Please contact the administrator and let them know what you were doing to get this error"
+      }
+    }
+    if (_isEmpty(response.message)) {
+      response.message =
+        response.error || "You do not have permissions to perform this action"
+    }
+    return Promise.reject(response)
+  },
+
+  mutationApollo(query, variables, variableDef) {
+    const graphQl = BaseAPI._buildGraphQl(
+      query,
+      variables,
+      variableDef,
+      undefined,
+      true
+    )
+    return client
+      .mutate({
+        mutation: gql`
+          ${graphQl.query}
+        `,
+        variables: graphQl.variables
+      })
+      .then(BaseAPI._handleSuccess)
+      .catch(BaseAPI._handleError)
+  },
+
+  queryApollo(query, variables, variableDef) {
+    const graphQl = BaseAPI._buildGraphQl(query, variables, variableDef)
+    return client
+      .query({
+        query: gql`
+          ${graphQl.query}
+        `,
+        variables: graphQl.variables
+      })
+      .then(BaseAPI._handleSuccess)
+      .catch(BaseAPI._handleError)
+  },
+
+  queryExportApollo(query, variables, variableDef, output) {
+    const graphQl = BaseAPI._buildGraphQl(query, variables, variableDef, output)
+    return client
+      .query({
+        query: gql`
+          ${graphQl.query}
+        `,
+        variables: graphQl.variables
+      })
+      .then(BaseAPI._handleSuccess)
+      .catch(BaseAPI._handleError)
   },
 
   _getAuthParams: function() {
