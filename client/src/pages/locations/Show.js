@@ -56,11 +56,15 @@ class BaseLocationShow extends Page {
 
   fetchData(props) {
     const locationQueryPart = new GQL.Part(/* GraphQL */ `
-      location(uuid:"${props.match.params.uuid}") {
-        uuid, name, lat, lng, status
+      location(uuid: $uuid) {
+        uuid
+        name
+        lat
+        lng
+        status
         ${GRAPHQL_NOTES_FIELDS}
       }
-    `)
+    `).addVariable("uuid", "String!", props.match.params.uuid)
 
     return GQL.run([locationQueryPart]).then(data => {
       this.setState({

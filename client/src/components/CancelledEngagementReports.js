@@ -39,7 +39,10 @@ class CancelledEngagementReports extends ReportsVisualisation {
     this.CHART_ID_BY_REASON = "cancelled_reports_by_reason"
     this.GQL_CHART_FIELDS = /* GraphQL */ `
       uuid
-      advisorOrg { uuid, shortName }
+      advisorOrg {
+        uuid
+        shortName
+      }
       cancelledReason
     `
     this.VISUALIZATIONS = [

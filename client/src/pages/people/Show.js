@@ -56,26 +56,55 @@ class BasePersonShow extends Page {
 
   fetchData(props) {
     let personPart = new GQL.Part(/* GraphQL */ `
-      person(uuid:"${props.match.params.uuid}") {
-        uuid,
-        name, rank, role, status, emailAddress, phoneNumber, domainUsername,
-        biography, country, gender, endOfTourDate, avatar(size: 256),
+      person(uuid: $uuid) {
+        uuid
+        name
+        rank
+        role
+        status
+        emailAddress
+        phoneNumber
+        domainUsername
+        biography
+        country
+        gender
+        endOfTourDate
+        avatar(size: 256)
         position {
-          uuid,
-          name,
-          type,
+          uuid
+          name
+          type
           organization {
-            uuid, shortName
-          },
+            uuid
+            shortName
+          }
           associatedPositions {
-            uuid, name, type
-            person { uuid, name, rank, role },
-            organization { uuid, shortName }
+            uuid
+            name
+            type
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+            organization {
+              uuid
+              shortName
+            }
           }
         }
-        previousPositions { startTime, endTime, position { uuid, name }}
+        previousPositions {
+          startTime
+          endTime
+          position {
+            uuid
+            name
+          }
+        }
         ${GRAPHQL_NOTES_FIELDS}
-    }`)
+      }
+    `).addVariable("uuid", "String!", props.match.params.uuid)
 
     return GQL.run([personPart]).then(data =>
       this.setState({

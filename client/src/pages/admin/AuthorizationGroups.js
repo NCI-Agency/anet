@@ -25,9 +25,20 @@ class AuthorizationGroups extends Page {
     }
     return API.query(
       /* GraphQL */ `
-      authorizationGroupList(query:$query) {
-        list { uuid, name, description, positions { uuid, name, type }, status }
-      }`,
+        authorizationGroupList(query: $query) {
+          list {
+            uuid
+            name
+            description
+            positions {
+              uuid
+              name
+              type
+            }
+            status
+          }
+        }
+      `,
       { query },
       "($query: AuthorizationGroupSearchQueryInput)"
     ).then(data => {

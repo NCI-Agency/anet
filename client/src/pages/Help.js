@@ -50,7 +50,14 @@ class BaseHelp extends Page {
     const positionsPart = new GQL.Part(/* GraphQL */ `
       positionList(query: $positionQuery) {
         list {
-          person { rank, role, name, emailAddress }
+          uuid
+          person {
+            uuid
+            rank
+            role
+            name
+            emailAddress
+          }
         }
       }`).addVariable(
       "positionQuery",

@@ -47,24 +47,59 @@ class BaseAuthorizationGroupShow extends Page {
       authorizationGroupUuid: authGroupUuid
     }
     const positionsPart = new GQL.Part(/* GraphQL */ `
-      paginatedPositions: positionList(query:$positionQuery) {
-        pageNum, pageSize, totalCount, list { uuid, name, code, type, status, organization { uuid, shortName }, person { uuid, name, rank, role } }
-      }`).addVariable(
-      "positionQuery",
-      "PositionSearchQueryInput",
-      positionQuery
-    )
+      paginatedPositions: positionList(query: $positionQuery) {
+        pageNum
+        pageSize
+        totalCount
+        list {
+          uuid
+          name
+          code
+          type
+          status
+          organization {
+            uuid
+            shortName
+          }
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+        }
+      }
+    `).addVariable("positionQuery", "PositionSearchQueryInput", positionQuery)
     return positionsPart
   }
 
   fetchData(props) {
     const authGroupPart = new GQL.Part(/* GraphQL */ `
-      authorizationGroup(uuid:"${props.match.params.uuid}") {
-      uuid, name, description
-      positions { uuid, name, code, type, status, organization { uuid, shortName }, person { uuid, name, rank, role } }
-      status
-      ${GRAPHQL_NOTES_FIELDS}
-    }`)
+      authorizationGroup(uuid: $uuid) {
+        uuid
+        name
+        description
+        positions {
+          uuid
+          name
+          code
+          type
+          status
+          organization {
+            uuid
+            shortName
+          }
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+        }
+        status
+        ${GRAPHQL_NOTES_FIELDS}
+      }
+    `).addVariable("uuid", "String!", props.match.params.uuid)
     const positionsPart = this.getPositionQueryPart(props.match.params.uuid)
     return this.runGQL([authGroupPart, positionsPart])
   }

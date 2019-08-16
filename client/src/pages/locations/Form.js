@@ -196,7 +196,9 @@ class LocationForm extends Component {
     const location = new Location(values)
     const { edit } = this.props
     const operation = edit ? "updateLocation" : "createLocation"
-    let graphql = /* GraphQL */ operation + "(location: $location)"
+    let graphql = /* GraphQL */ `
+      ${operation}(location: $location)
+    `
     graphql += edit ? "" : " { uuid }"
     const variables = { location: location }
     const variableDef = "($location: LocationInput!)"

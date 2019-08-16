@@ -38,7 +38,10 @@ class PendingApprovalReports extends ReportsVisualisation {
     this.CHART_ID = "not_approved_reports_chart"
     this.GQL_CHART_FIELDS = /* GraphQL */ `
       uuid
-      advisorOrg { uuid, shortName }
+      advisorOrg {
+        uuid
+        shortName
+      }
     `
     this.VISUALIZATIONS = [
       {

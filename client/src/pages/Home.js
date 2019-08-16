@@ -206,14 +206,22 @@ class BaseHome extends Page {
     queries.forEach((q, index) => {
       q.query.pageSize = 1 // we're only interested in the totalCount, so just get at most one report
       queryParts.push(
-        new GQL.Part(
-          /* GraphQL */ `tile${index}: reportList(query:$query${index}) { totalCount}`
-        ).addVariable("query" + index, "ReportSearchQueryInput", q.query)
+        new GQL.Part(/* GraphQL */ `
+            tile${index}: reportList(query: $query${index}) {
+              totalCount
+            }
+          `).addVariable(`query${index}`, "ReportSearchQueryInput", q.query)
       )
     })
     queryParts.push(
       new GQL.Part(/* GraphQL */ `
-      savedSearches: mySearches {uuid, name, objectType, query}`)
+        savedSearches: mySearches {
+          uuid
+          name
+          objectType
+          query
+        }
+      `)
     )
     GQL.run(queryParts).then(data => {
       let selectedSearch =
@@ -375,7 +383,9 @@ class BaseHome extends Page {
       s => s.uuid === search.uuid
     )
     const operation = "deleteSavedSearch"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ `
+      ${operation}(uuid: $uuid)
+    `
     const variables = { uuid: search.uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)

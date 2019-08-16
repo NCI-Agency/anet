@@ -164,7 +164,9 @@ class BaseAssignPositionModal extends Component {
 
   @autobind
   save() {
-    let graphql = /* GraphQL */ "deletePersonFromPosition(uuid: $uuid)"
+    let graphql = /* GraphQL */ `
+      deletePersonFromPosition(uuid: $uuid)
+    `
     let variables = {
       uuid: this.props.person.position.uuid
     }

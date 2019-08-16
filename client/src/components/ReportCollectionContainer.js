@@ -71,11 +71,15 @@ class ReportCollectionContainer extends Component {
   getReportsQuery = (reportsQueryParams, reportFields) => {
     return API.query(
       /* GraphQL */ `
-      reportList(query:$reportsQueryParams) {
-        pageNum, pageSize, totalCount, list {
-          ${reportFields}
+        reportList(query: $reportsQueryParams) {
+          pageNum
+          pageSize
+          totalCount
+          list {
+            ${reportFields}
+          }
         }
-      }`,
+      `,
       { reportsQueryParams },
       "($reportsQueryParams: ReportSearchQueryInput)"
     )

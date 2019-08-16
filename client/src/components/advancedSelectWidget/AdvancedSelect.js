@@ -401,19 +401,22 @@ export default class AdvancedSelect extends Component {
     const resourceName = this.props.objectType.resourceName
     const listName = filterDefs.listName || this.props.objectType.listName
     this.setState({ isLoading: true }, () => {
-      let graphQlQuery = /* GraphQL */ ""
+      let graphQlQuery
       let variables = {}
       let variableDef = ""
       if (filterDefs.searchQuery) {
         // GraphQL search type of query
-        graphQlQuery =
-          listName +
-          " (query: $query) { " +
-          "pageNum, pageSize, totalCount, list { " +
-          this.props.fields +
-          "}" +
-          "}"
-        variableDef = "($query: " + resourceName + "SearchQueryInput)"
+        graphQlQuery = /* GraphQL */ `
+          ${listName}(query: $query) {
+            pageNum
+            pageSize
+            totalCount
+            list {
+              ${this.props.fields}
+            }
+          }
+        `
+        variableDef = `($query: ${resourceName}SearchQueryInput)`
         let queryVars = { pageNum: pageNum, pageSize: 6 }
         if (this.props.queryParams) {
           Object.assign(queryVars, this.props.queryParams)
@@ -427,15 +430,16 @@ export default class AdvancedSelect extends Component {
         variables = { query: queryVars }
       } else {
         // GraphQL query other than search type
-        graphQlQuery =
-          listName +
-          "(" +
-          filterDefs.listArgs +
-          ") { " +
-          "pageNum, pageSize, totalCount, list { " +
-          this.props.fields +
-          "}" +
-          "}"
+        graphQlQuery = /* GraphQL */ `
+          ${listName}(${filterDefs.listArgs}) {
+            pageNum
+            pageSize
+            totalCount
+            list {
+              ${this.props.fields}
+            }
+          }
+        `
       }
       let thisRequest = (this.latestRequest = API.query(
         graphQlQuery,

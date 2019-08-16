@@ -349,7 +349,9 @@ class BasePositionForm extends Component {
     position.code = position.code || null // Need to null out empty position codes
     const { edit } = this.props
     const operation = edit ? "updatePosition" : "createPosition"
-    let graphql = /* GraphQL */ operation + "(position: $position)"
+    let graphql = /* GraphQL */ `
+      ${operation}(position: $position)
+    `
     graphql += edit ? "" : " { uuid }"
     const variables = { position: position }
     const variableDef = "($position: PositionInput!)"

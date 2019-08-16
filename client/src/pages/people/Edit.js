@@ -31,16 +31,30 @@ class PersonEdit extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      person(uuid:"${props.match.params.uuid}") {
-        uuid,
-        name, rank, role, emailAddress, phoneNumber, status, domainUsername,
-        biography, country, gender, endOfTourDate, avatar(size: 256),
-        position {
-          uuid, name, type
+        person(uuid: $uuid) {
+          uuid
+          name
+          rank
+          role
+          emailAddress
+          phoneNumber
+          status
+          domainUsername
+          biography
+          country
+          gender
+          endOfTourDate
+          avatar(size: 256)
+          position {
+            uuid
+            name
+            type
+          }
+          ${GRAPHQL_NOTES_FIELDS}
         }
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       if (data.person.endOfTourDate) {
         data.person.endOfTourDate = moment(data.person.endOfTourDate).format()

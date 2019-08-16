@@ -42,60 +42,163 @@ class ReportMinimal extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
-        keyOutcomes, reportText, nextSteps, cancelledReason
-
-        state
-
-        location { uuid, name }
-        author {
-          uuid, name, rank, role
-          position {
-            organization {
-              shortName, longName, identificationCode
-              approvalSteps {
-                uuid, name,
-                approvers {
-                  uuid, name,
-                  person { uuid, name, rank, role }
+        report(uuid: $uuid) {
+          uuid
+          intent
+          engagementDate
+          duration
+          atmosphere
+          atmosphereDetails
+          keyOutcomes
+          reportText
+          nextSteps
+          cancelledReason
+          releasedAt
+          state
+          location {
+            uuid
+            name
+          }
+          author {
+            uuid
+            name
+            rank
+            role
+            position {
+              uuid
+              organization {
+                uuid
+                shortName
+                longName
+                identificationCode
+                approvalSteps {
+                  uuid
+                  name
+                  approvers {
+                    uuid
+                    name
+                    person {
+                      uuid
+                      name
+                      rank
+                      role
+                    }
+                  }
                 }
               }
             }
           }
+          attendees {
+            uuid
+            name
+            primary
+            rank
+            role
+            status
+            endOfTourDate
+            avatar(size: 32)
+            position {
+              uuid
+              name
+              type
+              code
+              status
+              organization {
+                uuid
+                shortName
+              }
+              location {
+                uuid
+                name
+              }
+            }
+          }
+          primaryAdvisor {
+            uuid
+          }
+          primaryPrincipal {
+            uuid
+          }
+          tasks {
+            uuid
+            shortName
+            longName
+            responsibleOrg {
+              uuid
+              shortName
+            }
+          }
+          comments {
+            uuid
+            text
+            createdAt
+            updatedAt
+            author {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          principalOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+          advisorOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+          workflow {
+            type
+            createdAt
+            step {
+              uuid
+              name
+              approvers {
+                uuid
+                name
+                person {
+                  uuid
+                  name
+                  rank
+                  role
+                }
+              }
+            }
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          approvalStep {
+            uuid
+            name
+            approvers {
+              uuid
+            }
+            nextStepUuid
+          }
+          tags {
+            uuid
+            name
+            description
+          }
+          reportSensitiveInformation {
+            uuid
+            text
+          }
         }
-
-        attendees {
-          uuid, name, primary, rank, role, status, endOfTourDate
-          position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
-        }
-        primaryAdvisor { uuid }
-        primaryPrincipal { uuid }
-
-        tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-
-        comments {
-          uuid, text, createdAt, updatedAt
-          author { uuid, name, rank, role }
-        }
-
-        principalOrg { uuid, shortName, longName, identificationCode, type }
-        advisorOrg { uuid, shortName, longName, identificationCode, type }
-
-        workflow {
-          type, createdAt
-          step { uuid , name
-            approvers { uuid, name, person { uuid, name, rank, role } }
-          },
-          person { uuid, name, rank, role }
-        }
-
-        approvalStep { name, approvers { uuid }, nextStepUuid }
-
-        tags { uuid, name, description }
-        reportSensitiveInformation { uuid, text }
-      }
-    `
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       data.report.cancelled = !!data.report.cancelledReason
       const report = new Report(data.report)

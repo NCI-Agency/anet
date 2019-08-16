@@ -30,10 +30,16 @@ class PositionNew extends Page {
       // then look that org up and pre-populate the field.
       return API.query(
         /* GraphQL */ `
-        organization(uuid:"${qs.organizationUuid}") {
-          uuid, shortName, longName, identificationCode, type
-        }
-      `
+          organization(uuid: $uuid) {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+        `,
+        { uuid: qs.organizationUuid },
+        "($uuid: String!)"
       ).then(data => {
         const organization = new Organization(data.organization)
         const position = new Position({

@@ -77,21 +77,30 @@ class DecisivesDashboard extends Page {
       currentList: reportList(query: $reportQuery) {
         list {
           uuid
-          location { uuid }
+          location {
+            uuid
+          }
           attendees {
-            position { uuid }
+            position {
+              uuid
+            }
           }
         }
       }
       previousList: reportList(query: $reportPreviousQuery) {
         list {
           uuid
-          location { uuid }
+          location {
+            uuid
+          }
           attendees {
-            position { uuid }
+            position {
+              uuid
+            }
           }
         }
-      }`)
+      }
+    `)
       .addVariable("reportQuery", "ReportSearchQueryInput", {
         pageNum: 0,
         pageSize: 0,
@@ -152,21 +161,23 @@ class DecisivesDashboard extends Page {
     const dataPart = new GQL.Part(/* GraphQL */ `
       positionList(query: $positionQuery) {
         list {
-          uuid, name
+          uuid
+          name
         }
       }
       locationList(query: $locationQuery) {
         list {
-          uuid, name
+          uuid
+          name
         }
       }
       taskList(query: $taskQuery) {
         list {
-          uuid, shortName
+          uuid
+          shortName
         }
       }
-      
-      `)
+    `)
       .addVariable("positionQuery", "PositionSearchQueryInput", {
         // TODO: make this work with AbstractSearchQueryInput
         pageNum: 0,

@@ -526,8 +526,10 @@ class BaseOrganizationForm extends Component {
   removeApprovalStep = (arrayHelpers, index, step) => {
     return API.query(
       /* GraphQL */ `
-      approvalStepInUse(uuid:"${step.uuid}")
-    `
+        approvalStepInUse(uuid: $uuid)
+      `,
+      { uuid: step.uuid },
+      "($uuid: String!)"
     ).then(data => {
       if (data.approvalStepInUse) {
         this.setState({ showRemoveApprovalStepAlert: true })
@@ -581,7 +583,9 @@ class BaseOrganizationForm extends Component {
     organization.parentOrg = utils.getReference(organization.parentOrg)
     const { edit } = this.props
     const operation = edit ? "updateOrganization" : "createOrganization"
-    let graphql = /* GraphQL */ operation + "(organization: $organization)"
+    let graphql = /* GraphQL */ `
+      ${operation}(organization: $organization)
+    `
     graphql += edit ? "" : " { uuid }"
     const variables = { organization: organization }
     const variableDef = "($organization: OrganizationInput!)"
