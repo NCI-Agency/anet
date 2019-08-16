@@ -30,13 +30,33 @@ class AuthorizationGroupEdit extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-        authorizationGroup(uuid:"${props.match.params.uuid}") {
-        uuid, name, description
-        positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
-        status
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+        authorizationGroup(uuid: $uuid) {
+          uuid
+          name
+          description
+          positions {
+            uuid
+            name
+            code
+            type
+            status
+            organization {
+              uuid
+              shortName
+            }
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          status
+          ${GRAPHQL_NOTES_FIELDS}
+        }
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       this.setState({
         authorizationGroup: new AuthorizationGroup(data.authorizationGroup)

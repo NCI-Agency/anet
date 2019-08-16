@@ -43,39 +43,74 @@ class App extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      me {
-        uuid, name, rank, role, emailAddress, status, avatar(size: 32)
-        position {
-          uuid, name, code, type, status, isApprover
-          organization {
-            uuid, shortName,
-            descendantOrgs {
+        me {
+          uuid
+          name
+          rank
+          role
+          emailAddress
+          status
+          avatar(size: 32)
+          position {
+            uuid
+            name
+            code
+            type
+            status
+            isApprover
+            organization {
               uuid
-            }
-          }
-          location {uuid, name}
-          associatedPositions {
-            uuid, name,
-            person { uuid, name, rank,
-              position {
-                uuid, name, code, type
-                organization { uuid, shortName}
-                location {uuid, name}
+              shortName
+              descendantOrgs {
+                uuid
               }
             }
-            organization { uuid, shortName }
+            location {
+              uuid
+              name
+            }
+            associatedPositions {
+              uuid
+              name
+              person {
+                uuid
+                name
+                rank
+                position {
+                  uuid
+                  name
+                  code
+                  type
+                  organization {
+                    uuid
+                    shortName
+                  }
+                  location {
+                    uuid
+                    name
+                  }
+                }
+              }
+              organization {
+                uuid
+                shortName
+              }
+            }
           }
         }
-      }
 
-      adminSettings {
-        key, value
-      }
+        adminSettings {
+          key
+          value
+        }
 
-      organizationTopLevelOrgs(type: ADVISOR_ORG) {
-        list { uuid, shortName }
-      }
-    `
+        organizationTopLevelOrgs(type: ADVISOR_ORG) {
+          list {
+            uuid
+            shortName
+          }
+        }
+      `
     ).then(data => {
       data.me._loaded = true
       this.setState(this.processData(data), () => {

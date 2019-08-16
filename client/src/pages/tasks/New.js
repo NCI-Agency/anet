@@ -28,10 +28,16 @@ class TaskNew extends Page {
     if (qs.responsibleOrgUuid) {
       return API.query(
         /* GraphQL */ `
-        organization(uuid:"${qs.responsibleOrgUuid}") {
-          uuid, shortName, longName, identificationCode, type
-        }
-      `
+          organization(uuid: $uuid) {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+        `,
+        { uuid: qs.responsibleOrgUuid },
+        "($uuid: String!)"
       ).then(data => {
         const { task } = this.state
         task.responsibleOrg = new Organization(data.organization)

@@ -95,7 +95,10 @@ class BaseRollupShow extends Page {
 
     this.CHART_ID = "reports_by_day_of_week"
     this.GQL_CHART_FIELDS = /* GraphQL */ `
-      org {uuid shortName}
+      org {
+        uuid
+        shortName
+      }
       published
       cancelled
     `
@@ -251,9 +254,10 @@ class BaseRollupShow extends Page {
   runChartQuery = (chartQuery, chartQueryParams, chartQueryParamsDef) => {
     return API.query(
       /* GraphQL */ `
-      ${chartQuery} {
-        ${this.GQL_CHART_FIELDS}
-      }`,
+        ${chartQuery} {
+          ${this.GQL_CHART_FIELDS}
+        }
+      `,
       chartQueryParams,
       chartQueryParamsDef
     )
@@ -290,11 +294,15 @@ class BaseRollupShow extends Page {
   runReportsQuery = (reportsQueryParams, includeAll) => {
     return API.query(
       /* GraphQL */ `
-      reportList(query:$reportsQueryParams) {
-        pageNum, pageSize, totalCount, list {
-          ${includeAll ? GQL_BASIC_REPORT_FIELDS : GQL_REPORT_FIELDS}
+        reportList(query: $reportsQueryParams) {
+          pageNum
+          pageSize
+          totalCount
+          list {
+            ${includeAll ? GQL_BASIC_REPORT_FIELDS : GQL_REPORT_FIELDS}
+          }
         }
-      }`,
+      `,
       { reportsQueryParams },
       "($reportsQueryParams: ReportSearchQueryInput)"
     )
@@ -678,23 +686,31 @@ class BaseRollupShow extends Page {
 
   @autobind
   showPreview(print) {
-    let graphQL = /* GraphQL */ `
-      showRollupEmail(
-        startDate: ${this.rollupStart.valueOf()},
-        endDate: ${this.rollupEnd.valueOf()}
+    let graphql = /* GraphQL */ `
+      showRollupEmail(startDate: $startDate, endDate: $endDate
     `
+    const variables = {
+      startDate: this.rollupStart.valueOf(),
+      endDate: this.rollupEnd.valueOf()
+    }
+    let variableDef = "($startDate: Long!, $endDate: Long!"
     if (this.state.focusedOrg) {
       if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        graphQL += `, principalOrganizationUuid: "${this.state.focusedOrg.uuid}"`
+        graphql += ", principalOrganizationUuid: $organizationUuid"
       } else {
-        graphQL += `, advisorOrganizationUuid: "${this.state.focusedOrg.uuid}"`
+        graphql += ",advisorOrganizationUuid: $organizationUuid"
       }
+      variables.organizationUuid = this.state.focusedOrg.uuid
+      variableDef += ", $organizationUuid: String!"
     }
     if (this.state.orgType) {
-      graphQL += `, orgType: ${this.state.orgType}`
+      graphql += ", orgType: $orgType"
+      variables.orgType = this.state.orgType
+      variableDef += ", $orgType: OrganizationType!"
     }
-    graphQL += ")"
-    API.query(graphQL).then(data => {
+    graphql += ")"
+    variableDef += ")"
+    API.query(graphql, variables, variableDef).then(data => {
       let rollupWindow = window.open("", "rollup")
       let doc = rollupWindow.document
       doc.clear()
@@ -742,8 +758,9 @@ class BaseRollupShow extends Page {
       toAddresses: r.to,
       comment: values.comment
     }
-    let graphql =
-      /* GraphQL */ "emailRollup(startDate: $startDate, endDate: $endDate"
+    let graphql = /* GraphQL */ `
+      emailRollup(startDate: $startDate, endDate: $endDate
+    `
     const variables = {
       startDate: this.rollupStart.valueOf(),
       endDate: this.rollupEnd.valueOf(),
@@ -752,14 +769,12 @@ class BaseRollupShow extends Page {
     let variableDef = "($startDate: Long!, $endDate: Long!"
     if (this.state.focusedOrg) {
       if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        graphql += ", principalOrganizationUuid: $principalOrganizationUuid"
-        variables.principalOrganizationUuid = this.state.focusedOrg.uuid
-        variableDef += ", $principalOrganizationUuid: String!"
+        graphql += ", principalOrganizationUuid: $organizationUuid"
       } else {
-        graphql += ",advisorOrganizationUuid: $advisorOrganizationUuid"
-        variables.advisorOrganizationUuid = this.state.focusedOrg.uuid
-        variableDef += ", $advisorOrganizationUuid: String!"
+        graphql += ",advisorOrganizationUuid: $organizationUuid"
       }
+      variables.organizationUuid = this.state.focusedOrg.uuid
+      variableDef += ", $organizationUuid: String!"
     }
     if (this.state.orgType) {
       graphql += ", orgType: $orgType"

@@ -27,10 +27,19 @@ class KanbanDashboard extends Page {
     const tasksPart = new GQL.Part(/* GraphQL */ `
       taskList(query: $taskQuery) {
         list {
-          uuid, longName, shortName, customFieldEnum1, createdAt, updatedAt
-          responsibleOrg { uuid, shortName}
+          uuid
+          longName
+          shortName
+          customFieldEnum1
+          createdAt
+          updatedAt
+          responsibleOrg {
+            uuid
+            shortName
+          }
         }
-      }`).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
+      }
+    `).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
 
     const dashboardSettings = Settings.dashboards.find(
       o => o.label === this.props.match.params.dashboard

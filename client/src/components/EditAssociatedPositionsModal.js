@@ -189,8 +189,9 @@ class BaseEditAssociatedPositionsModal extends Component {
     position.associatedPositions = values.associatedPositions
     delete position.previousPeople
     delete position.person // prevent any changes to person.
-    const graphql =
-      /* GraphQL */ "updateAssociatedPosition(position: $position)"
+    const graphql = /* GraphQL */ `
+      updateAssociatedPosition(position: $position)
+    `
     const variables = { position: position }
     const variableDef = "($position: PositionInput!)"
     return API.mutation(graphql, variables, variableDef)

@@ -336,9 +336,9 @@ class MergePeople extends Page {
   save = (values, form) => {
     const { winner, loser, copyPosition } = values
     const operation = "mergePeople"
-    const graphql =
-      /* GraphQL */ operation +
-      "(winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition)"
+    const graphql = /* GraphQL */ `
+      ${operation}(winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition)
+    `
     const variables = {
       winnerUuid: winner.uuid,
       loserUuid: loser.uuid,

@@ -53,16 +53,47 @@ class BaseTaskShow extends Page {
 
   fetchData(props) {
     const taskQuery = new GQL.Part(/* GraphQL */ `
-      task(uuid:"${props.match.params.uuid}") {
-        uuid, shortName, longName, status,
-        customField, customFieldEnum1, customFieldEnum2,
-        plannedCompletion, projectedCompletion,
-        responsibleOrg { uuid, shortName, longName, identificationCode },
-        customFieldRef1 { uuid, shortName, longName },
-        responsiblePositions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
+      task(uuid: $uuid) {
+        uuid
+        shortName
+        longName
+        status
+        customField
+        customFieldEnum1
+        customFieldEnum2
+        plannedCompletion
+        projectedCompletion
+        responsibleOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
+        customFieldRef1 {
+          uuid
+          shortName
+          longName
+        }
+        responsiblePositions {
+          uuid
+          name
+          code
+          type
+          status
+          organization {
+            uuid
+            shortName
+          }
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+        }
         ${GRAPHQL_NOTES_FIELDS}
       }
-    `)
+    `).addVariable("uuid", "String!", props.match.params.uuid)
 
     return GQL.run([taskQuery]).then(data => {
       this.setState({

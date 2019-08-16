@@ -30,16 +30,49 @@ class TaskEdit extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      task(uuid:"${props.match.params.uuid}") {
-        uuid, shortName, longName, status,
-        customField, customFieldEnum1, customFieldEnum2,
-        plannedCompletion, projectedCompletion,
-        responsibleOrg { uuid, shortName, longName, identificationCode },
-        customFieldRef1 { uuid, shortName, longName }
-        responsiblePositions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+        task(uuid: $uuid) {
+          uuid
+          shortName
+          longName
+          status
+          customField
+          customFieldEnum1
+          customFieldEnum2
+          plannedCompletion
+          projectedCompletion
+          responsibleOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          customFieldRef1 {
+            uuid
+            shortName
+            longName
+          }
+          responsiblePositions {
+            uuid
+            name
+            code
+            type
+            status
+            organization {
+              uuid
+              shortName
+            }
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          ${GRAPHQL_NOTES_FIELDS}
+        }
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       this.setState({ task: new Task(data.task) })
     })

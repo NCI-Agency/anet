@@ -32,16 +32,43 @@ class OrganizationEdit extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      organization(uuid:"${props.match.params.uuid}") {
-        uuid, shortName, longName, status, identificationCode, type,
-        parentOrg { uuid, shortName, longName, identificationCode }
-        approvalSteps { uuid, name
-          approvers { uuid, name, person { uuid, name, rank, role }}
-        },
-        tasks { uuid, shortName, longName}
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+        organization(uuid: $uuid) {
+          uuid
+          shortName
+          longName
+          status
+          identificationCode
+          type
+          parentOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          approvalSteps {
+            uuid
+            name
+            approvers {
+              uuid
+              name
+              person {
+                uuid
+                name
+                rank
+                role
+              }
+            }
+          }
+          tasks {
+            uuid
+            shortName
+            longName
+          }
+          ${GRAPHQL_NOTES_FIELDS}
+        }
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       this.setState({
         organization: new Organization(data.organization)

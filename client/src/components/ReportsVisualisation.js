@@ -107,11 +107,13 @@ export default class ReportsVisualisation extends Component {
   runChartQuery = chartQueryParams => {
     return API.query(
       /* GraphQL */ `
-      reportList(query:$chartQueryParams) {
-        totalCount, list {
-          ${this.gqlChartFields}
+        reportList(query:$chartQueryParams) {
+          totalCount
+          list {
+            ${this.gqlChartFields}
+          }
         }
-      }`,
+      `,
       { chartQueryParams },
       "($chartQueryParams: ReportSearchQueryInput)"
     )
@@ -133,11 +135,15 @@ export default class ReportsVisualisation extends Component {
   runReportsQuery = (reportsQueryParams, includeAll) => {
     return API.query(
       /* GraphQL */ `
-      reportList(query:$reportsQueryParams) {
-        pageNum, pageSize, totalCount, list {
-          ${includeAll ? this.gqlBasicReportFields : this.gqlReportFields}
+        reportList(query: $reportsQueryParams) {
+          pageNum
+          pageSize
+          totalCount
+          list {
+            ${includeAll ? this.gqlBasicReportFields : this.gqlReportFields}
+          }
         }
-      }`,
+      `,
       { reportsQueryParams },
       "($reportsQueryParams: ReportSearchQueryInput)"
     )

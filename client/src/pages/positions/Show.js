@@ -52,20 +52,58 @@ class BasePositionShow extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      position(uuid:"${props.match.params.uuid}") {
-        uuid, name, type, status, code,
-        organization { uuid, shortName, longName, identificationCode },
-        person { uuid, name, rank, role },
-        associatedPositions {
-          uuid, name, type
-          person { uuid, name, rank, role }
-          organization { uuid, shortName }
-        },
-        previousPeople { startTime, endTime, person { uuid, name, rank, role }}
-        location { uuid, name }
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+        position(uuid: $uuid) {
+          uuid
+          name
+          type
+          status
+          code
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+          associatedPositions {
+            uuid
+            name
+            type
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+            organization {
+              uuid
+              shortName
+            }
+          }
+          previousPeople {
+            startTime
+            endTime
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          location {
+            uuid
+            name
+          }
+          ${GRAPHQL_NOTES_FIELDS}
+        }
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => this.setState({ position: new Position(data.position) }))
   }
 
@@ -374,7 +412,9 @@ class BasePositionShow extends Page {
 
   onConfirmDelete = () => {
     const operation = "deletePosition"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ `
+      ${operation}(uuid: $uuid)
+    `
     const variables = { uuid: this.state.position.uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)

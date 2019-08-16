@@ -123,21 +123,62 @@ class BaseReportForm extends Component {
     }
     API.query(
       /* GraphQL */ `
-      locationRecents(maxResults:6) {
-        list { uuid, name }
-      }
-      personRecents(maxResults:6) {
-        list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
-      }
-      taskRecents(maxResults:6) {
-        list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-      }
-      authorizationGroupRecents(maxResults:6) {
-        list { uuid, name, description }
-      }
-      tagList(query:$tagQuery) {
-        list { uuid, name, description }
-      }`,
+        locationRecents(maxResults: 6) {
+          list {
+            uuid
+            name
+          }
+        }
+        personRecents(maxResults: 6) {
+          list {
+            uuid
+            name
+            rank
+            role
+            status
+            endOfTourDate
+            position {
+              uuid
+              name
+              type
+              status
+              organization {
+                uuid
+                shortName
+              }
+              location {
+                uuid
+                name
+              }
+            }
+          }
+        }
+        taskRecents(maxResults: 6) {
+          list {
+            uuid
+            shortName
+            longName
+            responsibleOrg {
+              uuid
+              shortName
+            }
+          }
+        }
+        authorizationGroupRecents(maxResults: 6) {
+          list {
+            uuid
+            name
+            description
+          }
+        }
+        tagList(query: $tagQuery) {
+          list {
+            uuid
+            name
+            description
+          }
+        }
+      `,
       { tagQuery },
       "($tagQuery: TagSearchQueryInput)"
     ).then(data => {
@@ -881,7 +922,9 @@ class BaseReportForm extends Component {
 
   onConfirmDelete = (uuid, resetForm) => {
     const operation = "deleteReport"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ `
+      ${operation}(uuid: $uuid)
+    `
     const variables = { uuid: uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)
@@ -972,13 +1015,21 @@ class BaseReportForm extends Component {
     report.location = utils.getReference(report.location)
     const edit = this.isEditMode(values)
     const operation = edit ? "updateReport" : "createReport"
-    let graphql =
-      /* GraphQL */ operation +
-      "(report: $report" +
-      (edit ? ", sendEditEmail: $sendEditEmail" : "") +
-      ")"
-    graphql +=
-      "{ uuid state author { uuid } reportSensitiveInformation { uuid text } }"
+    let graphql = /* GraphQL */ `
+      ${operation}(report: $report${
+      edit ? ", sendEditEmail: $sendEditEmail" : ""
+    }) {
+        uuid
+        state
+        author {
+          uuid
+        }
+        reportSensitiveInformation {
+          uuid
+          text
+        }
+      }
+    `
     const variables = { report: report }
     if (edit) {
       variables.sendEditEmail = sendEmail

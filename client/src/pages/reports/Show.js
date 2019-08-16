@@ -61,62 +61,169 @@ class BaseReportShow extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
-        keyOutcomes, reportText, nextSteps, cancelledReason, releasedAt
-
-        state
-
-        location { uuid, name }
-        author {
-          uuid, name, rank, role
-          position {
-            organization {
-              shortName, longName, identificationCode
-              approvalSteps {
-                uuid, name,
-                approvers {
-                  uuid, name,
-                  person { uuid, name, rank, role }
+        report(uuid: $uuid) {
+          uuid
+          intent
+          engagementDate
+          duration
+          atmosphere
+          atmosphereDetails
+          keyOutcomes
+          reportText
+          nextSteps
+          cancelledReason
+          releasedAt
+          state
+          location {
+            uuid
+            name
+          }
+          author {
+            uuid
+            name
+            rank
+            role
+            position {
+              uuid
+              organization {
+                uuid
+                shortName
+                longName
+                identificationCode
+                approvalSteps {
+                  uuid
+                  name
+                  approvers {
+                    uuid
+                    name
+                    person {
+                      uuid
+                      name
+                      rank
+                      role
+                    }
+                  }
                 }
               }
             }
           }
+          attendees {
+            uuid
+            name
+            primary
+            rank
+            role
+            status
+            endOfTourDate
+            avatar(size: 32)
+            position {
+              uuid
+              name
+              type
+              code
+              status
+              organization {
+                uuid
+                shortName
+              }
+              location {
+                uuid
+                name
+              }
+            }
+          }
+          primaryAdvisor {
+            uuid
+          }
+          primaryPrincipal {
+            uuid
+          }
+          tasks {
+            uuid
+            shortName
+            longName
+            responsibleOrg {
+              uuid
+              shortName
+            }
+          }
+          comments {
+            uuid
+            text
+            createdAt
+            updatedAt
+            author {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          principalOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+          advisorOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+          workflow {
+            type
+            createdAt
+            step {
+              uuid
+              name
+              approvers {
+                uuid
+                name
+                person {
+                  uuid
+                  name
+                  rank
+                  role
+                }
+              }
+            }
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          approvalStep {
+            uuid
+            name
+            approvers {
+              uuid
+            }
+            nextStepUuid
+          }
+          tags {
+            uuid
+            name
+            description
+          }
+          reportSensitiveInformation {
+            uuid
+            text
+          }
+          authorizationGroups {
+            uuid
+            name
+            description
+          }
+          ${GRAPHQL_NOTES_FIELDS}
         }
-
-        attendees {
-          uuid, name, primary, rank, role, status, endOfTourDate, avatar(size: 32)
-          position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
-        }
-        primaryAdvisor { uuid }
-        primaryPrincipal { uuid }
-
-        tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-
-        comments {
-          uuid, text, createdAt, updatedAt
-          author { uuid, name, rank, role }
-        }
-
-        principalOrg { uuid, shortName, longName, identificationCode, type }
-        advisorOrg { uuid, shortName, longName, identificationCode, type }
-
-        workflow {
-          type, createdAt
-          step { uuid , name
-            approvers { uuid, name, person { uuid, name, rank, role } }
-          },
-          person { uuid, name, rank, role }
-        }
-
-        approvalStep { name, approvers { uuid }, nextStepUuid }
-
-        tags { uuid, name, description }
-        reportSensitiveInformation { uuid, text }
-        authorizationGroups { uuid, name, description }
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       data.report.cancelled = !!data.report.cancelledReason
       data.report.to = ""
@@ -612,7 +719,9 @@ class BaseReportShow extends Page {
 
   onConfirmDelete = () => {
     const operation = "deleteReport"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
+    let graphql = /* GraphQL */ `
+      ${operation}(uuid: $uuid)
+    `
     const variables = { uuid: this.state.report.uuid }
     const variableDef = "($uuid: String!)"
     API.mutation(graphql, variables, variableDef)
@@ -758,7 +867,9 @@ class BaseReportShow extends Page {
       comment: values.comment
     }
 
-    let graphql = /* GraphQL */ "emailReport(uuid: $uuid, email: $email)"
+    let graphql = /* GraphQL */ `
+      emailReport(uuid: $uuid, email: $email)
+    `
     const variables = {
       uuid: this.state.report.uuid,
       email: emailDelivery
@@ -783,7 +894,11 @@ class BaseReportShow extends Page {
   }
 
   submitDraft = () => {
-    let graphql = /* GraphQL */ "submitReport(uuid: $uuid) { uuid }"
+    let graphql = /* GraphQL */ `
+      submitReport(uuid: $uuid) {
+        uuid
+      }
+    `
     const variables = {
       uuid: this.state.report.uuid
     }
@@ -799,7 +914,11 @@ class BaseReportShow extends Page {
   }
 
   publishReport = () => {
-    const graphql = /* GraphQL */ "publishReport(uuid: $uuid) { uuid }"
+    const graphql = /* GraphQL */ `
+      publishReport(uuid: $uuid) {
+        uuid
+      }
+    `
     const variables = {
       uuid: this.state.report.uuid
     }
@@ -818,8 +937,11 @@ class BaseReportShow extends Page {
     if (_isEmpty(text)) {
       return
     }
-    let graphql =
-      /* GraphQL */ "addComment(uuid: $uuid, comment: $comment) { uuid }"
+    let graphql = /* GraphQL */ `
+      addComment(uuid: $uuid, comment: $comment) {
+        uuid
+      }
+    `
     const variables = {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })
@@ -845,8 +967,11 @@ class BaseReportShow extends Page {
     }
 
     const text = "REQUESTED CHANGES: " + rejectionComment
-    let graphql =
-      /* GraphQL */ "rejectReport(uuid: $uuid, comment: $comment) { uuid }"
+    let graphql = /* GraphQL */ `
+      rejectReport(uuid: $uuid, comment: $comment) {
+        uuid
+      }
+    `
     const variables = {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })
@@ -888,8 +1013,11 @@ class BaseReportShow extends Page {
   }
 
   approveReport = text => {
-    let graphql =
-      /* GraphQL */ "approveReport(uuid: $uuid, comment: $comment) { uuid }"
+    let graphql = /* GraphQL */ `
+      approveReport(uuid: $uuid, comment: $comment) {
+        uuid
+      }
+    `
     const variables = {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })

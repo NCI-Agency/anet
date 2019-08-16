@@ -30,15 +30,45 @@ class PositionEdit extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      position(uuid:"${props.match.params.uuid}") {
-        uuid, name, code, status, type
-        location { uuid, name },
-        associatedPositions { uuid, name, type, person { uuid, name, rank, role } },
-        organization {uuid, shortName, longName, identificationCode, type},
-        person { uuid, name, rank, role }
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+        position(uuid: $uuid) {
+          uuid
+          name
+          code
+          status
+          type
+          location {
+            uuid
+            name
+          }
+          associatedPositions {
+            uuid
+            name
+            type
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+          ${GRAPHQL_NOTES_FIELDS}
+        }
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       this.setState({ position: new Position(data.position) })
     })

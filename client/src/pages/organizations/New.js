@@ -28,10 +28,16 @@ class OrganizationNew extends Page {
     if (qs.parentOrgUuid) {
       return API.query(
         /* GraphQL */ `
-        organization(uuid:"${qs.parentOrgUuid}") {
-          uuid, shortName, longName, identificationCode, type
-        }
-      `
+          organization(uuid: $uuid) {
+            uuid
+            shortName
+            longName
+            identificationCode
+            type
+          }
+        `,
+        { uuid: qs.parentOrgUuid },
+        "($uuid: String!)"
       ).then(data => {
         const { organization } = this.state
         organization.parentOrg = new Organization(data.organization)

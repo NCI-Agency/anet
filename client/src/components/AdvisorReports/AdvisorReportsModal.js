@@ -20,8 +20,16 @@ class AdvisorReportsModal extends Component {
   fetchAdvisors(orgUuid) {
     API.query(
       /* GraphQL */ `
-          advisorReportInsights(orgUuid: $orgUuid) { uuid name stats { week nrReportsSubmitted nrEngagementsAttended }}
-        `,
+        advisorReportInsights(orgUuid: $orgUuid) {
+          uuid
+          name
+          stats {
+            week
+            nrReportsSubmitted
+            nrEngagementsAttended
+          }
+        }
+      `,
       { orgUuid: orgUuid },
       "($orgUuid: String!)"
     ).then(data => {

@@ -31,22 +31,82 @@ class ReportEdit extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails, state
-        keyOutcomes, reportText, nextSteps, cancelledReason,
-        author { uuid, name, rank, role, avatar(size: 32) },
-        location { uuid, name },
-        attendees {
-          uuid, name, rank, role, primary, status, endOfTourDate, avatar(size: 32)
-          position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
+        report(uuid: $uuid) {
+          uuid
+          intent
+          engagementDate
+          duration
+          atmosphere
+          atmosphereDetails
+          keyOutcomes
+          reportText
+          nextSteps
+          cancelledReason
+          state
+          location {
+            uuid
+            name
+          }
+          author {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+          attendees {
+            uuid
+            name
+            primary
+            rank
+            role
+            status
+            endOfTourDate
+            avatar(size: 32)
+            position {
+              uuid
+              name
+              type
+              code
+              status
+              organization {
+                uuid
+                shortName
+              }
+              location {
+                uuid
+                name
+              }
+            }
+          }
+          tasks {
+            uuid
+            shortName
+            longName
+            responsibleOrg {
+              uuid
+              shortName
+            }
+          }
+          tags {
+            uuid
+            name
+            description
+          }
+          reportSensitiveInformation {
+            uuid
+            text
+          }
+          authorizationGroups {
+            uuid
+            name
+            description
+          }
+          ${GRAPHQL_NOTES_FIELDS}
         }
-        tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-        tags { uuid, name, description }
-        reportSensitiveInformation { uuid, text }
-        authorizationGroups { uuid, name, description }
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
+      `,
+      { uuid: props.match.params.uuid },
+      "($uuid: String!)"
     ).then(data => {
       data.report.cancelled = !!data.report.cancelledReason
       data.report.reportTags = (data.report.tags || []).map(tag => ({

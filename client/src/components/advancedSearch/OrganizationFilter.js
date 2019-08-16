@@ -150,12 +150,17 @@ export default class OrganizationFilter extends Component {
   deserialize(query, key) {
     if (query[this.props.queryKey]) {
       let getInstanceName = Organization.getInstanceName
-      let graphQlQuery =
-        /* GraphQL */ getInstanceName +
-        '(uuid:"' +
-        query[this.props.queryKey] +
-        '") { uuid, shortName }'
-      return API.query(graphQlQuery).then(data => {
+      let graphQlQuery = /* GraphQL */ `
+        ${getInstanceName}(uuid: $orgUuid) {
+          uuid
+          shortName
+        }
+      `
+      return API.query(
+        graphQlQuery,
+        { orgUuid: query[this.props.queryKey] },
+        "($orgUuid: String!)"
+      ).then(data => {
         if (data[getInstanceName]) {
           const toQueryValue = {
             [this.props.queryKey]: query[this.props.queryKey]

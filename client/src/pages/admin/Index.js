@@ -29,8 +29,11 @@ class BaseAdminIndex extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-      adminSettings { key, value }
-    `
+        adminSettings {
+          key
+          value
+        }
+      `
     ).then(data => {
       let settings = {}
       data.adminSettings.forEach(
@@ -110,7 +113,9 @@ class BaseAdminIndex extends Page {
   save = (values, form) => {
     // settings as JSON
     let settings = Object.map(values, (key, value) => ({ key, value }))
-    let graphql = /* GraphQL */ "saveAdminSettings(settings: $settings)"
+    let graphql = /* GraphQL */ `
+      saveAdminSettings(settings: $settings)
+    `
     const variables = { settings: settings }
     const variableDef = "($settings: [AdminSettingInput]!)"
     return API.mutation(graphql, variables, variableDef)

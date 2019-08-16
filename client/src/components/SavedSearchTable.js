@@ -47,11 +47,14 @@ export default class SavedSearchTable extends Component {
       let fields = ReportCollection.GQL_REPORT_FIELDS
       API.query(
         /* GraphQL */ `
-        reports: reportList(query: $query) {
-          pageNum, pageSize, totalCount, list {
-            ${fields}
+          reports: reportList(query: $query) {
+            pageNum
+            pageSize
+            totalCount
+            list {
+              ${fields}
+            }
           }
-        }
       `,
         { query },
         "($query: ReportSearchQueryInput)"
