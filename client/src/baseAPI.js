@@ -3,9 +3,10 @@ import ApolloClient, { gql } from "apollo-boost"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import _isEmpty from "lodash/isEmpty"
 
-const useApollo = true
+const GRAPHQL_ENDPOINT = "/graphql"
+const LOGGING_ENDPOINT = "/api/logging/log"
 const client = new ApolloClient({
-  uri: "/graphql",
+  uri: GRAPHQL_ENDPOINT,
   cache: new InMemoryCache({
     addTypename: false,
     dataIdFromObject: object => object.uuid || null
@@ -15,7 +16,7 @@ const client = new ApolloClient({
   },
   request: operation => {
     let headers = {
-      accept: "application/json"
+      Accept: "application/json"
     }
     const authHeader = BaseAPI._getAuthHeader()
     if (authHeader) {
@@ -39,114 +40,38 @@ client.defaultOptions = {
 }
 
 const BaseAPI = {
-  _fetch(pathName, params, accept) {
-    params = params || {}
-    params.credentials = "same-origin"
+  _fetch(url, data, accept) {
+    const params = {
+      method: "POST",
+      body: JSON.stringify(data),
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: accept || "application/json"
+      }
+    }
 
-    params.headers = params.headers || {}
-    params.headers.Accept = accept || "application/json"
     const authHeader = BaseAPI._getAuthHeader()
     if (authHeader) {
       params.headers[authHeader[0]] = authHeader[1]
     }
 
-    return window.fetch(pathName, params).then(response => {
-      let isOk = response.ok
-      if (response.headers.get("content-type") === "application/json") {
-        let respBody = response.json()
-        if (!isOk) {
-          return respBody.then(r => {
-            // When the result returns a list of errors we only show the first one
-            if (r.errors) {
-              r.error = r.errors[0].message
-            }
-            r.status = response.status
-            r.statusText = response.statusText
-            if (!r.message) {
-              r.message =
-                r.error || "You do not have permissions to perform this action"
-            }
-            return Promise.reject(r)
-          })
-        }
-        return respBody
-      }
-
-      if (!isOk) {
-        if (response.status === 500) {
-          response.message =
-            "An Error occured! Please contact the administrator and let them know what you were doing to get this error"
-        }
-        response = Promise.reject(response)
-      }
-
-      return response
-    })
+    return window.fetch(url, params)
   },
 
-  _send(url, data, params) {
-    params = params || {}
-    params.method = params.method || "POST"
-    params.body = JSON.stringify(data)
-
-    params.headers = params.headers || {}
-    params.headers["Content-Type"] = "application/json"
-
-    return BaseAPI._fetch(url, params)
-  },
-
-  _queryCommon(query, variables, variableDef, output, isMutation, params) {
-    return BaseAPI._send(
-      "/graphql",
-      BaseAPI._buildGraphQl(query, variables, variableDef, output, isMutation),
-      params
-    )
-  },
-
-  _buildGraphQl(query, variables, variableDef, output, isMutation) {
+  _buildGraphQl(query, variables, variableDef, isMutation) {
     variables = variables || {}
     variableDef = variableDef || ""
-    const queryType = isMutation ? "mutation" : "query"
-    query = queryType + " " + variableDef + " { " + query + " }"
-    output = output || ""
-    return { query, variables, output }
-  },
-
-  mutation(query, variables, variableDef, params) {
-    const f = useApollo ? BaseAPI.mutationApollo : BaseAPI.mutationOld
-    return f(query, variables, variableDef, params)
-  },
-
-  mutationOld(query, variables, variableDef, params) {
-    return BaseAPI._queryCommon(
-      query,
-      variables,
-      variableDef,
-      undefined,
-      true,
-      params
-    ).then(json => json.data)
-  },
-
-  query(query, variables, variableDef, params) {
-    const f = useApollo ? BaseAPI.queryApollo : BaseAPI.queryOld
-    return f(query, variables, variableDef, params)
-  },
-
-  queryOld(query, variables, variableDef, params) {
-    return BaseAPI._queryCommon(
-      query,
-      variables,
-      variableDef,
-      undefined,
-      undefined,
-      params
-    ).then(json => json.data)
+    query = `${isMutation ? "mutation" : "query"} ${variableDef} { ${query} }`
+    return { query, variables }
   },
 
   queryExport(query, variables, variableDef, output) {
-    return BaseAPI._queryCommon(query, variables, variableDef, output).then(
-      response => response.blob()
+    const data = BaseAPI._buildGraphQl(query, variables, variableDef)
+    data.output = output
+    // Can't use client here as the response is not JSON
+    return BaseAPI._fetch(GRAPHQL_ENDPOINT, data, "*/*").then(response =>
+      response.blob()
     )
   },
 
@@ -158,7 +83,8 @@ const BaseAPI = {
    * - message: The error/log message
    */
   logOnServer(severity, url, lineNr, message) {
-    BaseAPI._send("/api/logging/log", [
+    // Can't use client here as we need to send to a different endpoint
+    BaseAPI._fetch(LOGGING_ENDPOINT, [
       { severity: severity, url: url, lineNr: lineNr, message: message }
     ])
   },
@@ -200,14 +126,8 @@ const BaseAPI = {
     return Promise.reject(response)
   },
 
-  mutationApollo(query, variables, variableDef) {
-    const graphQl = BaseAPI._buildGraphQl(
-      query,
-      variables,
-      variableDef,
-      undefined,
-      true
-    )
+  mutation(query, variables, variableDef, params) {
+    const graphQl = BaseAPI._buildGraphQl(query, variables, variableDef, true)
     return client
       .mutate({
         mutation: gql`
@@ -219,21 +139,8 @@ const BaseAPI = {
       .catch(BaseAPI._handleError)
   },
 
-  queryApollo(query, variables, variableDef) {
+  query(query, variables, variableDef, params) {
     const graphQl = BaseAPI._buildGraphQl(query, variables, variableDef)
-    return client
-      .query({
-        query: gql`
-          ${graphQl.query}
-        `,
-        variables: graphQl.variables
-      })
-      .then(BaseAPI._handleSuccess)
-      .catch(BaseAPI._handleError)
-  },
-
-  queryExportApollo(query, variables, variableDef, output) {
-    const graphQl = BaseAPI._buildGraphQl(query, variables, variableDef, output)
     return client
       .query({
         query: gql`
