@@ -8,20 +8,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 
-@PermitAll
 public class AuthorizationGroupResource {
 
   private final AnetObjectEngine engine;
@@ -48,24 +47,25 @@ public class AuthorizationGroupResource {
   }
 
   @GraphQLMutation(name = "createAuthorizationGroup")
-  @RolesAllowed("ADMINISTRATOR")
   public AuthorizationGroup createAuthorizationGroup(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup t) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
     if (t.getName() == null || t.getName().trim().length() == 0) {
       throw new WebApplicationException("AuthorizationGroup name must not be empty",
           Status.BAD_REQUEST);
     }
     t = dao.insert(t);
-    AnetAuditLogger.log("AuthorizationGroup {} created by {}", t,
-        DaoUtils.getUserFromContext(context));
+    AnetAuditLogger.log("AuthorizationGroup {} created by {}", t, user);
     return t;
   }
 
   @GraphQLMutation(name = "updateAuthorizationGroup")
-  @RolesAllowed("ADMINISTRATOR")
   public Integer updateAuthorizationGroup(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup t) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
     final int numRows = dao.update(t);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process authorization group update",
@@ -92,8 +92,7 @@ public class AuthorizationGroupResource {
         throw new WebApplicationException("failed to load Positions", e);
       }
     }
-    AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t,
-        DaoUtils.getUserFromContext(context));
+    AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
