@@ -13,7 +13,7 @@ public class AnetITConfiguration {
   private static final HashMap<String, Object> config;
   private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
   private static final File configFile =
-      new File("src/integration-test/resources/anet-integration.yml");
+      new File("src/integration-test/resources/anet-integrationtest.yml");
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
