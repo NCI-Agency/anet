@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -44,8 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/graphql")
-@Produces(MediaType.APPLICATION_JSON)
-@PermitAll
 public class GraphQlResource {
 
   private static final Logger logger =
@@ -153,7 +150,7 @@ public class GraphQlResource {
 
   @POST
   @Timed
-  @Produces()
+  @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MEDIATYPE_XLSX})
   public Response graphqlPost(@Auth Person user, Map<String, Object> body) {
     String query = (String) body.get("query");
     String output = (String) body.get("output");
