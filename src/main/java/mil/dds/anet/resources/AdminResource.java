@@ -44,7 +44,7 @@ public class AdminResource {
       @GraphQLArgument(name = "settings") List<AdminSetting> settings) {
     int numRows = 0;
     for (AdminSetting setting : settings) {
-      numRows = dao.saveSetting(setting);
+      numRows += dao.saveSetting(setting);
     }
     AnetAuditLogger.log("Admin settings updated by {}", DaoUtils.getUserFromContext(context));
     return numRows;
