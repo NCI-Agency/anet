@@ -74,7 +74,6 @@
     "js-yaml": "^3.13.1",
     "json-loader": "^0.5.7",
     "moment-timezone": "^0.5.26",
-    "node-fetch": "^2.6.0",
     "postcss-flexbugs-fixes": "^4.1.0",
     "postcss-loader": "^3.0.0",
     "prettier": "^1.18.2",
