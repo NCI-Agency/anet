@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
@@ -11,6 +12,12 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+
+const GQL_UPDATE_ASSOCIATED_POSITION = gql`
+  mutation($position: PositionInput!) {
+    updateAssociatedPosition(position: $position)
+  }
+`
 
 const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
   <Table striped condensed hover responsive>
@@ -189,12 +196,7 @@ class BaseEditAssociatedPositionsModal extends Component {
     position.associatedPositions = values.associatedPositions
     delete position.previousPeople
     delete position.person // prevent any changes to person.
-    const graphql = /* GraphQL */ `
-      updateAssociatedPosition(position: $position)
-    `
-    const variables = { position: position }
-    const variableDef = "($position: PositionInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(GQL_UPDATE_ASSOCIATED_POSITION, { position })
   }
 }
 

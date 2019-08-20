@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import ConfirmDelete from "components/ConfirmDelete"
@@ -26,6 +27,12 @@ import React from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
+
+const GQL_DELETE_POSITION = gql`
+  mutation($uuid: String!) {
+    deletePosition(uuid: $uuid)
+  }
+`
 
 class BasePositionShow extends Page {
   static propTypes = {
@@ -411,13 +418,8 @@ class BasePositionShow extends Page {
   }
 
   onConfirmDelete = () => {
-    const operation = "deletePosition"
-    let graphql = /* GraphQL */ `
-      ${operation}(uuid: $uuid)
-    `
-    const variables = { uuid: this.state.position.uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    const { uuid } = this.state.position
+    API.mutation(GQL_DELETE_POSITION, { uuid })
       .then(data => {
         this.props.history.push({
           pathname: "/",

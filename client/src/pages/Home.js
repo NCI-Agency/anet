@@ -1,5 +1,6 @@
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Fieldset from "components/Fieldset"
@@ -29,6 +30,12 @@ import {
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
+
+const GQL_DELETE_SAVED_SEARCH = gql`
+  mutation($uuid: String!) {
+    deleteSavedSearch(uuid: $uuid)
+  }
+`
 
 class BaseHome extends Page {
   static propTypes = {
@@ -382,13 +389,7 @@ class BaseHome extends Page {
     const index = this.state.savedSearches.findIndex(
       s => s.uuid === search.uuid
     )
-    const operation = "deleteSavedSearch"
-    let graphql = /* GraphQL */ `
-      ${operation}(uuid: $uuid)
-    `
-    const variables = { uuid: search.uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: search.uuid })
       .then(data => {
         let savedSearches = this.state.savedSearches
         savedSearches.splice(index, 1)

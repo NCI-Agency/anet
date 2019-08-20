@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   ApproverOverlayRow,
@@ -27,6 +28,19 @@ import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
+
+const GQL_CREATE_ORGANIZATION = gql`
+  mutation($organization: OrganizationInput!) {
+    createOrganization(organization: $organization) {
+      uuid
+    }
+  }
+`
+const GQL_UPDATE_ORGANIZATION = gql`
+  mutation($organization: OrganizationInput!) {
+    updateOrganization(organization: $organization)
+  }
+`
 
 const ApproverTable = props => {
   const { approvers, onDelete } = props
@@ -577,19 +591,15 @@ class BaseOrganizationForm extends Component {
   save = (values, form) => {
     const organization = Object.without(
       new Organization(values),
+      "notes",
       "childrenOrgs",
       "positions"
     )
     organization.parentOrg = utils.getReference(organization.parentOrg)
-    const { edit } = this.props
-    const operation = edit ? "updateOrganization" : "createOrganization"
-    let graphql = /* GraphQL */ `
-      ${operation}(organization: $organization)
-    `
-    graphql += edit ? "" : " { uuid }"
-    const variables = { organization: organization }
-    const variableDef = "($organization: OrganizationInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(
+      this.props.edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
+      { organization }
+    )
   }
 }
 

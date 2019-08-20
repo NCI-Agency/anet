@@ -126,15 +126,9 @@ const BaseAPI = {
     return Promise.reject(response)
   },
 
-  mutation(query, variables, variableDef, params) {
-    const graphQl = BaseAPI._buildGraphQl(query, variables, variableDef, true)
+  mutation(mutation, variables) {
     return client
-      .mutate({
-        mutation: gql`
-          ${graphQl.query}
-        `,
-        variables: graphQl.variables
-      })
+      .mutate({ mutation, variables })
       .then(BaseAPI._handleSuccess)
       .catch(BaseAPI._handleError)
   },

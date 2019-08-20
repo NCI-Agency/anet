@@ -3,6 +3,7 @@ import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
@@ -37,6 +38,28 @@ import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import utils from "utils"
+
+const GQL_EMAIL_ROLLUP = gql`
+  mutation(
+    $startDate: Long!
+    $endDate: Long!
+    $email: AnetEmailInput!
+    $principalOrganizationUuid: String
+    $advisorOrganizationUuid: String
+    $orgType: OrganizationType
+  ) {
+    emailRollup(
+      startDate: $startDate
+      endDate: $endDate
+      email: $email
+      principalOrganizationUuid: $principalOrganizationUuid
+      advisorOrganizationUuid: $advisorOrganizationUuid
+      orgType: $orgType
+    ) {
+      uuid
+    }
+  }
+`
 
 const BarChartWithLoader = connect(
   null,
@@ -758,32 +781,22 @@ class BaseRollupShow extends Page {
       toAddresses: r.to,
       comment: values.comment
     }
-    let graphql = /* GraphQL */ `
-      emailRollup(startDate: $startDate, endDate: $endDate
-    `
     const variables = {
       startDate: this.rollupStart.valueOf(),
       endDate: this.rollupEnd.valueOf(),
       email: emailDelivery
     }
-    let variableDef = "($startDate: Long!, $endDate: Long!"
     if (this.state.focusedOrg) {
       if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        graphql += ", principalOrganizationUuid: $organizationUuid"
+        variables.principalOrganizationUuid = this.state.focusedOrg.uuid
       } else {
-        graphql += ",advisorOrganizationUuid: $organizationUuid"
+        variables.advisorOrganizationUuid = this.state.focusedOrg.uuid
       }
-      variables.organizationUuid = this.state.focusedOrg.uuid
-      variableDef += ", $organizationUuid: String!"
     }
     if (this.state.orgType) {
-      graphql += ", orgType: $orgType"
       variables.orgType = this.state.orgType
-      variableDef += ", $orgType: OrganizationType!"
     }
-    graphql += ", email: $email)"
-    variableDef += ", $email: AnetEmailInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(GQL_EMAIL_ROLLUP, variables)
   }
 }
 

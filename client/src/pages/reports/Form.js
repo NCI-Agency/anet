@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   AuthorizationGroupOverlayRow,
@@ -34,6 +35,42 @@ import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+
+const GQL_CREATE_REPORT = gql`
+  mutation($report: ReportInput!) {
+    createReport(report: $report) {
+      uuid
+      state
+      author {
+        uuid
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+    }
+  }
+`
+const GQL_UPDATE_REPORT = gql`
+  mutation($report: ReportInput!, $sendEditEmail: Boolean!) {
+    updateReport(report: $report, sendEditEmail: $sendEditEmail) {
+      uuid
+      state
+      author {
+        uuid
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+    }
+  }
+`
+const GQL_DELETE_REPORT = gql`
+  mutation($uuid: String!) {
+    deleteReport(uuid: $uuid)
+  }
+`
 
 class BaseReportForm extends Component {
   static propTypes = {
@@ -921,13 +958,7 @@ class BaseReportForm extends Component {
   }
 
   onConfirmDelete = (uuid, resetForm) => {
-    const operation = "deleteReport"
-    let graphql = /* GraphQL */ `
-      ${operation}(uuid: $uuid)
-    `
-    const variables = { uuid: uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
         // After successful delete, reset the form in order to make sure the dirty
         // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -979,10 +1010,9 @@ class BaseReportForm extends Component {
   }
 
   save = (values, sendEmail) => {
-    let report = new Report(values)
-    const attendees = report.attendees
-    report = Object.without(
-      report,
+    const report = Object.without(
+      new Report(values),
+      "notes",
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
@@ -1009,36 +1039,16 @@ class BaseReportForm extends Component {
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = attendees.map(a =>
+    report.attendees = values.attendees.map(a =>
       Object.without(a, "firstName", "lastName", "position", "_loaded")
     )
     report.location = utils.getReference(report.location)
     const edit = this.isEditMode(values)
-    const operation = edit ? "updateReport" : "createReport"
-    let graphql = /* GraphQL */ `
-      ${operation}(report: $report${
-      edit ? ", sendEditEmail: $sendEditEmail" : ""
-    }) {
-        uuid
-        state
-        author {
-          uuid
-        }
-        reportSensitiveInformation {
-          uuid
-          text
-        }
-      }
-    `
-    const variables = { report: report }
+    const variables = { report }
     if (edit) {
       variables.sendEditEmail = sendEmail
     }
-    const variableDef =
-      "($report: ReportInput!" +
-      (edit ? ", $sendEditEmail: Boolean!" : "") +
-      ")"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
   }
 }
 

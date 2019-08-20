@@ -1,5 +1,6 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -42,6 +43,14 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
+
+const GQL_CREATE_SAVED_SEARCH = gql`
+  mutation($savedSearch: SavedSearchInput!) {
+    createSavedSearch(savedSearch: $savedSearch) {
+      uuid
+    }
+  }
+`
 
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
@@ -651,11 +660,7 @@ class Search extends Page {
       savedSearch.objectType =
         SEARCH_OBJECT_TYPES[this.props.searchQuery.objectType]
     }
-    const operation = "createSavedSearch"
-    let graphql = operation + "(savedSearch: $savedSearch) { uuid }"
-    const variables = { savedSearch: savedSearch }
-    const variableDef = "($savedSearch: SavedSearchInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(GQL_CREATE_SAVED_SEARCH, { savedSearch })
   }
 
   openSaveModal = () => {

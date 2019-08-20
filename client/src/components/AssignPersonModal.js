@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
@@ -10,6 +11,17 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
+
+const GQL_DELETE_PERSON_FROM_POSITION = gql`
+  mutation($uuid: String!) {
+    deletePersonFromPosition(uuid: $uuid)
+  }
+`
+const GQL_PUT_PERSON_IN_POSITION = gql`
+  mutation($uuid: String!, $person: PersonInput!) {
+    putPersonInPosition(uuid: $uuid, person: $person)
+  }
+`
 
 export default class AssignPersonModal extends Component {
   static propTypes = {
@@ -145,22 +157,20 @@ export default class AssignPersonModal extends Component {
 
   @autobind
   save() {
-    let graphql = /* GraphQL */ `
-      deletePersonFromPosition(uuid: $uuid)
-    `
-    let variables = {
-      uuid: this.props.position.uuid
-    }
-    let variableDef = "($uuid: String!)"
-    if (this.state.person !== null) {
-      graphql = "putPersonInPosition(uuid: $uuid, person: $person)"
+    let graphql, variables
+    if (this.state.person === null) {
+      graphql = GQL_DELETE_PERSON_FROM_POSITION
+      variables = {
+        uuid: this.props.position.uuid
+      }
+    } else {
+      graphql = GQL_PUT_PERSON_IN_POSITION
       variables = {
         uuid: this.props.position.uuid,
         person: { uuid: this.state.person.uuid }
       }
-      variableDef = "($uuid: String!, $person: PersonInput!)"
     }
-    API.mutation(graphql, variables, variableDef)
+    API.mutation(graphql, variables)
       .then(data => this.props.onSuccess())
       .catch(error => {
         this.setState({ error: error })

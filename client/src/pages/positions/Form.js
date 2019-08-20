@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import {
   LocationOverlayRow,
   OrganizationOverlayRow
@@ -21,6 +22,19 @@ import { withRouter } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
+
+const GQL_CREATE_POSITION = gql`
+  mutation($position: PositionInput!) {
+    createPosition(position: $position) {
+      uuid
+    }
+  }
+`
+const GQL_UPDATE_POSITION = gql`
+  mutation($position: PositionInput!) {
+    updatePosition(position: $position)
+  }
+`
 
 class BasePositionForm extends Component {
   static propTypes = {
@@ -336,7 +350,7 @@ class BasePositionForm extends Component {
   }
 
   save = (values, form) => {
-    const position = new Position(values)
+    const position = Object.without(new Position(values), "notes")
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
     }
@@ -347,15 +361,10 @@ class BasePositionForm extends Component {
     position.organization = utils.getReference(position.organization)
     position.person = utils.getReference(position.person)
     position.code = position.code || null // Need to null out empty position codes
-    const { edit } = this.props
-    const operation = edit ? "updatePosition" : "createPosition"
-    let graphql = /* GraphQL */ `
-      ${operation}(position: $position)
-    `
-    graphql += edit ? "" : " { uuid }"
-    const variables = { position: position }
-    const variableDef = "($position: PositionInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(
+      this.props.edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION,
+      { position }
+    )
   }
 }
 
