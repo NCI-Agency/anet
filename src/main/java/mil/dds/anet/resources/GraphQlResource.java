@@ -153,7 +153,7 @@ public class GraphQlResource {
 
   @POST
   @Timed
-  @Produces()
+  @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MEDIATYPE_XLSX})
   public Response graphqlPost(@Auth Person user, Map<String, Object> body) {
     String query = (String) body.get("query");
     String output = (String) body.get("output");

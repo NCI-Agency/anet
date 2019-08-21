@@ -5,7 +5,10 @@ async function runGQL(user, query) {
     `${process.env.SERVER_URL}/graphql?user=${user.name}&pass=${user.password}`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(query)
     }
   )
