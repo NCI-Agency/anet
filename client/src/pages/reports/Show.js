@@ -36,6 +36,170 @@ import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
+const GQL_GET_REPORT = gql`
+  query($uuid: String!) {
+    report(uuid: $uuid) {
+      uuid
+      intent
+      engagementDate
+      duration
+      atmosphere
+      atmosphereDetails
+      keyOutcomes
+      reportText
+      nextSteps
+      cancelledReason
+      releasedAt
+      state
+      location {
+        uuid
+        name
+      }
+      author {
+        uuid
+        name
+        rank
+        role
+        position {
+          uuid
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            approvalSteps {
+              uuid
+              name
+              approvers {
+                uuid
+                name
+                person {
+                  uuid
+                  name
+                  rank
+                  role
+                }
+              }
+            }
+          }
+        }
+      }
+      attendees {
+        uuid
+        name
+        primary
+        rank
+        role
+        status
+        endOfTourDate
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          type
+          code
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+      primaryAdvisor {
+        uuid
+      }
+      primaryPrincipal {
+        uuid
+      }
+      tasks {
+        uuid
+        shortName
+        longName
+        responsibleOrg {
+          uuid
+          shortName
+        }
+      }
+      comments {
+        uuid
+        text
+        createdAt
+        updatedAt
+        author {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      principalOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      advisorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      workflow {
+        type
+        createdAt
+        step {
+          uuid
+          name
+          approvers {
+            uuid
+            name
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      approvalStep {
+        uuid
+        name
+        approvers {
+          uuid
+        }
+        nextStepUuid
+      }
+      tags {
+        uuid
+        name
+        description
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+      authorizationGroups {
+        uuid
+        name
+        description
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 const GQL_DELETE_REPORT = gql`
   mutation($uuid: String!) {
     deleteReport(uuid: $uuid)
@@ -108,183 +272,20 @@ class BaseReportShow extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-        report(uuid: $uuid) {
-          uuid
-          intent
-          engagementDate
-          duration
-          atmosphere
-          atmosphereDetails
-          keyOutcomes
-          reportText
-          nextSteps
-          cancelledReason
-          releasedAt
-          state
-          location {
-            uuid
-            name
-          }
-          author {
-            uuid
-            name
-            rank
-            role
-            position {
-              uuid
-              organization {
-                uuid
-                shortName
-                longName
-                identificationCode
-                approvalSteps {
-                  uuid
-                  name
-                  approvers {
-                    uuid
-                    name
-                    person {
-                      uuid
-                      name
-                      rank
-                      role
-                    }
-                  }
-                }
-              }
-            }
-          }
-          attendees {
-            uuid
-            name
-            primary
-            rank
-            role
-            status
-            endOfTourDate
-            avatar(size: 32)
-            position {
-              uuid
-              name
-              type
-              code
-              status
-              organization {
-                uuid
-                shortName
-              }
-              location {
-                uuid
-                name
-              }
-            }
-          }
-          primaryAdvisor {
-            uuid
-          }
-          primaryPrincipal {
-            uuid
-          }
-          tasks {
-            uuid
-            shortName
-            longName
-            responsibleOrg {
-              uuid
-              shortName
-            }
-          }
-          comments {
-            uuid
-            text
-            createdAt
-            updatedAt
-            author {
-              uuid
-              name
-              rank
-              role
-            }
-          }
-          principalOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-            type
-          }
-          advisorOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-            type
-          }
-          workflow {
-            type
-            createdAt
-            step {
-              uuid
-              name
-              approvers {
-                uuid
-                name
-                person {
-                  uuid
-                  name
-                  rank
-                  role
-                }
-              }
-            }
-            person {
-              uuid
-              name
-              rank
-              role
-            }
-          }
-          approvalStep {
-            uuid
-            name
-            approvers {
-              uuid
-            }
-            nextStepUuid
-          }
-          tags {
-            uuid
-            name
-            description
-          }
-          reportSensitiveInformation {
-            uuid
-            text
-          }
-          authorizationGroups {
-            uuid
-            name
-            description
-          }
-          ${GRAPHQL_NOTES_FIELDS}
-        }
-      `,
-      { uuid: props.match.params.uuid },
-      "($uuid: String!)"
-    ).then(data => {
-      data.report.cancelled = !!data.report.cancelledReason
-      data.report.to = ""
-      const report = new Report(data.report)
-      this.setState({ report })
-      Report.yupSchema
-        .validate(report, { abortEarly: false })
-        .catch(e => this.setState({ validationErrors: e.errors }))
-      Report.yupWarningSchema
-        .validate(report, { abortEarly: false })
-        .catch(e => this.setState({ validationWarnings: e.errors }))
-    })
+    return API.query(GQL_GET_REPORT, { uuid: props.match.params.uuid }).then(
+      data => {
+        data.report.cancelled = !!data.report.cancelledReason
+        data.report.to = ""
+        const report = new Report(data.report)
+        this.setState({ report })
+        Report.yupSchema
+          .validate(report, { abortEarly: false })
+          .catch(e => this.setState({ validationErrors: e.errors }))
+        Report.yupWarningSchema
+          .validate(report, { abortEarly: false })
+          .catch(e => this.setState({ validationWarnings: e.errors }))
+      }
+    )
   }
 
   renderNoPositionAssignedText() {

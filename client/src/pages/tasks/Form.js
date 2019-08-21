@@ -110,21 +110,19 @@ class BaseTaskForm extends Component {
     const responsibleOrgFilters = {
       allOrganizations: {
         label: "All organizations",
-        searchQuery: true
+        queryVars: {}
       }
     }
 
     const tasksFilters = {
       allTasks: {
         label: "All tasks",
-        searchQuery: true,
         queryVars: {}
       }
     }
     const positionsFilters = {
       allAdvisorPositions: {
         label: "All advisor positions",
-        searchQuery: true,
         queryVars: {
           status: Position.STATUS.ACTIVE,
           type: [

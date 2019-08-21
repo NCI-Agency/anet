@@ -39,6 +39,62 @@ import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import utils from "utils"
 
+const GQL_ROLLUP_GRAPH = gql`
+  query(
+    $startDate: Long!
+    $endDate: Long!
+    $principalOrganizationUuid: String
+    $advisorOrganizationUuid: String
+    $orgType: OrganizationType
+  ) {
+    rollupGraph(
+      startDate: $startDate
+      endDate: $endDate
+      principalOrganizationUuid: $principalOrganizationUuid
+      advisorOrganizationUuid: $advisorOrganizationUuid
+      orgType: $orgType
+    ) {
+      org {
+        uuid
+        shortName
+      }
+      published
+      cancelled
+    }
+  }
+`
+const GQL_GET_REPORT_LIST = gql`
+  query($reportsQueryParams: ReportSearchQueryInput, $includeAll: Boolean!) {
+    reportList(query: $reportsQueryParams) {
+      pageNum
+      pageSize
+      totalCount
+      list @include(if: $includeAll) {
+        ${GQL_BASIC_REPORT_FIELDS}
+      }
+      list @skip(if: $includeAll) {
+        ${GQL_REPORT_FIELDS}
+      }
+    }
+  }
+`
+const GQL_SHOW_ROLLUP_EMAIL = gql`
+  query(
+    $startDate: Long!
+    $endDate: Long!
+    $principalOrganizationUuid: String
+    $advisorOrganizationUuid: String
+    $orgType: OrganizationType
+  ) {
+    showRollupEmail(
+      startDate: $startDate
+      endDate: $endDate
+      principalOrganizationUuid: $principalOrganizationUuid
+      advisorOrganizationUuid: $advisorOrganizationUuid
+      orgType: $orgType
+    )
+  }
+`
 const GQL_EMAIL_ROLLUP = gql`
   mutation(
     $startDate: Long!
@@ -117,14 +173,6 @@ class BaseRollupShow extends Page {
     super(props)
 
     this.CHART_ID = "reports_by_day_of_week"
-    this.GQL_CHART_FIELDS = /* GraphQL */ `
-      org {
-        uuid
-        shortName
-      }
-      published
-      cancelled
-    `
     this.VISUALIZATIONS = [
       {
         id: "rbdow-chart",
@@ -214,7 +262,7 @@ class BaseRollupShow extends Page {
     this.props.showLoading()
     Promise.all([
       // Query used by the chart
-      this.fetchChartData(this.runChartQuery(...this.chartQueryParams())),
+      this.fetchChartData(this.runChartQuery()),
       this.fetchReportData(true)
     ])
       .then(() => this.props.hideLoading())
@@ -244,46 +292,21 @@ class BaseRollupShow extends Page {
     })
   }
 
-  chartQueryParams = () => {
-    let chartQuery = "rollupGraph(startDate: $startDate, endDate: $endDate"
-    let chartQueryParamsDef = "($startDate: Long!, $endDate: Long!"
-    const chartQueryParams = {
+  runChartQuery = () => {
+    const variables = {
       startDate: this.rollupStart.valueOf(),
       endDate: this.rollupEnd.valueOf()
     }
     if (this.state.focusedOrg) {
       if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        chartQuery += ", principalOrganizationUuid: $principalOrganizationUuid"
-        chartQueryParamsDef += ", $principalOrganizationUuid: String!"
-        chartQueryParams.principalOrganizationUuid = this.state.focusedOrg.uuid
+        variables.principalOrganizationUuid = this.state.focusedOrg.uuid
       } else {
-        chartQuery += " ,advisorOrganizationUuid: $advisorOrganizationUuid"
-        chartQueryParamsDef += ", $advisorOrganizationUuid: String!"
-        chartQueryParams.advisorOrganizationUuid = this.state.focusedOrg.uuid
+        variables.advisorOrganizationUuid = this.state.focusedOrg.uuid
       }
     } else if (this.state.orgType) {
-      chartQuery += ", orgType: $orgType"
-      chartQueryParamsDef += ", $orgType: OrganizationType!"
-      chartQueryParams.orgType = this.state.orgType
+      variables.orgType = this.state.orgType
     }
-    chartQuery += ")"
-    chartQueryParamsDef += ")"
-    Object.assign(chartQueryParams, {
-      pageSize: 0 // retrieve all the filtered reports
-    })
-    return [chartQuery, chartQueryParams, chartQueryParamsDef]
-  }
-
-  runChartQuery = (chartQuery, chartQueryParams, chartQueryParamsDef) => {
-    return API.query(
-      /* GraphQL */ `
-        ${chartQuery} {
-          ${this.GQL_CHART_FIELDS}
-        }
-      `,
-      chartQueryParams,
-      chartQueryParamsDef
-    )
+    return API.query(GQL_ROLLUP_GRAPH, variables)
   }
 
   reportsQueryParams = includeAll => {
@@ -315,20 +338,7 @@ class BaseRollupShow extends Page {
   }
 
   runReportsQuery = (reportsQueryParams, includeAll) => {
-    return API.query(
-      /* GraphQL */ `
-        reportList(query: $reportsQueryParams) {
-          pageNum
-          pageSize
-          totalCount
-          list {
-            ${includeAll ? GQL_BASIC_REPORT_FIELDS : GQL_REPORT_FIELDS}
-          }
-        }
-      `,
-      { reportsQueryParams },
-      "($reportsQueryParams: ReportSearchQueryInput)"
-    )
+    return API.query(GQL_GET_REPORT_LIST, { reportsQueryParams, includeAll })
   }
 
   @autobind
@@ -709,31 +719,21 @@ class BaseRollupShow extends Page {
 
   @autobind
   showPreview(print) {
-    let graphql = /* GraphQL */ `
-      showRollupEmail(startDate: $startDate, endDate: $endDate
-    `
     const variables = {
       startDate: this.rollupStart.valueOf(),
       endDate: this.rollupEnd.valueOf()
     }
-    let variableDef = "($startDate: Long!, $endDate: Long!"
     if (this.state.focusedOrg) {
       if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        graphql += ", principalOrganizationUuid: $organizationUuid"
+        variables.principalOrganizationUuid = this.state.focusedOrg.uuid
       } else {
-        graphql += ",advisorOrganizationUuid: $organizationUuid"
+        variables.advisorOrganizationUuid = this.state.focusedOrg.uuid
       }
-      variables.organizationUuid = this.state.focusedOrg.uuid
-      variableDef += ", $organizationUuid: String!"
     }
     if (this.state.orgType) {
-      graphql += ", orgType: $orgType"
       variables.orgType = this.state.orgType
-      variableDef += ", $orgType: OrganizationType!"
     }
-    graphql += ")"
-    variableDef += ")"
-    API.query(graphql, variables, variableDef).then(data => {
+    return API.query(GQL_SHOW_ROLLUP_EMAIL, variables).then(data => {
       let rollupWindow = window.open("", "rollup")
       let doc = rollupWindow.document
       doc.clear()

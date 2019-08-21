@@ -105,7 +105,6 @@ class BaseEditAssociatedPositionsModal extends Component {
     const positionsFilters = {
       allAdvisorPositions: {
         label: "All",
-        searchQuery: true,
         queryVars: positionSearchQuery
       }
     }

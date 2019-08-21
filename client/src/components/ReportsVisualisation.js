@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import MosaicLayout from "components/MosaicLayout"
 import {
@@ -106,16 +107,17 @@ export default class ReportsVisualisation extends Component {
 
   runChartQuery = chartQueryParams => {
     return API.query(
-      /* GraphQL */ `
-        reportList(query:$chartQueryParams) {
-          totalCount
-          list {
-            ${this.gqlChartFields}
+      gql`
+        query($chartQueryParams: ReportSearchQueryInput) {
+          reportList(query: $chartQueryParams) {
+            totalCount
+            list {
+              ${this.gqlChartFields}
+            }
           }
         }
       `,
-      { chartQueryParams },
-      "($chartQueryParams: ReportSearchQueryInput)"
+      { chartQueryParams }
     )
   }
 
@@ -134,18 +136,22 @@ export default class ReportsVisualisation extends Component {
 
   runReportsQuery = (reportsQueryParams, includeAll) => {
     return API.query(
-      /* GraphQL */ `
-        reportList(query: $reportsQueryParams) {
-          pageNum
-          pageSize
-          totalCount
-          list {
-            ${includeAll ? this.gqlBasicReportFields : this.gqlReportFields}
+      gql`
+        query($reportsQueryParams: ReportSearchQueryInput, $includeAll: Boolean!) {
+          reportList(query: $reportsQueryParams) {
+            pageNum
+            pageSize
+            totalCount
+            list @include(if: $includeAll) {
+              ${this.gqlBasicReportFields}
+            }
+            list @skip(if: $includeAll) {
+              ${this.gqlReportFields}
+            }
           }
         }
       `,
-      { reportsQueryParams },
-      "($reportsQueryParams: ReportSearchQueryInput)"
+      { reportsQueryParams, includeAll }
     )
   }
 

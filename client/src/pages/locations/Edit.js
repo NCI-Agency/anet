@@ -1,5 +1,6 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -11,6 +12,19 @@ import { Location } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import LocationForm from "./Form"
+
+const GQL_GET_LOCATION = gql`
+  query($uuid: String!) {
+    location(uuid: $uuid) {
+      uuid
+      name
+      status
+      lat
+      lng
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 class LocationEdit extends Page {
   static propTypes = {
@@ -28,22 +42,11 @@ class LocationEdit extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-        location(uuid: $uuid) {
-          uuid
-          name
-          status
-          lat
-          lng
-          ${GRAPHQL_NOTES_FIELDS}
-        }
-      `,
-      { uuid: props.match.params.uuid },
-      "($uuid: String!)"
-    ).then(data => {
-      this.setState({ location: new Location(data.location) })
-    })
+    return API.query(GQL_GET_LOCATION, { uuid: props.match.params.uuid }).then(
+      data => {
+        this.setState({ location: new Location(data.location) })
+      }
+    )
   }
 
   render() {

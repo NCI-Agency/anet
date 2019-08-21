@@ -1,5 +1,6 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -11,6 +12,45 @@ import { Organization } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import OrganizationForm from "./Form"
+
+const GQL_GET_ORGANIZATION = gql`
+  query($uuid: String!) {
+    organization(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+      status
+      identificationCode
+      type
+      parentOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      approvalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+        }
+      }
+      tasks {
+        uuid
+        shortName
+        longName
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 class OrganizationEdit extends Page {
   static propTypes = {
@@ -30,46 +70,9 @@ class OrganizationEdit extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-        organization(uuid: $uuid) {
-          uuid
-          shortName
-          longName
-          status
-          identificationCode
-          type
-          parentOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-          }
-          approvalSteps {
-            uuid
-            name
-            approvers {
-              uuid
-              name
-              person {
-                uuid
-                name
-                rank
-                role
-              }
-            }
-          }
-          tasks {
-            uuid
-            shortName
-            longName
-          }
-          ${GRAPHQL_NOTES_FIELDS}
-        }
-      `,
-      { uuid: props.match.params.uuid },
-      "($uuid: String!)"
-    ).then(data => {
+    return API.query(GQL_GET_ORGANIZATION, {
+      uuid: props.match.params.uuid
+    }).then(data => {
       this.setState({
         organization: new Organization(data.organization)
       })

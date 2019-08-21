@@ -1,3 +1,5 @@
+import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -13,11 +15,78 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
-import GQL from "graphqlapi"
 import { AuthorizationGroup, Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+
+const GQL_GET_POSITION_LIST = gql`
+  fragment paginatedPositions on Query {
+    paginatedPositions: positionList(query: $positionQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        code
+        type
+        status
+        organization {
+          uuid
+          shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+    }
+  }
+`
+const GQL_GET_AUTHORIZATION_GROUP = gql`
+  fragment authorizationGroup on Query {
+    authorizationGroup(uuid: $uuid) {
+      uuid
+      name
+      description
+      positions {
+        uuid
+        name
+        code
+        type
+        status
+        organization {
+          uuid
+          shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      status
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
+const GQL_GET_DATA = gql`
+  query(
+    $positionQuery: PositionSearchQueryInput
+    $uuid: String
+    $includeAuthorizationGroup: Boolean!
+  ) {
+    ...paginatedPositions
+    ...authorizationGroup @include(if: $includeAuthorizationGroup)
+  }
+
+  ${GQL_GET_POSITION_LIST}
+  ${GQL_GET_AUTHORIZATION_GROUP}
+`
 
 class BaseAuthorizationGroupShow extends Page {
   static propTypes = {
@@ -40,76 +109,25 @@ class BaseAuthorizationGroupShow extends Page {
     setMessages(props, this.state)
   }
 
-  getPositionQueryPart(authGroupUuid) {
-    const positionQuery = {
-      pageNum: this.state.positionsPageNum,
-      pageSize: 10,
-      authorizationGroupUuid: authGroupUuid
-    }
-    const positionsPart = new GQL.Part(/* GraphQL */ `
-      paginatedPositions: positionList(query: $positionQuery) {
-        pageNum
-        pageSize
-        totalCount
-        list {
-          uuid
-          name
-          code
-          type
-          status
-          organization {
-            uuid
-            shortName
-          }
-          person {
-            uuid
-            name
-            rank
-            role
-          }
-        }
-      }
-    `).addVariable("positionQuery", "PositionSearchQueryInput", positionQuery)
-    return positionsPart
-  }
-
   fetchData(props) {
-    const authGroupPart = new GQL.Part(/* GraphQL */ `
-      authorizationGroup(uuid: $uuid) {
-        uuid
-        name
-        description
-        positions {
-          uuid
-          name
-          code
-          type
-          status
-          organization {
-            uuid
-            shortName
-          }
-          person {
-            uuid
-            name
-            rank
-            role
-          }
-        }
-        status
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `).addVariable("uuid", "String!", props.match.params.uuid)
-    const positionsPart = this.getPositionQueryPart(props.match.params.uuid)
-    return this.runGQL([authGroupPart, positionsPart])
-  }
-
-  runGQL(queries) {
-    return GQL.run(queries).then(data => {
+    return this.runGQL(props.match.params.uuid, true).then(data =>
       this.setState({
         authorizationGroup: new AuthorizationGroup(data.authorizationGroup),
         positions: data.paginatedPositions
       })
+    )
+  }
+
+  runGQL = (uuid, includeAuthorizationGroup) => {
+    const positionQuery = {
+      pageNum: this.state.positionsPageNum,
+      pageSize: 10,
+      authorizationGroupUuid: uuid
+    }
+    return API.query(GQL_GET_DATA, {
+      positionQuery,
+      uuid,
+      includeAuthorizationGroup
     })
   }
 
@@ -191,10 +209,7 @@ class BaseAuthorizationGroupShow extends Page {
 
   goToPositionsPage = pageNum => {
     this.setState({ positionsPageNum: pageNum }, () => {
-      const positionQueryPart = this.getPositionQueryPart(
-        this.state.authorizationGroup.uuid
-      )
-      GQL.run([positionQueryPart]).then(data =>
+      this.runGQL(this.state.authorizationGroup.uuid, false).then(data =>
         this.setState({ positions: data.paginatedPositions })
       )
     })

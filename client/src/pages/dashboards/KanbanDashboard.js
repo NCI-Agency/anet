@@ -1,14 +1,33 @@
-import { Settings } from "api"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import Kanban from "components/Kanban"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-import GQL from "graphqlapi"
 import { Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
+
+const GQL_GET_TASK_LIST = gql`
+  query($taskQuery: TaskSearchQueryInput) {
+    taskList(query: $taskQuery) {
+      list {
+        uuid
+        longName
+        shortName
+        customFieldEnum1
+        createdAt
+        updatedAt
+        responsibleOrg {
+          uuid
+          shortName
+        }
+      }
+    }
+  }
+`
 
 class KanbanDashboard extends Page {
   static propTypes = { ...pagePropTypes }
@@ -24,22 +43,6 @@ class KanbanDashboard extends Page {
       pageSize: 0,
       status: Task.STATUS.ACTIVE
     }
-    const tasksPart = new GQL.Part(/* GraphQL */ `
-      taskList(query: $taskQuery) {
-        list {
-          uuid
-          longName
-          shortName
-          customFieldEnum1
-          createdAt
-          updatedAt
-          responsibleOrg {
-            uuid
-            shortName
-          }
-        }
-      }
-    `).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
 
     const dashboardSettings = Settings.dashboards.find(
       o => o.label === this.props.match.params.dashboard
@@ -48,7 +51,7 @@ class KanbanDashboard extends Page {
     fetch(dashboardSettings.data)
       .then(response => response.json())
       .then(dashboardData =>
-        GQL.run([tasksPart]).then(data => {
+        API.query(GQL_GET_TASK_LIST, { taskQuery }).then(data => {
           const tasks = data.taskList.list
           this.setState({
             tasks: tasks,

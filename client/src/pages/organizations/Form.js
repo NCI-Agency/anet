@@ -29,6 +29,11 @@ import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
+const GQL_GET_APPROVAL_STEP_IN_USE = gql`
+  query($uuid: String!) {
+    approvalStepInUse(uuid: $uuid)
+  }
+`
 const GQL_CREATE_ORGANIZATION = gql`
   mutation($organization: OrganizationInput!) {
     createOrganization(organization: $organization) {
@@ -179,13 +184,12 @@ class BaseOrganizationForm extends Component {
           const tasksFilters = {
             allTasks: {
               label: "All tasks",
-              searchQuery: true
+              queryVars: {}
             }
           }
           if (this.props.currentUser.position) {
             tasksFilters.assignedToMyOrg = {
               label: "Assigned to my organization",
-              searchQuery: true,
               queryVars: {
                 responsibleOrgUuid: this.props.currentUser.position.organization
                   .uuid
@@ -196,14 +200,13 @@ class BaseOrganizationForm extends Component {
           const organizationFilters = {
             allOrganizations: {
               label: "All organizations",
-              searchQuery: true
+              queryVars: {}
             }
           }
 
           const approversFilters = {
             allAdvisorPositions: {
               label: "All advisor positions",
-              searchQuery: true,
               queryVars: {
                 type: [
                   Position.TYPE.ADVISOR,
@@ -217,7 +220,6 @@ class BaseOrganizationForm extends Component {
           if (this.props.currentUser.position) {
             approversFilters.myColleagues = {
               label: "My colleagues",
-              searchQuery: true,
               queryVars: {
                 matchPersonName: true,
                 organizationUuid: this.props.currentUser.position.organization
@@ -538,19 +540,15 @@ class BaseOrganizationForm extends Component {
   }
 
   removeApprovalStep = (arrayHelpers, index, step) => {
-    return API.query(
-      /* GraphQL */ `
-        approvalStepInUse(uuid: $uuid)
-      `,
-      { uuid: step.uuid },
-      "($uuid: String!)"
-    ).then(data => {
-      if (data.approvalStepInUse) {
-        this.setState({ showRemoveApprovalStepAlert: true })
-      } else {
-        arrayHelpers.remove(index)
+    return API.query(GQL_GET_APPROVAL_STEP_IN_USE, { uuid: step.uuid }).then(
+      data => {
+        if (data.approvalStepInUse) {
+          this.setState({ showRemoveApprovalStepAlert: true })
+        } else {
+          arrayHelpers.remove(index)
+        }
       }
-    })
+    )
   }
 
   onCancel = () => {

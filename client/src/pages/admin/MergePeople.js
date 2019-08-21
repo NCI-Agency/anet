@@ -115,7 +115,6 @@ class MergePeople extends Page {
             const peopleFilters = {
               all: {
                 label: "All",
-                searchQuery: true,
                 queryVars: { matchPositionName: true }
               }
             }

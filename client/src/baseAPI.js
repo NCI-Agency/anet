@@ -1,5 +1,5 @@
 import querystring from "querystring"
-import ApolloClient, { gql } from "apollo-boost"
+import ApolloClient from "apollo-boost"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import _isEmpty from "lodash/isEmpty"
 
@@ -59,20 +59,13 @@ const BaseAPI = {
     return window.fetch(url, params)
   },
 
-  _buildGraphQl(query, variables, variableDef, isMutation) {
-    variables = variables || {}
-    variableDef = variableDef || ""
-    query = `${isMutation ? "mutation" : "query"} ${variableDef} { ${query} }`
-    return { query, variables }
-  },
-
-  queryExport(query, variables, variableDef, output) {
-    const data = BaseAPI._buildGraphQl(query, variables, variableDef)
-    data.output = output
+  queryExport(query, variables, output) {
     // Can't use client here as the response is not JSON
-    return BaseAPI._fetch(GRAPHQL_ENDPOINT, data, "*/*").then(response =>
-      response.blob()
-    )
+    return BaseAPI._fetch(
+      GRAPHQL_ENDPOINT,
+      { query, variables, output },
+      "*/*"
+    ).then(response => response.blob())
   },
 
   /**
@@ -134,14 +127,8 @@ const BaseAPI = {
   },
 
   query(query, variables, variableDef, params) {
-    const graphQl = BaseAPI._buildGraphQl(query, variables, variableDef)
     return client
-      .query({
-        query: gql`
-          ${graphQl.query}
-        `,
-        variables: graphQl.variables
-      })
+      .query({ query, variables })
       .then(BaseAPI._handleSuccess)
       .catch(BaseAPI._handleError)
   },

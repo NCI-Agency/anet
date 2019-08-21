@@ -1,16 +1,33 @@
-import { Settings } from "api"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-import GQL from "graphqlapi"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
+
+const GQL_GET_POSITION_LIST = gql`
+  query($positionQuery: PositionSearchQueryInput) {
+    positionList(query: $positionQuery) {
+      list {
+        uuid
+        person {
+          uuid
+          rank
+          role
+          name
+          emailAddress
+        }
+      }
+    }
+  }
+`
 
 const screenshotCss = {
   width: "100%",
@@ -47,24 +64,7 @@ class BaseHelp extends Page {
       status: Position.STATUS.ACTIVE,
       organizationUuid: currentUser.position.organization.uuid
     }
-    const positionsPart = new GQL.Part(/* GraphQL */ `
-      positionList(query: $positionQuery) {
-        list {
-          uuid
-          person {
-            uuid
-            rank
-            role
-            name
-            emailAddress
-          }
-        }
-      }`).addVariable(
-      "positionQuery",
-      "PositionSearchQueryInput",
-      positionQuery
-    )
-    GQL.run([positionsPart]).then(data => {
+    API.query(GQL_GET_POSITION_LIST, { positionQuery }).then(data => {
       const filledPositions = data.positionList.list.filter(
         position => position && position.person
       )

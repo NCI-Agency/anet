@@ -15,6 +15,14 @@ import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 
+const GQL_GET_ADMIN_SETTINGS = gql`
+  query {
+    adminSettings {
+      key
+      value
+    }
+  }
+`
 const GQL_SAVE_ADMIN_SETTINGS = gql`
   mutation($settings: [AdminSettingInput]!) {
     saveAdminSettings(settings: $settings)
@@ -34,14 +42,7 @@ class BaseAdminIndex extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-        adminSettings {
-          key
-          value
-        }
-      `
-    ).then(data => {
+    return API.query(GQL_GET_ADMIN_SETTINGS).then(data => {
       let settings = {}
       data.adminSettings.forEach(
         setting => (settings[setting.key] = setting.value)

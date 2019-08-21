@@ -36,6 +36,65 @@ import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
+const GQL_GET_RECENTS = gql`
+  query($tagQuery: TagSearchQueryInput) {
+    locationRecents(maxResults: 6) {
+      list {
+        uuid
+        name
+      }
+    }
+    personRecents(maxResults: 6) {
+      list {
+        uuid
+        name
+        rank
+        role
+        status
+        endOfTourDate
+        position {
+          uuid
+          name
+          type
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+    }
+    taskRecents(maxResults: 6) {
+      list {
+        uuid
+        shortName
+        longName
+        responsibleOrg {
+          uuid
+          shortName
+        }
+      }
+    }
+    authorizationGroupRecents(maxResults: 6) {
+      list {
+        uuid
+        name
+        description
+      }
+    }
+    tagList(query: $tagQuery) {
+      list {
+        uuid
+        name
+        description
+      }
+    }
+  }
+`
 const GQL_CREATE_REPORT = gql`
   mutation($report: ReportInput!) {
     createReport(report: $report) {
@@ -158,67 +217,7 @@ class BaseReportForm extends Component {
     const tagQuery = {
       pageSize: 0 // retrieve all
     }
-    API.query(
-      /* GraphQL */ `
-        locationRecents(maxResults: 6) {
-          list {
-            uuid
-            name
-          }
-        }
-        personRecents(maxResults: 6) {
-          list {
-            uuid
-            name
-            rank
-            role
-            status
-            endOfTourDate
-            position {
-              uuid
-              name
-              type
-              status
-              organization {
-                uuid
-                shortName
-              }
-              location {
-                uuid
-                name
-              }
-            }
-          }
-        }
-        taskRecents(maxResults: 6) {
-          list {
-            uuid
-            shortName
-            longName
-            responsibleOrg {
-              uuid
-              shortName
-            }
-          }
-        }
-        authorizationGroupRecents(maxResults: 6) {
-          list {
-            uuid
-            name
-            description
-          }
-        }
-        tagList(query: $tagQuery) {
-          list {
-            uuid
-            name
-            description
-          }
-        }
-      `,
-      { tagQuery },
-      "($tagQuery: TagSearchQueryInput)"
-    ).then(data => {
+    API.query(GQL_GET_RECENTS, { tagQuery }).then(data => {
       const newState = {
         recents: {
           locations: data.locationRecents.list,
@@ -287,7 +286,6 @@ class BaseReportForm extends Component {
           const locationFilters = {
             activeLocations: {
               label: "Active locations",
-              searchQuery: true,
               queryVars: { status: Location.STATUS.ACTIVE }
             }
           }
@@ -295,24 +293,20 @@ class BaseReportForm extends Component {
           const attendeesFilters = {
             all: {
               label: "All",
-              searchQuery: true,
               queryVars: { matchPositionName: true }
             },
             activeAdvisors: {
               label: "All advisors",
-              searchQuery: true,
               queryVars: { role: Person.ROLE.ADVISOR, matchPositionName: true }
             },
             activePrincipals: {
               label: "All principals",
-              searchQuery: true,
               queryVars: { role: Person.ROLE.PRINCIPAL }
             }
           }
           if (this.props.currentUser.position) {
             attendeesFilters.myColleagues = {
               label: "My colleagues",
-              searchQuery: true,
               queryVars: {
                 role: Person.ROLE.ADVISOR,
                 matchPositionName: true,
@@ -321,7 +315,6 @@ class BaseReportForm extends Component {
             }
             attendeesFilters.myCounterparts = {
               label: "My counterparts",
-              searchQuery: false,
               list: this.props.currentUser.position.associatedPositions
                 .filter(ap => ap.person)
                 .map(ap => ap.person)
@@ -330,7 +323,6 @@ class BaseReportForm extends Component {
           if (values.location && values.location.uuid) {
             attendeesFilters.atLocation = {
               label: `At ${values.location.name}`,
-              searchQuery: true,
               queryVars: {
                 locationUuid:
                   values.location && values.location.uuid
@@ -343,13 +335,12 @@ class BaseReportForm extends Component {
           const tasksFilters = {
             allTasks: {
               label: "All tasks",
-              searchQuery: true
+              queryVars: {}
             }
           }
           if (this.props.currentUser.position) {
             tasksFilters.assignedToMyOrg = {
               label: "Assigned to my organization",
-              searchQuery: true,
               queryVars: {
                 responsibleOrgUuid: this.props.currentUser.position.organization
                   .uuid
@@ -369,7 +360,6 @@ class BaseReportForm extends Component {
           ) {
             tasksFilters.assignedToReportOrg = {
               label: "Assigned to organization of report",
-              searchQuery: true,
               queryVars: {
                 responsibleOrgUuid: primaryAdvisor.position.organization.uuid
               }
@@ -379,7 +369,7 @@ class BaseReportForm extends Component {
           const authorizationGroupsFilters = {
             allAuthorizationGroups: {
               label: "All authorization groups",
-              searchQuery: true
+              queryVars: {}
             }
           }
           // need up-to-date copies of these in the autosave handler

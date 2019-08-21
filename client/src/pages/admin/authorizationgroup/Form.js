@@ -81,7 +81,6 @@ class AuthorizationGroupForm extends Component {
           const positionsFilters = {
             allAdvisorPositions: {
               label: "All advisor positions",
-              searchQuery: true,
               queryVars: {
                 status: Position.STATUS.ACTIVE,
                 type: [

@@ -184,13 +184,12 @@ class BasePositionForm extends Component {
           const organizationFilters = {
             allOrganizations: {
               label: "All organizations",
-              searchQuery: true
+              queryVars: {}
             }
           }
           const locationFilters = {
             activeLocations: {
               label: "All locations",
-              searchQuery: true,
               queryVars: { status: Location.STATUS.ACTIVE }
             }
           }

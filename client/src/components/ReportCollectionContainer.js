@@ -1,20 +1,36 @@
 import { setPagination } from "actions"
-import PropTypes from "prop-types"
-import React, { Component } from "react"
+import API from "api"
+import { gql } from "apollo-boost"
 import ReportCollection, {
   GQL_REPORT_FIELDS,
   GQL_BASIC_REPORT_FIELDS
 } from "components/ReportCollection"
-
-import API from "api"
-import { connect } from "react-redux"
 import _isEqualWith from "lodash/isEqualWith"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { connect } from "react-redux"
 import utils from "utils"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
+
+const GQL_GET_REPORT_LIST = gql`
+  query($reportsQueryParams: ReportSearchQueryInput, $includeAll: Boolean!) {
+    reportList(query: $reportsQueryParams) {
+      pageNum
+      pageSize
+      totalCount
+      list @include(if: $includeAll) {
+        ${GQL_BASIC_REPORT_FIELDS}
+      }
+      list @skip(if: $includeAll) {
+        ${GQL_REPORT_FIELDS}
+      }
+    }
+  }
+`
 
 class ReportCollectionContainer extends Component {
   static propTypes = {
@@ -68,38 +84,19 @@ class ReportCollectionContainer extends Component {
     return reportsQueryParams
   }
 
-  getReportsQuery = (reportsQueryParams, reportFields) => {
-    return API.query(
-      /* GraphQL */ `
-        reportList(query: $reportsQueryParams) {
-          pageNum
-          pageSize
-          totalCount
-          list {
-            ${reportFields}
-          }
-        }
-      `,
-      { reportsQueryParams },
-      "($reportsQueryParams: ReportSearchQueryInput)"
-    )
+  getReportsQuery = (reportsQueryParams, includeAll) => {
+    return API.query(GQL_GET_REPORT_LIST, { reportsQueryParams, includeAll })
   }
 
   fetchReportData(includeAll, pageNum) {
     // Query used by the paginated views
     const queries = [
-      this.getReportsQuery(
-        this.reportsQueryParams(true, pageNum),
-        GQL_REPORT_FIELDS
-      )
+      this.getReportsQuery(this.reportsQueryParams(true, pageNum), false)
     ]
     if (includeAll) {
       // Query used by the map and calendar views
       queries.push(
-        this.getReportsQuery(
-          this.reportsQueryParams(false),
-          GQL_BASIC_REPORT_FIELDS
-        )
+        this.getReportsQuery(this.reportsQueryParams(false), includeAll)
       )
     }
     return Promise.all(queries).then(values => {

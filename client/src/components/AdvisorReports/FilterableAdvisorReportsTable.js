@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import OrganizationAdvisorsTable from "components/AdvisorReports/OrganizationAdvisorsTable"
 import Toolbar from "components/AdvisorReports/Toolbar"
 import LoaderHOC, { mapDispatchToProps } from "HOC/LoaderHOC"
@@ -7,6 +8,20 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { connect } from "react-redux"
+
+const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
+  query {
+    advisorReportInsights {
+      uuid
+      name
+      stats {
+        week
+        nrReportsSubmitted
+        nrEngagementsAttended
+      }
+    }
+  }
+`
 
 const DEFAULT_WEEKS_AGO = 3
 const OrganizationAdvisorsTableWithLoader = connect(
@@ -37,19 +52,7 @@ class FilterableAdvisorReportsTable extends Component {
   componentDidMount() {
     this.setState({ isLoading: true })
     this.props.showLoading()
-    API.query(
-      /* GraphQL */ `
-         advisorReportInsights {
-           uuid
-           name
-           stats {
-             week
-             nrReportsSubmitted
-             nrEngagementsAttended
-           }
-         }
-       `
-    ).then(data => {
+    API.query(GQL_GET_ADVISOR_REPORTS_INSIGHT).then(data => {
       this.setState({
         isLoading: false,
         data: data.advisorReportInsights

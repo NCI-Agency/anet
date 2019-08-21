@@ -28,6 +28,60 @@ import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 
+const GQL_GET_POSITION = gql`
+  query($uuid: String!) {
+    position(uuid: $uuid) {
+      uuid
+      name
+      type
+      status
+      code
+      organization {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      person {
+        uuid
+        name
+        rank
+        role
+      }
+      associatedPositions {
+        uuid
+        name
+        type
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+        organization {
+          uuid
+          shortName
+        }
+      }
+      previousPeople {
+        startTime
+        endTime
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      location {
+        uuid
+        name
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+
+    }
+  }
+`
 const GQL_DELETE_POSITION = gql`
   mutation($uuid: String!) {
     deletePosition(uuid: $uuid)
@@ -57,61 +111,9 @@ class BasePositionShow extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-        position(uuid: $uuid) {
-          uuid
-          name
-          type
-          status
-          code
-          organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-          }
-          person {
-            uuid
-            name
-            rank
-            role
-          }
-          associatedPositions {
-            uuid
-            name
-            type
-            person {
-              uuid
-              name
-              rank
-              role
-            }
-            organization {
-              uuid
-              shortName
-            }
-          }
-          previousPeople {
-            startTime
-            endTime
-            person {
-              uuid
-              name
-              rank
-              role
-            }
-          }
-          location {
-            uuid
-            name
-          }
-          ${GRAPHQL_NOTES_FIELDS}
-        }
-      `,
-      { uuid: props.match.params.uuid },
-      "($uuid: String!)"
-    ).then(data => this.setState({ position: new Position(data.position) }))
+    return API.query(GQL_GET_POSITION, { uuid: props.match.params.uuid }).then(
+      data => this.setState({ position: new Position(data.position) })
+    )
   }
 
   render() {

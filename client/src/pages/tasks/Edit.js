@@ -1,5 +1,6 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -11,6 +12,51 @@ import { Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import TaskForm from "./Form"
+
+const GQL_GET_TASK = gql`
+  query($uuid: String!) {
+    task(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+      status
+      customField
+      customFieldEnum1
+      customFieldEnum2
+      plannedCompletion
+      projectedCompletion
+      responsibleOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      customFieldRef1 {
+        uuid
+        shortName
+        longName
+      }
+      responsiblePositions {
+        uuid
+        name
+        code
+        type
+        status
+        organization {
+          uuid
+          shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 class TaskEdit extends Page {
   static propTypes = {
@@ -28,54 +74,11 @@ class TaskEdit extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-        task(uuid: $uuid) {
-          uuid
-          shortName
-          longName
-          status
-          customField
-          customFieldEnum1
-          customFieldEnum2
-          plannedCompletion
-          projectedCompletion
-          responsibleOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-          }
-          customFieldRef1 {
-            uuid
-            shortName
-            longName
-          }
-          responsiblePositions {
-            uuid
-            name
-            code
-            type
-            status
-            organization {
-              uuid
-              shortName
-            }
-            person {
-              uuid
-              name
-              rank
-              role
-            }
-          }
-          ${GRAPHQL_NOTES_FIELDS}
-        }
-      `,
-      { uuid: props.match.params.uuid },
-      "($uuid: String!)"
-    ).then(data => {
-      this.setState({ task: new Task(data.task) })
-    })
+    return API.query(GQL_GET_TASK, { uuid: props.match.params.uuid }).then(
+      data => {
+        this.setState({ task: new Task(data.task) })
+      }
+    )
   }
 
   render() {

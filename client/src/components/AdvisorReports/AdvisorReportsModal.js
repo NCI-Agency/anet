@@ -1,8 +1,23 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import AdvisorReportsTable from "components/AdvisorReports/AdvisorReportsTable"
 import SimpleModal from "components/SimpleModal"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
+
+const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
+  query($orgUuid: String!) {
+    advisorReportInsights(orgUuid: $orgUuid) {
+      uuid
+      name
+      stats {
+        week
+        nrReportsSubmitted
+        nrEngagementsAttended
+      }
+    }
+  }
+`
 
 class AdvisorReportsModal extends Component {
   constructor(props) {
@@ -18,21 +33,7 @@ class AdvisorReportsModal extends Component {
   }
 
   fetchAdvisors(orgUuid) {
-    API.query(
-      /* GraphQL */ `
-        advisorReportInsights(orgUuid: $orgUuid) {
-          uuid
-          name
-          stats {
-            week
-            nrReportsSubmitted
-            nrEngagementsAttended
-          }
-        }
-      `,
-      { orgUuid: orgUuid },
-      "($orgUuid: String!)"
-    ).then(data => {
+    API.query(GQL_GET_ADVISOR_REPORTS_INSIGHT, { orgUuid }).then(data => {
       this.setState({
         advisors: data.advisorReportInsights
       })

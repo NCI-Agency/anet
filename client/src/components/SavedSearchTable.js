@@ -1,9 +1,23 @@
 import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import ReportCollection from "components/ReportCollection"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
+
+const GQL_GET_REPORT_LIST = gql`
+  query($query: ReportSearchQueryInput) {
+    reports: reportList(query: $query) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        ${ReportCollection.GQL_REPORT_FIELDS}
+      }
+    }
+  }
+`
 
 export default class SavedSearchTable extends Component {
   static propTypes = {
@@ -44,21 +58,9 @@ export default class SavedSearchTable extends Component {
       query.sortOrder = query.sortOrder || "DESC"
       query.pageNum = query.pageNum || 0
       query.pageSize = query.pageSize || 10
-      let fields = ReportCollection.GQL_REPORT_FIELDS
-      API.query(
-        /* GraphQL */ `
-          reports: reportList(query: $query) {
-            pageNum
-            pageSize
-            totalCount
-            list {
-              ${fields}
-            }
-          }
-      `,
-        { query },
-        "($query: ReportSearchQueryInput)"
-      ).then(data => this.setState({ reports: data.reports }))
+      API.query(GQL_GET_REPORT_LIST, { query }).then(data =>
+        this.setState({ reports: data.reports })
+      )
     }
   }
 

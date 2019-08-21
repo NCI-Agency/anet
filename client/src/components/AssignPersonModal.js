@@ -62,7 +62,6 @@ export default class AssignPersonModal extends Component {
     const personFilters = {
       allPersons: {
         label: "All",
-        searchQuery: true,
         queryVars: personSearchQuery
       }
     }

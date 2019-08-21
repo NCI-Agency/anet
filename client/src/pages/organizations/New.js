@@ -1,5 +1,6 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -9,6 +10,18 @@ import React from "react"
 import { connect } from "react-redux"
 import utils from "utils"
 import OrganizationForm from "./Form"
+
+const GQL_GET_ORGANIZATION = gql`
+  query($uuid: String!) {
+    organization(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+      identificationCode
+      type
+    }
+  }
+`
 
 class OrganizationNew extends Page {
   static propTypes = {
@@ -26,24 +39,14 @@ class OrganizationNew extends Page {
   fetchData(props) {
     const qs = utils.parseQueryString(props.location.search)
     if (qs.parentOrgUuid) {
-      return API.query(
-        /* GraphQL */ `
-          organization(uuid: $uuid) {
-            uuid
-            shortName
-            longName
-            identificationCode
-            type
-          }
-        `,
-        { uuid: qs.parentOrgUuid },
-        "($uuid: String!)"
-      ).then(data => {
-        const { organization } = this.state
-        organization.parentOrg = new Organization(data.organization)
-        organization.type = organization.parentOrg.type
-        this.setState({ organization })
-      })
+      return API.query(GQL_GET_ORGANIZATION, { uuid: qs.parentOrgUuid }).then(
+        data => {
+          const { organization } = this.state
+          organization.parentOrg = new Organization(data.organization)
+          organization.type = organization.parentOrg.type
+          this.setState({ organization })
+        }
+      )
     }
   }
 
