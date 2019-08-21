@@ -906,7 +906,7 @@ public class ReportResource {
   }
 
   @GraphQLQuery(name = "showRollupEmail")
-  public String showRollupEmailGraphQL(@GraphQLArgument(name = "startDate") Long start,
+  public String showRollupEmail(@GraphQLArgument(name = "startDate") Long start,
       @GraphQLArgument(name = "endDate") Long end,
       @GraphQLArgument(name = "orgType") OrganizationType orgType,
       @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
