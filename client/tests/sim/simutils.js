@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import fetch from "cross-fetch"
 
 async function runGQL(user, query) {
   const result = await fetch(

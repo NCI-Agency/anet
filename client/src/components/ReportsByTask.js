@@ -36,7 +36,10 @@ class ReportsByTask extends ReportsVisualisation {
     this.CHART_ID = "reports_by_task"
     this.GQL_CHART_FIELDS = /* GraphQL */ `
       uuid
-      tasks { uuid shortName }
+      tasks {
+        uuid
+        shortName
+      }
     `
     this.VISUALIZATIONS = [
       {

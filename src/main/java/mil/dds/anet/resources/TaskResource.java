@@ -41,7 +41,7 @@ public class TaskResource {
   public Task getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Task p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Task not found", Status.NOT_FOUND);
     }
     return p;
   }

@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
@@ -12,6 +13,19 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
+
+const GQL_CREATE_LOCATION = gql`
+  mutation($location: LocationInput!) {
+    createLocation(location: $location) {
+      uuid
+    }
+  }
+`
+const GQL_UPDATE_LOCATION = gql`
+  mutation($location: LocationInput!) {
+    updateLocation(location: $location)
+  }
+`
 
 class LocationForm extends Component {
   static propTypes = {
@@ -194,14 +208,11 @@ class LocationForm extends Component {
   }
 
   save = (values, form) => {
-    const location = new Location(values)
-    const { edit } = this.props
-    const operation = edit ? "updateLocation" : "createLocation"
-    let graphql = /* GraphQL */ operation + "(location: $location)"
-    graphql += edit ? "" : " { uuid }"
-    const variables = { location: location }
-    const variableDef = "($location: LocationInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    const location = Object.without(new Location(values), "notes")
+    return API.mutation(
+      this.props.edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION,
+      { location }
+    )
   }
 }
 
