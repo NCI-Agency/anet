@@ -89,7 +89,8 @@ class LocationForm extends Component {
             id: values.uuid || 0,
             name: _escape(values.name) || "", // escape HTML in location name!
             draggable: true,
-            onMove: event => this.onMarkerMove(event, setFieldValue)
+            autoPan: true,
+            onMove: (event, map) => this.onMarkerMove(event, map, setFieldValue)
           }
           if (Location.hasCoordinates(values)) {
             Object.assign(marker, {
@@ -165,8 +166,8 @@ class LocationForm extends Component {
     )
   }
 
-  onMarkerMove = (event, setFieldValue) => {
-    const latLng = event.latlng
+  onMarkerMove = (event, map, setFieldValue) => {
+    const latLng = map.wrapLatLng(event.latlng)
     setFieldValue("lat", latLng.lat)
     setFieldValue("lng", latLng.lng)
   }
