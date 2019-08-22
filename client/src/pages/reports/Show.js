@@ -62,6 +62,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         role
+        avatar(size: 32)
         position {
           uuid
           organization {
@@ -80,6 +81,7 @@ const GQL_GET_REPORT = gql`
                   name
                   rank
                   role
+                  avatar(size: 32)
                 }
               }
             }
@@ -136,6 +138,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       principalOrg {
@@ -166,6 +169,7 @@ const GQL_GET_REPORT = gql`
               name
               rank
               role
+              avatar(size: 32)
             }
           }
         }
@@ -174,6 +178,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       approvalStep {

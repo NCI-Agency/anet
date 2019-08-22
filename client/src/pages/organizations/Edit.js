@@ -39,6 +39,7 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             role
+            avatar(size: 32)
           }
         }
       }

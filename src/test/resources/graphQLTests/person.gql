@@ -1,34 +1,66 @@
 person(uuid:"${personUuid}") {
-    uuid,
-    name, rank, role, emailAddress, phoneNumber, biography, country, gender, endOfTourDate
+  uuid
+  name
+  rank
+  role
+  status
+  emailAddress
+  phoneNumber
+  domainUsername
+  biography
+  country
+  gender
+  endOfTourDate
+  avatar(size: 256)
+  position {
+    uuid
+    name
+    type
+    organization {
+      uuid
+      shortName
+    }
+    associatedPositions {
+      uuid
+      name
+      type
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+      organization {
+        uuid
+        shortName
+      }
+    }
+  }
+  previousPositions {
+    startTime
+    endTime
     position {
-        uuid,
-        name,
-        organization {
-            uuid,
-            shortName, longName
-        }
-    },
-    authoredReports(query: {pageSize: 10}) { list {
-        uuid,
-        engagementDate, duration,
-        advisorOrg { uuid, shortName, longName }
-        intent,
-        author {
-            uuid,
-            name
-        }
-    }},
-    attendedReports(query: {pageSize: 10}) { list {
-        uuid,
-        engagementDate, duration,
-        advisorOrg { uuid, shortName, longName }
-        intent,
-        author {
-            uuid,
-            name
-        }
-    }}
-    previousPositions { startTime, endTime, position { uuid, name } }
-    notes { uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
+      uuid
+      name
+    }
+  }
+  notes {
+    uuid
+    createdAt
+    updatedAt
+    type
+    text
+    author {
+      uuid
+      name
+      rank
+      role
+    }
+    noteRelatedObjects {
+      noteUuid
+      relatedObjectType
+      relatedObjectUuid
+    }
+  }
 }

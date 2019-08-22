@@ -1,55 +1,182 @@
 report(uuid:"${reportUuid}") {
-    uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
-    keyOutcomes, nextSteps, reportText, 
-
-    state
-
-    location { uuid, name }
-    author {
-        uuid, name
-        position {
-            organization {
-                shortName, longName
-                approvalSteps {
-                    uuid, name,
-                    approvers {
-                        uuid, name,
-                        person { uuid, name rank }
-                    }
-                }
+  uuid
+  intent
+  engagementDate
+  duration
+  atmosphere
+  atmosphereDetails
+  keyOutcomes
+  reportText
+  nextSteps
+  cancelledReason
+  releasedAt
+  state
+  location {
+    uuid
+    name
+  }
+  author {
+    uuid
+    name
+    rank
+    role
+    avatar(size: 32)
+    position {
+      uuid
+      organization {
+        uuid
+        shortName
+        longName
+        identificationCode
+        approvalSteps {
+          uuid
+          name
+          approvers {
+            uuid
+            name
+            person {
+              uuid
+              name
+              rank
+              role
+              avatar(size: 32)
             }
+          }
         }
+      }
     }
-
-    attendees {
-        uuid, name, role, primary
-        position { uuid, name }
+  }
+  attendees {
+    uuid
+    name
+    primary
+    rank
+    role
+    status
+    endOfTourDate
+    avatar(size: 32)
+    position {
+      uuid
+      name
+      type
+      code
+      status
+      organization {
+        uuid
+        shortName
+      }
+      location {
+        uuid
+        name
+      }
     }
-    primaryAdvisor { uuid }
-    primaryPrincipal { uuid }
-
-    tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-
-    comments {
-        uuid, text, createdAt, updatedAt
-        author { uuid, name, rank }
+  }
+  primaryAdvisor {
+    uuid
+  }
+  primaryPrincipal {
+    uuid
+  }
+  tasks {
+    uuid
+    shortName
+    longName
+    responsibleOrg {
+      uuid
+      shortName
     }
-
-    principalOrg { uuid, shortName, longName }
-    advisorOrg { uuid, shortName, longName }
-
-    workflow {
-        type, createdAt
-        step { uuid , name
-            approvers { uuid, name, person { uuid, name } }
-        },
-        person { uuid, name, rank}
+  }
+  comments {
+    uuid
+    text
+    createdAt
+    updatedAt
+    author {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
     }
-
-    approvalStep { name, approvers { uuid } }
-
-    tags { uuid, name, description }
-
-    notes { uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
-
+  }
+  principalOrg {
+    uuid
+    shortName
+    longName
+    identificationCode
+    type
+  }
+  advisorOrg {
+    uuid
+    shortName
+    longName
+    identificationCode
+    type
+  }
+  workflow {
+    type
+    createdAt
+    step {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+    }
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+  }
+  approvalStep {
+    uuid
+    name
+    approvers {
+      uuid
+    }
+    nextStepUuid
+  }
+  tags {
+    uuid
+    name
+    description
+  }
+  reportSensitiveInformation {
+    uuid
+    text
+  }
+  authorizationGroups {
+    uuid
+    name
+    description
+  }
+  notes {
+    uuid
+    createdAt
+    updatedAt
+    type
+    text
+    author {
+      uuid
+      name
+      rank
+      role
+    }
+    noteRelatedObjects {
+      noteUuid
+      relatedObjectType
+      relatedObjectUuid
+    }
+  }
 }

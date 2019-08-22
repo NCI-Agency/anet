@@ -213,7 +213,6 @@ class BasePersonForm extends Component {
                   />
                   <AvatarEditModal
                     title="Edit avatar"
-                    size="large"
                     src={this.state.currentAvatar}
                     onAvatarUpdate={this.onAvatarUpdate}
                   />

@@ -1,9 +1,81 @@
 reportList(query:{pageSize:100}) {
-	totalCount, list { 
-	    uuid, intent, state
-	    author {
-	        uuid
-	        name
-	    }
-	}
+  totalCount
+  list {
+    uuid
+    intent
+    engagementDate
+    duration
+    keyOutcomes
+    nextSteps
+    cancelledReason
+    atmosphere
+    atmosphereDetails
+    state
+    author {
+      uuid
+      name
+      rank
+      role
+    }
+    primaryAdvisor {
+      uuid
+      name
+      rank
+      role
+    }
+    primaryPrincipal {
+      uuid
+      name
+      rank
+      role
+    }
+    advisorOrg {
+      uuid
+      shortName
+    }
+    principalOrg {
+      uuid
+      shortName
+    }
+    location {
+      uuid
+      name
+      lat
+      lng
+    }
+    tasks {
+      uuid
+      shortName
+    }
+    tags {
+      uuid
+      name
+      description
+    }
+    workflow {
+      type
+      createdAt
+      step {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+        }
+      }
+      person {
+        uuid
+        name
+        rank
+        role
+      }
+    }
+    updatedAt
+  }
 }

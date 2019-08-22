@@ -52,6 +52,7 @@ const GQL_GET_RECENTS = gql`
         role
         status
         endOfTourDate
+        avatar(size: 32)
         position {
           uuid
           name
@@ -617,7 +618,6 @@ class BaseReportForm extends Component {
                       />
                     }
                     overlayColumns={[
-                      "Avatar",
                       "Name",
                       "Position",
                       "Location",

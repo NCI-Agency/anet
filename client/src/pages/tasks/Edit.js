@@ -51,6 +51,7 @@ const GQL_GET_TASK = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       ${GRAPHQL_NOTES_FIELDS}

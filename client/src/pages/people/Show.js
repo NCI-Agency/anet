@@ -68,6 +68,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             role
+            avatar(size: 32)
           }
           organization {
             uuid

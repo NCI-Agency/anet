@@ -1,18 +1,68 @@
 me {
-    uuid, name, role
-    position {
-        uuid, name, type,
-		organization { uuid, shortName, longName, descendantOrgs { uuid }}
+  uuid
+  name
+  rank
+  role
+  emailAddress
+  status
+  avatar(size: 32)
+  position {
+    uuid
+    name
+    code
+    type
+    status
+    isApprover
+    organization {
+      uuid
+      shortName
+      descendantOrgs {
+        uuid
+      }
     }
+    location {
+      uuid
+      name
+    }
+    associatedPositions {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          code
+          type
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+      organization {
+        uuid
+        shortName
+      }
+    }
+  }
 }
 
 adminSettings {
-    key, value
+  key
+  value
 }
-organizationTopLevelOrgs(type: ADVISOR_ORG) {
-	list {
-	    uuid, shortName, longName
-	    parentOrg { uuid }
 
-	}
+organizationTopLevelOrgs(type: ADVISOR_ORG) {
+  list {
+    uuid
+    shortName
+  }
 }

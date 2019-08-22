@@ -41,6 +41,7 @@ const GQL_GET_POSITION_LIST = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
     }
@@ -67,6 +68,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       status

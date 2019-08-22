@@ -49,6 +49,7 @@ const GQL_GET_POSITION = gql`
         name
         rank
         role
+        avatar(size: 32)
       }
       associatedPositions {
         uuid
@@ -59,6 +60,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
         organization {
           uuid
@@ -73,6 +75,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       location {

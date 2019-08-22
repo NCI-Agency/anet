@@ -34,6 +34,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       status
