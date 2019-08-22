@@ -1,3 +1,25 @@
 personRecents {
-	list { uuid, name, rank, role, position { uuid, name, organization {uuid, shortName}} }
+  list {
+    uuid
+    name
+    rank
+    role
+    status
+    endOfTourDate
+    avatar(size: 32)
+    position {
+      uuid
+      name
+      type
+      status
+      organization {
+        uuid
+        shortName
+      }
+      location {
+        uuid
+        name
+      }
+    }
+  }
 }
