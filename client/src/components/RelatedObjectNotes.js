@@ -2,6 +2,7 @@ import { Classes, Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import { gql } from "apollo-boost"
 import classNames from "classnames"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
@@ -18,6 +19,12 @@ import React, { Component } from "react"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
 import "./BlueprintOverrides.css"
+
+const GQL_DELETE_NOTE = gql`
+  mutation($uuid: String!) {
+    deleteNote(uuid: $uuid)
+  }
+`
 
 export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 
@@ -100,11 +107,7 @@ class BaseRelatedObjectNotes extends Component {
   }
 
   deleteNote = uuid => {
-    const operation = "deleteNote"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
-    const variables = { uuid: uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    API.mutation(GQL_DELETE_NOTE, { uuid })
       .then(data => {
         this.setState({
           success: "note deleted",

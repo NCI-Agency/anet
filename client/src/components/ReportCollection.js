@@ -20,22 +20,80 @@ export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
 
 export const GQL_REPORT_FIELDS = /* GraphQL */ `
-  uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason
-  atmosphere, atmosphereDetails, state
-  author { uuid, name, rank, role }
-  primaryAdvisor { uuid, name, rank, role },
-  primaryPrincipal { uuid, name, rank, role },
-  advisorOrg { uuid, shortName },
-  principalOrg { uuid, shortName },
-  location { uuid, name, lat, lng },
-  tasks { uuid, shortName },
-  tags { uuid, name, description }
+  uuid
+  intent
+  engagementDate
+  duration
+  keyOutcomes
+  nextSteps
+  cancelledReason
+  atmosphere
+  atmosphereDetails
+  state
+  author {
+    uuid
+    name
+    rank
+    role
+  }
+  primaryAdvisor {
+    uuid
+    name
+    rank
+    role
+  }
+  primaryPrincipal {
+    uuid
+    name
+    rank
+    role
+  }
+  advisorOrg {
+    uuid
+    shortName
+  }
+  principalOrg {
+    uuid
+    shortName
+  }
+  location {
+    uuid
+    name
+    lat
+    lng
+  }
+  tasks {
+    uuid
+    shortName
+  }
+  tags {
+    uuid
+    name
+    description
+  }
   workflow {
-    type, createdAt
-    step { uuid, name
-      approvers { uuid, name, person { uuid, name, rank, role } }
-    },
-    person { uuid, name, rank, role }
+    type
+    createdAt
+    step {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+    }
+    person {
+      uuid
+      name
+      rank
+      role
+    }
   }
   updatedAt
 `
@@ -43,11 +101,23 @@ export const GQL_REPORT_FIELDS = /* GraphQL */ `
 export const GQL_BASIC_REPORT_FIELDS = /* GraphQL */ `
   uuid
   intent
-  primaryAdvisor { name }
-  principalOrg { shortName }
-  engagementDate, duration
+  primaryAdvisor {
+    uuid
+    name
+  }
+  principalOrg {
+    uuid
+    shortName
+  }
+  engagementDate
+  duration
   state
-  location { uuid name lat lng }
+  location {
+    uuid
+    name
+    lat
+    lng
+  }
 `
 
 export default class ReportCollection extends Component {
@@ -88,7 +158,7 @@ export default class ReportCollection extends Component {
     const viewWithPagination =
       ReportCollection.VIEW_FORMATS_WITH_PAGINATION.includes(
         this.state.viewFormat
-      ) && this.props.paginatedReports !== null
+      ) && this.props.paginatedReports
     if (viewWithPagination) {
       var { pageSize, pageNum, totalCount } = this.props.paginatedReports
       var numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)

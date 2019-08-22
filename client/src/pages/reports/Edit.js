@@ -1,5 +1,6 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -12,6 +13,84 @@ import React from "react"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import ReportForm from "./Form"
+
+const GQL_GET_REPORT = gql`
+  query($uuid: String!) {
+    report(uuid: $uuid) {
+      uuid
+      intent
+      engagementDate
+      duration
+      atmosphere
+      atmosphereDetails
+      keyOutcomes
+      reportText
+      nextSteps
+      cancelledReason
+      state
+      location {
+        uuid
+        name
+      }
+      author {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+      attendees {
+        uuid
+        name
+        primary
+        rank
+        role
+        status
+        endOfTourDate
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          type
+          code
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+      tasks {
+        uuid
+        shortName
+        longName
+        responsibleOrg {
+          uuid
+          shortName
+        }
+      }
+      tags {
+        uuid
+        name
+        description
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+      authorizationGroups {
+        uuid
+        name
+        description
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 class ReportEdit extends Page {
   static propTypes = {
@@ -29,32 +108,16 @@ class ReportEdit extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-      report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails, state
-        keyOutcomes, reportText, nextSteps, cancelledReason,
-        author { uuid, name, rank, role, avatar(size: 32) },
-        location { uuid, name },
-        attendees {
-          uuid, name, rank, role, primary, status, endOfTourDate, avatar(size: 32)
-          position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
-        }
-        tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-        tags { uuid, name, description }
-        reportSensitiveInformation { uuid, text }
-        authorizationGroups { uuid, name, description }
-        ${GRAPHQL_NOTES_FIELDS}
+    return API.query(GQL_GET_REPORT, { uuid: props.match.params.uuid }).then(
+      data => {
+        data.report.cancelled = !!data.report.cancelledReason
+        data.report.reportTags = (data.report.tags || []).map(tag => ({
+          id: tag.uuid.toString(),
+          text: tag.name
+        }))
+        this.setState({ report: new Report(data.report) })
       }
-    `
-    ).then(data => {
-      data.report.cancelled = !!data.report.cancelledReason
-      data.report.reportTags = (data.report.tags || []).map(tag => ({
-        id: tag.uuid.toString(),
-        text: tag.name
-      }))
-      this.setState({ report: new Report(data.report) })
-    })
+    )
   }
 
   render() {

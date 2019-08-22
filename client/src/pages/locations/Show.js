@@ -1,3 +1,5 @@
+import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -13,7 +15,6 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
-import GQL from "graphqlapi"
 import _escape from "lodash/escape"
 import { Location, Person } from "models"
 import PropTypes from "prop-types"
@@ -25,6 +26,19 @@ import {
   FORMAT_TABLE,
   FORMAT_CALENDAR
 } from "components/ReportCollection"
+
+const GQL_GET_LOCATION = gql`
+  query($uuid: String!) {
+    location(uuid: $uuid) {
+      uuid
+      name
+      lat
+      lng
+      status
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 const Coordinate = ({ coord }) => {
   const parsedCoord =
@@ -55,18 +69,13 @@ class BaseLocationShow extends Page {
   }
 
   fetchData(props) {
-    const locationQueryPart = new GQL.Part(/* GraphQL */ `
-      location(uuid:"${props.match.params.uuid}") {
-        uuid, name, lat, lng, status
-        ${GRAPHQL_NOTES_FIELDS}
+    return API.query(GQL_GET_LOCATION, { uuid: props.match.params.uuid }).then(
+      data => {
+        this.setState({
+          location: new Location(data.location)
+        })
       }
-    `)
-
-    return GQL.run([locationQueryPart]).then(data => {
-      this.setState({
-        location: new Location(data.location)
-      })
-    })
+    )
   }
 
   render() {

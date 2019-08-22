@@ -1,5 +1,6 @@
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import * as FieldHelper from "components/FieldHelper"
@@ -35,6 +36,223 @@ import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
+const GQL_GET_REPORT = gql`
+  query($uuid: String!) {
+    report(uuid: $uuid) {
+      uuid
+      intent
+      engagementDate
+      duration
+      atmosphere
+      atmosphereDetails
+      keyOutcomes
+      reportText
+      nextSteps
+      cancelledReason
+      releasedAt
+      state
+      location {
+        uuid
+        name
+      }
+      author {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+        position {
+          uuid
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            approvalSteps {
+              uuid
+              name
+              approvers {
+                uuid
+                name
+                person {
+                  uuid
+                  name
+                  rank
+                  role
+                  avatar(size: 32)
+                }
+              }
+            }
+          }
+        }
+      }
+      attendees {
+        uuid
+        name
+        primary
+        rank
+        role
+        status
+        endOfTourDate
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          type
+          code
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+      primaryAdvisor {
+        uuid
+      }
+      primaryPrincipal {
+        uuid
+      }
+      tasks {
+        uuid
+        shortName
+        longName
+        responsibleOrg {
+          uuid
+          shortName
+        }
+      }
+      comments {
+        uuid
+        text
+        createdAt
+        updatedAt
+        author {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+      principalOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      advisorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      workflow {
+        type
+        createdAt
+        step {
+          uuid
+          name
+          approvers {
+            uuid
+            name
+            person {
+              uuid
+              name
+              rank
+              role
+              avatar(size: 32)
+            }
+          }
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+      approvalStep {
+        uuid
+        name
+        approvers {
+          uuid
+        }
+        nextStepUuid
+      }
+      tags {
+        uuid
+        name
+        description
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+      authorizationGroups {
+        uuid
+        name
+        description
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
+const GQL_DELETE_REPORT = gql`
+  mutation($uuid: String!) {
+    deleteReport(uuid: $uuid)
+  }
+`
+const GQL_EMAIL_REPORT = gql`
+  mutation($uuid: String!, $email: AnetEmailInput!) {
+    emailReport(uuid: $uuid, email: $email) {
+      uuid
+    }
+  }
+`
+const GQL_SUBMIT_REPORT = gql`
+  mutation($uuid: String!) {
+    submitReport(uuid: $uuid) {
+      uuid
+    }
+  }
+`
+const GQL_PUBLISH_REPORT = gql`
+  mutation($uuid: String!) {
+    publishReport(uuid: $uuid) {
+      uuid
+    }
+  }
+`
+const GQL_ADD_REPORT_COMMENT = gql`
+  mutation($uuid: String!, $comment: CommentInput!) {
+    addComment(uuid: $uuid, comment: $comment) {
+      uuid
+    }
+  }
+`
+const GQL_REJECT_REPORT = gql`
+  mutation($uuid: String!, $comment: CommentInput!) {
+    rejectReport(uuid: $uuid, comment: $comment) {
+      uuid
+    }
+  }
+`
+const GQL_APPROVE_REPORT = gql`
+  mutation($uuid: String!, $comment: CommentInput!) {
+    approveReport(uuid: $uuid, comment: $comment) {
+      uuid
+    }
+  }
+`
+
 class BaseReportShow extends Page {
   static propTypes = {
     ...pagePropTypes,
@@ -59,76 +277,20 @@ class BaseReportShow extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-      report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
-        keyOutcomes, reportText, nextSteps, cancelledReason, releasedAt
-
-        state
-
-        location { uuid, name }
-        author {
-          uuid, name, rank, role, avatar(size: 32)
-          position {
-            organization {
-              shortName, longName, identificationCode
-              approvalSteps {
-                uuid, name,
-                approvers {
-                  uuid, name,
-                  person { uuid, name, rank, role, avatar(size: 32) }
-                }
-              }
-            }
-          }
-        }
-
-        attendees {
-          uuid, name, primary, rank, role, status, endOfTourDate, avatar(size: 32)
-          position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
-        }
-        primaryAdvisor { uuid }
-        primaryPrincipal { uuid }
-
-        tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-
-        comments {
-          uuid, text, createdAt, updatedAt
-          author { uuid, name, rank, role, avatar(size: 32) }
-        }
-
-        principalOrg { uuid, shortName, longName, identificationCode, type }
-        advisorOrg { uuid, shortName, longName, identificationCode, type }
-
-        workflow {
-          type, createdAt
-          step { uuid , name
-            approvers { uuid, name, person { uuid, name, rank, role, avatar(size: 32) } }
-          },
-          person { uuid, name, rank, role, avatar(size: 32) }
-        }
-
-        approvalStep { name, approvers { uuid }, nextStepUuid }
-
-        tags { uuid, name, description }
-        reportSensitiveInformation { uuid, text }
-        authorizationGroups { uuid, name, description }
-        ${GRAPHQL_NOTES_FIELDS}
+    return API.query(GQL_GET_REPORT, { uuid: props.match.params.uuid }).then(
+      data => {
+        data.report.cancelled = !!data.report.cancelledReason
+        data.report.to = ""
+        const report = new Report(data.report)
+        this.setState({ report })
+        Report.yupSchema
+          .validate(report, { abortEarly: false })
+          .catch(e => this.setState({ validationErrors: e.errors }))
+        Report.yupWarningSchema
+          .validate(report, { abortEarly: false })
+          .catch(e => this.setState({ validationWarnings: e.errors }))
       }
-    `
-    ).then(data => {
-      data.report.cancelled = !!data.report.cancelledReason
-      data.report.to = ""
-      const report = new Report(data.report)
-      this.setState({ report })
-      Report.yupSchema
-        .validate(report, { abortEarly: false })
-        .catch(e => this.setState({ validationErrors: e.errors }))
-      Report.yupWarningSchema
-        .validate(report, { abortEarly: false })
-        .catch(e => this.setState({ validationWarnings: e.errors }))
-    })
+    )
   }
 
   renderNoPositionAssignedText() {
@@ -611,11 +773,8 @@ class BaseReportShow extends Page {
   }
 
   onConfirmDelete = () => {
-    const operation = "deleteReport"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
-    const variables = { uuid: this.state.report.uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    const { uuid } = this.state.report
+    API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
         this.props.history.push({
           pathname: "/",
@@ -757,14 +916,10 @@ class BaseReportShow extends Page {
       toAddresses: r.to,
       comment: values.comment
     }
-
-    let graphql = /* GraphQL */ "emailReport(uuid: $uuid, email: $email)"
-    const variables = {
+    API.mutation(GQL_EMAIL_REPORT, {
       uuid: this.state.report.uuid,
       email: emailDelivery
-    }
-    const variableDef = "($uuid: String!, $email: AnetEmailInput!)"
-    API.mutation(graphql, variables, variableDef)
+    })
       .then(data => {
         setFieldValue("to", "")
         setFieldValue("comment", "")
@@ -783,12 +938,8 @@ class BaseReportShow extends Page {
   }
 
   submitDraft = () => {
-    let graphql = /* GraphQL */ "submitReport(uuid: $uuid) { uuid }"
-    const variables = {
-      uuid: this.state.report.uuid
-    }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    const { uuid } = this.state.report
+    API.mutation(GQL_SUBMIT_REPORT, { uuid })
       .then(data => {
         this.updateReport()
         this.setState({ success: "Report submitted", error: null })
@@ -799,12 +950,8 @@ class BaseReportShow extends Page {
   }
 
   publishReport = () => {
-    const graphql = /* GraphQL */ "publishReport(uuid: $uuid) { uuid }"
-    const variables = {
-      uuid: this.state.report.uuid
-    }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    const { uuid } = this.state.report
+    API.mutation(GQL_PUBLISH_REPORT, { uuid })
       .then(data => {
         this.updateReport()
         this.setState({ success: "Report published", error: null })
@@ -818,14 +965,10 @@ class BaseReportShow extends Page {
     if (_isEmpty(text)) {
       return
     }
-    let graphql =
-      /* GraphQL */ "addComment(uuid: $uuid, comment: $comment) { uuid }"
-    const variables = {
+    API.mutation(GQL_ADD_REPORT_COMMENT, {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })
-    }
-    const variableDef = "($uuid: String!, $comment: CommentInput!)"
-    API.mutation(graphql, variables, variableDef)
+    })
       .then(data => {
         setFieldValue("newComment", "")
         this.updateReport()
@@ -845,14 +988,10 @@ class BaseReportShow extends Page {
     }
 
     const text = "REQUESTED CHANGES: " + rejectionComment
-    let graphql =
-      /* GraphQL */ "rejectReport(uuid: $uuid, comment: $comment) { uuid }"
-    const variables = {
+    API.mutation(GQL_REJECT_REPORT, {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })
-    }
-    const variableDef = "($uuid: String!, $comment: CommentInput!)"
-    API.mutation(graphql, variables, variableDef)
+    })
       .then(data => {
         const queryDetails = this.pendingMyApproval(this.props.currentUser)
         const message = "Successfully requested changes."
@@ -888,14 +1027,10 @@ class BaseReportShow extends Page {
   }
 
   approveReport = text => {
-    let graphql =
-      /* GraphQL */ "approveReport(uuid: $uuid, comment: $comment) { uuid }"
-    const variables = {
+    API.mutation(GQL_APPROVE_REPORT, {
       uuid: this.state.report.uuid,
       comment: new Comment({ text })
-    }
-    const variableDef = "($uuid: String!, $comment: CommentInput!)"
-    API.mutation(graphql, variables, variableDef)
+    })
       .then(data => {
         const queryDetails = this.pendingMyApproval(this.props.currentUser)
         const lastApproval = this.state.report.approvalStep.nextStepId === null

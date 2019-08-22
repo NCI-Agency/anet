@@ -1,5 +1,6 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -11,6 +12,49 @@ import { Position } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import PositionForm from "./Form"
+
+const GQL_GET_POSITION = gql`
+  query($uuid: String!) {
+    position(uuid: $uuid) {
+      uuid
+      name
+      code
+      status
+      type
+      location {
+        uuid
+        name
+      }
+      associatedPositions {
+        uuid
+        name
+        type
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+      organization {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 class PositionEdit extends Page {
   static propTypes = {
@@ -28,20 +72,11 @@ class PositionEdit extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-      position(uuid:"${props.match.params.uuid}") {
-        uuid, name, code, status, type
-        location { uuid, name },
-        associatedPositions { uuid, name, type, person { uuid, name, rank, role, avatar(size: 32) } },
-        organization {uuid, shortName, longName, identificationCode, type},
-        person { uuid, name, rank, role, avatar(size: 32) }
-        ${GRAPHQL_NOTES_FIELDS}
+    return API.query(GQL_GET_POSITION, { uuid: props.match.params.uuid }).then(
+      data => {
+        this.setState({ position: new Position(data.position) })
       }
-    `
-    ).then(data => {
-      this.setState({ position: new Position(data.position) })
-    })
+    )
   }
 
   render() {

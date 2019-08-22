@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import { renderInputField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import UltimatePagination from "components/UltimatePagination"
@@ -393,6 +394,7 @@ export default class AdvancedSelect extends Component {
         }
       })
     } else {
+      // GraphQL search type of query
       this.queryResults(filterDefs, filterType, results, pageNum)
     }
   }
@@ -401,46 +403,30 @@ export default class AdvancedSelect extends Component {
     const resourceName = this.props.objectType.resourceName
     const listName = filterDefs.listName || this.props.objectType.listName
     this.setState({ isLoading: true }, () => {
-      let graphQlQuery = /* GraphQL */ ""
-      let variables = {}
-      let variableDef = ""
-      if (filterDefs.searchQuery) {
-        // GraphQL search type of query
-        graphQlQuery =
-          listName +
-          " (query: $query) { " +
-          "pageNum, pageSize, totalCount, list { " +
-          this.props.fields +
-          "}" +
-          "}"
-        variableDef = "($query: " + resourceName + "SearchQueryInput)"
-        let queryVars = { pageNum: pageNum, pageSize: 6 }
-        if (this.props.queryParams) {
-          Object.assign(queryVars, this.props.queryParams)
-        }
-        if (filterDefs.queryVars) {
-          Object.assign(queryVars, filterDefs.queryVars)
-        }
-        if (this.state.searchTerms) {
-          Object.assign(queryVars, { text: this.state.searchTerms + "*" })
-        }
-        variables = { query: queryVars }
-      } else {
-        // GraphQL query other than search type
-        graphQlQuery =
-          listName +
-          "(" +
-          filterDefs.listArgs +
-          ") { " +
-          "pageNum, pageSize, totalCount, list { " +
-          this.props.fields +
-          "}" +
-          "}"
+      let queryVars = { pageNum: pageNum, pageSize: 6 }
+      if (this.props.queryParams) {
+        Object.assign(queryVars, this.props.queryParams)
+      }
+      if (filterDefs.queryVars) {
+        Object.assign(queryVars, filterDefs.queryVars)
+      }
+      if (this.state.searchTerms) {
+        Object.assign(queryVars, { text: this.state.searchTerms + "*" })
       }
       let thisRequest = (this.latestRequest = API.query(
-        graphQlQuery,
-        variables,
-        variableDef
+        gql`
+          query($query: ${resourceName}SearchQueryInput) {
+            ${listName}(query: $query) {
+              pageNum
+              pageSize
+              totalCount
+              list {
+                ${this.props.fields}
+              }
+            }
+          }
+        `,
+        { query: queryVars }
       ).then(data => {
         // If this is true there's a newer request happening, stop everything
         if (thisRequest !== this.latestRequest) {
