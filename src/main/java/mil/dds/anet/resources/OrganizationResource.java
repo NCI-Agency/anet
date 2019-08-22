@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -32,7 +30,6 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PermitAll
 public class OrganizationResource {
 
   private static final Logger logger =
@@ -62,10 +59,9 @@ public class OrganizationResource {
   }
 
   @GraphQLMutation(name = "createOrganization")
-  @RolesAllowed("ADMINISTRATOR")
   public Organization createOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     final Organization created;
     try {
@@ -117,11 +113,10 @@ public class OrganizationResource {
   }
 
   @GraphQLMutation(name = "updateOrganization")
-  @RolesAllowed("SUPER_USER")
   public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org)
       throws InterruptedException, ExecutionException, Exception {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
     AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);
 

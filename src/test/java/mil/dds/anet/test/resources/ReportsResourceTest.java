@@ -23,6 +23,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AdvisorReportsEntry;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
@@ -1599,4 +1600,35 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final List<Report> reports = reportResults.getList();
     assertThat(reports.size()).isEqualTo(0);
   }
+
+  @Test
+  public void testAdvisorReportInsightsSuperUser() {
+    advisorReportInsights(getSuperUser());
+  }
+
+  @Test
+  public void testAdvisorReportInsightsRegularUser() {
+    advisorReportInsights(getRegularUser());
+  }
+
+  private void advisorReportInsights(final Person user) {
+    final Position position = user.getPosition();
+    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    try {
+      final List<AdvisorReportsEntry> advisorReports = graphQLHelper.getObjectList(user,
+          "query { payload: advisorReportInsights { uuid name stats { week nrReportsSubmitted nrEngagementsAttended } } }",
+          null, new TypeReference<GraphQlResponse<List<AdvisorReportsEntry>>>() {});
+      if (isSuperUser) {
+        assertThat(advisorReports).isNotNull();
+        assertThat(advisorReports.size()).isGreaterThan(0);
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+  }
+
 }

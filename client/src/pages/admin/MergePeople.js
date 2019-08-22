@@ -10,6 +10,7 @@ import Page, {
   propTypes as pagePropTypes
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
 import React from "react"
@@ -170,19 +171,25 @@ class MergePeople extends Page {
                   </Row>
                   <Row>
                     <Col md={12}>
-                      {loser && loser.position && winner && !winner.position && (
+                      {loser &&
+                        !_isEmpty(loser.position) &&
+                        winner &&
+                        _isEmpty(winner.position) && (
                         <Field
                           name="copyPosition"
                           component={FieldHelper.renderSpecialField}
                           label={null}
                           widget={
                             <Checkbox inline checked={values.copyPosition}>
-                              Set position on winner to {loser.position.name}
+                                Set position on winner to {loser.position.name}
                             </Checkbox>
                           }
                         />
                       )}
-                      {loser && loser.position && winner && winner.position && (
+                      {loser &&
+                        !_isEmpty(loser.position) &&
+                        winner &&
+                        !_isEmpty(winner.position) && (
                         <Alert bsStyle="danger">
                           <b>Danger:</b> Position on Loser (
                           {loser.position.name}) will be left unfilled

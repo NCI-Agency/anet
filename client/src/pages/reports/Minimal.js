@@ -122,7 +122,7 @@ class ReportMinimal extends Page {
               {report.isRejected() && (
                 <Fieldset style={{ textAlign: "center" }}>
                   <h4 className="text-danger">
-                    This report has CHANGES REQUESTED.{" "}
+                    This report has CHANGES REQUESTED.
                   </h4>
                   <p>
                     You can review the comments below, fix the report and
@@ -270,14 +270,14 @@ class ReportMinimal extends Page {
 
                   <Field
                     name="advisorOrg"
-                    label={Settings.fields.organization.name}
+                    label={Settings.fields.advisor.org.name}
                     component={FieldHelper.renderReadonlyField}
                     humanValue={<LinkTo organization={report.advisorOrg} />}
                   />
 
                   <Field
                     name="principalOrg"
-                    label={Settings.fields.organization.name}
+                    label={Settings.fields.principal.org.name}
                     component={FieldHelper.renderReadonlyField}
                     humanValue={<LinkTo organization={report.principalOrg} />}
                   />

@@ -165,13 +165,14 @@ export default class Leaflet extends Component {
       let marker = new Marker(latLng, {
         icon: this.icon,
         draggable: m.draggable || false,
+        autoPan: m.autoPan || false,
         id: m.id
       })
       if (m.name) {
         marker.bindPopup(m.name)
       }
       if (m.onMove) {
-        marker.on("move", m.onMove)
+        marker.on("move", event => m.onMove(event, this.state.map))
       }
       newMarkers.push(marker)
       markerLayer.addLayer(marker)
