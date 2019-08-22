@@ -2460,14 +2460,17 @@
     pretty-ms "^5.0.0"
     table "^5.4.2"
 
-"@wdio/sync@^5.12.1":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.12.1.tgz#a654e37252caf26cf235efc22f69cb705c200179"
-  integrity sha512-a2DvrHUA1xSAZcUx0UGQdU4VlCNpBp2vBLq89ppVu0+Sz2Cyr07dQZyIixDRUmmBDE9JH+DBtKykJiojg7W3+A==
+"@wdio/sync@^5.12.3":
+  version "5.12.3"
+  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.12.3.tgz#a37dd82a3bfbd9e7b71929987f49916a4fbefdf6"
+  integrity sha512-2EZX2W+5mk3O6vCGac/zlks9/ODj6Jtq0yWHqytxjy5lySs3lQxKxB2txBnlLX0HJuRN8wKj6GFyD1fX0M7y9g==
   dependencies:
     "@wdio/config" "^5.12.1"
     "@wdio/logger" "^5.12.1"
     "@wdio/utils" "^5.12.1"
+  optionalDependencies:
+    fibers "^4.0.1"
+    fibers_node_v8 "^3.1.2"
 
 "@wdio/utils@^5.12.1":
   version "5.12.1"
@@ -5944,7 +5947,7 @@ detect-file@^1.0.0:
   resolved "https://registry.yarnpkg.com/detect-file/-/detect-file-1.0.0.tgz#f0d66d03672a825cb1b73bdb3fe62310c8e552b7"
   integrity sha1-8NZtA2cqglyxtzvbP+YjEMjlUrc=
 
-detect-libc@^1.0.2:
+detect-libc@^1.0.2, detect-libc@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
@@ -7179,6 +7182,20 @@ fd-slicer@~1.0.1:
   integrity sha1-i1vL2ewyfFBBv5qwI/1nUPEXfmU=
   dependencies:
     pend "~1.2.0"
+
+fibers@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/fibers/-/fibers-4.0.1.tgz#34fe8a8d010db7f9096adb2558a45bbc1d03fe45"
+  integrity sha512-H79EJn7DMWXk48ygmC82bMP8KNcFBZF1CPfwBpYF6cO85hGWoIrlu7eyX9ayxfjP9Nsl0JXxdI6fpYU4DWVw2w==
+  dependencies:
+    detect-libc "^1.0.3"
+
+fibers_node_v8@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/fibers_node_v8/-/fibers_node_v8-3.1.2.tgz#616d4ab12f09c7b3d0067feb1e3ef48316d907ba"
+  integrity sha512-UHWmi178AbP9ZnnNYzVUasrhf8CceKIwL0C2n2nUwQc8MBJG37AwOakT0aiv9WSOJ3Sdt0tI0mAVZFz25PZPoQ==
+  dependencies:
+    detect-libc "^1.0.3"
 
 figgy-pudding@^3.5.1:
   version "3.5.1"
