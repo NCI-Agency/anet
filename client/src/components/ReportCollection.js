@@ -22,9 +22,9 @@ export const FORMAT_MAP = "map"
 export const GQL_REPORT_FIELDS = /* GraphQL */ `
   uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason
   atmosphere, atmosphereDetails, state
-  author { uuid, name, rank, role, avatar(size: 32) }
-  primaryAdvisor { uuid, name, rank, role, avatar(size: 32) },
-  primaryPrincipal { uuid, name, rank, role, avatar(size: 32) },
+  author { uuid, name, rank, role }
+  primaryAdvisor { uuid, name, rank, role },
+  primaryPrincipal { uuid, name, rank, role },
   advisorOrg { uuid, shortName },
   principalOrg { uuid, shortName },
   location { uuid, name, lat, lng },
