@@ -27,9 +27,7 @@ const GQL_MERGE_PEOPLE = gql`
       winnerUuid: $winnerUuid
       loserUuid: $loserUuid
       copyPosition: $copyPosition
-    ) {
-      uuid
-    }
+    )
   }
 `
 
