@@ -1,8 +1,9 @@
+import API from "api"
+import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Page from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
-import GQL from "graphqlapi"
 import _get from "lodash/get"
 import moment from "moment"
 import pluralize from "pluralize"
@@ -11,6 +12,74 @@ import React, { Component } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
+
+const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
+  query($subscriptionUpdatesQuery: SubscriptionUpdateSearchQueryInput) {
+    mySubscriptionUpdates(query: $subscriptionUpdatesQuery) {
+      pageNum pageSize totalCount list {
+        createdAt
+        updatedObjectType
+        updatedObjectUuid
+        updatedObject {
+          ... on Location {
+            name
+          }
+          ... on Organization {
+            shortName
+          }
+          ... on Person {
+            role
+            rank
+            name
+          }
+          ... on Position {
+            type
+            name
+          }
+          ... on Report {
+            intent
+          }
+          ... on Task {
+            shortName
+            longName
+          }
+        }
+        isNote
+        subscription {
+          uuid
+          createdAt
+          updatedAt
+          subscribedObjectType
+          subscribedObjectUuid
+          subscribedObject {
+            ... on Location {
+              name
+            }
+            ... on Organization {
+              shortName
+            }
+            ... on Person {
+              role
+              rank
+              name
+            }
+            ... on Position {
+              type
+              name
+            }
+            ... on Report {
+              intent
+            }
+            ... on Task {
+              shortName
+              longName
+            }
+          }
+        }
+      }
+    }
+  }
+`
 
 class BaseMySubscriptionUpdates extends Component {
   static propTypes = {
@@ -168,76 +237,9 @@ class BaseMySubscriptionUpdates extends Component {
       pageNum: this.state.pageNum,
       pageSize: 10
     }
-    const subscriptionUpdatesPart = new GQL.Part(/* GraphQL */ `
-      mySubscriptionUpdates(query: $subscriptionUpdatesQuery) {
-        pageNum pageSize totalCount list {
-          createdAt
-          updatedObjectType
-          updatedObjectUuid
-          updatedObject {
-            ... on Location {
-              name
-            }
-            ... on Organization {
-              shortName
-            }
-            ... on Person {
-              role
-              rank
-              name
-            }
-            ... on Position {
-              type
-              name
-            }
-            ... on Report {
-              intent
-            }
-            ... on Task {
-              shortName
-              longName
-            }
-          }
-          isNote
-          subscription {
-            uuid
-            createdAt
-            updatedAt
-            subscribedObjectType
-            subscribedObjectUuid
-            subscribedObject {
-              ... on Location {
-                name
-              }
-              ... on Organization {
-                shortName
-              }
-              ... on Person {
-                role
-                rank
-                name
-              }
-              ... on Position {
-                type
-                name
-              }
-              ... on Report {
-                intent
-              }
-              ... on Task {
-                shortName
-                longName
-              }
-            }
-          }
-        }
-      }`).addVariable(
-      "subscriptionUpdatesQuery",
-      "SubscriptionUpdateSearchQueryInput",
+    return API.query(GQL_GET_MY_SUBSCRIPTION_UPDATES, {
       subscriptionUpdatesQuery
-    )
-
-    return GQL.run([subscriptionUpdatesPart]).then(data =>
+    }).then(data =>
       this.setState({
         mySubscriptionUpdates: data.mySubscriptionUpdates
       })

@@ -1,8 +1,9 @@
+import API from "api"
+import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Page from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
-import GQL from "graphqlapi"
 import _get from "lodash/get"
 import moment from "moment"
 import pluralize from "pluralize"
@@ -11,6 +12,44 @@ import React, { Component } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
+
+const GQL_GET_MY_SUBSCRIPTIONS = gql`
+  query($subscriptionsQuery: SubscriptionSearchQueryInput) {
+    mySubscriptions(query: $subscriptionsQuery) {
+      pageNum pageSize totalCount list {
+        uuid
+        createdAt
+        updatedAt
+        subscribedObjectType
+        subscribedObjectUuid
+        subscribedObject {
+          ... on Location {
+            name
+          }
+          ... on Organization {
+            shortName
+          }
+          ... on Person {
+            role
+            rank
+            name
+          }
+          ... on Position {
+            type
+            name
+          }
+          ... on Report {
+            intent
+          }
+          ... on Task {
+            shortName
+            longName
+          }
+        }
+      }
+    }
+  }
+`
 
 class BaseMySubscriptions extends Component {
   static propTypes = {
@@ -134,46 +173,9 @@ class BaseMySubscriptions extends Component {
       pageNum: this.state.pageNum,
       pageSize: 10
     }
-    const subscriptionsPart = new GQL.Part(/* GraphQL */ `
-      mySubscriptions(query: $subscriptionsQuery) {
-        pageNum pageSize totalCount list {
-          uuid
-          createdAt
-          updatedAt
-          subscribedObjectType
-          subscribedObjectUuid
-          subscribedObject {
-            ... on Location {
-              name
-            }
-            ... on Organization {
-              shortName
-            }
-            ... on Person {
-              role
-              rank
-              name
-            }
-            ... on Position {
-              type
-              name
-            }
-            ... on Report {
-              intent
-            }
-            ... on Task {
-              shortName
-              longName
-            }
-          }
-        }
-      }`).addVariable(
-      "subscriptionsQuery",
-      "SubscriptionSearchQueryInput",
+    return API.query(GQL_GET_MY_SUBSCRIPTIONS, {
       subscriptionsQuery
-    )
-
-    return GQL.run([subscriptionsPart]).then(data =>
+    }).then(data =>
       this.setState({
         mySubscriptions: data.mySubscriptions
       })

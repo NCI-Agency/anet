@@ -8,6 +8,7 @@ import {
   setSearchProps
 } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import { setMessages } from "components/Messages"
 import NotFound from "components/NotFound"
@@ -19,6 +20,19 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
 import utils from "utils"
+
+const GQL_CREATE_SUBSCRIPTION = gql`
+  mutation($subscription: SubscriptionInput!) {
+    createSubscription(subscription: $subscription) {
+      uuid
+    }
+  }
+`
+const GQL_DELETE_OBJECT_SUBSCRIPTION = gql`
+  mutation($subscribedObjectUuid: String!) {
+    deleteObjectSubscription(uuid: $subscribedObjectUuid)
+  }
+`
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
   showLoading: () => dispatch(showLoading()),
@@ -279,23 +293,19 @@ export default class Page extends Component {
     isSubscribed,
     updatedAt
   ) => {
-    let graphql, variables, variableDef
-    if (isSubscribed) {
-      graphql = "deleteObjectSubscription(uuid: $subscribedObjectUuid)"
-      variables = { subscribedObjectUuid }
-      variableDef = "($subscribedObjectUuid: String!)"
-    } else {
-      graphql = "createSubscription(subscription: $subscription) { uuid }"
-      variables = {
+    const variables = isSubscribed
+      ? { subscribedObjectUuid }
+      : {
         subscription: {
           subscribedObjectType,
           subscribedObjectUuid,
           updatedAt
         }
       }
-      variableDef = "($subscription: SubscriptionInput!)"
-    }
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(
+      isSubscribed ? GQL_DELETE_OBJECT_SUBSCRIPTION : GQL_CREATE_SUBSCRIPTION,
+      variables
+    )
   }
 }
 
