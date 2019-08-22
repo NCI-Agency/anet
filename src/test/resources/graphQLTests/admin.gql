@@ -1,1 +1,4 @@
-adminSettings { key, value }
+adminSettings {
+  key
+  value
+}

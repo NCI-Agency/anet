@@ -14,8 +14,8 @@ class AvatarEditModal extends Component {
 
   static propTypes = {
     title: PropTypes.string.isRequired,
-    size: PropTypes.string.isRequired,
-    onAvatarUpdate: PropTypes.func.isRequired
+    onAvatarUpdate: PropTypes.func.isRequired,
+    size: PropTypes.string
   }
 
   close = () => {
