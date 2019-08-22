@@ -232,15 +232,13 @@ public class PersonResource {
       throw new WebApplicationException("You can only merge people of the same role",
           Status.NOT_ACCEPTABLE);
     }
-    if (winner.getPosition() != null && copyPosition) {
+
+    if (winner.loadPosition() != null && copyPosition) {
       throw new WebApplicationException("Winner already has a position", Status.NOT_ACCEPTABLE);
     }
 
-    loser.loadPosition();
-    winner.loadPosition();
-
     // Remove the loser from their position.
-    Position loserPosition = loser.getPosition();
+    final Position loserPosition = loser.loadPosition();
     if (loserPosition != null) {
       AnetObjectEngine.getInstance().getPositionDao()
           .removePersonFromPosition(loserPosition.getUuid());

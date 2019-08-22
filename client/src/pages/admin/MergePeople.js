@@ -181,17 +181,14 @@ class MergePeople extends Page {
                   </Row>
                   <Row>
                     <Col md={12}>
-                      {loser &&
-                        !_isEmpty(loser.position) &&
-                        winner &&
-                        _isEmpty(winner.position) && (
+                      {this.canCopyPosition(loser, winner) && (
                         <Field
                           name="copyPosition"
                           component={FieldHelper.renderSpecialField}
                           label={null}
                           widget={
                             <Checkbox inline checked={values.copyPosition}>
-                                Set position on winner to {loser.position.name}
+                              Set position on winner to {loser.position.name}
                             </Checkbox>
                           }
                         />
@@ -323,6 +320,9 @@ class MergePeople extends Page {
     )
   }
 
+  canCopyPosition = (loser, winner) =>
+    loser && !_isEmpty(loser.position) && winner && _isEmpty(winner.position)
+
   onSubmit = (values, form) => {
     return this.save(values, form)
       .then(response => this.onSubmitSuccess(response, values, form))
@@ -348,7 +348,7 @@ class MergePeople extends Page {
     return API.mutation(GQL_MERGE_PEOPLE, {
       winnerUuid: winner.uuid,
       loserUuid: loser.uuid,
-      copyPosition: copyPosition
+      copyPosition: copyPosition && this.canCopyPosition(loser, winner)
     })
   }
 }
