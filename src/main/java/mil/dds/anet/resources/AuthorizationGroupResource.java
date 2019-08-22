@@ -35,7 +35,7 @@ public class AuthorizationGroupResource {
   public AuthorizationGroup getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final AuthorizationGroup t = dao.getByUuid(uuid);
     if (t == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Authorization group not found", Status.NOT_FOUND);
     }
     return t;
   }
@@ -53,7 +53,7 @@ public class AuthorizationGroupResource {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     if (t.getName() == null || t.getName().trim().length() == 0) {
-      throw new WebApplicationException("AuthorizationGroup name must not be empty",
+      throw new WebApplicationException("Authorization group name must not be empty",
           Status.BAD_REQUEST);
     }
     t = dao.insert(t);

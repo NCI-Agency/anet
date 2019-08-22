@@ -40,7 +40,10 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
     this.GQL_CHART_FIELDS = /* GraphQL */ `
       uuid
       engagementDate
-      location { uuid, name }
+      location {
+        uuid
+        name
+      }
     `
     this.VISUALIZATIONS = [
       {

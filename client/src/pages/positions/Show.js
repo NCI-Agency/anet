@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import ConfirmDelete from "components/ConfirmDelete"
@@ -27,6 +28,68 @@ import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 
+const GQL_GET_POSITION = gql`
+  query($uuid: String!) {
+    position(uuid: $uuid) {
+      uuid
+      name
+      type
+      status
+      isSubscribed
+      updatedAt
+      code
+      organization {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      person {
+        uuid
+        name
+        rank
+        role
+      }
+      associatedPositions {
+        uuid
+        name
+        type
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+        organization {
+          uuid
+          shortName
+        }
+      }
+      previousPeople {
+        startTime
+        endTime
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      location {
+        uuid
+        name
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+
+    }
+  }
+`
+const GQL_DELETE_POSITION = gql`
+  mutation($uuid: String!) {
+    deletePosition(uuid: $uuid)
+  }
+`
+
 class BasePositionShow extends Page {
   static propTypes = {
     ...pagePropTypes,
@@ -50,23 +113,9 @@ class BasePositionShow extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-      position(uuid:"${props.match.params.uuid}") {
-        uuid, name, type, status, isSubscribed, updatedAt, code,
-        organization { uuid, shortName, longName, identificationCode },
-        person { uuid, name, rank, role },
-        associatedPositions {
-          uuid, name, type
-          person { uuid, name, rank, role }
-          organization { uuid, shortName }
-        },
-        previousPeople { startTime, endTime, person { uuid, name, rank, role }}
-        location { uuid, name }
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    `
-    ).then(data => this.setState({ position: new Position(data.position) }))
+    return API.query(GQL_GET_POSITION, { uuid: props.match.params.uuid }).then(
+      data => this.setState({ position: new Position(data.position) })
+    )
   }
 
   render() {
@@ -384,11 +433,8 @@ class BasePositionShow extends Page {
   }
 
   onConfirmDelete = () => {
-    const operation = "deletePosition"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
-    const variables = { uuid: this.state.position.uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    const { uuid } = this.state.position
+    API.mutation(GQL_DELETE_POSITION, { uuid })
       .then(data => {
         this.props.history.push({
           pathname: "/",

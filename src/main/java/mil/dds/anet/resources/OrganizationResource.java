@@ -53,7 +53,7 @@ public class OrganizationResource {
   public Organization getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Organization org = dao.getByUuid(uuid);
     if (org == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Organization not found", Status.NOT_FOUND);
     }
     return org;
   }

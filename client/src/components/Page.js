@@ -11,7 +11,6 @@ import API from "api"
 import autobind from "autobind-decorator"
 import { setMessages } from "components/Messages"
 import NotFound from "components/NotFound"
-import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
@@ -140,11 +139,7 @@ export default class Page extends Component {
     document.body.classList.remove("loading")
 
     if (response) {
-      if (
-        response.status === 404 ||
-        (response.status === 500 &&
-          _get(response, ["errors", 0]) === "Invalid Syntax")
-      ) {
+      if (response.status === 404) {
         this.setState({
           notFound: true,
           loadCount: this.decrementRefCount(this.state.loadCount)

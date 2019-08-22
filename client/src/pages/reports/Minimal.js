@@ -1,5 +1,6 @@
 import { PAGE_PROPS_MIN_HEAD } from "actions"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -22,6 +23,165 @@ import { connect } from "react-redux"
 import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 
+const GQL_GET_REPORT = gql`
+  query($uuid: String!) {
+    report(uuid: $uuid) {
+      uuid
+      intent
+      engagementDate
+      duration
+      atmosphere
+      atmosphereDetails
+      keyOutcomes
+      reportText
+      nextSteps
+      cancelledReason
+      releasedAt
+      state
+      location {
+        uuid
+        name
+      }
+      author {
+        uuid
+        name
+        rank
+        role
+        position {
+          uuid
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            approvalSteps {
+              uuid
+              name
+              approvers {
+                uuid
+                name
+                person {
+                  uuid
+                  name
+                  rank
+                  role
+                }
+              }
+            }
+          }
+        }
+      }
+      attendees {
+        uuid
+        name
+        primary
+        rank
+        role
+        status
+        endOfTourDate
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          type
+          code
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+      primaryAdvisor {
+        uuid
+      }
+      primaryPrincipal {
+        uuid
+      }
+      tasks {
+        uuid
+        shortName
+        longName
+        responsibleOrg {
+          uuid
+          shortName
+        }
+      }
+      comments {
+        uuid
+        text
+        createdAt
+        updatedAt
+        author {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      principalOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      advisorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      workflow {
+        type
+        createdAt
+        step {
+          uuid
+          name
+          approvers {
+            uuid
+            name
+            person {
+              uuid
+              name
+              rank
+              role
+            }
+          }
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+        }
+      }
+      approvalStep {
+        uuid
+        name
+        approvers {
+          uuid
+        }
+        nextStepUuid
+      }
+      tags {
+        uuid
+        name
+        description
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+    }
+  }
+`
+
 class ReportMinimal extends Page {
   static propTypes = {
     ...pagePropTypes
@@ -40,73 +200,19 @@ class ReportMinimal extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-      report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
-        keyOutcomes, reportText, nextSteps, cancelledReason
-
-        state
-
-        location { uuid, name }
-        author {
-          uuid, name, rank, role
-          position {
-            organization {
-              shortName, longName, identificationCode
-              approvalSteps {
-                uuid, name,
-                approvers {
-                  uuid, name,
-                  person { uuid, name, rank, role }
-                }
-              }
-            }
-          }
-        }
-
-        attendees {
-          uuid, name, primary, rank, role, status, endOfTourDate
-          position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
-        }
-        primaryAdvisor { uuid }
-        primaryPrincipal { uuid }
-
-        tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-
-        comments {
-          uuid, text, createdAt, updatedAt
-          author { uuid, name, rank, role }
-        }
-
-        principalOrg { uuid, shortName, longName, identificationCode, type }
-        advisorOrg { uuid, shortName, longName, identificationCode, type }
-
-        workflow {
-          type, createdAt
-          step { uuid , name
-            approvers { uuid, name, person { uuid, name, rank, role } }
-          },
-          person { uuid, name, rank, role }
-        }
-
-        approvalStep { name, approvers { uuid }, nextStepUuid }
-
-        tags { uuid, name, description }
-        reportSensitiveInformation { uuid, text }
+    return API.query(GQL_GET_REPORT, { uuid: props.match.params.uuid }).then(
+      data => {
+        data.report.cancelled = !!data.report.cancelledReason
+        const report = new Report(data.report)
+        this.setState({ report })
+        Report.yupSchema
+          .validate(report, { abortEarly: false })
+          .catch(e => this.setState({ validationErrors: e.errors }))
+        Report.yupWarningSchema
+          .validate(report, { abortEarly: false })
+          .catch(e => this.setState({ validationWarnings: e.errors }))
       }
-    `
-    ).then(data => {
-      data.report.cancelled = !!data.report.cancelledReason
-      const report = new Report(data.report)
-      this.setState({ report })
-      Report.yupSchema
-        .validate(report, { abortEarly: false })
-        .catch(e => this.setState({ validationErrors: e.errors }))
-      Report.yupWarningSchema
-        .validate(report, { abortEarly: false })
-        .catch(e => this.setState({ validationWarnings: e.errors }))
-    })
+    )
   }
 
   render() {

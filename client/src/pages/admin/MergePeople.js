@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import * as FieldHelper from "components/FieldHelper"
@@ -19,6 +20,16 @@ import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
 import * as yup from "yup"
+
+const GQL_MERGE_PEOPLE = gql`
+  mutation($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!) {
+    mergePeople(
+      winnerUuid: $winnerUuid
+      loserUuid: $loserUuid
+      copyPosition: $copyPosition
+    )
+  }
+`
 
 class MergePeople extends Page {
   static propTypes = { ...pagePropTypes }
@@ -102,7 +113,6 @@ class MergePeople extends Page {
             const peopleFilters = {
               all: {
                 label: "All",
-                searchQuery: true,
                 queryVars: { matchPositionName: true }
               }
             }
@@ -171,17 +181,14 @@ class MergePeople extends Page {
                   </Row>
                   <Row>
                     <Col md={12}>
-                      {loser &&
-                        !_isEmpty(loser.position) &&
-                        winner &&
-                        _isEmpty(winner.position) && (
+                      {this.canCopyPosition(loser, winner) && (
                         <Field
                           name="copyPosition"
                           component={FieldHelper.renderSpecialField}
                           label={null}
                           widget={
                             <Checkbox inline checked={values.copyPosition}>
-                                Set position on winner to {loser.position.name}
+                              Set position on winner to {loser.position.name}
                             </Checkbox>
                           }
                         />
@@ -313,6 +320,9 @@ class MergePeople extends Page {
     )
   }
 
+  canCopyPosition = (loser, winner) =>
+    loser && !_isEmpty(loser.position) && winner && _isEmpty(winner.position)
+
   onSubmit = (values, form) => {
     return this.save(values, form)
       .then(response => this.onSubmitSuccess(response, values, form))
@@ -335,18 +345,11 @@ class MergePeople extends Page {
 
   save = (values, form) => {
     const { winner, loser, copyPosition } = values
-    const operation = "mergePeople"
-    const graphql =
-      /* GraphQL */ operation +
-      "(winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition)"
-    const variables = {
+    return API.mutation(GQL_MERGE_PEOPLE, {
       winnerUuid: winner.uuid,
       loserUuid: loser.uuid,
-      copyPosition: copyPosition
-    }
-    const variableDef =
-      "($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!)"
-    return API.mutation(graphql, variables, variableDef)
+      copyPosition: copyPosition && this.canCopyPosition(loser, winner)
+    })
   }
 }
 

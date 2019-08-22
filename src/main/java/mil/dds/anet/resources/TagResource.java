@@ -29,7 +29,7 @@ public class TagResource {
   public Tag getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final Tag t = dao.getByUuid(uuid);
     if (t == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Tag not found", Status.NOT_FOUND);
     }
     return t;
   }

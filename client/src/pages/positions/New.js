@@ -1,5 +1,6 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -9,6 +10,18 @@ import React from "react"
 import { connect } from "react-redux"
 import utils from "utils"
 import PositionForm from "./Form"
+
+const GQL_GET_ORGANIZATION = gql`
+  query($uuid: String!) {
+    organization(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+      identificationCode
+      type
+    }
+  }
+`
 
 class PositionNew extends Page {
   static propTypes = {
@@ -28,13 +41,9 @@ class PositionNew extends Page {
     if (qs.organizationUuid) {
       // If an organizationUuid was given in query parameters,
       // then look that org up and pre-populate the field.
-      return API.query(
-        /* GraphQL */ `
-        organization(uuid:"${qs.organizationUuid}") {
-          uuid, shortName, longName, identificationCode, type
-        }
-      `
-      ).then(data => {
+      return API.query(GQL_GET_ORGANIZATION, {
+        uuid: qs.organizationUuid
+      }).then(data => {
         const organization = new Organization(data.organization)
         const position = new Position({
           type: organization.isAdvisorOrg()
