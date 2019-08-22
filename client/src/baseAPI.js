@@ -87,36 +87,39 @@ const BaseAPI = {
   },
 
   _handleError(response) {
+    let result = {}
+    let error
     // When the result returns a list of errors we only show the first one
     if (!_isEmpty(response.graphQLErrors)) {
-      response.error = response.graphQLErrors[0].message
-      if (response.error.endsWith(" not found")) {
+      error = response.graphQLErrors[0].message
+      if (error.endsWith(" not found")) {
         // Unfortunately, with GraphQL errors Apollo Client doesn't provide the HTTP statusCode
-        response.status = 404
+        result.status = 404
       }
     } else if (response.networkError) {
       if (response.networkError.response) {
-        response.status = response.networkError.response.status
-        response.statusText = response.networkError.response.statusText
+        result.status = response.networkError.response.status
+        result.statusText = response.networkError.response.statusText
       } else {
-        response.status = response.networkError.statusCode
-        response.statusText = response.networkError.name
+        result.status = response.networkError.statusCode
+        result.statusText = response.networkError.name
       }
       if (
         response.networkError.result &&
         !_isEmpty(response.networkError.result.errors)
       ) {
-        response.message = response.networkError.result.errors[0].message
-      } else if (response.status === 500) {
-        response.message =
+        error = response.networkError.result.errors[0].message
+      } else if (result.status === 500) {
+        error =
           "An Error occured! Please contact the administrator and let them know what you were doing to get this error"
       }
     }
-    if (_isEmpty(response.message)) {
-      response.message =
-        response.error || "You do not have permissions to perform this action"
-    }
-    return Promise.reject(response)
+    // Try to pick the most specific message
+    result.message =
+      error ||
+      response.message ||
+      "You do not have permissions to perform this action"
+    return Promise.reject(result)
   },
 
   mutation(mutation, variables) {
