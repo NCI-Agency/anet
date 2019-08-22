@@ -1,5 +1,8 @@
 mySubscriptionUpdates(query: {pageSize:0}) {
-  pageNum pageSize totalCount list {
+  pageNum
+  pageSize
+  totalCount
+  list {
     createdAt
     updatedObjectType
     updatedObjectUuid

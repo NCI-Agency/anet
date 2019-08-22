@@ -1,5 +1,8 @@
 mySubscriptions(query: {pageSize:0}) {
-  pageNum pageSize totalCount list {
+  pageNum
+  pageSize
+  totalCount
+  list {
     uuid
     createdAt
     updatedAt

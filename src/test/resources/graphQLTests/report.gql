@@ -11,6 +11,8 @@ report(uuid:"${reportUuid}") {
   cancelledReason
   releasedAt
   state
+  isSubscribed
+  updatedAt
   location {
     uuid
     name

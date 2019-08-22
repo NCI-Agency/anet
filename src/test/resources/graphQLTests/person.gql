@@ -4,6 +4,8 @@ person(uuid:"${personUuid}") {
   rank
   role
   status
+  isSubscribed
+  updatedAt
   emailAddress
   phoneNumber
   domainUsername

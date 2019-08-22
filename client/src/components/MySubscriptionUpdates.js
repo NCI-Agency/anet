@@ -16,7 +16,10 @@ import { hideLoading, showLoading } from "react-redux-loading-bar"
 const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
   query($subscriptionUpdatesQuery: SubscriptionUpdateSearchQueryInput) {
     mySubscriptionUpdates(query: $subscriptionUpdatesQuery) {
-      pageNum pageSize totalCount list {
+      pageNum
+      pageSize
+      totalCount
+      list {
         createdAt
         updatedObjectType
         updatedObjectUuid
