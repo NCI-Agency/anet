@@ -4,11 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
+import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
@@ -24,6 +28,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchSortBy;
+import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
@@ -32,7 +37,7 @@ import org.junit.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
-  private static final String POSITION_FIELDS = "uuid name";
+  private static final String POSITION_FIELDS = "uuid name code type status";
   private static final String PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
@@ -414,8 +419,6 @@ public class PersonResourceTest extends AbstractResourceTest {
         POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(),
         new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(winnerPos.getPerson()).isEqualTo(winner);
-
-
   }
 
   @Test
@@ -468,4 +471,125 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson2.getDomainUsername()).isNull();
     assertThat(retPerson2.getPosition()).isNull();
   }
+
+  @Test
+  public void personCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
+    createPerson(getSuperUser());
+  }
+
+  @Test
+  public void personCreateRegularUserPermissionTest() throws UnsupportedEncodingException {
+    createPerson(getRegularUser());
+  }
+
+  private void createPerson(Person user) {
+    final Position position = user.getPosition();
+    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final Organization organization = position.getOrganization();
+
+    // principal
+    final Person principal = new Person();
+    principal.setName("Namey McNameface");
+    principal.setRole(Role.PRINCIPAL);
+    principal.setStatus(PersonStatus.ACTIVE);
+    principal.setDomainUsername("namey_" + Instant.now().toEpochMilli());
+
+    try {
+      final String pUuid = graphQLHelper.createObject(user, "createPerson", "person", "PersonInput",
+          principal, new TypeReference<GraphQlResponse<Person>>() {});
+      if (isSuperUser) {
+        assertThat(pUuid).isNotNull();
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+
+    // advisor with no position
+    final Person advisorNoPosition = new Person();
+    advisorNoPosition.setName("Namey McNameface");
+    advisorNoPosition.setRole(Role.ADVISOR);
+    advisorNoPosition.setStatus(PersonStatus.ACTIVE);
+    advisorNoPosition.setDomainUsername("namey_" + Instant.now().toEpochMilli());
+
+    try {
+      final String anpUuid = graphQLHelper.createObject(user, "createPerson", "person",
+          "PersonInput", advisorNoPosition, new TypeReference<GraphQlResponse<Person>>() {});
+      if (isSuperUser) {
+        assertThat(anpUuid).isNotNull();
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+
+    // advisor with position in own organization
+    final PositionSearchQuery query = new PositionSearchQuery();
+    query.setOrganizationUuid(organization.getUuid());
+    query.setIsFilled(false);
+    final AnetBeanList<Position> searchObjects = graphQLHelper.searchObjects(user, "positionList",
+        "query", "PositionSearchQueryInput", POSITION_FIELDS, query,
+        new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {});
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getList()).isNotEmpty();
+    final Position freePos = searchObjects.getList().get(0);
+
+    final Person advisorPosition = new Person();
+    advisorPosition.setName("Namey McNameface");
+    advisorPosition.setRole(Role.ADVISOR);
+    advisorPosition.setStatus(PersonStatus.ACTIVE);
+    advisorPosition.setDomainUsername("namey_" + Instant.now().toEpochMilli());
+    advisorPosition.setPosition(freePos);
+
+    try {
+      final String apUuid = graphQLHelper.createObject(user, "createPerson", "person",
+          "PersonInput", advisorPosition, new TypeReference<GraphQlResponse<Person>>() {});
+      if (isSuperUser) {
+        assertThat(apUuid).isNotNull();
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+
+    // advisor with position in other organization
+    final PositionSearchQuery query2 = new PositionSearchQuery();
+    final List<PositionType> positionTypes = new ArrayList<>();
+    positionTypes.add(PositionType.ADVISOR);
+    query2.setType(positionTypes);
+    query2.setIsFilled(false);
+    final AnetBeanList<Position> searchObjects2 = graphQLHelper.searchObjects(user, "positionList",
+        "query", "PositionSearchQueryInput", POSITION_FIELDS, query2,
+        new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {});
+    assertThat(searchObjects2).isNotNull();
+    assertThat(searchObjects2.getList()).isNotEmpty();
+    final Optional<Position> foundPos2 = searchObjects2.getList().stream()
+        .filter(p -> !organization.getUuid().equals(p.getOrganizationUuid())).findFirst();
+    assertThat(foundPos2.isPresent()).isTrue();
+    final Position freePos2 = foundPos2.get();
+
+    final Person advisorPosition2 = new Person();
+    advisorPosition2.setName("Namey McNameface");
+    advisorPosition2.setRole(Role.ADVISOR);
+    advisorPosition2.setStatus(PersonStatus.ACTIVE);
+    advisorPosition2.setDomainUsername("namey_" + Instant.now().toEpochMilli());
+    advisorPosition2.setPosition(freePos2);
+
+    try {
+      graphQLHelper.createObject(user, "createPerson", "person", "PersonInput", advisorPosition2,
+          new TypeReference<GraphQlResponse<Person>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+  }
+
 }

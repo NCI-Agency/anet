@@ -4,16 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -362,4 +365,65 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(listAll.getTotalCount()).isEqualTo(list1.getTotalCount());
     assertThat(listAll.getTotalCount()).isEqualTo(listAll.getList().size());
   }
+
+  @Test
+  public void organizationCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
+    createOrganization(getSuperUser());
+  }
+
+  @Test
+  public void organizationCreateRegularUserPermissionTest() throws UnsupportedEncodingException {
+    createOrganization(getRegularUser());
+  }
+
+  private void createOrganization(Person user) {
+    final Organization o = OrganizationTest.getTestAO(true);
+    try {
+      graphQLHelper.createObject(user, "createOrganization", "organization", "OrganizationInput", o,
+          new TypeReference<GraphQlResponse<Organization>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+  }
+
+  @Test
+  public void organizationUpdateSuperUserPermissionTest() throws UnsupportedEncodingException {
+    updateOrganization(getRegularUser());
+  }
+
+  @Test
+  public void organizationUpdateRegularUserPermissionTest() throws UnsupportedEncodingException {
+    updateOrganization(getRegularUser());
+  }
+
+  private void updateOrganization(Person user) {
+    final Position position = user.getPosition();
+    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final Organization organization = position.getOrganization();
+
+    // own organization
+    try {
+      final Integer nrUpdated = graphQLHelper.updateObject(user, "updateOrganization",
+          "organization", "OrganizationInput", organization);
+      if (isSuperUser) {
+        assertThat(nrUpdated).isEqualTo(1);
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+
+    // other organization
+    final Organization o = OrganizationTest.getTestAO(true);
+    try {
+      graphQLHelper.updateObject(user, "updateOrganization", "organization", "OrganizationInput",
+          o);
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+  }
+
 }

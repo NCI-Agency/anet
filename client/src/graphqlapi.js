@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 
 class GraphQLPart {
   constructor(queryString) {
@@ -19,10 +20,9 @@ class GraphQLPart {
 
 const GQL = {
   // Pass a variable number of GraphQLQuery to run
-  _runCommon(parts, apiCall, output) {
-    let query = parts.map(p => p.queryString).join(",\n")
+  _combine(parts) {
+    const query = parts.map(p => p.queryString).join("\n")
     let variables = {}
-    let variableDef
     let variableDefs = []
     parts.forEach(part => {
       part.variables.forEach(variable => {
@@ -30,19 +30,25 @@ const GQL = {
         variableDefs.push(`$${variable.name}: ${variable.type}`)
       })
     })
-    if (variableDefs.length) {
-      variableDef = "(" + variableDefs.join(", ") + ")"
-    }
-
-    return apiCall(query, variables, variableDef, output)
+    const variableDef = variableDefs.length
+      ? "(" + variableDefs.join(", ") + ")"
+      : ""
+    return { query, variables, variableDef }
   },
 
   run(parts) {
-    return this._runCommon(parts, API.query)
+    const { query, variables, variableDef } = this._combine(parts)
+    const graphql = gql`
+      query ${variableDef} {
+        ${query}
+      }
+    `
+    return API.query(graphql, variables)
   },
 
   runExport(parts, output) {
-    return this._runCommon(parts, API.queryExport, output)
+    const { query, variables } = this._combine(parts)
+    return API.queryExport(query, variables, output)
   },
 
   Part: GraphQLPart

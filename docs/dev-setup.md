@@ -97,11 +97,7 @@ To log in as one of the base data users, when prompted for a username and passwo
    - You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
    - You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Run `./gradlew run` to run the server via Gradle, or hit Run in Eclipse
-   - If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can ignore exceptions like the following, because the SMTP server is not necessary for local development:
-    ```
-    ERROR [2017-02-10 16:39:38,044] mil.dds.anet.AnetEmailWorker: Sending email to [hunter+liz@dds.mil] re: ANET Report Approved
-    javax.mail.MessagingException: Unknown SMTP host: ${ANET_SMTP_SERVER};
-    ```
+   - If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
    - The following output indicates that the server is ready:
     ```
     INFO  [2017-02-10 16:44:59,902] org.eclipse.jetty.server.Server: Started @4098ms
@@ -151,7 +147,8 @@ _Note_: You can run the backend with either `gradle` or with Eclipse. Eclipse do
        - `ANET_DB_DRIVER` : `org.postgresql.Driver`
 
 ### Server side tests
-1. Start with a clean test-database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. Run the server side tests with a clean build: `./gradlew -PtestEnv cleanTest test`
 
 ### Client-side tests
@@ -162,7 +159,8 @@ This driver can either run the tests locally on your system, or remotely via [Br
 The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-mssql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
 #### Prerequisites
-1. Start with a clean test-database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
 
 Run `yarn run lint-fix` to automatically fix some kinds of lint errors.

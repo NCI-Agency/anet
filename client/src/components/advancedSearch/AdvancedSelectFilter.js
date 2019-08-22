@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import _isEqualWith from "lodash/isEqualWith"
@@ -98,14 +99,16 @@ export default class AdvancedSelectFilter extends Component {
   deserialize(query, key) {
     if (query[this.props.queryKey]) {
       const getInstanceName = this.props.objectType.getInstanceName
-      const graphQlQuery =
-        getInstanceName +
-        '(uuid:"' +
-        query[this.props.queryKey] +
-        '") { ' +
-        this.props.fields +
-        "}"
-      return API.query(graphQlQuery).then(data => {
+      return API.query(
+        gql`
+          query($uuid: String!) {
+            ${getInstanceName}(uuid: $uuid) {
+              ${this.props.fields}
+            }
+          }
+        `,
+        { uuid: query[this.props.queryKey] }
+      ).then(data => {
         if (data[getInstanceName]) {
           const toQueryValue = {
             [this.props.queryKey]: query[this.props.queryKey]

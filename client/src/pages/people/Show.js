@@ -1,4 +1,5 @@
-import { Settings } from "api"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPositionModal from "components/AssignPositionModal"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
@@ -16,7 +17,6 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
-import GQL from "graphqlapi"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
@@ -31,6 +31,60 @@ import {
   FORMAT_TABLE,
   FORMAT_CALENDAR
 } from "components/ReportCollection"
+
+const GQL_GET_PERSON = gql`
+  query($uuid: String!) {
+    person(uuid: $uuid) {
+      uuid
+      name
+      rank
+      role
+      status
+      emailAddress
+      phoneNumber
+      domainUsername
+      biography
+      country
+      gender
+      endOfTourDate
+      avatar(size: 256)
+      position {
+        uuid
+        name
+        type
+        organization {
+          uuid
+          shortName
+          identificationCode
+        }
+        associatedPositions {
+          uuid
+          name
+          type
+          person {
+            uuid
+            name
+            rank
+            role
+          }
+          organization {
+            uuid
+            shortName
+          }
+        }
+      }
+      previousPositions {
+        startTime
+        endTime
+        position {
+          uuid
+          name
+        }
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 class BasePersonShow extends Page {
   static propTypes = {
@@ -55,32 +109,11 @@ class BasePersonShow extends Page {
   }
 
   fetchData(props) {
-    let personPart = new GQL.Part(/* GraphQL */ `
-      person(uuid:"${props.match.params.uuid}") {
-        uuid,
-        name, rank, role, status, emailAddress, phoneNumber, domainUsername,
-        biography, country, gender, endOfTourDate, avatar(size: 256),
-        position {
-          uuid,
-          name,
-          type,
-          organization {
-            uuid, shortName, identificationCode
-          },
-          associatedPositions {
-            uuid, name, type
-            person { uuid, name, rank, role },
-            organization { uuid, shortName }
-          }
-        }
-        previousPositions { startTime, endTime, position { uuid, name }}
-        ${GRAPHQL_NOTES_FIELDS}
-    }`)
-
-    return GQL.run([personPart]).then(data =>
-      this.setState({
-        person: new Person(data.person)
-      })
+    return API.query(GQL_GET_PERSON, { uuid: props.match.params.uuid }).then(
+      data =>
+        this.setState({
+          person: new Person(data.person)
+        })
     )
   }
 

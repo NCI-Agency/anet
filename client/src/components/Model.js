@@ -6,10 +6,27 @@ import utils from "utils"
 import * as yup from "yup"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
-  uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
+  uuid
+  createdAt
+  updatedAt
+  type
+  text
+  author {
+    uuid
+    name
+    rank
+    role
+  }
+  noteRelatedObjects {
+    noteUuid
+    relatedObjectType
+    relatedObjectUuid
+  }
 `
 export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
-  notes { ${GRAPHQL_NOTE_FIELDS} }
+  notes {
+    ${GRAPHQL_NOTE_FIELDS}
+  }
 `
 export const NOTE_TYPE = {
   FREE_TEXT: "FREE_TEXT",

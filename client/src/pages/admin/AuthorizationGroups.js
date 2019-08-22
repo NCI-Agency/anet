@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import Page, {
   mapDispatchToProps,
@@ -7,6 +8,24 @@ import Page, {
 import React from "react"
 import { connect } from "react-redux"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+
+const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
+  query($query: AuthorizationGroupSearchQueryInput) {
+    authorizationGroupList(query: $query) {
+      list {
+        uuid
+        name
+        description
+        positions {
+          uuid
+          name
+          type
+        }
+        status
+      }
+    }
+  }
+`
 
 class AuthorizationGroups extends Page {
   static propTypes = { ...pagePropTypes }
@@ -23,14 +42,7 @@ class AuthorizationGroups extends Page {
     const query = {
       pageSize: 0 // retrieve all
     }
-    return API.query(
-      /* GraphQL */ `
-      authorizationGroupList(query:$query) {
-        list { uuid, name, description, positions { uuid, name, type }, status }
-      }`,
-      { query },
-      "($query: AuthorizationGroupSearchQueryInput)"
-    ).then(data => {
+    return API.query(GQL_GET_AUTHORIZATION_GROUP_LIST, { query }).then(data => {
       this.setState({ authorizationGroups: data.authorizationGroupList.list })
     })
   }

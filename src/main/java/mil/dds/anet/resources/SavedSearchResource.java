@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.security.PermitAll;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -19,7 +18,6 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
-@PermitAll
 public class SavedSearchResource {
 
   private final SavedSearchDao dao;

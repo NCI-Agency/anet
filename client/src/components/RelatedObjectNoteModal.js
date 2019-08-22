@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
 import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
@@ -8,6 +9,21 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Modal } from "react-bootstrap"
 import * as yup from "yup"
+
+const GQL_CREATE_NOTE = gql`
+  mutation($note: NoteInput!) {
+    createNote(note: $note) {
+      ${GRAPHQL_NOTE_FIELDS}
+    }
+  }
+`
+const GQL_UPDATE_NOTE = gql`
+  mutation($note: NoteInput!) {
+    updateNote(note: $note) {
+      ${GRAPHQL_NOTE_FIELDS}
+    }
+  }
+`
 
 export default class RelatedObjectNoteModal extends Component {
   static propTypes = {
@@ -141,22 +157,17 @@ export default class RelatedObjectNoteModal extends Component {
 
   save = (values, form) => {
     const edit = !!this.props.note.uuid
-    const operation = edit ? "updateNote" : "createNote"
-    const graphql =
-      /* GraphQL */ operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
-    const newNote = {
+    const note = {
       type: values.type,
       noteRelatedObjects: values.noteRelatedObjects,
       text: values.text
     }
-    const isJson = newNote.type !== NOTE_TYPE.FREE_TEXT
+    const isJson = note.type !== NOTE_TYPE.FREE_TEXT
     if (isJson) {
       const { type, noteRelatedObjects, ...jsonFields } = values
-      newNote.text = JSON.stringify(jsonFields)
+      note.text = JSON.stringify(jsonFields)
     }
-    const variables = { note: newNote }
-    const variableDef = "($note: NoteInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, { note })
   }
 
   close = () => {
