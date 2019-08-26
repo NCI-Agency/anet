@@ -13668,10 +13668,10 @@ responselike@^1.0.2:
   dependencies:
     lowercase-keys "^1.0.0"
 
-resq@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/resq/-/resq-1.5.0.tgz#a5f238e0c90f4e32ad0bfe3f36f041fae8b90f1d"
-  integrity sha512-6US6oo2fQ/vgs7wBwqq1w9901Z5VEDgxQH0LrNaN8HcHUZInhtrIt1a0Icysu0vuoK26Bt+SR1dIYeR9+ftMxA==
+resq@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/resq/-/resq-1.6.0.tgz#c7b87cbf5b47bdbe1b5e251ed080ea72f509f75f"
+  integrity sha512-8A4CsNY52RoSU4rpSfnEGPK2mkMO9kz0hi+SYhbKnSq7AFYxZFPTb2C7u6aEchD3vzFjotuCLnDfS81K/UsAmg==
   dependencies:
     fast-deep-equal "^2.0.1"
 
@@ -15662,10 +15662,10 @@ webdriver@^5.12.1:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@^5.12.1:
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.12.1.tgz#b1a4b600fa8337b5433efa9aa205a81a554e76ba"
-  integrity sha512-ZeNRP0KO4y84APKsLdCJZctW41Pm3CQ3Ve2+ZJsM3Z6TthJ3O+egZMirhB41gZBc1XraD9fjZxtQUHVl1NCMEw==
+webdriverio@^5.12.1, webdriverio@^5.12.4:
+  version "5.12.4"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.12.4.tgz#4bf90196fe26c5136313f9454825fd6c36809c7b"
+  integrity sha512-sWcno6mSyGpL/DFPE3UxRvKIKlU6OEs9bCJoLhR7vz9aHcRqvethJVRhN2YybGQw80J3ZhusohKr66m/SM33Qg==
   dependencies:
     "@wdio/config" "^5.12.1"
     "@wdio/logger" "^5.12.1"
@@ -15677,7 +15677,7 @@ webdriverio@^5.12.1:
     lodash.isobject "^3.0.2"
     lodash.isplainobject "^4.0.6"
     lodash.zip "^4.2.0"
-    resq "^1.5.0"
+    resq "^1.6.0"
     rgb2hex "^0.1.0"
     serialize-error "^4.1.0"
     webdriver "^5.12.1"
