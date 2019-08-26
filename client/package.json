@@ -81,7 +81,7 @@
     "selenium-webdriver": "^4.0.0-alpha.4",
     "style-loader": "^1.0.0",
     "threads": "^0.12.0",
-    "uuid": "^3.3.2",
+    "uuid": "^3.3.3",
     "wdio-chromedriver-service": "^5.0.2",
     "webdriverio": "^5.12.1",
     "webpack": "^4.39.2",
