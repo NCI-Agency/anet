@@ -129,7 +129,7 @@ const BaseAPI = {
       .catch(BaseAPI._handleError)
   },
 
-  query(query, variables, variableDef, params) {
+  query(query, variables) {
     return client
       .query({ query, variables })
       .then(BaseAPI._handleSuccess)
