@@ -153,10 +153,12 @@ class BaseTaskShow extends Page {
                     component={FieldHelper.renderReadonlyField}
                   />
 
-                  {/* TODO: replace with a generic component, but do not use componentClass textarea */}
-                  <Field
+                  {/* Override componentClass and style from dictProps */}
+                  <this.LongNameField
+                    dictProps={Settings.fields.task.longName}
+                    componentClass="div"
+                    style={{}}
                     name="longName"
-                    label={Settings.fields.task.longName.label}
                     component={FieldHelper.renderReadonlyField}
                   />
 
