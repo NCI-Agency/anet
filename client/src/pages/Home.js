@@ -384,9 +384,7 @@ class BaseHome extends Page {
       filters: filters,
       text: text
     })
-    this.props.history.push({
-      pathname: "/search"
-    })
+    this.props.history.push("/search")
   }
 
   onConfirmDelete = () => {

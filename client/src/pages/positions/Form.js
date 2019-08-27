@@ -339,12 +339,13 @@ class BasePositionForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.props.history.replace(Position.pathForEdit(position))
-    this.props.history.push({
-      pathname: Position.pathFor(position),
-      state: {
-        success: "Position saved"
-      }
+    if (!edit) {
+      this.props.history.replace(Position.pathForEdit(position), {
+        noRender: true
+      })
+    }
+    this.props.history.push(Position.pathFor(position), {
+      success: "Position saved"
     })
   }
 
