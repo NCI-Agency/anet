@@ -561,9 +561,7 @@ class BasePersonForm extends Component {
       localStorage.clear()
       localStorage.newUser = "true"
       this.props.loadAppData()
-      this.props.history.push({
-        pathname: "/"
-      })
+      this.props.history.push("/")
     } else {
       // After successful submit, reset the form in order to make sure the dirty
       // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -578,12 +576,13 @@ class BasePersonForm extends Component {
       if (Person.isEqual(this.props.currentUser, values)) {
         this.props.loadAppData()
       }
-      this.props.history.replace(Person.pathForEdit(person))
-      this.props.history.push({
-        pathname: Person.pathFor(person),
-        state: {
-          success: "Person saved"
-        }
+      if (!edit) {
+        this.props.history.replace(Person.pathForEdit(person), {
+          noRender: true
+        })
+      }
+      this.props.history.push(Person.pathFor(person), {
+        success: "Person saved"
       })
     }
   }

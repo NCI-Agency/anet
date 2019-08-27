@@ -416,11 +416,13 @@ class BaseTaskForm extends Component {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     this.props.history.replace(Task.pathForEdit(task))
-    this.props.history.push({
-      pathname: Task.pathFor(task),
-      state: {
-        success: "Task saved"
-      }
+    if (!edit) {
+      this.props.history.replace(Task.pathForEdit(task), {
+        noRender: true
+      })
+    }
+    this.props.history.push(Task.pathFor(task), {
+      success: "Task saved"
     })
   }
 

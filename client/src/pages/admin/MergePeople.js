@@ -336,9 +336,8 @@ class MergePeople extends Page {
 
   onSubmitSuccess = (response, values, form) => {
     if (response.mergePeople) {
-      this.props.history.push({
-        pathname: Person.pathFor(values.winner),
-        state: { success: "People merged" }
+      this.props.history.push(Person.pathFor(values.winner), {
+        success: "People merged"
       })
     }
   }
