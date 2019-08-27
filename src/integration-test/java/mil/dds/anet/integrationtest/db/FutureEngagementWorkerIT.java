@@ -17,8 +17,8 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
-import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportAction;
+import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.integrationtest.config.AnetITConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
@@ -49,7 +49,8 @@ public class FutureEngagementWorkerIT {
   public static void setUpClass() throws Exception {
     executeEmailServerTests = Boolean.parseBoolean(
         AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
-    whitelistedEmail = "test@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
+    whitelistedEmail =
+        "test@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
     engine = new AnetObjectEngine(app.getConfiguration().getDataSourceFactory().getUrl(),
         app.getApplication());
