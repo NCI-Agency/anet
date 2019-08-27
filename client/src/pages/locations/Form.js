@@ -198,7 +198,11 @@ class LocationForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.props.history.replace(Location.pathForEdit(location))
+    if (!edit) {
+      this.props.history.replace(Location.pathForEdit(location), {
+        noRender: true
+      })
+    }
     this.props.history.push({
       pathname: Location.pathFor(location),
       state: {

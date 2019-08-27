@@ -101,6 +101,10 @@ export default class Page extends Component {
 
   @autobind
   loadData() {
+    if (this.props.location.state && this.props.location.state.noRender) {
+      // Called e.g. because of `history.replace` that will immediately be followed by `history.push`
+      return
+    }
     this.setState({
       notFound: false,
       invalidRequest: false,
@@ -154,6 +158,10 @@ export default class Page extends Component {
   }
 
   render() {
+    if (this.props.location.state && this.props.location.state.noRender) {
+      // Called e.g. because of `history.replace` that will immediately be followed by `history.push`
+      return null
+    }
     if (this.state.loadCount !== 0) {
       return null
     }

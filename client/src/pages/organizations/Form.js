@@ -577,7 +577,11 @@ class BaseOrganizationForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.props.history.replace(Organization.pathForEdit(organization))
+    if (!edit) {
+      this.props.history.replace(Organization.pathForEdit(organization), {
+        noRender: true
+      })
+    }
     this.props.history.push({
       pathname: Organization.pathFor(organization),
       state: {

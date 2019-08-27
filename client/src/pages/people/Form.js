@@ -578,7 +578,11 @@ class BasePersonForm extends Component {
       if (Person.isEqual(this.props.currentUser, values)) {
         this.props.loadAppData()
       }
-      this.props.history.replace(Person.pathForEdit(person))
+      if (!edit) {
+        this.props.history.replace(Person.pathForEdit(person), {
+          noRender: true
+        })
+      }
       this.props.history.push({
         pathname: Person.pathFor(person),
         state: {

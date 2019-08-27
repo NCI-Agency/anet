@@ -990,7 +990,11 @@ class BaseReportForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     resetForm()
-    this.props.history.replace(Report.pathForEdit(report))
+    if (!edit) {
+      this.props.history.replace(Report.pathForEdit(report), {
+        noRender: true
+      })
+    }
     this.props.history.push({
       pathname: Report.pathFor(report),
       state: {
