@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   AuthorizationGroupOverlayRow,
@@ -34,6 +35,102 @@ import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+
+const GQL_GET_RECENTS = gql`
+  query($tagQuery: TagSearchQueryInput) {
+    locationRecents(maxResults: 6) {
+      list {
+        uuid
+        name
+      }
+    }
+    personRecents(maxResults: 6) {
+      list {
+        uuid
+        name
+        rank
+        role
+        status
+        endOfTourDate
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          type
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+    }
+    taskRecents(maxResults: 6) {
+      list {
+        uuid
+        shortName
+        longName
+        responsibleOrg {
+          uuid
+          shortName
+        }
+      }
+    }
+    authorizationGroupRecents(maxResults: 6) {
+      list {
+        uuid
+        name
+        description
+      }
+    }
+    tagList(query: $tagQuery) {
+      list {
+        uuid
+        name
+        description
+      }
+    }
+  }
+`
+const GQL_CREATE_REPORT = gql`
+  mutation($report: ReportInput!) {
+    createReport(report: $report) {
+      uuid
+      state
+      author {
+        uuid
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+    }
+  }
+`
+const GQL_UPDATE_REPORT = gql`
+  mutation($report: ReportInput!, $sendEditEmail: Boolean!) {
+    updateReport(report: $report, sendEditEmail: $sendEditEmail) {
+      uuid
+      state
+      author {
+        uuid
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+    }
+  }
+`
+const GQL_DELETE_REPORT = gql`
+  mutation($uuid: String!) {
+    deleteReport(uuid: $uuid)
+  }
+`
 
 class BaseReportForm extends Component {
   static propTypes = {
@@ -121,26 +218,7 @@ class BaseReportForm extends Component {
     const tagQuery = {
       pageSize: 0 // retrieve all
     }
-    API.query(
-      /* GraphQL */ `
-      locationRecents(maxResults:6) {
-        list { uuid, name }
-      }
-      personRecents(maxResults:6) {
-        list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
-      }
-      taskRecents(maxResults:6) {
-        list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-      }
-      authorizationGroupRecents(maxResults:6) {
-        list { uuid, name, description }
-      }
-      tagList(query:$tagQuery) {
-        list { uuid, name, description }
-      }`,
-      { tagQuery },
-      "($tagQuery: TagSearchQueryInput)"
-    ).then(data => {
+    API.query(GQL_GET_RECENTS, { tagQuery }).then(data => {
       const newState = {
         recents: {
           locations: data.locationRecents.list,
@@ -200,7 +278,6 @@ class BaseReportForm extends Component {
           const locationFilters = {
             activeLocations: {
               label: "Active locations",
-              searchQuery: true,
               queryVars: { status: Location.STATUS.ACTIVE }
             }
           }
@@ -208,24 +285,20 @@ class BaseReportForm extends Component {
           const attendeesFilters = {
             all: {
               label: "All",
-              searchQuery: true,
               queryVars: { matchPositionName: true }
             },
             activeAdvisors: {
               label: "All advisors",
-              searchQuery: true,
               queryVars: { role: Person.ROLE.ADVISOR, matchPositionName: true }
             },
             activePrincipals: {
               label: "All principals",
-              searchQuery: true,
               queryVars: { role: Person.ROLE.PRINCIPAL }
             }
           }
           if (this.props.currentUser.position) {
             attendeesFilters.myColleagues = {
               label: "My colleagues",
-              searchQuery: true,
               queryVars: {
                 role: Person.ROLE.ADVISOR,
                 matchPositionName: true,
@@ -234,7 +307,6 @@ class BaseReportForm extends Component {
             }
             attendeesFilters.myCounterparts = {
               label: "My counterparts",
-              searchQuery: false,
               list: this.props.currentUser.position.associatedPositions
                 .filter(ap => ap.person)
                 .map(ap => ap.person)
@@ -243,7 +315,6 @@ class BaseReportForm extends Component {
           if (values.location && values.location.uuid) {
             attendeesFilters.atLocation = {
               label: `At ${values.location.name}`,
-              searchQuery: true,
               queryVars: {
                 locationUuid:
                   values.location && values.location.uuid
@@ -256,13 +327,12 @@ class BaseReportForm extends Component {
           const tasksFilters = {
             allTasks: {
               label: "All tasks",
-              searchQuery: true
+              queryVars: {}
             }
           }
           if (this.props.currentUser.position) {
             tasksFilters.assignedToMyOrg = {
               label: "Assigned to my organization",
-              searchQuery: true,
               queryVars: {
                 responsibleOrgUuid: this.props.currentUser.position.organization
                   .uuid
@@ -282,7 +352,6 @@ class BaseReportForm extends Component {
           ) {
             tasksFilters.assignedToReportOrg = {
               label: "Assigned to organization of report",
-              searchQuery: true,
               queryVars: {
                 responsibleOrgUuid: primaryAdvisor.position.organization.uuid
               }
@@ -292,7 +361,7 @@ class BaseReportForm extends Component {
           const authorizationGroupsFilters = {
             allAuthorizationGroups: {
               label: "All authorization groups",
-              searchQuery: true
+              queryVars: {}
             }
           }
           // need up-to-date copies of these in the autosave handler
@@ -538,7 +607,6 @@ class BaseReportForm extends Component {
                       />
                     }
                     overlayColumns={[
-                      "Avatar",
                       "Name",
                       "Position",
                       "Location",
@@ -869,11 +937,7 @@ class BaseReportForm extends Component {
   }
 
   onConfirmDelete = (uuid, resetForm) => {
-    const operation = "deleteReport"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
-    const variables = { uuid: uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
         // After successful delete, reset the form in order to make sure the dirty
         // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -925,10 +989,9 @@ class BaseReportForm extends Component {
   }
 
   save = (values, sendEmail) => {
-    let report = new Report(values)
-    const attendees = report.attendees
-    report = Object.without(
-      report,
+    const report = Object.without(
+      new Report(values),
+      "notes",
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
@@ -955,28 +1018,16 @@ class BaseReportForm extends Component {
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = attendees.map(a =>
+    report.attendees = values.attendees.map(a =>
       Object.without(a, "firstName", "lastName", "position", "_loaded")
     )
     report.location = utils.getReference(report.location)
     const edit = this.isEditMode(values)
-    const operation = edit ? "updateReport" : "createReport"
-    let graphql =
-      /* GraphQL */ operation +
-      "(report: $report" +
-      (edit ? ", sendEditEmail: $sendEditEmail" : "") +
-      ")"
-    graphql +=
-      "{ uuid state author { uuid } reportSensitiveInformation { uuid text } }"
-    const variables = { report: report }
+    const variables = { report }
     if (edit) {
       variables.sendEditEmail = sendEmail
     }
-    const variableDef =
-      "($report: ReportInput!" +
-      (edit ? ", $sendEditEmail: Boolean!" : "") +
-      ")"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
   }
 }
 

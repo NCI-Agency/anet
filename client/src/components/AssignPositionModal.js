@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
@@ -11,6 +12,17 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+
+const GQL_DELETE_PERSON_FROM_POSITION = gql`
+  mutation($uuid: String!) {
+    deletePersonFromPosition(uuid: $uuid)
+  }
+`
+const GQL_PUT_PERSON_IN_POSITION = gql`
+  mutation($uuid: String!, $person: PersonInput!) {
+    putPersonInPosition(uuid: $uuid, person: $person)
+  }
+`
 
 class BaseAssignPositionModal extends Component {
   static propTypes = {
@@ -64,7 +76,6 @@ class BaseAssignPositionModal extends Component {
     const positionsFilters = {
       allAdvisorPositions: {
         label: "All",
-        searchQuery: true,
         queryVars: positionSearchQuery
       }
     }
@@ -109,7 +120,7 @@ class BaseAssignPositionModal extends Component {
                   objectType={Position}
                   valueKey="name"
                   fields={
-                    "uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role }"
+                    "uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
                   }
                   addon={POSITIONS_ICON}
                   vertical
@@ -164,20 +175,20 @@ class BaseAssignPositionModal extends Component {
 
   @autobind
   save() {
-    let graphql = /* GraphQL */ "deletePersonFromPosition(uuid: $uuid)"
-    let variables = {
-      uuid: this.props.person.position.uuid
-    }
-    let variableDef = "($uuid: String!)"
-    if (this.state.position !== null) {
-      graphql = "putPersonInPosition(uuid: $uuid, person: $person)"
+    let graphql, variables
+    if (this.state.position === null) {
+      graphql = GQL_DELETE_PERSON_FROM_POSITION
+      variables = {
+        uuid: this.props.person.position.uuid
+      }
+    } else {
+      graphql = GQL_PUT_PERSON_IN_POSITION
       variables = {
         uuid: this.state.position.uuid,
         person: { uuid: this.props.person.uuid }
       }
-      variableDef = "($uuid: String!, $person: PersonInput!)"
     }
-    API.mutation(graphql, variables, variableDef)
+    API.mutation(graphql, variables)
       .then(data => this.props.onSuccess())
       .catch(error => {
         this.setState({ error: error })

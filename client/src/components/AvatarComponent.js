@@ -29,38 +29,33 @@ export default class AvatarComponent extends React.Component {
   }
 
   render() {
-    let previewImage = null
-    if (this.props.showPreview) {
-      previewImage = (
-        <div style={{ float: "left" }}>
-          <div style={{ fontWeight: "bold" }}>Preview</div>
-          <img src={this.state.preview} alt="Preview" />
-        </div>
-      )
-    }
+    let previewImage = this.props.showPreview && (
+      <div style={{ float: "left" }}>
+        <div style={{ fontWeight: "bold" }}>Preview</div>
+        <img src={this.state.preview} alt="Preview" />
+      </div>
+    )
 
-    let image = null
-
-    if (this.props.editCurrent) {
-      image =
-        this.props.src == null || this.props.src === ""
-          ? DEFAULT_AVATAR
-          : "data:image/jpeg;base64," + this.props.src
-    }
+    let image =
+      this.props.editCurrent &&
+      (this.props.src == null || this.props.src === ""
+        ? DEFAULT_AVATAR
+        : "data:image/jpeg;base64," + this.props.src)
 
     return (
-      <div style={{ display: "inline", margin: "auto" }}>
-        <div style={{ float: "rigth" }}>
-          <Avatar
-            onCrop={this.onCrop}
-            onClose={this.onClose}
-            src={image}
-            width={"512"}
-            height={"512"}
-          />
-          {previewImage}
-        </div>
-      </div>
+      <span style={{ margin: "0 auto", display: "table", overflow: "scroll" }}>
+        <Avatar
+          onCrop={this.onCrop}
+          onClose={this.onClose}
+          src={image}
+          shadingColor="white"
+          closeIconColor="black"
+          backgroundColor="white"
+          imageWidth="512" // image
+          width="512" // editor
+        />
+        {previewImage}
+      </span>
     )
   }
 }

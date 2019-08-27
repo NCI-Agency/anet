@@ -1,97 +1,71 @@
 import querystring from "querystring"
+import ApolloClient from "apollo-boost"
+import { InMemoryCache } from "apollo-cache-inmemory"
+import _isEmpty from "lodash/isEmpty"
+
+const GRAPHQL_ENDPOINT = "/graphql"
+const LOGGING_ENDPOINT = "/api/logging/log"
+const client = new ApolloClient({
+  uri: GRAPHQL_ENDPOINT,
+  cache: new InMemoryCache({
+    addTypename: false,
+    dataIdFromObject: object => object.uuid || null
+  }),
+  fetchOptions: {
+    credentials: "same-origin"
+  },
+  request: operation => {
+    let headers = {
+      Accept: "application/json"
+    }
+    const authHeader = BaseAPI._getAuthHeader()
+    if (authHeader) {
+      headers[authHeader[0]] = authHeader[1]
+    }
+    operation.setContext({ headers })
+  }
+})
+// Have to initialise this after creating the client
+// (see https://github.com/apollographql/apollo-client/issues/3900)
+client.defaultOptions = {
+  query: {
+    fetchPolicy: "no-cache"
+  },
+  watchQuery: {
+    fetchPolicy: "no-cache"
+  },
+  mutate: {
+    fetchPolicy: "no-cache"
+  }
+}
 
 const BaseAPI = {
-  _fetch(pathName, params, accept) {
-    params = params || {}
-    params.credentials = "same-origin"
+  _fetch(url, data, accept) {
+    const params = {
+      method: "POST",
+      body: JSON.stringify(data),
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: accept || "application/json"
+      }
+    }
 
-    params.headers = params.headers || {}
-    params.headers.Accept = accept || "application/json"
     const authHeader = BaseAPI._getAuthHeader()
     if (authHeader) {
       params.headers[authHeader[0]] = authHeader[1]
     }
 
-    return window.fetch(pathName, params).then(response => {
-      let isOk = response.ok
-      if (response.headers.get("content-type") === "application/json") {
-        let respBody = response.json()
-        if (!isOk) {
-          return respBody.then(r => {
-            // When the result returns a list of errors we only show the first one
-            if (r.errors) {
-              r.error = r.errors[0].message
-            }
-            r.status = response.status
-            r.statusText = response.statusText
-            if (!r.message) {
-              r.message =
-                r.error || "You do not have permissions to perform this action"
-            }
-            return Promise.reject(r)
-          })
-        }
-        return respBody
-      }
-
-      if (!isOk) {
-        if (response.status === 500) {
-          response.message =
-            "An Error occured! Please contact the administrator and let them know what you were doing to get this error"
-        }
-        response = Promise.reject(response)
-      }
-
-      return response
-    })
+    return window.fetch(url, params)
   },
 
-  _send(url, data, params) {
-    params = params || {}
-    params.method = params.method || "POST"
-    params.body = JSON.stringify(data)
-
-    params.headers = params.headers || {}
-    params.headers["Content-Type"] = "application/json"
-
-    return BaseAPI._fetch(url, params)
-  },
-
-  _queryCommon(query, variables, variableDef, output, isMutation, params) {
-    variables = variables || {}
-    variableDef = variableDef || ""
-    const queryType = isMutation ? "mutation" : "query"
-    query = queryType + " " + variableDef + " { " + query + " }"
-    output = output || ""
-    return BaseAPI._send("/graphql", { query, variables, output }, params)
-  },
-
-  mutation(query, variables, variableDef, params) {
-    return BaseAPI._queryCommon(
-      query,
-      variables,
-      variableDef,
-      undefined,
-      true,
-      params
-    ).then(json => json.data)
-  },
-
-  query(query, variables, variableDef, params) {
-    return BaseAPI._queryCommon(
-      query,
-      variables,
-      variableDef,
-      undefined,
-      undefined,
-      params
-    ).then(json => json.data)
-  },
-
-  queryExport(query, variables, variableDef, output) {
-    return BaseAPI._queryCommon(query, variables, variableDef, output).then(
-      response => response.blob()
-    )
+  queryExport(query, variables, output) {
+    // Can't use client here as the response is not JSON
+    return BaseAPI._fetch(
+      GRAPHQL_ENDPOINT,
+      { query, variables, output },
+      "*/*"
+    ).then(response => response.blob())
   },
 
   /**
@@ -102,9 +76,64 @@ const BaseAPI = {
    * - message: The error/log message
    */
   logOnServer(severity, url, lineNr, message) {
-    BaseAPI._send("/api/logging/log", [
+    // Can't use client here as we need to send to a different endpoint
+    BaseAPI._fetch(LOGGING_ENDPOINT, [
       { severity: severity, url: url, lineNr: lineNr, message: message }
     ])
+  },
+
+  _handleSuccess(response) {
+    return response.data
+  },
+
+  _handleError(response) {
+    let result = {}
+    let error
+    // When the result returns a list of errors we only show the first one
+    if (!_isEmpty(response.graphQLErrors)) {
+      error = response.graphQLErrors[0].message
+      if (error.endsWith(" not found")) {
+        // Unfortunately, with GraphQL errors Apollo Client doesn't provide the HTTP statusCode
+        result.status = 404
+      }
+    } else if (response.networkError) {
+      if (response.networkError.response) {
+        result.status = response.networkError.response.status
+        result.statusText = response.networkError.response.statusText
+      } else {
+        result.status = response.networkError.statusCode
+        result.statusText = response.networkError.name
+      }
+      if (
+        response.networkError.result &&
+        !_isEmpty(response.networkError.result.errors)
+      ) {
+        error = response.networkError.result.errors[0].message
+      } else if (result.status === 500) {
+        error =
+          "An Error occured! Please contact the administrator and let them know what you were doing to get this error"
+      }
+    }
+    // Try to pick the most specific message
+    result.message =
+      error ||
+      response.message ||
+      "You do not have permissions to perform this action"
+    return Promise.reject(result)
+  },
+
+  mutation(mutation, variables) {
+    return client
+      .mutate({ mutation, variables })
+      .then(BaseAPI._handleSuccess)
+      .catch(BaseAPI._handleError)
+  },
+
+  query(query, variables) {
+    return client
+      .query({ query, variables })
+      .then(BaseAPI._handleSuccess)
+      .catch(BaseAPI._handleError)
   },
 
   _getAuthParams: function() {

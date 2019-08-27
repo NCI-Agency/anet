@@ -1,5 +1,6 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -43,6 +44,14 @@ import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
 
+const GQL_CREATE_SAVED_SEARCH = gql`
+  mutation($savedSearch: SavedSearchInput!) {
+    createSavedSearch(savedSearch: $savedSearch) {
+      uuid
+    }
+  }
+`
+
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
     listName: `${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
@@ -58,7 +67,7 @@ const SEARCH_CONFIG = {
     sortOrder: "ASC",
     variableType: "PersonSearchQueryInput",
     fields:
-      "uuid, name, rank, role, emailAddress, position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
+      "uuid, name, rank, role, emailAddress, avatar(size: 32), position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
   },
   [SEARCH_OBJECT_TYPES.POSITIONS]: {
     listName: `${SEARCH_OBJECT_TYPES.POSITIONS}: positionList`,
@@ -66,7 +75,7 @@ const SEARCH_CONFIG = {
     sortOrder: "ASC",
     variableType: "PositionSearchQueryInput",
     fields:
-      "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role }"
+      "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
   },
   [SEARCH_OBJECT_TYPES.TASKS]: {
     listName: `${SEARCH_OBJECT_TYPES.TASKS}: taskList`,
@@ -153,16 +162,18 @@ class Search extends Page {
     if (config.sortOrder) {
       subQuery.sortOrder = config.sortOrder
     }
-    const queryVarName = includeAll
-      ? searchType + "QueryAll"
-      : searchType + "Query"
+    const queryVarName = `${searchType}Query${includeAll ? "All" : ""}`
+    const queryMethod = includeAll ? config.listAllName : config.listName
     let gqlPart = new GQL.Part(/* GraphQL */ `
-      ${
-  includeAll ? config.listAllName : config.listName
-} (query:$${queryVarName}) {
-        pageNum, pageSize, totalCount, list { ${config.fields} }
+      ${queryMethod}(query: $${queryVarName}) {
+        pageNum
+        pageSize
+        totalCount
+        list {
+          ${config.fields}
+        }
       }
-      `).addVariable(queryVarName, config.variableType, subQuery)
+    `).addVariable(queryVarName, config.variableType, subQuery)
     return gqlPart
   }
 
@@ -649,11 +660,7 @@ class Search extends Page {
       savedSearch.objectType =
         SEARCH_OBJECT_TYPES[this.props.searchQuery.objectType]
     }
-    const operation = "createSavedSearch"
-    let graphql = operation + "(savedSearch: $savedSearch) { uuid }"
-    const variables = { savedSearch: savedSearch }
-    const variableDef = "($savedSearch: SavedSearchInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(GQL_CREATE_SAVED_SEARCH, { savedSearch })
   }
 
   openSaveModal = () => {

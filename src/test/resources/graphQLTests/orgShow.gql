@@ -1,18 +1,98 @@
 organization(uuid:"${orgUuid}") {
-	uuid, shortName, longName, type
-	parentOrg { uuid, shortName, longName }
-	tasks { uuid, longName, shortName }
-	childrenOrgs { uuid, shortName, longName },
-	positions {
-		uuid, name, code
-		person { uuid, name }
-		associatedPositions {
-			uuid, name, code
-			person { uuid, name }
-		}
-	},
-	approvalSteps {
-		uuid, name, approvers { uuid, name, person { uuid, name }}
-	},
-	notes { uuid createdAt updatedAt type text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
+  uuid
+  shortName
+  longName
+  status
+  identificationCode
+  type
+  parentOrg {
+    uuid
+    shortName
+    longName
+    identificationCode
+  }
+  childrenOrgs {
+    uuid
+    shortName
+    longName
+    identificationCode
+  }
+  positions {
+    uuid
+    name
+    code
+    status
+    type
+    person {
+      uuid
+      name
+      status
+      rank
+      role
+      avatar(size: 32)
+    }
+    associatedPositions {
+      uuid
+      name
+      type
+      code
+      status
+      person {
+        uuid
+        name
+        status
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+  }
+  planningApprovalSteps {
+    uuid
+    name
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+  }
+  approvalSteps {
+    uuid
+    name
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+  }
+  notes {
+    uuid
+    createdAt
+    updatedAt
+    type
+    text
+    author {
+      uuid
+      name
+      rank
+      role
+    }
+    noteRelatedObjects {
+      noteUuid
+      relatedObjectType
+      relatedObjectUuid
+    }
+  }
 }

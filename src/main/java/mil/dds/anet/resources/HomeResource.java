@@ -2,7 +2,6 @@ package mil.dds.anet.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
-import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -14,7 +13,6 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.views.IndexView;
 
 @Path("")
-@PermitAll
 public class HomeResource {
 
   private final AnetConfiguration config;

@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -14,6 +15,20 @@ import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 
+const GQL_GET_ADMIN_SETTINGS = gql`
+  query {
+    adminSettings {
+      key
+      value
+    }
+  }
+`
+const GQL_SAVE_ADMIN_SETTINGS = gql`
+  mutation($settings: [AdminSettingInput]!) {
+    saveAdminSettings(settings: $settings)
+  }
+`
+
 class BaseAdminIndex extends Page {
   static propTypes = {
     ...pagePropTypes,
@@ -27,11 +42,7 @@ class BaseAdminIndex extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-      adminSettings { key, value }
-    `
-    ).then(data => {
+    return API.query(GQL_GET_ADMIN_SETTINGS).then(data => {
       let settings = {}
       data.adminSettings.forEach(
         setting => (settings[setting.key] = setting.value)
@@ -110,10 +121,7 @@ class BaseAdminIndex extends Page {
   save = (values, form) => {
     // settings as JSON
     let settings = Object.map(values, (key, value) => ({ key, value }))
-    let graphql = /* GraphQL */ "saveAdminSettings(settings: $settings)"
-    const variables = { settings: settings }
-    const variableDef = "($settings: [AdminSettingInput]!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(GQL_SAVE_ADMIN_SETTINGS, { settings })
   }
 }
 

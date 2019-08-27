@@ -1,4 +1,5 @@
-import { Settings } from "api"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -16,7 +17,6 @@ import RelatedObjectNotes, {
 import ReportCollectionContainer from "components/ReportCollectionContainer"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import GQL from "graphqlapi"
 import { Organization, Person, Position, Report, Task } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
@@ -34,6 +34,119 @@ import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
+
+const GQL_GET_TASK_LIST = gql`
+  fragment tasks on Query {
+    tasks: taskList(query: $taskQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        shortName
+        longName
+      }
+    }
+  }
+`
+const GQL_GET_ORGANIZATION = gql`
+  fragment organization on Query {
+    organization(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+      status
+      identificationCode
+      type
+      parentOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      childrenOrgs {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      positions {
+        uuid
+        name
+        code
+        status
+        type
+        person {
+          uuid
+          name
+          status
+          rank
+          role
+          avatar(size: 32)
+        }
+        associatedPositions {
+          uuid
+          name
+          type
+          code
+          status
+          person {
+            uuid
+            name
+            status
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      approvalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
+const GQL_GET_DATA = gql`
+  query(
+    $taskQuery: TaskSearchQueryInput
+    $uuid: String
+    $includeOrganization: Boolean!
+  ) {
+    ...tasks
+    ...organization @include(if: $includeOrganization)
+  }
+
+  ${GQL_GET_TASK_LIST}
+  ${GQL_GET_ORGANIZATION}
+`
 
 class BaseOrganizationShow extends Page {
   static propTypes = {
@@ -66,58 +179,23 @@ class BaseOrganizationShow extends Page {
     }
   }
 
-  getTaskQueryPart = orgUuid => {
-    let taskQuery = {
-      pageNum: this.state.tasksPageNum,
-      status: Task.STATUS.ACTIVE,
-      pageSize: 10,
-      responsibleOrgUuid: orgUuid
-    }
-    let taskPart = new GQL.Part(/* GraphQL */ `
-      tasks: taskList(query:$taskQuery) {
-        pageNum, pageSize, totalCount, list {
-          uuid, shortName, longName
-        }
-      }`).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
-    return taskPart
-  }
-
   fetchData(props) {
-    let orgPart = new GQL.Part(/* GraphQL */ `
-      organization(uuid:"${props.match.params.uuid}") {
-        uuid, shortName, longName, status, identificationCode, type
-        parentOrg { uuid, shortName, longName, identificationCode }
-        childrenOrgs {
-          uuid, shortName, longName, identificationCode
-        },
-        positions {
-          uuid, name, code, status, type,
-          person { uuid, name, status, rank, role }
-          associatedPositions {
-            uuid, name, type, code, status
-            person { uuid, name, status, rank, role }
-          }
-        },
-        planningApprovalSteps { uuid, name, type
-          approvers { uuid, name, person { uuid, name, rank, role }}
-        },
-        approvalSteps {
-          uuid, name, type, approvers { uuid, name, person { uuid, name, rank, role }}
-        }
-        ${GRAPHQL_NOTES_FIELDS}
-      }`)
-    let tasksPart = this.getTaskQueryPart(props.match.params.uuid)
-
-    return this.runGQL([orgPart, tasksPart])
-  }
-
-  runGQL = queries => {
-    return GQL.run(queries).then(data =>
+    return this.runGQL(props.match.params.uuid, true).then(data =>
       this.setState({
         organization: new Organization(data.organization),
         tasks: data.tasks
       })
     )
+  }
+
+  runGQL = (uuid, includeOrganization) => {
+    const taskQuery = {
+      pageNum: this.state.tasksPageNum,
+      status: Task.STATUS.ACTIVE,
+      pageSize: 10,
+      responsibleOrgUuid: uuid
+    }
+    return API.query(GQL_GET_DATA, { taskQuery, uuid, includeOrganization })
   }
 
   togglePendingApprovalFilter = () => {
@@ -389,8 +467,7 @@ class BaseOrganizationShow extends Page {
 
   goToTasksPage = pageNum => {
     this.setState({ tasksPageNum: pageNum }, () => {
-      const taskQueryPart = this.getTaskQueryPart(this.state.organization.uuid)
-      GQL.run([taskQueryPart]).then(data =>
+      this.runGQL(this.state.organization.uuid, false).then(data =>
         this.setState({ tasks: data.tasks })
       )
     })

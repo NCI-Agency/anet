@@ -1,3 +1,8 @@
 tagList(query:{pageSize:0}) {
-	totalCount, list { uuid, name, description }
+  totalCount
+  list {
+    uuid
+    name
+    description
+  }
 }

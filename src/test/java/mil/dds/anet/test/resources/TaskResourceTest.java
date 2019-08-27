@@ -3,10 +3,17 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -196,4 +203,88 @@ public class TaskResourceTest extends AbstractResourceTest {
     } catch (ClientErrorException expectedException) {
     }
   }
+
+  @Test
+  public void taskCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
+    createTask(getSuperUser());
+  }
+
+  @Test
+  public void taskCreateRegularUserPermissionTest() throws UnsupportedEncodingException {
+    createTask(getRegularUser());
+  }
+
+  private void createTask(Person user) {
+    final String orgFields = "uuid shortName longName status identificationCode type";
+    final Position position = user.getPosition();
+    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final Organization organization = position.getOrganization();
+
+    // principal organization
+    final OrganizationSearchQuery query = new OrganizationSearchQuery();
+    query.setType(OrganizationType.PRINCIPAL_ORG);
+    final AnetBeanList<Organization> principalOrgs = graphQLHelper.searchObjects(user,
+        "organizationList", "query", "OrganizationSearchQueryInput", orgFields, query,
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    assertThat(principalOrgs).isNotNull();
+    assertThat(principalOrgs.getList()).isNotEmpty();
+    final Organization principalOrg = principalOrgs.getList().get(0);
+    final Task taskPrincipal =
+        TestData.createTask("Test task principal " + UUID.randomUUID().toString(),
+            "Test permissions principal org", "Test-PT-Principal");
+    taskPrincipal.setResponsibleOrg(principalOrg);
+    try {
+      final String tPrincipalUuid = graphQLHelper.createObject(user, "createTask", "task",
+          "TaskInput", taskPrincipal, new TypeReference<GraphQlResponse<Task>>() {});
+      if (isSuperUser) {
+        assertThat(tPrincipalUuid).isNotNull();
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+
+    // own organization
+    final Task taskOwn = TestData.createTask("Test task own " + UUID.randomUUID().toString(),
+        "Test permissions own org", "Test-PT-Own");
+    taskOwn.setResponsibleOrg(organization);
+    try {
+      final String tOwnUuid = graphQLHelper.createObject(user, "createTask", "task", "TaskInput",
+          taskOwn, new TypeReference<GraphQlResponse<Task>>() {});
+      if (isSuperUser) {
+        assertThat(tOwnUuid).isNotNull();
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+
+    // other advisor organization
+    final OrganizationSearchQuery query2 = new OrganizationSearchQuery();
+    query2.setType(OrganizationType.ADVISOR_ORG);
+    final AnetBeanList<Organization> advisorOrgs = graphQLHelper.searchObjects(user,
+        "organizationList", "query", "OrganizationSearchQueryInput", orgFields, query2,
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    assertThat(advisorOrgs).isNotNull();
+    assertThat(advisorOrgs.getList()).isNotEmpty();
+    final Optional<Organization> foundOrg = advisorOrgs.getList().stream()
+        .filter(o -> !organization.getUuid().equals(o.getUuid())).findFirst();
+    assertThat(foundOrg.isPresent()).isTrue();
+    final Organization advisorOrg = foundOrg.get();
+    final Task taskOther = TestData.createTask("Test task other " + UUID.randomUUID().toString(),
+        "Test permissions other org", "Test-PT-Other");
+    taskOther.setResponsibleOrg(advisorOrg);
+    try {
+      graphQLHelper.createObject(user, "createTask", "task", "TaskInput", taskOther,
+          new TypeReference<GraphQlResponse<Task>>() {});
+    } catch (ForbiddenException expectedException) {
+    }
+  }
+
 }

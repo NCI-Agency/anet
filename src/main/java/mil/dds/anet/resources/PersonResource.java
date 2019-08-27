@@ -7,8 +7,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -26,7 +24,6 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-@PermitAll
 public class PersonResource {
 
   private final PersonDao dao;
@@ -44,30 +41,29 @@ public class PersonResource {
   public Person getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Person p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException("No such person", Status.NOT_FOUND);
+      throw new WebApplicationException("Person not found", Status.NOT_FOUND);
     }
     return p;
   }
 
   @GraphQLMutation(name = "createPerson")
-  @RolesAllowed("SUPER_USER")
   public Person createPerson(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "person") Person p) {
-    Person user = DaoUtils.getUserFromContext(context);
-    if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
-      validateEmail(p.getEmailAddress());
+    final Person user = DaoUtils.getUserFromContext(context);
+    if (!canCreateOrUpdatePerson(user, p, true)) {
+      throw new WebApplicationException("You do not have permissions to create this person",
+          Status.FORBIDDEN);
     }
 
-    if (p.getPosition() != null && p.getPosition().getUuid() != null) {
-      Position position =
-          AnetObjectEngine.getInstance().getPositionDao().getByUuid(p.getPosition().getUuid());
-      if (position == null) {
-        throw new WebApplicationException("Position " + p.getPosition() + " does not exist",
-            Status.BAD_REQUEST);
-      }
-      if (position.getType() == PositionType.ADMINISTRATOR) {
-        AuthUtils.assertAdministrator(user);
-      }
+    final String positionUuid = DaoUtils.getUuid(p.getPosition());
+    if (positionUuid != null
+        && AnetObjectEngine.getInstance().getPositionDao().getByUuid(positionUuid) == null) {
+      throw new WebApplicationException("Position " + p.getPosition() + " does not exist",
+          Status.BAD_REQUEST);
+    }
+
+    if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
+      validateEmail(p.getEmailAddress());
     }
 
     p.setBiography(Utils.sanitizeHtml(p.getBiography()));
@@ -82,11 +78,11 @@ public class PersonResource {
     return created;
   }
 
-  private boolean canUpdatePerson(Person editor, Person subject) {
+  private boolean canCreateOrUpdatePerson(Person editor, Person subject, boolean create) {
     if (editor.getUuid().equals(subject.getUuid())) {
       return true;
     }
-    Position editorPos = editor.getPosition();
+    final Position editorPos = editor.getPosition();
     if (editorPos == null) {
       return false;
     }
@@ -99,7 +95,11 @@ public class PersonResource {
         return true;
       }
       // Ensure that the editor is the Super User for the subject's organization.
-      Position subjectPos = subject.loadPosition();
+      final Position subjectPos =
+          create
+              ? AnetObjectEngine.getInstance().getPositionDao()
+                  .getByUuid(DaoUtils.getUuid(subject.getPosition()))
+              : subject.loadPosition();
       if (subjectPos == null) {
         // Super Users can edit position-less people.
         return true;
@@ -112,9 +112,9 @@ public class PersonResource {
   @GraphQLMutation(name = "updatePerson")
   public Integer updatePerson(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "person") Person p) {
-    Person user = DaoUtils.getUserFromContext(context);
-    Person existing = dao.getByUuid(p.getUuid());
-    if (canUpdatePerson(user, existing) == false) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Person existing = dao.getByUuid(p.getUuid());
+    if (!canCreateOrUpdatePerson(user, existing, false)) {
       throw new WebApplicationException("You do not have permissions to edit this person",
           Status.FORBIDDEN);
     }
@@ -210,12 +210,12 @@ public class PersonResource {
   }
 
   @GraphQLMutation(name = "mergePeople")
-  @RolesAllowed("ADMINISTRATOR")
   public Integer mergePeople(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "winnerUuid") String winnerUuid,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "copyPosition", defaultValue = "false") boolean copyPosition) {
     final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
     if (loserUuid.equals(winnerUuid)) {
       throw new WebApplicationException("You selected the same person twice",
           Status.NOT_ACCEPTABLE);
@@ -232,15 +232,13 @@ public class PersonResource {
       throw new WebApplicationException("You can only merge people of the same role",
           Status.NOT_ACCEPTABLE);
     }
-    if (winner.getPosition() != null && copyPosition) {
+
+    if (winner.loadPosition() != null && copyPosition) {
       throw new WebApplicationException("Winner already has a position", Status.NOT_ACCEPTABLE);
     }
 
-    loser.loadPosition();
-    winner.loadPosition();
-
     // Remove the loser from their position.
-    Position loserPosition = loser.getPosition();
+    final Position loserPosition = loser.loadPosition();
     if (loserPosition != null) {
       AnetObjectEngine.getInstance().getPositionDao()
           .removePersonFromPosition(loserPosition.getUuid());

@@ -89,7 +89,7 @@ dependencies {
 	// Supported databases:
 	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // If using postgresql
-	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.7.0' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
+	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.0' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
 	compile 'ch.qos.logback:logback-classic:1.2.3'
@@ -462,9 +462,9 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.10.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:5.0.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.24.0"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.24.2"
 	}
 }
 
