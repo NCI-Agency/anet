@@ -229,11 +229,8 @@ class AuthorizationGroupForm extends Component {
         noRender: true
       })
     }
-    this.props.history.push({
-      pathname: AuthorizationGroup.pathFor(authGroup),
-      state: {
-        success: "Authorization Group saved"
-      }
+    this.props.history.push(AuthorizationGroup.pathFor(authGroup), {
+      success: "Authorization Group saved"
     })
   }
 

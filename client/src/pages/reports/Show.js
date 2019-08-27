@@ -776,10 +776,7 @@ class BaseReportShow extends Page {
     const { uuid } = this.state.report
     API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
-        this.props.history.push({
-          pathname: "/",
-          state: { success: "Report deleted" }
-        })
+        this.props.history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
         this.setState({ success: null, error: error })
@@ -1021,9 +1018,7 @@ class BaseReportShow extends Page {
       text: text
     })
     toast.success(message, { toastId: "success-message" })
-    this.props.history.push({
-      pathname: "/search"
-    })
+    this.props.history.push("/search")
   }
 
   approveReport = text => {

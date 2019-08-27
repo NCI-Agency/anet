@@ -155,9 +155,7 @@ class SearchBar extends Component {
       this.props.resetPagination()
       this.props.setSearchQuery({ text: this.state.searchTerms })
       if (this.props.onSearchGoToSearchPage) {
-        this.props.history.push({
-          pathname: "/search"
-        })
+        this.props.history.push("/search")
       }
     }
     event.preventDefault()

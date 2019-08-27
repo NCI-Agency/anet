@@ -421,11 +421,8 @@ class BaseTaskForm extends Component {
         noRender: true
       })
     }
-    this.props.history.push({
-      pathname: Task.pathFor(task),
-      state: {
-        success: "Task saved"
-      }
+    this.props.history.push(Task.pathFor(task), {
+      success: "Task saved"
     })
   }
 

@@ -953,10 +953,7 @@ class BaseReportForm extends Component {
         // After successful delete, reset the form in order to make sure the dirty
         // prop is also reset (otherwise we would get a blocking navigation warning)
         resetForm()
-        this.props.history.push({
-          pathname: "/",
-          state: { success: "Report deleted" }
-        })
+        this.props.history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
         this.setState({ success: null, error: error })
@@ -995,11 +992,8 @@ class BaseReportForm extends Component {
         noRender: true
       })
     }
-    this.props.history.push({
-      pathname: Report.pathFor(report),
-      state: {
-        success: "Report saved"
-      }
+    this.props.history.push(Report.pathFor(report), {
+      success: "Report saved"
     })
   }
 

@@ -582,11 +582,8 @@ class BaseOrganizationForm extends Component {
         noRender: true
       })
     }
-    this.props.history.push({
-      pathname: Organization.pathFor(organization),
-      state: {
-        success: "Organization saved"
-      }
+    this.props.history.push(Organization.pathFor(organization), {
+      success: "Organization saved"
     })
   }
 

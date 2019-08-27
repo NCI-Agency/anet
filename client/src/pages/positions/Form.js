@@ -344,11 +344,8 @@ class BasePositionForm extends Component {
         noRender: true
       })
     }
-    this.props.history.push({
-      pathname: Position.pathFor(position),
-      state: {
-        success: "Position saved"
-      }
+    this.props.history.push(Position.pathFor(position), {
+      success: "Position saved"
     })
   }
 

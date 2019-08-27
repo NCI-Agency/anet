@@ -203,11 +203,8 @@ class LocationForm extends Component {
         noRender: true
       })
     }
-    this.props.history.push({
-      pathname: Location.pathFor(location),
-      state: {
-        success: "Location saved"
-      }
+    this.props.history.push(Location.pathFor(location), {
+      success: "Location saved"
     })
   }
 

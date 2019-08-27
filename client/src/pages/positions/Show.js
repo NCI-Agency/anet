@@ -426,10 +426,7 @@ class BasePositionShow extends Page {
     const { uuid } = this.state.position
     API.mutation(GQL_DELETE_POSITION, { uuid })
       .then(data => {
-        this.props.history.push({
-          pathname: "/",
-          state: { success: "Position deleted" }
-        })
+        this.props.history.push("/", { success: "Position deleted" })
       })
       .catch(error => {
         this.setState({ success: null, error: error })
