@@ -5,7 +5,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Page, {
+import {
   jumpToTop,
   mapDispatchToProps,
   propTypes as pagePropTypes
@@ -14,7 +14,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
-import React from "react"
+import React, { useState } from "react"
 import { Alert, Button, Checkbox, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
@@ -31,14 +31,9 @@ const GQL_MERGE_PEOPLE = gql`
   }
 `
 
-class MergePeople extends Page {
-  static propTypes = { ...pagePropTypes }
-
-  state = {
-    success: null,
-    error: null
-  }
-  yupSchema = yup.object().shape({
+const MergePeople = props => {
+  const [saveError, setSaveError] = useState(null)
+  const yupSchema = yup.object().shape({
     loser: yup
       .object()
       .nullable()
@@ -77,156 +72,154 @@ class MergePeople extends Page {
       )
   })
 
-  render() {
-    const personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
-      position { uuid, name, type, organization { uuid, shortName, longName, identificationCode }},
-      authoredReports(query: {pageSize: 1}) { totalCount }
-      attendedReports(query: {pageSize: 1}) { totalCount }`
+  const personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
+    position { uuid, name, type, organization { uuid, shortName, longName, identificationCode }},
+    authoredReports(query: {pageSize: 1}) { totalCount }
+    attendedReports(query: {pageSize: 1}) { totalCount }`
 
-    return (
-      <div>
-        <Messages error={this.state.error} success={this.state.success} />
+  return (
+    <div>
+      <Messages error={saveError} />
 
-        <h2 className="form-header">Merge People Tool</h2>
-        <Alert bsStyle="warning">
-          <p>
-            <b>Important</b>: Select the two duplicative people below. The loser
-            account will be deleted and all reports will be transferred over to
-            the winner.{" "}
-          </p>
-        </Alert>
-        <Formik
-          enableReinitialize
-          onSubmit={this.onSubmit}
-          validationSchema={this.yupSchema}
-          isInitialValid={() => this.yupSchema.isValidSync({})}
-          initialValues={{ loser: {}, winner: {}, copyPosition: false }}
-        >
-          {({
-            isSubmitting,
-            setFieldValue,
-            setFieldTouched,
-            values,
-            submitForm
-          }) => {
-            const { loser, winner } = values
-            const peopleFilters = {
-              all: {
-                label: "All",
-                queryVars: { matchPositionName: true }
-              }
+      <h2 className="form-header">Merge People Tool</h2>
+      <Alert bsStyle="warning">
+        <p>
+          <b>Important</b>: Select the two duplicative people below. The loser
+          account will be deleted and all reports will be transferred over to
+          the winner.{" "}
+        </p>
+      </Alert>
+      <Formik
+        enableReinitialize
+        onSubmit={onSubmit}
+        validationSchema={yupSchema}
+        isInitialValid={() => yupSchema.isValidSync({})}
+        initialValues={{ loser: {}, winner: {}, copyPosition: false }}
+      >
+        {({
+          isSubmitting,
+          setFieldValue,
+          setFieldTouched,
+          values,
+          submitForm
+        }) => {
+          const { loser, winner } = values
+          const peopleFilters = {
+            all: {
+              label: "All",
+              queryVars: { matchPositionName: true }
             }
-            return (
-              <Form>
-                <Grid fluid>
-                  <Row>
-                    <Col md={6}>
-                      <Row>
-                        <AdvancedSingleSelect
-                          fieldName="loser"
-                          fieldLabel="Loser"
-                          placeholder="Select the duplicate person"
-                          value={values.loser}
-                          overlayColumns={["Name"]}
-                          overlayRenderRow={PersonSimpleOverlayRow}
-                          filterDefs={peopleFilters}
-                          onChange={value => {
-                            setFieldValue("loser", value)
-                            setFieldTouched("loser") // onBlur doesn't work when selecting an option
-                          }}
-                          objectType={Person}
-                          valueKey="name"
-                          fields={personFields}
-                          addon={PEOPLE_ICON}
-                          vertical
-                        />
-                      </Row>
-                      <Row>
-                        {loser && loser.uuid && (
-                          <fieldset>
-                            {this.showPersonDetails(new Person(loser))}
-                          </fieldset>
-                        )}
-                      </Row>
-                    </Col>
-                    <Col md={6}>
-                      <Row>
-                        <AdvancedSingleSelect
-                          fieldName="winner"
-                          fieldLabel="Winner"
-                          placeholder="Select the OTHER duplicate person"
-                          value={values.winner}
-                          overlayColumns={["Name"]}
-                          overlayRenderRow={PersonSimpleOverlayRow}
-                          filterDefs={peopleFilters}
-                          onChange={value => {
-                            setFieldValue("winner", value)
-                            setFieldTouched("winner") // onBlur doesn't work when selecting an option
-                          }}
-                          objectType={Person}
-                          valueKey="name"
-                          fields={personFields}
-                          addon={PEOPLE_ICON}
-                          vertical
-                        />
-                      </Row>
-                      <Row>
-                        {winner && winner.uuid && (
-                          <fieldset>
-                            {this.showPersonDetails(new Person(winner))}
-                          </fieldset>
-                        )}
-                      </Row>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col md={12}>
-                      {this.canCopyPosition(loser, winner) && (
-                        <Field
-                          name="copyPosition"
-                          component={FieldHelper.renderSpecialField}
-                          label={null}
-                          widget={
-                            <Checkbox inline checked={values.copyPosition}>
-                              Set position on winner to {loser.position.name}
-                            </Checkbox>
-                          }
-                        />
+          }
+          return (
+            <Form>
+              <Grid fluid>
+                <Row>
+                  <Col md={6}>
+                    <Row>
+                      <AdvancedSingleSelect
+                        fieldName="loser"
+                        fieldLabel="Loser"
+                        placeholder="Select the duplicate person"
+                        value={values.loser}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={PersonSimpleOverlayRow}
+                        filterDefs={peopleFilters}
+                        onChange={value => {
+                          setFieldValue("loser", value)
+                          setFieldTouched("loser") // onBlur doesn't work when selecting an option
+                        }}
+                        objectType={Person}
+                        valueKey="name"
+                        fields={personFields}
+                        addon={PEOPLE_ICON}
+                        vertical
+                      />
+                    </Row>
+                    <Row>
+                      {loser && loser.uuid && (
+                        <fieldset>
+                          {showPersonDetails(new Person(loser))}
+                        </fieldset>
                       )}
-                      {loser &&
-                        !_isEmpty(loser.position) &&
-                        winner &&
-                        !_isEmpty(winner.position) && (
-                        <Alert bsStyle="danger">
-                          <b>Danger:</b> Position on Loser (
-                          {loser.position.name}) will be left unfilled
-                        </Alert>
+                    </Row>
+                  </Col>
+                  <Col md={6}>
+                    <Row>
+                      <AdvancedSingleSelect
+                        fieldName="winner"
+                        fieldLabel="Winner"
+                        placeholder="Select the OTHER duplicate person"
+                        value={values.winner}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={PersonSimpleOverlayRow}
+                        filterDefs={peopleFilters}
+                        onChange={value => {
+                          setFieldValue("winner", value)
+                          setFieldTouched("winner") // onBlur doesn't work when selecting an option
+                        }}
+                        objectType={Person}
+                        valueKey="name"
+                        fields={personFields}
+                        addon={PEOPLE_ICON}
+                        vertical
+                      />
+                    </Row>
+                    <Row>
+                      {winner && winner.uuid && (
+                        <fieldset>
+                          {showPersonDetails(new Person(winner))}
+                        </fieldset>
                       )}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col md={12}>
-                      <Button
-                        bsStyle="primary"
-                        bsSize="large"
-                        block
-                        onClick={submitForm}
-                        disabled={isSubmitting}
-                      >
-                        Merge People
-                      </Button>
-                    </Col>
-                  </Row>
-                </Grid>
-              </Form>
-            )
-          }}
-        </Formik>
-      </div>
-    )
-  }
+                    </Row>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={12}>
+                    {canCopyPosition(loser, winner) && (
+                      <Field
+                        name="copyPosition"
+                        component={FieldHelper.renderSpecialField}
+                        label={null}
+                        widget={
+                          <Checkbox inline checked={values.copyPosition}>
+                            Set position on winner to {loser.position.name}
+                          </Checkbox>
+                        }
+                      />
+                    )}
+                    {loser &&
+                      !_isEmpty(loser.position) &&
+                      winner &&
+                      !_isEmpty(winner.position) && (
+                      <Alert bsStyle="danger">
+                        <b>Danger:</b> Position on Loser (
+                        {loser.position.name}) will be left unfilled
+                      </Alert>
+                    )}
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={12}>
+                    <Button
+                      bsStyle="primary"
+                      bsSize="large"
+                      block
+                      onClick={submitForm}
+                      disabled={isSubmitting}
+                    >
+                      Merge People
+                    </Button>
+                  </Col>
+                </Row>
+              </Grid>
+            </Form>
+          )
+        }}
+      </Formik>
+    </div>
+  )
 
-  showPersonDetails = person => {
+  function showPersonDetails(person) {
     return (
       <React.Fragment>
         <Field
@@ -320,37 +313,41 @@ class MergePeople extends Page {
     )
   }
 
-  canCopyPosition = (loser, winner) =>
-    loser && !_isEmpty(loser.position) && winner && _isEmpty(winner.position)
+  function canCopyPosition(loser, winner) {
+    return (
+      loser && !_isEmpty(loser.position) && winner && _isEmpty(winner.position)
+    )
+  }
 
-  onSubmit = (values, form) => {
-    return this.save(values, form)
-      .then(response => this.onSubmitSuccess(response, values, form))
+  function onSubmit(values, form) {
+    return save(values, form)
+      .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
-        this.setState({ success: null, error: error }, () => {
-          form.setSubmitting(false)
-          jumpToTop()
-        })
+        setSaveError(error)
+        form.setSubmitting(false)
+        jumpToTop()
       })
   }
 
-  onSubmitSuccess = (response, values, form) => {
+  function onSubmitSuccess(response, values, form) {
     if (response.mergePeople) {
-      this.props.history.push(Person.pathFor(values.winner), {
+      props.history.push(Person.pathFor(values.winner), {
         success: "People merged"
       })
     }
   }
 
-  save = (values, form) => {
+  function save(values, form) {
     const { winner, loser, copyPosition } = values
     return API.mutation(GQL_MERGE_PEOPLE, {
       winnerUuid: winner.uuid,
       loserUuid: loser.uuid,
-      copyPosition: copyPosition && this.canCopyPosition(loser, winner)
+      copyPosition: copyPosition && canCopyPosition(loser, winner)
     })
   }
 }
+
+MergePeople.propTypes = { ...pagePropTypes }
 
 export default connect(
   null,

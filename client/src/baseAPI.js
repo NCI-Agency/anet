@@ -106,7 +106,7 @@ const BaseAPI = {
   },
 
   useApiQuery(query, variables) {
-    const [error, setError] = useState()
+    const [error, setError] = useState(null)
     const results = useQuery(query, {
       variables,
       onError: error => setError(BaseAPI._handleError(error))

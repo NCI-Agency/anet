@@ -7,21 +7,23 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
-import Messages, { setMessages } from "components/Messages"
-import Page, {
+import Messages from "components/Messages"
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
@@ -86,282 +88,274 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-class BasePersonShow extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    currentUser: PropTypes.instanceOf(Person)
+const BasePersonShow = props => {
+  const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
+  const [
+    showAssociatedPositionsModal,
+    setShowAssociatedPositionsModal
+  ] = useState(false)
+  const uuid = props.match.params.uuid
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "User",
+    uuid,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "User"
+  const person = new Person(data ? data.person : {})
+  const stateSuccess = props.location.state && props.location.state.success
+  const stateError = props.location.state && props.location.state.error
+  const { currentUser, ...myFormProps } = props
+  // The position for this person's counterparts
+  const position = person.position
+  const assignedRole =
+    position.type === Position.TYPE.PRINCIPAL
+      ? Settings.fields.advisor.person.name
+      : Settings.fields.principal.person.name
 
-  state = {
-    person: new Person({
-      uuid: this.props.match.params.uuid,
-      previousPositions: []
-    }),
-    showAssignPositionModal: false,
-    showAssociatedPositionsModal: false
-  }
+  // User can always edit themselves
+  // Admins can always edit anybody
+  // SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
+  const isAdmin = currentUser && currentUser.isAdmin()
+  const hasPosition = position && position.uuid
+  const canEdit =
+    Person.isEqual(currentUser, person) ||
+    isAdmin ||
+    (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
+    (!hasPosition && currentUser.isSuperUser()) ||
+    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
+  const canChangePosition =
+    isAdmin ||
+    (!hasPosition && currentUser.isSuperUser()) ||
+    (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
+    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 
-  constructor(props) {
-    super(props)
-    setMessages(props, this.state)
-  }
+  return (
+    <Formik enableReinitialize initialValues={person} {...myFormProps}>
+      {({ values }) => {
+        const action = (
+          <div>
+            {canEdit && (
+              <LinkTo
+                person={person}
+                edit
+                button="primary"
+                className="edit-person"
+              >
+                Edit
+              </LinkTo>
+            )}
+          </div>
+        )
+        const emailHumanValue = (
+          <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
+        )
 
-  fetchData(props) {
-    return API.query(GQL_GET_PERSON, { uuid: props.match.params.uuid }).then(
-      data =>
-        this.setState({
-          person: new Person(data.person)
-        })
-    )
-  }
-
-  render() {
-    const { person } = this.state
-    const { currentUser, ...myFormProps } = this.props
-    // The position for this person's counterparts
-    const position = person.position
-    const assignedRole =
-      position.type === Position.TYPE.PRINCIPAL
-        ? Settings.fields.advisor.person.name
-        : Settings.fields.principal.person.name
-
-    // User can always edit themselves
-    // Admins can always edit anybody
-    // SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
-    const isAdmin = currentUser && currentUser.isAdmin()
-    const hasPosition = position && position.uuid
-    const canEdit =
-      Person.isEqual(currentUser, person) ||
-      isAdmin ||
-      (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
-      (!hasPosition && currentUser.isSuperUser()) ||
-      (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-    const canChangePosition =
-      isAdmin ||
-      (!hasPosition && currentUser.isSuperUser()) ||
-      (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
-      (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-
-    return (
-      <Formik enableReinitialize initialValues={person} {...myFormProps}>
-        {({ values }) => {
-          const action = (
-            <div>
-              {canEdit && (
-                <LinkTo
-                  person={person}
-                  edit
-                  button="primary"
-                  className="edit-person"
-                >
-                  Edit
-                </LinkTo>
-              )}
-            </div>
-          )
-          const emailHumanValue = (
-            <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
-          )
-
-          return (
-            <div>
-              <div className="pull-right">
-                <GuidedTour
-                  title="Take a guided tour of this person's page."
-                  tour={personTour}
-                  autostart={
-                    localStorage.newUser === "true" &&
-                    localStorage.hasSeenPersonTour !== "true"
-                  }
-                  onEnd={() => (localStorage.hasSeenPersonTour = "true")}
-                />
-              </div>
-
-              <RelatedObjectNotes
-                notes={person.notes}
-                relatedObject={
-                  person.uuid && {
-                    relatedObjectType: "people",
-                    relatedObjectUuid: person.uuid
-                  }
+        return (
+          <div>
+            <div className="pull-right">
+              <GuidedTour
+                title="Take a guided tour of this person's page."
+                tour={personTour}
+                autostart={
+                  localStorage.newUser === "true" &&
+                  localStorage.hasSeenPersonTour !== "true"
                 }
+                onEnd={() => (localStorage.hasSeenPersonTour = "true")}
               />
-              <Messages error={this.state.error} success={this.state.success} />
-              <Form className="form-horizontal" method="post">
-                <Fieldset
-                  title={`${person.rank} ${person.name}`}
-                  action={action}
+            </div>
+
+            <RelatedObjectNotes
+              notes={person.notes}
+              relatedObject={
+                person.uuid && {
+                  relatedObjectType: "people",
+                  relatedObjectUuid: person.uuid
+                }
+              }
+            />
+            <Messages error={stateError} success={stateSuccess} />
+            <Form className="form-horizontal" method="post">
+              <Fieldset
+                title={`${person.rank} ${person.name}`}
+                action={action}
+              />
+              <Fieldset>
+                <AvatarDisplayComponent
+                  avatar={person.avatar}
+                  height={256}
+                  width={256}
                 />
-                <Fieldset>
-                  <AvatarDisplayComponent
-                    avatar={person.avatar}
-                    height={256}
-                    width={256}
-                  />
+                <Field
+                  name="rank"
+                  label={Settings.fields.person.rank}
+                  component={FieldHelper.renderReadonlyField}
+                />
+                <Field
+                  name="role"
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={Person.humanNameOfRole(values.role)}
+                />
+                {isAdmin && (
                   <Field
-                    name="rank"
-                    label={Settings.fields.person.rank}
+                    name="domainUsername"
                     component={FieldHelper.renderReadonlyField}
                   />
-                  <Field
-                    name="role"
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={Person.humanNameOfRole(values.role)}
-                  />
-                  {isAdmin && (
-                    <Field
-                      name="domainUsername"
-                      component={FieldHelper.renderReadonlyField}
+                )}
+                <Field
+                  name="status"
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={Person.humanNameOfStatus(values.status)}
+                />
+                <Field
+                  name="phoneNumber"
+                  label={Settings.fields.person.phoneNumber}
+                  component={FieldHelper.renderReadonlyField}
+                />
+                <Field
+                  name="emailAddress"
+                  label={Settings.fields.person.emailAddress}
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={emailHumanValue}
+                />
+                <Field
+                  name="country"
+                  label={Settings.fields.person.country}
+                  component={FieldHelper.renderReadonlyField}
+                />
+                <Field
+                  name="gender"
+                  label={Settings.fields.person.gender}
+                  component={FieldHelper.renderReadonlyField}
+                />
+                <Field
+                  name="endOfTourDate"
+                  label={Settings.fields.person.endOfTourDate}
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={
+                    person.endOfTourDate &&
+                    moment(person.endOfTourDate).format(
+                      Settings.dateFormats.forms.displayShort.date
+                    )
+                  }
+                />
+                <Field
+                  name="biography"
+                  className="biography"
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={
+                    <div
+                      dangerouslySetInnerHTML={{ __html: person.biography }}
+                    />
+                  }
+                />
+              </Fieldset>
+
+              <Fieldset title="Position">
+                <Fieldset
+                  title="Current Position"
+                  id="current-position"
+                  className={
+                    !position || !position.uuid ? "warning" : undefined
+                  }
+                  action={
+                    hasPosition &&
+                    canChangePosition && (
+                      <div>
+                        <LinkTo position={position} edit button="default">
+                          Edit position details
+                        </LinkTo>
+                        <Button
+                          onClick={() => setShowAssignPositionModal(true)}
+                          className="change-assigned-position"
+                        >
+                          Change assigned position
+                        </Button>
+                      </div>
+                    )
+                  }
+                >
+                  {hasPosition
+                    ? renderPosition(position)
+                    : renderPositionBlankSlate(person)}
+                  {canChangePosition && (
+                    <AssignPositionModal
+                      showModal={showAssignPositionModal}
+                      person={person}
+                      onCancel={() => hideAssignPositionModal(false)}
+                      onSuccess={() => hideAssignPositionModal(true)}
                     />
                   )}
-                  <Field
-                    name="status"
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={Person.humanNameOfStatus(values.status)}
-                  />
-                  <Field
-                    name="phoneNumber"
-                    label={Settings.fields.person.phoneNumber}
-                    component={FieldHelper.renderReadonlyField}
-                  />
-                  <Field
-                    name="emailAddress"
-                    label={Settings.fields.person.emailAddress}
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={emailHumanValue}
-                  />
-                  <Field
-                    name="country"
-                    label={Settings.fields.person.country}
-                    component={FieldHelper.renderReadonlyField}
-                  />
-                  <Field
-                    name="gender"
-                    label={Settings.fields.person.gender}
-                    component={FieldHelper.renderReadonlyField}
-                  />
-                  <Field
-                    name="endOfTourDate"
-                    label={Settings.fields.person.endOfTourDate}
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={
-                      person.endOfTourDate &&
-                      moment(person.endOfTourDate).format(
-                        Settings.dateFormats.forms.displayShort.date
-                      )
-                    }
-                  />
-                  <Field
-                    name="biography"
-                    className="biography"
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={
-                      <div
-                        dangerouslySetInnerHTML={{ __html: person.biography }}
-                      />
-                    }
-                  />
                 </Fieldset>
 
-                <Fieldset title="Position">
+                {hasPosition && (
                   <Fieldset
-                    title="Current Position"
-                    id="current-position"
-                    className={
-                      !position || !position.uuid ? "warning" : undefined
-                    }
+                    title={`Assigned ${assignedRole}`}
                     action={
-                      hasPosition &&
                       canChangePosition && (
-                        <div>
-                          <LinkTo position={position} edit button="default">
-                            Edit position details
-                          </LinkTo>
-                          <Button
-                            onClick={this.showAssignPositionModal}
-                            className="change-assigned-position"
-                          >
-                            Change assigned position
-                          </Button>
-                        </div>
+                        <Button
+                          onClick={() => setShowAssociatedPositionsModal(true)}
+                        >
+                          Change assigned {assignedRole}
+                        </Button>
                       )
                     }
                   >
-                    {hasPosition
-                      ? this.renderPosition(position)
-                      : this.renderPositionBlankSlate(person)}
+                    {renderCounterparts(position)}
                     {canChangePosition && (
-                      <AssignPositionModal
-                        showModal={this.state.showAssignPositionModal}
-                        person={person}
-                        onCancel={() => this.hideAssignPositionModal(false)}
-                        onSuccess={() => this.hideAssignPositionModal(true)}
+                      <EditAssociatedPositionsModal
+                        position={position}
+                        showModal={showAssociatedPositionsModal}
+                        onCancel={() => hideAssociatedPositionsModal(false)}
+                        onSuccess={() => hideAssociatedPositionsModal(true)}
                       />
                     )}
                   </Fieldset>
-
-                  {hasPosition && (
-                    <Fieldset
-                      title={`Assigned ${assignedRole}`}
-                      action={
-                        canChangePosition && (
-                          <Button onClick={this.showAssociatedPositionsModal}>
-                            Change assigned {assignedRole}
-                          </Button>
-                        )
-                      }
-                    >
-                      {this.renderCounterparts(position)}
-                      {canChangePosition && (
-                        <EditAssociatedPositionsModal
-                          position={position}
-                          showModal={this.state.showAssociatedPositionsModal}
-                          onCancel={() =>
-                            this.hideAssociatedPositionsModal(false)
-                          }
-                          onSuccess={() =>
-                            this.hideAssociatedPositionsModal(true)
-                          }
-                        />
-                      )}
-                    </Fieldset>
-                  )}
-                </Fieldset>
-
-                {person.isAdvisor() && (
-                  <Fieldset title="Reports authored" id="reports-authored">
-                    <ReportCollectionContainer
-                      queryParams={{
-                        authorUuid: this.props.match.params.uuid
-                      }}
-                      viewFormats={[
-                        FORMAT_CALENDAR,
-                        FORMAT_SUMMARY,
-                        FORMAT_TABLE,
-                        FORMAT_MAP
-                      ]}
-                      paginationKey={`r_authored_${this.props.match.params.uuid}`}
-                      mapId="reports-authored"
-                    />
-                  </Fieldset>
                 )}
+              </Fieldset>
 
-                <Fieldset
-                  title={`Reports attended by ${person.name}`}
-                  id="reports-attended"
-                >
+              {person.isAdvisor() && (
+                <Fieldset title="Reports authored" id="reports-authored">
                   <ReportCollectionContainer
                     queryParams={{
-                      attendeeUuid: this.props.match.params.uuid
+                      authorUuid: uuid
                     }}
-                    paginationKey={`r_attended_${this.props.match.params.uuid}`}
-                    mapId="reports-attended"
+                    viewFormats={[
+                      FORMAT_CALENDAR,
+                      FORMAT_SUMMARY,
+                      FORMAT_TABLE,
+                      FORMAT_MAP
+                    ]}
+                    paginationKey={`r_authored_${uuid}`}
+                    mapId="reports-authored"
                   />
                 </Fieldset>
+              )}
 
-                <Fieldset title="Previous positions" id="previous-positions">
+              <Fieldset
+                title={`Reports attended by ${person.name}`}
+                id="reports-attended"
+              >
+                <ReportCollectionContainer
+                  queryParams={{
+                    attendeeUuid: uuid
+                  }}
+                  paginationKey={`r_attended_${uuid}`}
+                  mapId="reports-attended"
+                />
+              </Fieldset>
+
+              <Fieldset title="Previous positions" id="previous-positions">
+                {(_isEmpty(person.previousPositions) && (
+                  <em>No positions found</em>
+                )) || (
                   <Table>
                     <thead>
                       <tr>
@@ -389,16 +383,16 @@ class BasePersonShow extends Page {
                       ))}
                     </tbody>
                   </Table>
-                </Fieldset>
-              </Form>
-            </div>
-          )
-        }}
-      </Formik>
-    )
-  }
+                )}
+              </Fieldset>
+            </Form>
+          </div>
+        )
+      }}
+    </Formik>
+  )
 
-  renderPosition(position) {
+  function renderPosition(position) {
     return (
       <div style={{ textAlign: "center" }}>
         <h4>
@@ -409,7 +403,7 @@ class BasePersonShow extends Page {
     )
   }
 
-  renderCounterparts(position) {
+  function renderCounterparts(position) {
     let assocTitle =
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
@@ -450,8 +444,8 @@ class BasePersonShow extends Page {
     )
   }
 
-  renderPositionBlankSlate(person) {
-    const { currentUser } = this.props
+  function renderPositionBlankSlate(person) {
+    const { currentUser } = props
     // when the person is not in a position, any super user can assign them.
     let canChangePosition = currentUser.isSuperUser()
 
@@ -470,7 +464,7 @@ class BasePersonShow extends Page {
           </p>
           {canChangePosition && (
             <p>
-              <Button onClick={this.showAssignPositionModal}>
+              <Button onClick={() => setShowAssignPositionModal(true)}>
                 Assign position
               </Button>
             </p>
@@ -480,27 +474,24 @@ class BasePersonShow extends Page {
     }
   }
 
-  showAssignPositionModal = () => {
-    this.setState({ showAssignPositionModal: true })
-  }
-
-  hideAssignPositionModal = success => {
-    this.setState({ showAssignPositionModal: false })
+  function hideAssignPositionModal(success) {
+    setShowAssignPositionModal(false)
     if (success) {
-      this.fetchData(this.props)
+      refetch()
     }
   }
 
-  showAssociatedPositionsModal = () => {
-    this.setState({ showAssociatedPositionsModal: true })
-  }
-
-  hideAssociatedPositionsModal = success => {
-    this.setState({ showAssociatedPositionsModal: false })
+  function hideAssociatedPositionsModal(success) {
+    setShowAssociatedPositionsModal(false)
     if (success) {
-      this.fetchData(this.props)
+      refetch()
     }
   }
+}
+
+BasePersonShow.propTypes = {
+  ...pagePropTypes,
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 const PersonShow = props => (

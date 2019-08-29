@@ -1,54 +1,39 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
-import Page, {
+import API from "api"
+import { gql } from "apollo-boost"
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
+import * as GraphiQLreq from "graphiql"
+import "graphiql/graphiql.css"
 import React from "react"
 import { connect } from "react-redux"
 
-var GraphiQLreq = null /* required later */
+const GraphiQL = props => {
+  useBoilerplate({
+    pageProps: PAGE_PROPS_NO_NAV,
+    ...props
+  })
 
-class GraphiQL extends Page {
-  static propTypes = { ...pagePropTypes }
+  // TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
+  return (
+    <div style={{ height: "600px" }}>
+      <GraphiQLreq fetcher={fetch} />
+    </div>
+  )
 
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  componentDidMount() {
-    super.componentDidMount()
-    if (GraphiQLreq) {
-      return
-    }
-
-    import("graphiql").then(importedModule => {
-      GraphiQLreq = importedModule.default
-      require("graphiql/graphiql.css")
-      this.forceUpdate()
-    })
-  }
-
-  fetch(params) {
-    return fetch("/graphql", {
-      credentials: "same-origin",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      },
-      body: JSON.stringify(params)
-    }).then(response => response.json())
-  }
-
-  render() {
-    // TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
-    return (
-      <div style={{ height: "600px" }}>
-        {GraphiQLreq ? <GraphiQLreq fetcher={this.fetch} /> : "Loading..."}
-      </div>
-    )
+  function fetch(params) {
+    const { operationName, variables } = params
+    const query = gql`
+      ${params.query}
+    `
+    return API.client.query({ operationName, query, variables })
   }
 }
+
+GraphiQL.propTypes = { ...pagePropTypes }
 
 export default connect(
   null,

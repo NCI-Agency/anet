@@ -4,14 +4,15 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import Page, {
+import {
   jumpToTop,
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 
@@ -29,100 +30,93 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
   }
 `
 
-class BaseAdminIndex extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    loadAppData: PropTypes.func
+const BaseAdminIndex = props => {
+  const [saveError, setSaveError] = useState(null)
+  const [saveSuccess, setSaveSuccess] = useState(null)
+  const { loading, error, data } = API.useApiQuery(GQL_GET_ADMIN_SETTINGS)
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  state = {
-    success: null,
-    error: null,
-    settings: {}
-  }
+  let settings = {}
+  data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
 
-  fetchData(props) {
-    return API.query(GQL_GET_ADMIN_SETTINGS).then(data => {
-      let settings = {}
-      data.adminSettings.forEach(
-        setting => (settings[setting.key] = setting.value)
-      )
-      this.setState({ settings })
-    })
-  }
-
-  render() {
-    let { settings } = this.state
-    return (
-      <div>
-        <Messages success={this.state.success} error={this.state.error} />
-        <Formik
-          enableReinitialize
-          onSubmit={this.onSubmit}
-          initialValues={settings}
-        >
-          {({ values, isSubmitting, submitForm }) => {
-            const action = (
-              <div>
-                <Button
-                  bsStyle="primary"
-                  type="button"
-                  onClick={submitForm}
-                  disabled={isSubmitting}
-                >
-                  Save settings
-                </Button>
+  return (
+    <div>
+      <Messages success={saveSuccess} error={saveError} />
+      <Formik enableReinitialize onSubmit={onSubmit} initialValues={settings}>
+        {({ values, isSubmitting, submitForm }) => {
+          const action = (
+            <div>
+              <Button
+                bsStyle="primary"
+                type="button"
+                onClick={submitForm}
+                disabled={isSubmitting}
+              >
+                Save settings
+              </Button>
+            </div>
+          )
+          return (
+            <Form className="form-horizontal" method="post">
+              <Fieldset title="Site settings" action={action} />
+              <Fieldset>
+                {Object.map(settings, (key, value) => (
+                  <Field
+                    key={key}
+                    name={key}
+                    component={FieldHelper.renderInputField}
+                  />
+                ))}
+              </Fieldset>
+              <div className="submit-buttons">
+                <div />
+                {action}
               </div>
-            )
-            return (
-              <Form className="form-horizontal" method="post">
-                <Fieldset title="Site settings" action={action} />
-                <Fieldset>
-                  {Object.map(settings, (key, value) => (
-                    <Field
-                      key={key}
-                      name={key}
-                      component={FieldHelper.renderInputField}
-                    />
-                  ))}
-                </Fieldset>
-                <div className="submit-buttons">
-                  <div />
-                  {action}
-                </div>
-              </Form>
-            )
-          }}
-        </Formik>
-      </div>
-    )
-  }
+            </Form>
+          )
+        }}
+      </Formik>
+    </div>
+  )
 
-  onSubmit = (values, form) => {
-    return this.save(values, form)
-      .then(response => this.onSubmitSuccess(response, values, form))
+  function onSubmit(values, form) {
+    return save(values, form)
+      .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
-        this.setState({ success: null, error: error }, () => {
-          form.setSubmitting(false)
-          jumpToTop()
-        })
+        setSaveError(error)
+        setSaveSuccess()
+        form.setSubmitting(false)
+        jumpToTop()
       })
   }
 
-  onSubmitSuccess = (response, values, form) => {
+  function onSubmitSuccess(response, values, form) {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.setState({ success: "Admin settings saved", error: null })
+    setSaveError()
+    setSaveSuccess("Admin settings saved")
     jumpToTop()
-    this.props.loadAppData()
+    props.loadAppData()
   }
 
-  save = (values, form) => {
+  function save(values, form) {
     // settings as JSON
-    let settings = Object.map(values, (key, value) => ({ key, value }))
+    const settings = Object.map(values, (key, value) => ({ key, value }))
     return API.mutation(GQL_SAVE_ADMIN_SETTINGS, { settings })
   }
+}
+
+BaseAdminIndex.propTypes = {
+  ...pagePropTypes,
+  loadAppData: PropTypes.func
 }
 
 const AdminIndex = props => (

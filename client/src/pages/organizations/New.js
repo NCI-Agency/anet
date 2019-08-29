@@ -1,11 +1,13 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import { Organization } from "models"
+import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import utils from "utils"
@@ -23,42 +25,61 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-class OrganizationNew extends Page {
-  static propTypes = {
-    ...pagePropTypes
-  }
-
-  state = {
-    organization: new Organization()
-  }
-
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  fetchData(props) {
-    const qs = utils.parseQueryString(props.location.search)
-    if (qs.parentOrgUuid) {
-      return API.query(GQL_GET_ORGANIZATION, { uuid: qs.parentOrgUuid }).then(
-        data => {
-          const { organization } = this.state
-          organization.parentOrg = new Organization(data.organization)
-          organization.type = organization.parentOrg.type
-          this.setState({ organization })
-        }
-      )
-    }
-  }
-
-  render() {
-    const { organization } = this.state
+const OrganizationNew = props => {
+  const qs = utils.parseQueryString(props.location.search)
+  if (qs.parentOrgUuid) {
+    const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
+      uuid: qs.parentOrgUuid
+    })
     return (
-      <OrganizationForm
-        initialValues={organization}
-        title="Create a new Organization"
+      <OrganizationNewConditional
+        {...props}
+        {...queryResult}
+        orgUuid={qs.parentOrgUuid}
       />
     )
   }
+  return <OrganizationNewConditional {...props} />
+}
+
+OrganizationNew.propTypes = {
+  ...pagePropTypes
+}
+
+const OrganizationNewConditional = props => {
+  const { loading, error, data, orgUuid, ...otherProps } = props
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Organization",
+    uuid: orgUuid,
+    pageProps: PAGE_PROPS_NO_NAV,
+    ...otherProps
+  })
+  if (done) {
+    return result
+  }
+
+  const organization = new Organization()
+  if (data) {
+    organization.parentOrg = new Organization(data.organization)
+    organization.type = organization.parentOrg.type
+  }
+
+  return (
+    <OrganizationForm
+      initialValues={organization}
+      title="Create a new Organization"
+    />
+  )
+}
+
+OrganizationNewConditional.propTypes = {
+  loading: PropTypes.bool,
+  error: PropTypes.object,
+  data: PropTypes.object,
+  orgUuid: PropTypes.string,
+  ...pagePropTypes
 }
 
 export default connect(

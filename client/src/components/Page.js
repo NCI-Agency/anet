@@ -39,10 +39,9 @@ export const propTypes = {
     filters: PropTypes.any,
     objectType: PropTypes.string
   }),
-  /* eslint-disable react/no-unused-prop-types */
   /* FIXME: refactor setting the pagination, maybe use a container component */
+  // eslint-disable-next-line react/no-unused-prop-types
   setPagination: PropTypes.func.isRequired,
-  /* eslint-enable react/no-unused-prop-types */
   ...routerRelatedPropTypes
 }
 
@@ -60,6 +59,7 @@ export const AnchorLink = function(props) {
     </Link>
   )
 }
+
 AnchorLink.propTypes = {
   to: PropTypes.string,
   children: PropTypes.node
@@ -87,7 +87,7 @@ export const useBoilerplate = props => {
     [props.loading] // eslint-disable-line react-hooks/exhaustive-deps
   )
   if (props.loading) {
-    return { done: true, result: renderLoading() }
+    return { done: true, result: "Loading…" }
   }
   if (props.error) {
     return {
@@ -96,10 +96,6 @@ export const useBoilerplate = props => {
     }
   }
   return { done: false }
-}
-
-export const renderLoading = () => {
-  return null
 }
 
 export const renderError = (error, modelName, uuid) => {
@@ -141,6 +137,31 @@ export const applySearchProps = (setSearchProps, searchProps) => {
   if (typeof setSearchProps === "function") {
     setSearchProps(Object.assign({}, sp))
   }
+}
+
+export const getSearchQuery = searchQuery => {
+  let query = {}
+  if (!_isEmpty(searchQuery.text)) {
+    query.text = searchQuery.text
+  }
+  if (searchQuery.filters) {
+    searchQuery.filters.forEach(filter => {
+      if (filter.value) {
+        if (filter.value.toQuery) {
+          const toQuery =
+            typeof filter.value.toQuery === "function"
+              ? filter.value.toQuery()
+              : filter.value.toQuery
+          Object.assign(query, toQuery)
+        } else {
+          query[filter.key] = filter.value
+        }
+      }
+    })
+  }
+
+  console.log("NEW SEARCH advanced query", query)
+  return query
 }
 
 export default class Page extends Component {

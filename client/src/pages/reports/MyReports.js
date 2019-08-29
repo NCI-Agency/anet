@@ -1,7 +1,8 @@
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import { AnchorNavItem } from "components/Nav"
-import Page, {
+import {
+  getSearchQuery,
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
@@ -13,99 +14,81 @@ import React from "react"
 import { Nav } from "react-bootstrap"
 import { connect } from "react-redux"
 
-class BaseMyReports extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    currentUser: PropTypes.instanceOf(Person)
-  }
-
-  constructor(props) {
-    super(props)
-    this.sectionQueryParams = {
-      draft: {
-        state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
-      },
-      future: {
-        state: [Report.STATE.FUTURE]
-      },
-      pending: {
-        state: [Report.STATE.PENDING_APPROVAL]
-      },
-      approved: {
-        state: [Report.STATE.APPROVED]
-      },
-      published: {
-        state: [Report.STATE.PUBLISHED]
-      },
-      cancelled: {
-        state: [Report.STATE.CANCELLED]
-      }
+const BaseMyReports = props => {
+  const { searchQuery } = props
+  const sectionQueryParams = {
+    draft: {
+      state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
+    },
+    future: {
+      state: [Report.STATE.FUTURE]
+    },
+    pending: {
+      state: [Report.STATE.PENDING_APPROVAL]
+    },
+    approved: {
+      state: [Report.STATE.APPROVED]
+    },
+    published: {
+      state: [Report.STATE.PUBLISHED]
+    },
+    cancelled: {
+      state: [Report.STATE.CANCELLED]
     }
-    Object.keys(this.sectionQueryParams).forEach(
-      key => (this.sectionQueryParams[key].authorUuid = props.currentUser.uuid)
-    )
   }
+  Object.keys(sectionQueryParams).forEach(
+    key => (sectionQueryParams[key].authorUuid = props.currentUser.uuid)
+  )
 
-  render() {
-    return (
-      <div>
-        <SubNav subnavElemId="reports-nav">
-          <Nav>
-            <AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
-            <AnchorNavItem to="upcoming-engagements">
-              Upcoming Engagements
-            </AnchorNavItem>
-            <AnchorNavItem to="pending-approval">
-              Pending approval
-            </AnchorNavItem>
-            <AnchorNavItem to="approved">Approved reports</AnchorNavItem>
-            <AnchorNavItem to="published-reports">
-              Published reports
-            </AnchorNavItem>
-            <AnchorNavItem to="cancelled-reports">
-              Cancelled reports
-            </AnchorNavItem>
-          </Nav>
-        </SubNav>
+  return (
+    <div>
+      <SubNav subnavElemId="reports-nav">
+        <Nav>
+          <AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
+          <AnchorNavItem to="upcoming-engagements">
+            Upcoming Engagements
+          </AnchorNavItem>
+          <AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
+          <AnchorNavItem to="approved">Approved reports</AnchorNavItem>
+          <AnchorNavItem to="published-reports">
+            Published reports
+          </AnchorNavItem>
+          <AnchorNavItem to="cancelled-reports">
+            Cancelled reports
+          </AnchorNavItem>
+        </Nav>
+      </SubNav>
 
-        {this.renderSection("Draft Reports", "draft-reports", "draft")}
-        {this.renderSection(
-          "Upcoming Engagements",
-          "upcoming-engagements",
-          "future"
-        )}
-        {this.renderSection("Pending Approval", "pending-approval", "pending")}
-        {this.renderSection("Approved", "approved", "approved")}
-        {this.renderSection(
-          "Published Reports",
-          "published-reports",
-          "published"
-        )}
-        {this.renderSection(
-          "Cancelled Reports",
-          "cancelled-reports",
-          "cancelled"
-        )}
-      </div>
-    )
-  }
+      {renderSection("Draft Reports", "draft-reports", "draft")}
+      {renderSection("Upcoming Engagements", "upcoming-engagements", "future")}
+      {renderSection("Pending Approval", "pending-approval", "pending")}
+      {renderSection("Approved", "approved", "approved")}
+      {renderSection("Published Reports", "published-reports", "published")}
+      {renderSection("Cancelled Reports", "cancelled-reports", "cancelled")}
+    </div>
+  )
 
-  renderSection = (title, id, section) => {
+  function renderSection(title, id, section) {
     const queryParams = Object.assign(
       {},
-      this.sectionQueryParams[section],
-      this.getSearchQuery()
+      sectionQueryParams[section],
+      getSearchQuery(searchQuery)
     )
     return (
       <Fieldset title={title} id={id}>
         <ReportCollectionContainer
           queryParams={queryParams}
-          paginationKey={`r_${this.props.currentUser.uuid}_${id}`}
+          paginationKey={`r_${props.currentUser.uuid}_${id}`}
           mapId={id}
         />
       </Fieldset>
     )
   }
+}
+
+BaseMyReports.propTypes = {
+  ...pagePropTypes,
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 const mapStateToProps = (state, ownProps) => ({

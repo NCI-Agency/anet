@@ -11,14 +11,13 @@ import ReportCollection, {
 import ReportsVisualisation, {
   propTypes as rvPropTypes
 } from "components/ReportsVisualisation"
+import * as d3 from "d3"
 import LoaderHOC, { mapDispatchToProps } from "HOC/LoaderHOC"
 import moment from "moment"
 import React from "react"
 import { Overlay, Popover } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
-
-const d3 = require("d3")
 
 const BarChartWithLoader = connect(
   null,

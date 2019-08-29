@@ -1,23 +1,23 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import NotFound from "components/NotFound"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import React from "react"
 import { connect } from "react-redux"
 
-class PageMissing extends Page {
-  static propTypes = { ...pagePropTypes }
+const PageMissing = props => {
+  useBoilerplate({
+    pageProps: PAGE_PROPS_NO_NAV,
+    ...props
+  })
 
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  render() {
-    return <NotFound text={`Page ${this.props.match.params[0]} not found`} />
-  }
+  return <NotFound text={`Page ${this.props.match.params[0]} not found`} />
 }
+
+PageMissing.propTypes = { ...pagePropTypes }
 
 export default connect(
   null,

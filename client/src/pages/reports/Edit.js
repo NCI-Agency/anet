@@ -1,9 +1,10 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -92,60 +93,58 @@ const GQL_GET_REPORT = gql`
   }
 `
 
-class ReportEdit extends Page {
-  static propTypes = {
-    ...pagePropTypes
+const ReportEdit = props => {
+  const uuid = props.match.params.uuid
+  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Report",
+    uuid,
+    pageProps: PAGE_PROPS_NO_NAV,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "Report"
-
-  state = {
-    report: new Report()
+  if (data) {
+    data.report.cancelled = !!data.report.cancelledReason
+    data.report.reportTags = (data.report.tags || []).map(tag => ({
+      id: tag.uuid.toString(),
+      text: tag.name
+    }))
   }
+  const report = new Report(data ? data.report : {})
 
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  fetchData(props) {
-    return API.query(GQL_GET_REPORT, { uuid: props.match.params.uuid }).then(
-      data => {
-        data.report.cancelled = !!data.report.cancelledReason
-        data.report.reportTags = (data.report.tags || []).map(tag => ({
-          id: tag.uuid.toString(),
-          text: tag.name
-        }))
-        this.setState({ report: new Report(data.report) })
-      }
-    )
-  }
-
-  render() {
-    const { report } = this.state
-
-    return (
-      <div className="report-edit">
-        <RelatedObjectNotes
-          notes={report.notes}
-          relatedObject={
-            report.uuid && {
-              relatedObjectType: "reports",
-              relatedObjectUuid: report.uuid
-            }
+  return (
+    <div className="report-edit">
+      <RelatedObjectNotes
+        notes={report.notes}
+        relatedObject={
+          report.uuid && {
+            relatedObjectType: "reports",
+            relatedObjectUuid: report.uuid
           }
-        />
-        <ReportForm
-          edit
-          initialValues={report}
-          title={`Report #${report.uuid}`}
-          showSensitiveInfo={
-            !!report.reportSensitiveInformation &&
-            !!report.reportSensitiveInformation.text
-          }
-        />
-      </div>
-    )
-  }
+        }
+      />
+      <ReportForm
+        edit
+        initialValues={report}
+        title={`Report #${report.uuid}`}
+        showSensitiveInfo={
+          !!report.reportSensitiveInformation &&
+          !!report.reportSensitiveInformation.text
+        }
+      />
+    </div>
+  )
+}
+
+ReportEdit.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

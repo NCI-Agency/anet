@@ -1,32 +1,27 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import { Location } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import LocationForm from "./Form"
 
-class LocationNew extends Page {
-  static propTypes = {
-    ...pagePropTypes
-  }
+const LocationNew = props => {
+  useBoilerplate({
+    pageProps: PAGE_PROPS_NO_NAV,
+    ...props
+  })
 
-  state = {
-    location: new Location()
-  }
+  const location = new Location()
 
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
+  return <LocationForm initialValues={location} title="Create a new Location" />
+}
 
-  render() {
-    const { location } = this.state
-    return (
-      <LocationForm initialValues={location} title="Create a new Location" />
-    )
-  }
+LocationNew.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

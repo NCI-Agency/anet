@@ -205,7 +205,8 @@ class Search extends Page {
   }
 
   _fetchDataCallback = parts => {
-    return GQL.run(parts)
+    const { query: gqlQuery, variables } = GQL.getGqlQuery(parts)
+    return API.query(gqlQuery, variables)
       .then(data => {
         this.setState({
           error: null,
@@ -406,7 +407,8 @@ class Search extends Page {
     const { setPagination } = this.props
     const query = this.getSearchQuery()
     const part = this.getSearchPart(type, query, pageNum)
-    GQL.run([part])
+    const { query: gqlQuery, variables } = GQL.getGqlQuery([part])
+    API.query(gqlQuery, variables)
       .then(data => {
         let results = this.state.results // TODO: @nickjs this feels wrong, help!
         results[type] = data[type]
@@ -674,12 +676,14 @@ class Search extends Page {
   createExportResultsFunctionFor = exportType => () =>
     this._dataFetcher(
       this.props,
-      parts =>
-        GQL.runExport(parts, exportType)
+      parts => {
+        const { query, variables } = GQL.combine(parts)
+        return API.queryExport(query, variables, exportType)
           .then(blob => {
             FileSaver.saveAs(blob, `anet_export.${exportType}`)
           })
-          .catch(error => this.setState({ error: error })),
+          .catch(error => this.setState({ error: error }))
+      },
       0,
       0
     )

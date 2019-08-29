@@ -1,9 +1,7 @@
+import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-
 import "./BarChart.css"
-
-var d3 = require("d3")
 
 /*
  * Given an object and a property of the type prop1.prop2.prop3,

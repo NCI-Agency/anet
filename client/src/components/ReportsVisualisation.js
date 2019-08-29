@@ -6,11 +6,10 @@ import {
   GQL_REPORT_FIELDS,
   GQL_BASIC_REPORT_FIELDS
 } from "components/ReportCollection"
+import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-
-const d3 = require("d3")
 
 export const propTypes = {
   queryParams: PropTypes.object,

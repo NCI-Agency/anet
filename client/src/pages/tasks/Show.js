@@ -4,10 +4,11 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Messages, { setMessages } from "components/Messages"
-import Page, {
+import Messages from "components/Messages"
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -69,213 +70,205 @@ const GQL_GET_TASK = gql`
   }
 `
 
-class BaseTaskShow extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    currentUser: PropTypes.instanceOf(Person)
+const BaseTaskShow = props => {
+  const uuid = props.match.params.uuid
+  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Task",
+    uuid,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "Task"
+  const task = new Task(data ? data.task : {})
+  const ShortNameField = DictionaryField(Field)
+  const LongNameField = DictionaryField(Field)
+  const TaskCustomFieldRef1 = DictionaryField(Field)
+  const TaskCustomField = DictionaryField(Field)
+  const PlannedCompletionField = DictionaryField(Field)
+  const ProjectedCompletionField = DictionaryField(Field)
+  const TaskCustomFieldEnum1 = DictionaryField(Field)
+  const TaskCustomFieldEnum2 = DictionaryField(Field)
 
-  ShortNameField = DictionaryField(Field)
-  LongNameField = DictionaryField(Field)
-  TaskCustomFieldRef1 = DictionaryField(Field)
-  TaskCustomField = DictionaryField(Field)
-  PlannedCompletionField = DictionaryField(Field)
-  ProjectedCompletionField = DictionaryField(Field)
-  TaskCustomFieldEnum1 = DictionaryField(Field)
-  TaskCustomFieldEnum2 = DictionaryField(Field)
+  const stateSuccess = props.location.state && props.location.state.success
+  const stateError = props.location.state && props.location.state.error
+  const { currentUser, ...myFormProps } = props
 
-  state = {
-    task: new Task(),
-    success: null,
-    error: null
-  }
+  // Admins can edit tasks or users in positions related to the task
+  const canEdit =
+    currentUser.isAdmin() ||
+    (currentUser.position &&
+      !_isEmpty(
+        task.responsiblePositions.filter(
+          position => currentUser.position.uuid === position.uuid
+        )
+      ))
 
-  constructor(props) {
-    super(props)
-    setMessages(props, this.state)
-  }
-
-  fetchData(props) {
-    return API.query(GQL_GET_TASK, { uuid: props.match.params.uuid }).then(
-      data => {
-        this.setState({
-          task: new Task(data.task)
-        })
-      }
-    )
-  }
-
-  render() {
-    const { task } = this.state
-    const { currentUser, ...myFormProps } = this.props
-
-    // Admins can edit tasks or users in positions related to the task
-    const canEdit =
-      currentUser.isAdmin() ||
-      (currentUser.position &&
-        !_isEmpty(
-          task.responsiblePositions.filter(
-            position => currentUser.position.uuid === position.uuid
-          )
-        ))
-
-    return (
-      <Formik enableReinitialize initialValues={task} {...myFormProps}>
-        {({ values }) => {
-          const action = canEdit && (
-            <LinkTo task={task} edit button="primary">
-              Edit
-            </LinkTo>
-          )
-          return (
-            <div>
-              <RelatedObjectNotes
-                notes={task.notes}
-                relatedObject={
-                  task.uuid && {
-                    relatedObjectType: "tasks",
-                    relatedObjectUuid: task.uuid
-                  }
+  return (
+    <Formik enableReinitialize initialValues={task} {...myFormProps}>
+      {({ values }) => {
+        const action = canEdit && (
+          <LinkTo task={task} edit button="primary">
+            Edit
+          </LinkTo>
+        )
+        return (
+          <div>
+            <RelatedObjectNotes
+              notes={task.notes}
+              relatedObject={
+                task.uuid && {
+                  relatedObjectType: "tasks",
+                  relatedObjectUuid: task.uuid
                 }
+              }
+            />
+            <Messages success={stateSuccess} error={stateError} />
+            <Form className="form-horizontal" method="post">
+              <Fieldset
+                title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
+                action={action}
               />
-              <Messages success={this.state.success} error={this.state.error} />
-              <Form className="form-horizontal" method="post">
-                <Fieldset
-                  title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
-                  action={action}
+              <Fieldset>
+                <ShortNameField
+                  dictProps={Settings.fields.task.shortName}
+                  name="shortName"
+                  component={FieldHelper.renderReadonlyField}
                 />
-                <Fieldset>
-                  <this.ShortNameField
-                    dictProps={Settings.fields.task.shortName}
-                    name="shortName"
-                    component={FieldHelper.renderReadonlyField}
-                  />
 
-                  {/* Override componentClass and style from dictProps */}
-                  <this.LongNameField
-                    dictProps={Settings.fields.task.longName}
-                    componentClass="div"
-                    style={{}}
-                    name="longName"
-                    component={FieldHelper.renderReadonlyField}
-                  />
+                {/* Override componentClass and style from dictProps */}
+                <LongNameField
+                  dictProps={Settings.fields.task.longName}
+                  componentClass="div"
+                  style={{}}
+                  name="longName"
+                  component={FieldHelper.renderReadonlyField}
+                />
 
-                  <Field
-                    name="status"
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={Task.humanNameOfStatus}
-                  />
+                <Field
+                  name="status"
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={Task.humanNameOfStatus}
+                />
 
-                  <Field
-                    name="responsibleOrg"
-                    label={Settings.fields.task.responsibleOrg}
+                <Field
+                  name="responsibleOrg"
+                  label={Settings.fields.task.responsibleOrg}
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={
+                    task.responsibleOrg && (
+                      <LinkTo organization={task.responsibleOrg}>
+                        {task.responsibleOrg.shortName}
+                      </LinkTo>
+                    )
+                  }
+                />
+
+                {Settings.fields.task.customFieldRef1 && (
+                  <TaskCustomFieldRef1
+                    dictProps={Settings.fields.task.customFieldRef1}
+                    name="customFieldRef1"
                     component={FieldHelper.renderReadonlyField}
                     humanValue={
-                      task.responsibleOrg && (
-                        <LinkTo organization={task.responsibleOrg}>
-                          {task.responsibleOrg.shortName}
+                      task.customFieldRef1 && (
+                        <LinkTo task={task.customFieldRef1}>
+                          {task.customFieldRef1.shortName}{" "}
+                          {task.customFieldRef1.longName}
                         </LinkTo>
                       )
                     }
                   />
+                )}
 
-                  {Settings.fields.task.customFieldRef1 && (
-                    <this.TaskCustomFieldRef1
-                      dictProps={Settings.fields.task.customFieldRef1}
-                      name="customFieldRef1"
-                      component={FieldHelper.renderReadonlyField}
-                      humanValue={
-                        task.customFieldRef1 && (
-                          <LinkTo task={task.customFieldRef1}>
-                            {task.customFieldRef1.shortName}{" "}
-                            {task.customFieldRef1.longName}
-                          </LinkTo>
-                        )
-                      }
-                    />
-                  )}
+                <TaskCustomField
+                  dictProps={Settings.fields.task.customField}
+                  name="customField"
+                  component={FieldHelper.renderReadonlyField}
+                />
 
-                  <this.TaskCustomField
-                    dictProps={Settings.fields.task.customField}
-                    name="customField"
+                {Settings.fields.task.plannedCompletion && (
+                  <PlannedCompletionField
+                    dictProps={Settings.fields.task.plannedCompletion}
+                    name="plannedCompletion"
+                    component={FieldHelper.renderReadonlyField}
+                    humanValue={
+                      task.plannedCompletion &&
+                      moment(task.plannedCompletion).format(
+                        Settings.dateFormats.forms.displayShort.date
+                      )
+                    }
+                  />
+                )}
+
+                {Settings.fields.task.projectedCompletion && (
+                  <ProjectedCompletionField
+                    dictProps={Settings.fields.task.projectedCompletion}
+                    name="projectedCompletion"
+                    component={FieldHelper.renderReadonlyField}
+                    humanValue={
+                      task.projectedCompletion &&
+                      moment(task.projectedCompletion).format(
+                        Settings.dateFormats.forms.displayShort.date
+                      )
+                    }
+                  />
+                )}
+
+                {Settings.fields.task.customFieldEnum1 && (
+                  <TaskCustomFieldEnum1
+                    dictProps={Object.without(
+                      Settings.fields.task.customFieldEnum1,
+                      "enum"
+                    )}
+                    name="customFieldEnum1"
                     component={FieldHelper.renderReadonlyField}
                   />
+                )}
 
-                  {Settings.fields.task.plannedCompletion && (
-                    <this.PlannedCompletionField
-                      dictProps={Settings.fields.task.plannedCompletion}
-                      name="plannedCompletion"
-                      component={FieldHelper.renderReadonlyField}
-                      humanValue={
-                        task.plannedCompletion &&
-                        moment(task.plannedCompletion).format(
-                          Settings.dateFormats.forms.displayShort.date
-                        )
-                      }
-                    />
-                  )}
-
-                  {Settings.fields.task.projectedCompletion && (
-                    <this.ProjectedCompletionField
-                      dictProps={Settings.fields.task.projectedCompletion}
-                      name="projectedCompletion"
-                      component={FieldHelper.renderReadonlyField}
-                      humanValue={
-                        task.projectedCompletion &&
-                        moment(task.projectedCompletion).format(
-                          Settings.dateFormats.forms.displayShort.date
-                        )
-                      }
-                    />
-                  )}
-
-                  {Settings.fields.task.customFieldEnum1 && (
-                    <this.TaskCustomFieldEnum1
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum1,
-                        "enum"
-                      )}
-                      name="customFieldEnum1"
-                      component={FieldHelper.renderReadonlyField}
-                    />
-                  )}
-
-                  {Settings.fields.task.customFieldEnum2 && (
-                    <this.TaskCustomFieldEnum2
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum2,
-                        "enum"
-                      )}
-                      name="customFieldEnum2"
-                      component={FieldHelper.renderReadonlyField}
-                    />
-                  )}
-                </Fieldset>
-              </Form>
-
-              <Fieldset title="Responsible positions">
-                <PositionTable positions={task.responsiblePositions} />
+                {Settings.fields.task.customFieldEnum2 && (
+                  <TaskCustomFieldEnum2
+                    dictProps={Object.without(
+                      Settings.fields.task.customFieldEnum2,
+                      "enum"
+                    )}
+                    name="customFieldEnum2"
+                    component={FieldHelper.renderReadonlyField}
+                  />
+                )}
               </Fieldset>
+            </Form>
 
-              <Fieldset
-                title={`Reports for this ${Settings.fields.task.shortLabel}`}
-              >
-                <ReportCollectionContainer
-                  queryParams={{
-                    taskUuid: this.props.match.params.uuid
-                  }}
-                  paginationKey={`r_${this.props.match.params.uuid}`}
-                  mapId="reports"
-                />
-              </Fieldset>
-            </div>
-          )
-        }}
-      </Formik>
-    )
-  }
+            <Fieldset title="Responsible positions">
+              <PositionTable positions={task.responsiblePositions} />
+            </Fieldset>
+
+            <Fieldset
+              title={`Reports for this ${Settings.fields.task.shortLabel}`}
+            >
+              <ReportCollectionContainer
+                queryParams={{
+                  taskUuid: uuid
+                }}
+                paginationKey={`r_${uuid}`}
+                mapId="reports"
+              />
+            </Fieldset>
+          </div>
+        )
+      }}
+    </Formik>
+  )
+}
+
+BaseTaskShow.propTypes = {
+  ...pagePropTypes,
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 const TaskShow = props => (

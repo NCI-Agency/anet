@@ -1,9 +1,10 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -43,52 +44,50 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-class AuthorizationGroupEdit extends Page {
-  static propTypes = {
-    ...pagePropTypes
+const AuthorizationGroupEdit = props => {
+  const uuid = props.match.params.uuid
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_AUTHORIZATION_GROUP,
+    { uuid }
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "AuthorizationGroup",
+    uuid,
+    pageProps: PAGE_PROPS_NO_NAV,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "AuthorizationGroup"
+  const authorizationGroup = new AuthorizationGroup(
+    data ? data.authorizationGroup : {}
+  )
 
-  state = {
-    authorizationGroup: new AuthorizationGroup()
-  }
-
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  fetchData(props) {
-    return API.query(GQL_GET_AUTHORIZATION_GROUP, {
-      uuid: props.match.params.uuid
-    }).then(data => {
-      this.setState({
-        authorizationGroup: new AuthorizationGroup(data.authorizationGroup)
-      })
-    })
-  }
-
-  render() {
-    const { authorizationGroup } = this.state
-    return (
-      <div>
-        <RelatedObjectNotes
-          notes={authorizationGroup.notes}
-          relatedObject={
-            authorizationGroup.uuid && {
-              relatedObjectType: "authorizationGroups",
-              relatedObjectUuid: authorizationGroup.uuid
-            }
+  return (
+    <div>
+      <RelatedObjectNotes
+        notes={authorizationGroup.notes}
+        relatedObject={
+          authorizationGroup.uuid && {
+            relatedObjectType: "authorizationGroups",
+            relatedObjectUuid: authorizationGroup.uuid
           }
-        />
-        <AuthorizationGroupForm
-          edit
-          initialValues={authorizationGroup}
-          title={`Authorization Group ${authorizationGroup.name}`}
-        />
-      </div>
-    )
-  }
+        }
+      />
+      <AuthorizationGroupForm
+        edit
+        initialValues={authorizationGroup}
+        title={`Authorization Group ${authorizationGroup.name}`}
+      />
+    </div>
+  )
+}
+
+AuthorizationGroupEdit.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

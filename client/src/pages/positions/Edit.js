@@ -1,9 +1,10 @@
 import { PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -56,50 +57,47 @@ const GQL_GET_POSITION = gql`
   }
 `
 
-class PositionEdit extends Page {
-  static propTypes = {
-    ...pagePropTypes
+const PositionEdit = props => {
+  const uuid = props.match.params.uuid
+  const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Position",
+    uuid,
+    pageProps: PAGE_PROPS_NO_NAV,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "Position"
+  const position = new Position(data ? data.position : {})
 
-  state = {
-    position: new Position()
-  }
-
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  fetchData(props) {
-    return API.query(GQL_GET_POSITION, { uuid: props.match.params.uuid }).then(
-      data => {
-        this.setState({ position: new Position(data.position) })
-      }
-    )
-  }
-
-  render() {
-    const { position } = this.state
-    return (
-      <div>
-        <RelatedObjectNotes
-          notes={position.notes}
-          relatedObject={
-            position.uuid && {
-              relatedObjectType: "positions",
-              relatedObjectUuid: position.uuid
-            }
+  return (
+    <div>
+      <RelatedObjectNotes
+        notes={position.notes}
+        relatedObject={
+          position.uuid && {
+            relatedObjectType: "positions",
+            relatedObjectUuid: position.uuid
           }
-        />
-        <PositionForm
-          edit
-          initialValues={position}
-          title={`Position ${position.name}`}
-        />
-      </div>
-    )
-  }
+        }
+      />
+      <PositionForm
+        edit
+        initialValues={position}
+        title={`Position ${position.name}`}
+      />
+    </div>
+  )
+}
+
+PositionEdit.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

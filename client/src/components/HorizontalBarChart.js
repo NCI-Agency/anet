@@ -1,8 +1,7 @@
+import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import "./BarChart.css"
-
-let d3 = require("d3")
 
 /*
  * A bar chart component displaying horizontal bars, grouped per category

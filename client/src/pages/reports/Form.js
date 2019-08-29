@@ -1030,7 +1030,7 @@ class BaseReportForm extends Component {
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
     report.attendees = values.attendees.map(a =>
-      Object.without(a, "firstName", "lastName", "position", "_loaded")
+      Object.without(a, "firstName", "lastName", "position")
     )
     report.location = utils.getReference(report.location)
     const edit = this.isEditMode(values)
