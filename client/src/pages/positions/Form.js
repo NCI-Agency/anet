@@ -340,9 +340,7 @@ class BasePositionForm extends Component {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      this.props.history.replace(Position.pathForEdit(position), {
-        noRender: true
-      })
+      this.props.history.replace(Position.pathForEdit(position))
     }
     this.props.history.push(Position.pathFor(position), {
       success: "Position saved"
