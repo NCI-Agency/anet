@@ -6278,20 +6278,20 @@ draft-js@^0.10.5:
     immutable "~3.7.4"
     object-assign "^4.1.0"
 
-draftail@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/draftail/-/draftail-1.2.1.tgz#e8f8dd53ebb62612ed8e1c16cc6805466a401484"
-  integrity sha512-YL0QjfUxneOzwGaO1t66H47cFN82zGjrvw+0ERHpFGtUPjfrD7uCKlfXhPg1mOJgFFxuc44p7M5fUlrS1asBYg==
+draftail@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/draftail/-/draftail-1.3.0.tgz#989441f4143fc636a0ce02b523c26a7a1bbbc002"
+  integrity sha512-LOG4YgrJX4BMYJX5XrKGBegH9f/M21I8nFt+7MrPAB0ABXpURZhUVzVfWVa6hEdw6yOl2Z1T4H2G4OFTouK6Bg==
   dependencies:
     decorate-component-with-props "^1.0.2"
     draft-js-plugins-editor "^2.1.1"
-    draftjs-conductor "^0.4.1"
+    draftjs-conductor "^1.0.0"
     draftjs-filters "^2.2.3"
 
-draftjs-conductor@^0.4.1:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/draftjs-conductor/-/draftjs-conductor-0.4.4.tgz#c02b381c98a0a87d2aef99ca97c09efd2f441dab"
-  integrity sha512-Rw3MsypQ6MaeYDAgvGVpXT5oVNHbUZwzUbCpNiBDhIsNix8Ko5w83hZv9f/0btxeVx0RV9sNJEbc9qFxVgMEzA==
+draftjs-conductor@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/draftjs-conductor/-/draftjs-conductor-1.0.0.tgz#6c8aaa03eb0135210f4d32ce79015a3adcbdb647"
+  integrity sha512-pz5MIpS2aH6fgo2jrHo0Rt+rxqRgqnbrxEaaTiFLW4Dg/0U0eZhyxZPt6pByoS20Q7jCYOpolGpszKodNVi+TQ==
 
 draftjs-filters@^2.2.3:
   version "2.2.3"
