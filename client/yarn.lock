@@ -2329,10 +2329,10 @@
   resolved "https://registry.yarnpkg.com/@types/zen-observable/-/zen-observable-0.8.0.tgz#8b63ab7f1aa5321248aad5ac890a485656dcea4d"
   integrity sha512-te5lMAWii1uEJ4FwLjzdlbw3+n0FZNOvFXHxQDKeT0dilh7HOzdMzV2TrJVUzq8ep7J4Na8OUYPRLSQkJHAlrg==
 
-"@wdio/browserstack-service@^5.12.1":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.12.1.tgz#5f82373bf0f60ef6ea32b13a18425fe2e187bd3e"
-  integrity sha512-9SV3cspcLkNXRCiiR0yUOt3gQoyTrwaZsk46FllhexBjSvI04NLB3cVoeLvwgj/UOvjR6rIh0AuK7G7SW5BSVQ==
+"@wdio/browserstack-service@^5.12.5":
+  version "5.12.5"
+  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.12.5.tgz#2fa188cbafed7f63134ef776427384e8575af178"
+  integrity sha512-/5xJFbpPzH28M0gWWFyAW9LLxTSZpxxgRX29eT5izp8zR7pHSFTJgmRWnvMIZYtiKviDaXpa3oqI2Kc8mMG0ow==
   dependencies:
     "@wdio/logger" "^5.12.1"
     browserstack-local "1.4.2"
