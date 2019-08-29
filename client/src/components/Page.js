@@ -11,7 +11,7 @@ import NotFound from "components/NotFound"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { Component, useEffect } from "react"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
 import utils from "utils"
@@ -74,17 +74,80 @@ export function jumpToTop() {
   })
 }
 
+export const useBoilerplate = props => {
+  useEffect(
+    () => {
+      applyPageProps(props.setPageProps, props.pageProps)
+      applySearchProps(props.setSearchProps, props.searchProps)
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  )
+  useEffect(
+    () => toggleLoading(props.loading, props.showLoading, props.hideLoading),
+    [props.loading] // eslint-disable-line react-hooks/exhaustive-deps
+  )
+  if (props.loading) {
+    return { done: true, result: renderLoading() }
+  }
+  if (props.error) {
+    return {
+      done: true,
+      result: renderError(props.error, props.modelName, props.uuid)
+    }
+  }
+  return { done: false }
+}
+
+export const renderLoading = () => {
+  return null
+}
+
+export const renderError = (error, modelName, uuid) => {
+  if (error.status === 404) {
+    const text = modelName ? `${modelName} #${uuid}` : "Page"
+    return <NotFound text={`${text} not found.`} />
+  }
+  if (error.status === 500) {
+    return (
+      <NotFound text="There was an error processing this request. Please contact an administrator." />
+    )
+  }
+  return `${error.message}`
+}
+
+export const toggleLoading = (loading, showLoading, hideLoading) => {
+  if (loading) {
+    document.body.classList.add("loading")
+    if (typeof showLoading === "function") {
+      showLoading()
+    }
+  } else {
+    if (typeof hideLoading === "function") {
+      hideLoading()
+    }
+    document.body.classList.remove("loading")
+  }
+}
+
+export const applyPageProps = (setPageProps, pageProps) => {
+  const pp = _isEmpty(pageProps) ? DEFAULT_PAGE_PROPS : pageProps
+  if (typeof setPageProps === "function") {
+    setPageProps(Object.assign({}, pp))
+  }
+}
+
+export const applySearchProps = (setSearchProps, searchProps) => {
+  const sp = _isEmpty(searchProps) ? DEFAULT_SEARCH_PROPS : searchProps
+  if (typeof setSearchProps === "function") {
+    setSearchProps(Object.assign({}, sp))
+  }
+}
+
 export default class Page extends Component {
   constructor(props, pageProps, searchProps) {
     super(props)
-    const pp = _isEmpty(pageProps) ? DEFAULT_PAGE_PROPS : pageProps
-    const sp = _isEmpty(searchProps) ? DEFAULT_SEARCH_PROPS : searchProps
-    if (typeof props.setPageProps === "function") {
-      props.setPageProps(Object.assign({}, pp))
-    }
-    if (typeof props.setSearchProps === "function") {
-      props.setSearchProps(Object.assign({}, sp))
-    }
+    applyPageProps(props.setPageProps, pageProps)
+    applySearchProps(props.setSearchProps, searchProps)
     this.state = {
       notFound: false,
       invalidRequest: false,
@@ -108,10 +171,7 @@ export default class Page extends Component {
     })
 
     if (this.fetchData) {
-      document.body.classList.add("loading")
-      if (typeof this.props.showLoading === "function") {
-        this.props.showLoading()
-      }
+      toggleLoading(true, this.props.showLoading, this.props.hideLoading)
 
       const promise = this.fetchData(this.props)
 
@@ -129,10 +189,7 @@ export default class Page extends Component {
 
   @autobind
   doneLoading(response) {
-    if (typeof this.props.hideLoading === "function") {
-      this.props.hideLoading()
-    }
-    document.body.classList.remove("loading")
+    toggleLoading(false, this.props.showLoading, this.props.hideLoading)
 
     if (response) {
       if (response.status === 404) {

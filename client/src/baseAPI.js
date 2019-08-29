@@ -1,43 +1,12 @@
 import querystring from "querystring"
+import { useQuery } from "@apollo/react-hooks"
 import ApolloClient from "apollo-boost"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import _isEmpty from "lodash/isEmpty"
+import { useState } from "react"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
-const client = new ApolloClient({
-  uri: GRAPHQL_ENDPOINT,
-  cache: new InMemoryCache({
-    addTypename: false,
-    dataIdFromObject: object => object.uuid || null
-  }),
-  fetchOptions: {
-    credentials: "same-origin"
-  },
-  request: operation => {
-    let headers = {
-      Accept: "application/json"
-    }
-    const authHeader = BaseAPI._getAuthHeader()
-    if (authHeader) {
-      headers[authHeader[0]] = authHeader[1]
-    }
-    operation.setContext({ headers })
-  }
-})
-// Have to initialise this after creating the client
-// (see https://github.com/apollographql/apollo-client/issues/3900)
-client.defaultOptions = {
-  query: {
-    fetchPolicy: "no-cache"
-  },
-  watchQuery: {
-    fetchPolicy: "no-cache"
-  },
-  mutate: {
-    fetchPolicy: "no-cache"
-  }
-}
 
 const BaseAPI = {
   _fetch(url, data, accept) {
@@ -119,21 +88,31 @@ const BaseAPI = {
       error ||
       response.message ||
       "You do not have permissions to perform this action"
-    return Promise.reject(result)
+    return result
   },
 
   mutation(mutation, variables) {
-    return client
+    return BaseAPI.client
       .mutate({ mutation, variables })
       .then(BaseAPI._handleSuccess)
-      .catch(BaseAPI._handleError)
+      .catch(response => Promise.reject(BaseAPI._handleError(response)))
   },
 
   query(query, variables) {
-    return client
+    return BaseAPI.client
       .query({ query, variables })
       .then(BaseAPI._handleSuccess)
-      .catch(BaseAPI._handleError)
+      .catch(response => Promise.reject(BaseAPI._handleError(response)))
+  },
+
+  useApiQuery(query, variables) {
+    const [error, setError] = useState()
+    const results = useQuery(query, {
+      variables,
+      onError: error => setError(BaseAPI._handleError(error))
+    })
+    results.error = error
+    return results
   },
 
   _getAuthParams: function() {
@@ -164,6 +143,41 @@ const BaseAPI = {
       ]
     }
     return null
+  },
+
+  client: new ApolloClient({
+    uri: GRAPHQL_ENDPOINT,
+    cache: new InMemoryCache({
+      addTypename: false,
+      dataIdFromObject: object => object.uuid || null
+    }),
+    fetchOptions: {
+      credentials: "same-origin"
+    },
+    request: operation => {
+      let headers = {
+        Accept: "application/json"
+      }
+      const authHeader = BaseAPI._getAuthHeader()
+      if (authHeader) {
+        headers[authHeader[0]] = authHeader[1]
+      }
+      operation.setContext({ headers })
+    }
+  })
+}
+
+// Have to initialise this after creating the client
+// (see https://github.com/apollographql/apollo-client/issues/3900)
+BaseAPI.client.defaultOptions = {
+  query: {
+    fetchPolicy: "no-cache"
+  },
+  watchQuery: {
+    fetchPolicy: "no-cache"
+  },
+  mutate: {
+    fetchPolicy: "no-cache"
   }
 }
 
