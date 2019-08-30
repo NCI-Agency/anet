@@ -96,7 +96,7 @@ dependencies {
 	compile 'ch.qos.logback:logback-core:1.2.3'
 	compile 'ch.qos.logback:logback-access:1.2.3'
 	compile 'com.github.waffle:waffle-jna:1.9.1'
-	compile 'com.graphql-java:java-dataloader:2.2.1'
+	compile 'com.graphql-java:java-dataloader:2.2.3'
 	compile 'io.leangen.graphql:spqr:0.10.0'
 	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190610.1'
 
