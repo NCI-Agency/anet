@@ -577,9 +577,7 @@ class BasePersonForm extends Component {
         this.props.loadAppData()
       }
       if (!edit) {
-        this.props.history.replace(Person.pathForEdit(person), {
-          noRender: true
-        })
+        this.props.history.replace(Person.pathForEdit(person))
       }
       this.props.history.push(Person.pathFor(person), {
         success: "Person saved"

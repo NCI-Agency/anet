@@ -662,9 +662,7 @@ class BaseOrganizationForm extends Component {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      this.props.history.replace(Organization.pathForEdit(organization), {
-        noRender: true
-      })
+      this.props.history.replace(Organization.pathForEdit(organization))
     }
     this.props.history.push(Organization.pathFor(organization), {
       success: "Organization saved"

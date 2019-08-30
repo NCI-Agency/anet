@@ -233,7 +233,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static Blob convertImageToBlob(String image) {
     try {
-      return new SerialBlob(image.getBytes());
+      return image == null ? null : new SerialBlob(image.getBytes());
     } catch (Exception e) {
       logger.error("Failed to save avatar: ", e);
       return null;

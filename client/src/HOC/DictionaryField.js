@@ -13,7 +13,7 @@ const DictionaryField = WrappedComponent => {
       // Only display field if the dictProps are defined
       if (!_isEmpty(dictProps)) {
         return (
-          <WrappedComponent {...Object.assign({}, otherProps, dictProps)} />
+          <WrappedComponent {...Object.assign({}, dictProps, otherProps)} />
         )
       } else {
         return null

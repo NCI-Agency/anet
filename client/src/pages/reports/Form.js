@@ -977,9 +977,7 @@ class BaseReportForm extends Component {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     resetForm()
     if (!edit) {
-      this.props.history.replace(Report.pathForEdit(report), {
-        noRender: true
-      })
+      this.props.history.replace(Report.pathForEdit(report))
     }
     this.props.history.push(Report.pathFor(report), {
       success: "Report saved"
