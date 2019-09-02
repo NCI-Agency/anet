@@ -3,6 +3,8 @@ let _includes = require("lodash/includes")
 let moment = require("moment")
 let test = require("../util/test")
 
+var testReportURL = null
+
 test("Draft and submit a report", async t => {
   t.plan(14)
 
@@ -141,6 +143,7 @@ test("Draft and submit a report", async t => {
     /reports\/[0-9a-f-]+/,
     "URL is updated to reports/show page"
   )
+  testReportURL = currentPathname
 
   let $submitReportButton = await $("#submitReportButton")
   await $submitReportButton.click()
@@ -234,8 +237,11 @@ test("Publish report chain", async t => {
   )
   await $reportsPendingJacobSummaryTab.click()
 
-  let $firstReadReportButtonJacob = await $(".read-report-button")
-  await $firstReadReportButtonJacob.click()
+  let $readReportButtonJacob = await $(
+    ".read-report-button[href='" + testReportURL + "']"
+  )
+  await t.context.driver.wait(until.elementIsEnabled($readReportButtonJacob))
+  await $readReportButtonJacob.click()
   await pageHelpers.assertReportShowStatusText(
     t,
     "This report about a past engagement is PENDING approvals."
@@ -267,9 +273,11 @@ test("Publish report chain", async t => {
   )
   await $reportsPendingRebeccaSummaryTab.click()
 
-  let $firstReadReportButton = await $(".read-report-button")
-  await t.context.driver.wait(until.elementIsEnabled($firstReadReportButton))
-  await $firstReadReportButton.click()
+  let $readReportButtonRebecca = await $(
+    ".read-report-button[href='" + testReportURL + "']"
+  )
+  await t.context.driver.wait(until.elementIsEnabled($readReportButtonRebecca))
+  await $readReportButtonRebecca.click()
 
   await pageHelpers.assertReportShowStatusText(
     t,
@@ -296,16 +304,16 @@ test("Publish report chain", async t => {
   await $approvedReports.click()
   await t.context.driver.wait(until.stalenessOf($approvedReports))
 
-  let $reportsPendingArthurSummaryTab = await $(
+  let $reportsApprovedSummaryTab = await $(
     ".report-collection button[value='summary']"
   )
-  await $reportsPendingArthurSummaryTab.click()
+  await $reportsApprovedSummaryTab.click()
 
-  let $firstReadApprovedReportButton = await $(".read-report-button")
-  await t.context.driver.wait(
-    until.elementIsEnabled($firstReadApprovedReportButton)
+  let $readApprovedReportButton = await $(
+    ".read-report-button[href='" + testReportURL + "']"
   )
-  await $firstReadApprovedReportButton.click()
+  await t.context.driver.wait(until.elementIsEnabled($readApprovedReportButton))
+  await $readApprovedReportButton.click()
 
   await pageHelpers.assertReportShowStatusText(
     t,
