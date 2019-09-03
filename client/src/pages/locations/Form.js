@@ -199,9 +199,7 @@ class LocationForm extends Component {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      this.props.history.replace(Location.pathForEdit(location), {
-        noRender: true
-      })
+      this.props.history.replace(Location.pathForEdit(location))
     }
     this.props.history.push(Location.pathFor(location), {
       success: "Location saved"

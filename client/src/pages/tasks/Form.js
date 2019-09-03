@@ -417,9 +417,7 @@ class BaseTaskForm extends Component {
     form.resetForm()
     this.props.history.replace(Task.pathForEdit(task))
     if (!edit) {
-      this.props.history.replace(Task.pathForEdit(task), {
-        noRender: true
-      })
+      this.props.history.replace(Task.pathForEdit(task))
     }
     this.props.history.push(Task.pathFor(task), {
       success: "Task saved"

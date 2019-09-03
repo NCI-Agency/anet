@@ -225,9 +225,7 @@ class AuthorizationGroupForm extends Component {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup), {
-        noRender: true
-      })
+      this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
     }
     this.props.history.push(AuthorizationGroup.pathFor(authGroup), {
       success: "Authorization Group saved"
