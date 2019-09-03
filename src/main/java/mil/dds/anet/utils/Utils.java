@@ -323,7 +323,8 @@ public class Utils {
    * @param whitelistDomainNames The list of whitelisted domain names (wildcards allowed)
    * @return Whether the email is whitelisted
    */
-  public static boolean isEmailWhitelisted(final String email, final List<String> whitelistDomainNames) {
+  public static boolean isEmailWhitelisted(final String email,
+      final List<String> whitelistDomainNames) {
     try {
       return isLogonDomainInList(email, whitelistDomainNames);
     } catch (Exception e) {
@@ -344,14 +345,15 @@ public class Utils {
   public static boolean isDomainUserNameIgnored(final String domainUserName,
       final List<String> ignoredDomainNames) {
     try {
-        return isLogonDomainInList(domainUserName, ignoredDomainNames);
+      return isLogonDomainInList(domainUserName, ignoredDomainNames);
     } catch (Exception e) {
       logger.error("Failed to process domain user name: ", domainUserName);
       return true;
     }
   }
 
-  public static boolean isLogonDomainInList(final String logon, final List<String> list) throws Exception {
+  public static boolean isLogonDomainInList(final String logon, final List<String> list)
+      throws Exception {
 
     final String upnSeparator = "@";
     final String dlSeparator = "\\";
@@ -360,29 +362,34 @@ public class Utils {
       return false;
     }
 
-    // Logon has no domain  
-    // TODO: Decide whether to also support usernames without domain (supported for now, but no filtering can take place)   
+    // Logon has no domain
+    // TODO: Decide whether to also support usernames without domain (supported for now, but no
+    // filtering can take place)
     if (!logon.contains(upnSeparator) && !logon.contains(dlSeparator)) {
       return false;
-    }    
+    }
 
-    // Does it have 'Down-Level Logon Name' format (<userName>@<domain>) or 'User Principal Name' format (<domain>\<userName>)?
+    // Does it have 'Down-Level Logon Name' format (<userName>@<domain>) or 'User Principal Name'
+    // format (<domain>\<userName>)?
     boolean isDownLevelFormat = logon.contains(dlSeparator);
 
     final String wildcard = "*";
-    final String[] splittedLogon = logon.trim().split(isDownLevelFormat ? dlSeparator + "\\": upnSeparator);
+    final String[] splittedLogon =
+        logon.trim().split(isDownLevelFormat ? dlSeparator + "\\" : upnSeparator);
 
     // A logon (domain user name or email) is expected to have two parts: username<separator>domain
     if (splittedLogon.length != 2) {
       throw new Exception("Misformed logon: " + logon);
     }
 
-    // Decide whether it is a name without domain, or it has the down-level or 'User Principal Name' format
-    final String domainName = (isDownLevelFormat ? splittedLogon[0] : splittedLogon[1]).toLowerCase();
+    // Decide whether it is a name without domain, or it has the down-level or 'User Principal Name'
+    // format
+    final String domainName =
+        (isDownLevelFormat ? splittedLogon[0] : splittedLogon[1]).toLowerCase();
 
-    // Compile a list of domain names regex patterns we want to use to filter and then find any match
-    return list.stream()
-        .map(domain -> domainToRegexPattern(domain, wildcard))
+    // Compile a list of domain names regex patterns we want to use to filter and then find any
+    // match
+    return list.stream().map(domain -> domainToRegexPattern(domain, wildcard))
         .anyMatch(domainPattern -> domainPattern.matcher(domainName).matches());
   }
 

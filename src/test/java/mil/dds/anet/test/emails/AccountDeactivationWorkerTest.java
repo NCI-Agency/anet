@@ -183,8 +183,8 @@ public class AccountDeactivationWorkerTest {
 
     when(personDao.search(Mockito.any()))
         .thenReturn(new AnetBeanList<>(Arrays.asList(testPersonIgnored1, testPersonIgnored2,
-            testPersonIgnored3, testPersonIgnored4, testPersonIgnored5, testPersonIgnored6, testPersonIgnored7, 
-            testPersonIgnored8, testPersonIgnored9, testPersonIgnored10)));
+            testPersonIgnored3, testPersonIgnored4, testPersonIgnored5, testPersonIgnored6,
+            testPersonIgnored7, testPersonIgnored8, testPersonIgnored9, testPersonIgnored10)));
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
