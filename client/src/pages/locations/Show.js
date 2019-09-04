@@ -14,19 +14,18 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollectionContainer from "components/ReportCollectionContainer"
+import ReportCollection, {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location, Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
-import {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
 
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
@@ -133,9 +132,9 @@ const BaseLocationShow = props => {
             </Form>
 
             <Fieldset title={"Reports at this Location"}>
-              <ReportCollectionContainer
-                queryParams={{ locationUuid: uuid }}
+              <ReportCollection
                 paginationKey={`r_${uuid}`}
+                queryParams={{ locationUuid: uuid }}
                 mapId="reports"
                 viewFormats={[
                   FORMAT_CALENDAR,

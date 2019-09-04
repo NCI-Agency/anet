@@ -236,45 +236,32 @@ class CancelledEngagementReports extends ReportsVisualisation {
   @autobind
   getReportCollection(id) {
     return (
-      <Context.Consumer>
-        {context =>
-          context.allReports === null ? null : (
-            <div className="scrollable">
-              <ReportCollection
-                reports={context.allReports}
-                paginatedReports={context.reports}
-                goToPage={this.goToReportsPage}
-                viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY, FORMAT_CALENDAR]}
-              />
-            </div>
-          )
-        }
-      </Context.Consumer>
+      <div className="scrollable">
+        <ReportCollection
+          paginationKey={`r_${id}`}
+          queryParams={this.getQueryParams()}
+          viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY, FORMAT_CALENDAR]}
+        />
+      </div>
     )
   }
 
   @autobind
   getReportMap(id) {
     return (
-      <Context.Consumer>
-        {context =>
-          context.allReports === null ? null : (
-            <div className="non-scrollable">
-              <ContainerDimensions>
-                {({ width, height }) => (
-                  <ReportCollection
-                    width={width}
-                    height={height}
-                    marginBottom={0}
-                    reports={context.allReports}
-                    viewFormats={[FORMAT_MAP]}
-                  />
-                )}
-              </ContainerDimensions>
-            </div>
-          )
-        }
-      </Context.Consumer>
+      <div className="non-scrollable">
+        <ContainerDimensions>
+          {({ width, height }) => (
+            <ReportCollection
+              queryParams={this.getQueryParams()}
+              width={width}
+              height={height}
+              marginBottom={0}
+              viewFormats={[FORMAT_MAP]}
+            />
+          )}
+        </ContainerDimensions>
+      </div>
     )
   }
 

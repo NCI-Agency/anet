@@ -6,7 +6,7 @@ import {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-import ReportCollectionContainer from "components/ReportCollectionContainer"
+import ReportCollection from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import { Person, Report } from "models"
 import PropTypes from "prop-types"
@@ -76,9 +76,9 @@ const BaseMyReports = props => {
     )
     return (
       <Fieldset title={title} id={id}>
-        <ReportCollectionContainer
+        <ReportCollection
+          paginationKey={`r_${id}_${props.currentUser.uuid}`}
           queryParams={queryParams}
-          paginationKey={`r_${props.currentUser.uuid}_${id}`}
           mapId={id}
         />
       </Fieldset>

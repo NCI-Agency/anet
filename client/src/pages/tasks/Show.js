@@ -13,7 +13,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollectionContainer from "components/ReportCollectionContainer"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { Person, Task } from "models"
 import moment from "moment"
@@ -251,11 +251,11 @@ const BaseTaskShow = props => {
             <Fieldset
               title={`Reports for this ${Settings.fields.task.shortLabel}`}
             >
-              <ReportCollectionContainer
+              <ReportCollection
+                paginationKey={`r_${uuid}`}
                 queryParams={{
                   taskUuid: uuid
                 }}
-                paginationKey={`r_${uuid}`}
                 mapId="reports"
               />
             </Fieldset>

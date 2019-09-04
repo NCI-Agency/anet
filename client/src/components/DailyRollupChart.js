@@ -171,6 +171,9 @@ class DailyRollupChart extends Component {
           `translate(1, ${i * (BAR_HEIGHT + BAR_PADDING) + BAR_PADDING / 2})`
       )
       .classed("bar", true)
+      .attr("id", function(d, i) {
+        return `bar_${d.org.uuid}`
+      })
       .on(
         "mouseenter",
         d =>

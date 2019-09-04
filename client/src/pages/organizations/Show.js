@@ -15,7 +15,12 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollectionContainer from "components/ReportCollectionContainer"
+import ReportCollection, {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import { Organization, Person, Position, Report, Task } from "models"
@@ -25,12 +30,6 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
@@ -167,10 +166,6 @@ const BaseOrganizationShow = props => {
       <AnchorNavItem to="reports">Reports</AnchorNavItem>
     </Nav>
   )
-  // TODO: Check if this is still needed
-  if (!currentUser) {
-    return <div className="loader" />
-  }
   const reportQueryParams = {
     orgUuid: uuid
   }
@@ -351,9 +346,9 @@ const BaseOrganizationShow = props => {
                 id="reports"
                 title={`Reports from ${organization.shortName}`}
               >
-                <ReportCollectionContainer
-                  queryParams={reportQueryParams}
+                <ReportCollection
                   paginationKey={`r_${uuid}`}
+                  queryParams={reportQueryParams}
                   viewFormats={[
                     FORMAT_CALENDAR,
                     FORMAT_SUMMARY,

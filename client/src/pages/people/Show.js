@@ -2,6 +2,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPositionModal from "components/AssignPositionModal"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -16,7 +17,12 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollectionContainer from "components/ReportCollectionContainer"
+import ReportCollection, {
+  FORMAT_MAP,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE,
+  FORMAT_CALENDAR
+} from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -26,13 +32,6 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -323,7 +322,8 @@ const BasePersonShow = props => {
 
               {person.isAdvisor() && (
                 <Fieldset title="Reports authored" id="reports-authored">
-                  <ReportCollectionContainer
+                  <ReportCollection
+                    paginationKey={`r_authored_${uuid}`}
                     queryParams={{
                       authorUuid: uuid
                     }}
@@ -333,7 +333,6 @@ const BasePersonShow = props => {
                       FORMAT_TABLE,
                       FORMAT_MAP
                     ]}
-                    paginationKey={`r_authored_${uuid}`}
                     mapId="reports-authored"
                   />
                 </Fieldset>
@@ -343,11 +342,11 @@ const BasePersonShow = props => {
                 title={`Reports attended by ${person.name}`}
                 id="reports-attended"
               >
-                <ReportCollectionContainer
+                <ReportCollection
+                  paginationKey={`r_attended_${uuid}`}
                   queryParams={{
                     attendeeUuid: uuid
                   }}
-                  paginationKey={`r_attended_${uuid}`}
                   mapId="reports-attended"
                 />
               </Fieldset>

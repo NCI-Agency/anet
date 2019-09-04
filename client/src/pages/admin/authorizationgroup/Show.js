@@ -14,7 +14,7 @@ import PositionTable from "components/PositionTable"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollectionContainer from "components/ReportCollectionContainer"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Person } from "models"
 import PropTypes from "prop-types"
@@ -128,11 +128,11 @@ const BaseAuthorizationGroupShow = props => {
               </Fieldset>
 
               <Fieldset title="Reports">
-                <ReportCollectionContainer
+                <ReportCollection
+                  paginationKey={`r_${uuid}`}
                   queryParams={{
                     authorizationGroupUuid: uuid
                   }}
-                  paginationKey={`r_${uuid}`}
                   mapId="reports"
                 />
               </Fieldset>

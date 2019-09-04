@@ -2,10 +2,6 @@ import API from "api"
 import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import MosaicLayout from "components/MosaicLayout"
-import {
-  GQL_REPORT_FIELDS,
-  GQL_BASIC_REPORT_FIELDS
-} from "components/ReportCollection"
 import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
@@ -43,14 +39,6 @@ export default class ReportsVisualisation extends Component {
     return "selected-bar"
   }
 
-  get gqlReportFields() {
-    return GQL_REPORT_FIELDS
-  }
-
-  get gqlBasicReportFields() {
-    return GQL_BASIC_REPORT_FIELDS
-  }
-
   render() {
     return (
       <MosaicLayout
@@ -67,32 +55,8 @@ export default class ReportsVisualisation extends Component {
     this.props.showLoading()
     Promise.all([
       // Query used by the chart
-      this.fetchChartData(this.runChartQuery(this.chartQueryParams())),
-      this.fetchReportData(true)
+      this.fetchChartData(this.runChartQuery(this.chartQueryParams()))
     ]).then(() => this.props.hideLoading())
-  }
-
-  fetchReportData(includeAll) {
-    // Query used by the reports collection
-    const queries = [
-      this.runReportsQuery(this.reportsQueryParams(false), false)
-    ]
-    if (includeAll) {
-      // Query used by the map and calendar
-      queries.push(this.runReportsQuery(this.reportsQueryParams(true), true))
-    }
-    return Promise.all(queries).then(values => {
-      const stateUpdate = {
-        updateChart: false, // only update the report list
-        reports: values[0].reportList
-      }
-      if (includeAll) {
-        Object.assign(stateUpdate, {
-          allReports: values[1].reportList.list
-        })
-      }
-      this.setState(stateUpdate)
-    })
   }
 
   chartQueryParams = () => {
@@ -120,45 +84,13 @@ export default class ReportsVisualisation extends Component {
     )
   }
 
-  reportsQueryParams = includeAll => {
-    const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.props.queryParams)
-    Object.assign(reportsQueryParams, {
-      pageNum: includeAll ? 0 : this.state.reportsPageNum,
-      pageSize: includeAll ? 0 : 10
-    })
+  getQueryParams = () => {
+    const queryParams = {}
+    Object.assign(queryParams, this.props.queryParams)
     if (this.state.focusedSelection) {
-      Object.assign(reportsQueryParams, this.additionalReportParams)
+      Object.assign(queryParams, this.additionalReportParams)
     }
-    return reportsQueryParams
-  }
-
-  runReportsQuery = (reportsQueryParams, includeAll) => {
-    return API.query(
-      gql`
-        query($reportsQueryParams: ReportSearchQueryInput, $includeAll: Boolean!) {
-          reportList(query: $reportsQueryParams) {
-            pageNum
-            pageSize
-            totalCount
-            list @include(if: $includeAll) {
-              ${this.gqlBasicReportFields}
-            }
-            list @skip(if: $includeAll) {
-              ${this.gqlReportFields}
-            }
-          }
-        }
-      `,
-      { reportsQueryParams, includeAll }
-    )
-  }
-
-  @autobind
-  goToReportsPage(newPage) {
-    this.setState({ updateChart: false, reportsPageNum: newPage }, () =>
-      this.fetchReportData(false)
-    )
+    return queryParams
   }
 
   @autobind
@@ -168,15 +100,9 @@ export default class ReportsVisualisation extends Component {
     // Note: we set updateChart to false as we do not want to re-render the chart
     // when changing the focus.
     if (!item || item === this.state.focusedSelection) {
-      this.setState(
-        { updateChart: false, reportsPageNum: 0, focusedSelection: "" },
-        () => this.fetchReportData(true)
-      )
+      this.setState({ updateChart: false, focusedSelection: "" })
     } else {
-      this.setState(
-        { updateChart: false, reportsPageNum: 0, focusedSelection: item },
-        () => this.fetchReportData(true)
-      )
+      this.setState({ updateChart: false, focusedSelection: item })
       this.updateHighlight(item, false, chartId)
     }
   }
@@ -202,7 +128,6 @@ export default class ReportsVisualisation extends Component {
   componentDidMount() {
     this.setState(
       {
-        reportsPageNum: 0,
         focusedSelection: "" // reset focus when changing the queryParams
       },
       () => this.fetchData()
@@ -213,7 +138,6 @@ export default class ReportsVisualisation extends Component {
     if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState(
         {
-          reportsPageNum: 0,
           focusedSelection: "" // reset focus when changing the queryParams
         },
         () => this.fetchData()
