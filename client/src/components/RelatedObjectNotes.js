@@ -38,6 +38,11 @@ class BaseRelatedObjectNotes extends Component {
     relatedObject: PropTypes.shape({
       relatedObjectType: PropTypes.string.isRequired,
       relatedObjectUuid: PropTypes.string.isRequired
+    }),
+    relatedObjectValue: PropTypes.shape({
+      role: PropTypes.string.isRequired,
+      rank: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired
     })
   }
 
@@ -287,16 +292,12 @@ class BaseRelatedObjectNotes extends Component {
 
                     <br />
                     {question.choice.map(choice => (
-                      <>
-                        <span
-                          key={choice.value}
-                          style={{ backgroundColor: choice.color }}
-                        >
+                      <React.Fragment key={choice.value}>
+                        <span style={{ backgroundColor: choice.color }}>
                           {choice.label} :
-                          <b>{assessmentsSummary[question.id][choice.value]}</b>
-                        </span>{" "}
-                        {"  "}
-                      </>
+                          <b>{assessmentsSummary[question.id][choice.value]}</b>{" "}
+                        </span>
+                      </React.Fragment>
                     ))}
                     <br />
                     <br />
