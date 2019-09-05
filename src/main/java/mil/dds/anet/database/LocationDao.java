@@ -12,7 +12,7 @@ import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class LocationDao extends AnetBaseDao<Location> {
+public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
 
   public static final String TABLE_NAME = "locations";
 
@@ -64,19 +64,20 @@ public class LocationDao extends AnetBaseDao<Location> {
     String sql;
     if (DaoUtils.isMsSql()) {
       sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE uuid IN ( "
-          + "SELECT TOP(:maxResults) reports.\"locationUuid\" " + "FROM reports "
-          + "WHERE authorUuid = :authorUuid " + "GROUP BY \"locationUuid\" "
-          + "ORDER BY MAX(reports.\"createdAt\") DESC" + ")";
+          + "SELECT TOP(:maxResults) reports.\"locationUuid\" FROM reports "
+          + "WHERE authorUuid = :authorUuid GROUP BY \"locationUuid\" "
+          + "ORDER BY MAX(reports.\"createdAt\") DESC)";
     } else {
       sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE uuid IN ( "
-          + "SELECT reports.\"locationUuid\" " + "FROM reports "
-          + "WHERE \"authorUuid\" = :authorUuid " + "GROUP BY \"locationUuid\" "
-          + "ORDER BY MAX(reports.\"createdAt\") DESC " + "LIMIT :maxResults" + ")";
+          + "SELECT reports.\"locationUuid\" FROM reports "
+          + "WHERE \"authorUuid\" = :authorUuid GROUP BY \"locationUuid\" "
+          + "ORDER BY MAX(reports.\"createdAt\") DESC LIMIT :maxResults)";
     }
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).map(new LocationMapper()).list();
   }
 
+  @Override
   public AnetBeanList<Location> search(LocationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getLocationSearcher().runSearch(query);
   }

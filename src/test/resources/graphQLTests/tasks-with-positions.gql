@@ -1,0 +1,26 @@
+taskList(query: {pageSize: 0}) {
+  totalCount
+  list {
+    uuid
+    shortName
+    longName
+    responsiblePositions {
+      uuid
+      name
+      code
+      type
+      status
+      organization {
+        uuid
+        shortName
+      }
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+  }
+}

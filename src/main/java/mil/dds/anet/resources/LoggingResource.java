@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.auth.Auth;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -17,8 +16,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 @Path("/api/logging")
-@Consumes(MediaType.APPLICATION_JSON)
-@PermitAll
 public class LoggingResource {
 
   private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
@@ -48,7 +45,7 @@ public class LoggingResource {
   @POST
   @Timed
   @Path("/log")
-  @PermitAll
+  @Consumes(MediaType.APPLICATION_JSON)
   public void logMessage(final @Context HttpServletRequest requestContext, final @Auth Person user,
       final List<LogEntry> logEntries) {
     for (final LogEntry logEntry : logEntries) {

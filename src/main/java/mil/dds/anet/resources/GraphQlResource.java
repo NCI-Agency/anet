@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -44,8 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path("/graphql")
-@Produces(MediaType.APPLICATION_JSON)
-@PermitAll
 public class GraphQlResource {
 
   private static final Logger logger =
@@ -153,10 +150,10 @@ public class GraphQlResource {
 
   @POST
   @Timed
-  @Produces()
+  @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MEDIATYPE_XLSX})
   public Response graphqlPost(@Auth Person user, Map<String, Object> body) {
-    String query = (String) body.get("query");
-    String output = (String) body.get("output");
+    final String operationName = (String) body.get("operationName");
+    final String query = (String) body.get("query");
 
     @SuppressWarnings("unchecked")
     Map<String, Object> variables = (Map<String, Object>) body.get("variables");
@@ -164,24 +161,26 @@ public class GraphQlResource {
       variables = new HashMap<String, Object>();
     }
 
-    return graphql(user, query, output, variables);
+    final String output = (String) body.get("output"); // Non-GraphQL
+
+    return graphql(user, operationName, query, variables, output);
   }
 
   @GET
   @Timed
   @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MEDIATYPE_XLSX})
-  public Response graphqlGet(@Auth Person user, @QueryParam("query") String query,
-      @QueryParam("output") String output) {
-    return graphql(user, query, output, new HashMap<String, Object>());
+  public Response graphqlGet(@Auth Person user, @QueryParam("operationName") String operationName,
+      @QueryParam("query") String query, @QueryParam("output") String output) {
+    return graphql(user, operationName, query, new HashMap<String, Object>(), output);
   }
 
-  protected Response graphql(@Auth Person user, String query, String output,
-      Map<String, Object> variables) {
+  protected Response graphql(@Auth Person user, String operationName, String query,
+      Map<String, Object> variables, String output) {
     if (developmentMode) {
       buildGraph();
     }
 
-    final ExecutionResult executionResult = dispatchRequest(user, query, variables);
+    final ExecutionResult executionResult = dispatchRequest(user, operationName, query, variables);
     final Map<String, Object> result = executionResult.toSpecification();
     if (executionResult.getErrors().size() > 0) {
       WebApplicationException actual = null;
@@ -206,15 +205,16 @@ public class GraphQlResource {
     return transformer.apply(result).build();
   }
 
-  private ExecutionResult dispatchRequest(Person user, String query,
+  private ExecutionResult dispatchRequest(Person user, String operationName, String query,
       Map<String, Object> variables) {
     final DataLoaderRegistry dataLoaderRegistry =
         BatchingUtils.registerDataLoaders(engine, true, true);
     final Map<String, Object> context = new HashMap<>();
     context.put("user", user);
     context.put("dataLoaderRegistry", dataLoaderRegistry);
-    final ExecutionInput executionInput = ExecutionInput.newExecutionInput().query(query)
-        .dataLoaderRegistry(dataLoaderRegistry).context(context).variables(variables).build();
+    final ExecutionInput executionInput =
+        ExecutionInput.newExecutionInput().operationName(operationName).query(query)
+            .variables(variables).dataLoaderRegistry(dataLoaderRegistry).context(context).build();
 
     final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
         // .instrumentation(new DataLoaderDispatcherInstrumentation()) — use our own dispatcher

@@ -14,33 +14,31 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
   }
 
   @Override
-  protected void buildQuery(PersonSearchQuery query) {
-    qb.addSelectClause(PersonDao.PERSON_FIELDS);
-    super.buildQuery(query);
-    qb.addTotalCount();
-  }
-
-  @Override
   protected void addTextQuery(PersonSearchQuery query) {
     final boolean doSoundex = !query.isSortByPresent();
     final String text = query.getText();
     if (doSoundex) {
-      qb.addSelectClause("EXP(SUM(LOG(1.0/(5-DIFFERENCE(name_token.value, search_token.value)))))"
-          + " AS search_rank");
+      if (!query.isSortByPresent()) {
+        // If we're doing a full-text search without an explicit sort order, add a pseudo-rank so we
+        // can sort on it.
+        qb.addSelectClause("EXP(SUM(LOG(1.0/(5-DIFFERENCE(name_token.value, search_token.value)))))"
+            + " AS search_rank");
+      }
       qb.addFromClause("CROSS APPLY STRING_SPLIT(people.name, ' ') AS name_token"
           + " CROSS APPLY STRING_SPLIT(:freetextQuery, ' ') AS search_token");
       qb.addSqlArg("freetextQuery", text);
       // Add grouping needed for soundex score
       qb.addGroupByClause(PersonDao.PERSON_FIELDS_NOAS);
     } else {
-      // If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
-      // so we can sort on it (show the most relevant hits at the top).
-      // Note that summing up independent ranks is not ideal, but it's the best we can do now.
-      // See
-      // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
-      qb.addSelectClause("ISNULL(c_people.rank, 0) + ISNULL(f_people.rank, 0)"
-          + (query.getMatchPositionName() ? " + ISNULL(c_positions.rank, 0)" : "")
-          + " AS search_rank");
+      if (!query.isSortByPresent()) {
+        // If we're doing a full-text search without an explicit sort order, add a pseudo-rank (the
+        // sum of all search ranks) so we can sort on it (show the most relevant hits at the top).
+        // Note that summing up independent ranks is not ideal, but it's the best we can do now. See
+        // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
+        qb.addSelectClause("ISNULL(c_people.rank, 0) + ISNULL(f_people.rank, 0)"
+            + (query.getMatchPositionName() ? " + ISNULL(c_positions.rank, 0)" : "")
+            + " AS search_rank");
+      }
       qb.addFromClause(
           "LEFT JOIN CONTAINSTABLE (people, (name, emailAddress, biography), :containsQuery) c_people"
               + " ON people.uuid = c_people.[Key]"
@@ -59,20 +57,6 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
       qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
       qb.addSqlArg("freetextQuery", text);
     }
-  }
-
-  @Override
-  protected void addOrgUuidQuery(PersonSearchQuery query) {
-    if (!query.getIncludeChildOrgs()) {
-      qb.addWhereClause("positions.organizationUuid = :orgUuid");
-    } else {
-      qb.addWithClause("parent_orgs(uuid) AS ("
-          + " SELECT uuid FROM organizations WHERE uuid = :orgUuid UNION ALL"
-          + " SELECT o.uuid FROM parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid"
-          + ")");
-      qb.addWhereClause("positions.organizationUuid IN (SELECT uuid FROM parent_orgs)");
-    }
-    qb.addSqlArg("orgUuid", query.getOrgUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {

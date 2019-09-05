@@ -8,7 +8,6 @@ import {
 import autobind from "autobind-decorator"
 import { setMessages } from "components/Messages"
 import NotFound from "components/NotFound"
-import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
@@ -89,16 +88,24 @@ export default class Page extends Component {
     this.state = {
       notFound: false,
       invalidRequest: false,
-      isLoading: true
+      loadCount: null
     }
 
     this.renderPage = this.render
     this.render = Page.prototype.render
   }
 
+  incrementRefCount = refCount => (refCount ? refCount + 1 : 1)
+
+  decrementRefCount = refCount => (refCount ? refCount - 1 : 0)
+
   @autobind
   loadData() {
-    this.setState({ notFound: false, invalidRequest: false, isLoading: true })
+    this.setState({
+      notFound: false,
+      invalidRequest: false,
+      loadCount: this.incrementRefCount(this.state.loadCount)
+    })
 
     if (this.fetchData) {
       document.body.classList.add("loading")
@@ -128,24 +135,26 @@ export default class Page extends Component {
     document.body.classList.remove("loading")
 
     if (response) {
-      if (
-        response.status === 404 ||
-        (response.status === 500 &&
-          _get(response, ["errors", 0]) === "Invalid Syntax")
-      ) {
-        this.setState({ notFound: true, isLoading: false })
+      if (response.status === 404) {
+        this.setState({
+          notFound: true,
+          loadCount: this.decrementRefCount(this.state.loadCount)
+        })
       } else if (response.status === 500) {
-        this.setState({ invalidRequest: true, isLoading: false })
+        this.setState({
+          invalidRequest: true,
+          loadCount: this.decrementRefCount(this.state.loadCount)
+        })
       }
     } else {
-      this.setState({ isLoading: false })
+      this.setState({ loadCount: this.decrementRefCount(this.state.loadCount) })
     }
 
     return response
   }
 
   render() {
-    if (this.state.isLoading) {
+    if (this.state.loadCount !== 0) {
       return null
     }
     if (this.state.notFound) {

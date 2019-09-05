@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
@@ -27,6 +28,22 @@ import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
+
+const GQL_CREATE_TASK = gql`
+  mutation($task: TaskInput!) {
+    createTask(task: $task) {
+      uuid
+    }
+  }
+`
+const GQL_UPDATE_TASK = gql`
+  mutation($task: TaskInput!, $withNote: Boolean!, $note: NoteInput) {
+    updateTask(task: $task)
+    createNote(note: $note) @include(if: $withNote) {
+      ${GRAPHQL_NOTE_FIELDS}
+    }
+  }
+`
 
 class BaseTaskForm extends Component {
   static propTypes = {
@@ -93,21 +110,19 @@ class BaseTaskForm extends Component {
     const responsibleOrgFilters = {
       allOrganizations: {
         label: "All organizations",
-        searchQuery: true
+        queryVars: {}
       }
     }
 
     const tasksFilters = {
       allTasks: {
         label: "All tasks",
-        searchQuery: true,
         queryVars: {}
       }
     }
     const positionsFilters = {
       allAdvisorPositions: {
         label: "All advisor positions",
-        searchQuery: true,
         queryVars: {
           status: Position.STATUS.ACTIVE,
           type: [
@@ -301,7 +316,17 @@ class BaseTaskForm extends Component {
                           onChange={value =>
                             setFieldValue("assessment_customFieldEnum1", value)
                           }
-                          widget={<RichTextEditor className="textField" />}
+                          widget={
+                            <RichTextEditor
+                              className="textField"
+                              onHandleBlur={() =>
+                                setFieldTouched(
+                                  "assessment_customFieldEnum1",
+                                  true
+                                )
+                              }
+                            />
+                          }
                         />
                       )}
                     </React.Fragment>
@@ -391,31 +416,30 @@ class BaseTaskForm extends Component {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     this.props.history.replace(Task.pathForEdit(task))
-    this.props.history.push({
-      pathname: Task.pathFor(task),
-      state: {
-        success: "Task saved"
-      }
+    if (!edit) {
+      this.props.history.replace(Task.pathForEdit(task))
+    }
+    this.props.history.push(Task.pathFor(task), {
+      success: "Task saved"
     })
   }
 
   save = (values, form) => {
-    const task = Object.without(new Task(values), "assessment_customFieldEnum1")
+    const task = Object.without(
+      new Task(values),
+      "notes",
+      "assessment_customFieldEnum1"
+    )
     task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     const { edit } = this.props
-    const operation = edit ? "updateTask" : "createTask"
-    let graphql = /* GraphQL */ operation + "(task: $task)"
-    graphql += edit ? "" : " { uuid }"
     const variables = { task: task }
-    let variableDef = "($task: TaskInput!"
     if (
       edit &&
       (this.props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
         !utils.isEmptyHtml(values.assessment_customFieldEnum1))
     ) {
       // Add an additional mutation to create a change record
-      graphql += ` createNote(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
       variables.note = {
         type: NOTE_TYPE.CHANGE_RECORD,
         noteRelatedObjects: [
@@ -431,10 +455,9 @@ class BaseTaskForm extends Component {
           newValue: values.customFieldEnum1
         })
       }
-      variableDef += ", $note: NoteInput!"
     }
-    variableDef += ")"
-    return API.mutation(graphql, variables, variableDef)
+    variables.withNote = !!variables.note
+    return API.mutation(edit ? GQL_UPDATE_TASK : GQL_CREATE_TASK, variables)
   }
 }
 

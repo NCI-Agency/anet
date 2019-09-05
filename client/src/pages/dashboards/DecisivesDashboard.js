@@ -4,13 +4,13 @@ import {
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
-import { Settings } from "api"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import Page, {
   mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-import GQL from "graphqlapi"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -19,6 +19,67 @@ import { Panel, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
+
+const GQL_GET_REPORT_LISTS = gql`
+  query(
+    $reportQuery: ReportSearchQueryInput
+    $reportPreviousQuery: ReportSearchQueryInput
+  ) {
+    currentList: reportList(query: $reportQuery) {
+      list {
+        uuid
+        location {
+          uuid
+        }
+        attendees {
+          position {
+            uuid
+          }
+        }
+      }
+    }
+    previousList: reportList(query: $reportPreviousQuery) {
+      list {
+        uuid
+        location {
+          uuid
+        }
+        attendees {
+          position {
+            uuid
+          }
+        }
+      }
+    }
+  }
+`
+// TODO: replace this with a way ask graphql for the content of a set of UUIDs
+const GQL_GET_STATIC_DATA = gql`
+  query(
+    $positionQuery: PositionSearchQueryInput
+    $locationQuery: LocationSearchQueryInput
+    $taskQuery: TaskSearchQueryInput
+  ) {
+    positionList(query: $positionQuery) {
+      list {
+        uuid
+        name
+      }
+    }
+    locationList(query: $locationQuery) {
+      list {
+        uuid
+        name
+      }
+    }
+    taskList(query: $taskQuery) {
+      list {
+        uuid
+        shortName
+      }
+    }
+  }
+`
 
 const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   onSearchGoToSearchPage: false,
@@ -73,36 +134,18 @@ class DecisivesDashboard extends Page {
         2 * searchQuery.engagementDateStart - searchQuery.engagementDateEnd
     }
 
-    const reportsPart = new GQL.Part(/* GraphQL */ `
-      currentList: reportList(query: $reportQuery) {
-        list {
-          uuid
-          location { uuid }
-          attendees {
-            position { uuid }
-          }
-        }
-      }
-      previousList: reportList(query: $reportPreviousQuery) {
-        list {
-          uuid
-          location { uuid }
-          attendees {
-            position { uuid }
-          }
-        }
-      }`)
-      .addVariable("reportQuery", "ReportSearchQueryInput", {
+    API.query(GQL_GET_REPORT_LISTS, {
+      reportQuery: {
         pageNum: 0,
         pageSize: 0,
         ...searchQuery
-      })
-      .addVariable("reportPreviousQuery", "ReportSearchQueryInput", {
+      },
+      reportPreviousQuery: {
         pageNum: 0,
         pageSize: 0,
         ...searchPreviousQuery
-      })
-    GQL.run([reportsPart]).then(data => {
+      }
+    }).then(data => {
       const reports = data.currentList.list
       const reportStats = reports.reduce(
         (counter, report) => {
@@ -148,42 +191,6 @@ class DecisivesDashboard extends Page {
   }
 
   fetchStaticData() {
-    // TODO: replace this with a way ask graphql for the content of a set of UUIDs
-    const dataPart = new GQL.Part(/* GraphQL */ `
-      positionList(query: $positionQuery) {
-        list {
-          uuid, name
-        }
-      }
-      locationList(query: $locationQuery) {
-        list {
-          uuid, name
-        }
-      }
-      taskList(query: $taskQuery) {
-        list {
-          uuid, shortName
-        }
-      }
-      
-      `)
-      .addVariable("positionQuery", "PositionSearchQueryInput", {
-        // TODO: make this work with AbstractSearchQueryInput
-        pageNum: 0,
-        pageSize: 0,
-        status: "ACTIVE"
-      })
-      .addVariable("locationQuery", "LocationSearchQueryInput", {
-        pageNum: 0,
-        pageSize: 0,
-        status: "ACTIVE"
-      })
-      .addVariable("taskQuery", "TaskSearchQueryInput", {
-        pageNum: 0,
-        pageSize: 0,
-        status: "ACTIVE"
-      })
-
     const dashboardSettings = Settings.dashboards.find(
       o => o.label === this.props.match.params.dashboard
     )
@@ -191,7 +198,24 @@ class DecisivesDashboard extends Page {
     fetch(dashboardSettings.data)
       .then(response => response.json())
       .then(dashboardData =>
-        GQL.run([dataPart]).then(data => {
+        API.query(GQL_GET_STATIC_DATA, {
+          positionQuery: {
+            // TODO: make this work with AbstractSearchQueryInput
+            pageNum: 0,
+            pageSize: 0,
+            status: "ACTIVE"
+          },
+          locationQuery: {
+            pageNum: 0,
+            pageSize: 0,
+            status: "ACTIVE"
+          },
+          taskQuery: {
+            pageNum: 0,
+            pageSize: 0,
+            status: "ACTIVE"
+          }
+        }).then(data => {
           this.setState({
             decisives:
               dashboardData &&

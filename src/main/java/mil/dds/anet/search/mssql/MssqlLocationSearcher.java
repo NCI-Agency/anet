@@ -14,9 +14,11 @@ public class MssqlLocationSearcher extends AbstractLocationSearcher {
 
   @Override
   protected void addTextQuery(LocationSearchQuery query) {
-    // If we're doing a full-text search, add a pseudo-rank
-    // so we can sort on it (show the most relevant hits at the top).
-    qb.addSelectClause("ISNULL(c_locations.rank, 0) AS search_rank");
+    if (!query.isSortByPresent()) {
+      // If we're doing a full-text search without an explicit sort order, add a pseudo-rank so we
+      // can sort on it (show the most relevant hits at the top).
+      qb.addSelectClause("ISNULL(c_locations.rank, 0) AS search_rank");
+    }
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
         + " ON locations.uuid = c_locations.[Key]");
     qb.addWhereClause("c_locations.rank IS NOT NULL");

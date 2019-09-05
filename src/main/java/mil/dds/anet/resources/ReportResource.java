@@ -25,8 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -68,7 +66,6 @@ import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PermitAll
 public class ReportResource {
 
   private static final Logger logger =
@@ -833,7 +830,8 @@ public class ReportResource {
   @GraphQLQuery(name = "reportList")
   public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
-    return dao.search(query, DaoUtils.getUserFromContext(context));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return dao.search(query);
   }
 
   /**
@@ -905,7 +903,7 @@ public class ReportResource {
   }
 
   @GraphQLQuery(name = "showRollupEmail")
-  public String showRollupEmailGraphQL(@GraphQLArgument(name = "startDate") Long start,
+  public String showRollupEmail(@GraphQLArgument(name = "startDate") Long start,
       @GraphQLArgument(name = "endDate") Long end,
       @GraphQLArgument(name = "orgType") OrganizationType orgType,
       @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
@@ -960,14 +958,15 @@ public class ReportResource {
    * advisor in a given organization.
    * 
    * @param weeksAgo Weeks ago integer for the amount of weeks before the current week
-   *
    */
   @GraphQLQuery(name = "advisorReportInsights")
-  @RolesAllowed("SUPER_USER")
   public List<AdvisorReportsEntry> getAdvisorReportInsights(
+      @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "weeksAgo", defaultValue = "3") int weeksAgo,
       @GraphQLArgument(name = "orgUuid",
           defaultValue = Organization.DUMMY_ORG_UUID) String orgUuid) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertSuperUser(user);
 
     Instant now = Instant.now();
     Instant weekStart = now.atZone(DaoUtils.getDefaultZoneId()).with(DayOfWeek.MONDAY).withHour(0)

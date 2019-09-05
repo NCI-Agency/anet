@@ -1,4 +1,5 @@
-import { Settings } from "api"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -13,7 +14,6 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollectionContainer from "components/ReportCollectionContainer"
 import { Field, Form, Formik } from "formik"
-import GQL from "graphqlapi"
 import { Person, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -22,6 +22,52 @@ import { connect } from "react-redux"
 import _isEmpty from "lodash/isEmpty"
 import PositionTable from "components/PositionTable"
 import DictionaryField from "../../HOC/DictionaryField"
+
+const GQL_GET_TASK = gql`
+  query($uuid: String!) {
+    task(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+      status
+      customField
+      customFieldEnum1
+      customFieldEnum2
+      plannedCompletion
+      projectedCompletion
+      responsibleOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      customFieldRef1 {
+        uuid
+        shortName
+        longName
+      }
+      responsiblePositions {
+        uuid
+        name
+        code
+        type
+        status
+        organization {
+          uuid
+          shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
 
 class BaseTaskShow extends Page {
   static propTypes = {
@@ -52,23 +98,13 @@ class BaseTaskShow extends Page {
   }
 
   fetchData(props) {
-    const taskQuery = new GQL.Part(/* GraphQL */ `
-      task(uuid:"${props.match.params.uuid}") {
-        uuid, shortName, longName, status,
-        customField, customFieldEnum1, customFieldEnum2,
-        plannedCompletion, projectedCompletion,
-        responsibleOrg { uuid, shortName, longName, identificationCode },
-        customFieldRef1 { uuid, shortName, longName },
-        responsiblePositions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
-        ${GRAPHQL_NOTES_FIELDS}
+    return API.query(GQL_GET_TASK, { uuid: props.match.params.uuid }).then(
+      data => {
+        this.setState({
+          task: new Task(data.task)
+        })
       }
-    `)
-
-    return GQL.run([taskQuery]).then(data => {
-      this.setState({
-        task: new Task(data.task)
-      })
-    })
+    )
   }
 
   render() {
@@ -117,10 +153,12 @@ class BaseTaskShow extends Page {
                     component={FieldHelper.renderReadonlyField}
                   />
 
-                  {/* TODO: replace with a generic component, but do not use componentClass textarea */}
-                  <Field
+                  {/* Override componentClass and style from dictProps */}
+                  <this.LongNameField
+                    dictProps={Settings.fields.task.longName}
+                    componentClass="div"
+                    style={{}}
                     name="longName"
-                    label={Settings.fields.task.longName.label}
                     component={FieldHelper.renderReadonlyField}
                   />
 

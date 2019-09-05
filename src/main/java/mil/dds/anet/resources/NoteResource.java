@@ -4,7 +4,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
-import javax.annotation.security.PermitAll;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -16,7 +15,6 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-@PermitAll
 public class NoteResource {
 
   private final NoteDao dao;
@@ -72,6 +70,8 @@ public class NoteResource {
   }
 
   private void checkPermission(Note n, final Person user) {
+    System.out.println("n " + n);
+    System.out.println("n.getAuthorUuid() " + n.getAuthorUuid());
     if (!n.getAuthorUuid().equals(DaoUtils.getUuid(user)) && !AuthUtils.isAdmin(user)) {
       throw new WebApplicationException("Only the author or an admin can do this",
           Status.FORBIDDEN);

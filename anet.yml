@@ -345,9 +345,7 @@ dictionary:
         assessment:
           questions:
             - id: test1
-              test:
-                regex: "^(Z|z)"
-                expression: position.organization.identificationCode
+              test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
               label: Test question 1
               choice:
                 - value: "1"
@@ -360,9 +358,7 @@ dictionary:
                   label: three
                   color: '#ff8279'
             - id: test2
-              test:
-                regex: "^(Z|z)"
-                expression: position.organization.identificationCode
+              test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
               label: Test question 2
               choice:
                 - value: "3"
@@ -375,9 +371,7 @@ dictionary:
                   label: five
                   color: '#c2ffb3'
             - id: test3
-              test:
-                regex: "^(Z|z)"
-                expression: position.organization.identificationCode
+              test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
               label: Test question 3
               choice:
                 - value: "1"

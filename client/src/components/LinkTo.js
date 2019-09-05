@@ -4,6 +4,7 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Link } from "react-router-dom"
 import utils from "utils"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 const MODEL_NAMES = Object.keys(Models).map(key => {
   let camel = utils.camelCase(key)
@@ -32,6 +33,7 @@ export default class LinkTo extends Component {
     className: PropTypes.string,
 
     showIcon: PropTypes.bool,
+    showAvatar: PropTypes.bool,
     isLink: PropTypes.bool,
     edit: PropTypes.bool,
 
@@ -47,6 +49,7 @@ export default class LinkTo extends Component {
   static defaultProps = {
     componentClass: Link,
     showIcon: true,
+    showAvatar: true,
     isLink: true,
     edit: false,
     button: false,
@@ -60,6 +63,7 @@ export default class LinkTo extends Component {
       edit,
       button,
       showIcon,
+      showAvatar,
       isLink,
       whenUnspecified,
       className,
@@ -89,10 +93,36 @@ export default class LinkTo extends Component {
     const ModelClass = Models[modelName]
     const isModel = typeof modelFields !== "string"
     const modelInstance = new ModelClass(isModel ? modelFields : {})
-    showIcon = showIcon && !button
-    const modelIcon = showIcon && modelInstance.iconUrl()
 
-    if (!isLink) return <span>{modelInstance.toString()}</span>
+    // Icon
+    const iconComponent = showIcon && !button && modelInstance.iconUrl() && (
+      <img
+        src={modelInstance.iconUrl()}
+        alt=""
+        style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
+      />
+    )
+
+    // Avatar
+    const avatarComponent = showAvatar &&
+      !button &&
+      modelFields.hasOwnProperty("avatar") && (
+      <AvatarDisplayComponent
+        avatar={modelInstance.avatar}
+        height={32}
+        width={32}
+        style={{ marginLeft: 5, marginRight: 5 }}
+      />
+    )
+
+    if (!isLink) {
+      return (
+        <span>
+          {avatarComponent}
+          {modelInstance.toString()}
+        </span>
+      )
+    }
 
     let to = modelFields
     if (!isModel) {
@@ -112,13 +142,8 @@ export default class LinkTo extends Component {
     return (
       <LinkToComponent to={to} {...componentProps}>
         <React.Fragment>
-          {showIcon && modelIcon && (
-            <img
-              src={modelIcon}
-              alt=""
-              style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
-            />
-          )}
+          {iconComponent}
+          {avatarComponent}
           {children || modelInstance.toString()}
         </React.Fragment>
       </LinkToComponent>

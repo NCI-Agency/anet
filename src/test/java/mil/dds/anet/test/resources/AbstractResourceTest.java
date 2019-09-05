@@ -1,5 +1,6 @@
 package mil.dds.anet.test.resources;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -48,6 +49,11 @@ public abstract class AbstractResourceTest {
   protected static Person admin;
   protected static Map<String, Object> context;
 
+  private static final String PERSON_FIELDS =
+      "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
+          + " position { uuid name type status "
+          + "   organization { uuid shortName parentOrg { uuid shortName } } }";
+
   @BeforeClass
   public static void setUp() {
     client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
@@ -67,26 +73,17 @@ public abstract class AbstractResourceTest {
    * Finds the specified person in the database. If missing, creates them.
    */
   public static Person findOrPutPersonInDb(Person stub) {
-    final String fields =
-        "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
-            + " position {" + "   uuid name type status "
-            + "   organization { uuid shortName parentOrg { uuid shortName } }" + " }";
     if (stub.getDomainUsername() != null) {
-      try {
-        final Person user = graphQLHelper.getObject(stub, "me", fields,
-            new TypeReference<GraphQlResponse<Person>>() {});
-        if (user != null) {
-          return user;
-        }
-      } catch (Exception e) {
-        logger.error("error getting user", e);
+      final Person user = findPerson(stub);
+      if (user != null) {
+        return user;
       }
     } else {
       PersonSearchQuery query = new PersonSearchQuery();
       query.setText(stub.getName());
       final AnetBeanList<Person> searchObjects = graphQLHelper.searchObjects(
-          PersonTest.getJackJacksonStub(), "personList", "query", "PersonSearchQueryInput", fields,
-          query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+          PersonTest.getJackJacksonStub(), "personList", "query", "PersonSearchQueryInput",
+          PERSON_FIELDS, query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
       for (Person p : searchObjects.getList()) {
         if (p.getEmailAddress().equals(stub.getEmailAddress())) {
           return p;
@@ -97,8 +94,34 @@ public abstract class AbstractResourceTest {
     // Create insert into DB
     final String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
         "PersonInput", stub, new TypeReference<GraphQlResponse<Person>>() {});
-    return graphQLHelper.getObjectById(admin, "person", fields, newPersonUuid,
+    return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, newPersonUuid,
         new TypeReference<GraphQlResponse<Person>>() {});
+  }
+
+  public static Person findPerson(Person stub) {
+    try {
+      return graphQLHelper.getObject(stub, "me", PERSON_FIELDS,
+          new TypeReference<GraphQlResponse<Person>>() {});
+    } catch (Exception e) {
+      logger.error("error getting user", e);
+      return null;
+    }
+  }
+
+  public static Person getSuperUser() {
+    final Person rebeccaStub = new Person();
+    rebeccaStub.setDomainUsername("rebecca"); // super-user from the demo data
+    final Person rebecca = findPerson(rebeccaStub);
+    assertThat(rebecca).isNotNull();
+    return rebecca;
+  }
+
+  public static Person getRegularUser() {
+    final Person erinStub = new Person();
+    erinStub.setDomainUsername("erin"); // regular user from the demo data
+    final Person erin = findPerson(erinStub);
+    assertThat(erin).isNotNull();
+    return erin;
   }
 
   public Person getJackJackson() {

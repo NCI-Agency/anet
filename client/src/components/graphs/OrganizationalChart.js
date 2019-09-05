@@ -1,3 +1,4 @@
+import { gql } from "apollo-boost"
 import API, { Settings } from "api"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import * as d3 from "d3"
@@ -335,45 +336,46 @@ export default class OrganizationalChart extends SVGCanvas {
 
     const chartQuery = API.query(
       /* GraphQL */
-      `organization(uuid: "${this.props.org.uuid}") {
-            uuid
-            shortName
-            longName
-            type
-            positions{
-                name
-                uuid
-                person
-                {
-                  rank
-                  name
-                  uuid
-                  avatar(size:32)
-                }
-              }
-            childrenOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
-              uuid
-            }
-            descendantOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
+      gql`query {
+            organization(uuid: "${this.props.org.uuid}") {
               uuid
               shortName
               longName
               type
+              positions{
+                  name
+                  uuid
+                  person
+                  {
+                    rank
+                    name
+                    uuid
+                    avatar(size:32)
+                  }
+                }
               childrenOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
                 uuid
               }
-              positions{
-                name
+              descendantOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
                 uuid
-                person
-                {
-                  rank
+                shortName
+                longName
+                type
+                childrenOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
+                  uuid
+                }
+                positions{
                   name
                   uuid
-                  avatar(size:32)
+                  person
+                  {
+                    rank
+                    name
+                    uuid
+                    avatar(size:32)
+                  }
                 }
               }
-        
             }
           }`
     )

@@ -6,8 +6,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -23,7 +21,6 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-@PermitAll
 public class PositionResource {
 
   private final PositionDao dao;
@@ -38,7 +35,7 @@ public class PositionResource {
   public Position getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Position p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Position not found", Status.NOT_FOUND);
     }
     return p;
   }
@@ -64,14 +61,13 @@ public class PositionResource {
   }
 
   @GraphQLMutation(name = "createPosition")
-  @RolesAllowed("SUPER_USER")
   public Position createPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
 
-    Position position = dao.insert(pos);
+    final Position position = dao.insert(pos);
 
     if (pos.getPersonUuid() != null) {
       dao.setPersonInPosition(pos.getPersonUuid(), position.getUuid());
@@ -82,10 +78,9 @@ public class PositionResource {
   }
 
   @GraphQLMutation(name = "updateAssociatedPosition")
-  @RolesAllowed("SUPER_USER")
   public Integer updateAssociatedPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
 
     final Position current = dao.getByUuid(pos.getUuid());
@@ -110,10 +105,9 @@ public class PositionResource {
   }
 
   @GraphQLMutation(name = "updatePosition")
-  @RolesAllowed("SUPER_USER")
   public Integer updatePosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
 
@@ -158,11 +152,10 @@ public class PositionResource {
   }
 
   @GraphQLMutation(name = "putPersonInPosition")
-  @RolesAllowed("SUPER_USER")
   public Integer putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String positionUuid,
       @GraphQLArgument(name = "person") Person person) {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     final Position pos = dao.getByUuid(positionUuid);
     if (pos == null) {
       throw new WebApplicationException("Position not found", Status.NOT_FOUND);
@@ -177,8 +170,8 @@ public class PositionResource {
   @GraphQLMutation(name = "deletePersonFromPosition")
   public Integer deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String positionUuid) {
-    Person user = DaoUtils.getUserFromContext(context);
-    Position pos = dao.getByUuid(positionUuid);
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Position pos = dao.getByUuid(positionUuid);
     if (pos == null) {
       throw new WebApplicationException("Position not found", Status.NOT_FOUND);
     }

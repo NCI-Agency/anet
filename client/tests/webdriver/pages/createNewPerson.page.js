@@ -40,7 +40,7 @@ class CreatePerson extends Page {
     return browser.$("#endOfTourDate")
   }
   get biography() {
-    return browser.$(".biography .text-editor p")
+    return browser.$(".biography .public-DraftEditor-content")
   }
   get submitButton() {
     return browser.$("#formBottomSubmit")

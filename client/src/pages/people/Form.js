@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
@@ -28,6 +29,19 @@ import {
 } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+
+const GQL_CREATE_PERSON = gql`
+  mutation($person: PersonInput!) {
+    createPerson(person: $person) {
+      uuid
+    }
+  }
+`
+const GQL_UPDATE_PERSON = gql`
+  mutation($person: PersonInput!) {
+    updatePerson(person: $person)
+  }
+`
 
 class BasePersonForm extends Component {
   static propTypes = {
@@ -199,7 +213,6 @@ class BasePersonForm extends Component {
                   />
                   <AvatarEditModal
                     title="Edit avatar"
-                    size="large"
                     src={this.state.currentAvatar}
                     onAvatarUpdate={this.onAvatarUpdate}
                   />
@@ -485,7 +498,12 @@ class BasePersonForm extends Component {
                     name="biography"
                     component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("biography", value)}
-                    widget={<RichTextEditor className="biography" />}
+                    widget={
+                      <RichTextEditor
+                        className="biography"
+                        onHandleBlur={() => setFieldTouched("biography", true)}
+                      />
+                    }
                   />
                 </Fieldset>
                 <div className="submit-buttons">
@@ -543,9 +561,7 @@ class BasePersonForm extends Component {
       localStorage.clear()
       localStorage.newUser = "true"
       this.props.loadAppData()
-      this.props.history.push({
-        pathname: "/"
-      })
+      this.props.history.push("/")
     } else {
       // After successful submit, reset the form in order to make sure the dirty
       // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -560,35 +576,34 @@ class BasePersonForm extends Component {
       if (Person.isEqual(this.props.currentUser, values)) {
         this.props.loadAppData()
       }
-      this.props.history.replace(Person.pathForEdit(person))
-      this.props.history.push({
-        pathname: Person.pathFor(person),
-        state: {
-          success: "Person saved"
-        }
+      if (!edit) {
+        this.props.history.replace(Person.pathForEdit(person))
+      }
+      this.props.history.push(Person.pathFor(person), {
+        success: "Person saved"
       })
     }
   }
 
   save = (values, form) => {
-    const { edit } = this.props
     values.avatar = this.state.currentAvatar
-    let person = new Person(values)
+    const person = Object.without(
+      new Person(values),
+      "notes",
+      "firstName",
+      "lastName"
+    )
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
     }
     person.name = Person.fullName(
-      { firstName: person.firstName, lastName: person.lastName },
+      { firstName: values.firstName, lastName: values.lastName },
       true
     )
-    // Clean up person object for JSON response
-    person = Object.without(person, "firstName", "lastName")
-    const operation = edit ? "updatePerson" : "createPerson"
-    let graphql = /* GraphQL */ operation + "(person: $person)"
-    graphql += edit ? "" : " { uuid }"
-    const variables = { person: person }
-    const variableDef = "($person: PersonInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(
+      this.props.edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON,
+      { person }
+    )
   }
 
   showWrongPersonModal = () => {

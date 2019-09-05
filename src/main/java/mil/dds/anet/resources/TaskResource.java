@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -26,7 +24,6 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
-@PermitAll
 public class TaskResource {
 
   private final AnetObjectEngine engine;
@@ -44,17 +41,16 @@ public class TaskResource {
   public Task getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Task p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Task not found", Status.NOT_FOUND);
     }
     return p;
   }
 
   @GraphQLMutation(name = "createTask")
-  @RolesAllowed("ADMIN")
   public Task createTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task p) {
-    Person user = DaoUtils.getUserFromContext(context);
-    if (AuthUtils.isAdmin(user) == false) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    if (!AuthUtils.isAdmin(user)) {
       if (p.getResponsibleOrgUuid() == null) {
         throw new WebApplicationException("You must select a responsible organization",
             Status.FORBIDDEN);

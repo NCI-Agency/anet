@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -32,7 +30,6 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PermitAll
 public class OrganizationResource {
 
   private static final Logger logger =
@@ -56,16 +53,15 @@ public class OrganizationResource {
   public Organization getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Organization org = dao.getByUuid(uuid);
     if (org == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
+      throw new WebApplicationException("Organization not found", Status.NOT_FOUND);
     }
     return org;
   }
 
   @GraphQLMutation(name = "createOrganization")
-  @RolesAllowed("ADMINISTRATOR")
   public Organization createOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     final Organization created;
     try {
@@ -117,11 +113,10 @@ public class OrganizationResource {
   }
 
   @GraphQLMutation(name = "updateOrganization")
-  @RolesAllowed("SUPER_USER")
   public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org)
       throws InterruptedException, ExecutionException, Exception {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
     AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);
 
@@ -156,7 +151,7 @@ public class OrganizationResource {
 
     if (org.getTasks() != null) {
       logger.debug("Editing tasks for {}", org);
-      Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
+      Utils.addRemoveElementsByUuid(existing.loadTasks(engine.getContext()).join(), org.getTasks(),
           newTask -> engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(newTask),
               DaoUtils.getUuid(existing)),
           oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(oldTaskUuid, null));

@@ -80,7 +80,7 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role }"
+    "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
 
   static autocompleteTemplate(position) {
     return (

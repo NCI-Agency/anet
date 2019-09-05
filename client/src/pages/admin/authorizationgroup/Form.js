@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
@@ -14,6 +15,19 @@ import React, { Component } from "react"
 import { Button } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
+
+const GQL_CREATE_AUTHORIZATION_GROUP = gql`
+  mutation($authorizationGroup: AuthorizationGroupInput!) {
+    createAuthorizationGroup(authorizationGroup: $authorizationGroup) {
+      uuid
+    }
+  }
+`
+const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
+  mutation($authorizationGroup: AuthorizationGroupInput!) {
+    updateAuthorizationGroup(authorizationGroup: $authorizationGroup)
+  }
+`
 
 class AuthorizationGroupForm extends Component {
   static propTypes = {
@@ -67,7 +81,6 @@ class AuthorizationGroupForm extends Component {
           const positionsFilters = {
             allAdvisorPositions: {
               label: "All advisor positions",
-              searchQuery: true,
               queryVars: {
                 status: Position.STATUS.ACTIVE,
                 type: [
@@ -211,27 +224,25 @@ class AuthorizationGroupForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
-    this.props.history.push({
-      pathname: AuthorizationGroup.pathFor(authGroup),
-      state: {
-        success: "Authorization Group saved"
-      }
+    if (!edit) {
+      this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
+    }
+    this.props.history.push(AuthorizationGroup.pathFor(authGroup), {
+      success: "Authorization Group saved"
     })
   }
 
   save = (values, form) => {
-    const authGroup = new AuthorizationGroup(values)
-    const { edit } = this.props
-    const operation = edit
-      ? "updateAuthorizationGroup"
-      : "createAuthorizationGroup"
-    let graphql =
-      /* GraphQL */ operation + "(authorizationGroup: $authorizationGroup)"
-    graphql += edit ? "" : " { uuid }"
-    const variables = { authorizationGroup: authGroup }
-    const variableDef = "($authorizationGroup: AuthorizationGroupInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    const authorizationGroup = Object.without(
+      new AuthorizationGroup(values),
+      "notes"
+    )
+    return API.mutation(
+      this.props.edit
+        ? GQL_UPDATE_AUTHORIZATION_GROUP
+        : GQL_CREATE_AUTHORIZATION_GROUP,
+      { authorizationGroup }
+    )
   }
 }
 

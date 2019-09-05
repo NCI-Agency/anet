@@ -1,4 +1,5 @@
 import API from "api"
+import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
@@ -9,6 +10,15 @@ import React, { Component } from "react"
 import { Checkbox } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
+
+const GQL_GET_ORGANIZATION = gql`
+  query($uuid: String!) {
+    organization(uuid: $uuid) {
+      uuid
+      shortName
+    }
+  }
+`
 
 export default class OrganizationFilter extends Component {
   static propTypes = {
@@ -77,7 +87,6 @@ export default class OrganizationFilter extends Component {
     const organizationWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: this.state.queryParams
       }
     }
@@ -149,19 +158,15 @@ export default class OrganizationFilter extends Component {
   @autobind
   deserialize(query, key) {
     if (query[this.props.queryKey]) {
-      let getInstanceName = Organization.getInstanceName
-      let graphQlQuery =
-        /* GraphQL */ getInstanceName +
-        '(uuid:"' +
-        query[this.props.queryKey] +
-        '") { uuid, shortName }'
-      return API.query(graphQlQuery).then(data => {
-        if (data[getInstanceName]) {
+      return API.query(GQL_GET_ORGANIZATION, {
+        uuid: query[this.props.queryKey]
+      }).then(data => {
+        if (data.organization) {
           const toQueryValue = {
             [this.props.queryKey]: query[this.props.queryKey]
           }
           if (query[this.props.queryIncludeChildOrgsKey]) {
-            data[getInstanceName].includeChildOrgs =
+            data.organization.includeChildOrgs =
               query[this.props.queryIncludeChildOrgsKey]
             toQueryValue[this.props.queryIncludeChildOrgsKey] =
               query[this.props.queryIncludeChildOrgsKey]
@@ -169,7 +174,7 @@ export default class OrganizationFilter extends Component {
           return {
             key: key,
             value: {
-              ...data[getInstanceName],
+              ...data.organization,
               toQuery: () => toQueryValue
             }
           }

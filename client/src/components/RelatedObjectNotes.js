@@ -2,11 +2,13 @@ import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
+import { JSONPath } from "jsonpath-plus"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Person } from "models"
@@ -20,6 +22,12 @@ import { Button, Panel } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import Pie from "components/graphs/Pie"
 
+const GQL_DELETE_NOTE = gql`
+  mutation($uuid: String!) {
+    deleteNote(uuid: $uuid)
+  }
+`
+
 export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 
 class BaseRelatedObjectNotes extends Component {
@@ -30,6 +38,11 @@ class BaseRelatedObjectNotes extends Component {
     relatedObject: PropTypes.shape({
       relatedObjectType: PropTypes.string.isRequired,
       relatedObjectUuid: PropTypes.string.isRequired
+    }),
+    relatedObjectValue: PropTypes.shape({
+      role: PropTypes.string.isRequired,
+      rank: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired
     })
   }
 
@@ -44,7 +57,7 @@ class BaseRelatedObjectNotes extends Component {
       success: null,
       error: null,
       hide: true,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null,
       notes: this.props.notes
     }
@@ -64,11 +77,11 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({ hide: !this.state.hide })
   }
 
-  showRelatedObjectNoteModal = (type, key) => {
+  showRelatedObjectNoteModal = (key, type) => {
     this.setState({
       success: null,
       error: null,
-      showRelatedObjectNoteModal: key,
+      showRelatedObjectNoteModalKey: key,
       noteType: type
     })
   }
@@ -77,7 +90,7 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({
       success: null,
       error: null,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null
     })
   }
@@ -87,7 +100,7 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({
       success: "note added",
       error: null,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null,
       notes: this.state.notes
     })
@@ -99,18 +112,14 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({
       success: "note updated",
       error: null,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null,
       notes: notes
     })
   }
 
   deleteNote = uuid => {
-    const operation = "deleteNote"
-    let graphql = /* GraphQL */ operation + "(uuid: $uuid)"
-    const variables = { uuid: uuid }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
+    API.mutation(GQL_DELETE_NOTE, { uuid })
       .then(data => {
         this.setState({
           success: "note deleted",
@@ -145,14 +154,7 @@ class BaseRelatedObjectNotes extends Component {
         ? Settings.fields.principal.person.assessment.questions.filter(
           question =>
             !question.test ||
-              RegExp(question.test.regex).test(
-                question.test.expression
-                  .split(".")
-                  .reduce(
-                    (cursor, accessor) => cursor && cursor[accessor],
-                    this.props.relatedObjectValue
-                  )
-              )
+              !_isEmpty(JSONPath(question.test, this.props.relatedObjectValue))
         )
         : []
     const assessments = notes.filter(
@@ -190,7 +192,8 @@ class BaseRelatedObjectNotes extends Component {
           flexDirection: "column",
           alignItems: "flex-end",
           padding: 5,
-          height: "100%"
+          height: "100%",
+          overflowX: "hidden"
         }}
       >
         <div
@@ -220,7 +223,7 @@ class BaseRelatedObjectNotes extends Component {
             bsStyle="primary"
             style={{ margin: "5px" }}
             onClick={() =>
-              this.showRelatedObjectNoteModal(NOTE_TYPE.FREE_TEXT, "new")
+              this.showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)
             }
           >
             Post new note
@@ -231,8 +234,8 @@ class BaseRelatedObjectNotes extends Component {
               style={{ margin: "5px" }}
               onClick={() =>
                 this.showRelatedObjectNoteModal(
-                  NOTE_TYPE.PARTNER_ASSESSMENT,
-                  "new"
+                  "new",
+                  NOTE_TYPE.PARTNER_ASSESSMENT
                 )
               }
             >
@@ -247,7 +250,7 @@ class BaseRelatedObjectNotes extends Component {
             noteRelatedObjects: [{ ...this.props.relatedObject }]
           }}
           questions={questions}
-          showModal={this.state.showRelatedObjectNoteModal === "new"}
+          showModal={this.state.showRelatedObjectNoteModalKey === "new"}
           onCancel={this.cancelRelatedObjectNoteModal}
           onSuccess={this.hideNewRelatedObjectNoteModal}
         />
@@ -289,16 +292,12 @@ class BaseRelatedObjectNotes extends Component {
 
                     <br />
                     {question.choice.map(choice => (
-                      <>
-                        <span
-                          key={choice.value}
-                          style={{ backgroundColor: choice.color }}
-                        >
+                      <React.Fragment key={choice.value}>
+                        <span style={{ backgroundColor: choice.color }}>
                           {choice.label} :
-                          <b>{assessmentsSummary[question.id][choice.value]}</b>
-                        </span>{" "}
-                        {"  "}
-                      </>
+                          <b>{assessmentsSummary[question.id][choice.value]}</b>{" "}
+                        </span>
+                      </React.Fragment>
                     ))}
                     <br />
                     <br />
@@ -312,14 +311,12 @@ class BaseRelatedObjectNotes extends Component {
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            overflow: "auto"
+            flexDirection: "column"
           }}
         >
           {notes.map(note => {
             const updatedAt = moment(note.updatedAt).fromNow()
             const byMe = Person.isEqual(currentUser, note.author)
-            const author = byMe ? "me" : <LinkTo person={note.author} />
             const canEdit = byMe || currentUser.isAdmin()
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
             const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
@@ -333,15 +330,18 @@ class BaseRelatedObjectNotes extends Component {
                 <Panel.Heading
                   style={{
                     padding: "1px 1px",
-                    textAlign: "right",
                     borderTopLeftRadius: "15px",
                     borderTopRightRadius: "15px",
                     paddingRight: "10px",
                     paddingLeft: "10px",
-                    whiteSpace: "nowrap"
+                    // whiteSpace: "nowrap", TODO: disabled for now as not working well in IE11
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "flex-end"
                   }}
                 >
-                  <i>{updatedAt}</i> by <b>{author}</b>
+                  <i>{updatedAt}</i>{" "}
+                  <LinkTo style={{ color: "white" }} person={note.author} />
                   {canEdit && (
                     <>
                       <Button
@@ -356,8 +356,9 @@ class BaseRelatedObjectNotes extends Component {
                       </Button>
                       <RelatedObjectNoteModal
                         note={note}
+                        questions={questions}
                         showModal={
-                          this.state.showRelatedObjectNoteModal === note.uuid
+                          this.state.showRelatedObjectNoteModalKey === note.uuid
                         }
                         onCancel={this.cancelRelatedObjectNoteModal}
                         onSuccess={this.hideEditRelatedObjectNoteModal}

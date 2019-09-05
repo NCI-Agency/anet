@@ -123,14 +123,12 @@ export default {
     const authorWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: { role: Person.ROLE.ADVISOR }
       }
     }
     const attendeeWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: {}
       }
     }
@@ -138,7 +136,6 @@ export default {
     const authorPositionWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: {
           type: [
             Position.TYPE.ADVISOR,
@@ -151,14 +148,12 @@ export default {
     const attendeePositionWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: {}
       }
     }
     const locationWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: {}
       }
     }
@@ -166,7 +161,6 @@ export default {
     const taskWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: {}
       }
     }
@@ -174,7 +168,6 @@ export default {
     const tagWidgetFilters = {
       all: {
         label: "All",
-        searchQuery: true,
         queryVars: {}
       }
     }

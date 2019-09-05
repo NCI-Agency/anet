@@ -1,5 +1,6 @@
 import { PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Page, {
   mapDispatchToProps,
@@ -11,6 +12,31 @@ import PersonForm from "pages/people/Form"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+
+const GQL_GET_PERSON = gql`
+  query($uuid: String!) {
+    person(uuid: $uuid) {
+      uuid
+      name
+      rank
+      role
+      emailAddress
+      phoneNumber
+      status
+      biography
+      country
+      gender
+      endOfTourDate
+      domainUsername
+      avatar(size: 256)
+      position {
+        uuid
+        name
+        type
+      }
+    }
+  }
+`
 
 class BaseOnboardingEdit extends Page {
   static propTypes = {
@@ -29,26 +55,17 @@ class BaseOnboardingEdit extends Page {
   }
 
   fetchData(props) {
-    return API.query(
-      /* GraphQL */ `
-      person(uuid:"${props.currentUser.uuid}") {
-        uuid,
-        name, rank, role, emailAddress, phoneNumber, status
-        biography, country, gender, endOfTourDate, domainUsername, avatar(size: 256),
-        position {
-          uuid, name, type
+    return API.query(GQL_GET_PERSON, { uuid: props.currentUser.uuid }).then(
+      data => {
+        if (data.person.endOfTourDate) {
+          data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
         }
+        const parsedFullName = Person.parseFullName(data.person.name)
+        data.person.firstName = parsedFullName.firstName
+        data.person.lastName = parsedFullName.lastName
+        this.setState({ person: new Person(data.person) })
       }
-    `
-    ).then(data => {
-      if (data.person.endOfTourDate) {
-        data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
-      }
-      const parsedFullName = Person.parseFullName(data.person.name)
-      data.person.firstName = parsedFullName.firstName
-      data.person.lastName = parsedFullName.lastName
-      this.setState({ person: new Person(data.person) })
-    })
+    )
   }
 
   render() {

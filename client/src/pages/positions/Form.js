@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import {
   LocationOverlayRow,
   OrganizationOverlayRow
@@ -21,6 +22,19 @@ import { withRouter } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
+
+const GQL_CREATE_POSITION = gql`
+  mutation($position: PositionInput!) {
+    createPosition(position: $position) {
+      uuid
+    }
+  }
+`
+const GQL_UPDATE_POSITION = gql`
+  mutation($position: PositionInput!) {
+    updatePosition(position: $position)
+  }
+`
 
 class BasePositionForm extends Component {
   static propTypes = {
@@ -170,13 +184,12 @@ class BasePositionForm extends Component {
           const organizationFilters = {
             allOrganizations: {
               label: "All organizations",
-              searchQuery: true
+              queryVars: {}
             }
           }
           const locationFilters = {
             activeLocations: {
               label: "All locations",
-              searchQuery: true,
               queryVars: { status: Location.STATUS.ACTIVE }
             }
           }
@@ -326,17 +339,16 @@ class BasePositionForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.props.history.replace(Position.pathForEdit(position))
-    this.props.history.push({
-      pathname: Position.pathFor(position),
-      state: {
-        success: "Position saved"
-      }
+    if (!edit) {
+      this.props.history.replace(Position.pathForEdit(position))
+    }
+    this.props.history.push(Position.pathFor(position), {
+      success: "Position saved"
     })
   }
 
   save = (values, form) => {
-    const position = new Position(values)
+    const position = Object.without(new Position(values), "notes")
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
     }
@@ -347,13 +359,10 @@ class BasePositionForm extends Component {
     position.organization = utils.getReference(position.organization)
     position.person = utils.getReference(position.person)
     position.code = position.code || null // Need to null out empty position codes
-    const { edit } = this.props
-    const operation = edit ? "updatePosition" : "createPosition"
-    let graphql = /* GraphQL */ operation + "(position: $position)"
-    graphql += edit ? "" : " { uuid }"
-    const variables = { position: position }
-    const variableDef = "($position: PositionInput!)"
-    return API.mutation(graphql, variables, variableDef)
+    return API.mutation(
+      this.props.edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION,
+      { position }
+    )
   }
 }
 

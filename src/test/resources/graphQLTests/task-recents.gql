@@ -1,3 +1,11 @@
 taskRecents {
-	list { uuid, shortName, longName }
+  list {
+    uuid
+    shortName
+    longName
+    responsibleOrg {
+      uuid
+      shortName
+    }
+  }
 }

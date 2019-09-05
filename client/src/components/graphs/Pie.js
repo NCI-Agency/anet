@@ -4,7 +4,7 @@ import PropTypes from "prop-types"
 
 export default class Pie extends SVGCanvas {
   static propTypes = {
-    label: PropTypes.string.isRequired,
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     segmentFill: PropTypes.func.isRequired,
     segmentLabel: PropTypes.func.isRequired,
     data: PropTypes.object.isRequired

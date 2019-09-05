@@ -1,0 +1,32 @@
+organizationList(query: {pageSize: 0}) {
+  totalCount
+  list {
+    uuid
+    shortName
+    longName
+    children: childrenOrgs {
+      uuid
+    }
+    activeChildren: childrenOrgs(query: {status: ACTIVE}) {
+      uuid
+    }
+    inactiveChildren: childrenOrgs(query: {status: INACTIVE}) {
+      uuid
+    }
+    activeChildrenCopy: childrenOrgs(query: {status: ACTIVE}) {
+      uuid
+    }
+    descendants: descendantOrgs {
+      uuid
+    }
+    activeDescendants: descendantOrgs(query: {status: ACTIVE}) {
+      uuid
+    }
+    inactiveDescendants: descendantOrgs(query: {status: INACTIVE}) {
+      uuid
+    }
+    activeDescendants: descendantOrgs(query: {status: ACTIVE}) {
+      uuid
+    }
+  }
+}

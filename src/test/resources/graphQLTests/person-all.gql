@@ -1,3 +1,5 @@
 personList(query:{pageSize:0}) {
-	list { uuid, name, rank, role, position { uuid, name, organization {uuid, shortName}} }
+  list {
+    uuid, name, rank, role, emailAddress, avatar(size: 32), position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }
+  }
 }

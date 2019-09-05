@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
@@ -16,14 +17,13 @@ import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
-import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public class PersonDao extends AnetBaseDao<Person> {
+public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
       "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
@@ -92,7 +92,7 @@ public class PersonDao extends AnetBaseDao<Person> {
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
+        .bind("avatar", convertImageToBlob(p.getAvatar())).execute();
     return p;
   }
 
@@ -119,14 +119,10 @@ public class PersonDao extends AnetBaseDao<Person> {
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
+        .bind("avatar", convertImageToBlob(p.getAvatar())).execute();
   }
 
   @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
   public AnetBeanList<Person> search(PersonSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
   }
@@ -150,15 +146,15 @@ public class PersonDao extends AnetBaseDao<Person> {
           + "FROM people WHERE people.uuid IN ( "
           + "SELECT top(:maxResults) \"reportPeople\".\"personUuid\" "
           + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid " + "AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" " + "ORDER BY MAX(reports.\"createdAt\") DESC" + ")";
+          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
+          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC)";
     } else {
       sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
-          + "FROM people WHERE people.uuid IN ( " + "SELECT \"reportPeople\".\"personUuid\" "
+          + "FROM people WHERE people.uuid IN ( SELECT \"reportPeople\".\"personUuid\" "
           + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid " + "AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" " + "ORDER BY MAX(reports.\"createdAt\") DESC "
-          + "LIMIT :maxResults" + ")";
+          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
+          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC "
+          + "LIMIT :maxResults)";
     }
     return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
         .bind("maxResults", maxResults).map(new PersonMapper()).list();
@@ -169,7 +165,7 @@ public class PersonDao extends AnetBaseDao<Person> {
     getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
         + "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
         + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
-        + ")) OR (" + "\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
+        + ")) OR (\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
         + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
         + ")) OR ("
         + "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("
@@ -235,19 +231,12 @@ public class PersonDao extends AnetBaseDao<Person> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
-  private Blob convertImageToBlob(String image) {
-    Blob avatar = null;
+  private static Blob convertImageToBlob(String image) {
     try {
-      avatar = this.getDbHandle().getConnection().createBlob();
-      if (image != null) {
-        String resizedImage = Utils.resizeImageBase64(image, 256, 256, "png");
-        avatar.setBytes(1l, resizedImage.getBytes());
-      }
+      return image == null ? null : new SerialBlob(image.getBytes());
     } catch (Exception e) {
       logger.error("Failed to save avatar: ", e);
+      return null;
     }
-
-    return avatar;
   }
-
 }

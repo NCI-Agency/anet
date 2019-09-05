@@ -448,14 +448,7 @@ properties:
                         id:
                           type: string
                         test:
-                          type: object
-                          additionalProperties: false
-                          required: [regex,expression]
-                          properties:
-                            regex:
-                              type: string
-                            expression:
-                              type: string
+                          type: string
                         label:
                           type: string
                         choice:
