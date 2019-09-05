@@ -145,7 +145,7 @@
     "react-toastify": "^5.3.2",
     "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.4",
-    "redux-persist": "^5.10.0",
+    "redux-persist": "^6.0.0",
     "yup": "^0.27.0"
   },
   "resolutions": {
