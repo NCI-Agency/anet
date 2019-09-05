@@ -34,6 +34,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       organization {
@@ -48,6 +49,7 @@ const GQL_GET_POSITION = gql`
         name
         rank
         role
+        avatar(size: 32)
       }
       ${GRAPHQL_NOTES_FIELDS}
     }

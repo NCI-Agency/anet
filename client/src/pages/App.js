@@ -50,6 +50,7 @@ const GQL_GET_APP_DATA = gql`
             uuid
             name
             rank
+            avatar(size: 32)
             position {
               uuid
               name

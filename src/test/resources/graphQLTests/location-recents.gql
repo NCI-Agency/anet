@@ -1,3 +1,6 @@
 locationRecents {
-	list { uuid, name }
+  list {
+    uuid
+    name
+  }
 }

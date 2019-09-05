@@ -47,6 +47,7 @@ const GQL_GET_POSITION = gql`
         name
         rank
         role
+        avatar(size: 32)
       }
       associatedPositions {
         uuid
@@ -57,6 +58,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
         organization {
           uuid
@@ -71,6 +73,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       location {
@@ -423,10 +426,7 @@ class BasePositionShow extends Page {
     const { uuid } = this.state.position
     API.mutation(GQL_DELETE_POSITION, { uuid })
       .then(data => {
-        this.props.history.push({
-          pathname: "/",
-          state: { success: "Position deleted" }
-        })
+        this.props.history.push("/", { success: "Position deleted" })
       })
       .catch(error => {
         this.setState({ success: null, error: error })

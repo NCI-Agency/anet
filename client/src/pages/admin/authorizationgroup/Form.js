@@ -224,12 +224,11 @@ class AuthorizationGroupForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
-    this.props.history.push({
-      pathname: AuthorizationGroup.pathFor(authGroup),
-      state: {
-        success: "Authorization Group saved"
-      }
+    if (!edit) {
+      this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
+    }
+    this.props.history.push(AuthorizationGroup.pathFor(authGroup), {
+      success: "Authorization Group saved"
     })
   }
 

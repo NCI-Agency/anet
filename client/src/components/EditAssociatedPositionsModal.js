@@ -148,7 +148,7 @@ class BaseEditAssociatedPositionsModal extends Component {
                             setFieldValue("associatedPositions", value)
                           }
                           objectType={Position}
-                          fields="uuid, name, code, type, person { uuid, name, rank, role }, organization { uuid, shortName, longName, identificationCode }"
+                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
                           addon={POSITIONS_ICON}
                           vertical
                         />

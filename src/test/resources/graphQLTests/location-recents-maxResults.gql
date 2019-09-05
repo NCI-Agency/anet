@@ -1,3 +1,6 @@
 locationRecents(maxResults:${maxResults}) {
-	list { uuid, name }
+  list {
+    uuid
+    name
+  }
 }

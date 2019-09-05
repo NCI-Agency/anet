@@ -52,6 +52,7 @@ const GQL_GET_RECENTS = gql`
         role
         status
         endOfTourDate
+        avatar(size: 32)
         position {
           uuid
           name
@@ -283,6 +284,11 @@ class BaseReportForm extends Component {
           resetForm,
           setSubmitting
         }) => {
+          const currentOrgUuid =
+            this.props.currentUser.position &&
+            this.props.currentUser.position.organization
+              ? this.props.currentUser.position.organization.uuid
+              : undefined
           const locationFilters = {
             activeLocations: {
               label: "Active locations",
@@ -304,13 +310,13 @@ class BaseReportForm extends Component {
               queryVars: { role: Person.ROLE.PRINCIPAL }
             }
           }
-          if (this.props.currentUser.position) {
+          if (currentOrgUuid) {
             attendeesFilters.myColleagues = {
               label: "My colleagues",
               queryVars: {
                 role: Person.ROLE.ADVISOR,
                 matchPositionName: true,
-                orgUuid: this.props.currentUser.position.organization.uuid
+                orgUuid: currentOrgUuid
               }
             }
             attendeesFilters.myCounterparts = {
@@ -338,12 +344,11 @@ class BaseReportForm extends Component {
               queryVars: {}
             }
           }
-          if (this.props.currentUser.position) {
+          if (currentOrgUuid) {
             tasksFilters.assignedToMyOrg = {
               label: "Assigned to my organization",
               queryVars: {
-                responsibleOrgUuid: this.props.currentUser.position.organization
-                  .uuid
+                responsibleOrgUuid: currentOrgUuid
               }
             }
           }
@@ -617,7 +622,6 @@ class BaseReportForm extends Component {
                       />
                     }
                     overlayColumns={[
-                      "Avatar",
                       "Name",
                       "Position",
                       "Location",
@@ -953,10 +957,7 @@ class BaseReportForm extends Component {
         // After successful delete, reset the form in order to make sure the dirty
         // prop is also reset (otherwise we would get a blocking navigation warning)
         resetForm()
-        this.props.history.push({
-          pathname: "/",
-          state: { success: "Report deleted" }
-        })
+        this.props.history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
         this.setState({ success: null, error: error })
@@ -990,12 +991,11 @@ class BaseReportForm extends Component {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     resetForm()
-    this.props.history.replace(Report.pathForEdit(report))
-    this.props.history.push({
-      pathname: Report.pathFor(report),
-      state: {
-        success: "Report saved"
-      }
+    if (!edit) {
+      this.props.history.replace(Report.pathForEdit(report))
+    }
+    this.props.history.push(Report.pathFor(report), {
+      success: "Report saved"
     })
   }
 

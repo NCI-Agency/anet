@@ -84,19 +84,19 @@ dependencies {
 	compile group: 'io.dropwizard-bundles', name: 'dropwizard-configurable-assets-bundle', version: '1.3.5'
 
 	compile 'ru.vyarus.guicey:guicey-jdbi3:0.7.0'
-	compile 'com.google.guava:guava:28.0-jre' // Pick the non-Android version of Guice
+	compile 'com.google.guava:guava:28.1-jre' // Pick the non-Android version of Guice
 
 	// Supported databases:
 	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // If using postgresql
-	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.7.0' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
+	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.0' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
 	compile 'ch.qos.logback:logback-classic:1.2.3'
 	compile 'ch.qos.logback:logback-core:1.2.3'
 	compile 'ch.qos.logback:logback-access:1.2.3'
 	compile 'com.github.waffle:waffle-jna:1.9.1'
-	compile 'com.graphql-java:java-dataloader:2.2.1'
+	compile 'com.graphql-java:java-dataloader:2.2.3'
 	compile 'io.leangen.graphql:spqr:0.10.0'
 	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190610.1'
 
@@ -463,7 +463,7 @@ buildscript {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:5.0.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.24.1"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.24.2"
 	}
 }
 

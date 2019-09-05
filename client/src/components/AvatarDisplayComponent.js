@@ -6,7 +6,8 @@ export default class AvatarDisplayComponent extends React.Component {
   static propTypes = {
     avatar: PropTypes.string,
     height: PropTypes.number,
-    width: PropTypes.number
+    width: PropTypes.number,
+    style: PropTypes.object
   }
 
   render() {
@@ -21,6 +22,7 @@ export default class AvatarDisplayComponent extends React.Component {
         height={this.props.height}
         width={this.props.width}
         alt="Avatar"
+        style={this.props.style}
       />
     )
   }

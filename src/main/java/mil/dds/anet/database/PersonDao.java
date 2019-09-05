@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
@@ -16,7 +17,6 @@ import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
-import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +92,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
+        .bind("avatar", convertImageToBlob(p.getAvatar())).execute();
     return p;
   }
 
@@ -119,7 +119,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", this.convertImageToBlob(p.getAvatar())).execute();
+        .bind("avatar", convertImageToBlob(p.getAvatar())).execute();
   }
 
   @Override
@@ -231,19 +231,12 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
-  private Blob convertImageToBlob(String image) {
-    Blob avatar = null;
+  private static Blob convertImageToBlob(String image) {
     try {
-      avatar = this.getDbHandle().getConnection().createBlob();
-      if (image != null) {
-        String resizedImage = Utils.resizeImageBase64(image, 256, 256, "png");
-        avatar.setBytes(1L, resizedImage.getBytes());
-      }
+      return image == null ? null : new SerialBlob(image.getBytes());
     } catch (Exception e) {
       logger.error("Failed to save avatar: ", e);
+      return null;
     }
-
-    return avatar;
   }
-
 }

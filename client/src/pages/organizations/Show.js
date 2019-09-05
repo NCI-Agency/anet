@@ -82,6 +82,7 @@ const GQL_GET_ORGANIZATION = gql`
           status
           rank
           role
+          avatar(size: 32)
         }
         associatedPositions {
           uuid
@@ -95,6 +96,7 @@ const GQL_GET_ORGANIZATION = gql`
             status
             rank
             role
+            avatar(size: 32)
           }
         }
       }
@@ -109,6 +111,7 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             role
+            avatar(size: 32)
           }
         }
       }
