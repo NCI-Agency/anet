@@ -86,7 +86,7 @@
     "webdriverio": "^5.12.5",
     "webpack": "^4.39.2",
     "webpack-cleanup-plugin": "^0.5.1",
-    "webpack-cli": "^3.3.7",
+    "webpack-cli": "^3.3.8",
     "webpack-dev-server": "^3.8.0",
     "webpack-merge": "^4.2.1",
     "xhr2": "^0.2.0"
