@@ -158,13 +158,15 @@ export default class RelatedObjectNoteModal extends Component {
   save = (values, form) => {
     const edit = !!this.props.note.uuid
     const note = {
+      uuid: values.uuid,
+      author: values.author,
       type: values.type,
       noteRelatedObjects: values.noteRelatedObjects,
       text: values.text
     }
     const isJson = note.type !== NOTE_TYPE.FREE_TEXT
     if (isJson) {
-      const { type, noteRelatedObjects, ...jsonFields } = values
+      const { uuid, author, type, noteRelatedObjects, ...jsonFields } = values
       note.text = JSON.stringify(jsonFields)
     }
     return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, { note })

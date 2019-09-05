@@ -57,7 +57,7 @@ class BaseRelatedObjectNotes extends Component {
       success: null,
       error: null,
       hide: true,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null,
       notes: this.props.notes
     }
@@ -77,11 +77,11 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({ hide: !this.state.hide })
   }
 
-  showRelatedObjectNoteModal = (type, key) => {
+  showRelatedObjectNoteModal = (key, type) => {
     this.setState({
       success: null,
       error: null,
-      showRelatedObjectNoteModal: key,
+      showRelatedObjectNoteModalKey: key,
       noteType: type
     })
   }
@@ -90,7 +90,7 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({
       success: null,
       error: null,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null
     })
   }
@@ -100,7 +100,7 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({
       success: "note added",
       error: null,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null,
       notes: this.state.notes
     })
@@ -112,7 +112,7 @@ class BaseRelatedObjectNotes extends Component {
     this.setState({
       success: "note updated",
       error: null,
-      showRelatedObjectNoteModal: null,
+      showRelatedObjectNoteModalKey: null,
       noteType: null,
       notes: notes
     })
@@ -223,7 +223,7 @@ class BaseRelatedObjectNotes extends Component {
             bsStyle="primary"
             style={{ margin: "5px" }}
             onClick={() =>
-              this.showRelatedObjectNoteModal(NOTE_TYPE.FREE_TEXT, "new")
+              this.showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)
             }
           >
             Post new note
@@ -234,8 +234,8 @@ class BaseRelatedObjectNotes extends Component {
               style={{ margin: "5px" }}
               onClick={() =>
                 this.showRelatedObjectNoteModal(
-                  NOTE_TYPE.PARTNER_ASSESSMENT,
-                  "new"
+                  "new",
+                  NOTE_TYPE.PARTNER_ASSESSMENT
                 )
               }
             >
@@ -250,7 +250,7 @@ class BaseRelatedObjectNotes extends Component {
             noteRelatedObjects: [{ ...this.props.relatedObject }]
           }}
           questions={questions}
-          showModal={this.state.showRelatedObjectNoteModal === "new"}
+          showModal={this.state.showRelatedObjectNoteModalKey === "new"}
           onCancel={this.cancelRelatedObjectNoteModal}
           onSuccess={this.hideNewRelatedObjectNoteModal}
         />
@@ -356,8 +356,9 @@ class BaseRelatedObjectNotes extends Component {
                       </Button>
                       <RelatedObjectNoteModal
                         note={note}
+                        questions={questions}
                         showModal={
-                          this.state.showRelatedObjectNoteModal === note.uuid
+                          this.state.showRelatedObjectNoteModalKey === note.uuid
                         }
                         onCancel={this.cancelRelatedObjectNoteModal}
                         onSuccess={this.hideEditRelatedObjectNoteModal}
