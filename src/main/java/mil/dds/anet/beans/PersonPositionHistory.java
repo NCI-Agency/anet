@@ -26,6 +26,17 @@ public class PersonPositionHistory extends AbstractAnetBean {
   private ForeignObjectHolder<Position> position = new ForeignObjectHolder<>();
   Instant startTime;
   Instant endTime;
+  protected Instant endedAt;
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public Instant getEndedAt() {
+    return endedAt;
+  }
+
+  public void setEndedAt(Instant endedAt) {
+    this.endedAt = endedAt;
+  }
 
   @Override
   @JsonIgnore
@@ -119,14 +130,10 @@ public class PersonPositionHistory extends AbstractAnetBean {
   }
 
   public static List<PersonPositionHistory> getDerivedHistory(List<PersonPositionHistory> history) {
-    // Derive the start and end times; assumes list is in chronological order
-    PersonPositionHistory pphPrev = null;
+    // Set the start and end times; assumes list is in chronological order
     for (final PersonPositionHistory pph : history) {
       pph.setStartTime(pph.getCreatedAt());
-      if (pphPrev != null) {
-        pphPrev.setEndTime(pph.getStartTime());
-      }
-      pphPrev = pph;
+      pph.setEndTime(pph.getEndedAt());
     }
     // Remove all null entries
     return history.stream()

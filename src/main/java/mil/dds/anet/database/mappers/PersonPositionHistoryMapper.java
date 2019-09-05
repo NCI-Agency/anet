@@ -13,6 +13,7 @@ public class PersonPositionHistoryMapper implements RowMapper<PersonPositionHist
   public PersonPositionHistory map(ResultSet rs, StatementContext ctx) throws SQLException {
     final PersonPositionHistory pph = new PersonPositionHistory();
     pph.setCreatedAt(DaoUtils.getInstantAsLocalDateTime(rs, "createdAt"));
+    pph.setEndedAt(DaoUtils.getInstantAsLocalDateTime(rs, "endedAt"));
     pph.setPositionUuid(rs.getString("positionUuid"));
     pph.setPersonUuid(rs.getString("personUuid"));
     return pph;
