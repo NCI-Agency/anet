@@ -2633,4 +2633,35 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-endedAt-to-peoplePositions" author="mdragan">
+		<addColumn tableName="peoplePositions">
+			<column name="endedAt" type="datetime" />
+		</addColumn>
+		<sql dbms="mssql">
+			ALTER TABLE peoplePositions ALTER COLUMN endedAt datetime2;
+		</sql>
+	</changeSet>
+
+	<changeSet id="fill-endedAt-peoplePositions-column" author="mdragan">
+		<comment>Populate the new endedAt column of the peoplePositions table.</comment>
+		<sql dbms="mssql">
+			UPDATE "peoplePositions" SET "endedAt" = (
+				SELECT TOP(1) "createdAt" FROM "peoplePositions" next
+				WHERE next."positionUuid" = "peoplePositions"."positionUuid" AND next.createdAt > "peoplePositions"."createdAt"
+				ORDER BY next."createdAt"
+			);
+		</sql>
+		<sql dbms="postgresql">
+			UPDATE "peoplePositions" SET "endedAt" = (
+				SELECT "createdAt" FROM "peoplePositions" next
+				WHERE next."positionUuid" = "peoplePositions"."positionUuid" AND next.createdAt > "peoplePositions"."createdAt"
+				ORDER BY next."createdAt"
+				LIMIT 1
+			);
+		</sql>
+		<rollback>
+			UPDATE "peoplePositions" set "endedAt" = NULL;
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
