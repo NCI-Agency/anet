@@ -172,12 +172,31 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   public int setPersonInPosition(String personUuid, String positionUuid) {
     Instant now = Instant.now();
+    // If the position is already assigned to another person, remove the person from the position
+    AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(positionUuid);
+
     // If this person is in a position already, we need to remove them.
     Position currPos = getDbHandle()
         .createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
             + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
     if (currPos != null) {
+      String sql;
+      if (DaoUtils.isMsSql()) {
+        sql = "/* positionSetPerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM ( "
+            + "          SELECT TOP(1) * FROM \"peoplePositions\" "
+            + "          WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid "
+            + "          ORDER BY \"createdAt\" DESC ) t";
+      } else {
+        sql = "/* positionSetPerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM ("
+            + "          SELECT TOP(1) * FROM \"peoplePositions\" "
+            + "          WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid "
+            + "          ORDER BY \"createdAt\" DESC LIMIT 1) t";
+      }
+      getDbHandle().createUpdate(sql).bind("personUuid", personUuid)
+          .bind("positionUuid", currPos.getUuid()).bind("endedAt", DaoUtils.asLocalDateTime(now))
+          .execute();
+
       getDbHandle()
           .createUpdate(
               "/* positionSetPerson.remove1 */ UPDATE positions set \"currentPersonUuid\" = null "
@@ -215,19 +234,32 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("personUuid", (Integer) null).bind("updatedAt", DaoUtils.asLocalDateTime(now))
         .bind("positionUuid", positionUuid).execute();
 
-    String sql;
+    String updateSql;
     if (DaoUtils.isMsSql()) {
-      sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+      updateSql = "/* positionRemovePerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM "
+          + "(SELECT TOP(1) * FROM \"peoplePositions\" "
+          + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC) t";
+    } else {
+      updateSql = "/* positionRemovePerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM "
+          + "(SELECT * FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
+          + "ORDER BY \"createdAt\" DESC LIMIT 1) t";
+    }
+    getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
+        .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
+
+    String insertSql;
+    if (DaoUtils.isMsSql()) {
+      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
           + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
           + "(SELECT TOP(1)\"personUuid\" FROM \"peoplePositions\" "
           + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), :createdAt)";
     } else {
-      sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
           + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
           + "(SELECT \"personUuid\" FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
           + "ORDER BY \"createdAt\" DESC LIMIT 1), :createdAt)";
     }
-    getDbHandle().createUpdate(sql).bind("positionUuid", positionUuid)
+    getDbHandle().createUpdate(insertSql).bind("positionUuid", positionUuid)
         .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
 
     return getDbHandle()
