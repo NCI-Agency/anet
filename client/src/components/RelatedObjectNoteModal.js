@@ -105,7 +105,7 @@ export default class RelatedObjectNoteModal extends Component {
                     )}
 
                     <Field
-                      name="note"
+                      name="text"
                       value={noteText}
                       component={FieldHelper.renderSpecialField}
                       onChange={value => setFieldValue("text", value)}
