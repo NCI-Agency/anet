@@ -408,9 +408,9 @@ dictionary:
           layers: GEBCO_LATEST
           format: "image/png" 
 
-#  automaticallyInactivateUsers:
-#    emailRemindersDaysPrior: [15, 30, 45]
-#    ignoredDomainNames: []
+  automaticallyInactivateUsers:
+    emailRemindersDaysPrior: [15, 30, 45]
+    ignoredDomainNames: []
 
   dashboards:
     - label: dashboard0

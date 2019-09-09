@@ -116,13 +116,11 @@ public class AccountDeactivationWorkerTest {
   public void testDeactivation() throws Exception {
 
     // Configure
-    final Person testPersonEotActive =
-        createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS), "test1_eot_acive@test.com",
-            PersonStatus.ACTIVE, "anet_test_domain\\test1_eot_acive", new Position());
+    final Person testPersonEotActive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
+        "test1_eot_acive@test.com", PersonStatus.ACTIVE);
 
-    final Person testPersonEotInactive =
-        createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS), "test2_eot_inacive@test.com",
-            PersonStatus.INACTIVE, "anet_test_domain\\test2_eot_inacive", new Position());
+    final Person testPersonEotInactive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
+        "test2_eot_inacive@test.com", PersonStatus.INACTIVE);
 
     when(personDao.search(Mockito.any()))
         .thenReturn(new AnetBeanList<>(Arrays.asList(testPersonEotActive, testPersonEotInactive)));
@@ -137,9 +135,6 @@ public class AccountDeactivationWorkerTest {
     PowerMockito.verifyPrivate(AnetEmailWorker.class, Mockito.times(1)).invoke("sendEmailAsync",
         captor.capture());
 
-    PowerMockito.verifyPrivate(positionDao, Mockito.times(1)).invoke("removePersonFromPosition",
-        Mockito.any());
-
     final List<AnetEmail> emails = captor.getAllValues();
     assertEquals(1, emails.size());
 
@@ -147,95 +142,8 @@ public class AccountDeactivationWorkerTest {
         && e.getToAddresses().contains("test1_eot_acive@test.com")));
   }
 
-  @Test
-  public void testIgnoredDomainNames() throws Exception {
-
-    // Configure
-    final Person testPersonIgnored1 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored1@test.com", PersonStatus.ACTIVE, "user@ignored_domain", new Position());
-
-    final Person testPersonIgnored2 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored2@test.com", PersonStatus.ACTIVE, "ignored_domain\\user", new Position());
-
-    final Person testPersonIgnored3 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored3@test.com", PersonStatus.ACTIVE, "user@test.ignored", new Position());
-
-    final Person testPersonIgnored4 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored4@test.com", PersonStatus.ACTIVE, "test.ignored\\user", new Position());
-
-    final Person testPersonIgnored5 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored5@test.com", PersonStatus.ACTIVE, "user@test.ignored.not", new Position());
-
-    final Person testPersonIgnored6 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored6@test.com", PersonStatus.ACTIVE, "not_ignored_domain\\user", new Position());
-
-    final Person testPersonIgnored7 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored7@test.com", PersonStatus.ACTIVE, "ignored_domain", new Position());
-
-    final Person testPersonIgnored8 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored8@test.com", PersonStatus.ACTIVE, "user@ignored.domain", new Position());
-
-    final Person testPersonIgnored9 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored9@test.com", PersonStatus.ACTIVE, "ignored_domain@user", new Position());
-
-    final Person testPersonIgnored10 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored10@test.com", PersonStatus.ACTIVE, "user\\ignored_domain", new Position());
-
-    when(personDao.search(Mockito.any()))
-        .thenReturn(new AnetBeanList<>(Arrays.asList(testPersonIgnored1, testPersonIgnored2,
-            testPersonIgnored3, testPersonIgnored4, testPersonIgnored5, testPersonIgnored6,
-            testPersonIgnored7, testPersonIgnored8, testPersonIgnored9, testPersonIgnored10)));
-
-    // Send email(s)
-    final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(config, personDao, SCHEDULER_TIME_MS);
-    accountDeactivationWorker.run();
-
-    // Verify
-    final ArgumentCaptor<AnetEmail> captor = ArgumentCaptor.forClass(AnetEmail.class);
-    PowerMockito.verifyPrivate(AnetEmailWorker.class, Mockito.times(5)).invoke("sendEmailAsync",
-        captor.capture());
-
-    final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(5, emails.size());
-
-    assertTrue(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
-        && e.getToAddresses().contains("testIgnored5@test.com")));
-    assertTrue(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
-        && e.getToAddresses().contains("testIgnored6@test.com")));
-    assertTrue(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
-        && e.getToAddresses().contains("testIgnored7@test.com")));
-    assertTrue(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
-        && e.getToAddresses().contains("testIgnored9@test.com")));
-    assertTrue(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
-        && e.getToAddresses().contains("testIgnored10@test.com")));
-  }
-
-  @Test
-  public void testIgnoredAll() throws Exception {
-
-    // Configure
-    final Person testPersonIgnored1 = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "testIgnored1@test.com", PersonStatus.ACTIVE, "user@domain", new Position());
-
-    when(personDao.search(Mockito.any()))
-        .thenReturn(new AnetBeanList<>(Arrays.asList(testPersonIgnored1)));
-
-    when(config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames"))
-        .thenReturn(Arrays.asList("*"));
-
-    // Send email(s)
-    final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(config, personDao, SCHEDULER_TIME_MS);
-    accountDeactivationWorker.run();
-
-    // Verify
-    final ArgumentCaptor<AnetEmail> captor = ArgumentCaptor.forClass(AnetEmail.class);
-    PowerMockito.verifyPrivate(AnetEmailWorker.class, Mockito.times(0)).invoke("sendEmailAsync",
-        captor.capture());
-
-    final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(0, emails.size());
+  private Person createDummyPerson(Instant endOfTour, String email, PersonStatus status) {
+    return createDummyPerson(endOfTour, email, status, "domain\\dummy", new Position());
   }
 
   private Person createDummyPerson(Instant endOfTour, String email, PersonStatus status,

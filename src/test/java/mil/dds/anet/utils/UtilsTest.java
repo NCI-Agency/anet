@@ -1,7 +1,10 @@
 package mil.dds.anet.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 
@@ -100,4 +103,43 @@ public class UtilsTest {
         .isEqualTo(combinedTestCase.getOutput());
   }
 
+  @Test
+  public void testWhitelistedEmailAddresses() throws Exception {
+
+    final List<String> whitelistedDomains =
+        Arrays.asList("ignored_domain.com", "*.ignored", "ignored.*");
+
+    assertFalse("1", Utils.isEmailWhitelisted("user@test.com", whitelistedDomains));
+    assertTrue("2", Utils.isEmailWhitelisted("user@ignored_domain.com", whitelistedDomains));
+    assertTrue("3", Utils.isEmailWhitelisted("user@ignored.com", whitelistedDomains));
+    assertTrue("4", Utils.isEmailWhitelisted("user@test.ignored", whitelistedDomains));
+    assertFalse("5", Utils.isEmailWhitelisted("user", whitelistedDomains));
+  }
+
+  @Test
+  public void testIgnoredDomainNames() throws Exception {
+
+    final List<String> ignoredDomainNames =
+        Arrays.asList("ignored_domain", "*.ignored", "ignored.domain");
+
+    assertTrue("1", Utils.isDomainUserNameIgnored("user@ignored_domain", ignoredDomainNames));
+    assertTrue("2", Utils.isDomainUserNameIgnored("ignored_domain\\user", ignoredDomainNames));
+    assertTrue("3", Utils.isDomainUserNameIgnored("user@test.ignored", ignoredDomainNames));
+    assertTrue("4", Utils.isDomainUserNameIgnored("test.ignored\\user", ignoredDomainNames));
+    assertFalse("5", Utils.isDomainUserNameIgnored("user@test.ignored.not", ignoredDomainNames));
+    assertFalse("6", Utils.isDomainUserNameIgnored("not_ignored_domain\\user", ignoredDomainNames));
+    assertFalse("7", Utils.isDomainUserNameIgnored("ignored_domain", ignoredDomainNames));
+    assertTrue("8", Utils.isDomainUserNameIgnored("user@ignored.domain", ignoredDomainNames));
+    assertFalse("9", Utils.isDomainUserNameIgnored("ignored_domain@user", ignoredDomainNames));
+    assertFalse("10", Utils.isDomainUserNameIgnored("user\\ignored_domain", ignoredDomainNames));
+  }
+
+  @Test
+  public void testAllDomains() throws Exception {
+
+    final List<String> ignoredDomainNames = Arrays.asList("*");
+
+    assertTrue("1", Utils.isDomainUserNameIgnored("user@domain", ignoredDomainNames));
+    assertTrue("2", Utils.isEmailWhitelisted("user@domain", ignoredDomainNames));
+  }
 }
