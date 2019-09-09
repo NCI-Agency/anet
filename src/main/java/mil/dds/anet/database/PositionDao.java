@@ -183,15 +183,19 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     if (currPos != null) {
       String sql;
       if (DaoUtils.isMsSql()) {
-        sql = "/* positionSetPerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM ( "
-            + "          SELECT TOP(1) * FROM \"peoplePositions\" "
-            + "          WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid "
-            + "          ORDER BY \"createdAt\" DESC ) t";
+        sql =
+            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+                + "      (SELECT TOP(1) * FROM \"peoplePositions\" WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC) AS t "
+                + "      WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND "
+                + "            t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND "
+                + "            t.\"createdAt\" = \"peoplePositions\".\"createdAt\" ";
       } else {
-        sql = "/* positionSetPerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM ("
-            + "          SELECT TOP(1) * FROM \"peoplePositions\" "
-            + "          WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid "
-            + "          ORDER BY \"createdAt\" DESC LIMIT 1) t";
+        sql =
+            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+                + "      (SELECT * FROM \"peoplePositions\" WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+                + "      WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND "
+                + "            t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND "
+                + "            t.\"createdAt\" = \"peoplePositions\".\"createdAt\" ";
       }
       getDbHandle().createUpdate(sql).bind("personUuid", personUuid)
           .bind("positionUuid", currPos.getUuid()).bind("endedAt", DaoUtils.asLocalDateTime(now))
@@ -236,13 +240,19 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
     String updateSql;
     if (DaoUtils.isMsSql()) {
-      updateSql = "/* positionRemovePerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM "
-          + "(SELECT TOP(1) * FROM \"peoplePositions\" "
-          + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC) t";
+      updateSql =
+          "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+              + "      (SELECT TOP(1) * FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC) AS t "
+              + "      WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND "
+              + "            t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND "
+              + "            t.\"createdAt\" = \"peoplePositions\".\"createdAt\" ";
     } else {
-      updateSql = "/* positionRemovePerson.end */ UPDATE t SET t.\"endedAt\" = :endedAt FROM "
-          + "(SELECT * FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
-          + "ORDER BY \"createdAt\" DESC LIMIT 1) t";
+      updateSql =
+          "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+              + "      (SELECT * FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+              + "      WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND "
+              + "            t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND "
+              + "            t.\"createdAt\" = \"peoplePositions\".\"createdAt\" ";
     }
     getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
         .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
