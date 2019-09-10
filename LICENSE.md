@@ -1,5 +1,7 @@
 MIT License
 
+Copyright (c) 2017-2019 NATO Communication and Information Agency (NCIA)
+
 Copyright (c) 2016-2017 U.S. Federal Government (in countries where recognized)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
