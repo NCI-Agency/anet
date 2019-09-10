@@ -104,7 +104,7 @@ public class UtilsTest {
   }
 
   @Test
-  public void testWhitelistedEmailAddresses() throws Exception {
+  public void testWhitelistedEmailAddresses() {
 
     final List<String> whitelistedDomains =
         Arrays.asList("ignored_domain.com", "*.ignored", "ignored.*");
@@ -117,7 +117,7 @@ public class UtilsTest {
   }
 
   @Test
-  public void testIgnoredDomainNames() throws Exception {
+  public void testIgnoredDomainNames() {
 
     final List<String> ignoredDomainNames =
         Arrays.asList("ignored_domain", "*.ignored", "ignored.domain");
@@ -141,5 +141,21 @@ public class UtilsTest {
 
     assertTrue("1", Utils.isDomainUserNameIgnored("user@domain", ignoredDomainNames));
     assertTrue("2", Utils.isEmailWhitelisted("user@domain", ignoredDomainNames));
+  }
+
+  @Test
+  public void testMalformed() {
+    final List<String> ignoredDomainNames = Arrays.asList("ignored_domain");
+
+    assertTrue("1", Utils.isDomainUserNameIgnored("user@domain@domain", ignoredDomainNames));
+    assertFalse("2", Utils.isEmailWhitelisted("domain\\domain\\user", ignoredDomainNames));
+  }
+
+  @Test
+  public void testEmpty() {
+    final List<String> ignoredDomainNames = Arrays.asList("ignored_domain");
+
+    assertFalse("1", Utils.isDomainUserNameIgnored("", ignoredDomainNames));
+    assertFalse("2", Utils.isEmailWhitelisted("domain\\user", Arrays.asList()));
   }
 }

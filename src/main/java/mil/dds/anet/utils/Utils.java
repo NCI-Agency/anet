@@ -352,10 +352,15 @@ public class Utils {
     }
   }
 
-  public static boolean isLogonDomainInList(final String logon, final List<String> list)
+  private static boolean isLogonDomainInList(final String logon, final List<String> list)
       throws Exception {
 
+    final String wildcard = "*";
+
+    // Separator for 'User Principal Name' format
     final String upnSeparator = "@";
+
+    // Separator for 'Down-Level Logon Name' format
     final String dlSeparator = "\\";
 
     if (isEmptyOrNull(logon) || isEmptyOrNull(list)) {
@@ -363,17 +368,13 @@ public class Utils {
     }
 
     // Logon has no domain
-    // TODO: Decide whether to also support usernames without domain (supported for now, but no
-    // filtering can take place)
     if (!logon.contains(upnSeparator) && !logon.contains(dlSeparator)) {
       return false;
     }
 
-    // Does it have 'Down-Level Logon Name' format (<userName>@<domain>) or 'User Principal Name'
-    // format (<domain>\<userName>)?
+    // Find out the format
     boolean isDownLevelFormat = logon.contains(dlSeparator);
 
-    final String wildcard = "*";
     final String[] splittedLogon =
         logon.trim().split(isDownLevelFormat ? dlSeparator + "\\" : upnSeparator);
 
@@ -382,13 +383,11 @@ public class Utils {
       throw new Exception("Misformed logon: " + logon);
     }
 
-    // Decide whether it is a name without domain, or it has the down-level or 'User Principal Name'
-    // format
+    // Find the domain name depending on the format
     final String domainName =
         (isDownLevelFormat ? splittedLogon[0] : splittedLogon[1]).toLowerCase();
 
-    // Compile a list of domain names regex patterns we want to use to filter and then find any
-    // match
+    // Compile a list of regex patterns we want to use to filter and then find any match
     return list.stream().map(domain -> domainToRegexPattern(domain, wildcard))
         .anyMatch(domainPattern -> domainPattern.matcher(domainName).matches());
   }
