@@ -36,7 +36,7 @@
     "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.6.1",
     "ava": "^2.3.0",
-    "babel-eslint": "^10.0.2",
+    "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
     "chai": "^4.2.0",
