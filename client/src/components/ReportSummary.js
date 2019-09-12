@@ -135,7 +135,7 @@ const ReportSummary = props => {
 
   const reports = data ? data.reportList.list : []
   if (setTotalCount) {
-    const { totalCount } = data.reportList
+    const totalCount = data && data.reportList && data.reportList.totalCount
     setTotalCount(totalCount)
   }
   if (_get(reports, "length", 0) === 0) {

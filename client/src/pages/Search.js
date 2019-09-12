@@ -18,9 +18,8 @@ import ReportCollection from "components/ReportCollection"
 import { SearchDescription } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import UltimatePagination from "components/UltimatePagination"
-import FileSaver from "file-saver"
+import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
-import GQL from "graphqlapi"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Person, Task } from "models"
@@ -224,7 +223,7 @@ const Organizations = props => {
 
   const organizations = data ? data.organizationList.list : []
   const totalCount =
-    data && data.organizationList ? data.organizationList.totalCount : undefined
+    data && data.organizationList && data.organizationList.totalCount
   setTotalCount(totalCount)
   if (_get(organizations, "length", 0) === 0) {
     return <em>No organizations found</em>
@@ -306,8 +305,7 @@ const People = props => {
   }
 
   const people = data ? data.personList.list : []
-  const totalCount =
-    data && data.personList ? data.personList.totalCount : undefined
+  const totalCount = data && data.personList && data.personList.totalCount
   setTotalCount(totalCount)
   if (_get(people, "length", 0) === 0) {
     return <em>No people found</em>
@@ -403,8 +401,7 @@ const Positions = props => {
   }
 
   const positions = data ? data.positionList.list : []
-  const totalCount =
-    data && data.positionList ? data.positionList.totalCount : undefined
+  const totalCount = data && data.positionList && data.positionList.totalCount
   setTotalCount(totalCount)
   if (_get(positions, "length", 0) === 0) {
     return <em>No positions found</em>
@@ -465,8 +462,7 @@ const Tasks = props => {
   }
 
   const tasks = data ? data.taskList.list : []
-  const totalCount =
-    data && data.taskList ? data.taskList.totalCount : undefined
+  const totalCount = data && data.taskList && data.taskList.totalCount
   setTotalCount(totalCount)
   if (_get(tasks, "length", 0) === 0) {
     return <em>No tasks found</em>
@@ -544,8 +540,7 @@ const Locations = props => {
   }
 
   const locations = data ? data.locationList.list : []
-  const totalCount =
-    data && data.locationList ? data.locationList.totalCount : undefined
+  const totalCount = data && data.locationList && data.locationList.totalCount
   setTotalCount(totalCount)
   if (_get(locations, "length", 0) === 0) {
     return <em>No locations found</em>
@@ -694,14 +689,27 @@ const Search = props => {
                 alt="Export search results"
               />
             </Dropdown.Toggle>
+            {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
             <Dropdown.Menu className="super-colors">
-              <MenuItem onClick={() => createExportResultsFunctionFor("xlsx")}>
+              <MenuItem
+                onClick={() =>
+                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)
+                }
+              >
                 Excel (xlsx)
               </MenuItem>
-              <MenuItem onClick={() => createExportResultsFunctionFor("kml")}>
+              <MenuItem
+                onClick={() =>
+                  exportResults(searchQueryParams, queryTypes, "kml", setError)
+                }
+              >
                 Google Earth (kml)
               </MenuItem>
-              <MenuItem onClick={() => createExportResultsFunctionFor("nvg")}>
+              <MenuItem
+                onClick={() =>
+                  exportResults(searchQueryParams, queryTypes, "nvg", setError)
+                }
+              >
                 NATO Vector Graphics (nvg)
               </MenuItem>
             </Dropdown.Menu>
@@ -942,23 +950,6 @@ const Search = props => {
 
   function closeSaveModal() {
     setShowSaveSearch(false)
-  }
-
-  function createExportResultsFunctionFor(exportType) {
-    // FIXME: make this work
-    return this._dataFetcher(
-      props,
-      parts => {
-        const { query, variables } = GQL.combine(parts)
-        return API.queryExport(query, variables, exportType)
-          .then(blob => {
-            FileSaver.saveAs(blob, `anet_export.${exportType}`)
-          })
-          .catch(error => setError(error))
-      },
-      0,
-      0
-    )
   }
 }
 

@@ -32,7 +32,7 @@ const BaseAPI = {
     // Can't use client here as the response is not JSON
     return BaseAPI._fetch(
       GRAPHQL_ENDPOINT,
-      { query, variables, output },
+      { query: query.loc.source.body, variables, output },
       "*/*"
     ).then(response => response.blob())
   },
