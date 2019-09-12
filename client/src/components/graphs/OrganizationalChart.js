@@ -176,7 +176,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("dy", 22)
       .attr("x", 38)
       .text(d =>
-        d.data.shortName.length > 14
+        d.data.shortName && d.data.shortName.length > 14
           ? d.data.shortName.substring(0, 12) + ".."
           : d.data.shortName
       )
@@ -189,7 +189,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("dy", 50)
       .attr("x", -40)
       .text(d =>
-        d.data.longName.length > 21
+        d.data.longName && d.data.longName.length > 21
           ? d.data.longName.substring(0, 18) + ".."
           : d.data.longName
       )
@@ -287,11 +287,6 @@ export default class OrganizationalChart extends SVGCanvas {
       1.2,
       1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
     )
-
-    const translate = [
-      fullWidth / 2 - scale * bounds.center[0],
-      fullHeight / 2 - scale * bounds.center[1]
-    ]
 
     this.canvas.attr(
       "transform",
