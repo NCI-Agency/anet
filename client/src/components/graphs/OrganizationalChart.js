@@ -11,10 +11,7 @@ const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
 const sortPositions = (positions, truncateLimit) => {
   const allResults = [...positions].sort((p1, p2) =>
-    ranks.indexOf(p1.person && p1.person.rank) <
-    ranks.indexOf(p2.person && p2.person.rank)
-      ? 1
-      : -1
+    ranks.indexOf(p1.person?.rank) > ranks.indexOf(p2.person?.rank) ? -1 : 1
   )
   return truncateLimit && truncateLimit < allResults.length
     ? allResults.slice(0, truncateLimit)
@@ -151,12 +148,7 @@ export default class OrganizationalChart extends SVGCanvas {
 
     iconNodeG.each(function(d) {
       const positions = sortPositions(d.data.positions)
-      const unitcode =
-        rankToUnit[
-          positions.length > 0 &&
-            positions[0].person &&
-            positions[0].person.rank
-        ]
+      const unitcode = rankToUnit[(positions?.[0]?.person?.rank)]
       const sym = new Symbol(
         `S${
           d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
@@ -176,7 +168,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("dy", 22)
       .attr("x", 38)
       .text(d =>
-        d.data.shortName && d.data.shortName.length > 14
+        d.data.shortName?.length > 14
           ? d.data.shortName.substring(0, 12) + ".."
           : d.data.shortName
       )
@@ -189,7 +181,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("dy", 50)
       .attr("x", -40)
       .text(d =>
-        d.data.longName && d.data.longName.length > 21
+        d.data.longName?.length > 21
           ? d.data.longName.substring(0, 18) + ".."
           : d.data.longName
       )
