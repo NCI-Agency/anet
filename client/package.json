@@ -22,7 +22,7 @@
     "@babel/plugin-syntax-import-meta": "^7.2.0",
     "@babel/plugin-transform-proto-to-assign": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
-    "@babel/register": "^7.5.5",
+    "@babel/register": "^7.6.0",
     "@babel/runtime": "^7.5.5",
     "@storybook/addon-actions": "^5.1.11",
     "@storybook/react": "^5.1.11",
