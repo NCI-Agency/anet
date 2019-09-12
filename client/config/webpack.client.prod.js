@@ -23,7 +23,8 @@ const clientConfig = merge(common.clientConfig, {
     minimizer: [
       new TerserPlugin({
         cache: true,
-        parallel: true
+        parallel: true,
+        sourceMap: true
       })
     ],
     splitChunks: {
