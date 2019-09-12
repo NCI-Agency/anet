@@ -14,7 +14,6 @@ import {
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
 import { LAST_WEEK } from "dateUtils"
-import GQL from "graphqlapi"
 import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
@@ -48,24 +47,23 @@ const GQL_DELETE_SAVED_SEARCH = gql`
   }
 `
 
-const HomeTiles = props => {
-  const { currentUser } = props
-  // queries will contain the queries that will show up on the home tiles
-  // Based on the users role. They are all report searches
-  const queries = getQueriesForUser(currentUser)
-  let queryParts = [] // GQL query parts
-  queries.forEach((q, index) => {
-    q.query.pageSize = 1 // we're only interested in the totalCount, so just get at most one report
-    queryParts.push(
-      new GQL.Part(/* GraphQL */ `
-        tile${index}: reportList(query: $query${index}) {
-          totalCount
-        }
-      `).addVariable(`query${index}`, "ReportSearchQueryInput", q.query)
-    )
+const GQL_GET_REPORT_COUNT = gql`
+  query($reportQuery: ReportSearchQueryInput) {
+    reportList(query: $reportQuery) {
+      totalCount
+    }
+  }
+`
+
+const HomeTile = props => {
+  const { query, setSearchQuery, history } = props
+  const reportQuery = Object.assign({}, query.query, {
+    // we're only interested in the totalCount, so just get at most one report
+    pageSize: 1
   })
-  const { query, variables } = GQL.getGqlQuery(queryParts)
-  const { loading, error, data } = API.useApiQuery(query, variables)
+  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_COUNT, {
+    reportQuery
+  })
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -75,29 +73,16 @@ const HomeTiles = props => {
     return result
   }
 
-  let tileCounts = []
-  if (data) {
-    tileCounts = queries.map((q, index) => data["tile" + index].totalCount)
-  }
-
+  const totalCount = data && data.reportList && data.reportList.totalCount
   return (
-    <Grid fluid>
-      <Row>
-        {queries.map((query, index) => {
-          return (
-            <Button
-              bsStyle="link"
-              onClick={event => onClickDashboard(query, event)}
-              className="home-tile"
-              key={index}
-            >
-              <h1>{tileCounts[index]}</h1>
-              {query.title}
-            </Button>
-          )
-        })}
-      </Row>
-    </Grid>
+    <Button
+      bsStyle="link"
+      onClick={event => onClickDashboard(query, event)}
+      className="home-tile"
+    >
+      <h1>{totalCount}</h1>
+      {query.title}
+    </Button>
   )
 
   function onClickDashboard(queryDetails, event) {
@@ -112,13 +97,41 @@ const HomeTiles = props => {
 
   function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
-    props.setSearchQuery({
+    setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
     })
-    props.history.push("/search")
+    history.push("/search")
   }
+}
+
+HomeTile.propTypes = {
+  query: PropTypes.object.isRequired,
+  setSearchQuery: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired
+}
+
+const HomeTiles = props => {
+  const { currentUser, setSearchQuery, history } = props
+  // queries will contain the queries that will show up on the home tiles
+  // Based on the users role. They are all report searches
+  const queries = getQueriesForUser(currentUser)
+
+  return (
+    <Grid fluid>
+      <Row>
+        {queries.map((query, index) => (
+          <HomeTile
+            key={index}
+            query={query}
+            setSearchQuery={setSearchQuery}
+            history={history}
+          />
+        ))}
+      </Row>
+    </Grid>
+  )
 
   function getQueriesForUser(currentUser) {
     if (currentUser.isAdmin()) {
