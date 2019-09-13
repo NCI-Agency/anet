@@ -13,7 +13,33 @@ const VALID_PERSON_ADVISOR = {
 
 describe("Create new Person form page", () => {
   describe("When creating a Principle user", () => {
-    it("Should not save a principle with only a last name", () => {
+    it("Should not save a principle without gender being filled in", () => {
+      CreatePerson.openAsSuperUser()
+      CreatePerson.form.waitForExist()
+      CreatePerson.form.waitForDisplayed()
+      CreatePerson.lastName.waitForDisplayed()
+      CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
+      CreatePerson.gender.click()
+      CreatePerson.lastName.click()
+      const errorMessage = browser.$('select[name="gender"] + span.help-block')
+      errorMessage.waitForExist()
+      errorMessage.waitForDisplayed()
+      expect(errorMessage.getText()).to.equal("You must provide the Gender")
+
+      CreatePerson.gender.selectByAttribute(
+        "value",
+        CreatePerson.getRandomOption(CreatePerson.gender)
+      )
+      CreatePerson.rank.selectByAttribute(
+        "value",
+        CreatePerson.getRandomOption(CreatePerson.rank)
+      )
+      CreatePerson.submitForm()
+      CreatePerson.waitForAlertSuccessToLoad()
+      const alertMessage = CreatePerson.alertSuccess.getText()
+      expect(alertMessage).to.equal("Person saved")
+    })
+    it("Should save a principle without first name", () => {
       CreatePerson.openAsSuperUser()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
@@ -22,6 +48,10 @@ describe("Create new Person form page", () => {
       CreatePerson.rank.selectByAttribute(
         "value",
         CreatePerson.getRandomOption(CreatePerson.rank)
+      )
+      CreatePerson.gender.selectByAttribute(
+        "value",
+        CreatePerson.getRandomOption(CreatePerson.gender)
       )
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
@@ -37,6 +67,10 @@ describe("Create new Person form page", () => {
       CreatePerson.rank.selectByAttribute(
         "value",
         CreatePerson.getRandomOption(CreatePerson.rank)
+      )
+      CreatePerson.gender.selectByAttribute(
+        "value",
+        CreatePerson.getRandomOption(CreatePerson.gender)
       )
       CreatePerson.emailAddress.setValue("notValidEmail@")
       CreatePerson.lastName.click()
