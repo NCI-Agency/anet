@@ -496,19 +496,10 @@
         },
         "spacy": {
             "hashes": [
-                "sha256:2441ad9e6195669c13f4035dd77c4206414a40ebb8543c69f3386d984abfb942",
-                "sha256:92413e0ee146c0b4dd52959799aa6d61e7900f403269bda77cc549b025bedf2a",
-                "sha256:9a1c268e99ac8e19f3a98ecf2da0d8dc48ce0e8c5a6943c19cecccc48ea9f50e",
-                "sha256:ae392362e1b3769e54242cc341d237d39c94f80cded466c8f11862f26bd899da",
-                "sha256:b708bb5825976220de78ad7e20e827912ca95653738a812cc2e5d194e3060ae8",
-                "sha256:c383a4ea7682c124dacc119651c9710fa618aa2751bcafec99c876bdc7810ac0",
-                "sha256:ca8719ff445184913ca672bf544d9c5b59f77efc725510ffc43c83009fff3253",
-                "sha256:cdb331604c1568f7848c4d74320d65e1a7ebd5314eb63373ef41713b16333d4a",
-                "sha256:e1de6177fc259a4601cf8573f65c41021afad6fde975c6692e8ed21989c9492d",
-                "sha256:f6ed3d25aa8d46d9923ae607917a7d31666c04cf6a4f9314154586da4a8e7673"
+                "sha256:10b208898231153c67da4f2a34462eba201d0014b131de25565cb56b6582934c"
             ],
             "index": "pypi",
-            "version": "==2.1.6"
+            "version": "==2.1.7"
         },
         "sqlalchemy": {
             "hashes": [
