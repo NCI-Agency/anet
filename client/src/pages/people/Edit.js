@@ -35,6 +35,11 @@ const GQL_GET_PERSON = gql`
         uuid
         name
         type
+        organization {
+          uuid
+          shortName
+          identificationCode
+        }
       }
       ${GRAPHQL_NOTES_FIELDS}
     }
@@ -82,6 +87,7 @@ const PersonEdit = props => {
             relatedObjectUuid: person.uuid
           }
         }
+        relatedObjectValue={person}
       />
       <PersonForm
         initialValues={person}
