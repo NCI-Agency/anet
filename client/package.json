@@ -94,7 +94,7 @@
   "dependencies": {
     "@apollo/react-hooks": "^3.1.0",
     "@blueprintjs/core": "^3.18.1",
-    "@blueprintjs/datetime": "^3.9.0",
+    "@blueprintjs/datetime": "^3.13.0",
     "@fullcalendar/core": "^4.3.1",
     "@fullcalendar/daygrid": "^4.3.0",
     "@fullcalendar/interaction": "^4.3.0",
