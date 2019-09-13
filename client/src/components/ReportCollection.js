@@ -25,15 +25,14 @@ const ReportCollection = props => {
     marginBottom
   } = props
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
-  const [numReports, setNumReports] = useState(null)
-
   const showHeader = viewFormats.length > 1 || reportsFilter
+
   return (
     <div className="report-collection">
       <div>
         {showHeader && (
           <header>
-            {viewFormats.length > 1 && numReports > 0 && (
+            {viewFormats.length > 1 && (
               <ButtonToggleGroup
                 value={viewFormat}
                 onChange={setViewFormat}
@@ -64,7 +63,7 @@ const ReportCollection = props => {
           {viewFormat === FORMAT_CALENDAR && (
             <ReportCalendar
               queryParams={queryParams}
-              setTotalCount={setCount}
+              setTotalCount={setTotalCount}
             />
           )}
           {viewFormat === FORMAT_TABLE && (
@@ -72,20 +71,20 @@ const ReportCollection = props => {
               showAuthors
               paginationKey={paginationKey}
               queryParams={queryParams}
-              setTotalCount={setCount}
+              setTotalCount={setTotalCount}
             />
           )}
           {viewFormat === FORMAT_SUMMARY && (
             <ReportSummary
               paginationKey={paginationKey}
               queryParams={queryParams}
-              setTotalCount={setCount}
+              setTotalCount={setTotalCount}
             />
           )}
           {viewFormat === FORMAT_MAP && (
             <ReportMap
               queryParams={queryParams}
-              setTotalCount={setCount}
+              setTotalCount={setTotalCount}
               mapId={mapId}
               width={width}
               height={height}
@@ -96,11 +95,6 @@ const ReportCollection = props => {
       </div>
     </div>
   )
-
-  function setCount(count) {
-    setTotalCount && setTotalCount(count)
-    setNumReports(count)
-  }
 }
 
 ReportCollection.propTypes = {

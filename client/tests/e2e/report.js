@@ -203,7 +203,7 @@ test("Publish report chain", async t => {
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
   await $reportsPendingErin.click()
   await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
-  let $reportCollection = await $(".report-collection")
+  let $reportCollection = await $(".report-collection em")
   await assertElementText(
     t,
     $reportCollection,
