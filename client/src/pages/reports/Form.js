@@ -634,7 +634,7 @@ class BaseReportForm extends Component {
                     }
                     objectType={Person}
                     queryParams={{
-                      status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]
+                      status: [Person.STATUS.ACTIVE]
                     }}
                     fields={Person.autocompleteQuery}
                     addon={PEOPLE_ICON}
