@@ -182,7 +182,7 @@ const ReportSummary = props => {
 
 ReportSummary.propTypes = {
   queryParams: PropTypes.object,
-  setTotalCount: PropTypes.func.isRequired,
+  setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
   setPagination: PropTypes.func.isRequired,
   pagination: PropTypes.object.isRequired
