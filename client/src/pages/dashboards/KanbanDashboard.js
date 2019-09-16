@@ -28,11 +28,18 @@ const GQL_GET_TASK_LIST = gql`
         allReports: reports {
           uuid
         }
-        lastMonthReports: reports(query:{pageSize:0, engagementDateStart: ${LAST_MONTH},engagementDateEnd: 0}  ) {
+        lastMonthReports: reports(query: {
+          pageSize:0,
+          engagementDateStart: ${LAST_MONTH},
+          engagementDateEnd: 0
+        }) {
           uuid
         }
-        preLastMonthReports: reports(query:{pageSize:0, engagementDateStart: ${2 *
-          LAST_MONTH},engagementDateEnd: ${LAST_MONTH}}  ) {
+        preLastMonthReports: reports(query: {
+          pageSize:0,
+          engagementDateStart: ${2 * LAST_MONTH},
+          engagementDateEnd: ${LAST_MONTH}
+        }) {
           uuid
         }
 
