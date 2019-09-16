@@ -62,6 +62,8 @@ script:
     yarn run lint
     yarn run test-all
   - kill $SERVER_PID
+    echo "Client log:"
+    cat logs/clientLog.log
 
 after_script:
   - docker logs "$CONTAINER"
