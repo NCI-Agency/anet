@@ -106,7 +106,6 @@ export const renderError = (error, modelName, uuid) => {
 
 export const toggleLoading = (loading, showLoading, hideLoading) => {
   if (loading) {
-    document.body.classList.add("loading")
     if (typeof showLoading === "function") {
       showLoading()
     }
@@ -114,7 +113,6 @@ export const toggleLoading = (loading, showLoading, hideLoading) => {
     if (typeof hideLoading === "function") {
       hideLoading()
     }
-    document.body.classList.remove("loading")
   }
 }
 

@@ -318,16 +318,6 @@ button.home-tile.btn {
 	text-align: center;
 }
 
-.loading .anet section {
-	visibility: hidden;
-}
-
-.loading .anet section:before {
-	content: "Loading...";
-	visibility: visible;
-	font-size: 2rem;
-}
-
 .nav img {
 	width: 16px;
 	margin-right: 6px;
