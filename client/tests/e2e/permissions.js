@@ -2,7 +2,7 @@ let uuidv4 = require("uuid/v4")
 let test = require("../util/test")
 
 test("checking super user permissions", async t => {
-  t.plan(7)
+  t.plan(9)
 
   let { pageHelpers } = t.context
 
@@ -31,9 +31,23 @@ test("checking super user permissions", async t => {
   // User is super user, only admins may edit position of type super user
   await editAndSavePositionFromCurrentUserPage(t, false)
 
-  let $principalOrgLink = await getPrincipalOrgFromSearchResults(t, "MoD")
+  let $principalOrgLink = await getFromSearchResults(
+    t,
+    "MoD",
+    "MoD",
+    "organizations"
+  )
   await $principalOrgLink.click()
   await validateSuperUserPrincipalOrgPermissions(t)
+
+  let $locationLink = await getFromSearchResults(
+    t,
+    "General Hospital",
+    "General Hospital",
+    "locations"
+  )
+  await $locationLink.click()
+  await validateSuperUserLocationPermissions(t)
 })
 
 validateUserCannotEditOtherUser(
@@ -85,7 +99,7 @@ validateUserCannotEditOtherUser(
 )
 
 test("checking admin permissions", async t => {
-  t.plan(9)
+  t.plan(11)
 
   await t.context.get("/", "arthur")
   await t.context.pageHelpers.clickMyOrgLink()
@@ -97,9 +111,23 @@ test("checking admin permissions", async t => {
   // User is admin, and can therefore edit an admin position type
   await editAndSavePositionFromCurrentUserPage(t, true)
 
-  let $principalOrgLink = await getPrincipalOrgFromSearchResults(t, "MoD")
+  let $principalOrgLink = await getFromSearchResults(
+    t,
+    "MoD",
+    "MoD",
+    "organizations"
+  )
   await $principalOrgLink.click()
   await validateAdminPrincipalOrgPermissions(t)
+
+  let $locationLink = await getFromSearchResults(
+    t,
+    "General Hospital",
+    "General Hospital",
+    "locations"
+  )
+  await $locationLink.click()
+  await validateAdminLocationPermissions(t)
 })
 
 test("admins can edit superusers and their positions", async t => {
@@ -107,11 +135,11 @@ test("admins can edit superusers and their positions", async t => {
 
   await t.context.get("/", "arthur")
 
-  let [$rebeccaPersonLink] = await getUserPersonAndPositionFromSearchResults(
+  let $rebeccaPersonLink = await getFromSearchResults(
     t,
     "rebecca",
     "CTR BECCABON, Rebecca",
-    "EF 2.2 Final Reviewer"
+    "people"
   )
   await $rebeccaPersonLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($rebeccaPersonLink))
@@ -135,11 +163,11 @@ function validateUserCannotEditOtherUser(
 
     await t.context.get("/", user)
 
-    let [$arthurPersonLink] = await getUserPersonAndPositionFromSearchResults(
+    let $arthurPersonLink = await getFromSearchResults(
       t,
       searchQuery,
       otherUserName,
-      otherUserPosition
+      "people"
     )
     await $arthurPersonLink.click()
     await t.context.driver.sleep(shortWaitMs) // wait for transition
@@ -150,12 +178,12 @@ function validateUserCannotEditOtherUser(
       shortWaitMs
     )
 
-    let $arthurPositionLink = (await getUserPersonAndPositionFromSearchResults(
+    let $arthurPositionLink = await getFromSearchResults(
       t,
       searchQuery,
-      otherUserName,
-      otherUserPosition
-    ))[1]
+      otherUserPosition,
+      "people"
+    )
     await $arthurPositionLink.click()
     await assertElementNotPresent(
       t,
@@ -255,70 +283,6 @@ async function validationEditPositionOnCurrentPage(t, validateTrue) {
   }
 }
 
-async function getUserPersonAndPositionFromSearchResults(
-  t,
-  searchQuery,
-  personName,
-  positionName
-) {
-  let { $, $$ } = t.context
-
-  let $searchBar = await $("#searchBarInput")
-  await $searchBar.clear()
-  await $searchBar.sendKeys(searchQuery)
-
-  let $searchBarSubmit = await $("#searchBarSubmit")
-  await $searchBarSubmit.click()
-
-  let $searchResultLinks = await $$(".people-search-results td a")
-
-  async function findLinkWithText(text) {
-    for (let $link of $searchResultLinks) {
-      let linkText = await $link.getText()
-      if (linkText === text) {
-        return $link
-      }
-    }
-    t.fail(
-      `Could not find link with text '${text}' when searching '${searchQuery}'. The data does not match what this test expects.`
-    )
-  }
-
-  let $arthurPersonLink = await findLinkWithText(personName)
-  let $arthurPositionLink = await findLinkWithText(positionName)
-
-  return [$arthurPersonLink, $arthurPositionLink]
-}
-
-async function getPrincipalOrgFromSearchResults(t, principalOrgName) {
-  let { $, $$ } = t.context
-
-  let $searchBar = await $("#searchBarInput")
-  await $searchBar.clear()
-  await $searchBar.sendKeys(principalOrgName)
-
-  let $searchBarSubmit = await $("#searchBarSubmit")
-  await $searchBarSubmit.click()
-
-  let $searchResultLinks = await $$("#organizations-search-results td a")
-
-  async function findLinkWithText(text) {
-    for (let $link of $searchResultLinks) {
-      let linkText = await $link.getText()
-      if (linkText === text) {
-        return $link
-      }
-    }
-    t.fail(
-      `Could not find link with text '${text}' when searching '${principalOrgName}'. The data does not match what this test expects.`
-    )
-  }
-
-  let $rebeccaPrincipalOrgLink = await findLinkWithText(principalOrgName)
-
-  return $rebeccaPrincipalOrgLink
-}
-
 async function validateSuperUserPrincipalOrgPermissions(t) {
   let { assertElementNotPresent, shortWaitMs } = t.context
 
@@ -368,4 +332,80 @@ async function validateAdminPrincipalOrgPermissions(t) {
     "#identificationCode",
     "Field identificationCode of a principal organization should be enabled for admins"
   )
+}
+
+async function validateSuperUserLocationPermissions(t) {
+  let { $, assertElementEnabled, assertElementDisabled } = t.context
+
+  let $editLocationButton = await $("#editButton")
+  await t.context.driver.wait(
+    t.context.until.elementIsVisible($editLocationButton)
+  )
+  await $editLocationButton.click()
+  await assertElementDisabled(
+    t,
+    '[name="name"]',
+    "Field name of a location should be disabled for super users"
+  )
+  await assertElementEnabled(
+    t,
+    '[name="status"]',
+    "Field status of a location should be enabled for super users"
+  )
+}
+
+async function validateAdminLocationPermissions(t) {
+  let { $, assertElementEnabled } = t.context
+
+  let $editLocationButton = await $("#editButton")
+  await t.context.driver.wait(
+    t.context.until.elementIsVisible($editLocationButton)
+  )
+  await $editLocationButton.click()
+  await assertElementEnabled(
+    t,
+    '[name="name"]',
+    "Field name of a location should be enabled for admins"
+  )
+  await assertElementEnabled(
+    t,
+    '[name="status"]',
+    "Field status of a location should be enabled for admins"
+  )
+}
+
+async function getFromSearchResults(
+  t,
+  searchQuery,
+  resultText,
+  searchResultsType
+) {
+  let { $, $$ } = t.context
+
+  let $searchBar = await $("#searchBarInput")
+  await $searchBar.clear()
+  await $searchBar.sendKeys(searchQuery)
+
+  let $searchBarSubmit = await $("#searchBarSubmit")
+  await $searchBarSubmit.click()
+
+  let $searchResultLinks = await $$(
+    "#" + searchResultsType + "-search-results td a"
+  )
+
+  async function findLinkWithText(text) {
+    for (let $link of $searchResultLinks) {
+      let linkText = await $link.getText()
+      if (linkText === text) {
+        return $link
+      }
+    }
+    t.fail(
+      `Could not find link with text '${text}' when searching '${searchQuery}'. The data does not match what this test expects.`
+    )
+  }
+
+  let $resultLink = await findLinkWithText(resultText)
+
+  return $resultLink
 }
