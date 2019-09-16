@@ -1,97 +1,81 @@
 import { Settings } from "api"
-import autobind from "autobind-decorator"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { Element } from "react-scroll"
 
-class BaseOrganizationLaydown extends Component {
-  static propTypes = {
-    organization: PropTypes.instanceOf(Organization).isRequired,
-    currentUser: PropTypes.instanceOf(Person)
-  }
+const BaseOrganizationLaydown = props => {
+  const [showInactivePositions, setShowInactivePositions] = useState(false)
+  const { currentUser, organization } = props
+  const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
 
-  constructor(props) {
-    super(props)
+  const numInactivePos = organization.positions.filter(
+    p => p.status === Position.STATUS.INACTIVE
+  ).length
 
-    this.state = {
-      showInactivePositions: false
-    }
-  }
+  const positionsNeedingAttention = organization.positions.filter(
+    position => !position.person
+  )
+  const supportedPositions = organization.positions.filter(
+    position => positionsNeedingAttention.indexOf(position) === -1
+  )
 
-  render() {
-    const { currentUser } = this.props
-    const org = this.props.organization
-    const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
+  return (
+    <Element name="laydown">
+      <Fieldset
+        id="supportedPositions"
+        title="Supported positions"
+        action={
+          <div>
+            {isSuperUser && (
+              <LinkTo
+                position={Position.pathForNew({
+                  organizationUuid: organization.uuid
+                })}
+                button
+              >
+                Create position
+              </LinkTo>
+            )}
+          </div>
+        }
+      >
+        {renderPositionTable(supportedPositions)}
+        {supportedPositions.length === 0 && (
+          <em>There are no occupied positions</em>
+        )}
+      </Fieldset>
 
-    const showInactivePositions = this.state.showInactivePositions
-    const numInactivePos = org.positions.filter(
-      p => p.status === Position.STATUS.INACTIVE
-    ).length
+      <Fieldset
+        id="vacantPositions"
+        title="Vacant positions"
+        action={
+          <div>
+            {numInactivePos > 0 && (
+              <Button onClick={toggleShowInactive}>
+                {(showInactivePositions ? "Hide " : "Show ") +
+                  numInactivePos +
+                  " inactive position(s)"}
+              </Button>
+            )}
+          </div>
+        }
+      >
+        {renderPositionTable(positionsNeedingAttention)}
+        {positionsNeedingAttention.length === 0 && (
+          <em>There are no vacant positions</em>
+        )}
+      </Fieldset>
+    </Element>
+  )
 
-    const positionsNeedingAttention = org.positions.filter(
-      position => !position.person
-    )
-    const supportedPositions = org.positions.filter(
-      position => positionsNeedingAttention.indexOf(position) === -1
-    )
-
-    return (
-      <Element name="laydown">
-        <Fieldset
-          id="supportedPositions"
-          title="Supported positions"
-          action={
-            <div>
-              {isSuperUser && (
-                <LinkTo
-                  position={Position.pathForNew({ organizationUuid: org.uuid })}
-                  button
-                >
-                  Create position
-                </LinkTo>
-              )}
-            </div>
-          }
-        >
-          {this.renderPositionTable(supportedPositions)}
-          {supportedPositions.length === 0 && (
-            <em>There are no occupied positions</em>
-          )}
-        </Fieldset>
-
-        <Fieldset
-          id="vacantPositions"
-          title="Vacant positions"
-          action={
-            <div>
-              {numInactivePos > 0 && (
-                <Button onClick={this.toggleShowInactive}>
-                  {(showInactivePositions ? "Hide " : "Show ") +
-                    numInactivePos +
-                    " inactive position(s)"}
-                </Button>
-              )}
-            </div>
-          }
-        >
-          {this.renderPositionTable(positionsNeedingAttention)}
-          {positionsNeedingAttention.length === 0 && (
-            <em>There are no vacant positions</em>
-          )}
-        </Fieldset>
-      </Element>
-    )
-  }
-
-  renderPositionTable(positions) {
-    const org = this.props.organization
+  function renderPositionTable(positions) {
     let posNameHeader, posPersonHeader, otherNameHeader, otherPersonHeader
-    if (org.isAdvisorOrg()) {
+    if (organization.isAdvisorOrg()) {
       posNameHeader = Settings.fields.advisor.position.name
       posPersonHeader = Settings.fields.advisor.person.name
       otherNameHeader = Settings.fields.principal.position.name
@@ -116,21 +100,21 @@ class BaseOrganizationLaydown extends Component {
           {Position.map(positions, position =>
             position.associatedPositions.length
               ? Position.map(position.associatedPositions, (other, idx) =>
-                this.renderPositionRow(position, other, idx)
+                renderPositionRow(position, other, idx)
               )
-              : this.renderPositionRow(position, null, 0)
+              : renderPositionRow(position, null, 0)
           )}
         </tbody>
       </Table>
     )
   }
 
-  renderPositionRow(position, other, otherIndex) {
+  function renderPositionRow(position, other, otherIndex) {
     let key = position.uuid
     let otherPersonCol, otherNameCol, positionPersonCol, positionNameCol
     if (
       position.status === Position.STATUS.INACTIVE &&
-      this.state.showInactivePositions === false
+      !showInactivePositions
     ) {
       return
     }
@@ -139,14 +123,14 @@ class BaseOrganizationLaydown extends Component {
       key += "." + other.uuid
       otherNameCol = (
         <td>
-          <LinkTo position={other}>{this.positionWithStatus(other)}</LinkTo>
+          <LinkTo position={other}>{positionWithStatus(other)}</LinkTo>
         </td>
       )
 
       otherPersonCol = other.person ? (
         <td>
           <LinkTo person={other.person}>
-            {this.personWithStatus(other.person)}
+            {personWithStatus(other.person)}
           </LinkTo>
         </td>
       ) : (
@@ -157,16 +141,14 @@ class BaseOrganizationLaydown extends Component {
     if (otherIndex === 0) {
       positionNameCol = (
         <td>
-          <LinkTo position={position}>
-            {this.positionWithStatus(position)}
-          </LinkTo>
+          <LinkTo position={position}>{positionWithStatus(position)}</LinkTo>
         </td>
       )
       positionPersonCol =
         position.person && position.person.uuid ? (
           <td>
             <LinkTo person={position.person}>
-              {this.personWithStatus(position.person)}
+              {personWithStatus(position.person)}
             </LinkTo>
           </td>
         ) : (
@@ -189,7 +171,7 @@ class BaseOrganizationLaydown extends Component {
     )
   }
 
-  personWithStatus(person) {
+  function personWithStatus(person) {
     person = new Person(person)
     if (person.status === Person.STATUS.INACTIVE) {
       return <i>{person.toString() + " (Inactive)"}</i>
@@ -198,7 +180,7 @@ class BaseOrganizationLaydown extends Component {
     }
   }
 
-  positionWithStatus(pos) {
+  function positionWithStatus(pos) {
     let code = pos.code ? ` (${pos.code})` : ""
     if (pos.status === Position.STATUS.INACTIVE) {
       return <i>{`${pos.name}${code} (Inactive)`}</i>
@@ -207,10 +189,14 @@ class BaseOrganizationLaydown extends Component {
     }
   }
 
-  @autobind
-  toggleShowInactive() {
-    this.setState({ showInactivePositions: !this.state.showInactivePositions })
+  function toggleShowInactive() {
+    setShowInactivePositions(!showInactivePositions)
   }
+}
+
+BaseOrganizationLaydown.propTypes = {
+  organization: PropTypes.instanceOf(Organization).isRequired,
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 const OrganizationLaydown = props => (
