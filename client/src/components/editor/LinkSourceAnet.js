@@ -14,10 +14,10 @@ import LOCATIONS_ICON from "resources/locations.png"
 import POSITIONS_ICON from "resources/positions.png"
 import { Organization, Person, Position, Task, Location, Report } from "models"
 import {
-  ReportOverlayRow,
+  ReportDetailedOverlayRow,
   OrganizationOverlayRow,
   TaskSimpleOverlayRow,
-  PersonSimpleOverlayRow,
+  PersonDetailedOverlayRow,
   PositionOverlayRow,
   LocationOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -37,10 +37,25 @@ const entityFilters = {
   }
 }
 
+const peopleFilters = {
+  allEntities: {
+    label: "All",
+    queryVars: { matchPositionName: true }
+  },
+  activeAdvisors: {
+    label: "All advisors",
+    queryVars: { role: Person.ROLE.ADVISOR, matchPositionName: true }
+  },
+  activePrincipals: {
+    label: "All principals",
+    queryVars: { role: Person.ROLE.PRINCIPAL }
+  }
+}
+
 const widgetPropsReport = {
   objectType: Report,
-  overlayRenderRow: ReportOverlayRow,
-  overlayColumns: ["Name"],
+  overlayRenderRow: ReportDetailedOverlayRow,
+  overlayColumns: ["Goal", "Author", "Updated"],
   filterDefs: entityFilters,
   queryParams: {},
   fields: Report.autocompleteQuery,
@@ -49,9 +64,9 @@ const widgetPropsReport = {
 
 const widgetPropsPeople = {
   objectType: Person,
-  overlayRenderRow: PersonSimpleOverlayRow,
-  overlayColumns: ["Name"],
-  filterDefs: entityFilters,
+  overlayRenderRow: PersonDetailedOverlayRow,
+  overlayColumns: ["Name", "Position", "Location", "Organization"],
+  filterDefs: peopleFilters,
   queryParams: {},
   fields: Person.autocompleteQuery,
   addon: PEOPLE_ICON
@@ -117,8 +132,6 @@ class LinkSourceAnet extends Component {
   }
 
   onConfirm = value => {
-    console.log(value)
-
     const { editorState, entityType, onComplete } = this.props
 
     let nextState = createEntity(
@@ -127,7 +140,12 @@ class LinkSourceAnet extends Component {
       {
         url: "\\" + this.state.objectType.toLowerCase() + "/" + value.uuid
       },
-      value.name || value.longName || value.shortName || value.intent,
+      value.name ||
+        value.shortName ||
+        value.longName ||
+        value.intent ||
+        value.uuid,
+      // this.state.objectType + ":" + value.uuid,
       "MUTABLE"
     )
 
@@ -164,7 +182,7 @@ class LinkSourceAnet extends Component {
         onEntered={this.onAfterOpen}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Search ANET entities</Modal.Title>
+          <Modal.Title>Link to ANET entity</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -178,11 +196,13 @@ class LinkSourceAnet extends Component {
               </Button>
             ))}
           </ButtonToggleGroup>
+        </Modal.Body>
 
+        <Modal.Footer>
           <AdvancedSingleSelect
             fieldName="entitySelect"
             fieldLabel="Search in ANET:"
-            placeholder={"Search in ANET"}
+            placeholder="Search in ANET"
             value={{}}
             overlayColumns={this.state.advancedSelectProps.overlayColumns}
             overlayRenderRow={this.state.advancedSelectProps.overlayRenderRow}
@@ -193,7 +213,7 @@ class LinkSourceAnet extends Component {
             fields={this.state.advancedSelectProps.fields}
             addon={this.state.advancedSelectProps.addon}
           />
-        </Modal.Body>
+        </Modal.Footer>
       </Modal>
     )
   }

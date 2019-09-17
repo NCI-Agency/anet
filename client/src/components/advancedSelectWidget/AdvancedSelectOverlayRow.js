@@ -1,5 +1,7 @@
 import React from "react"
 import LinkTo from "components/LinkTo"
+import { Settings } from "api"
+import moment from "moment"
 
 export const AuthorizationGroupOverlayRow = item => (
   <React.Fragment key={item.uuid}>
@@ -119,6 +121,24 @@ export const ReportOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
       <LinkTo report={item} isLink={false} />
+    </td>
+  </React.Fragment>
+)
+
+export const ReportDetailedOverlayRow = item => (
+  <React.Fragment key={item.uuid}>
+    <td>
+      <LinkTo report={item} isLink={false} />
+    </td>
+    <td>
+      <span>{item.author ? item.author.name : "Unknown"}</span>
+    </td>
+    <td>
+      <span>
+        {moment(item.updatedAt).format(
+          Settings.dateFormats.forms.displayShort.withTime
+        )}
+      </span>
     </td>
   </React.Fragment>
 )
