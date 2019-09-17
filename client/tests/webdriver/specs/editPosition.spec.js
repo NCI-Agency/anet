@@ -4,7 +4,7 @@ import EditPosition from "../pages/editPosition.page"
 const ADVISOR_ORG = "EF 2.2"
 const ADVISOR_ORG_COMPLETE = "EF 2.2 -"
 const PRINCIPAL_ORG = "MoI"
-const PRINCIPAL_ORG_COMPLETE = "MoI - Ministry of Interior"
+const PRINCIPAL_ORG_COMPLETE = "MoI - Ministry of Interior P12345"
 
 describe("Create position page", () => {
   beforeEach("Open the create position page", () => {

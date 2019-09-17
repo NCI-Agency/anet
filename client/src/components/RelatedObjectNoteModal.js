@@ -30,17 +30,12 @@ export default class RelatedObjectNoteModal extends Component {
     note: Model.notePropTypes,
     showModal: PropTypes.bool,
     onCancel: PropTypes.func.isRequired,
-    onSuccess: PropTypes.func.isRequired
+    onSuccess: PropTypes.func.isRequired,
+    questions: PropTypes.array
   }
   yupSchema = yup.object().shape({
-    type: yup
-      .string()
-      .required()
-      .default(NOTE_TYPE.FREE_TEXT),
-    text: yup
-      .string()
-      .required()
-      .default("")
+    type: yup.string().required(),
+    text: yup.string().default("")
   })
   state = {
     error: null
@@ -54,7 +49,7 @@ export default class RelatedObjectNoteModal extends Component {
           enableReinitialize
           onSubmit={this.onSubmit}
           validationSchema={this.yupSchema}
-          isInitialValid={() => this.yupSchema.isValidSync(note)}
+          isInitialValid
           initialValues={note}
         >
           {({
@@ -66,30 +61,63 @@ export default class RelatedObjectNoteModal extends Component {
             submitForm
           }) => {
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-            const jsonFields = isJson ? JSON.parse(note.text) : {}
+            const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
+            const typeName =
+              note.type === NOTE_TYPE.PARTNER_ASSESSMENT ? "assessment" : "note"
             return (
               <Form>
                 <Modal.Header closeButton>
                   <Modal.Title>
-                    {note.uuid ? "Edit note" : "Post a new note"}
+                    {(note.uuid ? "Edit " : "Post a new ") + typeName}
                   </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  <Messages error={this.state.error} />
-                  <Field
-                    name="text"
-                    value={noteText}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("text", value)}
-                    widget={
-                      <RichTextEditor
-                        className="textField"
-                        onHandleBlur={() => setFieldTouched("text", true)}
-                      />
-                    }
-                    vertical
-                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: 5,
+                      height: "100%"
+                    }}
+                  >
+                    <Messages error={this.state.error} />
+
+                    {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
+                      <>
+                        {this.props.questions.map(question => (
+                          <React.Fragment key={question.id}>
+                            <p>{question.label}</p>
+                            <Field
+                              name={question.id}
+                              label=""
+                              component={FieldHelper.renderButtonToggleGroup}
+                              buttons={question.choice}
+                              onChange={value => {
+                                setFieldValue(question.id, value)
+                              }}
+                            />
+                            <br />
+                            <br />
+                          </React.Fragment>
+                        ))}
+                      </>
+                    )}
+
+                    <Field
+                      name="text"
+                      value={noteText}
+                      component={FieldHelper.renderSpecialField}
+                      onChange={value => setFieldValue("text", value)}
+                      widget={
+                        <RichTextEditor
+                          className="textField"
+                          onHandleBlur={() => setFieldTouched("text", true)}
+                        />
+                      }
+                      vertical
+                    />
+                  </div>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button className="pull-left" onClick={this.close}>
@@ -129,11 +157,16 @@ export default class RelatedObjectNoteModal extends Component {
 
   save = (values, form) => {
     const edit = !!this.props.note.uuid
-    const note = values
+    const note = {
+      uuid: values.uuid,
+      author: values.author,
+      type: values.type,
+      noteRelatedObjects: values.noteRelatedObjects,
+      text: values.text
+    }
     const isJson = note.type !== NOTE_TYPE.FREE_TEXT
     if (isJson) {
-      const jsonFields = JSON.parse(this.props.note.text)
-      jsonFields.text = note.text
+      const { uuid, author, type, noteRelatedObjects, ...jsonFields } = values
       note.text = JSON.stringify(jsonFields)
     }
     return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, { note })
