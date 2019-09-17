@@ -70,8 +70,6 @@ public class NoteResource {
   }
 
   private void checkPermission(Note n, final Person user) {
-    System.out.println("n " + n);
-    System.out.println("n.getAuthorUuid() " + n.getAuthorUuid());
     if (!n.getAuthorUuid().equals(DaoUtils.getUuid(user)) && !AuthUtils.isAdmin(user)) {
       throw new WebApplicationException("Only the author or an admin can do this",
           Status.FORBIDDEN);
