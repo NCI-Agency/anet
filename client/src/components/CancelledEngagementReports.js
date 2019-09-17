@@ -14,7 +14,6 @@ import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Overlay, Popover } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST_BY_ORG = gql`
@@ -43,37 +42,6 @@ const GQL_GET_REPORT_LIST_BY_REASON = gql`
   }
 `
 
-const ChartByOrgPopover = props => {
-  const { graphPopover, hoveredBar } = props
-  if (!graphPopover || !hoveredBar) {
-    return null
-  }
-
-  return (
-    <Overlay
-      show
-      placement="top"
-      container={document.body}
-      animation={false}
-      target={() => graphPopover}
-    >
-      <Popover
-        id="graph-popover"
-        title={hoveredBar && hoveredBar.advisorOrg.shortName}
-      >
-        <p style={{ textAlign: "center" }}>
-          {hoveredBar && hoveredBar.cancelledByOrg}
-        </p>
-      </Popover>
-    </Overlay>
-  )
-}
-
-ChartByOrgPopover.propTypes = {
-  graphPopover: PropTypes.object,
-  hoveredBar: PropTypes.object
-}
-
 const ChartByOrg = props => {
   const {
     chartId,
@@ -82,10 +50,6 @@ const ChartByOrg = props => {
     goToSelection,
     selectedBarClass
   } = props
-  const [popover, setPopover] = useState({
-    graphPopover: null,
-    hoveredBar: null
-  })
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST_BY_ORG, {
     reportQuery
@@ -148,8 +112,10 @@ const ChartByOrg = props => {
             yProp="cancelledByOrg"
             xLabel="advisorOrg.shortName"
             onBarClick={goToSelection}
-            showPopover={showPopover}
-            hidePopover={hidePopover}
+            tooltip={d => `
+              <h4>${d.advisorOrg.shortName}</h4>
+              <p>${d.cancelledByOrg}</p>
+            `}
             selectedBarClass={selectedBarClass}
             selectedBar={
               focusedSelection && focusedSelection.focusedIsOrg
@@ -159,23 +125,8 @@ const ChartByOrg = props => {
           />
         )}
       </ContainerDimensions>
-
-      <ChartByOrgPopover {...popover} graphData={graphData} />
     </div>
   )
-
-  function showPopover(g, h) {
-    if (g && popover.graphPopover && _isEqual(g.id, popover.graphPopover.id)) {
-      // Same graphPopover already set, but prevent state update
-      // (because e.g. target.ownerDocument.lastModified will have changed)
-      return
-    }
-    setPopover({ graphPopover: g, hoveredBar: h })
-  }
-
-  function hidePopover() {
-    setPopover({ graphPopover: null, hoveredBar: null })
-  }
 }
 
 ChartByOrg.propTypes = {
@@ -186,37 +137,6 @@ ChartByOrg.propTypes = {
   selectedBarClass: PropTypes.string
 }
 
-const ChartByReasonPopover = props => {
-  const { graphPopover, hoveredBar } = props
-  if (!graphPopover || !hoveredBar) {
-    return null
-  }
-
-  return (
-    <Overlay
-      show
-      placement="top"
-      container={document.body}
-      animation={false}
-      target={() => graphPopover}
-    >
-      <Popover
-        id="graph-popover-by-reason"
-        title={hoveredBar && hoveredBar.reason}
-      >
-        <p style={{ textAlign: "center" }}>
-          {hoveredBar && hoveredBar.cancelledByReason}
-        </p>
-      </Popover>
-    </Overlay>
-  )
-}
-
-ChartByReasonPopover.propTypes = {
-  graphPopover: PropTypes.object,
-  hoveredBar: PropTypes.object
-}
-
 const ChartByReason = props => {
   const {
     chartId,
@@ -225,10 +145,6 @@ const ChartByReason = props => {
     goToSelection,
     selectedBarClass
   } = props
-  const [popover, setPopover] = useState({
-    graphPopover: null,
-    hoveredBar: null
-  })
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_REPORT_LIST_BY_REASON,
@@ -287,8 +203,10 @@ const ChartByReason = props => {
             yProp="cancelledByReason"
             xLabel="reason"
             onBarClick={goToSelection}
-            showPopover={showPopover}
-            hidePopover={hidePopover}
+            tooltip={d => `
+              <h4>${d.reason}</h4>
+              <p>${d.cancelledByReason}</p>
+            `}
             selectedBarClass={selectedBarClass}
             selectedBar={
               focusedSelection && !focusedSelection.focusedIsOrg
@@ -298,23 +216,8 @@ const ChartByReason = props => {
           />
         )}
       </ContainerDimensions>
-
-      <ChartByReasonPopover {...popover} graphData={graphData} />
     </div>
   )
-
-  function showPopover(g, h) {
-    if (g && popover.graphPopover && _isEqual(g.id, popover.graphPopover.id)) {
-      // Same graphPopover already set, but prevent state update
-      // (because e.g. target.ownerDocument.lastModified will have changed)
-      return
-    }
-    setPopover({ graphPopover: g, hoveredBar: h })
-  }
-
-  function hidePopover() {
-    setPopover({ graphPopover: null, hoveredBar: null })
-  }
 
   function getReasonDisplayName(reason) {
     return reason

@@ -1,6 +1,7 @@
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
+import ReactTooltip from "react-tooltip"
 import "./BarChart.css"
 
 /*
@@ -67,8 +68,7 @@ const HorizontalBarChart = props => {
     chartId,
     data,
     onBarClick,
-    showPopover,
-    hidePopover,
+    tooltip,
     selectedBarClass,
     selectedBar
   } = props
@@ -269,8 +269,9 @@ const HorizontalBarChart = props => {
       .attr("y", yCategoryScale(BAR_PADDING))
       .attr("width", d => xScale(d.value))
       .attr("height", BAR_HEIGHT)
-      .on("mouseenter", d => showPopover && showPopover(d3.event.target, d))
-      .on("mouseleave", d => hidePopover && hidePopover())
+      .attr("data-for", "tooltip-top")
+      .attr("data-html", true)
+      .attr("data-tip", d => tooltip && tooltip(d))
 
     barsGroup
       .selectAll(".bar-label")
@@ -289,6 +290,8 @@ const HorizontalBarChart = props => {
       .attr("text-anchor", "start")
 
     bindElementOnClick(barsGroup, onBarClick)
+
+    ReactTooltip.rebuild()
   }, [
     node,
     width,
@@ -296,8 +299,7 @@ const HorizontalBarChart = props => {
     chartId,
     data,
     onBarClick,
-    showPopover,
-    hidePopover,
+    tooltip,
     selectedBarClass,
     selectedBar
   ])
@@ -323,8 +325,7 @@ HorizontalBarChart.propTypes = {
   chartId: PropTypes.string,
   data: PropTypes.object,
   onBarClick: PropTypes.func,
-  showPopover: PropTypes.func,
-  hidePopover: PropTypes.func,
+  tooltip: PropTypes.func,
   selectedBarClass: PropTypes.string,
   selectedBar: PropTypes.string
 }

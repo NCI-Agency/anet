@@ -15,7 +15,6 @@ import _isEqual from "lodash/isEqual"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Overlay, Popover } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -34,39 +33,6 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const ChartPopover = props => {
-  const { graphPopover, hoveredBar, graphData } = props
-  if (!graphPopover || !hoveredBar) {
-    return null
-  }
-
-  return (
-    <Overlay
-      show
-      placement="top"
-      container={document.body}
-      animation={false}
-      target={() => graphPopover}
-    >
-      <Popover
-        id="graph-popover"
-        title={hoveredBar && graphData.categoryLabels[hoveredBar.parentKey]}
-      >
-        <p style={{ textAlign: "center" }}>
-          {hoveredBar &&
-            `${graphData.leavesLabels[hoveredBar.key]}: ${hoveredBar.value}`}
-        </p>
-      </Popover>
-    </Overlay>
-  )
-}
-
-ChartPopover.propTypes = {
-  graphPopover: PropTypes.object,
-  hoveredBar: PropTypes.object,
-  graphData: PropTypes.object
-}
-
 const Chart = props => {
   const {
     chartId,
@@ -75,10 +41,6 @@ const Chart = props => {
     goToSelection,
     selectedBarClass
   } = props
-  const [popover, setPopover] = useState({
-    graphPopover: null,
-    hoveredBar: null
-  })
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
@@ -154,8 +116,10 @@ const Chart = props => {
             chartId={chartId}
             data={graphData}
             onBarClick={goToSelection}
-            showPopover={showPopover}
-            hidePopover={hidePopover}
+            tooltip={d => `
+              <h4>${graphData.categoryLabels[d.parentKey]}</h4>
+              <p>${graphData.leavesLabels[d.key]}: ${d.value}</p>
+            `}
             selectedBarClass={selectedBarClass}
             selectedBar={
               focusedSelection
@@ -165,23 +129,8 @@ const Chart = props => {
           />
         )}
       </ContainerDimensions>
-
-      <ChartPopover {...popover} graphData={graphData} />
     </div>
   )
-
-  function showPopover(g, h) {
-    if (g && popover.graphPopover && _isEqual(g.id, popover.graphPopover.id)) {
-      // Same graphPopover already set, but prevent state update
-      // (because e.g. target.ownerDocument.lastModified will have changed)
-      return
-    }
-    setPopover({ graphPopover: g, hoveredBar: h })
-  }
-
-  function hidePopover() {
-    setPopover({ graphPopover: null, hoveredBar: null })
-  }
 
   function getEngagementDateRangeArray() {
     let dateArray = []

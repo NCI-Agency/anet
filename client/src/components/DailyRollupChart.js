@@ -1,19 +1,11 @@
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
+import ReactTooltip from "react-tooltip"
 import "./BarChart.css"
 
 const DailyRollupChart = props => {
-  const {
-    width,
-    height,
-    chartId,
-    data,
-    onBarClick,
-    showPopover,
-    hidePopover,
-    barColors
-  } = props
+  const { width, height, chartId, data, onBarClick, tooltip, barColors } = props
   const node = useRef(null)
   useEffect(() => {
     if (!node.current) {
@@ -144,8 +136,9 @@ const DailyRollupChart = props => {
       .attr("id", function(d, i) {
         return `bar_${d.org.uuid}`
       })
-      .on("mouseenter", d => showPopover && showPopover(d3.event.target, d))
-      .on("mouseleave", d => hidePopover && hidePopover())
+      .attr("data-for", "tooltip-top")
+      .attr("data-html", true)
+      .attr("data-tip", d => tooltip && tooltip(d))
     if (onBarClick) {
       bar.on("click", function(d) {
         onBarClick(d.org)
@@ -180,16 +173,9 @@ const DailyRollupChart = props => {
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(d => d.cancelled || "")
-  }, [
-    node,
-    width,
-    height,
-    data,
-    onBarClick,
-    showPopover,
-    hidePopover,
-    barColors
-  ])
+
+    ReactTooltip.rebuild()
+  }, [node, width, height, data, onBarClick, tooltip, barColors])
 
   return <svg id={chartId} ref={node} width={width} height={height} />
 
@@ -204,8 +190,7 @@ DailyRollupChart.propTypes = {
   chartId: PropTypes.string,
   data: PropTypes.array,
   onBarClick: PropTypes.func,
-  showPopover: PropTypes.func,
-  hidePopover: PropTypes.func,
+  tooltip: PropTypes.func,
   barColors: PropTypes.shape({
     cancelled: PropTypes.string.isRequired,
     verified: PropTypes.string.isRequired

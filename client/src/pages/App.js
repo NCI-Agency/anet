@@ -16,6 +16,7 @@ import { connect } from "react-redux"
 import { Redirect } from "react-router"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import ReactTooltip from "react-tooltip"
 import "../components/reactToastify.css"
 
 const GQL_GET_APP_DATA = gql`
@@ -134,6 +135,7 @@ const App = props => {
         sidebarData={appState.organizations}
       >
         <ToastContainer />
+        <ReactTooltip id="tooltip-top" place="top" className="tooltip-top" />
         <Routing />
       </ResponsiveLayout>
     </AppContext.Provider>

@@ -760,6 +760,18 @@ header.searchPagination {
 	padding-bottom: 1px;
 }
 
+.tooltip-top {
+  /*
+   * override if needed, use !important as described on:
+   *   https://github.com/wwayne/react-tooltip#options
+   */
+}
+
+.tooltip-top h4 {
+  width: 100%;
+  border-bottom: 1px solid white;
+}
+
 @keyframes flash {
 	50% {
 		background: #fff;

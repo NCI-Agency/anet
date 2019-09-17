@@ -25,13 +25,12 @@ import ReportCollection, {
   FORMAT_TABLE
 } from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
-import _isEqual from "lodash/isEqual"
 import { Organization, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, HelpBlock, Modal, Overlay, Popover } from "react-bootstrap"
+import { Button, HelpBlock, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
@@ -100,40 +99,8 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
-const ChartPopover = props => {
-  const { graphPopover, hoveredBar } = props
-  if (!graphPopover || !hoveredBar) {
-    return null
-  }
-
-  return (
-    <Overlay
-      show
-      placement="top"
-      container={document.body}
-      animation={false}
-      target={() => graphPopover}
-    >
-      <Popover id="graph-popover" title={hoveredBar.org.shortName}>
-        <p>Published: {hoveredBar.published}</p>
-        <p>Cancelled: {hoveredBar.cancelled}</p>
-        <p>Click to view details</p>
-      </Popover>
-    </Overlay>
-  )
-}
-
-ChartPopover.propTypes = {
-  graphPopover: PropTypes.object,
-  hoveredBar: PropTypes.object
-}
-
 const Chart = props => {
   const { rollupStart, rollupEnd, focusedOrg, setFocusedOrg, orgType } = props
-  const [popover, setPopover] = useState({
-    graphPopover: null,
-    hoveredBar: null
-  })
   const variables = getVariables()
   const { loading, error, data } = API.useApiQuery(GQL_ROLLUP_GRAPH, variables)
   const { done, result } = useBoilerplate({
@@ -187,8 +154,12 @@ const Chart = props => {
             chartId={CHART_ID}
             data={graphData}
             onBarClick={setFocusedOrg}
-            showPopover={showPopover}
-            hidePopover={hidePopover}
+            tooltip={d => `
+              <h4>${d.org.shortName}</h4>
+              <p>Published: ${d.published}</p>
+              <p>Cancelled: ${d.cancelled}</p>
+              <p>Click to view details</p>
+            `}
             barColors={barColors}
           />
         )}
@@ -208,8 +179,6 @@ const Chart = props => {
           {graphData.reduce((acc, org) => acc + org.cancelled, 0)}
         </strong>
       </div>
-
-      <ChartPopover {...popover} />
     </div>
   )
 
@@ -228,19 +197,6 @@ const Chart = props => {
       variables.orgType = orgType
     }
     return variables
-  }
-
-  function showPopover(g, h) {
-    if (g && popover.graphPopover && _isEqual(g.id, popover.graphPopover.id)) {
-      // Same graphPopover already set, but prevent state update
-      // (because e.g. target.ownerDocument.lastModified will have changed)
-      return
-    }
-    setPopover({ graphPopover: g, hoveredBar: h })
-  }
-
-  function hidePopover() {
-    setPopover({ graphPopover: null, hoveredBar: null })
   }
 }
 

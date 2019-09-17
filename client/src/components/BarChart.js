@@ -1,6 +1,7 @@
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
+import ReactTooltip from "react-tooltip"
 import "./BarChart.css"
 
 /*
@@ -29,8 +30,7 @@ const BarChart = props => {
     xLabel, // data property to use for the x-axis ticks label
     barClass,
     onBarClick,
-    showPopover,
-    hidePopover,
+    tooltip,
     selectedBarClass,
     selectedBar
   } = props
@@ -168,13 +168,16 @@ const BarChart = props => {
       .attr("height", function(d) {
         return yHeight - yScale(getPropValue(d, yProp))
       })
-      .on("mouseenter", d => showPopover && showPopover(d3.event.target, d))
-      .on("mouseleave", d => hidePopover && hidePopover())
+      .attr("data-for", "tooltip-top")
+      .attr("data-html", true)
+      .attr("data-tip", d => tooltip && tooltip(d))
     if (onBarClick) {
       bar.on("click", function(d) {
         onBarClick(d)
       })
     }
+
+    ReactTooltip.rebuild()
   }, [
     node,
     width,
@@ -186,8 +189,7 @@ const BarChart = props => {
     xLabel,
     barClass,
     onBarClick,
-    showPopover,
-    hidePopover,
+    tooltip,
     selectedBarClass,
     selectedBar
   ])
@@ -209,8 +211,7 @@ BarChart.propTypes = {
   xLabel: PropTypes.string,
   barClass: PropTypes.string,
   onBarClick: PropTypes.func,
-  showPopover: PropTypes.func,
-  hidePopover: PropTypes.func,
+  tooltip: PropTypes.func,
   selectedBarClass: PropTypes.string,
   selectedBar: PropTypes.string
 }

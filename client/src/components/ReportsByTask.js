@@ -14,7 +14,6 @@ import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Overlay, Popover } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -32,37 +31,6 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const ChartPopover = props => {
-  const { graphPopover, hoveredBar } = props
-  if (!graphPopover || !hoveredBar) {
-    return null
-  }
-
-  return (
-    <Overlay
-      show
-      placement="top"
-      container={document.body}
-      animation={false}
-      target={() => graphPopover}
-    >
-      <Popover
-        id="graph-popover"
-        title={hoveredBar && hoveredBar.task.shortName}
-      >
-        <p style={{ textAlign: "center" }}>
-          {hoveredBar && hoveredBar.reportsCount}
-        </p>
-      </Popover>
-    </Overlay>
-  )
-}
-
-ChartPopover.propTypes = {
-  graphPopover: PropTypes.object,
-  hoveredBar: PropTypes.object
-}
-
 const Chart = props => {
   const {
     chartId,
@@ -71,10 +39,6 @@ const Chart = props => {
     goToSelection,
     selectedBarClass
   } = props
-  const [popover, setPopover] = useState({
-    graphPopover: null,
-    hoveredBar: null
-  })
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
@@ -139,8 +103,10 @@ const Chart = props => {
             yProp="reportsCount"
             xLabel="task.shortName"
             onBarClick={goToSelection}
-            showPopover={showPopover}
-            hidePopover={hidePopover}
+            tooltip={d => `
+              <h4>${d.task.shortName}</h4>
+              <p>${d.reportsCount}</p>
+            `}
             selectedBarClass={selectedBarClass}
             selectedBar={
               focusedSelection ? "bar_" + focusedSelection.task.uuid : ""
@@ -148,23 +114,8 @@ const Chart = props => {
           />
         )}
       </ContainerDimensions>
-
-      <ChartPopover {...popover} graphData={graphData} />
     </div>
   )
-
-  function showPopover(g, h) {
-    if (g && popover.graphPopover && _isEqual(g.id, popover.graphPopover.id)) {
-      // Same graphPopover already set, but prevent state update
-      // (because e.g. target.ownerDocument.lastModified will have changed)
-      return
-    }
-    setPopover({ graphPopover: g, hoveredBar: h })
-  }
-
-  function hidePopover() {
-    setPopover({ graphPopover: null, hoveredBar: null })
-  }
 }
 
 Chart.propTypes = {
