@@ -6,6 +6,7 @@ import moment from "moment"
 import REPORTS_ICON from "resources/reports.png"
 import utils from "utils"
 import * as yup from "yup"
+import React from "react"
 
 export default class Report extends Model {
   static resourceName = "Report"
@@ -252,6 +253,17 @@ export default class Report extends Model {
             If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
       )
   })
+
+  static autocompleteQuery =
+    "uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason, atmosphere, author { uuid, name, rank, role }, tags { uuid, name, description }, updatedAt"
+
+  static autocompleteTemplate(report) {
+    return (
+      <span>
+        {report.intent} - {report.author}
+      </span>
+    )
+  }
 
   constructor(props) {
     super(Model.fillObject(props, Report.yupSchema))

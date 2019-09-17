@@ -46,7 +46,7 @@ class LinkSource extends Component {
     if (url) {
       const selection = editorState.getSelection()
       const entityData = {
-        url: url.replace(/\s/g, "")
+        url: url
       }
 
       const hasText = !selection.isCollapsed()

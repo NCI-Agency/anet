@@ -114,3 +114,11 @@ export const ApproverOverlayRow = item => (
     </td>
   </React.Fragment>
 )
+
+export const ReportOverlayRow = item => (
+  <React.Fragment key={item.uuid}>
+    <td>
+      <LinkTo report={item} isLink={false} />
+    </td>
+  </React.Fragment>
+)
