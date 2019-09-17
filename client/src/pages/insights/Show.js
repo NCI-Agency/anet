@@ -54,49 +54,37 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: PendingApprovalReports,
     navTitle: "Pending Approval Reports",
-    title: "",
-    dateRange: false,
-    showCalendar: true
+    title: ""
   },
   [CANCELLED_REPORTS]: {
     searchProps: _SEARCH_PROPS,
     component: CancelledEngagementReports,
     navTitle: "Cancelled Engagement Reports",
-    title: "",
-    dateRange: false,
-    showCalendar: true
+    title: ""
   },
   [REPORTS_BY_TASK]: {
     searchProps: _SEARCH_PROPS,
     component: ReportsByTask,
     navTitle: "Reports by Task",
-    title: "",
-    dateRange: false,
-    showCalendar: true
+    title: ""
   },
   [REPORTS_BY_DAY_OF_WEEK]: {
     searchProps: _SEARCH_PROPS,
     component: ReportsByDayOfWeek,
     navTitle: "Reports by Day of the Week",
-    title: "",
-    dateRange: true,
-    showCalendar: false
+    title: ""
   },
   [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
     searchProps: _SEARCH_PROPS,
     component: FutureEngagementsByLocation,
     navTitle: "Future Engagements by Location",
-    title: "",
-    dateRange: true,
-    onlyShowBetween: true
+    title: ""
   },
   [ADVISOR_REPORTS]: {
     searchProps: DEFAULT_SEARCH_PROPS,
     component: FilterableAdvisorReportsTable,
     navTitle: `${Settings.fields.advisor.person.name} Reports`,
-    title: `${Settings.fields.advisor.person.name} Reports`,
-    dateRange: false,
-    showCalendar: false
+    title: `${Settings.fields.advisor.person.name} Reports`
   }
 }
 
