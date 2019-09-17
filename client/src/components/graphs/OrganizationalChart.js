@@ -7,6 +7,49 @@ import { Symbol } from "milsymbol"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import Organization from "../../models/Organization"
 
+const GQL_GET_CHART_DATA = gql`
+  query($uuid: String!) {
+    organization(uuid: $uuid) {
+      uuid
+      shortName
+      longName
+      type
+      positions {
+        name
+        uuid
+        person {
+          rank
+          name
+          uuid
+          avatar(size: 32)
+        }
+      }
+      childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+        uuid
+      }
+      descendantOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+        uuid
+        shortName
+        longName
+        type
+        childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+          uuid
+        }
+        positions {
+          name
+          uuid
+          person {
+            rank
+            name
+            uuid
+            avatar(size: 32)
+          }
+        }
+      }
+    }
+  }
+`
+
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
 const sortPositions = (positions, truncateLimit) => {
@@ -16,18 +59,6 @@ const sortPositions = (positions, truncateLimit) => {
   return truncateLimit && truncateLimit < allResults.length
     ? allResults.slice(0, truncateLimit)
     : allResults
-}
-
-const rankToUnit = {
-  "OF-9": "K",
-  "OF-8": "J",
-  "OF-7": "I",
-  "OF-6": "H",
-  "OF-5": "G",
-  "OF-4": "F",
-  "OF-3": "E",
-  "OF-2": "E",
-  "OF-1": "E"
 }
 
 export default class OrganizationalChart extends SVGCanvas {
@@ -148,7 +179,10 @@ export default class OrganizationalChart extends SVGCanvas {
 
     iconNodeG.each(function(d) {
       const positions = sortPositions(d.data.positions)
-      const unitcode = rankToUnit[(positions?.[0]?.person?.rank)]
+      const unitcode = Settings.fields.person.ranks.find(
+        element => element.value === positions?.[0]?.person?.rank
+      )?.app6Modifier
+
       const sym = new Symbol(
         `S${
           d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
@@ -321,57 +355,11 @@ export default class OrganizationalChart extends SVGCanvas {
   fetchData() {
     if (!this.props.org || !this.props.org.uuid) return
 
-    const chartQuery = API.query(
-      /* GraphQL */
-      gql`query {
-            organization(uuid: "${this.props.org.uuid}") {
-              uuid
-              shortName
-              longName
-              type
-              positions{
-                  name
-                  uuid
-                  person
-                  {
-                    rank
-                    name
-                    uuid
-                    avatar(size:32)
-                  }
-                }
-              childrenOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
-                uuid
-              }
-              descendantOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
-                uuid
-                shortName
-                longName
-                type
-                childrenOrgs(query: {pageNum: 0, pageSize: 0, status:ACTIVE}) {
-                  uuid
-                }
-                positions{
-                  name
-                  uuid
-                  person
-                  {
-                    rank
-                    name
-                    uuid
-                    avatar(size:32)
-                  }
-                }
-              }
-            }
-          }`
-    )
-
-    Promise.all([chartQuery]).then(values =>
+    API.query(GQL_GET_CHART_DATA, { uuid: this.props.org.uuid }).then(data =>
       this.setState({
-        root: values[0].organization,
-        orgs: values[0].organization.descendantOrgs,
-        collapsed: values[0].organization.childrenOrgs.map(d => d.uuid)
+        root: data.organization,
+        orgs: data.organization.descendantOrgs,
+        collapsed: data.organization.childrenOrgs.map(d => d.uuid)
       })
     )
   }

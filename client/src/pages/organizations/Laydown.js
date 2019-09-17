@@ -52,7 +52,7 @@ class BaseOrganizationLaydown extends Component {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div>
               <h2 className="legend">
-                <span className="title-text">Org Diagram</span>
+                <span className="title-text">Organization Diagram</span>
               </h2>
             </div>
             <div style={{ backgroundColor: "white" }}>
