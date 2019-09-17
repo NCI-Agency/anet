@@ -1,5 +1,6 @@
 import API from "api"
 import { gql } from "apollo-boost"
+import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
@@ -8,7 +9,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, routerRelatedPropTypes } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
-import { Location } from "models"
+import { Location, Person } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -28,9 +29,11 @@ const GQL_UPDATE_LOCATION = gql`
   }
 `
 
-const LocationForm = props => {
-  const { edit, title, ...myFormProps } = props
+const BaseLocationForm = props => {
+  const { currentUser, edit, title, ...myFormProps } = props
   const [error, setError] = useState(null)
+  const canEditName =
+    (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -94,7 +97,11 @@ const LocationForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field name="name" component={FieldHelper.renderInputField} />
+                <Field
+                  name="name"
+                  component={FieldHelper.renderInputField}
+                  disabled={!canEditName}
+                />
 
                 <Field
                   name="status"
@@ -189,17 +196,26 @@ const LocationForm = props => {
   }
 }
 
-LocationForm.propTypes = {
+BaseLocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
+  currentUser: PropTypes.instanceOf(Person),
   ...routerRelatedPropTypes
 }
 
-LocationForm.defaultProps = {
+BaseLocationForm.defaultProps = {
   initialValues: new Location(),
   title: "",
   edit: false
 }
+
+const LocationForm = props => (
+  <AppContext.Consumer>
+    {context => (
+      <BaseLocationForm currentUser={context.currentUser} {...props} />
+    )}
+  </AppContext.Consumer>
+)
 
 export default withRouter(LocationForm)

@@ -320,7 +320,7 @@ const People = props => {
         goToPage={setPage}
       />
       <br />
-      <Table responsive hover striped className="people-search-results">
+      <Table responsive hover striped id="people-search-results">
         <thead>
           <tr>
             <th>Name</th>
@@ -477,7 +477,7 @@ const Tasks = props => {
         goToPage={setPage}
       />
       <br />
-      <Table responsive hover striped>
+      <Table responsive hover striped id="tasks-search-results">
         <thead>
           <tr>
             <th>Name</th>
@@ -555,7 +555,7 @@ const Locations = props => {
         goToPage={setPage}
       />
       <br />
-      <Table responsive hover striped>
+      <Table responsive hover striped id="locations-search-results">
         <thead>
           <tr>
             <th>Name</th>

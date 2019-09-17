@@ -86,7 +86,7 @@ const BaseLocationShow = props => {
           })
         }
         const action = canEdit && (
-          <LinkTo anetLocation={location} edit button="primary">
+          <LinkTo anetLocation={location} edit button="primary" id="editButton">
             Edit
           </LinkTo>
         )

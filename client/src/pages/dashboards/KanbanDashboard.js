@@ -11,6 +11,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
+import { LAST_MONTH } from "dateUtils"
 
 const GQL_GET_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
@@ -26,6 +27,24 @@ const GQL_GET_TASK_LIST = gql`
           uuid
           shortName
         }
+        allReports: reports {
+          uuid
+        }
+        lastMonthReports: reports(query: {
+          pageSize:0,
+          engagementDateStart: ${LAST_MONTH},
+          engagementDateEnd: 0
+        }) {
+          uuid
+        }
+        preLastMonthReports: reports(query: {
+          pageSize:0,
+          engagementDateStart: ${2 * LAST_MONTH},
+          engagementDateEnd: ${LAST_MONTH}
+        }) {
+          uuid
+        }
+
       }
     }
   }
