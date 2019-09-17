@@ -1,49 +1,24 @@
 import * as d3 from "d3"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useEffect, useRef } from "react"
 import "./BarChart.css"
 
-class DailyRollupChart extends Component {
-  static propTypes = {
-    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    chartId: PropTypes.string,
-    data: PropTypes.array,
-    onBarClick: PropTypes.func,
-    showPopover: PropTypes.func,
-    hidePopover: PropTypes.func,
-    barColors: PropTypes.shape({
-      cancelled: PropTypes.string.isRequired,
-      verified: PropTypes.string.isRequired
-    }).isRequired,
-    updateChart: PropTypes.bool
-  }
-
-  static defaultProps = {
-    width: "100%",
-    updateChart: true
-  }
-
-  node = React.createRef()
-
-  constructor(props) {
-    super(props)
-    this.createBarChart = this.createBarChart.bind(this)
-  }
-
-  componentDidMount() {
-    this.createBarChart()
-  }
-
-  componentDidUpdate() {
-    this.createBarChart()
-  }
-
-  isNumeric(value) {
-    return typeof value === "number"
-  }
-
-  createBarChart() {
+const DailyRollupChart = props => {
+  const {
+    width,
+    height,
+    chartId,
+    data,
+    onBarClick,
+    showPopover,
+    hidePopover,
+    barColors
+  } = props
+  const node = useRef(null)
+  useEffect(() => {
+    if (!node.current) {
+      return
+    }
     const BAR_HEIGHT = 24
     const BAR_PADDING = 8
     const MARGIN = {
@@ -52,19 +27,14 @@ class DailyRollupChart extends Component {
       left: 20,
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
-    let { width, onBarClick, barColors } = this.props
-    let chartBox = this.node.current.getBoundingClientRect()
-    let chartWidth = this.isNumeric(width)
+    let chartBox = node.current.getBoundingClientRect()
+    let chartWidth = isNumeric(width)
       ? width - 30
       : chartBox.right - chartBox.left - 30
-    let chartData = this.props.data
-    let chart = d3.select(this.node.current)
-    let xLabels = [].concat.apply(
-      [],
-      chartData.map(d => d.published + d.cancelled)
-    )
+    let chart = d3.select(node.current)
+    let xLabels = [].concat.apply([], data.map(d => d.published + d.cancelled))
     let yLabels = {}
-    let yDomain = chartData.map(d => {
+    let yDomain = data.map(d => {
       yLabels[d.org.uuid] = d.org.shortName
       return d.org.uuid
     })
@@ -113,7 +83,7 @@ class DailyRollupChart extends Component {
 
     // We use a dynamic yHeight, depending on how much data we have to display,
     // in order to make sure the chart is readable for lots of data
-    let yHeight = (BAR_HEIGHT + BAR_PADDING) * chartData.length
+    let yHeight = (BAR_HEIGHT + BAR_PADDING) * data.length
     let chartHeight = yHeight + MARGIN.top + marginBottom
 
     let xMax = d3.max(xLabels)
@@ -162,7 +132,7 @@ class DailyRollupChart extends Component {
 
     let bar = chart
       .selectAll(".bar")
-      .data(chartData)
+      .data(data)
       .enter()
       .append("g")
       .attr(
@@ -174,12 +144,8 @@ class DailyRollupChart extends Component {
       .attr("id", function(d, i) {
         return `bar_${d.org.uuid}`
       })
-      .on(
-        "mouseenter",
-        d =>
-          this.props.showPopover && this.props.showPopover(d3.event.target, d)
-      )
-      .on("mouseleave", d => this.props.hidePopover && this.props.hidePopover())
+      .on("mouseenter", d => showPopover && showPopover(d3.event.target, d))
+      .on("mouseleave", d => hidePopover && hidePopover())
     if (onBarClick) {
       bar.on("click", function(d) {
         onBarClick(d.org)
@@ -214,30 +180,40 @@ class DailyRollupChart extends Component {
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(d => d.cancelled || "")
-  }
+  }, [
+    node,
+    width,
+    height,
+    data,
+    onBarClick,
+    showPopover,
+    hidePopover,
+    barColors
+  ])
 
-  render() {
-    return (
-      <svg
-        id={this.props.chartId}
-        ref={this.node}
-        width={this.props.width}
-        height={this.props.height}
-      />
-    )
-  }
+  return <svg id={chartId} ref={node} width={width} height={height} />
 
-  shouldComponentUpdate(nextProps, nextState) {
-    if (
-      nextProps &&
-      !nextProps.updateChart &&
-      nextProps.width === this.props.width &&
-      nextProps.height === this.props.height
-    ) {
-      return false
-    }
-    return true
+  function isNumeric(value) {
+    return typeof value === "number"
   }
+}
+
+DailyRollupChart.propTypes = {
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  chartId: PropTypes.string,
+  data: PropTypes.array,
+  onBarClick: PropTypes.func,
+  showPopover: PropTypes.func,
+  hidePopover: PropTypes.func,
+  barColors: PropTypes.shape({
+    cancelled: PropTypes.string.isRequired,
+    verified: PropTypes.string.isRequired
+  }).isRequired
+}
+
+DailyRollupChart.defaultProps = {
+  width: "100%"
 }
 
 export default DailyRollupChart

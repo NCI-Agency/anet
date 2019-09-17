@@ -100,7 +100,7 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
-const BarChartPopover = props => {
+const ChartPopover = props => {
   const { graphPopover, hoveredBar } = props
   if (!graphPopover || !hoveredBar) {
     return null
@@ -123,12 +123,12 @@ const BarChartPopover = props => {
   )
 }
 
-BarChartPopover.propTypes = {
+ChartPopover.propTypes = {
   graphPopover: PropTypes.object,
   hoveredBar: PropTypes.object
 }
 
-const BarChart = props => {
+const Chart = props => {
   const { rollupStart, rollupEnd, focusedOrg, setFocusedOrg, orgType } = props
   const [popover, setPopover] = useState({
     graphPopover: null,
@@ -194,8 +194,6 @@ const BarChart = props => {
         )}
       </ContainerDimensions>
 
-      <BarChartPopover {...popover} />
-
       <div className="graph-legend">
         <div style={{ ...legendCss, background: barColors.verified }} />{" "}
         Published reports:&nbsp;
@@ -210,6 +208,8 @@ const BarChart = props => {
           {graphData.reduce((acc, org) => acc + org.cancelled, 0)}
         </strong>
       </div>
+
+      <ChartPopover {...popover} />
     </div>
   )
 
@@ -244,7 +244,7 @@ const BarChart = props => {
   }
 }
 
-BarChart.propTypes = {
+Chart.propTypes = {
   rollupStart: PropTypes.object,
   rollupEnd: PropTypes.object,
   focusedOrg: PropTypes.object,
@@ -309,7 +309,7 @@ const BaseRollupShow = props => {
       id: "rbdow-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
       title: "Chart by organization",
-      renderer: getBarChart
+      renderer: getChart
     },
     {
       id: "rbdow-collection",
@@ -435,9 +435,9 @@ const BaseRollupShow = props => {
     </div>
   )
 
-  function getBarChart(id) {
+  function getChart(id) {
     return (
-      <BarChart
+      <Chart
         rollupStart={getRollupStart()}
         rollupEnd={getRollupEnd()}
         focusedOrg={focusedOrg}
