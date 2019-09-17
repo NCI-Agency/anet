@@ -34,6 +34,11 @@ const GQL_GET_PERSON = gql`
         uuid
         name
         type
+        organization {
+          uuid
+          shortName
+          identificationCode
+        }
       }
       ${GRAPHQL_NOTES_FIELDS}
     }
@@ -85,6 +90,7 @@ class PersonEdit extends Page {
               relatedObjectUuid: person.uuid
             }
           }
+          relatedObjectValue={person}
         />
         <PersonForm
           initialValues={person}
