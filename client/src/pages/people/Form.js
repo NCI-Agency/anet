@@ -17,7 +17,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import {
   Alert,
   Button,
@@ -52,6 +52,7 @@ const BasePersonForm = props => {
     initialValues,
     ...myFormProps
   } = props
+  const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
   const [currentAvatar, setCurrentAvatar] = useState(initialValues.avatar)
   const [showWrongPersonModal, setShowWrongPersonModal] = useState(false)
@@ -102,7 +103,6 @@ const BasePersonForm = props => {
       label: Settings.fields.principal.person.name
     }
   ]
-  const confirmHasReplacementButton = React.createRef()
 
   return (
     <Formik

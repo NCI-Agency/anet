@@ -5,7 +5,7 @@ import { mapDispatchToProps } from "components/Page"
 import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useRef } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -41,7 +41,7 @@ const GQL_GET_REPORT_LIST = gql`
 
 const ReportCalendar = props => {
   const { queryParams, setTotalCount } = props
-  const calendarComponentRef = React.createRef()
+  const calendarComponentRef = useRef(null)
 
   return (
     <Calendar events={getEvents} calendarComponentRef={calendarComponentRef} />
