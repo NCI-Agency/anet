@@ -1,15 +1,21 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import { renderInputField } from "components/FieldHelper"
-import LinkTo from "components/LinkTo"
+import * as FieldHelper from "components/FieldHelper"
 import UltimatePagination from "components/UltimatePagination"
-import { Field } from "formik"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Button, Col, Overlay, Popover, Row } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  FormControl,
+  InputGroup,
+  Overlay,
+  Popover,
+  Row
+} from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import "./AdvancedMultiSelect.css"
 
@@ -19,7 +25,7 @@ const AdvancedSelectTarget = ({ overlayRef }) => (
   <Row>
     <Col
       sm={12}
-      lg={9}
+      lg={12}
       className="form-group"
       ref={overlayRef}
       style={{ position: "relative", marginBottom: 0 }}
@@ -79,7 +85,6 @@ SelectFilterInputField.propTypes = {
 
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
-  fieldLabel: PropTypes.string, // input field label
   placeholder: PropTypes.string, // input field placeholder
   searchTerms: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
@@ -94,35 +99,27 @@ export const propTypes = {
   overlayRenderRow: PropTypes.func.isRequired,
   closeOverlayOnAdd: PropTypes.bool, // set to true if you want the overlay to be closed after an add action
   filterDefs: PropTypes.object, // config of the search filters
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
   // Required: ANET Object Type (Person, Report, etc) to search for.
   objectType: PropTypes.func.isRequired,
   // Optional: Parameters to pass to all search filters.
   queryParams: PropTypes.object,
   // Optional: GraphQL string of fields to return from search.
   fields: PropTypes.string,
-  shortcuts: PropTypes.array,
-  shortcutsTitle: PropTypes.string,
-  renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
+  handleAddItem: PropTypes.func,
+  handleRemoveItem: PropTypes.func,
+  smallOverlay: PropTypes.bool, // set to true if you want to display the filters on top
   addon: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
     PropTypes.object
   ]),
-  extraAddon: PropTypes.object,
-  handleAddItem: PropTypes.func,
-  handleRemoveItem: PropTypes.func,
-  smallOverlay: PropTypes.bool, // set to true if you want to display the filters on top
-  vertical: PropTypes.bool
+  extraAddon: PropTypes.object
 }
 
 export default class AdvancedSelect extends Component {
   static defaultProps = {
-    fieldLabel: "Add item",
     filterDefs: {},
-    shortcuts: [],
-    shortcutsTitle: "Recents",
-    renderExtraCol: false,
     closeOverlayOnAdd: false,
     searchTerms: "",
     smallOverlay: false
@@ -164,24 +161,20 @@ export default class AdvancedSelect extends Component {
   render() {
     const {
       fieldName,
-      fieldLabel,
       placeholder,
       value,
-      vertical,
       renderSelected,
       onChange,
       objectType,
       queryParams,
       fields,
-      shortcuts,
-      shortcutsTitle,
-      renderExtraCol,
-      addon,
-      extraAddon,
       handleAddItem,
       handleRemoveItem,
+      addon,
+      extraAddon,
       ...overlayProps
     } = this.props
+
     const {
       overlayTableClassName,
       overlayColumns,
@@ -196,21 +189,23 @@ export default class AdvancedSelect extends Component {
     const items = results && results[filterType] ? results[filterType].list : []
     return (
       <React.Fragment>
-        <Field
-          name={fieldName}
-          label={fieldLabel}
-          component={renderInputField}
-          value={this.state.searchTerms}
-          placeholder={placeholder}
-          onChange={this.changeSearchTerms}
-          onFocus={this.handleInputFocus}
-          onBlur={this.handleInputBlur}
-          innerRef={this.overlayTarget}
-          extraColElem={renderExtraCol ? this.renderShortcutsTitle() : ""}
-          addon={addon}
-          extraAddon={extraAddon}
-          vertical={vertical}
-        />
+        <InputGroup>
+          <FormControl
+            name={fieldName}
+            value={
+              this.state.searchTerms === null ? "" : this.state.searchTerms
+            }
+            placeholder={placeholder}
+            onChange={this.changeSearchTerms}
+            onFocus={this.handleInputFocus}
+            onBlur={this.handleInputBlur}
+            ref={this.overlayTarget}
+          />
+          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+          {addon && (
+            <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+          )}
+        </InputGroup>
         <Overlay
           show={this.state.showOverlay}
           container={this.overlayContainer.current}
@@ -224,10 +219,9 @@ export default class AdvancedSelect extends Component {
           <Popover
             id={`${fieldName}-popover`}
             title={null}
-            placement="bottom"
             style={{
-              width: "100%",
-              maxWidth: "100%",
+              width: "120%",
+              maxWidth: "120%",
               boxShadow: "0 6px 20px hsla(0, 0%, 0%, 0.4)"
             }}
           >
@@ -251,7 +245,6 @@ export default class AdvancedSelect extends Component {
                         </div>
                       </Col>
                     )}
-
                     <Col
                       sm={hasLeftNav ? 8 : 12}
                       md={hasLeftNav ? 9 : 12}
@@ -295,15 +288,7 @@ export default class AdvancedSelect extends Component {
         </Overlay>
         <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
-          {vertical ? (
-            <Col sm={12}>{renderSelectedWithDelete}</Col>
-          ) : (
-            <React.Fragment>
-              <Col sm={2} />
-              <Col sm={7}>{renderSelectedWithDelete}</Col>
-              <Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
-            </React.Fragment>
-          )}
+          <Col sm={12}>{renderSelectedWithDelete}</Col>
         </Row>
       </React.Fragment>
     )
@@ -475,47 +460,6 @@ export default class AdvancedSelect extends Component {
 
   goToPage = pageNum => {
     this.fetchResults(pageNum)
-  }
-
-  renderShortcutsTitle = () => {
-    return (
-      <div
-        id={`${this.props.fieldName}-shortcut-title`}
-        className="shortcut-title"
-      >
-        <h5>{this.props.shortcutsTitle}</h5>
-      </div>
-    )
-  }
-
-  renderShortcuts = () => {
-    const shortcuts = this.props.shortcuts
-    return (
-      shortcuts &&
-      shortcuts.length > 0 && (
-        <div
-          id={`${this.props.fieldName}-shortcut-list`}
-          className="shortcut-list"
-        >
-          {shortcuts.map(shortcut => {
-            const shortcutLinkProps = {
-              [this.props.objectType.getModelNameLinkTo]: shortcut,
-              isLink: false,
-              forShortcut: true
-            }
-            return (
-              <Button
-                key={shortcut.uuid}
-                bsStyle="link"
-                onClick={() => this.props.handleAddItem(shortcut)}
-              >
-                Add <LinkTo {...shortcutLinkProps} />
-              </Button>
-            )
-          })}
-        </div>
-      )
-    )
   }
 }
 

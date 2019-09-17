@@ -609,6 +609,24 @@ class BaseReportForm extends Component {
                   }
                   id="attendance-fieldset"
                 >
+                <Field
+                  name="attendees"
+                  component={FieldHelper.renderSpecialField}
+                  extraColElem={
+                    recents.persons.length > 0 && (
+                    <div className="shortcut-list">
+                      <h5>Recent attendees</h5>
+                        {Person.map(recents.persons, person => (
+                        <Button
+                          key={person.id}
+                          bsStyle="link"
+                        >
+                        Add <LinkTo person={person} isLink={false} />
+                        </Button>
+                      ))}
+                    </div>
+                )}
+                widget={
                   <AdvancedMultiSelect
                     fieldName="attendees"
                     fieldLabel="Attendees"
@@ -642,6 +660,8 @@ class BaseReportForm extends Component {
                     shortcuts={recents.persons}
                     renderExtraCol
                   />
+                  }
+                />
                 </Fieldset>
 
                 <Fieldset
