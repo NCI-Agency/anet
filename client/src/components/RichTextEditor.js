@@ -104,9 +104,9 @@ const importerConfig = {
     return null
   },
   htmlToStyle: (nodeName, node, currentStyle) => {
-    if (nodeName === 'mark') {
-      return currentStyle.add(INLINE_STYLE.MARK);
-    } 
+    if (nodeName === "mark") {
+      return currentStyle.add(INLINE_STYLE.MARK)
+    }
     return currentStyle
   }
 }
@@ -140,7 +140,7 @@ const exporterConfig = {
     return originalText
   },
 
-  styleToHTML: (style) => {
+  styleToHTML: style => {
     if (style === INLINE_STYLE.STRIKETHROUGH) {
       return <strike />
     }
@@ -148,7 +148,7 @@ const exporterConfig = {
     if (style === INLINE_STYLE.MARK) {
       return <mark />
     }
-  },
+  }
 }
 
 const fromHTML = html => convertToRaw(convertFromHTML(importerConfig)(html))
