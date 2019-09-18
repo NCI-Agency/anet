@@ -202,7 +202,7 @@ class LinkSourceAnet extends Component {
           <AdvancedSingleSelect
             fieldName="entitySelect"
             fieldLabel="Search in ANET:"
-            placeholder="Search in ANET"
+            placeholder={"Search " + this.state.objectType.toLowerCase()}
             value={{}}
             overlayColumns={this.state.advancedSelectProps.overlayColumns}
             overlayRenderRow={this.state.advancedSelectProps.overlayRenderRow}
