@@ -437,7 +437,7 @@ class Search extends Page {
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.PEOPLE)}
         <br />
-        <Table responsive hover striped className="people-search-results">
+        <Table responsive hover striped id="people-search-results">
           <thead>
             <tr>
               <th>Name</th>
@@ -531,7 +531,7 @@ class Search extends Page {
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.LOCATIONS)}
         <br />
-        <Table responsive hover striped>
+        <Table responsive hover striped id="locations-search-results">
           <thead>
             <tr>
               <th>Name</th>
@@ -556,7 +556,7 @@ class Search extends Page {
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.TASKS)}
         <br />
-        <Table responsive hover striped>
+        <Table responsive hover striped id="tasks-search-results">
           <thead>
             <tr>
               <th>Name</th>
