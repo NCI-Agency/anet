@@ -503,22 +503,37 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <AdvancedSingleSelect
-                    fieldName="location"
-                    fieldLabel="Location"
-                    placeholder="Search for the engagement location..."
-                    value={values.location}
-                    overlayColumns={["Name"]}
-                    overlayRenderRow={LocationOverlayRow}
-                    filterDefs={locationFilters}
+                  <Field
+                    name="location"
+                    component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("location", value)}
-                    objectType={Location}
-                    fields={Location.autocompleteQuery}
-                    valueKey="name"
-                    addon={LOCATIONS_ICON}
-                    shortcutsTitle="Recent Locations"
-                    shortcuts={recents.locations}
-                    renderExtraCol
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="location"
+                        placeholder="Search for the engagement location..."
+                        value={values.location}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={LocationOverlayRow}
+                        filterDefs={locationFilters}
+                        objectType={Location}
+                        fields={Location.autocompleteQuery}
+                        valueKey="name"
+                        addon={LOCATIONS_ICON}
+                      />
+                    }
+                    extraColElem={
+                      <>
+                        <FieldHelper.FieldShortcuts
+                          title="Recent Locations"
+                          shortcuts={recents.locations}
+                          fieldName="location"
+                          objectType={Location}
+                          curValue={values.location}
+                          onChange={value => setFieldValue("location", value)}
+                          handleAddItem={FieldHelper.handleSingleSelectAddItem}
+                        />
+                      </>
+                    }
                   />
 
                   {!isFutureEngagement && (
@@ -609,95 +624,117 @@ class BaseReportForm extends Component {
                   }
                   id="attendance-fieldset"
                 >
-                <Field
-                  name="attendees"
-                  component={FieldHelper.renderSpecialField}
-                  extraColElem={
-                    recents.persons.length > 0 && (
-                    <div className="shortcut-list">
-                      <h5>Recent attendees</h5>
-                        {Person.map(recents.persons, person => (
-                        <Button
-                          key={person.id}
-                          bsStyle="link"
-                        >
-                        Add <LinkTo person={person} isLink={false} />
-                        </Button>
-                      ))}
-                    </div>
-                )}
-                widget={
-                  <AdvancedMultiSelect
-                    fieldName="attendees"
-                    fieldLabel="Attendees"
-                    placeholder="Search for the meeting attendees..."
-                    value={values.attendees}
-                    renderSelected={
-                      <AttendeesTable
-                        attendees={values.attendees}
-                        onChange={value => setFieldValue("attendees", value)}
-                        showDelete
-                      />
-                    }
-                    overlayColumns={[
-                      "Name",
-                      "Position",
-                      "Location",
-                      "Organization"
-                    ]}
-                    overlayRenderRow={PersonDetailedOverlayRow}
-                    filterDefs={attendeesFilters}
+                  <Field
+                    name="attendees"
+                    component={FieldHelper.renderSpecialField}
                     onChange={value =>
                       this.updateAttendees(setFieldValue, "attendees", value)
                     }
-                    objectType={Person}
-                    queryParams={{
-                      status: [Person.STATUS.ACTIVE]
-                    }}
-                    fields={Person.autocompleteQuery}
-                    addon={PEOPLE_ICON}
-                    shortcutsTitle="Recent Attendees"
-                    shortcuts={recents.persons}
-                    renderExtraCol
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="attendees"
+                        placeholder="Search for the meeting attendees..."
+                        value={values.attendees}
+                        renderSelected={
+                          <AttendeesTable
+                            attendees={values.attendees}
+                            onChange={value =>
+                              setFieldValue("attendees", value)
+                            }
+                            showDelete
+                          />
+                        }
+                        overlayColumns={[
+                          "Name",
+                          "Position",
+                          "Location",
+                          "Organization"
+                        ]}
+                        overlayRenderRow={PersonDetailedOverlayRow}
+                        filterDefs={attendeesFilters}
+                        objectType={Person}
+                        queryParams={{
+                          status: [Person.STATUS.ACTIVE]
+                        }}
+                        fields={Person.autocompleteQuery}
+                        addon={PEOPLE_ICON}
+                      />
+                    }
+                    extraColElem={
+                      <>
+                        <FieldHelper.FieldShortcuts
+                          title="Recent attendees"
+                          shortcuts={recents.persons}
+                          fieldName="attendees"
+                          objectType={Person}
+                          curValue={values.attendees}
+                          onChange={value =>
+                            this.updateAttendees(
+                              setFieldValue,
+                              "attendees",
+                              value
+                            )
+                          }
+                          handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                        />
+                      </>
+                    }
                   />
-                  }
-                />
                 </Fieldset>
 
                 <Fieldset
                   title={Settings.fields.task.longLabel}
                   className="tasks-selector"
                 >
-                  <AdvancedMultiSelect
-                    fieldName="tasks"
-                    fieldLabel={Settings.fields.task.shortLabel}
-                    placeholder={`Search for ${pluralize(
-                      Settings.fields.task.shortLabel
-                    )}...`}
-                    value={values.tasks}
-                    renderSelected={
-                      <TaskTable
-                        tasks={values.tasks}
-                        showDelete
-                        showOrganization
-                      />
-                    }
-                    overlayColumns={["Name", "Organization"]}
-                    overlayRenderRow={TaskDetailedOverlayRow}
-                    filterDefs={tasksFilters}
+                  <Field
+                    name="tasks"
+                    label={Settings.fields.task.shortLabel}
+                    component={FieldHelper.renderSpecialField}
                     onChange={value => {
                       setFieldValue("tasks", value)
                       setFieldTouched("tasks", true)
                     }}
-                    objectType={Task}
-                    queryParams={{ status: Task.STATUS.ACTIVE }}
-                    fields={Task.autocompleteQuery}
-                    addon={TASKS_ICON}
-                    shortcutsTitle={`Recent ${pluralize(
-                      Settings.fields.task.shortLabel
-                    )}`}
-                    shortcuts={recents.tasks}
-                    renderExtraCol
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="tasks"
+                        placeholder={`Search for ${pluralize(
+                          Settings.fields.task.shortLabel
+                        )}...`}
+                        value={values.tasks}
+                        renderSelected={
+                          <TaskTable
+                            tasks={values.tasks}
+                            showDelete
+                            showOrganization
+                          />
+                        }
+                        overlayColumns={["Name", "Organization"]}
+                        overlayRenderRow={TaskDetailedOverlayRow}
+                        filterDefs={tasksFilters}
+                        objectType={Task}
+                        queryParams={{ status: Task.STATUS.ACTIVE }}
+                        fields={Task.autocompleteQuery}
+                        addon={TASKS_ICON}
+                      />
+                    }
+                    extraColElem={
+                      <>
+                        <FieldHelper.FieldShortcuts
+                          title={`Recent ${pluralize(
+                            Settings.fields.task.shortLabel
+                          )}`}
+                          shortcuts={recents.tasks}
+                          fieldName="tasks"
+                          objectType={Task}
+                          curValue={values.tasks}
+                          onChange={value => {
+                            setFieldValue("tasks", value)
+                            setFieldTouched("tasks", true)
+                          }}
+                          handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                        />
+                      </>
+                    }
                   />
                 </Fieldset>
 
@@ -810,31 +847,53 @@ class BaseReportForm extends Component {
                             />
                           }
                         />
-                        <AdvancedMultiSelect
-                          fieldName="authorizationGroups"
-                          fieldLabel="Authorization Groups"
-                          placeholder="Search for authorization groups..."
-                          value={values.authorizationGroups}
-                          renderSelected={
-                            <AuthorizationGroupTable
-                              authorizationGroups={values.authorizationGroups}
-                              showDelete
-                            />
-                          }
-                          overlayColumns={["Name", "Description"]}
-                          overlayRenderRow={AuthorizationGroupOverlayRow}
-                          filterDefs={authorizationGroupsFilters}
+                        <Field
+                          name="authorizationGroups"
+                          label="Authorization Groups"
+                          component={FieldHelper.renderSpecialField}
                           onChange={value =>
                             setFieldValue("authorizationGroups", value)
                           }
-                          objectType={AuthorizationGroup}
-                          queryParams={{
-                            status: AuthorizationGroup.STATUS.ACTIVE
-                          }}
-                          fields={AuthorizationGroup.autocompleteQuery}
-                          shortcutsTitle="Recent Authorization Groups"
-                          shortcuts={recents.authorizationGroups}
-                          renderExtraCol
+                          widget={
+                            <AdvancedMultiSelect
+                              fieldName="authorizationGroups"
+                              placeholder="Search for authorization groups..."
+                              value={values.authorizationGroups}
+                              renderSelected={
+                                <AuthorizationGroupTable
+                                  authorizationGroups={
+                                    values.authorizationGroups
+                                  }
+                                  showDelete
+                                />
+                              }
+                              overlayColumns={["Name", "Description"]}
+                              overlayRenderRow={AuthorizationGroupOverlayRow}
+                              filterDefs={authorizationGroupsFilters}
+                              objectType={AuthorizationGroup}
+                              queryParams={{
+                                status: AuthorizationGroup.STATUS.ACTIVE
+                              }}
+                              fields={AuthorizationGroup.autocompleteQuery}
+                            />
+                          }
+                          extraColElem={
+                            <>
+                              <FieldHelper.FieldShortcuts
+                                title="Recent Authorization Groups"
+                                shortcuts={recents.authorizationGroups}
+                                fieldName="authorizationGroups"
+                                objectType={AuthorizationGroup}
+                                curValue={values.authorizationGroups}
+                                onChange={value =>
+                                  setFieldValue("authorizationGroups", value)
+                                }
+                                handleAddItem={
+                                  FieldHelper.handleMultiSelectAddItem
+                                }
+                              />
+                            </>
+                          }
                         />
                       </div>
                     )}
