@@ -47,8 +47,13 @@ const GQL = {
   },
 
   runExport(parts, output) {
-    const { query, variables } = this._combine(parts)
-    return API.queryExport(query, variables, output)
+    const { query, variables, variableDef } = this._combine(parts)
+    const graphql = `
+      query ${variableDef} {
+        ${query}
+      }
+    `
+    return API.queryExport(graphql, variables, output)
   },
 
   Part: GraphQLPart

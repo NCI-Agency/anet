@@ -445,10 +445,10 @@ INSERT INTO locations (uuid, name, createdAt, updatedAt)
 	VALUES (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
-INSERT INTO organizations (uuid, shortName, longName, type, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoD', 'Ministry of Defense', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO organizations (uuid, shortName, longName, type, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI', 'Ministry of Interior', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, shortName, longName, type, identificationCode, createdAt, updatedAt)
+	VALUES (lower(newid()), 'MoD', 'Ministry of Defense', 1, 'Z12345', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, shortName, longName, type, identificationCode, createdAt, updatedAt)
+	VALUES (lower(newid()), 'MoI', 'Ministry of Interior', 1, 'P12345', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO organizations (uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'MOD-F', 'Ministry of Defense Finances', 1,
