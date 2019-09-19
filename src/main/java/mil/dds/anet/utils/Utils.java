@@ -334,7 +334,7 @@ public class Utils {
   }
 
   /**
-   * Checks whether an domain user name is allowed according to a list of whitelisted domains.
+   * Checks whether a domain user name is allowed according to a list of whitelisted domains.
    * 
    * More info: https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats
    * 
@@ -353,7 +353,7 @@ public class Utils {
   }
 
   private static boolean isLogonDomainInList(final String logon, final List<String> list)
-      throws Exception {
+      throws IllegalArgumentException {
 
     final String wildcard = "*";
 
@@ -380,7 +380,7 @@ public class Utils {
 
     // A logon (domain user name or email) is expected to have two parts: username<separator>domain
     if (splittedLogon.length != 2) {
-      throw new Exception("Misformed logon: " + logon);
+      throw new IllegalArgumentException("Malformed logon: " + logon);
     }
 
     // Find the domain name depending on the format
