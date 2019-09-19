@@ -27,7 +27,7 @@
     "@storybook/addon-actions": "^5.1.11",
     "@storybook/react": "^5.1.11",
     "@wdio/browserstack-service": "^5.12.5",
-    "@wdio/cli": "^5.12.5",
+    "@wdio/cli": "^5.13.1",
     "@wdio/local-runner": "^5.12.5",
     "@wdio/mocha-framework": "^5.12.1",
     "@wdio/spec-reporter": "^5.12.1",
