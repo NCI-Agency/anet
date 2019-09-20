@@ -55,6 +55,7 @@ const GQL_GET_PERSON = gql`
         organization {
           uuid
           shortName
+          identificationCode
         }
         associatedPositions {
           uuid
@@ -187,6 +188,7 @@ class BasePersonShow extends Page {
                     relatedObjectUuid: person.uuid
                   }
                 }
+                relatedObjectValue={person}
               />
               <Messages error={this.state.error} success={this.state.success} />
               <Form className="form-horizontal" method="post">

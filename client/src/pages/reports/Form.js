@@ -275,6 +275,11 @@ class BaseReportForm extends Component {
           resetForm,
           setSubmitting
         }) => {
+          const currentOrgUuid =
+            this.props.currentUser.position &&
+            this.props.currentUser.position.organization
+              ? this.props.currentUser.position.organization.uuid
+              : undefined
           const locationFilters = {
             activeLocations: {
               label: "Active locations",
@@ -296,13 +301,13 @@ class BaseReportForm extends Component {
               queryVars: { role: Person.ROLE.PRINCIPAL }
             }
           }
-          if (this.props.currentUser.position) {
+          if (currentOrgUuid) {
             attendeesFilters.myColleagues = {
               label: "My colleagues",
               queryVars: {
                 role: Person.ROLE.ADVISOR,
                 matchPositionName: true,
-                orgUuid: this.props.currentUser.position.organization.uuid
+                orgUuid: currentOrgUuid
               }
             }
             attendeesFilters.myCounterparts = {
@@ -330,12 +335,11 @@ class BaseReportForm extends Component {
               queryVars: {}
             }
           }
-          if (this.props.currentUser.position) {
+          if (currentOrgUuid) {
             tasksFilters.assignedToMyOrg = {
               label: "Assigned to my organization",
               queryVars: {
-                responsibleOrgUuid: this.props.currentUser.position.organization
-                  .uuid
+                responsibleOrgUuid: currentOrgUuid
               }
             }
           }
@@ -619,7 +623,7 @@ class BaseReportForm extends Component {
                     }
                     objectType={Person}
                     queryParams={{
-                      status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]
+                      status: [Person.STATUS.ACTIVE]
                     }}
                     fields={Person.autocompleteQuery}
                     addon={PEOPLE_ICON}

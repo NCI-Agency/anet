@@ -88,7 +88,7 @@ dependencies {
 
 	// Supported databases:
 	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6' // If using postgresql
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.0' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
