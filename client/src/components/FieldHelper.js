@@ -1,4 +1,5 @@
 import LinkTo from "components/LinkTo"
+import PropTypes from "prop-types"
 import React from "react"
 import {
   Button,
@@ -297,6 +298,14 @@ export const FieldAddon = ({ fieldId, addon }) => {
     }
   }
   return <InputGroup.Addon onClick={focusElement}>{addon}</InputGroup.Addon>
+}
+FieldAddon.propTypes = {
+  fieldId: PropTypes.string,
+  addon: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.object
+  ])
 }
 
 export function handleMultiSelectAddItem(curValue, newItem, onChange) {
