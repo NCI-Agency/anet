@@ -232,20 +232,26 @@ class BasePositionForm extends Component {
                     )}
                   </Field>
 
-                  <AdvancedSingleSelect
-                    fieldName="organization"
-                    fieldLabel="Organization"
-                    placeholder="Search the organization for this position..."
-                    value={values.organization}
-                    overlayColumns={["Name"]}
-                    overlayRenderRow={OrganizationOverlayRow}
-                    filterDefs={organizationFilters}
+                  <Field
+                    name="organization"
+                    label="Organization"
+                    component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("organization", value)}
-                    objectType={Organization}
-                    fields={Organization.autocompleteQuery}
-                    queryParams={orgSearchQuery}
-                    valueKey="shortName"
-                    addon={ORGANIZATIONS_ICON}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="organization"
+                        placeholder="Search the organization for this position..."
+                        value={values.organization}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        queryParams={orgSearchQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
+                      />
+                    }
                   />
 
                   <this.CodeFieldWithLabel
@@ -272,20 +278,26 @@ class BasePositionForm extends Component {
                 </Fieldset>
 
                 <Fieldset title="Additional information">
-                  <AdvancedSingleSelect
-                    fieldName="location"
-                    fieldLabel="Location"
-                    placeholder="Search for the location where this Position will operate from..."
-                    value={values.location}
-                    overlayColumns={["Name"]}
-                    overlayRenderRow={LocationOverlayRow}
-                    filterDefs={locationFilters}
+                  <Field
+                    name="location"
+                    label="Location"
+                    component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("location", value)}
-                    objectType={Location}
-                    fields={Location.autocompleteQuery}
-                    queryParams={{ status: Location.STATUS.ACTIVE }}
-                    valueKey="name"
-                    addon={LOCATIONS_ICON}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="location"
+                        placeholder="Search for the location where this Position will operate from..."
+                        value={values.location}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={LocationOverlayRow}
+                        filterDefs={locationFilters}
+                        objectType={Location}
+                        fields={Location.autocompleteQuery}
+                        queryParams={{ status: Location.STATUS.ACTIVE }}
+                        valueKey="name"
+                        addon={LOCATIONS_ICON}
+                      />
+                    }
                   />
                 </Fieldset>
 
