@@ -117,7 +117,7 @@
     "file-saver": "^2.0.2",
     "formik": "^1.5.8",
     "graphiql": "^0.14.2",
-    "graphql": "^14.5.4",
+    "graphql": "^14.5.6",
     "hopscotch": "^0.3.1",
     "jsonpath-plus": "^0.20.1",
     "leaflet": "^1.5.1",
