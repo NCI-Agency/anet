@@ -98,8 +98,6 @@ export default class OrganizationFilter extends Component {
         <AdvancedSingleSelect
           {...advancedSelectProps}
           fieldName={this.props.queryKey}
-          fieldLabel={null}
-          vertical
           showRemoveButton={false}
           filterDefs={organizationWidgetFilters}
           overlayColumns={["Name"]}

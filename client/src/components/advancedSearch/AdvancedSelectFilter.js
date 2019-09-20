@@ -66,8 +66,6 @@ export default class AdvancedSelectFilter extends Component {
         <AdvancedSingleSelect
           {...advancedSelectProps}
           fieldName={this.props.queryKey}
-          fieldLabel={null}
-          vertical
           showRemoveButton={false}
           onChange={this.onChange}
           value={this.state.value}
