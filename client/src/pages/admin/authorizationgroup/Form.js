@@ -144,25 +144,34 @@ class AuthorizationGroupForm extends Component {
                     onChange={value => setFieldValue("status", value)}
                   />
 
-                  <AdvancedMultiSelect
-                    fieldName="positions"
-                    fieldLabel="Positions"
-                    placeholder="Search for a position..."
-                    value={values.positions}
-                    renderSelected={
-                      <PositionTable positions={values.positions} showDelete />
-                    }
-                    overlayColumns={[
-                      "Position",
-                      "Organization",
-                      "Current Occupant"
-                    ]}
-                    overlayRenderRow={PositionOverlayRow}
-                    filterDefs={positionsFilters}
+                  <Field
+                    name="positions"
+                    label="Positions"
+                    component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("positions", value)}
-                    objectType={Position}
-                    fields={Position.autocompleteQuery}
-                    addon={POSITIONS_ICON}
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="positions"
+                        placeholder="Search for a position..."
+                        value={values.positions}
+                        renderSelected={
+                          <PositionTable
+                            positions={values.positions}
+                            showDelete
+                          />
+                        }
+                        overlayColumns={[
+                          "Position",
+                          "Organization",
+                          "Current Occupant"
+                        ]}
+                        overlayRenderRow={PositionOverlayRow}
+                        filterDefs={positionsFilters}
+                        objectType={Position}
+                        fields={Position.autocompleteQuery}
+                        addon={POSITIONS_ICON}
+                      />
+                    }
                   />
                 </Fieldset>
 
