@@ -193,20 +193,26 @@ class BaseTaskForm extends Component {
                     onChange={value => setFieldValue("status", value)}
                   />
 
-                  <AdvancedSingleSelect
-                    fieldName="responsibleOrg"
-                    fieldLabel={Settings.fields.task.responsibleOrg}
-                    placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
-                    value={values.responsibleOrg}
-                    overlayColumns={["Name"]}
-                    overlayRenderRow={OrganizationOverlayRow}
-                    filterDefs={responsibleOrgFilters}
+                  <Field
+                    name="responsibleOrg"
+                    label={Settings.fields.task.responsibleOrg}
+                    component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("responsibleOrg", value)}
-                    objectType={Organization}
-                    fields={Organization.autocompleteQuery}
-                    valueKey="shortName"
-                    queryParams={orgSearchQuery}
-                    addon={ORGANIZATIONS_ICON}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="responsibleOrg"
+                        placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
+                        value={values.responsibleOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={responsibleOrgFilters}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        queryParams={orgSearchQuery}
+                        valueKey="shortName"
+                        addon={ORGANIZATIONS_ICON}
+                      />
+                    }
                   />
 
                   <this.ResponsiblePositonsMultiSelect
