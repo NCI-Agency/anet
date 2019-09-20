@@ -3,8 +3,10 @@ import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { Field } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -85,22 +87,28 @@ export default class AssignPersonModal extends Component {
           <Grid fluid>
             <Row>
               <Col md={12}>
-                <AdvancedSingleSelect
-                  fieldName="person"
-                  fieldLabel="Select a person"
-                  placeholder="Select a person for this position"
-                  value={this.state.person}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={PersonSimpleOverlayRow}
-                  filterDefs={personFilters}
+                <Field
+                  name="person"
+                  label="Select a person"
+                  component={FieldHelper.renderSpecialField}
                   onChange={this.handleChangePerson}
-                  objectType={Person}
-                  valueKey="name"
-                  fields={
-                    "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
-                  }
-                  addon={PEOPLE_ICON}
                   vertical
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="person"
+                      placeholder="Select a person for this position"
+                      value={this.state.person}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={PersonSimpleOverlayRow}
+                      filterDefs={personFilters}
+                      objectType={Person}
+                      valueKey="name"
+                      fields={
+                        "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
+                      }
+                      addon={PEOPLE_ICON}
+                    />
+                  }
                 />
               </Col>
             </Row>

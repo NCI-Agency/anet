@@ -3,10 +3,11 @@ import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
+import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import RemoveButton from "components/RemoveButton"
-import { Form, Formik } from "formik"
+import { Field, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -127,30 +128,37 @@ class BaseEditAssociatedPositionsModal extends Component {
                   <Grid fluid>
                     <Row>
                       <Col md={12}>
-                        <AdvancedMultiSelect
-                          fieldName="associatedPositions"
-                          fieldLabel={null}
-                          placeholder={`Search for a ${assignedRole} position...`}
-                          value={values.associatedPositions}
-                          renderSelected={
-                            <AssociatedPositionsTable
-                              associatedPositions={values.associatedPositions}
-                            />
-                          }
-                          overlayColumns={[
-                            "Position",
-                            "Organization",
-                            "Current Occupant"
-                          ]}
-                          overlayRenderRow={PositionOverlayRow}
-                          filterDefs={positionsFilters}
+                        <Field
+                          name="associatedPositions"
+                          component={FieldHelper.renderSpecialField}
                           onChange={value =>
                             setFieldValue("associatedPositions", value)
                           }
-                          objectType={Position}
-                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
-                          addon={POSITIONS_ICON}
                           vertical
+                          widget={
+                            <AdvancedMultiSelect
+                              fieldName="associatedPositions"
+                              placeholder={`Search for a ${assignedRole} position...`}
+                              value={values.associatedPositions}
+                              renderSelected={
+                                <AssociatedPositionsTable
+                                  associatedPositions={
+                                    values.associatedPositions
+                                  }
+                                />
+                              }
+                              overlayColumns={[
+                                "Position",
+                                "Organization",
+                                "Current Occupant"
+                              ]}
+                              overlayRenderRow={PositionOverlayRow}
+                              filterDefs={positionsFilters}
+                              objectType={Position}
+                              fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
+                              addon={POSITIONS_ICON}
+                            />
+                          }
                         />
                       </Col>
                     </Row>
