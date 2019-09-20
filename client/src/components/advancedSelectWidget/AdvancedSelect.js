@@ -87,6 +87,12 @@ export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
   placeholder: PropTypes.string, // input field placeholder
   searchTerms: PropTypes.string,
+  addon: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.object
+  ]),
+  extraAddon: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
   overlayTableClassName: PropTypes.string,
@@ -108,13 +114,7 @@ export const propTypes = {
   fields: PropTypes.string,
   handleAddItem: PropTypes.func,
   handleRemoveItem: PropTypes.func,
-  smallOverlay: PropTypes.bool, // set to true if you want to display the filters on top
-  addon: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.func,
-    PropTypes.object
-  ]),
-  extraAddon: PropTypes.object
+  smallOverlay: PropTypes.bool // set to true if you want to display the filters on top
 }
 
 export default class AdvancedSelect extends Component {
