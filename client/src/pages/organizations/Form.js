@@ -427,7 +427,7 @@ class BaseOrganizationForm extends Component {
                               bsStyle="primary"
                               id="addApprovalStepButton"
                             >
-                              Add an Approval Step
+                              Add a Publication Approval Step
                             </Button>
                             <Modal
                               show={this.state.showAddApprovalStepAlert}

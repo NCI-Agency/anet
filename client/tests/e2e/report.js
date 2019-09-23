@@ -134,7 +134,7 @@ test("Draft and submit a report", async t => {
   await $formButtonSubmit.click()
   await pageHelpers.assertReportShowStatusText(
     t,
-    "This is a DRAFT report about a past engagement and hasn't been submitted."
+    "This is a DRAFT report and hasn't been submitted."
   )
 
   let currentPathname = await t.context.getCurrentPathname()
@@ -156,7 +156,7 @@ test("Draft and submit a report", async t => {
   )
   await pageHelpers.assertReportShowStatusText(
     t,
-    "This report about a past engagement is PENDING approvals."
+    "This report is PENDING approvals."
   )
 
   let $allertSuccess = await t.context.driver.findElement(
@@ -244,7 +244,7 @@ test("Publish report chain", async t => {
   await $readReportButtonJacob.click()
   await pageHelpers.assertReportShowStatusText(
     t,
-    "This report about a past engagement is PENDING approvals."
+    "This report is PENDING approvals."
   )
   let $jacobApproveButton = await $(".approve-button")
   await t.context.driver.wait(until.elementIsEnabled($jacobApproveButton))
@@ -281,7 +281,7 @@ test("Publish report chain", async t => {
 
   await pageHelpers.assertReportShowStatusText(
     t,
-    "This report about a past engagement is PENDING approvals."
+    "This report is PENDING approvals."
   )
   let $rebeccaApproveButton = await $(".approve-button")
   await $rebeccaApproveButton.click()
@@ -315,10 +315,7 @@ test("Publish report chain", async t => {
   await t.context.driver.wait(until.elementIsEnabled($readApprovedReportButton))
   await $readApprovedReportButton.click()
 
-  await pageHelpers.assertReportShowStatusText(
-    t,
-    "This report about a past engagement is APPROVED."
-  )
+  await pageHelpers.assertReportShowStatusText(t, "This report is APPROVED.")
   let $arthurPublishButton = await $(".publish-button")
   await $arthurPublishButton.click()
   await t.context.driver.wait(until.stalenessOf($arthurPublishButton))
@@ -642,7 +639,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   await $submitButton.click()
   await pageHelpers.assertReportShowStatusText(
     t,
-    "This is a DRAFT report about a past engagement and hasn't been submitted."
+    "This is a DRAFT report and hasn't been submitted."
   )
 
   var serverResponse = await httpRequestSmtpServer("GET")

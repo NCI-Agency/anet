@@ -21,6 +21,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
@@ -238,6 +239,16 @@ class BaseReportForm extends Component {
 
   componentWillUnmount() {
     window.clearTimeout(this.autoSaveSettings.timeoutId)
+  }
+
+  getReportType = values => {
+    return values.engagementDate && Report.isFuture(values.engagementDate)
+      ? "upcoming engagement"
+      : "report"
+  }
+
+  getReportTypeUpperFirst = values => {
+    return _upperFirst(this.getReportType(values))
   }
 
   render() {
@@ -831,7 +842,9 @@ class BaseReportForm extends Component {
                         objectType="report"
                         objectDisplay={values.uuid}
                         bsStyle="warning"
-                        buttonLabel="Delete this report"
+                        buttonLabel={`Delete this ${this.getReportType(
+                          values
+                        )}`}
                       />
                     )}
                     {/* Skip validation on save! */}
@@ -912,7 +925,9 @@ class BaseReportForm extends Component {
           )
           this.autoSaveSettings.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
           this.setState({ autoSavedAt: moment() })
-          toast.success("Your report has been automatically saved")
+          toast.success(
+            `Your ${this.getReportType(newValues)} has been automatically saved`
+          )
           // And re-schedule the auto-save timer
           this.autoSaveSettings.timeoutId = window.setTimeout(
             autosaveHandler,
@@ -927,8 +942,9 @@ class BaseReportForm extends Component {
             this.autoSaveSettings.autoSaveTimeout
           ) // exponential back-off
           toast.error(
-            "There was an error autosaving your report; we'll try again in " +
-              this.autoSaveSettings.autoSaveTimeout.humanize()
+            `There was an error autosaving your ${this.getReportType(
+              this.autoSaveSettings.values
+            )}; we'll try again in ${this.autoSaveSettings.autoSaveTimeout.humanize()}`
           )
           // And re-schedule the auto-save timer
           this.autoSaveSettings.timeoutId = window.setTimeout(
@@ -984,7 +1000,7 @@ class BaseReportForm extends Component {
       this.props.history.replace(Report.pathForEdit(report))
     }
     this.props.history.push(Report.pathFor(report), {
-      success: "Report saved"
+      success: `${this.getReportTypeUpperFirst(values)} saved`
     })
   }
 
