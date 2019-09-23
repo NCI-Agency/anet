@@ -13,7 +13,7 @@ import ReportCollection, {
 import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -45,12 +45,10 @@ const Chart = props => {
     error,
     ...props
   })
-  if (done) {
-    return result
-  }
-
-  let graphData = []
-  if (data) {
+  const graphData = useMemo(() => {
+    if (!data) {
+      return []
+    }
     // The server returns values from 1 to 7
     let daysOfWeekInt = [1, 2, 3, 4, 5, 6, 7]
     // The day of the week (returned by the server) with value 1 is Sunday
@@ -74,20 +72,24 @@ const Chart = props => {
       "Sunday"
     ]
     let reportsList = data.reportList.list || []
-    if (reportsList.length) {
-      let simplifiedValues = reportsList.map(d => {
-        return { reportUuid: d.uuid, dayOfWeek: d.engagementDayOfWeek }
-      })
-      graphData = displayOrderDaysOfWeek.map(d => {
-        let r = {}
-        r.dayOfWeekInt = daysOfWeekInt[daysOfWeek.indexOf(d)]
-        r.dayOfWeekString = d
-        r.reportsCount = simplifiedValues.filter(
-          item => item.dayOfWeek === r.dayOfWeekInt
-        ).length
-        return r
-      })
+    if (!reportsList.length) {
+      return []
     }
+    let simplifiedValues = reportsList.map(d => {
+      return { reportUuid: d.uuid, dayOfWeek: d.engagementDayOfWeek }
+    })
+    return displayOrderDaysOfWeek.map(d => {
+      let r = {}
+      r.dayOfWeekInt = daysOfWeekInt[daysOfWeek.indexOf(d)]
+      r.dayOfWeekString = d
+      r.reportsCount = simplifiedValues.filter(
+        item => item.dayOfWeek === r.dayOfWeekInt
+      ).length
+      return r
+    })
+  }, [data])
+  if (done) {
+    return result
   }
 
   return (

@@ -13,7 +13,7 @@ import ReportCollection, {
 import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST_BY_ORG = gql`
@@ -59,23 +59,24 @@ const ChartByOrg = props => {
     error,
     ...props
   })
-  if (done) {
-    return result
-  }
-
-  let graphData = []
-  if (data) {
+  const graphData = useMemo(() => {
+    if (!data) {
+      return []
+    }
     const pinnedOrgs = Settings.pinned_ORGs
     const noAdvisorOrg = {
       uuid: "-1",
       shortName: `No ${Settings.fields.advisor.org.name}`
     }
     let reportsList = data.reportList.list || []
+    if (!reportsList.length) {
+      return []
+    }
     reportsList = reportsList.map(d => {
       if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg
       return d
     })
-    graphData = reportsList
+    return reportsList
       .filter(
         (item, index, d) =>
           d.findIndex(t => {
@@ -97,6 +98,9 @@ const ChartByOrg = props => {
             : 1
         } else return bIndex < 0 ? -1 : aIndex - bIndex
       })
+  }, [data])
+  if (done) {
+    return result
   }
 
   return (
@@ -157,18 +161,19 @@ const ChartByReason = props => {
     error,
     ...props
   })
-  if (done) {
-    return result
-  }
-
-  let graphData = []
-  if (data) {
+  const graphData = useMemo(() => {
+    if (!data) {
+      return []
+    }
     let reportsList = data.reportList.list || []
+    if (!reportsList.length) {
+      return []
+    }
     reportsList = reportsList.map(d => {
       if (!d.cancelledReason) d.cancelledReason = "NO_REASON_GIVEN"
       return d
     })
-    graphData = reportsList
+    return reportsList
       .filter(
         (item, index, d) =>
           d.findIndex(t => {
@@ -188,6 +193,9 @@ const ChartByReason = props => {
       .sort((a, b) => {
         return a.reason.localeCompare(b.reason)
       })
+  }, [data])
+  if (done) {
+    return result
   }
 
   return (

@@ -17,7 +17,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Panel, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
@@ -133,27 +133,28 @@ const DecisivesDashboardStatic = props => {
     error,
     ...props
   })
+  const decisives = useMemo(() => {
+    if (!data || !dashboardData) {
+      return []
+    }
+    return dashboardData.map(decisive => {
+      return {
+        label: decisive.label,
+        positions: data.positionList.list.filter(item =>
+          decisive.positions.includes(item.uuid)
+        ),
+        tasks: data.taskList.list.filter(item =>
+          decisive.tasks.includes(item.uuid)
+        ),
+        locations: data.locationList.list.filter(item =>
+          decisive.locations.includes(item.uuid)
+        )
+      }
+    })
+  }, [dashboardData, data])
   if (done) {
     return result
   }
-
-  const decisives =
-    !data || !dashboardData
-      ? []
-      : dashboardData.map(decisive => {
-        return {
-          label: decisive.label,
-          positions: data.positionList.list.filter(item =>
-            decisive.positions.includes(item.uuid)
-          ),
-          tasks: data.taskList.list.filter(item =>
-            decisive.tasks.includes(item.uuid)
-          ),
-          locations: data.locationList.list.filter(item =>
-            decisive.locations.includes(item.uuid)
-          )
-        }
-      })
 
   return _isEmpty(dashboardData) ? null : (
     <DecisivesDashboardImpl decisives={decisives} {...props} />
@@ -199,46 +200,50 @@ const DecisivesDashboardImpl = props => {
     searchProps: _SEARCH_PROPS,
     ...props
   })
+  const [reportStats, prevReportStats] = useMemo(() => {
+    if (!data) {
+      return []
+    }
+    const currentReports = data.currentList.list || []
+    const currentStats = currentReports.reduce(
+      (counter, report) => {
+        counter.locationStats[report.location.uuid] =
+          ++counter.locationStats[report.location.uuid] || 1
+        report.attendees.reduce((counterNested, attendee) => {
+          if (attendee.position) {
+            counterNested.positionStats[attendee.position.uuid] =
+              ++counterNested.positionStats[attendee.position.uuid] || 1
+          }
+          return counterNested
+        }, counter)
+        return counter
+      },
+      { locationStats: {}, positionStats: {} }
+    )
+    const previousReports = data.previousList.list || []
+    const previousStats = previousReports.reduce(
+      (counter, report) => {
+        counter.locationStats[report.location.uuid] =
+          ++counter.locationStats[report.location.uuid] || 1
+        report.attendees.reduce((counterNested, attendee) => {
+          if (attendee.position) {
+            counterNested.positionStats[attendee.position.uuid] =
+              ++counterNested.positionStats[attendee.position.uuid] || 1
+          }
+          return counterNested
+        }, counter)
+        return counter
+      },
+      { locationStats: {}, positionStats: {} }
+    )
+    return [currentStats, previousStats]
+  }, [data])
   if (done) {
     return result
   }
-
   if (!data) {
     return null
   }
-
-  const reports = data.currentList.list
-  const reportStats = reports.reduce(
-    (counter, report) => {
-      counter.locationStats[report.location.uuid] =
-        ++counter.locationStats[report.location.uuid] || 1
-      report.attendees.reduce((counterNested, attendee) => {
-        if (attendee.position) {
-          counterNested.positionStats[attendee.position.uuid] =
-            ++counterNested.positionStats[attendee.position.uuid] || 1
-        }
-        return counterNested
-      }, counter)
-      return counter
-    },
-    { locationStats: {}, positionStats: {} }
-  )
-
-  const prevReportStats = data.previousList.list.reduce(
-    (counter, report) => {
-      counter.locationStats[report.location.uuid] =
-        ++counter.locationStats[report.location.uuid] || 1
-      report.attendees.reduce((counterNested, attendee) => {
-        if (attendee.position) {
-          counterNested.positionStats[attendee.position.uuid] =
-            ++counterNested.positionStats[attendee.position.uuid] || 1
-        }
-        return counterNested
-      }, counter)
-      return counter
-    },
-    { locationStats: {}, positionStats: {} }
-  )
 
   return (
     <>

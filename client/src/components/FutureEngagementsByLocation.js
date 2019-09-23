@@ -14,7 +14,7 @@ import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -50,61 +50,76 @@ const Chart = props => {
     error,
     ...props
   })
-  if (done) {
-    return result
-  }
+  const graphData = useMemo(() => {
+    function getEngagementDateRangeArray() {
+      let dateArray = []
+      let currentDate = moment(queryParams.engagementDateStart).clone()
+      let endDate = moment(queryParams.engagementDateEnd)
+      while (currentDate <= endDate) {
+        dateArray.push(currentDate.clone())
+        currentDate = currentDate.add(1, "days")
+      }
+      return dateArray
+    }
 
-  let graphData = {}
-  if (data) {
+    if (!data) {
+      return {}
+    }
     const noLocation = {
       uuid: "-1",
       name: "No location allocated"
     }
     let reportsList = data.reportList.list || []
-    if (reportsList.length) {
-      reportsList = reportsList.map(d => {
-        if (!d.location) d.location = noLocation
-        return d
-      })
-      // add days without data as we want to display them in the chart
-      let allCategories = getEngagementDateRangeArray().map(function(d) {
-        return {
-          key: d.valueOf(),
-          values: [{}]
-        }
-      })
-      let categoriesWithData = d3
-        .nest()
-        .key(function(d) {
-          return moment(d.engagementDate)
-            .startOf("day")
-            .valueOf()
-        })
-        .key(function(d) {
-          return d.location.uuid
-        })
-        .rollup(function(leaves) {
-          return leaves.length
-        })
-        .entries(reportsList)
-      let groupedData = allCategories.map(d => {
-        let categData = categoriesWithData.find(x => {
-          return Number(x.key) === d.key
-        })
-        return Object.assign({}, d, categData)
-      })
-      graphData.data = groupedData
-      graphData.categoryLabels = allCategories.reduce(function(prev, curr) {
-        prev[curr.key] = moment(curr.key).format(
-          Settings.dateFormats.forms.displayShort.date
-        )
-        return prev
-      }, {})
-      graphData.leavesLabels = reportsList.reduce(function(prev, curr) {
-        prev[curr.location.uuid] = curr.location.name
-        return prev
-      }, {})
+    if (!reportsList.length) {
+      return {}
     }
+    reportsList = reportsList.map(d => {
+      if (!d.location) {
+        d.location = noLocation
+      }
+      return d
+    })
+    // add days without data as we want to display them in the chart
+    let allCategories = getEngagementDateRangeArray().map(function(d) {
+      return {
+        key: d.valueOf(),
+        values: [{}]
+      }
+    })
+    let categoriesWithData = d3
+      .nest()
+      .key(function(d) {
+        return moment(d.engagementDate)
+          .startOf("day")
+          .valueOf()
+      })
+      .key(function(d) {
+        return d.location.uuid
+      })
+      .rollup(function(leaves) {
+        return leaves.length
+      })
+      .entries(reportsList)
+    const groupedData = allCategories.map(d => {
+      let categData = categoriesWithData.find(x => {
+        return Number(x.key) === d.key
+      })
+      return Object.assign({}, d, categData)
+    })
+    const categoryLabels = allCategories.reduce(function(prev, curr) {
+      prev[curr.key] = moment(curr.key).format(
+        Settings.dateFormats.forms.displayShort.date
+      )
+      return prev
+    }, {})
+    const leavesLabels = reportsList.reduce(function(prev, curr) {
+      prev[curr.location.uuid] = curr.location.name
+      return prev
+    }, {})
+    return { data: groupedData, categoryLabels, leavesLabels }
+  }, [data, queryParams.engagementDateEnd, queryParams.engagementDateStart])
+  if (done) {
+    return result
   }
 
   return (
@@ -131,17 +146,6 @@ const Chart = props => {
       </ContainerDimensions>
     </div>
   )
-
-  function getEngagementDateRangeArray() {
-    let dateArray = []
-    let currentDate = moment(queryParams.engagementDateStart).clone()
-    let endDate = moment(queryParams.engagementDateEnd)
-    while (currentDate <= endDate) {
-      dateArray.push(currentDate.clone())
-      currentDate = currentDate.add(1, "days")
-    }
-    return dateArray
-  }
 }
 
 Chart.propTypes = {

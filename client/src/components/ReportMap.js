@@ -5,7 +5,7 @@ import { mapDispatchToProps, useBoilerplate } from "components/Page"
 import _escape from "lodash/escape"
 import { Location } from "models"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useMemo } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -57,28 +57,34 @@ const ReportMap = props => {
     error,
     ...props
   })
+  const markers = useMemo(() => {
+    const reports = data ? data.reportList.list : []
+    if (!reports.length) {
+      return []
+    }
+    const markerArray = []
+    reports.forEach(report => {
+      if (Location.hasCoordinates(report.location)) {
+        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
+        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
+        markerArray.push({
+          id: report.uuid,
+          lat: report.location.lat,
+          lng: report.location.lng,
+          name: label
+        })
+      }
+    })
+    return markerArray
+  }, [data])
   if (done) {
     return result
   }
 
-  const reports = data ? data.reportList.list : []
   if (setTotalCount) {
     const { totalCount } = data.reportList
     setTotalCount(totalCount)
   }
-  let markers = []
-  reports.forEach(report => {
-    if (Location.hasCoordinates(report.location)) {
-      let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
-      label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
-      markers.push({
-        id: report.uuid,
-        lat: report.location.lat,
-        lng: report.location.lng,
-        name: label
-      })
-    }
-  })
 
   return (
     <Leaflet

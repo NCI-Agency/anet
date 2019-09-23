@@ -13,7 +13,7 @@ import ReportCollection, {
 import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -48,12 +48,10 @@ const Chart = props => {
     error,
     ...props
   })
-  if (done) {
-    return result
-  }
-
-  let graphData = []
-  if (data) {
+  const graphData = useMemo(() => {
+    if (!data) {
+      return []
+    }
     const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
     const noTask = {
       uuid: "-1",
@@ -61,33 +59,37 @@ const Chart = props => {
       longName: noTaskMessage
     }
     let reportsList = data.reportList.list || []
-    if (reportsList.length) {
-      let simplifiedValues = reportsList.map(d => {
-        return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
-      })
-      let tasks = reportsList.map(d => d.tasks)
-      tasks = [].concat
-        .apply([], tasks)
-        .filter(
-          (item, index, d) =>
-            d.findIndex(t => {
-              return t.uuid === item.uuid
-            }) === index
-        )
-        .sort((a, b) => a.shortName.localeCompare(b.shortName))
-      // add No Task item, in order to relate to reports without Tasks
-      tasks.push(noTask)
-      graphData = tasks.map(d => {
-        let r = {}
-        r.task = d
-        r.reportsCount =
-          d.uuid === noTask.uuid
-            ? simplifiedValues.filter(item => item.tasks.length === 0).length
-            : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
-              .length
-        return r
-      })
+    if (!reportsList.length) {
+      return []
     }
+    let simplifiedValues = reportsList.map(d => {
+      return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
+    })
+    let tasks = reportsList.map(d => d.tasks)
+    tasks = [].concat
+      .apply([], tasks)
+      .filter(
+        (item, index, d) =>
+          d.findIndex(t => {
+            return t.uuid === item.uuid
+          }) === index
+      )
+      .sort((a, b) => a.shortName.localeCompare(b.shortName))
+    // add No Task item, in order to relate to reports without Tasks
+    tasks.push(noTask)
+    return tasks.map(d => {
+      let r = {}
+      r.task = d
+      r.reportsCount =
+        d.uuid === noTask.uuid
+          ? simplifiedValues.filter(item => item.tasks.length === 0).length
+          : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
+            .length
+      return r
+    })
+  }, [data])
+  if (done) {
+    return result
   }
 
   return (

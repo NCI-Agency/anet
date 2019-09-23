@@ -29,7 +29,7 @@ import { Organization, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Button, HelpBlock, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
@@ -108,14 +108,12 @@ const Chart = props => {
     error,
     ...props
   })
-  if (done) {
-    return result
-  }
-
-  const pinnedOrgs = Settings.pinned_ORGs
-  const graphData = !data
-    ? []
-    : data.rollupGraph
+  const graphData = useMemo(() => {
+    if (!data) {
+      return []
+    }
+    const pinnedOrgs = Settings.pinned_ORGs
+    return data.rollupGraph
       .map(d => {
         d.org = d.org || { uuid: "-1", shortName: "Other" }
         return d
@@ -134,6 +132,11 @@ const Chart = props => {
           return bIndex < 0 ? -1 : aIndex - bIndex
         }
       })
+  }, [data])
+  if (done) {
+    return result
+  }
+
   const CHART_ID = "reports_by_day_of_week"
   const barColors = {
     cancelled: "#EC971F",
