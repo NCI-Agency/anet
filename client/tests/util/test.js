@@ -76,6 +76,7 @@ test.beforeEach(t => {
     let urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
     debugLog("Getting URL", urlToGet)
     await t.context.driver.get(urlToGet)
+    await t.context.waitForLoadingFinished()
 
     // If we have a page-wide error message, we would like to cleanly fail the test on that.
     try {
@@ -104,6 +105,15 @@ test.beforeEach(t => {
         throw e
       }
     }
+  }
+
+  t.context.waitForLoadingFinished = async() => {
+    await t.context.assertElementNotPresent(
+      t,
+      "span.loading",
+      "Loading indicator should disappear",
+      mediumWaitMs
+    )
   }
 
   // For debugging purposes.
@@ -281,6 +291,7 @@ test.beforeEach(t => {
       let $myOrgLink = await t.context.$("#my-organization")
       await t.context.driver.wait(t.context.until.elementIsVisible($myOrgLink))
       await $myOrgLink.click()
+      await t.context.waitForLoadingFinished()
     },
     async clickFormBottomSubmit() {
       let $formBottomSubmit = await t.context.$("#formBottomSubmit")
