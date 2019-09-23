@@ -1,11 +1,13 @@
 import { Settings } from "api"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
+import OrganizationalChart from "components/graphs/OrganizationalChart"
 import LinkTo from "components/LinkTo"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
+import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 
 const BaseOrganizationLaydown = props => {
@@ -26,6 +28,33 @@ const BaseOrganizationLaydown = props => {
 
   return (
     <Element name="laydown">
+      <Element
+        id="orgChart"
+        name="orgChart"
+        className="scroll-anchor-container"
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div>
+            <h2 className="legend">
+              <span className="title-text">Organization Diagram</span>
+            </h2>
+          </div>
+          <div style={{ backgroundColor: "white" }}>
+            <ContainerDimensions>
+              {({ width, height }) => (
+                <OrganizationalChart
+                  width={width}
+                  height={height}
+                  label="test"
+                  org={organization}
+                  size={{ width: "100%", height: 800 }}
+                />
+              )}
+            </ContainerDimensions>
+          </div>
+        </div>
+      </Element>
+
       <Fieldset
         id="supportedPositions"
         title="Supported positions"
