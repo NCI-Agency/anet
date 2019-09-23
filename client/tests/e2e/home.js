@@ -9,7 +9,7 @@ test("Home Page", async t => {
   // looks like it exited successfully, when in fact it just died. I've
   // seen people get bit by that a done with frameworks like Mocha which
   // do not offer test planning.
-  t.plan(6)
+  t.plan(7)
 
   let {
     assertElementText,
@@ -27,13 +27,15 @@ test("Home Page", async t => {
     $draftReports,
     $reportsPending,
     $orgReports,
-    $upcomingEngagements
+    $upcomingEngagements,
+    $sensitiveInfo
   ] = await $$(".home-tile h1")
 
   await assertElementTextIsInt(t, $reportsPending)
   await assertElementTextIsInt(t, $draftReports)
   await assertElementTextIsInt(t, $orgReports)
   await assertElementTextIsInt(t, $upcomingEngagements)
+  await assertElementTextIsInt(t, $sensitiveInfo)
 
   let $tourLauncher = await $(".persistent-tour-launcher")
   await $tourLauncher.click()
