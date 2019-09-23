@@ -74,13 +74,13 @@ class BaseTaskForm extends Component {
 
   ShortNameField = DictionaryField(Field)
   LongNameField = DictionaryField(Field)
-  TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
+  TaskCustomFieldRef1 = DictionaryField(Field)
   TaskCustomField = DictionaryField(Field)
   PlannedCompletionField = DictionaryField(Field)
   ProjectedCompletionField = DictionaryField(Field)
   TaskCustomFieldEnum1 = DictionaryField(Field)
   TaskCustomFieldEnum2 = DictionaryField(Field)
-  ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
+  ResponsiblePositonsMultiSelect = DictionaryField(Field)
   state = {
     error: null
   }
@@ -216,51 +216,58 @@ class BaseTaskForm extends Component {
                   />
 
                   <this.ResponsiblePositonsMultiSelect
-                    fieldName="responsiblePositions"
+                    name="responsiblePositions"
+                    component={FieldHelper.renderSpecialField}
                     dictProps={Settings.fields.task.responsiblePositions}
-                    fieldLabel={Settings.fields.task.responsiblePositions.label}
-                    value={values.responsiblePositions}
-                    renderSelected={
-                      <PositionTable
-                        positions={values.responsiblePositions}
-                        showDelete
-                      />
-                    }
-                    overlayColumns={[
-                      "Position",
-                      "Organization",
-                      "Current Occupant"
-                    ]}
-                    overlayRenderRow={PositionOverlayRow}
-                    filterDefs={positionsFilters}
                     onChange={value =>
                       setFieldValue("responsiblePositions", value)
                     }
-                    objectType={Position}
-                    fields={Position.autocompleteQuery}
-                    addon={POSITIONS_ICON}
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="responsiblePositions"
+                        value={values.responsiblePositions}
+                        renderSelected={
+                          <PositionTable
+                            positions={values.responsiblePositions}
+                            showDelete
+                          />
+                        }
+                        overlayColumns={[
+                          "Position",
+                          "Organization",
+                          "Current Occupant"
+                        ]}
+                        overlayRenderRow={PositionOverlayRow}
+                        filterDefs={positionsFilters}
+                        objectType={Position}
+                        fields={Position.autocompleteQuery}
+                        addon={POSITIONS_ICON}
+                      />
+                    }
                   />
 
                   {Settings.fields.task.customFieldRef1 && (
                     <this.TaskCustomFieldRef1
+                      name="customFieldRef1"
+                      component={FieldHelper.renderSpecialField}
                       dictProps={Settings.fields.task.customFieldRef1}
-                      fieldName="customFieldRef1"
-                      fieldLabel={Settings.fields.task.customFieldRef1.label}
-                      placeholder={
-                        Settings.fields.task.customFieldRef1.placeholder
-                      }
-                      value={values.customFieldRef1}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={TaskSimpleOverlayRow}
-                      filterDefs={tasksFilters}
                       onChange={value =>
                         setFieldValue("customFieldRef1", value)
                       }
-                      objectType={Task}
-                      fields={Task.autocompleteQuery}
-                      valueKey="shortName"
-                      queryParams={{}}
-                      addon={TASKS_ICON}
+                      widget={
+                        <AdvancedSingleSelect
+                          fieldName="customFieldRef1"
+                          value={values.customFieldRef1}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={TaskSimpleOverlayRow}
+                          filterDefs={tasksFilters}
+                          objectType={Task}
+                          fields={Task.autocompleteQuery}
+                          valueKey="shortName"
+                          queryParams={{}}
+                          addon={TASKS_ICON}
+                        />
+                      }
                     />
                   )}
 
