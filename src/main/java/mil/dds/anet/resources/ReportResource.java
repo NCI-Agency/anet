@@ -458,7 +458,6 @@ public class ReportResource {
     try {
       if (r.isFutureEngagement()) {
         steps = engine.getPlanningApprovalStepsForOrg(engine.getContext(), orgUuid).get();
-        throwExceptionNoPlanningApprovalSteps(steps);
       } else {
         steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
         throwExceptionNoApprovalSteps(steps);
@@ -474,16 +473,29 @@ public class ReportResource {
     action.setType(ActionType.SUBMIT);
     engine.getReportActionDao().insert(action);
 
-    // Push the report into the first step of this workflow
-    r.setApprovalStep(steps.get(0));
-    r.setState(ReportState.PENDING_APPROVAL);
+    if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
+      // Future engagements for orgs without planning approval chain will be approved directly
+      // Write the approval action
+      ReportAction approval = new ReportAction();
+      approval.setReportUuid(r.getUuid());
+      approval.setPersonUuid(user.getUuid());
+      approval.setType(ActionType.APPROVE);
+      engine.getReportActionDao().insert(approval);
+      r.setState(ReportState.APPROVED);
+    } else {
+      // Push the report into the first step of this workflow
+      r.setApprovalStep(steps.get(0));
+      r.setState(ReportState.PENDING_APPROVAL);
+    }
     final int numRows = dao.update(r, user);
-    sendApprovalNeededEmail(r);
-    logger.info("Putting report {} into step {} because of org {} on author {}", r.getUuid(),
-        steps.get(0).getUuid(), orgUuid, r.getAuthorUuid());
-
     if (numRows != 1) {
       throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
+    }
+
+    if (!Utils.isEmptyOrNull(steps)) {
+      sendApprovalNeededEmail(r);
+      logger.info("Putting report {} into step {} because of org {} on author {}", r.getUuid(),
+          steps.get(0).getUuid(), orgUuid, r.getAuthorUuid());
     }
 
     AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(),
@@ -500,15 +512,6 @@ public class ReportResource {
     if (Utils.isEmptyOrNull(steps)) {
       final String messageBody =
           "Advisor organization is missing a report approval chain. In order to have an approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
-      throwException(messageBody);
-    }
-  }
-
-
-  private void throwExceptionNoPlanningApprovalSteps(List<ApprovalStep> steps) {
-    if (Utils.isEmptyOrNull(steps)) {
-      final String messageBody =
-          "Advisor organization is missing a planning report approval chain. In order to have a planning approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
       throwException(messageBody);
     }
   }
