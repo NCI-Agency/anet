@@ -201,7 +201,7 @@ test("Publish report chain", async t => {
     $reportsPendingErin,
     /* eslint-disable no-unused-vars */
     $orgReportsErin,
-    $upcomingEngagementsErin
+    $plannedEngagementsErin
     /* eslint-enable no-unused-vars */
   ] = $homeTileErin
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
@@ -222,7 +222,7 @@ test("Publish report chain", async t => {
     $reportsPendingJacob,
     /* eslint-disable no-unused-vars */
     $orgReportsJacob,
-    $upcomingEngagementsJacob
+    $plannedEngagementsJacob
     /* eslint-enable no-unused-vars */
   ] = $homeTileJacob
   await t.context.driver.wait(until.elementIsVisible($reportsPendingJacob))
@@ -258,7 +258,7 @@ test("Publish report chain", async t => {
     $reportsPending,
     /* eslint-disable no-unused-vars */
     $orgReports,
-    $upcomingEngagements
+    $plannedEngagements
     /* eslint-enable no-unused-vars */
   ] = $homeTile
   await t.context.driver.wait(until.elementIsVisible($reportsPending))
@@ -295,7 +295,7 @@ test("Publish report chain", async t => {
     $draftReportsArthur,
     $reportsPendingAll,
     $reportsPendingArthur,
-    $upcomingEngagementsArthur,
+    $plannedEngagementsArthur,
     $reportsSensitiveInfo,
     /* eslint-enable no-unused-vars */
     $approvedReports

@@ -27,7 +27,7 @@ const userTour = (currentUser, history) => {
       {
         title: "My ANET snapshot",
         content:
-          "This area shows you how many reports you've drafted but haven't submitted, the number of your reports waiting for approval from your organization's approval chain, and your organization's reports published in the last 7 days and upcoming engagements.",
+          "This area shows you how many reports you've drafted but haven't submitted, the number of your reports waiting for approval from your organization's approval chain, and your organization's reports published in the last 7 days and planned engagements.",
         target: ".home-tile-row",
         placement: "bottom"
       },
@@ -96,7 +96,7 @@ const superUserTour = (currentUser, history) => {
       {
         title: "My ANET snapshot",
         content:
-          "This area shows you the reports that need your approval as well as your organization's draft reports, reports submitted in the last 7 days, and upcoming engagements.",
+          "This area shows you the reports that need your approval as well as your organization's draft reports, reports submitted in the last 7 days, and planned engagements.",
         target: ".home-tile-row",
         placement: "bottom"
       },
@@ -137,7 +137,7 @@ const reportTour = (currentUser, history) => {
       {
         title: "Engagement date",
         content:
-          "When did this engagement happen, or when will it take place? Choosing a date in the future will create an upcoming engagement. On the day of your upcoming engagement you'll get an email letting you know that the report you started moved back to your drafts.",
+          "When did this engagement happen, or when will it take place? Choosing a date in the future will create an planned engagement. On the day of your planned engagement you'll get an email letting you know that the report you started moved back to your drafts.",
         target: "#engagementDate",
         placement: "right"
       },

@@ -61,7 +61,7 @@ class BaseHome extends Page {
       this.allDraft(),
       this.allPending(),
       this.pendingMe(currentUser),
-      this.allUpcoming(),
+      this.allPlanned(),
       this.mySensitiveInfo(),
       this.allApproved()
     ]
@@ -166,7 +166,7 @@ class BaseHome extends Page {
     }
     return {
       title:
-        currentUser.position.organization.shortName + "'s upcoming engagements",
+        currentUser.position.organization.shortName + "'s planned engagements",
       query: {
         orgUuid: currentUser.position.organization.uuid,
         includeOrgChildren: false,
@@ -177,9 +177,9 @@ class BaseHome extends Page {
     }
   }
 
-  allUpcoming() {
+  allPlanned() {
     return {
-      title: "All upcoming engagements",
+      title: "All planned engagements",
       query: {
         state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
         engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,

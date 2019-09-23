@@ -243,7 +243,7 @@ class BaseReportForm extends Component {
 
   getReportType = values => {
     return values.engagementDate && Report.isFuture(values.engagementDate)
-      ? "upcoming engagement"
+      ? "planned engagement"
       : "report"
   }
 
@@ -489,7 +489,7 @@ class BaseReportForm extends Component {
                     {isFutureEngagement && (
                       <HelpBlock>
                         <span className="text-success">
-                          This will create an upcoming engagement
+                          This will create an planned engagement
                         </span>
                       </HelpBlock>
                     )}

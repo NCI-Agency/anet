@@ -278,7 +278,7 @@ class BaseReportShow extends Page {
   }
 
   get reportType() {
-    return this.state.report.isFuture() ? "upcoming engagement" : "report"
+    return this.state.report.isFuture() ? "planned engagement" : "report"
   }
 
   get reportTypeUpperFirst() {

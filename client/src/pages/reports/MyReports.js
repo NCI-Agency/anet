@@ -53,8 +53,8 @@ class BaseMyReports extends Page {
         <SubNav subnavElemId="reports-nav">
           <Nav>
             <AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
-            <AnchorNavItem to="upcoming-engagements">
-              Upcoming Engagements
+            <AnchorNavItem to="planned-engagements">
+              Planned Engagements
             </AnchorNavItem>
             <AnchorNavItem to="pending-approval">
               Pending approval
@@ -71,8 +71,8 @@ class BaseMyReports extends Page {
 
         {this.renderSection("Draft Reports", "draft-reports", "draft")}
         {this.renderSection(
-          "Upcoming Engagements",
-          "upcoming-engagements",
+          "Planned Engagements",
+          "planned-engagements",
           "future"
         )}
         {this.renderSection("Pending Approval", "pending-approval", "pending")}
