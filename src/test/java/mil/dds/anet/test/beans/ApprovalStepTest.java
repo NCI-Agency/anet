@@ -2,6 +2,7 @@ package mil.dds.anet.test.beans;
 
 import com.google.common.collect.ImmutableList;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import org.junit.Test;
 
 public class ApprovalStepTest extends BeanTester<ApprovalStep> {
@@ -14,6 +15,7 @@ public class ApprovalStepTest extends BeanTester<ApprovalStep> {
     as.setAdvisorOrganizationUuid("22");
     as.setApprovers(ImmutableList.of());
     as.setNextStepUuid("9292");
+    as.setType(ApprovalStepType.REPORT_APPROVAL);
     return as;
   }
 

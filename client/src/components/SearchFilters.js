@@ -15,7 +15,15 @@ import {
   TagOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
-import { Location, Organization, Person, Position, Tag, Task } from "models"
+import {
+  Location,
+  Organization,
+  Person,
+  Position,
+  Report,
+  Tag,
+  Task
+} from "models"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -255,6 +263,17 @@ export default {
         },
         State: {
           component: ReportStateSearch
+        },
+        "Engagement Status": {
+          component: SelectSearchFilter,
+          props: {
+            queryKey: "engagementStatus",
+            values: [
+              Report.ENGAGEMENT_STATUS.HAPPENED,
+              Report.ENGAGEMENT_STATUS.FUTURE,
+              Report.ENGAGEMENT_STATUS.CANCELLED
+            ]
+          }
         },
         [Settings.fields.report.atmosphere]: {
           component: SelectSearchFilter,

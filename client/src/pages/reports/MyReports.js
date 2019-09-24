@@ -21,12 +21,13 @@ class BaseMyReports extends Page {
 
   constructor(props) {
     super(props)
+
     this.sectionQueryParams = {
       draft: {
         state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
       },
       future: {
-        state: [Report.STATE.FUTURE]
+        engagementStatus: "FUTURE"
       },
       pending: {
         state: [Report.STATE.PENDING_APPROVAL]
@@ -52,8 +53,8 @@ class BaseMyReports extends Page {
         <SubNav subnavElemId="reports-nav">
           <Nav>
             <AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
-            <AnchorNavItem to="upcoming-engagements">
-              Upcoming Engagements
+            <AnchorNavItem to="planned-engagements">
+              Planned Engagements
             </AnchorNavItem>
             <AnchorNavItem to="pending-approval">
               Pending approval
@@ -70,8 +71,8 @@ class BaseMyReports extends Page {
 
         {this.renderSection("Draft Reports", "draft-reports", "draft")}
         {this.renderSection(
-          "Upcoming Engagements",
-          "upcoming-engagements",
+          "Planned Engagements",
+          "planned-engagements",
           "future"
         )}
         {this.renderSection("Pending Approval", "pending-approval", "pending")}

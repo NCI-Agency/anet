@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -104,6 +105,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Give this Org some Approval Steps
     ApprovalStep step1 = new ApprovalStep();
     step1.setName("First Approvers");
+    step1.setType(ApprovalStepType.REPORT_APPROVAL);
     step1.setApprovers(ImmutableList.of(b1));
     child.setApprovalSteps(ImmutableList.of(step1));
     nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization",
@@ -147,6 +149,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     step1.setApprovers(ImmutableList.of(admin.loadPosition()));
     ApprovalStep step2 = new ApprovalStep();
     step2.setName("Final Reviewers");
+    step2.setType(ApprovalStepType.REPORT_APPROVAL);
     step2.setApprovers(ImmutableList.of(b1));
     child.setApprovalSteps(ImmutableList.of(step1, step2));
     child.setTasks(null);

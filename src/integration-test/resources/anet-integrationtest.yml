@@ -1,0 +1,15 @@
+##############################################################
+#### ANET IT Configuration 
+####
+#### This is the configuration file for the ANET integration tests. 
+#### 
+##############################################################
+
+# The wait period before sending a command to the email server (in ms)
+emailWaitBeforeAction: 1000
+
+# How many times to check that the server has been cleared after a command has been sent
+emailMaxWaitRetriesOnClear: 5
+
+# Whether to execute the tests involving the email server
+emailServerTestsExecute: true
