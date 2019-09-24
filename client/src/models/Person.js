@@ -105,13 +105,7 @@ export default class Person extends Model {
       gender: yup
         .string()
         .nullable()
-        .when("role", (role, schema) =>
-          Person.isAdvisor({ role })
-            ? schema.required(
-              `You must provide the ${Settings.fields.person.gender}`
-            )
-            : schema.nullable()
-        )
+        .required(`You must provide the ${Settings.fields.person.gender}`)
         .default("")
         .label(Settings.fields.person.gender),
       phoneNumber: yup

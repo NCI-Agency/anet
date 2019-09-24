@@ -88,7 +88,7 @@ dependencies {
 
 	// Supported databases:
 	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.7' // If using postgresql
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.0' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
@@ -416,6 +416,7 @@ task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container
 
 // Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
 task integrationTest(type: Test) {
+	description = "Runs the integration tests."
 	testClassesDirs = sourceSets.integrationTest.output.classesDirs
 	classpath = sourceSets.integrationTest.runtimeClasspath
 	outputs.upToDateWhen { false }

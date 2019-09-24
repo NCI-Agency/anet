@@ -286,22 +286,31 @@ dictionary:
           description: the rank of WO-5
         - value: OF-1
           description: the rank of OF-1
+          app6Modifier: E
         - value: OF-2
           description: the rank of OF-2
+          app6Modifier: E
         - value: OF-3
           description: the rank of OF-3
+          app6Modifier: E
         - value: OF-4
           description: the rank of OF-4
+          app6Modifier: F
         - value: OF-5
           description: the rank of OF-5
+          app6Modifier: G
         - value: OF-6
           description: the rank of OF-6
+          app6Modifier: H
         - value: OF-7
           description: the rank of OF-7
+          app6Modifier: I
         - value: OF-8
           description: the rank of OF-8
+          app6Modifier: J
         - value: OF-9
           description: the rank of OF-9
+          app6Modifier: K
       gender: Gender
       endOfTourDate: End of tour
 
@@ -449,9 +458,9 @@ dictionary:
           layers: GEBCO_LATEST
           format: "image/png" 
 
-#  automaticallyInactivateUsers:
-#    emailRemindersDaysPrior: [15, 30, 45]
-#    ignoredDomainNames: []
+  automaticallyInactivateUsers:
+    emailRemindersDaysPrior: [15, 30, 45]
+    ignoredDomainNames: []
 
   dashboards:
     - label: dashboard0

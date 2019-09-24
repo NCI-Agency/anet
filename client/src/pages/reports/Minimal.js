@@ -417,7 +417,7 @@ class ReportMinimal extends Page {
                 )}
 
                 {report.showWorkflow() && (
-                  <ReportCompactWorkflow report={report} />
+                  <ReportCompactWorkflow workflow={report.workflow} />
                 )}
 
                 <Fieldset className="report-sub-form" title="Comments">

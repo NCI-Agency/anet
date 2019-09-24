@@ -22,6 +22,7 @@ import TaskTable from "components/TaskTable"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
+import _upperFirst from "lodash/upperFirst"
 import { Comment, Person, Position, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -276,6 +277,14 @@ class BaseReportShow extends Page {
     setMessages(props, this.state)
   }
 
+  get reportType() {
+    return this.state.report.isFuture() ? "planned engagement" : "report"
+  }
+
+  get reportTypeUpperFirst() {
+    return _upperFirst(this.reportType)
+  }
+
   fetchData(props) {
     return API.query(GQL_GET_REPORT, { uuid: props.match.params.uuid }).then(
       data => {
@@ -344,21 +353,22 @@ class BaseReportShow extends Page {
         Position.isEqual(member, currentUser.position)
       )
     const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
-    const canPublish = report.isApproved() && isAdmin
+    // Approved reports for not future engagements may be published by an admin user
+    const canPublish = !report.isFuture() && report.isApproved() && isAdmin
     // Warn admins when they try to approve their own report
     const warnApproveOwnReport = canApprove && isAuthor
 
-    // Authors can edit in draft mode (also future engagements) or rejected mode
-    let canEdit =
-      isAuthor && (report.isDraft() || report.isFuture() || report.isRejected())
-    // Approvers can edit.
+    // Authors can edit if report is not published
+    let canEdit = isAuthor && !report.isPublished()
+    // Approvers can edit
     canEdit = canEdit || canApprove
 
     // Only the author can submit when report is in draft or rejected AND author has a position
-    const hasAssignedPosition = currentUser.hasAssignedPosition()
     const hasActivePosition = currentUser.hasActivePosition()
     const canSubmit =
       isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
+
+    const hasAssignedPosition = currentUser.hasAssignedPosition()
 
     // Anybody can email a report as long as it's not in draft.
     const canEmail = !report.isDraft()
@@ -388,6 +398,7 @@ class BaseReportShow extends Page {
                 )}
             </div>
           )
+
           return (
             <div className="report-show">
               {this.renderEmailModal(values, setFieldValue)}
@@ -402,10 +413,11 @@ class BaseReportShow extends Page {
                 }
               />
               <Messages success={this.state.success} error={this.state.error} />
-
               {report.isPublished() && (
                 <Fieldset style={{ textAlign: "center" }}>
-                  <h4 className="text-danger">This report is PUBLISHED.</h4>
+                  <h4 className="text-danger">
+                    This {this.reportType} is PUBLISHED.
+                  </h4>
                   <p>
                     This report has been approved and published to the ANET
                     community on{" "}
@@ -419,7 +431,7 @@ class BaseReportShow extends Page {
               {report.isRejected() && (
                 <Fieldset style={{ textAlign: "center" }}>
                   <h4 className="text-danger">
-                    This report has CHANGES REQUESTED.
+                    This {this.reportType} has CHANGES REQUESTED.
                   </h4>
                   <p>
                     You can review the comments below, fix the report and
@@ -434,7 +446,7 @@ class BaseReportShow extends Page {
               {report.isDraft() && (
                 <Fieldset style={{ textAlign: "center" }}>
                   <h4 className="text-danger">
-                    This is a DRAFT report and hasn't been submitted.
+                    This is a DRAFT {this.reportType} and hasn't been submitted.
                   </h4>
                   <p>
                     You can review the draft below to make sure all the details
@@ -451,7 +463,7 @@ class BaseReportShow extends Page {
               {report.isPending() && (
                 <Fieldset style={{ textAlign: "center" }}>
                   <h4 className="text-danger">
-                    This report is PENDING approvals.
+                    This {this.reportType} is PENDING approvals.
                   </h4>
                   <p>
                     It won't be available in the ANET database until your{" "}
@@ -466,17 +478,21 @@ class BaseReportShow extends Page {
 
               {report.isApproved() && (
                 <Fieldset style={{ textAlign: "center" }}>
-                  <h4 className="text-danger">This report is APPROVED.</h4>
-                  <p>
-                    This report has been approved and will be automatically
-                    published to the ANET community in{" "}
-                    {moment(report.getReportApprovedAt())
-                      .add(
-                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
-                        "hours"
-                      )
-                      .toNow(true)}
-                  </p>
+                  <h4 className="text-danger">
+                    This {this.reportType} is APPROVED.
+                  </h4>
+                  {!report.isFuture() && (
+                    <p>
+                      This report has been approved and will be automatically
+                      published to the ANET community in{" "}
+                      {moment(report.getReportApprovedAt())
+                        .add(
+                          Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                          "hours"
+                        )
+                        .toNow(true)}
+                    </p>
+                  )}
                   {canPublish && (
                     <p>
                       You can also{" "}
@@ -486,21 +502,6 @@ class BaseReportShow extends Page {
                       it immediately.
                     </p>
                   )}
-                </Fieldset>
-              )}
-
-              {report.isFuture() && (
-                <Fieldset style={{ textAlign: "center" }}>
-                  <h4 className="text-success">
-                    This report is for an UPCOMING engagement.
-                  </h4>
-                  <p>
-                    After your engagement has taken place, edit and submit this
-                    document as an engagement report.
-                  </p>
-                  <div style={{ textAlign: "left" }}>
-                    {this.renderValidationMessages()}
-                  </div>
                 </Fieldset>
               )}
 
@@ -659,7 +660,7 @@ class BaseReportShow extends Page {
                 )}
 
                 {report.showWorkflow() && (
-                  <ReportFullWorkflow report={report} />
+                  <ReportFullWorkflow workflow={report.workflow} />
                 )}
 
                 {canSubmit && (
@@ -667,7 +668,8 @@ class BaseReportShow extends Page {
                     <Col md={9}>
                       {_isEmpty(this.state.validationErrors) && (
                         <p>
-                          By pressing submit, this report will be sent to
+                          By pressing submit, this {this.reportType} will be
+                          sent to
                           <strong>
                             {" "}
                             {Object.get(
@@ -759,7 +761,7 @@ class BaseReportShow extends Page {
                       objectType="report"
                       objectDisplay={"#" + report.uuid}
                       bsStyle="warning"
-                      buttonLabel="Delete report"
+                      buttonLabel={`Delete ${this.reportType}`}
                       className="pull-right"
                     />
                   </div>
@@ -776,7 +778,9 @@ class BaseReportShow extends Page {
     const { uuid } = this.state.report
     API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
-        this.props.history.push("/", { success: "Report deleted" })
+        this.props.history.push("/", {
+          success: `${this.reportTypeUpperFirst} deleted`
+        })
       })
       .catch(error => {
         this.setState({ success: null, error: error })
@@ -791,8 +795,13 @@ class BaseReportShow extends Page {
     cancelHandler
   ) => {
     return (
-      <Fieldset className="report-sub-form" title="Report approval">
-        <h5>You can approve, request changes to, or edit this report</h5>
+      <Fieldset
+        className="report-sub-form"
+        title={`${this.reportTypeUpperFirst} approval`}
+      >
+        <h5>
+          You can approve, request changes to, or edit this {this.reportType}
+        </h5>
         {this.renderValidationMessages("approving")}
 
         <Field
@@ -811,7 +820,7 @@ class BaseReportShow extends Page {
         )}
         <div className="right-button">
           <LinkTo report={this.state.report} edit button>
-            Edit report
+            Edit {this.reportType}
           </LinkTo>
           {this.renderApproveButton(
             warnApproveOwnReport,
@@ -832,7 +841,7 @@ class BaseReportShow extends Page {
   ) => {
     return (
       <Fieldset className="report-sub-form" title="Request changes">
-        <h5>You can request changes to this report</h5>
+        <h5>You can request changes to this {this.reportType}</h5>
         <Field
           name="requestChangesComment"
           label="Request changes comment"
@@ -855,7 +864,7 @@ class BaseReportShow extends Page {
     return (
       <Modal show={this.state.showEmailModal} onHide={this.toggleEmailModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Email Report</Modal.Title>
+          <Modal.Title>Email {this.reportTypeUpperFirst}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -939,7 +948,10 @@ class BaseReportShow extends Page {
     API.mutation(GQL_SUBMIT_REPORT, { uuid })
       .then(data => {
         this.updateReport()
-        this.setState({ success: "Report submitted", error: null })
+        this.setState({
+          success: `${this.reportTypeUpperFirst} submitted`,
+          error: null
+        })
       })
       .catch(error => {
         this.handleError(error)
@@ -951,7 +963,10 @@ class BaseReportShow extends Page {
     API.mutation(GQL_PUBLISH_REPORT, { uuid })
       .then(data => {
         this.updateReport()
-        this.setState({ success: "Report published", error: null })
+        this.setState({
+          success: `${this.reportTypeUpperFirst} published`,
+          error: null
+        })
       })
       .catch(error => {
         this.handleError(error)
@@ -1030,7 +1045,7 @@ class BaseReportShow extends Page {
         const queryDetails = this.pendingMyApproval(this.props.currentUser)
         const lastApproval = this.state.report.approvalStep.nextStepId === null
         const message =
-          "Successfully approved report." +
+          `Successfully approved ${this.reportType}.` +
           (lastApproval ? " It has been added to the daily rollup" : "")
         deserializeQueryParams(
           SEARCH_OBJECT_TYPES.REPORTS,
@@ -1060,7 +1075,7 @@ class BaseReportShow extends Page {
     cancelHandler
   ) => {
     const validationWarnings = warnApproveOwnReport
-      ? ["You are requesting changes to your own report"]
+      ? [`You are requesting changes to your own ${this.reportType}`]
       : []
     return _isEmpty(validationWarnings) ? (
       <Button bsStyle="warning" onClick={confirmHandler}>
@@ -1089,8 +1104,8 @@ class BaseReportShow extends Page {
       false,
       disabled,
       "submitting",
-      "Submit report?",
-      "Submit report",
+      `Submit ${this.reportType}?`,
+      `Submit ${this.reportType}`,
       "Submit anyway",
       this.submitDraft,
       "Cancel submit",
@@ -1112,7 +1127,7 @@ class BaseReportShow extends Page {
       warnApproveOwnReport,
       disabled,
       "approving",
-      "Approve report?",
+      `Approve ${this.reportType}?`,
       "Approve",
       "Approve anyway",
       confirmHandler,
@@ -1129,7 +1144,7 @@ class BaseReportShow extends Page {
       false,
       disabled,
       "publishing",
-      "Publish report?",
+      `Publish ${this.reportType}?`,
       "Publish",
       "Publish anyway",
       this.publishReport,
@@ -1156,7 +1171,7 @@ class BaseReportShow extends Page {
     className
   ) => {
     let validationWarnings = warnApproveOwnReport
-      ? ["You are approving your own report"]
+      ? [`You are approving your own ${this.reportType}`]
       : []
     if (!_isEmpty(this.state.validationWarnings)) {
       validationWarnings = _concat(
@@ -1219,8 +1234,8 @@ class BaseReportShow extends Page {
       return null
     }
     const warning = this.state.report.isFuture()
-      ? "You'll need to fill out these required fields before you can submit your final report:"
-      : `The following errors must be fixed before ${submitType} this report:`
+      ? `You'll need to fill out these required fields before you can submit your final ${this.reportType}:`
+      : `The following errors must be fixed before ${submitType} this ${this.reportType}:`
     const style = this.state.report.isFuture() ? "info" : "danger"
     return (
       <Alert bsStyle={style}>
@@ -1241,7 +1256,7 @@ class BaseReportShow extends Page {
     return (
       <Alert bsStyle="warning">
         The following warnings should be addressed before {submitType} this
-        report:
+        {this.reportType}:
         <ul>
           {validationWarnings.map((warning, idx) => (
             <li key={idx}>{warning}</li>

@@ -6,6 +6,7 @@ public enum FkDataLoaderKey {
   AUTHORIZATION_GROUP_POSITIONS, // authorizationGroup.positions
   NOTE_NOTE_RELATED_OBJECTS, // note.noteRelatedObjects
   NOTE_RELATED_OBJECT_NOTES, // noteRelatedObject.notes
+  ORGANIZATION_PLANNING_APPROVAL_STEPS, // organization.planningApprovalSteps
   ORGANIZATION_APPROVAL_STEPS, // organization.approvalSteps
   PERSON_ORGANIZATIONS, // person.organizations
   PERSON_PERSON_POSITION_HISTORY, // person.personPositionHistory

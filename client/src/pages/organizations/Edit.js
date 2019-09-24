@@ -28,6 +28,21 @@ const GQL_GET_ORGANIZATION = gql`
         longName
         identificationCode
       }
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
       approvalSteps {
         uuid
         name

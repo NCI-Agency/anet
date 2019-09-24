@@ -5,6 +5,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Button, Glyphicon, Panel } from "react-bootstrap"
 import Pie from "components/graphs/Pie"
+import { EngagementTrends } from "components/Trends"
 
 export default class Kanban extends React.Component {
   static propTypes = {
@@ -81,6 +82,23 @@ class Column extends React.Component {
             segmentLabel={d => d.data.value}
           />
           <br />
+          <EngagementTrends
+            newValue={tasks.reduce(
+              (accumulator, task) => accumulator + task.lastMonthReports.length,
+              0
+            )}
+            oldValue={tasks.reduce(
+              (accumulator, task) =>
+                accumulator + task.preLastMonthReports.length,
+              0
+            )}
+            totalValue={tasks.reduce(
+              (accumulator, task) => accumulator + task.allReports.length,
+              0
+            )}
+          />
+          <br />
+          <br />
           <strong>{Settings.fields.task.longLabel}</strong>
           {"  "}
           <Button bsSize="xs" onClick={() => this.setState({ open: !open })}>
@@ -125,6 +143,12 @@ class Card extends React.Component {
           <LinkTo task={this.props.task}>
             <strong>{this.props.task.shortName}</strong>
           </LinkTo>
+          <br />
+          <EngagementTrends
+            newValue={this.props.task.lastMonthReports.length}
+            oldValue={this.props.task.preLastMonthReports.length}
+            totalValue={this.props.task.allReports.length}
+          />
           <br />
           {/* TODO make a single line when collapsed <div style={this.state.open ? {} : {textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}> */}
           <div>
