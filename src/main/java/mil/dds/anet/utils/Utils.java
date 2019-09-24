@@ -327,8 +327,8 @@ public class Utils {
       final List<String> whitelistDomainNames) {
     try {
       return isLogonDomainInList(email, whitelistDomainNames);
-    } catch (Exception e) {
-      logger.error("Failed to process email: ", email);
+    } catch (IllegalArgumentException e) {
+      logger.error("Failed to process email: {}", email);
       return false;
     }
   }
@@ -346,8 +346,8 @@ public class Utils {
       final List<String> ignoredDomainNames) {
     try {
       return isLogonDomainInList(domainUserName, ignoredDomainNames);
-    } catch (Exception e) {
-      logger.error("Failed to process domain user name: ", domainUserName);
+    } catch (IllegalArgumentException e) {
+      logger.error("Failed to process domain user name: {}", domainUserName);
       return true;
     }
   }
