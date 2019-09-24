@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import java.lang.invoke.MethodHandles;
 import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -234,8 +235,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   private static Blob convertImageToBlob(String image) {
     try {
       return image == null ? null : new SerialBlob(image.getBytes());
-    } catch (Exception e) {
-      logger.error("Failed to save avatar: ", e);
+    } catch (SQLException e) {
+      logger.error("Failed to save avatar", e);
       return null;
     }
   }
