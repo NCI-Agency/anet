@@ -2633,4 +2633,24 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="alter-fulltext-stoplist" author="gjvoosten" dbms="mssql" runInTransaction="false">
+		<!--
+		  Most columns in the full-text index (except for the reports columns,
+		  and people.biography) do not contain English text; don't use a stoplist
+		  for these. Note that we can have only one full-text index per table, so
+		  people.biography no longer has a stoplist with this changeSet.
+		-->
+		<sql>
+			ALTER FULLTEXT INDEX ON authorizationGroups SET STOPLIST = OFF;
+			ALTER FULLTEXT INDEX ON locations SET STOPLIST = OFF;
+			ALTER FULLTEXT INDEX ON organizations SET STOPLIST = OFF;
+			ALTER FULLTEXT INDEX ON people SET STOPLIST = OFF;
+			ALTER FULLTEXT INDEX ON positions SET STOPLIST = OFF;
+			ALTER FULLTEXT INDEX ON tags SET STOPLIST = OFF;
+			ALTER FULLTEXT INDEX ON tasks SET STOPLIST = OFF;
+			ALTER FULLTEXT CATALOG anet_ft_catalog REBUILD WITH ACCENT_SENSITIVITY = OFF;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
 </databaseChangeLog>
