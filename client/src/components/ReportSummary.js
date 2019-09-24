@@ -193,7 +193,7 @@ const ReportSummaryRow = props => {
 
   return (
     <Grid fluid className="report-summary">
-      {report.state === Report.STATE.DRAFT && (
+      {report.isDraft() && (
         <p className="report-draft">
           <strong>Draft</strong>
           {/* If the parent does not fetch report.updatedAt, we will not display this
@@ -225,24 +225,23 @@ const ReportSummaryRow = props => {
         </p>
       )}
 
-      {report.isPending() && (
-        <p className="report-pending">
-          <strong>Pending Approval</strong>
-        </p>
-      )}
-
       {report.isFuture() && (
         <p className="report-future">
-          <strong>Upcoming Engagement</strong>
+          <strong>Planned Engagement</strong>
         </p>
       )}
 
       {report.isPending() && (
-        <Row>
-          <Col md={12}>
-            <ReportCompactWorkflow report={report} />
-          </Col>
-        </Row>
+        <React.Fragment>
+          <p className="report-pending">
+            <strong>Pending Approval</strong>
+          </p>
+          <Row>
+            <Col md={12}>
+              <ReportCompactWorkflow report={report.workflow} />
+            </Col>
+          </Row>
+        </React.Fragment>
       )}
       <Row>
         <Col md={12}>

@@ -2633,4 +2633,70 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-approvalSteps-type-column" author="maradragan">
+		<!-- Create a new type column for approval steps and fill it for the existing approval steps -->
+		<addColumn tableName="approvalSteps">
+			<column name="type" type="int" />
+		</addColumn>
+		<sql>
+			UPDATE "approvalSteps" SET type=1;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-approvalSteps-type-notnull-constraint" author="maradragan" dbms="mssql,postgresql">
+		<addNotNullConstraint
+			columnDataType="int"
+			columnName="type"
+			tableName="approvalSteps" />
+	</changeSet>
+
+	<changeSet id="move_future_to_draft" author="maradragan">
+		<sql>
+			UPDATE reports SET state=0 WHERE state=5;
+		</sql>
+		<rollback>
+			<sql>
+				UPDATE reports SET state=5 WHERE "engagementDate" > CURRENT_TIMESTAMP;
+			</sql>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add-endedAt-to-peoplePositions" author="mdragan">
+		<addColumn tableName="peoplePositions">
+			<column name="endedAt" type="datetime" />
+		</addColumn>
+		<sql dbms="mssql">
+			ALTER TABLE peoplePositions ALTER COLUMN endedAt datetime2;
+		</sql>
+	</changeSet>
+
+	<changeSet id="fill-endedAt-peoplePositions-column" author="mdragan">
+		<comment>Populate the new endedAt column of the peoplePositions table.</comment>
+		<sql dbms="mssql">
+			UPDATE "peoplePositions" SET "endedAt" = (
+				SELECT TOP(1) "createdAt"
+				FROM "peoplePositions" next
+				WHERE
+					next."positionUuid" = "peoplePositions"."positionUuid" AND
+					next."createdAt" > "peoplePositions"."createdAt"
+				ORDER BY next."createdAt"
+			);
+		</sql>
+		<sql dbms="postgresql">
+			UPDATE "peoplePositions" SET "endedAt" = (
+				SELECT "createdAt"
+				FROM "peoplePositions" next
+				WHERE
+					next."positionUuid" = "peoplePositions"."positionUuid" AND
+					next."createdAt" > "peoplePositions"."createdAt"
+				ORDER BY next."createdAt"
+				LIMIT 1
+			);
+		</sql>
+		<rollback>
+			UPDATE "peoplePositions" set "endedAt" = NULL;
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

@@ -61,7 +61,7 @@ const GQL_GET_ORGANIZATION = gql`
         name
         code
         status
-        type,
+        type
         person {
           uuid
           name
@@ -80,6 +80,21 @@ const GQL_GET_ORGANIZATION = gql`
             uuid
             name
             status
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
             rank
             role
             avatar(size: 32)

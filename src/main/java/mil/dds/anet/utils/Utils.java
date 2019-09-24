@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -323,27 +324,87 @@ public class Utils {
    * @param whitelistDomainNames The list of whitelisted domain names (wildcards allowed)
    * @return Whether the email is whitelisted
    */
-  public static boolean isEmailWhitelisted(String email, List<String> whitelistDomainNames) {
-    if (isEmptyOrNull(email) || isEmptyOrNull(whitelistDomainNames)) {
+  public static boolean isEmailWhitelisted(final String email,
+      final List<String> whitelistDomainNames) {
+    try {
+      return isLogonDomainInList(email, whitelistDomainNames);
+    } catch (IllegalArgumentException e) {
+      logger.error("Failed to process email: {}", email);
+      return false;
+    }
+  }
+
+  /**
+   * Checks whether a domain user name is allowed according to a list of whitelisted domains.
+   * 
+   * More info: https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats
+   * 
+   * @param email The domain user name to check
+   * @param whitelistDomainNames The list of ignaored domain user names (wildcards allowed)
+   * @return Whether the domain user name is ignored
+   */
+  public static boolean isDomainUserNameIgnored(final String domainUserName,
+      final List<String> ignoredDomainNames) {
+    try {
+      return isLogonDomainInList(domainUserName, ignoredDomainNames);
+    } catch (IllegalArgumentException e) {
+      logger.error("Failed to process domain user name: {}", domainUserName);
+      return true;
+    }
+  }
+
+  private static boolean isLogonDomainInList(final String logon, final List<String> list)
+      throws IllegalArgumentException {
+
+    final String wildcard = "*";
+
+    // Separator for 'User Principal Name' format
+    final String upnSeparator = "@";
+
+    // Separator for 'Down-Level Logon Name' format
+    final String dlSeparator = "\\";
+
+    if (isEmptyOrNull(logon) || isEmptyOrNull(list)) {
       return false;
     }
 
-    final String wildcard = "*";
-    final String[] splittedEmail = email.split("@");
-    final String from = splittedEmail[0].trim();
-    final String domainName = splittedEmail[1].toLowerCase();
+    // Logon has no domain
+    if (!logon.contains(upnSeparator) && !logon.contains(dlSeparator)) {
+      return false;
+    }
 
-    final List<String> wildcardDomainNames = whitelistDomainNames.stream()
-        .filter(domain -> String.valueOf(domain.charAt(0)).equals(wildcard))
-        .collect((Collectors.toList()));
+    // Find out the format
+    boolean isDownLevelFormat = logon.contains(dlSeparator);
 
-    final boolean isWhitelistedEmail =
-        from.length() > 0 && whitelistDomainNames.indexOf(domainName) >= 0;
-    final boolean isValidWildcardDomain =
-        wildcardDomainNames.stream().anyMatch(wildcardDomain -> domainName.charAt(0) != '.'
-            && domainName.endsWith(wildcardDomain.substring(1)));
+    final String[] splittedLogon =
+        logon.trim().split(isDownLevelFormat ? dlSeparator + "\\" : upnSeparator);
 
-    return isWhitelistedEmail || isValidWildcardDomain;
+    // A logon (domain user name or email) is expected to have two parts: username<separator>domain
+    if (splittedLogon.length != 2) {
+      throw new IllegalArgumentException("Malformed logon: " + logon);
+    }
+
+    // Find the domain name depending on the format
+    final String domainName =
+        (isDownLevelFormat ? splittedLogon[0] : splittedLogon[1]).toLowerCase();
+
+    // Compile a list of regex patterns we want to use to filter and then find any match
+    return list.stream().map(domain -> domainToRegexPattern(domain, wildcard))
+        .anyMatch(domainPattern -> domainPattern.matcher(domainName).matches());
+  }
+
+  private static Pattern domainToRegexPattern(final String domain, final String wildcard) {
+    final String regex = domain.replace(".", "[.]") // replace dots
+        .replace(wildcard, ".*?"); // replace wildcards
+    return Pattern.compile("^" + regex + "$");
+  }
+
+
+  // Returns an instant representing the very end of today.
+  // Used to determine if a date is tomorrow or later.
+  public static Instant endOfToday() {
+    return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59)
+        .withSecond(59).withNano(999999999).toInstant();
   }
 
   /**

@@ -30,7 +30,7 @@ public class AccountDeactivationWorker implements Runnable {
   private final PersonDao dao;
 
   private final List<Integer> daysTillEndOfTourWarnings;
-  private final List<String> ignoredDomains;
+  private final List<String> ignoredDomainNames;
 
   private final int warningIntervalInMs;
 
@@ -44,10 +44,10 @@ public class AccountDeactivationWorker implements Runnable {
     this.daysTillEndOfTourWarnings = daysTillWarning;
 
     @SuppressWarnings("unchecked")
-    List<String> domainsToIgnore =
+    List<String> domainNamesToIgnore =
         (List<String>) config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
-    this.ignoredDomains = domainsToIgnore == null ? domainsToIgnore
-        : domainsToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
+    this.ignoredDomainNames = domainNamesToIgnore == null ? domainNamesToIgnore
+        : domainNamesToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
 
     this.warningIntervalInMs = warningIntervalInMs;
   }
@@ -90,7 +90,7 @@ public class AccountDeactivationWorker implements Runnable {
 
       // Skip inactive ANET users or users from ignored domains
       if (p.getStatus() == PersonStatus.INACTIVE
-          || Utils.isEmailWhitelisted(p.getEmailAddress(), this.ignoredDomains)) {
+          || Utils.isDomainUserNameIgnored(p.getDomainUsername(), this.ignoredDomainNames)) {
         continue;
       }
 

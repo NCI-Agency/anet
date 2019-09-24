@@ -319,7 +319,87 @@ const BaseOrganizationForm = props => {
 
               {isAdvisorOrg && (
                 <div>
-                  <Fieldset title="Approval process">
+                  <Fieldset title="Engagement planning approval process">
+                    <FieldArray
+                      name="planningApprovalSteps"
+                      render={arrayHelpers => (
+                        <div>
+                          <Button
+                            className="pull-right"
+                            onClick={() =>
+                              addApprovalStep(
+                                arrayHelpers,
+                                values.planningApprovalSteps
+                              )
+                            }
+                            bsStyle="primary"
+                            id="addApprovalStepButton"
+                          >
+                            Add a Planning Approval Step
+                          </Button>
+                          <Modal
+                            show={showAddApprovalStepAlert}
+                            onHide={hideAddApprovalStepAlert}
+                          >
+                            <Modal.Header closeButton>
+                              <Modal.Title>Step not added</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                              Please complete all approval steps; there already
+                              is an approval step that is not completely filled
+                              in.
+                            </Modal.Body>
+                            <Modal.Footer>
+                              <Button
+                                className="pull-right"
+                                onClick={hideAddApprovalStepAlert}
+                                bsStyle="primary"
+                              >
+                                OK
+                              </Button>
+                            </Modal.Footer>
+                          </Modal>
+                          <Modal
+                            show={showRemoveApprovalStepAlert}
+                            onHide={hideRemoveApprovalStepAlert}
+                          >
+                            <Modal.Header closeButton>
+                              <Modal.Title>Step not removed</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                              You cannot remove this step; it is being used in a
+                              report.
+                            </Modal.Body>
+                            <Modal.Footer>
+                              <Button
+                                className="pull-right"
+                                onClick={hideRemoveApprovalStepAlert}
+                                bsStyle="primary"
+                              >
+                                OK
+                              </Button>
+                            </Modal.Footer>
+                          </Modal>
+
+                          {values.planningApprovalSteps.map((step, index) =>
+                            renderApprovalStep(
+                              "planningApprovalSteps",
+                              arrayHelpers,
+                              setFieldValue,
+                              step,
+                              index,
+                              approversFilters
+                            )
+                          )}
+                        </div>
+                      )}
+                    />
+                  </Fieldset>
+                </div>
+              )}
+              {isAdvisorOrg && (
+                <div>
+                  <Fieldset title="Report publication approval process">
                     <FieldArray
                       name="approvalSteps"
                       render={arrayHelpers => (
@@ -327,12 +407,15 @@ const BaseOrganizationForm = props => {
                           <Button
                             className="pull-right"
                             onClick={() =>
-                              addApprovalStep(arrayHelpers, values)
+                              addApprovalStep(
+                                arrayHelpers,
+                                values.approvalSteps
+                              )
                             }
                             bsStyle="primary"
                             id="addApprovalStepButton"
                           >
-                            Add an Approval Step
+                            Add a Publication Approval Step
                           </Button>
                           <Modal
                             show={showAddApprovalStepAlert}
@@ -380,6 +463,7 @@ const BaseOrganizationForm = props => {
 
                           {values.approvalSteps.map((step, index) =>
                             renderApprovalStep(
+                              "approvalSteps",
                               arrayHelpers,
                               setFieldValue,
                               step,
@@ -451,6 +535,7 @@ const BaseOrganizationForm = props => {
   )
 
   function renderApprovalStep(
+    fieldName,
     arrayHelpers,
     setFieldValue,
     step,
@@ -470,13 +555,12 @@ const BaseOrganizationForm = props => {
         </Button>
 
         <Field
-          name={`approvalSteps.${index}.name`}
+          name={`${fieldName}.${index}.name`}
           component={FieldHelper.renderInputField}
           label="Step name"
         />
-
         <AdvancedMultiSelect
-          fieldName={`approvalSteps.${index}.approvers`}
+          fieldName={`${fieldName}.${index}.approvers`}
           fieldLabel="Add an approver"
           placeholder="Search for the approver's position..."
           value={approvers}
@@ -485,7 +569,7 @@ const BaseOrganizationForm = props => {
           overlayRenderRow={ApproverOverlayRow}
           filterDefs={approversFilters}
           onChange={value =>
-            setFieldValue(`approvalSteps.${index}.approvers`, value)
+            setFieldValue(`${fieldName}.${index}.approvers`, value)
           }
           objectType={Position}
           queryParams={{
@@ -513,7 +597,7 @@ const BaseOrganizationForm = props => {
   }
 
   function addApprovalStep(arrayHelpers, values) {
-    const approvalSteps = values.approvalSteps || []
+    const approvalSteps = values || []
 
     for (let i = 0; i < approvalSteps.length; i++) {
       const step = approvalSteps[i]

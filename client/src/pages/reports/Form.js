@@ -25,6 +25,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
@@ -388,9 +389,7 @@ const BaseReportForm = props => {
             </Button>
           </div>
         )
-        const isFutureEngagement = checkIsFutureEngagement(
-          values.engagementDate
-        )
+        const isFutureEngagement = Report.isFuture(values.engagementDate)
         return (
           <div className="report-form">
             <NavigationWarning isBlocking={dirty} />
@@ -466,7 +465,7 @@ const BaseReportForm = props => {
                   {isFutureEngagement && (
                     <HelpBlock>
                       <span className="text-success">
-                        This will create an upcoming engagement
+                        This will create an planned engagement
                       </span>
                     </HelpBlock>
                   )}
@@ -817,7 +816,7 @@ const BaseReportForm = props => {
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
-                      buttonLabel="Delete this report"
+                      buttonLabel={`Delete this ${getReportType(values)}`}
                     />
                   )}
                   {/* Skip validation on save! */}
@@ -839,13 +838,14 @@ const BaseReportForm = props => {
     </Formik>
   )
 
-  function checkIsFutureEngagement(engagementDate) {
-    return (
-      engagementDate &&
-      moment()
-        .endOf("day")
-        .isBefore(engagementDate)
-    )
+  function getReportType(values) {
+    return values.engagementDate && Report.isFuture(values.engagementDate)
+      ? "planned engagement"
+      : "report"
+  }
+
+  function getReportTypeUpperFirst(values) {
+    return _upperFirst(getReportType(values))
   }
 
   function updateAttendees(setFieldValue, field, attendees) {
@@ -904,7 +904,9 @@ const BaseReportForm = props => {
           )
           autoSaveSettings.autoSaveTimeout = defaultTimeout.clone() // reset to default
           setAutoSavedAt(moment())
-          toast.success("Your report has been automatically saved")
+          toast.success(
+            `Your ${getReportType(newValues)} has been automatically saved`
+          )
           // And re-schedule the auto-save timer
           autoSaveSettings.timeoutId = window.setTimeout(
             autosaveHandler,
@@ -917,8 +919,9 @@ const BaseReportForm = props => {
           // Show an error message
           autoSaveSettings.autoSaveTimeout.add(autoSaveSettings.autoSaveTimeout) // exponential back-off
           toast.error(
-            "There was an error autosaving your report; we'll try again in " +
-              autoSaveSettings.autoSaveTimeout.humanize()
+            `There was an error autosaving your ${getReportType(
+              autoSaveSettings.values
+            )}; we'll try again in ${autoSaveSettings.autoSaveTimeout.humanize()}`
           )
           // And re-schedule the auto-save timer
           autoSaveSettings.timeoutId = window.setTimeout(
@@ -973,7 +976,7 @@ const BaseReportForm = props => {
       props.history.replace(Report.pathForEdit(report))
     }
     props.history.push(Report.pathFor(report), {
-      success: "Report saved"
+      success: `${getReportTypeUpperFirst(values)} saved`
     })
   }
 
@@ -986,7 +989,7 @@ const BaseReportForm = props => {
       "showSensitiveInfo",
       "attendees"
     )
-    if (checkIsFutureEngagement(values.engagementDate)) {
+    if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
       // They might have been set before the report has been marked as future.
       report.atmosphere = null

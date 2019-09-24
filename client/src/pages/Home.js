@@ -148,7 +148,7 @@ const HomeTiles = props => {
       allDraft(),
       allPending(),
       pendingMe(currentUser),
-      allUpcoming(),
+      allPlanned(),
       mySensitiveInfo(),
       allApproved()
     ]
@@ -253,20 +253,25 @@ const HomeTiles = props => {
     }
     return {
       title:
-        currentUser.position.organization.shortName + "'s upcoming engagements",
+        currentUser.position.organization.shortName + "'s planned engagements",
       query: {
         orgUuid: currentUser.position.organization.uuid,
         includeOrgChildren: false,
-        state: [Report.STATE.FUTURE],
+        state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
+        engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,
         sortOrder: "ASC"
       }
     }
   }
 
-  function allUpcoming() {
+  function allPlanned() {
     return {
-      title: "All upcoming engagements",
-      query: { state: [Report.STATE.FUTURE], sortOrder: "ASC" }
+      title: "All planned engagements",
+      query: {
+        state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
+        engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,
+        sortOrder: "ASC"
+      }
     }
   }
 

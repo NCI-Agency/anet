@@ -412,7 +412,7 @@ const ReportMinimal = props => {
               )}
 
               {report.showWorkflow() && (
-                <ReportCompactWorkflow report={report} />
+                <ReportCompactWorkflow report={report.workflow} />
               )}
 
               <Fieldset className="report-sub-form" title="Comments">

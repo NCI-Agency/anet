@@ -23,6 +23,7 @@ import TaskTable from "components/TaskTable"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
+import _upperFirst from "lodash/upperFirst"
 import { Comment, Person, Position, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -296,6 +297,8 @@ const BaseReportShow = props => {
     }
   }
 
+  const reportType = report.isFuture() ? "planned engagement" : "report"
+  const reportTypeUpperFirst = _upperFirst(reportType)
   const { currentUser } = props
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAuthor = Person.isEqual(currentUser, report.author)
@@ -310,21 +313,22 @@ const BaseReportShow = props => {
       Position.isEqual(member, currentUser.position)
     )
   const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
-  const canPublish = report.isApproved() && isAdmin
+  // Approved reports for not future engagements may be published by an admin user
+  const canPublish = !report.isFuture() && report.isApproved() && isAdmin
   // Warn admins when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
-  // Authors can edit in draft mode (also future engagements) or rejected mode
-  let canEdit =
-    isAuthor && (report.isDraft() || report.isFuture() || report.isRejected())
-  // Approvers can edit.
+  // Authors can edit if report is not published
+  let canEdit = isAuthor && !report.isPublished()
+  // Approvers can edit
   canEdit = canEdit || canApprove
 
   // Only the author can submit when report is in draft or rejected AND author has a position
-  const hasAssignedPosition = currentUser.hasAssignedPosition()
   const hasActivePosition = currentUser.hasActivePosition()
   const canSubmit =
     isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
+
+  const hasAssignedPosition = currentUser.hasAssignedPosition()
 
   // Anybody can email a report as long as it's not in draft.
   const canEmail = !report.isDraft()
@@ -354,6 +358,7 @@ const BaseReportShow = props => {
               )}
           </div>
         )
+
         return (
           <div className="report-show">
             {renderEmailModal(values, setFieldValue)}
@@ -371,7 +376,7 @@ const BaseReportShow = props => {
 
             {report.isPublished() && (
               <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">This report is PUBLISHED.</h4>
+                <h4 className="text-danger">This {reportType} is PUBLISHED.</h4>
                 <p>
                   This report has been approved and published to the ANET
                   community on{" "}
@@ -385,7 +390,7 @@ const BaseReportShow = props => {
             {report.isRejected() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">
-                  This report has CHANGES REQUESTED.
+                  This {reportType} has CHANGES REQUESTED.
                 </h4>
                 <p>
                   You can review the comments below, fix the report and
@@ -400,7 +405,7 @@ const BaseReportShow = props => {
             {report.isDraft() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">
-                  This is a DRAFT report and hasn't been submitted.
+                  This is a DRAFT {reportType} and hasn't been submitted.
                 </h4>
                 <p>
                   You can review the draft below to make sure all the details
@@ -417,7 +422,7 @@ const BaseReportShow = props => {
             {report.isPending() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">
-                  This report is PENDING approvals.
+                  This {reportType} is PENDING approvals.
                 </h4>
                 <p>
                   It won't be available in the ANET database until your{" "}
@@ -432,17 +437,19 @@ const BaseReportShow = props => {
 
             {report.isApproved() && (
               <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">This report is APPROVED.</h4>
-                <p>
-                  This report has been approved and will be automatically
-                  published to the ANET community in{" "}
-                  {moment(report.getReportApprovedAt())
-                    .add(
-                      Settings.reportWorkflow.nbOfHoursQuarantineApproved,
-                      "hours"
-                    )
-                    .toNow(true)}
-                </p>
+                <h4 className="text-danger">This {reportType} is APPROVED.</h4>
+                {!report.isFuture() && (
+                  <p>
+                    This report has been approved and will be automatically
+                    published to the ANET community in{" "}
+                    {moment(report.getReportApprovedAt())
+                      .add(
+                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                        "hours"
+                      )
+                      .toNow(true)}
+                  </p>
+                )}
                 {canPublish && (
                   <p>
                     You can also{" "}
@@ -452,21 +459,6 @@ const BaseReportShow = props => {
                     it immediately.
                   </p>
                 )}
-              </Fieldset>
-            )}
-
-            {report.isFuture() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-success">
-                  This report is for an UPCOMING engagement.
-                </h4>
-                <p>
-                  After your engagement has taken place, edit and submit this
-                  document as an engagement report.
-                </p>
-                <div style={{ textAlign: "left" }}>
-                  {renderValidationMessages()}
-                </div>
               </Fieldset>
             )}
 
@@ -622,14 +614,16 @@ const BaseReportShow = props => {
                 </Fieldset>
               )}
 
-              {report.showWorkflow() && <ReportFullWorkflow report={report} />}
+              {report.showWorkflow() && (
+                <ReportFullWorkflow report={report.workflow} />
+              )}
 
               {canSubmit && (
                 <Fieldset>
                   <Col md={9}>
                     {_isEmpty(validationErrors) && (
                       <p>
-                        By pressing submit, this report will be sent to
+                        By pressing submit, this {reportType} will be sent to
                         <strong>
                           {" "}
                           {Object.get(
@@ -721,7 +715,7 @@ const BaseReportShow = props => {
                     objectType="report"
                     objectDisplay={"#" + uuid}
                     bsStyle="warning"
-                    buttonLabel="Delete report"
+                    buttonLabel="Delete {reportType}"
                     className="pull-right"
                   />
                 </div>
@@ -771,7 +765,9 @@ const BaseReportShow = props => {
   function onConfirmDelete() {
     API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
-        props.history.push("/", { success: "Report deleted" })
+        props.history.push("/", {
+          success: `${reportTypeUpperFirst} deleted`
+        })
       })
       .catch(error => {
         setSaveSuccess(null)
@@ -787,8 +783,11 @@ const BaseReportShow = props => {
     cancelHandler
   ) {
     return (
-      <Fieldset className="report-sub-form" title="Report approval">
-        <h5>You can approve, request changes to, or edit this report</h5>
+      <Fieldset
+        className="report-sub-form"
+        title={`${reportTypeUpperFirst} approval`}
+      >
+        <h5>You can approve, request changes to, or edit this {reportType}</h5>
         {renderValidationMessages("approving")}
 
         <Field
@@ -807,7 +806,7 @@ const BaseReportShow = props => {
         )}
         <div className="right-button">
           <LinkTo report={report} edit button>
-            Edit report
+            Edit {reportType}
           </LinkTo>
           {renderApproveButton(
             warnApproveOwnReport,
@@ -828,7 +827,7 @@ const BaseReportShow = props => {
   ) {
     return (
       <Fieldset className="report-sub-form" title="Request changes">
-        <h5>You can request changes to this report</h5>
+        <h5>You can request changes to this {reportType}</h5>
         <Field
           name="requestChangesComment"
           label="Request changes comment"
@@ -851,7 +850,7 @@ const BaseReportShow = props => {
     return (
       <Modal show={showEmailModal} onHide={toggleEmailModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Email Report</Modal.Title>
+          <Modal.Title>Email {reportTypeUpperFirst}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -930,7 +929,7 @@ const BaseReportShow = props => {
     API.mutation(GQL_SUBMIT_REPORT, { uuid })
       .then(data => {
         updateReport()
-        setSaveSuccess("Report submitted")
+        setSaveSuccess(`${reportTypeUpperFirst} submitted`)
         setSaveError(null)
       })
       .catch(error => {
@@ -943,6 +942,7 @@ const BaseReportShow = props => {
       .then(data => {
         updateReport()
         setSaveSuccess("Report published")
+        setSaveSuccess(`${reportTypeUpperFirst} published`)
         setSaveError(null)
       })
       .catch(error => {
@@ -1023,7 +1023,7 @@ const BaseReportShow = props => {
         const queryDetails = pendingMyApproval(currentUser)
         const lastApproval = report.approvalStep.nextStepId === null
         const message =
-          "Successfully approved report." +
+          `Successfully approved ${reportType}.` +
           (lastApproval ? " It has been added to the daily rollup" : "")
         deserializeQueryParams(
           SEARCH_OBJECT_TYPES.REPORTS,
@@ -1054,7 +1054,7 @@ const BaseReportShow = props => {
     cancelHandler
   ) {
     const validationWarnings = warnApproveOwnReport
-      ? ["You are requesting changes to your own report"]
+      ? [`You are requesting changes to your own ${reportType}`]
       : []
     return _isEmpty(validationWarnings) ? (
       <Button bsStyle="warning" onClick={confirmHandler}>
@@ -1083,8 +1083,8 @@ const BaseReportShow = props => {
       false,
       disabled,
       "submitting",
-      "Submit report?",
-      "Submit report",
+      `Submit ${reportType}?`,
+      `Submit ${reportType}`,
       "Submit anyway",
       submitDraft,
       "Cancel submit",
@@ -1106,7 +1106,7 @@ const BaseReportShow = props => {
       warnApproveOwnReport,
       disabled,
       "approving",
-      "Approve report?",
+      `Approve ${reportType}?`,
       "Approve",
       "Approve anyway",
       confirmHandler,
@@ -1123,7 +1123,7 @@ const BaseReportShow = props => {
       false,
       disabled,
       "publishing",
-      "Publish report?",
+      `Publish ${reportType}?`,
       "Publish",
       "Publish anyway",
       publishReport,
@@ -1150,7 +1150,7 @@ const BaseReportShow = props => {
     className
   ) {
     let validationWarnings = warnApproveOwnReport
-      ? ["You are approving your own report"]
+      ? [`You are approving your own ${reportType}`]
       : []
     if (!_isEmpty(validationWarnings)) {
       validationWarnings = _concat(validationWarnings, validationWarnings)
@@ -1207,8 +1207,8 @@ const BaseReportShow = props => {
       return null
     }
     const warning = report.isFuture()
-      ? "You'll need to fill out these required fields before you can submit your final report:"
-      : `The following errors must be fixed before ${submitType} this report:`
+      ? `You'll need to fill out these required fields before you can submit your final ${reportType}:`
+      : `The following errors must be fixed before ${submitType} this ${reportType}:`
     const style = report.isFuture() ? "info" : "danger"
     return (
       <Alert bsStyle={style}>
@@ -1229,7 +1229,7 @@ const BaseReportShow = props => {
     return (
       <Alert bsStyle="warning">
         The following warnings should be addressed before {submitType} this
-        report:
+        {reportType}:
         <ul>
           {validationWarnings.map((warning, idx) => (
             <li key={idx}>{warning}</li>

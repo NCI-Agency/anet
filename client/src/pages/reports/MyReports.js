@@ -21,7 +21,7 @@ const BaseMyReports = props => {
       state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
     },
     future: {
-      state: [Report.STATE.FUTURE]
+      engagementStatus: "FUTURE"
     },
     pending: {
       state: [Report.STATE.PENDING_APPROVAL]
@@ -45,8 +45,8 @@ const BaseMyReports = props => {
       <SubNav subnavElemId="reports-nav">
         <Nav>
           <AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
-          <AnchorNavItem to="upcoming-engagements">
-            Upcoming Engagements
+          <AnchorNavItem to="planned-engagements">
+            Planned Engagements
           </AnchorNavItem>
           <AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
           <AnchorNavItem to="approved">Approved reports</AnchorNavItem>
@@ -60,7 +60,7 @@ const BaseMyReports = props => {
       </SubNav>
 
       {renderSection("Draft Reports", "draft-reports", "draft")}
-      {renderSection("Upcoming Engagements", "upcoming-engagements", "future")}
+      {renderSection("Planned Engagements", "planned-engagements", "future")}
       {renderSection("Pending Approval", "pending-approval", "pending")}
       {renderSection("Approved", "approved", "approved")}
       {renderSection("Published Reports", "published-reports", "published")}

@@ -21,6 +21,11 @@ export default class Organization extends Model {
     PRINCIPAL_ORG: "PRINCIPAL_ORG"
   }
 
+  static APPROVAL_STEP_TYPE = {
+    PLANNING_APPROVAL: "PLANNING_APPROVAL",
+    REPORT_APPROVAL: "REPORT_APPROVAL"
+  }
+
   static yupSchema = yup
     .object()
     .shape({
@@ -54,6 +59,26 @@ export default class Organization extends Model {
         .array()
         .nullable()
         .default([]),
+      planningApprovalSteps: yup
+        .array()
+        .of(
+          yup.object().shape({
+            name: yup
+              .string()
+              .required()
+              .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Organization.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
+            approvers: yup
+              .array()
+              .required()
+              .default([])
+          })
+        )
+        .nullable()
+        .default([]),
       approvalSteps: yup
         .array()
         .of(
@@ -62,6 +87,10 @@ export default class Organization extends Model {
               .string()
               .required()
               .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Organization.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
             approvers: yup
               .array()
               .required()
