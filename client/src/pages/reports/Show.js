@@ -615,7 +615,7 @@ const BaseReportShow = props => {
               )}
 
               {report.showWorkflow() && (
-                <ReportFullWorkflow report={report.workflow} />
+                <ReportFullWorkflow workflow={report.workflow} />
               )}
 
               {canSubmit && (

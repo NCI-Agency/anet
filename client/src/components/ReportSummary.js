@@ -238,7 +238,7 @@ const ReportSummaryRow = props => {
           </p>
           <Row>
             <Col md={12}>
-              <ReportCompactWorkflow report={report.workflow} />
+              <ReportCompactWorkflow workflow={report.workflow} />
             </Col>
           </Row>
         </React.Fragment>
