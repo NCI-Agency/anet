@@ -18,6 +18,9 @@
   display: none;
 }
 
+.border-between {
+}
+
 .overlayFilters {
   list-style-type: none;
 }
@@ -42,4 +45,15 @@
 .advisorAttendeesTable.table > tbody > tr > td,
 .principalAttendeesTable.table > tbody > tr > td  {
   vertical-align: middle;
+}
+
+.bp3-popover.advancedSelectPopover {
+  width: 100%;
+}
+.bp3-popover.advancedSelectPopover .bp3-popover-content {
+  box-shadow: 0 6px 20px hsla(0, 0%, 0%, 0.4);
+  padding: 15px;
+}
+.bp3-transition-container {
+  width: 120%;
 }
