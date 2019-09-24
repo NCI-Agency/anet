@@ -119,15 +119,6 @@ public class PersonPositionHistory extends AbstractAnetBean {
   }
 
   public static List<PersonPositionHistory> getDerivedHistory(List<PersonPositionHistory> history) {
-    // Derive the start and end times; assumes list is in chronological order
-    PersonPositionHistory pphPrev = null;
-    for (final PersonPositionHistory pph : history) {
-      pph.setStartTime(pph.getCreatedAt());
-      if (pphPrev != null) {
-        pphPrev.setEndTime(pph.getStartTime());
-      }
-      pphPrev = pph;
-    }
     // Remove all null entries
     return history.stream()
         .filter(
