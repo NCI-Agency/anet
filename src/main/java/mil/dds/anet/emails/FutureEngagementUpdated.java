@@ -16,7 +16,7 @@ public class FutureEngagementUpdated implements AnetEmailAction {
 
   @Override
   public String getSubject(Map<String, Object> context) {
-    return "ANET: Upcoming Engagement Report";
+    return "ANET: Planned Engagement Report";
   }
 
   @Override

@@ -2633,4 +2633,33 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-approvalSteps-type-column" author="maradragan">
+		<!-- Create a new type column for approval steps and fill it for the existing approval steps -->
+		<addColumn tableName="approvalSteps">
+			<column name="type" type="int" />
+		</addColumn>
+		<sql>
+			UPDATE "approvalSteps" SET type=1;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-approvalSteps-type-notnull-constraint" author="maradragan" dbms="mssql,postgresql">
+		<addNotNullConstraint
+			columnDataType="int"
+			columnName="type"
+			tableName="approvalSteps" />
+	</changeSet>
+
+	<changeSet id="move_future_to_draft" author="maradragan">
+		<sql>
+			UPDATE reports SET state=0 WHERE state=5;
+		</sql>
+		<rollback>
+			<sql>
+				UPDATE reports SET state=5 WHERE "engagementDate" > CURRENT_TIMESTAMP;
+			</sql>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

@@ -1,8 +1,8 @@
 package mil.dds.anet.integrationtest.emails;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.when;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.integrationtest.config.AnetITConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -36,9 +37,14 @@ public class AnetEmailWorkerIT {
 
   /**
    * Sets up the test.
+   * 
+   * @throws Exception If the setup fails
    */
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    assumeTrue(Boolean.parseBoolean(
+        AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
 
     final AnetConfiguration config =
@@ -74,14 +80,13 @@ public class AnetEmailWorkerIT {
     when(AnetObjectEngine.getInstance()).thenReturn(instance);
   }
 
-
   /**
    * Test the worker.
    * 
-   * @throws IOException On error from the email server
+   * @throws Exception On error from the email server
    */
   @Test
-  public void testWorker() throws IOException {
+  public void testWorker() throws Exception {
     // Setup
     emailServer.clearEmailServer();
 

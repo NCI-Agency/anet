@@ -27,13 +27,13 @@ test("Home Page", async t => {
     $draftReports,
     $reportsPending,
     $orgReports,
-    $upcomingEngagements
+    $plannedEngagements
   ] = await $$(".home-tile h1")
 
   await assertElementTextIsInt(t, $reportsPending)
   await assertElementTextIsInt(t, $draftReports)
   await assertElementTextIsInt(t, $orgReports)
-  await assertElementTextIsInt(t, $upcomingEngagements)
+  await assertElementTextIsInt(t, $plannedEngagements)
 
   let $tourLauncher = await $(".persistent-tour-launcher")
   await $tourLauncher.click()

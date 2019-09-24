@@ -255,6 +255,16 @@ test.beforeEach(t => {
       )
       await $todayButton.click()
     },
+    async clickNextMonthDate() {
+      let $nextMonthButton = await t.context.driver.findElement(
+        By.xpath('//button/span[icon="chevron-right"]')
+      )
+      await $nextMonthButton.click()
+      let $nextMonthDate = await t.context.driver.findElement(
+        By.xpath('//div[class="DayPicker-Day--selected"]')
+      )
+      await $nextMonthDate.click()
+    },
     async chooseAdvancedSelectOption(inputSelector, text) {
       const popoverSelector = `${inputSelector}-popover`
       let $advancedSelectInput = await t.context.$(inputSelector)

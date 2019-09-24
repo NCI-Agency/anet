@@ -189,12 +189,12 @@
 <tr>
 	<td>waitForText</td>
 	<td>css=h4.text-danger</td>
-	<td>This report is PENDING approvals.</td>
+	<td>This report for a past engagement is PENDING approvals.</td>
 </tr>
 <tr>
 	<td>assertText</td>
 	<td>css=h4.text-danger</td>
-	<td>This report is PENDING approvals.</td>
+	<td>This report for a past engagement is PENDING approvals.</td>
 </tr>
 </tbody></table>
 </body>

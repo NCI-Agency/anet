@@ -1,6 +1,9 @@
 package mil.dds.anet.search;
 
+import com.google.common.base.Joiner;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Location;
@@ -13,12 +16,13 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
-import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
@@ -141,6 +145,27 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     qb.addInClause("states", "reports.state", query.getState());
 
+    if (query.getEngagementStatus() != null) {
+      final List<String> engagementStatusClauses = new ArrayList<>();
+      List<EngagementStatus> esValues = query.getEngagementStatus();
+      esValues.stream().forEach(es -> {
+        switch (es) {
+          case HAPPENED:
+            engagementStatusClauses.add(" reports.\"engagementDate\" <= :endOfHappened");
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endOfHappened", Utils.endOfToday());
+            break;
+          case FUTURE:
+            engagementStatusClauses.add(" reports.\"engagementDate\" > :startOfFuture");
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startOfFuture", Utils.endOfToday());
+            break;
+          case CANCELLED:
+            engagementStatusClauses.add(" reports.state = :cancelledState");
+            qb.addSqlArg("cancelledState", DaoUtils.getEnumId(ReportState.CANCELLED));
+        }
+      });
+      qb.addWhereClause("(" + Joiner.on(" OR ").join(engagementStatusClauses) + ")");
+    }
+
     if (query.getCancelledReason() != null) {
       if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
         qb.addWhereClause("reports.\"cancelledReason\" IS NULL");
@@ -214,12 +239,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
         qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
-        if (!AuthUtils.isAdmin(query.getUser())) {
-          // Admin users may access all approved reports, other users only owned approved reports
-          qb.addWhereClause(
-              "((reports.state != :approvedState) OR (reports.\"authorUuid\" = :userUuid))");
-          qb.addSqlArg("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
-        }
       }
     }
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -109,6 +110,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
 
     ApprovalStep defaultStep = new ApprovalStep();
     defaultStep.setName("Default Approver");
+    defaultStep.setType(ApprovalStepType.REPORT_APPROVAL);
     defaultStep.setAdvisorOrganizationUuid(adminOrg.getUuid());
     defaultStep.setApprovers(ImmutableList.of(adminPos));
     engine.getApprovalStepDao().insert(defaultStep);
