@@ -164,36 +164,6 @@ const GQL_GET_LOCATION_LIST = gql`
 
 const DEFAULT_PAGESIZE = 10
 
-const Pagination = props => {
-  const { pageNum, pageSize, totalCount, goToPage } = props
-  const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
-  if (numPages === 1) {
-    return null
-  }
-  return (
-    <header className="searchPagination">
-      <UltimatePagination
-        className="pull-right"
-        currentPage={pageNum + 1}
-        totalPages={numPages}
-        boundaryPagesRange={1}
-        siblingPagesRange={2}
-        hideEllipsis={false}
-        hidePreviousAndNextPageLinks={false}
-        hideFirstAndLastPageLinks
-        onChange={value => goToPage(value - 1)}
-      />
-    </header>
-  )
-}
-
-Pagination.propTypes = {
-  pageNum: PropTypes.number,
-  pageSize: PropTypes.number,
-  totalCount: PropTypes.number,
-  goToPage: PropTypes.func
-}
-
 const Organizations = props => {
   const {
     queryParams,
@@ -231,7 +201,10 @@ const Organizations = props => {
 
   return (
     <div>
-      <Pagination
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
         pageNum={pageNum}
         pageSize={organizationQuery.pageSize}
         totalCount={totalCount}
@@ -313,7 +286,10 @@ const People = props => {
 
   return (
     <div>
-      <Pagination
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
         pageNum={pageNum}
         pageSize={personQuery.pageSize}
         totalCount={totalCount}
@@ -409,7 +385,10 @@ const Positions = props => {
 
   return (
     <div>
-      <Pagination
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
         pageNum={pageNum}
         pageSize={positionQuery.pageSize}
         totalCount={totalCount}
@@ -470,7 +449,10 @@ const Tasks = props => {
 
   return (
     <div>
-      <Pagination
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
         pageNum={pageNum}
         pageSize={taskQuery.pageSize}
         totalCount={totalCount}
@@ -548,7 +530,10 @@ const Locations = props => {
 
   return (
     <div>
-      <Pagination
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
         pageNum={pageNum}
         pageSize={locationQuery.pageSize}
         totalCount={totalCount}

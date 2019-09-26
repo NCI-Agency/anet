@@ -53,6 +53,8 @@ const BaseOrganizationTasks = props => {
     return <div />
   }
 
+  const { pageSize, totalCount } = paginatedTasks
+
   return (
     <Fieldset
       id="tasks"
@@ -68,7 +70,15 @@ const BaseOrganizationTasks = props => {
         )
       }
     >
-      {pagination()}
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={setPageNum}
+      />
       <Table>
         <thead>
           <tr>
@@ -94,29 +104,6 @@ const BaseOrganizationTasks = props => {
       )}
     </Fieldset>
   )
-
-  function pagination() {
-    let { pageSize, pageNum, totalCount } = paginatedTasks
-    let numPages = Math.ceil(totalCount / pageSize)
-    if (numPages < 2) {
-      return
-    }
-    return (
-      <header className="searchPagination">
-        <UltimatePagination
-          className="pull-right"
-          currentPage={pageNum + 1}
-          totalPages={numPages}
-          boundaryPagesRange={1}
-          siblingPagesRange={2}
-          hideEllipsis={false}
-          hidePreviousAndNextPageLinks={false}
-          hideFirstAndLastPageLinks
-          onChange={value => setPageNum(value - 1)}
-        />
-      </header>
-    )
-  }
 }
 
 BaseOrganizationTasks.propTypes = {

@@ -142,37 +142,23 @@ const ReportSummary = props => {
     return <em>No reports found</em>
   }
 
+  const { pageSize, totalCount } = data.reportList
+
   return (
     <div>
-      {renderPagination()}
+      <UltimatePagination
+        Component="header"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={setPage}
+      />
       {reports.map(report => (
         <ReportSummaryRow report={report} key={report.uuid} />
       ))}
     </div>
   )
-
-  function renderPagination() {
-    let { pageSize, pageNum, totalCount } = data.reportList
-    let numPages = Math.ceil(totalCount / pageSize)
-    if (numPages < 2) {
-      return
-    }
-    return (
-      <header>
-        <UltimatePagination
-          className="pull-right"
-          currentPage={pageNum + 1}
-          totalPages={numPages}
-          boundaryPagesRange={1}
-          siblingPagesRange={2}
-          hideEllipsis={false}
-          hidePreviousAndNextPageLinks={false}
-          hideFirstAndLastPageLinks
-          onChange={value => setPage(value - 1)}
-        />
-      </header>
-    )
-  }
 
   function setPage(pageNum) {
     setPagination(paginationKey, pageNum)

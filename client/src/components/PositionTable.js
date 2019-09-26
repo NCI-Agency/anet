@@ -100,19 +100,15 @@ const BasePositionTable = props => {
       {positionsExist ? (
         <div>
           {numPages > 1 && (
-            <header className="searchPagination">
-              <UltimatePagination
-                className="pull-right"
-                currentPage={pageNum}
-                totalPages={numPages}
-                boundaryPagesRange={1}
-                siblingPagesRange={2}
-                hideEllipsis={false}
-                hidePreviousAndNextPageLinks={false}
-                hideFirstAndLastPageLinks
-                onChange={value => props.goToPage(value - 1)}
-              />
-            </header>
+            <UltimatePagination
+              Component="header"
+              componentClassName="searchPagination"
+              className="pull-right"
+              pageNum={pageNum}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              goToPage={props.goToPage}
+            />
           )}
 
           <Table striped condensed hover responsive className="positions_table">
