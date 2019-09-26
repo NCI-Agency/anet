@@ -69,9 +69,6 @@ const HomeTile = props => {
     error,
     ...props
   })
-  if (done) {
-    return result
-  }
 
   const totalCount = data && data.reportList && data.reportList.totalCount
   return (
@@ -80,7 +77,7 @@ const HomeTile = props => {
       onClick={event => onClickDashboard(query, event)}
       className="home-tile"
     >
-      <h1>{totalCount}</h1>
+      {(done && <p>{result}</p>) || <h1>{totalCount}</h1>}
       {query.title}
     </Button>
   )
