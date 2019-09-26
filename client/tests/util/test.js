@@ -9,7 +9,8 @@ let _isRegExp = require("lodash/isRegExp")
 let chalk = require("chalk")
 
 let capabilities = {}
-let testEnv = (process.env.CI && "remote") || process.env.TEST_ENV || "local"
+let testEnv =
+  (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   // This gives us access to send Chrome commands.
   require("chromedriver")
