@@ -2383,12 +2383,12 @@
   resolved "https://registry.yarnpkg.com/@types/zen-observable/-/zen-observable-0.8.0.tgz#8b63ab7f1aa5321248aad5ac890a485656dcea4d"
   integrity sha512-te5lMAWii1uEJ4FwLjzdlbw3+n0FZNOvFXHxQDKeT0dilh7HOzdMzV2TrJVUzq8ep7J4Na8OUYPRLSQkJHAlrg==
 
-"@wdio/browserstack-service@^5.12.5":
-  version "5.12.5"
-  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.12.5.tgz#2fa188cbafed7f63134ef776427384e8575af178"
-  integrity sha512-/5xJFbpPzH28M0gWWFyAW9LLxTSZpxxgRX29eT5izp8zR7pHSFTJgmRWnvMIZYtiKviDaXpa3oqI2Kc8mMG0ow==
+"@wdio/browserstack-service@^5.13.2":
+  version "5.13.2"
+  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.13.2.tgz#a8588176dfe76358b2524caaea5be9bc35a35d35"
+  integrity sha512-T02TO77UvdpGZuQKmEGJkwFki/85yIbPuAAK5PDW6q2gPtjhs7YFP6ODUylK07hroUznwArbRG1sFq06H9SJGQ==
   dependencies:
-    "@wdio/logger" "^5.12.1"
+    "@wdio/logger" "5.13.2"
     browserstack-local "1.4.2"
     request "^2.85.0"
 
@@ -2444,10 +2444,10 @@
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
-"@wdio/logger@^5.12.1":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.12.1.tgz#1f753b0fa0c1dae455c2a485553890661150fc01"
-  integrity sha512-KUmdS0Scj0T5UQGtcWFiQRqc0NpFLQ/vSvRxlDzzkoeGwwPINqTRkLT103KL7Lyitlm9uLfaFfYc2KSzynTung==
+"@wdio/logger@5.13.2", "@wdio/logger@^5.12.1":
+  version "5.13.2"
+  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.13.2.tgz#417f580f0882ff6d6ec2bd2c210502f2f8fa4f2b"
+  integrity sha512-F8NlP+AoN0zKv8+0iDAJxdbb488kk5LlPA6U6XPgTT/1xxPgpM4MVQoiCGtLOU9UNPX9XLfgoCXyYWMxp96Ncg==
   dependencies:
     chalk "^2.3.0"
     loglevel "^1.6.0"
