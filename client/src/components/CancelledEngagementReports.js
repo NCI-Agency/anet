@@ -343,7 +343,7 @@ const CancelledEngagementReports = props => {
     }
   }
   const DESCRIPTION = `The reports are grouped by ${advisorOrgLabel} or reason for cancellation.
-    In order to see the list of cancelled engagement reports for an organization or a reaons,
+    In order to see the list of cancelled engagement reports for an organization or a reason,
     click on the bar corresponding to the organization or the reason.`
 
   return (
