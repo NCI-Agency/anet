@@ -371,7 +371,7 @@ const SavedSearches = props => {
   function onConfirmDelete() {
     return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: selectedSearch.uuid })
       .then(data => {
-        setSelectedSearch(undefined)
+        setSelectedSearch(null)
         refetch()
       })
       .catch(error => {
