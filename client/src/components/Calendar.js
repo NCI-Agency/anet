@@ -65,7 +65,7 @@ const Calendar = props => {
 }
 
 Calendar.propTypes = {
-  events: PropTypes.oneOfType([PropTypes.func, PropTypes.array]),
+  events: PropTypes.func.isRequired,
   calendarComponentRef: PropTypes.shape({
     current: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
   })
