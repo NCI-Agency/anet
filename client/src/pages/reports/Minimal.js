@@ -47,6 +47,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         role
+        avatar(size: 32)
         position {
           uuid
           organization {
@@ -65,6 +66,7 @@ const GQL_GET_REPORT = gql`
                   name
                   rank
                   role
+                  avatar(size: 32)
                 }
               }
             }
@@ -121,6 +123,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       principalOrg {
@@ -151,6 +154,7 @@ const GQL_GET_REPORT = gql`
               name
               rank
               role
+              avatar(size: 32)
             }
           }
         }
@@ -159,6 +163,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
+          avatar(size: 32)
         }
       }
       approvalStep {
@@ -217,6 +222,8 @@ const ReportMinimal = props => {
     }
   }
 
+  const reportType = report.isFuture() ? "planned engagement" : "report"
+
   return (
     <Formik enableReinitialize initialValues={report}>
       {({ values }) => {
@@ -225,7 +232,7 @@ const ReportMinimal = props => {
             {report.isRejected() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">
-                  This report has CHANGES REQUESTED.
+                  This {reportType} has CHANGES REQUESTED.
                 </h4>
                 <p>
                   You can review the comments below, fix the report and
@@ -240,7 +247,7 @@ const ReportMinimal = props => {
             {report.isDraft() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">
-                  This is a DRAFT report and hasn't been submitted.
+                  This is a DRAFT {reportType} and hasn't been submitted.
                 </h4>
                 <p>
                   You can review the draft below to make sure all the details
@@ -255,7 +262,7 @@ const ReportMinimal = props => {
             {report.isPending() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">
-                  This report is PENDING approvals.
+                  This {reportType} is PENDING approvals.
                 </h4>
                 <p>
                   It won't be available in the ANET database until your{" "}
@@ -458,8 +465,8 @@ const ReportMinimal = props => {
       return null
     }
     const warning = report.isFuture()
-      ? "You'll need to fill out these required fields before you can submit your final report:"
-      : `The following errors must be fixed before ${submitType} this report:`
+      ? `You'll need to fill out these required fields before you can submit your final ${reportType}:`
+      : `The following errors must be fixed before ${submitType} this ${reportType}:`
     const style = report.isFuture() ? "info" : "danger"
     return (
       <Alert bsStyle={style}>
@@ -480,7 +487,7 @@ const ReportMinimal = props => {
     return (
       <Alert bsStyle="warning">
         The following warnings should be addressed before {submitType} this
-        report:
+        {reportType}:
         <ul>
           {validationWarnings.map((warning, idx) => (
             <li key={idx}>{warning}</li>
