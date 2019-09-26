@@ -71,8 +71,4 @@ Calendar.propTypes = {
   })
 }
 
-Calendar.defaultProps = {
-  events: []
-}
-
 export default Calendar
