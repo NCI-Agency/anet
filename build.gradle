@@ -103,7 +103,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
+	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.12.0'
 
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
