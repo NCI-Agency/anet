@@ -33,7 +33,7 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
 const BaseAdminIndex = props => {
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
-  const { loading, error, data } = API.useApiQuery(GQL_GET_ADMIN_SETTINGS)
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_ADMIN_SETTINGS)
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -105,6 +105,7 @@ const BaseAdminIndex = props => {
     setSaveSuccess("Admin settings saved")
     jumpToTop()
     props.loadAppData()
+    refetch()
   }
 
   function save(values, form) {
