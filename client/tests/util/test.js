@@ -181,8 +181,9 @@ test.beforeEach(t => {
     try {
       await t.context.driver.wait(
         async() => {
+          const loopDelay = 250
           try {
-            return !(await t.context.$(cssSelector, waitTimeoutMs))
+            return !(await t.context.$(cssSelector, loopDelay))
           } catch (e) {
             // Hilariously, when Selenium can't find an element, sometimes it throws TimeoutError,
             // and sometimes it throws NoSuchElementError.
