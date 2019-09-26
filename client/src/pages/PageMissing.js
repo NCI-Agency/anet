@@ -14,7 +14,7 @@ const PageMissing = props => {
     ...props
   })
 
-  return <NotFound text={`Page ${this.props.match.params[0]} not found`} />
+  return <NotFound text={`Page ${props.match.params[0]} not found.`} />
 }
 
 PageMissing.propTypes = { ...pagePropTypes }
