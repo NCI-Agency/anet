@@ -715,7 +715,7 @@ const BaseReportShow = props => {
                     objectType="report"
                     objectDisplay={"#" + uuid}
                     bsStyle="warning"
-                    buttonLabel="Delete {reportType}"
+                    buttonLabel={`Delete ${reportType}`}
                     className="pull-right"
                   />
                 </div>
