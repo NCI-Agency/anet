@@ -1,12 +1,12 @@
-import { gql } from "apollo-boost"
 import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import * as d3 from "d3"
-import PropTypes from "prop-types"
 import { Symbol } from "milsymbol"
+import { Organization } from "models"
+import PropTypes from "prop-types"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import Organization from "../../models/Organization"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
