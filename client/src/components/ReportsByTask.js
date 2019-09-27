@@ -186,19 +186,19 @@ const ReportsByTask = props => {
       id: "rbt-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
       title: `Chart by ${taskShortLabel}`,
-      renderer: getChart
+      renderer: renderChart
     },
     {
       id: "rbt-collection",
       icons: [IconNames.PANEL_TABLE],
       title: `Reports by ${taskShortLabel}`,
-      renderer: getReportCollection
+      renderer: renderReportCollection
     },
     {
       id: "rbt-map",
       icons: [IconNames.MAP],
       title: `Map by ${taskShortLabel}`,
-      renderer: getReportMap
+      renderer: renderReportMap
     }
   ]
   const INITIAL_LAYOUT = {
@@ -223,7 +223,7 @@ const ReportsByTask = props => {
     />
   )
 
-  function getChart(id) {
+  function renderChart(id) {
     return (
       <Chart
         chartId={chartId}
@@ -235,11 +235,11 @@ const ReportsByTask = props => {
     )
   }
 
-  function getReportCollection(id) {
+  function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
-  function getReportMap(id) {
+  function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }
 

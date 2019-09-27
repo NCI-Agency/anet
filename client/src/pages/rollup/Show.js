@@ -268,19 +268,19 @@ const BaseRollupShow = props => {
       id: "rbdow-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
       title: "Chart by organization",
-      renderer: getChart
+      renderer: renderChart
     },
     {
       id: "rbdow-collection",
       icons: [IconNames.PANEL_TABLE],
       title: "Reports by organization",
-      renderer: getReportCollection
+      renderer: renderReportCollection
     },
     {
       id: "rbdow-map",
       icons: [IconNames.MAP],
       title: "Map by organization",
-      renderer: getReportMap
+      renderer: renderReportMap
     }
   ]
   const INITIAL_LAYOUT = {
@@ -394,7 +394,7 @@ const BaseRollupShow = props => {
     </div>
   )
 
-  function getChart(id) {
+  function renderChart(id) {
     return (
       <Chart
         rollupStart={getRollupStart()}
@@ -406,11 +406,11 @@ const BaseRollupShow = props => {
     )
   }
 
-  function getReportCollection(id) {
+  function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
-  function getReportMap(id) {
+  function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }
 
