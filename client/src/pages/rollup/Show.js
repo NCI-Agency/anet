@@ -348,7 +348,9 @@ const BaseRollupShow = props => {
               />
             </div>
             {focusedOrg ? (
-              <Button onClick={setFocusedOrg}>All organizations</Button>
+              <Button onClick={() => setFocusedOrg(null)}>
+                All organizations
+              </Button>
             ) : (
               <ButtonToggleGroup value={orgType} onChange={setOrgType}>
                 <Button value={Organization.TYPE.ADVISOR_ORG}>
