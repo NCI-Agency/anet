@@ -51,7 +51,7 @@ function randomOrganization() {
  * Creates an organization with a hiearchical structure for sub-organizations
  * @param {*} user The user that will insert the organization into the database
  */
-async function createHiearchy(user, grow) {
+async function createHiearchy(user, grow, args) {
   if (grow) {
     const count = await countOrganizations(user)
     if (!grow(count)) {
@@ -64,8 +64,8 @@ async function createHiearchy(user, grow) {
 
   const longName = faker.company.companyName()
   const shortName = abbreviateCompanyName(longName)
-  const type = Organization.TYPE.PRINCIPAL_ORG // faker.random.objectElement(Organization.TYPE)
-  const status = Organization.STATUS.ACTIVE // faker.random.objectElement(Organization.STATUS)
+  const type = args.type || Organization.TYPE.PRINCIPAL_ORG // faker.random.objectElement(Organization.TYPE)
+  const status = args.status || Organization.STATUS.ACTIVE // faker.random.objectElement(Organization.STATUS)
   const usedServices = []
 
   console.debug(
@@ -73,6 +73,7 @@ async function createHiearchy(user, grow) {
       shortName.green
     })`
   )
+
   return createSubOrg(undefined, [])
 
   /**
@@ -127,10 +128,12 @@ async function createHiearchy(user, grow) {
     const result = await gqlCreateOrganization(user, org)
 
     // create sub organizations
-    const subOrgCount = randomSubOrgCount(level)
-    var i
-    for (i = 1; i <= subOrgCount; i++) {
-      await createSubOrg(result, path.concat(i))
+    if (args.subOrgs) {
+      const subOrgCount = randomSubOrgCount(level)
+      var i
+      for (i = 1; i <= subOrgCount; i++) {
+        await createSubOrg(result, path.concat(i))
+      }
     }
 
     return result

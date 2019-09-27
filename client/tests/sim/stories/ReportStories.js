@@ -4,7 +4,7 @@ import _isEmpty from "lodash/isEmpty"
 import { runGQL, populate } from "../simutils"
 import Position from "../../../src/models/Position"
 
-const populateReport = async function(report, user) {
+const populateReport = async function(report, user, args) {
   const emptyArray = () => {
     return []
   }
@@ -166,7 +166,8 @@ const populateReport = async function(report, user) {
     keyOutcomes: () => faker.lorem.sentence(),
     tags: emptyArray,
     reportSensitiveInformation: () => null,
-    authorizationGroups: emptyArray
+    authorizationGroups: emptyArray,
+    state: args.state || Report.STATE.DRAFT
   }
 
   populate(report, template)
@@ -185,13 +186,14 @@ const populateReport = async function(report, user) {
     .tags.rarely()
     .reportSensitiveInformation.and()
     .authorizationGroups.rarely()
+    .state.always()
 
   return report
 }
 
-const createReport = async function(user) {
+const createReport = async function(user, args) {
   const report = new Report()
-  if (await populateReport(report, user)) {
+  if (await populateReport(report, user, args)) {
     const { reportTags, cancelled, ...reportStripped } = report // TODO: we need to do this more generically
 
     return (await runGQL(user, {

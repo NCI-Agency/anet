@@ -23,7 +23,7 @@ function advisorName(gender) {
   }
 }
 
-function randomPerson(role) {
+function randomPerson(role, status) {
   const gender = fuzzy.withProbability(0.9) ? "MALE" : "FEMALE"
   if (!role) {
     role = faker.random.arrayElement([
@@ -37,7 +37,7 @@ function randomPerson(role) {
 
   return {
     name: () => Person.fullName(name, true),
-    status: () => Person.STATUS.ACTIVE,
+    status: () => status || Person.STATUS.ACTIVE,
     country: identity,
     rank: identity,
     gender: () => gender,
@@ -70,9 +70,9 @@ function modifiedPerson() {
   }
 }
 
-const _createPerson = async function(user) {
+const _createPerson = async function(user, role, status) {
   const person = new Person()
-  populate(person, randomPerson())
+  populate(person, randomPerson(role, status))
     .name.always()
     .role.always()
     .status.always()
@@ -228,7 +228,7 @@ async function countPersons(user) {
   })).data.personList.totalCount
 }
 
-const createPerson = async function(user, grow) {
+const createPerson = async function(user, grow, args) {
   if (grow) {
     const count = await countPersons(user)
     if (!grow(count)) {
@@ -236,7 +236,7 @@ const createPerson = async function(user, grow) {
       return "(skipped)"
     }
   }
-  return _createPerson(user)
+  return _createPerson(user, args.role, args.status)
 }
 
 const deletePerson = async function(user, grow) {
