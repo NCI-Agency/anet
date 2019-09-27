@@ -4,10 +4,11 @@ import LinkTo from "components/LinkTo"
 import { mapDispatchToProps, useBoilerplate } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
+import _isEqual from "lodash/isEqual"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
@@ -111,11 +112,23 @@ const ReportTable = props => {
     pagination,
     setPagination
   } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
   const [pageNum, setPageNum] = useState(
-    pagination[paginationKey] ? pagination[paginationKey].pageNum : 0
+    _isEqual(latestQueryParams.current, queryParams) &&
+      pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
   )
+  useEffect(() => {
+    if (!_isEqual(latestQueryParams.current, queryParams)) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey])
   const reportQuery = Object.assign({}, queryParams, {
-    pageNum,
+    pageNum: _isEqual(latestQueryParams.current, queryParams) ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
