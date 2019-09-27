@@ -76,7 +76,13 @@ export const useBoilerplate = props => {
     [] // eslint-disable-line react-hooks/exhaustive-deps
   )
   useEffect(
-    () => toggleLoading(props.loading, props.showLoading, props.hideLoading),
+    () => {
+      toggleLoading(props.loading, props.showLoading, props.hideLoading)
+      return function cleanup() {
+        // Make sure loading indicator is hidden when 'unmounting'
+        toggleLoading(false, props.showLoading, props.hideLoading)
+      }
+    },
     [props.loading] // eslint-disable-line react-hooks/exhaustive-deps
   )
   if (props.loading) {
