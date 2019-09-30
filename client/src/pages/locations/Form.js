@@ -6,14 +6,14 @@ import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+import { jumpToTop } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location, Person } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import { Coordinate } from "./Show"
 
 const GQL_CREATE_LOCATION = gql`
@@ -31,6 +31,7 @@ const GQL_UPDATE_LOCATION = gql`
 
 const BaseLocationForm = props => {
   const { currentUser, edit, title, ...myFormProps } = props
+  const history = useHistory()
   const [error, setError] = useState(null)
   const canEditName =
     (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
@@ -155,7 +156,7 @@ const BaseLocationForm = props => {
   }
 
   function onCancel() {
-    props.history.goBack()
+    history.goBack()
   }
 
   function onSubmit(values, form) {
@@ -180,9 +181,9 @@ const BaseLocationForm = props => {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      props.history.replace(Location.pathForEdit(location))
+      history.replace(Location.pathForEdit(location))
     }
-    props.history.push(Location.pathFor(location), {
+    history.push(Location.pathFor(location), {
       success: "Location saved"
     })
   }
@@ -200,8 +201,7 @@ BaseLocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person),
-  ...routerRelatedPropTypes
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 BaseLocationForm.defaultProps = {
@@ -218,4 +218,4 @@ const LocationForm = props => (
   </AppContext.Consumer>
 )
 
-export default withRouter(LocationForm)
+export default LocationForm

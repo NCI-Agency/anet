@@ -33,6 +33,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import { useLocation, useParams } from "react-router-dom"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -90,12 +91,13 @@ const GQL_GET_PERSON = gql`
 `
 
 const BasePersonShow = props => {
+  const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
@@ -113,8 +115,8 @@ const BasePersonShow = props => {
   }
 
   const person = new Person(data ? data.person : {})
-  const stateSuccess = props.location.state && props.location.state.success
-  const stateError = props.location.state && props.location.state.error
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const stateError = routerLocation.state && routerLocation.state.error
   const { currentUser, ...myFormProps } = props
   // The position for this person's counterparts
   const position = person.position

@@ -32,7 +32,7 @@ import {
   Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory, useLocation } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
 
 const GQL_GET_SAVED_SEARCHES = gql`
@@ -61,7 +61,8 @@ const GQL_GET_REPORT_COUNT = gql`
 `
 
 const HomeTile = props => {
-  const { query, setSearchQuery, history } = props
+  const { query, setSearchQuery } = props
+  const history = useHistory()
   const reportQuery = Object.assign({}, query.query, {
     // we're only interested in the totalCount, so just get at most one report
     pageSize: 1
@@ -110,12 +111,11 @@ const HomeTile = props => {
 
 HomeTile.propTypes = {
   query: PropTypes.object.isRequired,
-  setSearchQuery: PropTypes.func.isRequired,
-  history: PropTypes.object.isRequired
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const HomeTiles = props => {
-  const { currentUser, setSearchQuery, history } = props
+  const { currentUser, setSearchQuery } = props
   // queries will contain the queries that will show up on the home tiles
   // Based on the users role. They are all report searches
   const queries = getQueriesForUser(currentUser)
@@ -124,12 +124,7 @@ const HomeTiles = props => {
     <Grid fluid>
       <Row>
         {queries.map((query, index) => (
-          <HomeTile
-            key={index}
-            query={query}
-            setSearchQuery={setSearchQuery}
-            history={history}
-          />
+          <HomeTile key={index} query={query} setSearchQuery={setSearchQuery} />
         ))}
       </Row>
     </Grid>
@@ -292,6 +287,7 @@ HomeTiles.propTypes = {
 }
 
 const SavedSearches = props => {
+  const history = useHistory()
   const [stateError, setStateError] = useState(null)
   const [selectedSearch, setSelectedSearch] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -370,7 +366,7 @@ const SavedSearches = props => {
       filters: filters,
       text: text
     })
-    props.history.push("/search")
+    history.push("/search")
   }
 
   function onConfirmDelete() {
@@ -393,7 +389,8 @@ SavedSearches.propTypes = {
 
 const BaseHome = props => {
   const { currentUser } = props
-  const stateSuccess = props.location.state && props.location.state.success
+  const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
   const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
@@ -478,4 +475,4 @@ const Home = props => (
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(Home))
+)(Home)

@@ -14,11 +14,6 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum))
 })
 
-export const routerRelatedPropTypes = {
-  location: PropTypes.object,
-  history: PropTypes.object.isRequired
-}
-
 export const propTypes = {
   showLoading: PropTypes.func.isRequired,
   hideLoading: PropTypes.func.isRequired,
@@ -28,8 +23,7 @@ export const propTypes = {
     text: PropTypes.string,
     filters: PropTypes.any,
     objectType: PropTypes.string
-  }),
-  ...routerRelatedPropTypes
+  })
 }
 
 export const AnchorLink = function(props) {

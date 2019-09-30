@@ -12,6 +12,7 @@ import RelatedObjectNotes, {
 import { AuthorizationGroup } from "models"
 import React from "react"
 import { connect } from "react-redux"
+import { useParams } from "react-router-dom"
 import AuthorizationGroupForm from "./Form"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`
@@ -45,7 +46,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
 `
 
 const AuthorizationGroupEdit = props => {
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP,
     { uuid }
