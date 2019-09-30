@@ -1,4 +1,5 @@
 import {
+  DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   DEFAULT_SEARCH_QUERY,
   SEARCH_OBJECT_TYPES,
@@ -197,6 +198,7 @@ const DecisivesDashboardImpl = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
+    pageProps: DEFAULT_PAGE_PROPS,
     searchProps: _SEARCH_PROPS,
     ...props
   })

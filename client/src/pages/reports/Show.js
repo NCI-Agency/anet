@@ -1,4 +1,9 @@
-import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  SEARCH_OBJECT_TYPES,
+  setSearchQuery
+} from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -268,6 +273,8 @@ const BaseReportShow = props => {
     error,
     modelName: "Report",
     uuid,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
   if (done) {

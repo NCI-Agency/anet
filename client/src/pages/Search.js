@@ -1,4 +1,9 @@
-import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  SEARCH_OBJECT_LABELS,
+  SEARCH_OBJECT_TYPES
+} from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
@@ -22,10 +27,11 @@ import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {
   Alert,
   Badge,
@@ -172,11 +178,23 @@ const Organizations = props => {
     pagination,
     setPagination
   } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    pagination[paginationKey] ? pagination[paginationKey].pageNum : 0
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
   )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const organizationQuery = Object.assign({}, queryParams, {
-    pageNum,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION_LIST, {
@@ -258,11 +276,23 @@ const People = props => {
     pagination,
     setPagination
   } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    pagination[paginationKey] ? pagination[paginationKey].pageNum : 0
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
   )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const personQuery = Object.assign({}, queryParams, {
-    pageNum,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON_LIST, {
@@ -357,11 +387,23 @@ const Positions = props => {
     pagination,
     setPagination
   } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    pagination[paginationKey] ? pagination[paginationKey].pageNum : 0
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
   )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const positionQuery = Object.assign({}, queryParams, {
-    pageNum,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
@@ -421,11 +463,23 @@ const Tasks = props => {
     pagination,
     setPagination
   } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    pagination[paginationKey] ? pagination[paginationKey].pageNum : 0
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
   )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const taskQuery = Object.assign({}, queryParams, {
-    pageNum,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
@@ -502,11 +556,23 @@ const Locations = props => {
     pagination,
     setPagination
   } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    pagination[paginationKey] ? pagination[paginationKey].pageNum : 0
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
   )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const locationQuery = Object.assign({}, queryParams, {
-    pageNum,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION_LIST, {
@@ -615,6 +681,11 @@ const Search = props => {
     queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && numLocations > 0
   const hasReportsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && numReports > 0
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
 
   return (
     <div>

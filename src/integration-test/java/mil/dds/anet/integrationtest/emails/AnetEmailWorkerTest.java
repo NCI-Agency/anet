@@ -13,7 +13,7 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.EmailDao;
-import mil.dds.anet.integrationtest.config.AnetITConfiguration;
+import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -28,7 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({EmailDao.class, AnetConfiguration.class, ScheduledExecutorService.class,
     AnetObjectEngine.class})
-public class AnetEmailWorkerIT {
+public class AnetEmailWorkerTest {
 
   private AnetEmailWorker emailWorker;
   private EmailDao emailDao;
@@ -43,7 +43,7 @@ public class AnetEmailWorkerIT {
   @Before
   public void setUp() throws Exception {
     assumeTrue(Boolean.parseBoolean(
-        AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
 
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
 

@@ -1,10 +1,4 @@
-import {
-  DEFAULT_PAGE_PROPS,
-  DEFAULT_SEARCH_PROPS,
-  setPageProps,
-  setPagination,
-  setSearchProps
-} from "actions"
+import { setPageProps, setPagination, setSearchProps } from "actions"
 import NotFound from "components/NotFound"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
@@ -76,7 +70,13 @@ export const useBoilerplate = props => {
     [] // eslint-disable-line react-hooks/exhaustive-deps
   )
   useEffect(
-    () => toggleLoading(props.loading, props.showLoading, props.hideLoading),
+    () => {
+      toggleLoading(props.loading, props.showLoading, props.hideLoading)
+      return function cleanup() {
+        // Make sure loading indicator is hidden when 'unmounting'
+        toggleLoading(false, props.showLoading, props.hideLoading)
+      }
+    },
     [props.loading] // eslint-disable-line react-hooks/exhaustive-deps
   )
   if (props.loading) {
@@ -117,16 +117,14 @@ export const toggleLoading = (loading, showLoading, hideLoading) => {
 }
 
 export const applyPageProps = (setPageProps, pageProps) => {
-  const pp = _isEmpty(pageProps) ? DEFAULT_PAGE_PROPS : pageProps
-  if (typeof setPageProps === "function") {
-    setPageProps(Object.assign({}, pp))
+  if (pageProps && typeof setPageProps === "function") {
+    setPageProps(Object.assign({}, pageProps))
   }
 }
 
 export const applySearchProps = (setSearchProps, searchProps) => {
-  const sp = _isEmpty(searchProps) ? DEFAULT_SEARCH_PROPS : searchProps
-  if (typeof setSearchProps === "function") {
-    setSearchProps(Object.assign({}, sp))
+  if (searchProps && typeof setSearchProps === "function") {
+    setSearchProps(Object.assign({}, searchProps))
   }
 }
 

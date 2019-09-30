@@ -1,4 +1,9 @@
-import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  SEARCH_OBJECT_TYPES,
+  setSearchQuery
+} from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -392,6 +397,11 @@ const BaseHome = props => {
   const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
 
   return (
     <div>

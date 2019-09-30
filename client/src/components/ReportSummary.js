@@ -7,11 +7,12 @@ import Tag from "components/Tag"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Col, Grid, Label, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import utils from "utils"
@@ -114,11 +115,23 @@ const ReportSummary = props => {
     pagination,
     setPagination
   } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    pagination[paginationKey] ? pagination[paginationKey].pageNum : 0
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
   )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const reportQuery = Object.assign({}, queryParams, {
-    pageNum,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {

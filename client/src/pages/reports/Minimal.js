@@ -1,4 +1,4 @@
-import { PAGE_PROPS_MIN_HEAD } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
@@ -198,6 +198,7 @@ const ReportMinimal = props => {
     modelName: "Report",
     uuid,
     pageProps: PAGE_PROPS_MIN_HEAD,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
   if (done) {

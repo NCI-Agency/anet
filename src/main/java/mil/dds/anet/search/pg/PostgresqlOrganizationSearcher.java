@@ -7,7 +7,8 @@ import mil.dds.anet.search.AbstractOrganizationSearcher;
 public class PostgresqlOrganizationSearcher extends AbstractOrganizationSearcher {
 
   public PostgresqlOrganizationSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Organization, OrganizationSearchQuery>(""));
+    super(new PostgresqlSearchQueryBuilder<Organization, OrganizationSearchQuery>(
+        "PostgresqlOrganizationSearch"));
   }
 
   @Override

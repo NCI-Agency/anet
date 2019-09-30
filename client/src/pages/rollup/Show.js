@@ -2,6 +2,7 @@ import "@blueprintjs/core/lib/css/blueprint.css"
 import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -262,25 +263,30 @@ const BaseRollupShow = props => {
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const previewPlaceholderUrl = API.addAuthParams("/help")
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
 
   const VISUALIZATIONS = [
     {
       id: "rbdow-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
       title: "Chart by organization",
-      renderer: getChart
+      renderer: renderChart
     },
     {
       id: "rbdow-collection",
       icons: [IconNames.PANEL_TABLE],
       title: "Reports by organization",
-      renderer: getReportCollection
+      renderer: renderReportCollection
     },
     {
       id: "rbdow-map",
       icons: [IconNames.MAP],
       title: "Map by organization",
-      renderer: getReportMap
+      renderer: renderReportMap
     }
   ]
   const INITIAL_LAYOUT = {
@@ -348,7 +354,9 @@ const BaseRollupShow = props => {
               />
             </div>
             {focusedOrg ? (
-              <Button onClick={setFocusedOrg}>All organizations</Button>
+              <Button onClick={() => setFocusedOrg(null)}>
+                All organizations
+              </Button>
             ) : (
               <ButtonToggleGroup value={orgType} onChange={setOrgType}>
                 <Button value={Organization.TYPE.ADVISOR_ORG}>
@@ -394,7 +402,7 @@ const BaseRollupShow = props => {
     </div>
   )
 
-  function getChart(id) {
+  function renderChart(id) {
     return (
       <Chart
         rollupStart={getRollupStart()}
@@ -406,11 +414,11 @@ const BaseRollupShow = props => {
     )
   }
 
-  function getReportCollection(id) {
+  function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
-  function getReportMap(id) {
+  function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }
 
@@ -473,11 +481,16 @@ const BaseRollupShow = props => {
   }
 
   function changeRollupDate(dateRange) {
+    const startDate = dateRange[0] && dateRange[0].valueOf()
+    const endDate = dateRange[1] && dateRange[1].valueOf()
+    if (!startDate || !endDate) {
+      return
+    }
     props.history.replace({
       pathname: "rollup",
       search: utils.formatQueryString({
-        startDate: dateRange[0].valueOf(),
-        endDate: dateRange[1].valueOf()
+        startDate,
+        endDate
       })
     })
   }

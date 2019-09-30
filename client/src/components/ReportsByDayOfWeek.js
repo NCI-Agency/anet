@@ -186,19 +186,19 @@ const ReportsByDayOfWeek = props => {
       id: "rbdow-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
       title: "Chart by day of the week",
-      renderer: getChart
+      renderer: renderChart
     },
     {
       id: "rbdow-collection",
       icons: [IconNames.PANEL_TABLE],
       title: "Reports by day of the week",
-      renderer: getReportCollection
+      renderer: renderReportCollection
     },
     {
       id: "rbdow-map",
       icons: [IconNames.MAP],
       title: "Map by day of the week",
-      renderer: getReportMap
+      renderer: renderReportMap
     }
   ]
   const INITIAL_LAYOUT = {
@@ -223,7 +223,7 @@ const ReportsByDayOfWeek = props => {
     />
   )
 
-  function getChart(id) {
+  function renderChart(id) {
     return (
       <Chart
         chartId={chartId}
@@ -235,11 +235,11 @@ const ReportsByDayOfWeek = props => {
     )
   }
 
-  function getReportCollection(id) {
+  function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
-  function getReportMap(id) {
+  function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }
 

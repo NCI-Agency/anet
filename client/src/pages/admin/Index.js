@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -39,6 +40,8 @@ const BaseAdminIndex = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
   if (done) {

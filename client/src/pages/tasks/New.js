@@ -1,4 +1,4 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import {
@@ -54,6 +54,7 @@ const TaskNewConditional = props => {
     modelName: "Organization",
     uuid: orgUuid,
     pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...otherProps
   })
   if (done) {

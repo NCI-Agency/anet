@@ -308,25 +308,25 @@ const CancelledEngagementReports = props => {
       id: "cer-chart-by-org",
       icons: [IconNames.GROUPED_BAR_CHART, IconNames.DIAGRAM_TREE],
       title: `Chart by ${advisorOrgLabel}`,
-      renderer: getChartByOrg
+      renderer: renderChartByOrg
     },
     {
       id: "cer-chart-by-reason",
       icons: [IconNames.GROUPED_BAR_CHART, IconNames.COMMENT],
       title: "Chart by reason for cancellation",
-      renderer: getChartByReason
+      renderer: renderChartByReason
     },
     {
       id: "cer-collection",
       icons: [IconNames.PANEL_TABLE],
       title: "Reports",
-      renderer: getReportCollection
+      renderer: renderReportCollection
     },
     {
       id: "cer-map",
       icons: [IconNames.MAP],
       title: "Map",
-      renderer: getReportMap
+      renderer: renderReportMap
     }
   ]
   const INITIAL_LAYOUT = {
@@ -355,7 +355,7 @@ const CancelledEngagementReports = props => {
     />
   )
 
-  function getChartByOrg(id) {
+  function renderChartByOrg(id) {
     return (
       <ChartByOrg
         chartId={chartIdByOrg}
@@ -367,7 +367,7 @@ const CancelledEngagementReports = props => {
     )
   }
 
-  function getChartByReason(id) {
+  function renderChartByReason(id) {
     return (
       <ChartByReason
         chartId={chartIdByReason}
@@ -379,11 +379,11 @@ const CancelledEngagementReports = props => {
     )
   }
 
-  function getReportCollection(id) {
+  function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
-  function getReportMap(id) {
+  function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }
 

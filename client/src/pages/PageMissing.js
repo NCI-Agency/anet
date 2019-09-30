@@ -1,4 +1,4 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import NotFound from "components/NotFound"
 import {
   mapDispatchToProps,
@@ -11,6 +11,7 @@ import { connect } from "react-redux"
 const PageMissing = props => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
 

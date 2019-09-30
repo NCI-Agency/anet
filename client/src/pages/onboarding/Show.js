@@ -1,4 +1,4 @@
-import { PAGE_PROPS_MIN_HEAD } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import {
   mapDispatchToProps,
   propTypes as pagePropTypes,
@@ -12,6 +12,7 @@ import { withRouter } from "react-router-dom"
 const OnboardingShow = props => {
   useBoilerplate({
     pageProps: PAGE_PROPS_MIN_HEAD,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
 

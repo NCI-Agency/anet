@@ -1,4 +1,5 @@
 import * as d3 from "d3"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
 import ReactTooltip from "react-tooltip"
@@ -304,7 +305,13 @@ const HorizontalBarChart = props => {
     selectedBar
   ])
 
-  return <svg id={chartId} ref={node} width={width} height={height} />
+  return (
+    (_isEmpty(data) && (
+      <div>
+        <em>No data</em>
+      </div>
+    )) || <svg id={chartId} ref={node} width={width} height={height} />
+  )
 
   function isNumeric(value) {
     return typeof value === "number"

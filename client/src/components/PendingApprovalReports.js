@@ -190,19 +190,19 @@ const PendingApprovalReports = props => {
       id: "par-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
       title: `Chart by ${advisorOrgLabel}`,
-      renderer: getChart
+      renderer: renderChart
     },
     {
       id: "par-collection",
       icons: [IconNames.PANEL_TABLE],
       title: `Reports by ${advisorOrgLabel}`,
-      renderer: getReportCollection
+      renderer: renderReportCollection
     },
     {
       id: "par-map",
       icons: [IconNames.MAP],
       title: `Map by ${advisorOrgLabel}`,
-      renderer: getReportMap
+      renderer: renderReportMap
     }
   ]
   const INITIAL_LAYOUT = {
@@ -227,7 +227,7 @@ const PendingApprovalReports = props => {
     />
   )
 
-  function getChart(id) {
+  function renderChart(id) {
     return (
       <Chart
         chartId={chartId}
@@ -239,11 +239,11 @@ const PendingApprovalReports = props => {
     )
   }
 
-  function getReportCollection(id) {
+  function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
-  function getReportMap(id) {
+  function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }
 

@@ -1,4 +1,4 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import {
@@ -104,6 +104,7 @@ const ReportEdit = props => {
     modelName: "Report",
     uuid,
     pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
   if (done) {

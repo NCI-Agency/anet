@@ -1,4 +1,4 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import {
   mapDispatchToProps,
   propTypes as pagePropTypes,
@@ -12,6 +12,7 @@ import AuthorizationGroupForm from "./Form"
 const AuthorizationGroupNew = props => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
 

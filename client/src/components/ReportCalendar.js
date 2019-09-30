@@ -1,12 +1,13 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
-import { mapDispatchToProps } from "components/Page"
+import { mapDispatchToProps, routerRelatedPropTypes } from "components/Page"
 import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { connect } from "react-redux"
+import { withRouter } from "react-router-dom"
 
 const GQL_GET_REPORT_LIST = gql`
   query($reportQuery: ReportSearchQueryInput) {
@@ -44,7 +45,15 @@ const ReportCalendar = props => {
   const calendarComponentRef = useRef(null)
 
   return (
-    <Calendar events={getEvents} calendarComponentRef={calendarComponentRef} />
+    <Calendar
+      events={getEvents}
+      eventClick={info => {
+        props.history.push(info.event.url)
+        // Prevent browser navigation to the url
+        info.jsEvent.preventDefault()
+      }}
+      calendarComponentRef={calendarComponentRef}
+    />
   )
 
   function getEvents(fetchInfo, successCallback, failureCallback) {
@@ -89,10 +98,11 @@ const ReportCalendar = props => {
 
 ReportCalendar.propTypes = {
   queryParams: PropTypes.object,
-  setTotalCount: PropTypes.func
+  setTotalCount: PropTypes.func,
+  ...routerRelatedPropTypes
 }
 
 export default connect(
   null,
   mapDispatchToProps
-)(ReportCalendar)
+)(withRouter(ReportCalendar))

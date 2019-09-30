@@ -214,19 +214,19 @@ const FutureEngagementsByLocation = props => {
       id: "febl-chart",
       icons: [IconNames.HORIZONTAL_BAR_CHART],
       title: "Chart by date and location",
-      renderer: getChart
+      renderer: renderChart
     },
     {
       id: "febl-collection",
       icons: [IconNames.PANEL_TABLE],
       title: "Reports by date and location",
-      renderer: getReportCollection
+      renderer: renderReportCollection
     },
     {
       id: "febl-map",
       icons: [IconNames.MAP],
       title: "Map by date and location",
-      renderer: getReportMap
+      renderer: renderReportMap
     }
   ]
   const INITIAL_LAYOUT = {
@@ -251,7 +251,7 @@ const FutureEngagementsByLocation = props => {
     />
   )
 
-  function getChart(id) {
+  function renderChart(id) {
     return (
       <Chart
         chartId={chartId}
@@ -263,11 +263,11 @@ const FutureEngagementsByLocation = props => {
     )
   }
 
-  function getReportCollection(id) {
+  function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
   }
 
-  function getReportMap(id) {
+  function renderReportMap(id) {
     return <Map queryParams={getQueryParams()} />
   }
 

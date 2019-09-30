@@ -12,7 +12,7 @@ import React from "react"
 import "./Calendar.css"
 
 const Calendar = props => {
-  const { events, calendarComponentRef } = props
+  const { events, eventClick, calendarComponentRef } = props
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -55,7 +55,7 @@ const Calendar = props => {
       events={events}
       eventOverlap
       eventLimit
-      eventClick={eventInfo => {}}
+      eventClick={eventClick}
       dateClick={info => {
         const calendarApi = calendarComponentRef.current.getApi()
         calendarApi.changeView("listDay", info.dateStr) // call a method on the Calendar object
@@ -66,6 +66,7 @@ const Calendar = props => {
 
 Calendar.propTypes = {
   events: PropTypes.func.isRequired,
+  eventClick: PropTypes.func.isRequired,
   calendarComponentRef: PropTypes.shape({
     current: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
   })

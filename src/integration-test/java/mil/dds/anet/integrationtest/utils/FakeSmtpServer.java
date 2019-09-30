@@ -20,7 +20,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
-import mil.dds.anet.integrationtest.config.AnetITConfiguration;
+import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -56,9 +56,9 @@ public class FakeSmtpServer {
 
     // Read from test config
     waitBeforeActionMs = Integer
-        .parseInt(AnetITConfiguration.getConfiguration().get("emailWaitBeforeAction").toString());
+        .parseInt(AnetTestConfiguration.getConfiguration().get("emailWaitBeforeAction").toString());
     maxRetriesClear = Integer.parseInt(
-        AnetITConfiguration.getConfiguration().get("emailMaxWaitRetriesOnClear").toString());
+        AnetTestConfiguration.getConfiguration().get("emailMaxWaitRetriesOnClear").toString());
 
     clearEmailServer();
   }

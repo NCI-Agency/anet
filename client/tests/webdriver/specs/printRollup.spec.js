@@ -3,6 +3,8 @@ import Rollup from "../pages/rollup.page"
 describe("Print rollup page", () => {
   beforeEach("Open the rollup page", () => {
     Rollup.open()
+    Rollup.rollup.waitForExist()
+    Rollup.rollup.waitForDisplayed()
   })
 
   describe("When clicking the print button, the daily rollup should be generated", () => {
