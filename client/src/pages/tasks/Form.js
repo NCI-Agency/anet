@@ -20,7 +20,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -45,21 +45,10 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-class BaseTaskForm extends Component {
-  static propTypes = {
-    initialValues: PropTypes.instanceOf(Task).isRequired,
-    title: PropTypes.string,
-    edit: PropTypes.bool,
-    currentUser: PropTypes.instanceOf(Person),
-    ...routerRelatedPropTypes
-  }
-
-  static defaultProps = {
-    title: "",
-    edit: false
-  }
-
-  statusButtons = [
+const BaseTaskForm = props => {
+  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+  const [error, setError] = useState(null)
+  const statusButtons = [
     {
       id: "statusActiveButton",
       value: Task.STATUS.ACTIVE,
@@ -72,309 +61,291 @@ class BaseTaskForm extends Component {
     }
   ]
 
-  ShortNameField = DictionaryField(Field)
-  LongNameField = DictionaryField(Field)
-  TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
-  TaskCustomField = DictionaryField(Field)
-  PlannedCompletionField = DictionaryField(Field)
-  ProjectedCompletionField = DictionaryField(Field)
-  TaskCustomFieldEnum1 = DictionaryField(Field)
-  TaskCustomFieldEnum2 = DictionaryField(Field)
-  ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
-  state = {
-    error: null
+  const ShortNameField = DictionaryField(Field)
+  const LongNameField = DictionaryField(Field)
+  const TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
+  const TaskCustomField = DictionaryField(Field)
+  const PlannedCompletionField = DictionaryField(Field)
+  const ProjectedCompletionField = DictionaryField(Field)
+  const TaskCustomFieldEnum1 = DictionaryField(Field)
+  const TaskCustomFieldEnum2 = DictionaryField(Field)
+  const ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
+
+  initialValues.assessment_customFieldEnum1 = ""
+
+  const orgSearchQuery = {
+    status: Organization.STATUS.ACTIVE,
+    type: Organization.TYPE.ADVISOR_ORG
   }
 
-  render() {
-    const {
-      currentUser,
-      edit,
-      title,
-      initialValues,
-      ...myFormProps
-    } = this.props
-    initialValues.assessment_customFieldEnum1 = ""
+  if (currentUser && currentUser.isSuperUser() && !currentUser.isAdmin()) {
+    Object.assign(orgSearchQuery, {
+      parentOrgUuid: currentUser.position.organization.uuid,
+      parentOrgRecursively: true
+    })
+  }
 
-    const orgSearchQuery = {
-      status: Organization.STATUS.ACTIVE,
-      type: Organization.TYPE.ADVISOR_ORG
+  const responsibleOrgFilters = {
+    allOrganizations: {
+      label: "All organizations",
+      queryVars: {}
     }
+  }
 
-    if (currentUser && currentUser.isSuperUser() && !currentUser.isAdmin()) {
-      Object.assign(orgSearchQuery, {
-        parentOrgUuid: currentUser.position.organization.uuid,
-        parentOrgRecursively: true
-      })
+  const tasksFilters = {
+    allTasks: {
+      label: "All tasks",
+      queryVars: {}
     }
-
-    const responsibleOrgFilters = {
-      allOrganizations: {
-        label: "All organizations",
-        queryVars: {}
+  }
+  const positionsFilters = {
+    allAdvisorPositions: {
+      label: "All advisor positions",
+      queryVars: {
+        status: Position.STATUS.ACTIVE,
+        type: [
+          Position.TYPE.ADVISOR,
+          Position.TYPE.SUPER_USER,
+          Position.TYPE.ADMINISTRATOR
+        ],
+        matchPersonName: true
       }
     }
+  }
 
-    const tasksFilters = {
-      allTasks: {
-        label: "All tasks",
-        queryVars: {}
-      }
-    }
-    const positionsFilters = {
-      allAdvisorPositions: {
-        label: "All advisor positions",
-        queryVars: {
-          status: Position.STATUS.ACTIVE,
-          type: [
-            Position.TYPE.ADVISOR,
-            Position.TYPE.SUPER_USER,
-            Position.TYPE.ADMINISTRATOR
-          ],
-          matchPersonName: true
-        }
-      }
-    }
+  return (
+    <Formik
+      enableReinitialize
+      onSubmit={onSubmit}
+      validationSchema={Task.yupSchema}
+      isInitialValid
+      initialValues={initialValues}
+      {...myFormProps}
+    >
+      {({
+        handleSubmit,
+        isSubmitting,
+        dirty,
+        errors,
+        setFieldValue,
+        setFieldTouched,
+        values,
+        submitForm
+      }) => {
+        const action = (
+          <div>
+            <Button
+              key="submit"
+              bsStyle="primary"
+              type="button"
+              onClick={submitForm}
+              disabled={isSubmitting}
+            >
+              Save {Settings.fields.task.shortLabel}
+            </Button>
+          </div>
+        )
+        return (
+          <div>
+            <NavigationWarning isBlocking={dirty} />
+            <Messages error={error} />
+            <Form className="form-horizontal" method="post">
+              <Fieldset title={title} action={action} />
+              <Fieldset>
+                <ShortNameField
+                  dictProps={Settings.fields.task.shortName}
+                  name="shortName"
+                  component={FieldHelper.renderInputField}
+                />
 
-    return (
-      <Formik
-        enableReinitialize
-        onSubmit={this.onSubmit}
-        validationSchema={Task.yupSchema}
-        isInitialValid
-        initialValues={initialValues}
-        {...myFormProps}
-      >
-        {({
-          handleSubmit,
-          isSubmitting,
-          dirty,
-          errors,
-          setFieldValue,
-          setFieldTouched,
-          values,
-          submitForm
-        }) => {
-          const action = (
-            <div>
-              <Button
-                key="submit"
-                bsStyle="primary"
-                type="button"
-                onClick={submitForm}
-                disabled={isSubmitting}
-              >
-                Save {Settings.fields.task.shortLabel}
-              </Button>
-            </div>
-          )
-          return (
-            <div>
-              <NavigationWarning isBlocking={dirty} />
-              <Messages error={this.state.error} />
-              <Form className="form-horizontal" method="post">
-                <Fieldset title={title} action={action} />
-                <Fieldset>
-                  <this.ShortNameField
-                    dictProps={Settings.fields.task.shortName}
-                    name="shortName"
-                    component={FieldHelper.renderInputField}
-                  />
+                <LongNameField
+                  dictProps={Settings.fields.task.longName}
+                  name="longName"
+                  component={FieldHelper.renderInputField}
+                />
 
-                  <this.LongNameField
-                    dictProps={Settings.fields.task.longName}
-                    name="longName"
-                    component={FieldHelper.renderInputField}
-                  />
+                <Field
+                  name="status"
+                  component={FieldHelper.renderButtonToggleGroup}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
 
-                  <Field
-                    name="status"
-                    component={FieldHelper.renderButtonToggleGroup}
-                    buttons={this.statusButtons}
-                    onChange={value => setFieldValue("status", value)}
-                  />
+                <AdvancedSingleSelect
+                  fieldName="responsibleOrg"
+                  fieldLabel={Settings.fields.task.responsibleOrg}
+                  placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
+                  value={values.responsibleOrg}
+                  overlayColumns={["Name"]}
+                  overlayRenderRow={OrganizationOverlayRow}
+                  filterDefs={responsibleOrgFilters}
+                  onChange={value => setFieldValue("responsibleOrg", value)}
+                  objectType={Organization}
+                  fields={Organization.autocompleteQuery}
+                  valueKey="shortName"
+                  queryParams={orgSearchQuery}
+                  addon={ORGANIZATIONS_ICON}
+                />
 
-                  <AdvancedSingleSelect
-                    fieldName="responsibleOrg"
-                    fieldLabel={Settings.fields.task.responsibleOrg}
-                    placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
-                    value={values.responsibleOrg}
+                <ResponsiblePositonsMultiSelect
+                  fieldName="responsiblePositions"
+                  dictProps={Settings.fields.task.responsiblePositions}
+                  fieldLabel={Settings.fields.task.responsiblePositions.label}
+                  value={values.responsiblePositions}
+                  renderSelected={
+                    <PositionTable
+                      positions={values.responsiblePositions}
+                      showDelete
+                    />
+                  }
+                  overlayColumns={[
+                    "Position",
+                    "Organization",
+                    "Current Occupant"
+                  ]}
+                  overlayRenderRow={PositionOverlayRow}
+                  filterDefs={positionsFilters}
+                  onChange={value =>
+                    setFieldValue("responsiblePositions", value)
+                  }
+                  objectType={Position}
+                  fields={Position.autocompleteQuery}
+                  addon={POSITIONS_ICON}
+                />
+
+                {Settings.fields.task.customFieldRef1 && (
+                  <TaskCustomFieldRef1
+                    dictProps={Settings.fields.task.customFieldRef1}
+                    fieldName="customFieldRef1"
+                    fieldLabel={Settings.fields.task.customFieldRef1.label}
+                    placeholder={
+                      Settings.fields.task.customFieldRef1.placeholder
+                    }
+                    value={values.customFieldRef1}
                     overlayColumns={["Name"]}
-                    overlayRenderRow={OrganizationOverlayRow}
-                    filterDefs={responsibleOrgFilters}
-                    onChange={value => setFieldValue("responsibleOrg", value)}
-                    objectType={Organization}
-                    fields={Organization.autocompleteQuery}
+                    overlayRenderRow={TaskSimpleOverlayRow}
+                    filterDefs={tasksFilters}
+                    onChange={value => setFieldValue("customFieldRef1", value)}
+                    objectType={Task}
+                    fields={Task.autocompleteQuery}
                     valueKey="shortName"
-                    queryParams={orgSearchQuery}
-                    addon={ORGANIZATIONS_ICON}
+                    queryParams={{}}
+                    addon={TASKS_ICON}
                   />
+                )}
 
-                  <this.ResponsiblePositonsMultiSelect
-                    fieldName="responsiblePositions"
-                    dictProps={Settings.fields.task.responsiblePositions}
-                    fieldLabel={Settings.fields.task.responsiblePositions.label}
-                    value={values.responsiblePositions}
-                    renderSelected={
-                      <PositionTable
-                        positions={values.responsiblePositions}
-                        showDelete
-                      />
-                    }
-                    overlayColumns={[
-                      "Position",
-                      "Organization",
-                      "Current Occupant"
-                    ]}
-                    overlayRenderRow={PositionOverlayRow}
-                    filterDefs={positionsFilters}
+                <TaskCustomField
+                  dictProps={Settings.fields.task.customField}
+                  name="customField"
+                  component={FieldHelper.renderInputField}
+                />
+
+                {Settings.fields.task.plannedCompletion && (
+                  <PlannedCompletionField
+                    dictProps={Settings.fields.task.plannedCompletion}
+                    name="plannedCompletion"
+                    component={FieldHelper.renderSpecialField}
                     onChange={value =>
-                      setFieldValue("responsiblePositions", value)
+                      setFieldValue("plannedCompletion", value)
                     }
-                    objectType={Position}
-                    fields={Position.autocompleteQuery}
-                    addon={POSITIONS_ICON}
+                    onBlur={() => setFieldTouched("plannedCompletion", true)}
+                    widget={<CustomDateInput id="plannedCompletion" />}
                   />
+                )}
 
-                  {Settings.fields.task.customFieldRef1 && (
-                    <this.TaskCustomFieldRef1
-                      dictProps={Settings.fields.task.customFieldRef1}
-                      fieldName="customFieldRef1"
-                      fieldLabel={Settings.fields.task.customFieldRef1.label}
-                      placeholder={
-                        Settings.fields.task.customFieldRef1.placeholder
-                      }
-                      value={values.customFieldRef1}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={TaskSimpleOverlayRow}
-                      filterDefs={tasksFilters}
-                      onChange={value =>
-                        setFieldValue("customFieldRef1", value)
-                      }
-                      objectType={Task}
-                      fields={Task.autocompleteQuery}
-                      valueKey="shortName"
-                      queryParams={{}}
-                      addon={TASKS_ICON}
-                    />
-                  )}
-
-                  <this.TaskCustomField
-                    dictProps={Settings.fields.task.customField}
-                    name="customField"
-                    component={FieldHelper.renderInputField}
+                {Settings.fields.task.projectedCompletion && (
+                  <ProjectedCompletionField
+                    dictProps={Settings.fields.task.projectedCompletion}
+                    name="projectedCompletion"
+                    component={FieldHelper.renderSpecialField}
+                    onChange={value =>
+                      setFieldValue("projectedCompletion", value)
+                    }
+                    onBlur={() => setFieldTouched("projectedCompletion", true)}
+                    widget={<CustomDateInput id="projectedCompletion" />}
                   />
+                )}
 
-                  {Settings.fields.task.plannedCompletion && (
-                    <this.PlannedCompletionField
-                      dictProps={Settings.fields.task.plannedCompletion}
-                      name="plannedCompletion"
-                      component={FieldHelper.renderSpecialField}
-                      onChange={value =>
-                        setFieldValue("plannedCompletion", value)
-                      }
-                      onBlur={() => setFieldTouched("plannedCompletion", true)}
-                      widget={<CustomDateInput id="plannedCompletion" />}
-                    />
-                  )}
-
-                  {Settings.fields.task.projectedCompletion && (
-                    <this.ProjectedCompletionField
-                      dictProps={Settings.fields.task.projectedCompletion}
-                      name="projectedCompletion"
-                      component={FieldHelper.renderSpecialField}
-                      onChange={value =>
-                        setFieldValue("projectedCompletion", value)
-                      }
-                      onBlur={() =>
-                        setFieldTouched("projectedCompletion", true)
-                      }
-                      widget={<CustomDateInput id="projectedCompletion" />}
-                    />
-                  )}
-
-                  {Settings.fields.task.customFieldEnum1 && (
-                    <React.Fragment>
-                      <this.TaskCustomFieldEnum1
-                        dictProps={Object.without(
-                          Settings.fields.task.customFieldEnum1,
-                          "enum"
-                        )}
-                        name="customFieldEnum1"
-                        component={FieldHelper.renderButtonToggleGroup}
-                        buttons={this.customEnumButtons(
-                          Settings.fields.task.customFieldEnum1.enum
-                        )}
-                        onChange={value =>
-                          setFieldValue("customFieldEnum1", value)
-                        }
-                      />
-                      {edit && (
-                        <Field
-                          name="assessment_customFieldEnum1"
-                          label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
-                          component={FieldHelper.renderSpecialField}
-                          onChange={value =>
-                            setFieldValue("assessment_customFieldEnum1", value)
-                          }
-                          widget={
-                            <RichTextEditor
-                              className="textField"
-                              onHandleBlur={() =>
-                                setFieldTouched(
-                                  "assessment_customFieldEnum1",
-                                  true
-                                )
-                              }
-                            />
-                          }
-                        />
-                      )}
-                    </React.Fragment>
-                  )}
-
-                  {Settings.fields.task.customFieldEnum2 && (
-                    <this.TaskCustomFieldEnum2
+                {Settings.fields.task.customFieldEnum1 && (
+                  <React.Fragment>
+                    <TaskCustomFieldEnum1
                       dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum2,
+                        Settings.fields.task.customFieldEnum1,
                         "enum"
                       )}
-                      name="customFieldEnum2"
+                      name="customFieldEnum1"
                       component={FieldHelper.renderButtonToggleGroup}
-                      buttons={this.customEnumButtons(
-                        Settings.fields.task.customFieldEnum2.enum
+                      buttons={customEnumButtons(
+                        Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
-                        setFieldValue("customFieldEnum2", value)
+                        setFieldValue("customFieldEnum1", value)
                       }
                     />
-                  )}
-                </Fieldset>
+                    {edit && (
+                      <Field
+                        name="assessment_customFieldEnum1"
+                        label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
+                        component={FieldHelper.renderSpecialField}
+                        onChange={value =>
+                          setFieldValue("assessment_customFieldEnum1", value)
+                        }
+                        widget={
+                          <RichTextEditor
+                            className="textField"
+                            onHandleBlur={() =>
+                              setFieldTouched(
+                                "assessment_customFieldEnum1",
+                                true
+                              )
+                            }
+                          />
+                        }
+                      />
+                    )}
+                  </React.Fragment>
+                )}
 
-                <div className="submit-buttons">
-                  <div>
-                    <Button onClick={this.onCancel}>Cancel</Button>
-                  </div>
-                  <div>
-                    <Button
-                      id="formBottomSubmit"
-                      bsStyle="primary"
-                      type="button"
-                      onClick={submitForm}
-                      disabled={isSubmitting}
-                    >
-                      Save {Settings.fields.task.shortLabel}
-                    </Button>
-                  </div>
+                {Settings.fields.task.customFieldEnum2 && (
+                  <TaskCustomFieldEnum2
+                    dictProps={Object.without(
+                      Settings.fields.task.customFieldEnum2,
+                      "enum"
+                    )}
+                    name="customFieldEnum2"
+                    component={FieldHelper.renderButtonToggleGroup}
+                    buttons={customEnumButtons(
+                      Settings.fields.task.customFieldEnum2.enum
+                    )}
+                    onChange={value => setFieldValue("customFieldEnum2", value)}
+                  />
+                )}
+              </Fieldset>
+
+              <div className="submit-buttons">
+                <div>
+                  <Button onClick={onCancel}>Cancel</Button>
                 </div>
-              </Form>
-            </div>
-          )
-        }}
-      </Formik>
-    )
-  }
+                <div>
+                  <Button
+                    id="formBottomSubmit"
+                    bsStyle="primary"
+                    type="button"
+                    onClick={submitForm}
+                    disabled={isSubmitting}
+                  >
+                    Save {Settings.fields.task.shortLabel}
+                  </Button>
+                </div>
+              </div>
+            </Form>
+          </div>
+        )
+      }}
+    </Formik>
+  )
 
-  customEnumButtons = list => {
+  function customEnumButtons(list) {
     const buttons = []
     for (const key in list) {
       if (list.hasOwnProperty(key)) {
@@ -389,42 +360,41 @@ class BaseTaskForm extends Component {
     return buttons
   }
 
-  onCancel = () => {
-    this.props.history.goBack()
+  function onCancel() {
+    props.history.goBack()
   }
 
-  onSubmit = (values, form) => {
-    return this.save(values, form)
-      .then(response => this.onSubmitSuccess(response, values, form))
+  function onSubmit(values, form) {
+    return save(values, form)
+      .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
-        this.setState({ error }, () => {
-          form.setSubmitting(false)
-          jumpToTop()
-        })
+        setError(error)
+        form.setSubmitting(false)
+        jumpToTop()
       })
   }
 
-  onSubmitSuccess = (response, values, form) => {
-    const { edit } = this.props
+  function onSubmitSuccess(response, values, form) {
+    const { edit } = props
     const operation = edit ? "updateTask" : "createTask"
     const task = new Task({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : this.props.initialValues.uuid
+        : props.initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    this.props.history.replace(Task.pathForEdit(task))
+    props.history.replace(Task.pathForEdit(task))
     if (!edit) {
-      this.props.history.replace(Task.pathForEdit(task))
+      props.history.replace(Task.pathForEdit(task))
     }
-    this.props.history.push(Task.pathFor(task), {
+    props.history.push(Task.pathFor(task), {
       success: "Task saved"
     })
   }
 
-  save = (values, form) => {
+  function save(values, form) {
     const task = Object.without(
       new Task(values),
       "notes",
@@ -432,11 +402,11 @@ class BaseTaskForm extends Component {
     )
     task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
-    const { edit } = this.props
+    const { edit } = props
     const variables = { task: task }
     if (
       edit &&
-      (this.props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
+      (props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
         !utils.isEmptyHtml(values.assessment_customFieldEnum1))
     ) {
       // Add an additional mutation to create a change record
@@ -445,13 +415,13 @@ class BaseTaskForm extends Component {
         noteRelatedObjects: [
           {
             relatedObjectType: "tasks",
-            relatedObjectUuid: this.props.initialValues.uuid
+            relatedObjectUuid: props.initialValues.uuid
           }
         ],
         text: JSON.stringify({
           text: values.assessment_customFieldEnum1,
           changedField: "customFieldEnum1",
-          oldValue: this.props.initialValues.customFieldEnum1,
+          oldValue: props.initialValues.customFieldEnum1,
           newValue: values.customFieldEnum1
         })
       }
@@ -459,6 +429,19 @@ class BaseTaskForm extends Component {
     variables.withNote = !!variables.note
     return API.mutation(edit ? GQL_UPDATE_TASK : GQL_CREATE_TASK, variables)
   }
+}
+
+BaseTaskForm.propTypes = {
+  initialValues: PropTypes.instanceOf(Task).isRequired,
+  title: PropTypes.string,
+  edit: PropTypes.bool,
+  currentUser: PropTypes.instanceOf(Person),
+  ...routerRelatedPropTypes
+}
+
+BaseTaskForm.defaultProps = {
+  title: "",
+  edit: false
 }
 
 const TaskForm = props => (

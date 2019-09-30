@@ -266,7 +266,8 @@ var config = {
   // onReload: function(oldSessionId, newSessionId) {
   // }
 }
-let testEnv = (process.env.CI && "remote") || process.env.TEST_ENV || "local"
+let testEnv =
+  (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   config.services = ["chromedriver"]
   config.port = 9515

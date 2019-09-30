@@ -1,9 +1,10 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -59,50 +60,48 @@ const GQL_GET_TASK = gql`
   }
 `
 
-class TaskEdit extends Page {
-  static propTypes = {
-    ...pagePropTypes
+const TaskEdit = props => {
+  const uuid = props.match.params.uuid
+  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Task",
+    uuid,
+    pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "Task"
+  const task = new Task(data ? data.task : {})
 
-  state = {
-    task: new Task()
-  }
-
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  fetchData(props) {
-    return API.query(GQL_GET_TASK, { uuid: props.match.params.uuid }).then(
-      data => {
-        this.setState({ task: new Task(data.task) })
-      }
-    )
-  }
-
-  render() {
-    const { task } = this.state
-    return (
-      <div>
-        <RelatedObjectNotes
-          notes={task.notes}
-          relatedObject={
-            task.uuid && {
-              relatedObjectType: "tasks",
-              relatedObjectUuid: task.uuid
-            }
+  return (
+    <div>
+      <RelatedObjectNotes
+        notes={task.notes}
+        relatedObject={
+          task.uuid && {
+            relatedObjectType: "tasks",
+            relatedObjectUuid: task.uuid
           }
-        />
-        <TaskForm
-          edit
-          initialValues={task}
-          title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
-        />
-      </div>
-    )
-  }
+        }
+      />
+      <TaskForm
+        edit
+        initialValues={task}
+        title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
+      />
+    </div>
+  )
+}
+
+TaskEdit.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

@@ -183,7 +183,6 @@ test("Publish report chain", async t => {
     $,
     $$,
     assertElementText,
-    assertElementNotPresent,
     By,
     Key,
     until,
@@ -207,11 +206,12 @@ test("Publish report chain", async t => {
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
   await $reportsPendingErin.click()
   await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
-  await assertElementNotPresent(
+  let $reportCollection = await $(".report-collection em")
+  await assertElementText(
     t,
-    ".report-collection",
-    "Erin should not be allowed to approve her own reports",
-    shortWaitMs
+    $reportCollection,
+    "No reports found",
+    "Erin should not be allowed to approve her own reports"
   )
 
   // First Jacob needs to approve the report, then rebecca can approve the report
@@ -358,9 +358,9 @@ test("Publish report chain", async t => {
   let $rollupTableTab = await $(".report-collection button[value='table']")
   await $rollupTableTab.click()
 
-  let $reportCollection = await $(".report-collection table")
-  await t.context.driver.wait(until.elementIsVisible($reportCollection))
-  let $approvedIntent = await $reportCollection.findElement(
+  let $reportCollectionTable = await $(".report-collection table")
+  await t.context.driver.wait(until.elementIsVisible($reportCollectionTable))
+  let $approvedIntent = await $reportCollectionTable.findElement(
     By.linkText("meeting goal")
   )
   await assertElementText(

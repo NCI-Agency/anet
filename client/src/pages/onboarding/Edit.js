@@ -1,10 +1,11 @@
-import { PAGE_PROPS_MIN_HEAD } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import { Person } from "models"
 import moment from "moment"
@@ -38,48 +39,48 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-class BaseOnboardingEdit extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    currentUser: PropTypes.instanceOf(Person)
+const BaseOnboardingEdit = props => {
+  const uuid = props.currentUser.uuid
+  const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "User",
+    uuid,
+    pageProps: PAGE_PROPS_MIN_HEAD,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "User"
+  const person = new Person(data ? data.person : {})
 
-  constructor(props) {
-    super(props, PAGE_PROPS_MIN_HEAD)
-
-    this.state = {
-      person: new Person()
-    }
+  if (data.person.endOfTourDate) {
+    person.endOfTourDate = moment(person.endOfTourDate).format()
   }
+  const parsedFullName = Person.parseFullName(person.name)
+  person.firstName = parsedFullName.firstName
+  person.lastName = parsedFullName.lastName
 
-  fetchData(props) {
-    return API.query(GQL_GET_PERSON, { uuid: props.currentUser.uuid }).then(
-      data => {
-        if (data.person.endOfTourDate) {
-          data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
-        }
-        const parsedFullName = Person.parseFullName(data.person.name)
-        data.person.firstName = parsedFullName.firstName
-        data.person.lastName = parsedFullName.lastName
-        this.setState({ person: new Person(data.person) })
-      }
-    )
-  }
+  return (
+    <div>
+      <PersonForm
+        initialValues={person}
+        edit
+        title="Create your account"
+        saveText="Create profile"
+      />
+    </div>
+  )
+}
 
-  render() {
-    return (
-      <div>
-        <PersonForm
-          initialValues={this.state.person}
-          edit
-          title="Create your account"
-          saveText="Create profile"
-        />
-      </div>
-    )
-  }
+BaseOnboardingEdit.propTypes = {
+  ...pagePropTypes,
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 const OnboardingEdit = props => (

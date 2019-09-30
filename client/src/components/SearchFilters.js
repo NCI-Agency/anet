@@ -1,4 +1,4 @@
-import { SEARCH_OBJECT_TYPES } from "actions"
+import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import { Settings } from "api"
 import AdvancedSelectFilter from "components/advancedSearch/AdvancedSelectFilter"
 import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
@@ -24,6 +24,8 @@ import {
   Tag,
   Task
 } from "models"
+import PropTypes from "prop-types"
+import React from "react"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -125,355 +127,433 @@ const advancedSelectFilterTaskProps = {
   addon: TASKS_ICON
 }
 
-export default {
-  searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
-    const filters = {}
-    const authorWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: { role: Person.ROLE.ADVISOR }
+const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
+  const filters = {}
+  const authorWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: { role: Person.ROLE.ADVISOR }
+    }
+  }
+  const attendeeWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {}
+    }
+  }
+  const pendingApprovalOfWidgetFilters = authorWidgetFilters
+  const authorPositionWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {
+        type: [
+          Position.TYPE.ADVISOR,
+          Position.TYPE.SUPER_USER,
+          Position.TYPE.ADMINISTRATOR
+        ]
       }
     }
-    const attendeeWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: {}
+  }
+  const attendeePositionWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {}
+    }
+  }
+  const locationWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {}
+    }
+  }
+
+  const taskWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {}
+    }
+  }
+
+  const tagWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {}
+    }
+  }
+
+  filters[SEARCH_OBJECT_TYPES.REPORTS] = {
+    filters: {
+      Author: {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterPersonProps, {
+          filterDefs: authorWidgetFilters,
+          placeholder: "Filter reports by author...",
+          queryKey: "authorUuid"
+        })
+      },
+      Attendee: {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterPersonProps, {
+          filterDefs: attendeeWidgetFilters,
+          placeholder: "Filter reports by attendee...",
+          queryKey: "attendeeUuid"
+        })
+      },
+      "Pending Approval Of": {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterPersonProps, {
+          filterDefs: pendingApprovalOfWidgetFilters,
+          placeholder: "Filter reports pending approval of...",
+          queryKey: "pendingApprovalOf"
+        })
+      },
+      "Author Position": {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterPositionProps, {
+          filterDefs: authorPositionWidgetFilters,
+          placeholder: "Filter reports by author position...",
+          queryKey: "authorPositionUuid"
+        })
+      },
+      "Attendee Position": {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterPositionProps, {
+          filterDefs: attendeePositionWidgetFilters,
+          placeholder: "Filter reports by attendee position...",
+          queryKey: "attendeePositionUuid"
+        })
+      },
+      Organization: {
+        component: OrganizationFilter,
+        props: {
+          queryKey: "orgUuid",
+          queryIncludeChildOrgsKey: "includeOrgChildren"
+        }
+      },
+      "Engagement Date": {
+        component: DateRangeSearch,
+        props: {
+          queryKey: "engagementDate"
+        }
+      },
+      "Release Date": {
+        component: DateRangeSearch,
+        props: {
+          queryKey: "releasedAt"
+        }
+      },
+      "Creation Date": {
+        component: DateRangeSearch,
+        props: {
+          queryKey: "createdAt"
+        }
+      },
+      "Update Date": {
+        component: DateRangeSearch,
+        props: {
+          queryKey: "updatedAt"
+        }
+      },
+      Location: {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterLocationProps, {
+          filterDefs: locationWidgetFilters,
+          placeholder: "Filter reports by location...",
+          queryKey: "locationUuid"
+        })
+      },
+      State: {
+        component: ReportStateSearch
+      },
+      "Engagement Status": {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "engagementStatus",
+          values: [
+            Report.ENGAGEMENT_STATUS.HAPPENED,
+            Report.ENGAGEMENT_STATUS.FUTURE,
+            Report.ENGAGEMENT_STATUS.CANCELLED
+          ]
+        }
+      },
+      [Settings.fields.report.atmosphere]: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "atmosphere",
+          values: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
+        }
+      },
+      Tag: {
+        component: AdvancedSelectFilter,
+        props: {
+          overlayColumns: ["Name"],
+          overlayRenderRow: TagOverlayRow,
+          objectType: Tag,
+          valueKey: "name",
+          fields: Tag.autocompleteQuery,
+          filterDefs: tagWidgetFilters,
+          placeholder: "Filter reports by tag...",
+          queryKey: "tagUuid"
+        }
+      },
+      "Sensitive Info": {
+        component: CheckboxSearchFilter,
+        props: {
+          queryKey: "sensitiveInfo"
+        }
       }
     }
-    const pendingApprovalOfWidgetFilters = authorWidgetFilters
-    const authorPositionWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: {
-          type: [
-            Position.TYPE.ADVISOR,
-            Position.TYPE.SUPER_USER,
-            Position.TYPE.ADMINISTRATOR
+  }
+
+  const taskShortLabel = Settings.fields.task.shortLabel
+  filters[SEARCH_OBJECT_TYPES.REPORTS].filters[taskShortLabel] = {
+    component: AdvancedSelectFilter,
+    props: Object.assign({}, advancedSelectFilterTaskProps, {
+      filterDefs: taskWidgetFilters,
+      placeholder: `Filter reports by ${taskShortLabel}...`,
+      queryKey: "taskUuid"
+    })
+  }
+
+  const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
+  const ranks = (Settings.fields.person.ranks || []).map(f => f.value)
+  filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
+    filters: {
+      Organization: {
+        component: OrganizationFilter,
+        props: {
+          queryKey: "orgUuid",
+          queryIncludeChildOrgsKey: "includeChildOrgs"
+        }
+      },
+      Role: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "role",
+          values: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
+          labels: [
+            Settings.fields.advisor.person.name,
+            Settings.fields.principal.person.name
+          ]
+        }
+      },
+      Status: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "status",
+          values: [
+            Person.STATUS.ACTIVE,
+            Person.STATUS.INACTIVE,
+            Person.STATUS.NEW_USER
+          ]
+        }
+      },
+      Location: {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterLocationProps, {
+          filterDefs: locationWidgetFilters,
+          placeholder: "Filter by location...",
+          queryKey: "locationUuid"
+        })
+      },
+      Rank: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "rank",
+          values: ranks,
+          labels: ranks
+        }
+      },
+      Nationality: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "country",
+          values: countries,
+          labels: countries
+        }
+      }
+    }
+  }
+
+  filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
+    filters: {
+      Status: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "status",
+          values: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
+        }
+      },
+      "Organization Type": {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "type",
+          values: [
+            Organization.TYPE.ADVISOR_ORG,
+            Organization.TYPE.PRINCIPAL_ORG
+          ],
+          labels: [
+            Settings.fields.advisor.org.name,
+            Settings.fields.principal.org.name
           ]
         }
       }
     }
-    const attendeePositionWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: {}
-      }
-    }
-    const locationWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: {}
-      }
-    }
-
-    const taskWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: {}
-      }
-    }
-
-    const tagWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: {}
-      }
-    }
-
-    filters[SEARCH_OBJECT_TYPES.REPORTS] = {
-      filters: {
-        Author: {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterPersonProps, {
-            filterDefs: authorWidgetFilters,
-            placeholder: "Filter reports by author...",
-            queryKey: "authorUuid"
-          })
-        },
-        Attendee: {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterPersonProps, {
-            filterDefs: attendeeWidgetFilters,
-            placeholder: "Filter reports by attendee...",
-            queryKey: "attendeeUuid"
-          })
-        },
-        "Pending Approval Of": {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterPersonProps, {
-            filterDefs: pendingApprovalOfWidgetFilters,
-            placeholder: "Filter reports pending approval of...",
-            queryKey: "pendingApprovalOf"
-          })
-        },
-        "Author Position": {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterPositionProps, {
-            filterDefs: authorPositionWidgetFilters,
-            placeholder: "Filter reports by author position...",
-            queryKey: "authorPositionUuid"
-          })
-        },
-        "Attendee Position": {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterPositionProps, {
-            filterDefs: attendeePositionWidgetFilters,
-            placeholder: "Filter reports by attendee position...",
-            queryKey: "attendeePositionUuid"
-          })
-        },
-        Organization: {
-          component: OrganizationFilter,
-          props: {
-            queryKey: "orgUuid",
-            queryIncludeChildOrgsKey: "includeOrgChildren"
-          }
-        },
-        "Engagement Date": {
-          component: DateRangeSearch,
-          props: {
-            queryKey: "engagementDate"
-          }
-        },
-        "Release Date": {
-          component: DateRangeSearch,
-          props: {
-            queryKey: "releasedAt"
-          }
-        },
-        "Creation Date": {
-          component: DateRangeSearch,
-          props: {
-            queryKey: "createdAt"
-          }
-        },
-        "Update Date": {
-          component: DateRangeSearch,
-          props: {
-            queryKey: "updatedAt"
-          }
-        },
-        Location: {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterLocationProps, {
-            filterDefs: locationWidgetFilters,
-            placeholder: "Filter reports by location...",
-            queryKey: "locationUuid"
-          })
-        },
-        State: {
-          component: ReportStateSearch
-        },
-        "Engagement Status": {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "engagementStatus",
-            values: [
-              Report.ENGAGEMENT_STATUS.HAPPENED,
-              Report.ENGAGEMENT_STATUS.FUTURE,
-              Report.ENGAGEMENT_STATUS.CANCELLED
-            ]
-          }
-        },
-        [Settings.fields.report.atmosphere]: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "atmosphere",
-            values: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
-          }
-        },
-        Tag: {
-          component: AdvancedSelectFilter,
-          props: {
-            overlayColumns: ["Name"],
-            overlayRenderRow: TagOverlayRow,
-            objectType: Tag,
-            valueKey: "name",
-            fields: Tag.autocompleteQuery,
-            filterDefs: tagWidgetFilters,
-            placeholder: "Filter reports by tag...",
-            queryKey: "tagUuid"
-          }
-        },
-        "Sensitive Info": {
-          component: CheckboxSearchFilter,
-          props: {
-            queryKey: "sensitiveInfo"
-          }
-        }
-      }
-    }
-
-    const taskShortLabel = Settings.fields.task.shortLabel
-    filters[SEARCH_OBJECT_TYPES.REPORTS].filters[taskShortLabel] = {
-      component: AdvancedSelectFilter,
-      props: Object.assign({}, advancedSelectFilterTaskProps, {
-        filterDefs: taskWidgetFilters,
-        placeholder: `Filter reports by ${taskShortLabel}...`,
-        queryKey: "taskUuid"
-      })
-    }
-
-    const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
-    const ranks = (Settings.fields.person.ranks || []).map(f => f.value)
-    filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
-      filters: {
-        Organization: {
-          component: OrganizationFilter,
-          props: {
-            queryKey: "orgUuid",
-            queryIncludeChildOrgsKey: "includeChildOrgs"
-          }
-        },
-        Role: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "role",
-            values: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
-            labels: [
-              Settings.fields.advisor.person.name,
-              Settings.fields.principal.person.name
-            ]
-          }
-        },
-        Status: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "status",
-            values: [
-              Person.STATUS.ACTIVE,
-              Person.STATUS.INACTIVE,
-              Person.STATUS.NEW_USER
-            ]
-          }
-        },
-        Location: {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterLocationProps, {
-            filterDefs: locationWidgetFilters,
-            placeholder: "Filter by location...",
-            queryKey: "locationUuid"
-          })
-        },
-        Rank: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "rank",
-            values: ranks,
-            labels: ranks
-          }
-        },
-        Nationality: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "country",
-            values: countries,
-            labels: countries
-          }
-        }
-      }
-    }
-
-    filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
-      filters: {
-        Status: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "status",
-            values: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
-          }
-        },
-        "Organization Type": {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "type",
-            values: [
-              Organization.TYPE.ADVISOR_ORG,
-              Organization.TYPE.PRINCIPAL_ORG
-            ],
-            labels: [
-              Settings.fields.advisor.org.name,
-              Settings.fields.principal.org.name
-            ]
-          }
-        }
-      }
-    }
-
-    filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
-      filters: {
-        [POSTITION_POSITION_TYPE_FILTER_KEY]: {
-          component: PositionTypeSearchFilter,
-          props: {
-            queryKey: "type",
-            values: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
-            labels: [
-              Settings.fields.advisor.position.name,
-              Settings.fields.principal.position.name
-            ],
-            ref: positionTypeFilterRef
-          }
-        },
-        [POSTITION_ORGANIZATION_FILTER_KEY]: {
-          component: OrganizationFilter,
-          props: {
-            queryKey: "organizationUuid",
-            queryIncludeChildOrgsKey: "includeChildrenOrgs",
-            ref: organizationFilterRef
-          }
-        },
-        Status: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "status",
-            values: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
-          }
-        },
-        Location: {
-          component: AdvancedSelectFilter,
-          props: Object.assign({}, advancedSelectFilterLocationProps, {
-            filterDefs: locationWidgetFilters,
-            placeholder: "Filter by location...",
-            queryKey: "locationUuid"
-          })
-        },
-        "Is Filled?": {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "isFilled",
-            values: ["true", "false"],
-            labels: ["Yes", "No"]
-          }
-        }
-      }
-    }
-
-    filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
-      filters: {
-        Status: {
-          component: SelectSearchFilter,
-          props: {
-            queryKey: "status",
-            values: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
-          }
-        }
-      }
-    }
-
-    // Task filters
-    filters[SEARCH_OBJECT_TYPES.TASKS] = {
-      filters: taskFilters()
-    }
-
-    return filters
-  },
-  // filters not being displayed in the advanced search but being used in the search
-  extraFilters: function(positionTypeFilterRef, organizationFilterRef) {
-    const filters = {}
-    filters[SEARCH_OBJECT_TYPES.REPORTS] = [
-      "includeEngagementDayOfWeek",
-      "sortOrder"
-    ]
-    return filters
   }
+
+  filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
+    filters: {
+      [POSTITION_POSITION_TYPE_FILTER_KEY]: {
+        component: PositionTypeSearchFilter,
+        props: {
+          queryKey: "type",
+          values: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
+          labels: [
+            Settings.fields.advisor.position.name,
+            Settings.fields.principal.position.name
+          ],
+          ref: positionTypeFilterRef
+        }
+      },
+      [POSTITION_ORGANIZATION_FILTER_KEY]: {
+        component: OrganizationFilter,
+        props: {
+          queryKey: "organizationUuid",
+          queryIncludeChildOrgsKey: "includeChildrenOrgs",
+          ref: organizationFilterRef
+        }
+      },
+      Status: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "status",
+          values: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
+        }
+      },
+      Location: {
+        component: AdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterLocationProps, {
+          filterDefs: locationWidgetFilters,
+          placeholder: "Filter by location...",
+          queryKey: "locationUuid"
+        })
+      },
+      "Is Filled?": {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "isFilled",
+          values: ["true", "false"],
+          labels: ["Yes", "No"]
+        }
+      }
+    }
+  }
+
+  filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
+    filters: {
+      Status: {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "status",
+          values: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
+        }
+      }
+    }
+  }
+
+  // Task filters
+  filters[SEARCH_OBJECT_TYPES.TASKS] = {
+    filters: taskFilters()
+  }
+
+  return filters
 }
+
+// filters not being displayed in the advanced search but being used in the search
+const extraFilters = function(positionTypeFilterRef, organizationFilterRef) {
+  const filters = {}
+  filters[SEARCH_OBJECT_TYPES.REPORTS] = [
+    "includeEngagementDayOfWeek",
+    "sortOrder"
+  ]
+  return filters
+}
+
+const SearchFilterDisplay = props => {
+  const { filter, element } = props
+  const label = filter.key
+  const ChildComponent = element.component
+  const sep = props.showSeparator ? ", " : ""
+  return (
+    <React.Fragment>
+      <b>{label}</b>:{" "}
+      <em>
+        <ChildComponent
+          value={filter.value || ""}
+          asFormField={false}
+          {...element.props}
+        />
+      </em>
+      {sep}
+    </React.Fragment>
+  )
+}
+
+SearchFilterDisplay.propTypes = {
+  filter: PropTypes.object,
+  element: PropTypes.shape({
+    component: PropTypes.func.isRequired,
+    props: PropTypes.object
+  }),
+  showSeparator: PropTypes.bool
+}
+
+export const SearchDescription = props => {
+  const { query, showPlaceholders } = props
+  const allFilters = searchFilters()
+  const filterDefs =
+    query.objectType && SEARCH_OBJECT_TYPES[query.objectType]
+      ? allFilters[SEARCH_OBJECT_TYPES[query.objectType]].filters
+      : {}
+  const filters = query.filters.filter(f => filterDefs[f.key])
+  return (
+    <span className="asLink">
+      {query.objectType ? (
+        <React.Fragment>
+          <b>{SEARCH_OBJECT_LABELS[query.objectType]}</b>
+          {filters.length > 0 ? (
+            <React.Fragment>
+              <React.Fragment> filtered on </React.Fragment>
+              {filters.map(
+                (filter, i) =>
+                  filterDefs[filter.key] && (
+                    <SearchFilterDisplay
+                      key={filter.key}
+                      filter={filter}
+                      element={filterDefs[filter.key]}
+                      showSeparator={i !== filters.length - 1}
+                    />
+                  )
+              )}
+            </React.Fragment>
+          ) : (
+            showPlaceholders && " - add filters"
+          )}
+        </React.Fragment>
+      ) : (
+        showPlaceholders && "Add filters"
+      )}
+    </span>
+  )
+}
+
+SearchDescription.propTypes = {
+  query: PropTypes.shape({
+    text: PropTypes.string,
+    filters: PropTypes.any,
+    objectType: PropTypes.string
+  }),
+  showPlaceholders: PropTypes.bool
+}
+
+export default { searchFilters, extraFilters }

@@ -6,16 +6,17 @@ import {
   setSearchQuery
 } from "actions"
 import { Settings } from "api"
-import autobind from "autobind-decorator"
 import FilterableAdvisorReportsTable from "components/AdvisorReports/FilterableAdvisorReportsTable"
 import AppContext from "components/AppContext"
 import CancelledEngagementReports from "components/CancelledEngagementReports"
 import Fieldset from "components/Fieldset"
 import FutureEngagementsByLocation from "components/FutureEngagementsByLocation"
 import Messages from "components/Messages"
-import Page, {
+import {
+  getSearchQuery,
   mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
@@ -54,214 +55,167 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: PendingApprovalReports,
     navTitle: "Pending Approval Reports",
-    title: "",
-    dateRange: false,
-    showCalendar: true
+    title: ""
   },
   [CANCELLED_REPORTS]: {
     searchProps: _SEARCH_PROPS,
     component: CancelledEngagementReports,
     navTitle: "Cancelled Engagement Reports",
-    title: "",
-    dateRange: false,
-    showCalendar: true
+    title: ""
   },
   [REPORTS_BY_TASK]: {
     searchProps: _SEARCH_PROPS,
     component: ReportsByTask,
     navTitle: "Reports by Task",
-    title: "",
-    dateRange: false,
-    showCalendar: true
+    title: ""
   },
   [REPORTS_BY_DAY_OF_WEEK]: {
     searchProps: _SEARCH_PROPS,
     component: ReportsByDayOfWeek,
     navTitle: "Reports by Day of the Week",
-    title: "",
-    dateRange: true,
-    showCalendar: false
+    title: ""
   },
   [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
     searchProps: _SEARCH_PROPS,
     component: FutureEngagementsByLocation,
     navTitle: "Future Engagements by Location",
-    title: "",
-    dateRange: true,
-    onlyShowBetween: true
+    title: ""
   },
   [ADVISOR_REPORTS]: {
     searchProps: DEFAULT_SEARCH_PROPS,
     component: FilterableAdvisorReportsTable,
     navTitle: `${Settings.fields.advisor.person.name} Reports`,
-    title: `${Settings.fields.advisor.person.name} Reports`,
-    dateRange: false,
-    showCalendar: false
+    title: `${Settings.fields.advisor.person.name} Reports`
   }
 }
 
-class BaseInsightsShow extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    setSearchQuery: PropTypes.func.isRequired,
-    appSettings: PropTypes.object
+const BaseInsightsShow = props => {
+  const { appSettings, searchQuery } = props
+  const flexStyle = {
+    display: "flex",
+    flexDirection: "column",
+    flex: "1 1 auto",
+    height: "100%"
   }
+  const mosaicLayoutStyle = {
+    display: "flex",
+    flex: "1 1 auto",
+    height: "100%"
+  }
+  const defaultPastDates = {
+    referenceDate: getCutoffDate(),
+    startDate: getCutoffDate(),
+    endDate: getCurrentDateTime()
+  }
+  const defaultFutureDates = {
+    referenceDate: getCurrentDateTime(),
+    startDate: getCurrentDateTime(),
+    endDate: getCurrentDateTime().add(14, "days")
+  }
+  const insightDefaultQueryParams = {
+    [NOT_APPROVED_REPORTS]: {
+      state: [Report.STATE.PENDING_APPROVAL],
+      updatedAtEnd: defaultPastDates.referenceDate.endOf("day").valueOf()
+    },
+    [CANCELLED_REPORTS]: {
+      state: [Report.STATE.CANCELLED],
+      cancelledReason: null,
+      releasedAtStart: defaultPastDates.referenceDate.startOf("day").valueOf()
+    },
+    [REPORTS_BY_TASK]: {
+      state: [Report.STATE.PUBLISHED],
+      releasedAtStart: defaultPastDates.referenceDate.startOf("day").valueOf()
+    },
+    [REPORTS_BY_DAY_OF_WEEK]: {
+      state: [Report.STATE.PUBLISHED],
+      releasedAtStart: defaultPastDates.startDate.startOf("day").valueOf(),
+      releasedAtEnd: defaultPastDates.endDate.endOf("day").valueOf(),
+      includeEngagementDayOfWeek: 1
+    },
+    [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
+      engagementDateStart: defaultFutureDates.startDate
+        .startOf("day")
+        .valueOf(),
+      engagementDateEnd: defaultFutureDates.endDate.endOf("day").valueOf()
+    },
+    [ADVISOR_REPORTS]: {}
+  }
+  let queryParams
+  if (props.searchQuery === DEFAULT_SEARCH_QUERY) {
+    // when going from a different page to the insight page, use the default
+    // insight search query
+    queryParams = setInsightDefaultSearchQuery()
+  } else {
+    queryParams = getSearchQuery(searchQuery)
+  }
+  const insightConfig = INSIGHT_DETAILS[props.match.params.insight]
+  const InsightComponent = insightConfig.component
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: insightConfig.searchProps,
+    ...props
+  })
+  const hasSearchCriteria =
+    _isEmpty(insightDefaultQueryParams[props.match.params.insight]) ||
+    !_isEmpty(queryParams)
 
-  get cutoffDate() {
-    const { appSettings } = this.props || {}
+  return (
+    <div style={flexStyle}>
+      {hasSearchCriteria ? (
+        <Fieldset
+          id={props.match.params.insight}
+          title={insightConfig.title}
+          style={flexStyle}
+        >
+          <InsightComponent
+            style={mosaicLayoutStyle}
+            queryParams={queryParams}
+          />
+        </Fieldset>
+      ) : (
+        <Messages
+          error={{ message: "You did not enter any search criteria." }}
+        />
+      )}
+    </div>
+  )
+
+  function getCutoffDate() {
     let maxReportAge =
       1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment()
       .subtract(maxReportAge, "days")
       .clone()
   }
-  get currentDateTime() {
+
+  function getCurrentDateTime() {
     return moment().clone()
   }
 
-  defaultPastDates = {
-    referenceDate: this.cutoffDate,
-    startDate: this.cutoffDate,
-    endDate: this.currentDateTime
-  }
-  defaultFutureDates = {
-    referenceDate: this.currentDateTime,
-    startDate: this.currentDateTime,
-    endDate: this.currentDateTime.add(14, "days")
-  }
-
-  constructor(props) {
-    const insightConfig = INSIGHT_DETAILS[props.match.params.insight]
-    super(props, DEFAULT_PAGE_PROPS, insightConfig.searchProps)
-  }
-
-  get insightDefaultQueryParams() {
-    return {
-      [NOT_APPROVED_REPORTS]: {
-        state: [Report.STATE.PENDING_APPROVAL],
-        updatedAtEnd: this.defaultPastDates.referenceDate.endOf("day").valueOf()
-      },
-      [CANCELLED_REPORTS]: {
-        state: [Report.STATE.CANCELLED],
-        cancelledReason: "",
-        releasedAtStart: this.defaultPastDates.referenceDate
-          .startOf("day")
-          .valueOf()
-      },
-      [REPORTS_BY_TASK]: {
-        state: [Report.STATE.PUBLISHED],
-        releasedAtStart: this.defaultPastDates.referenceDate
-          .startOf("day")
-          .valueOf()
-      },
-      [REPORTS_BY_DAY_OF_WEEK]: {
-        state: [Report.STATE.PUBLISHED],
-        releasedAtStart: this.defaultPastDates.startDate
-          .startOf("day")
-          .valueOf(),
-        releasedAtEnd: this.defaultPastDates.endDate.endOf("day").valueOf(),
-        includeEngagementDayOfWeek: 1
-      },
-      [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
-        engagementDateStart: this.defaultFutureDates.startDate
-          .startOf("day")
-          .valueOf(),
-        engagementDateEnd: this.defaultFutureDates.endDate
-          .endOf("day")
-          .valueOf()
-      },
-      [ADVISOR_REPORTS]: {}
-    }
-  }
-
-  @autobind
-  deserializeCallback(objectType, filters, text) {
+  function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
-    this.props.setSearchQuery({
+    props.setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
     })
   }
 
-  @autobind
-  setInsightDefaultSearchQuery() {
-    const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
-    this.props.setSearchProps(Object.assign({}, insightConfig.searchProps))
+  function setInsightDefaultSearchQuery() {
+    const queryParams = insightDefaultQueryParams[props.match.params.insight]
     deserializeQueryParams(
       SEARCH_OBJECT_TYPES.REPORTS,
-      this.insightDefaultQueryParams[this.props.match.params.insight],
-      this.deserializeCallback
+      queryParams,
+      deserializeCallback
     )
+    return queryParams
   }
+}
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.match.params.insight !== this.props.match.params.insight) {
-      // when insight changes we need to update the search query to use the new
-      // insight default query params
-      // NOTE: this also happens now when using the back browser button from one
-      // insight to the previous one. Do we want that?
-      this.setInsightDefaultSearchQuery()
-    } else if (
-      prevProps.searchQuery !== this.props.searchQuery &&
-      this.props.searchQuery === DEFAULT_SEARCH_QUERY
-    ) {
-      // when the search query has been cleared, use the default insight search query
-      // (for instance on consecutive clicks on the same insight in the left navigation)
-      this.setInsightDefaultSearchQuery()
-    }
-  }
-
-  componentDidMount() {
-    super.componentDidMount()
-    if (this.props.searchQuery === DEFAULT_SEARCH_QUERY) {
-      // when going from a different page to the insight page,  use the default
-      // insight search query
-      this.setInsightDefaultSearchQuery()
-    }
-  }
-
-  render() {
-    const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
-    const InsightComponent = insightConfig.component
-    const queryParams = this.getSearchQuery()
-    const flexStyle = {
-      display: "flex",
-      flexDirection: "column",
-      flex: "1 1 auto",
-      height: "100%"
-    }
-    const mosaicLayoutStyle = {
-      display: "flex",
-      flex: "1 1 auto",
-      height: "100%"
-    }
-    const hasSearchCriteria =
-      _isEmpty(
-        this.insightDefaultQueryParams[this.props.match.params.insight]
-      ) || !_isEmpty(queryParams)
-    return (
-      <div style={flexStyle}>
-        <Messages error={this.state.error} success={this.state.success} />
-        {hasSearchCriteria ? (
-          <Fieldset
-            id={this.props.match.params.insight}
-            title={insightConfig.title}
-            style={flexStyle}
-          >
-            <InsightComponent
-              style={mosaicLayoutStyle}
-              queryParams={queryParams}
-            />
-          </Fieldset>
-        ) : (
-          <Messages
-            error={{ message: "You did not enter any search criteria." }}
-          />
-        )}
-      </div>
-    )
-  }
+BaseInsightsShow.propTypes = {
+  ...pagePropTypes,
+  setSearchQuery: PropTypes.func.isRequired,
+  appSettings: PropTypes.object
 }
 
 const mapStateToProps = (state, ownProps) => ({

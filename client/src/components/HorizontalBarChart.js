@@ -1,18 +1,19 @@
+import * as d3 from "d3"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useEffect, useRef } from "react"
+import ReactTooltip from "react-tooltip"
 import "./BarChart.css"
-
-let d3 = require("d3")
 
 /*
  * A bar chart component displaying horizontal bars, grouped per category
  */
-class HorizontalBarChart extends Component {
+const HorizontalBarChart = props => {
   /*
    * Example for the data property structure when displaying number of
    * engagements per location, grouped by day:
    *
-   *  this.props.data = {
+   *  props.data = {
    *    categoryLabels: {
    *      1540677600000: "28 Oct 2018",
    *      1540767600000: "29 Oct 2018",
@@ -62,47 +63,21 @@ class HorizontalBarChart extends Component {
    *    ]
    *  }
    */
-
-  static propTypes = {
-    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-    chartId: PropTypes.string,
-    data: PropTypes.object,
-    onBarClick: PropTypes.func,
-    showPopover: PropTypes.func,
-    hidePopover: PropTypes.func,
-    selectedBarClass: PropTypes.string,
-    selectedBar: PropTypes.string,
-    updateChart: PropTypes.bool
-  }
-
-  static defaultProps = {
-    width: "100%",
-    selectedBarClass: "selected-bar",
-    selectedBar: "",
-    updateChart: true
-  }
-
-  node = React.createRef()
-
-  constructor(props) {
-    super(props)
-    this.createBarChart = this.createBarChart.bind(this)
-  }
-
-  componentDidMount() {
-    this.createBarChart()
-  }
-
-  componentDidUpdate() {
-    this.createBarChart()
-  }
-
-  isNumeric(value) {
-    return typeof value === "number"
-  }
-
-  createBarChart() {
+  const {
+    width,
+    height,
+    chartId,
+    data,
+    onBarClick,
+    tooltip,
+    selectedBarClass,
+    selectedBar
+  } = props
+  const node = useRef(null)
+  useEffect(() => {
+    if (!node.current) {
+      return
+    }
     const BAR_HEIGHT = 24
     const BAR_PADDING = 8
     const MARGIN = {
@@ -111,15 +86,12 @@ class HorizontalBarChart extends Component {
       left: 0,
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
-    let chartBox = this.node.current.getBoundingClientRect()
-    let chartWidth = this.isNumeric(this.props.width)
-      ? this.props.width
-      : chartBox.right - chartBox.left
-    let chartData = this.props.data.data
-    let categoryLabels = this.props.data.categoryLabels
-    let leavesLabels = this.props.data.leavesLabels
-    let onBarClick = this.props.onBarClick
-    let chart = d3.select(this.node.current)
+    let chartBox = node.current.getBoundingClientRect()
+    let chartWidth = isNumeric(width) ? width : chartBox.right - chartBox.left
+    let chartData = data.data
+    let categoryLabels = data.categoryLabels
+    let leavesLabels = data.leavesLabels
+    let chart = d3.select(node.current)
     let xLabels = [].concat.apply(
       [],
       chartData.map(d => d.values.map(d => d.value))
@@ -279,7 +251,6 @@ class HorizontalBarChart extends Component {
         return `translate(0, ${yCategoryScale(i * yScale.bandwidth())})`
       })
 
-    const selectedBar = this.props.selectedBar
     barsGroup
       .selectAll(".bar")
       .data(function(d) {
@@ -292,19 +263,16 @@ class HorizontalBarChart extends Component {
       .attr("id", function(d, i) {
         return `bar_${d.key}${d.parentKey}`
       })
-      .classed(this.props.selectedBarClass, function(d, i) {
+      .classed(selectedBarClass, function(d, i) {
         return this.id === selectedBar
       })
       .attr("x", 0)
       .attr("y", yCategoryScale(BAR_PADDING))
       .attr("width", d => xScale(d.value))
       .attr("height", BAR_HEIGHT)
-      .on(
-        "mouseenter",
-        d =>
-          this.props.showPopover && this.props.showPopover(d3.event.target, d)
-      )
-      .on("mouseleave", d => this.props.hidePopover && this.props.hidePopover())
+      .attr("data-for", "tooltip-top")
+      .attr("data-html", true)
+      .attr("data-tip", d => tooltip && tooltip(d))
 
     barsGroup
       .selectAll(".bar-label")
@@ -322,42 +290,58 @@ class HorizontalBarChart extends Component {
       .text(d => leavesLabels[d.key])
       .attr("text-anchor", "start")
 
-    this.bindElementOnClick(barsGroup, onBarClick)
+    bindElementOnClick(barsGroup, onBarClick)
+
+    ReactTooltip.rebuild()
+  }, [
+    node,
+    width,
+    height,
+    chartId,
+    data,
+    onBarClick,
+    tooltip,
+    selectedBarClass,
+    selectedBar
+  ])
+
+  return (
+    (_isEmpty(data) && (
+      <div>
+        <em>No data</em>
+      </div>
+    )) || <svg id={chartId} ref={node} width={width} height={height} />
+  )
+
+  function isNumeric(value) {
+    return typeof value === "number"
   }
 
-  bindElementOnClick(element, onClickHandler) {
+  function bindElementOnClick(element, onClickHandler) {
     if (onClickHandler) {
       element.on("click", function(d) {
         onClickHandler(d)
       })
     }
   }
+}
 
-  render() {
-    return (
-      <svg
-        id={this.props.chartId}
-        ref={this.node}
-        width={this.props.width}
-        height={this.props.height}
-      />
-    )
-  }
+HorizontalBarChart.propTypes = {
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  chartId: PropTypes.string,
+  data: PropTypes.object,
+  onBarClick: PropTypes.func,
+  tooltip: PropTypes.func,
+  selectedBarClass: PropTypes.string,
+  selectedBar: PropTypes.string
+}
 
-  shouldComponentUpdate(nextProps, nextState) {
-    // Make sure the chart is only re-rendered if the state or properties have
-    // changed. This because we do not want to re-render the chart only in order
-    // to highlight a bar in the chart.
-    if (
-      nextProps &&
-      !nextProps.updateChart &&
-      nextProps.width === this.props.width &&
-      nextProps.height === this.props.height
-    ) {
-      return false
-    }
-    return true
-  }
+HorizontalBarChart.defaultProps = {
+  width: "100%",
+  selectedBarClass: "selected-bar",
+  selectedBar: "",
+  updateChart: true
 }
 
 export default HorizontalBarChart

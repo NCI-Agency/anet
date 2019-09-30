@@ -60,6 +60,7 @@
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-react-hooks": "^2.0.1",
     "eslint-plugin-standard": "^4.0.1",
     "faker": "^4.1.0",
     "file-loader": "^4.2.0",
@@ -145,6 +146,7 @@
     "react-scroll": "^1.7.14",
     "react-tag-input": "^5.2.3",
     "react-toastify": "^5.3.2",
+    "react-tooltip": "^3.11.1",
     "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.4",
     "redux-persist": "^6.0.0",
@@ -246,6 +248,7 @@
       "node",
       "promise",
       "react",
+      "react-hooks",
       "standard"
     ],
     "rules": {
@@ -313,6 +316,8 @@
           "avoidEscape": true
         }
       ],
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/rules-of-hooks": "error",
       "react/jsx-boolean-value": "warn",
       "react/jsx-curly-spacing": "warn",
       "react/jsx-equals-spacing": "warn",

@@ -283,9 +283,7 @@ export default class AdvancedSelect extends Component {
                         loaderMessage={"No results found"}
                         tableClassName={overlayTableClassName}
                       />
-                      <footer className="searchPagination">
-                        {this.paginationFor(filterType)}
-                      </footer>
+                      {this.paginationFor(filterType)}
                     </Col>
                   </Row>
                 )
@@ -454,21 +452,15 @@ export default class AdvancedSelect extends Component {
       results && results[filterType] ? results[filterType].pageNum : 0
     const totalCount =
       results && results[filterType] ? results[filterType].totalCount : 0
-    const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
-    if (numPages <= 1) {
-      return
-    }
     return (
       <UltimatePagination
+        Component="footer"
+        componentClassName="searchPagination"
         className="pull-right"
-        currentPage={pageNum + 1}
-        totalPages={numPages}
-        boundaryPagesRange={1}
-        siblingPagesRange={2}
-        hideEllipsis={false}
-        hidePreviousAndNextPageLinks={false}
-        hideFirstAndLastPageLinks
-        onChange={value => this.goToPage(value - 1)}
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={this.goToPage}
       />
     )
   }
