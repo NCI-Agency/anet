@@ -6,6 +6,9 @@
 pool:
   vmImage: 'Ubuntu 16.04'
 
+variables:
+  NODE_OPTIONS: '--max-old-space-size=8192'
+
 steps:
 - task: Gradle@2
   inputs:

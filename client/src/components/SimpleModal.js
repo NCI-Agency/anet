@@ -1,56 +1,37 @@
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
-class SimpleModal extends Component {
-  static propTypes = {
-    title: PropTypes.string.isRequired,
-    size: PropTypes.string,
-    onClickModalOpen: PropTypes.func.isRequired,
-    children: PropTypes.node
-  }
+const SimpleModal = props => {
+  const [showModal, setShowModal] = useState(false)
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      showModal: false
-    }
-    this.close = this.close.bind(this)
-    this.open = this.open.bind(this)
-  }
+  return (
+    <div>
+      <span className="asLink" onClick={() => setShowModal(true)}>
+        {props.title}
+      </span>
 
-  close() {
-    this.setState({ showModal: false })
-  }
+      <Modal
+        bsSize={props.size}
+        show={showModal}
+        onHide={() => setShowModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{props.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{props.children}</Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setShowModal(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  )
+}
 
-  open() {
-    this.setState({ showModal: true })
-    this.props.onClickModalOpen()
-  }
-
-  render() {
-    return (
-      <div>
-        <span className="asLink" onClick={this.open}>
-          {this.props.title}
-        </span>
-
-        <Modal
-          bsSize={this.props.size}
-          show={this.state.showModal}
-          onHide={this.close}
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>{this.props.title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{this.props.children}</Modal.Body>
-          <Modal.Footer>
-            <Button onClick={this.close}>Close</Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    )
-  }
+SimpleModal.propTypes = {
+  title: PropTypes.string.isRequired,
+  size: PropTypes.string,
+  children: PropTypes.node
 }
 
 export default SimpleModal

@@ -1,256 +1,288 @@
 import { IconNames } from "@blueprintjs/icons"
-import { Settings } from "api"
-import autobind from "autobind-decorator"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import BarChart from "components/BarChart"
+import MosaicLayout from "components/MosaicLayout"
+import { useBoilerplate } from "components/Page"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
   FORMAT_TABLE,
   FORMAT_CALENDAR
 } from "components/ReportCollection"
-import ReportsVisualisation, {
-  propTypes as rvPropTypes
-} from "components/ReportsVisualisation"
-import LoaderHOC, { mapDispatchToProps } from "HOC/LoaderHOC"
-import React from "react"
-import { Overlay, Popover } from "react-bootstrap"
+import * as d3 from "d3"
+import _isEqual from "lodash/isEqual"
+import PropTypes from "prop-types"
+import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
-import { connect } from "react-redux"
 
-const BarChartWithLoader = connect(
-  null,
-  mapDispatchToProps
-)(LoaderHOC("isLoading")("data")(BarChart))
-const Context = React.createContext()
+const GQL_GET_REPORT_LIST = gql`
+  query($reportQuery: ReportSearchQueryInput) {
+    reportList(query: $reportQuery) {
+      totalCount
+      list {
+        uuid
+        tasks {
+          uuid
+          shortName
+        }
+      }
+    }
+  }
+`
+
+const Chart = props => {
+  const {
+    chartId,
+    queryParams,
+    focusedSelection,
+    goToSelection,
+    selectedBarClass
+  } = props
+  const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
+    reportQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  const graphData = useMemo(() => {
+    if (!data) {
+      return []
+    }
+    const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
+    const noTask = {
+      uuid: "-1",
+      shortName: noTaskMessage,
+      longName: noTaskMessage
+    }
+    let reportsList = data.reportList.list || []
+    if (!reportsList.length) {
+      return []
+    }
+    let simplifiedValues = reportsList.map(d => {
+      return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
+    })
+    let tasks = reportsList.map(d => d.tasks)
+    tasks = [].concat
+      .apply([], tasks)
+      .filter(
+        (item, index, d) =>
+          d.findIndex(t => {
+            return t.uuid === item.uuid
+          }) === index
+      )
+      .sort((a, b) => a.shortName.localeCompare(b.shortName))
+    // add No Task item, in order to relate to reports without Tasks
+    tasks.push(noTask)
+    return tasks.map(d => {
+      let r = {}
+      r.task = d
+      r.reportsCount =
+        d.uuid === noTask.uuid
+          ? simplifiedValues.filter(item => item.tasks.length === 0).length
+          : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
+            .length
+      return r
+    })
+  }, [data])
+  if (done) {
+    return result
+  }
+
+  return (
+    <div className="non-scrollable">
+      <ContainerDimensions>
+        {({ width, height }) => (
+          <BarChart
+            width={width}
+            height={height}
+            chartId={chartId}
+            data={graphData}
+            xProp="task.uuid"
+            yProp="reportsCount"
+            xLabel="task.shortName"
+            onBarClick={goToSelection}
+            tooltip={d => `
+              <h4>${d.task.shortName}</h4>
+              <p>${d.reportsCount}</p>
+            `}
+            selectedBarClass={selectedBarClass}
+            selectedBar={
+              focusedSelection ? "bar_" + focusedSelection.task.uuid : ""
+            }
+          />
+        )}
+      </ContainerDimensions>
+    </div>
+  )
+}
+
+Chart.propTypes = {
+  chartId: PropTypes.string,
+  queryParams: PropTypes.object,
+  focusedSelection: PropTypes.object,
+  goToSelection: PropTypes.func,
+  selectedBarClass: PropTypes.string
+}
+
+const Collection = props => {
+  const { id, queryParams } = props
+
+  return (
+    <div className="scrollable">
+      <ReportCollection
+        paginationKey={`r_${id}`}
+        queryParams={queryParams}
+        viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+      />
+    </div>
+  )
+}
+
+Collection.propTypes = {
+  id: PropTypes.string,
+  queryParams: PropTypes.object
+}
+
+const Map = props => {
+  const { queryParams } = props
+
+  return (
+    <div className="non-scrollable">
+      <ContainerDimensions>
+        {({ width, height }) => (
+          <ReportCollection
+            queryParams={queryParams}
+            width={width}
+            height={height}
+            marginBottom={0}
+            viewFormats={[FORMAT_MAP]}
+          />
+        )}
+      </ContainerDimensions>
+    </div>
+  )
+}
+
+Map.propTypes = {
+  queryParams: PropTypes.object
+}
 
 /*
  * Component displaying a chart with number of reports per Task.
  */
-class ReportsByTask extends ReportsVisualisation {
-  static propTypes = { ...rvPropTypes }
+const ReportsByTask = props => {
+  const { queryParams, style } = props
+  const [focusedSelection, setFocusedSelection] = useState(null)
 
-  constructor(props) {
-    super(props)
-
-    this.taskShortLabel = Settings.fields.task.shortLabel
-    this.CHART_ID = "reports_by_task"
-    this.GQL_CHART_FIELDS = /* GraphQL */ `
-      uuid
-      tasks {
-        uuid
-        shortName
-      }
-    `
-    this.VISUALIZATIONS = [
-      {
-        id: "rbt-chart",
-        icons: [IconNames.GROUPED_BAR_CHART],
-        title: `Chart by ${this.taskShortLabel}`,
-        renderer: this.getBarChart
-      },
-      {
-        id: "rbt-collection",
-        icons: [IconNames.PANEL_TABLE],
-        title: `Reports by ${this.taskShortLabel}`,
-        renderer: this.getReportCollection
-      },
-      {
-        id: "rbt-map",
-        icons: [IconNames.MAP],
-        title: `Map by ${this.taskShortLabel}`,
-        renderer: this.getReportMap
-      }
-    ]
-    this.INITIAL_LAYOUT = {
-      direction: "column",
-      first: {
-        direction: "row",
-        first: this.VISUALIZATIONS[0].id,
-        second: this.VISUALIZATIONS[1].id
-      },
-      second: this.VISUALIZATIONS[2].id
+  const taskShortLabel = Settings.fields.task.shortLabel
+  const chartId = "reports_by_task"
+  const selectedBarClass = "selected-bar"
+  const VISUALIZATIONS = [
+    {
+      id: "rbt-chart",
+      icons: [IconNames.GROUPED_BAR_CHART],
+      title: `Chart by ${taskShortLabel}`,
+      renderer: renderChart
+    },
+    {
+      id: "rbt-collection",
+      icons: [IconNames.PANEL_TABLE],
+      title: `Reports by ${taskShortLabel}`,
+      renderer: renderReportCollection
+    },
+    {
+      id: "rbt-map",
+      icons: [IconNames.MAP],
+      title: `Map by ${taskShortLabel}`,
+      renderer: renderReportMap
     }
-    this.DESCRIPTION = `The reports are grouped by ${this.taskShortLabel}.
-      In order to see the list of published reports for a ${this.taskShortLabel},
-      click on the bar corresponding to the ${this.taskShortLabel}.`
+  ]
+  const INITIAL_LAYOUT = {
+    direction: "column",
+    first: {
+      direction: "row",
+      first: VISUALIZATIONS[0].id,
+      second: VISUALIZATIONS[1].id
+    },
+    second: VISUALIZATIONS[2].id
+  }
+  const DESCRIPTION = `The reports are grouped by ${taskShortLabel}.
+    In order to see the list of published reports for a ${taskShortLabel},
+    click on the bar corresponding to the ${taskShortLabel}.`
 
-    this.state = {
-      graphData: [],
-      reports: null,
-      allReports: null,
-      reportsPageNum: 0,
-      focusedSelection: "",
-      graphPopover: null,
-      hoveredBar: null,
-      updateChart: true, // whether the chart needs to be updated
-      isLoading: false
+  return (
+    <MosaicLayout
+      style={style}
+      visualizations={VISUALIZATIONS}
+      initialNode={INITIAL_LAYOUT}
+      description={DESCRIPTION}
+    />
+  )
+
+  function renderChart(id) {
+    return (
+      <Chart
+        chartId={chartId}
+        queryParams={queryParams}
+        focusedSelection={focusedSelection}
+        goToSelection={goToSelection}
+        selectedBarClass={selectedBarClass}
+      />
+    )
+  }
+
+  function renderReportCollection(id) {
+    return <Collection queryParams={getQueryParams()} />
+  }
+
+  function renderReportMap(id) {
+    return <Map queryParams={getQueryParams()} />
+  }
+
+  function getQueryParams() {
+    const sqParams = Object.assign({}, queryParams)
+    if (focusedSelection) {
+      Object.assign(sqParams, getAdditionalReportParams())
+    }
+    return sqParams
+  }
+
+  function goToSelection(item) {
+    updateHighlight(null, true)
+    if (!item || _isEqual(item, focusedSelection)) {
+      setFocusedSelection(null)
+    } else {
+      setFocusedSelection(item)
+      updateHighlight(item, false)
     }
   }
 
-  get additionalReportParams() {
-    return { taskUuid: this.state.focusedSelection.task.uuid }
+  function updateHighlight(item, clear) {
+    const focusedSelectionId = item ? item.task.uuid : ""
+    if (clear) {
+      // remove highlighting of the bars
+      d3.selectAll("#" + chartId + " rect").classed(selectedBarClass, false)
+    } else if (focusedSelectionId) {
+      // highlight the bar corresponding to the selected day of the week
+      d3.select("#" + chartId + " #bar_" + focusedSelectionId).classed(
+        selectedBarClass,
+        true
+      )
+    }
   }
 
-  @autobind
-  getBarChart(id) {
-    return (
-      <Context.Consumer>
-        {context => (
-          <div className="non-scrollable">
-            <ContainerDimensions>
-              {({ width, height }) => (
-                <BarChartWithLoader
-                  width={width}
-                  height={height}
-                  chartId={this.chartId}
-                  data={context.graphData}
-                  xProp="task.uuid"
-                  yProp="reportsCount"
-                  xLabel="task.shortName"
-                  onBarClick={this.goToSelection}
-                  showPopover={this.showPopover}
-                  hidePopover={this.hidePopover}
-                  updateChart={context.updateChart}
-                  selectedBarClass={this.selectedBarClass}
-                  selectedBar={
-                    context.focusedSelection
-                      ? "bar_" + context.focusedSelection.task.uuid
-                      : ""
-                  }
-                  isLoading={context.isLoading}
-                />
-              )}
-            </ContainerDimensions>
-
-            <Overlay
-              show={!!context.graphPopover}
-              placement="top"
-              container={document.body}
-              animation={false}
-              target={() => context.graphPopover}
-            >
-              <Popover
-                id="graph-popover"
-                title={context.hoveredBar && context.hoveredBar.task.shortName}
-              >
-                <p style={{ textAlign: "center" }}>
-                  {context.hoveredBar && context.hoveredBar.reportsCount}
-                </p>
-              </Popover>
-            </Overlay>
-          </div>
-        )}
-      </Context.Consumer>
-    )
-  }
-
-  @autobind
-  getReportCollection(id) {
-    return (
-      <Context.Consumer>
-        {context =>
-          context.allReports === null ? null : (
-            <div className="scrollable">
-              <ReportCollection
-                reports={context.allReports}
-                paginatedReports={context.reports}
-                goToPage={this.goToReportsPage}
-                viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
-              />
-            </div>
-          )
-        }
-      </Context.Consumer>
-    )
-  }
-
-  @autobind
-  getReportMap(id) {
-    return (
-      <Context.Consumer>
-        {context =>
-          context.allReports === null ? null : (
-            <div className="non-scrollable">
-              <ContainerDimensions>
-                {({ width, height }) => (
-                  <ReportCollection
-                    width={width}
-                    height={height}
-                    marginBottom={0}
-                    reports={context.allReports}
-                    viewFormats={[FORMAT_MAP]}
-                  />
-                )}
-              </ContainerDimensions>
-            </div>
-          )
-        }
-      </Context.Consumer>
-    )
-  }
-
-  render() {
-    return (
-      <Context.Provider value={this.state}>{super.render()}</Context.Provider>
-    )
-  }
-
-  @autobind
-  fetchChartData(chartQuery) {
-    return Promise.all([chartQuery]).then(values => {
-      const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
-      const noTask = {
-        uuid: "-1",
-        shortName: noTaskMessage,
-        longName: noTaskMessage
-      }
-      let graphData = []
-      let reportsList = values[0].reportList.list || []
-      if (reportsList.length) {
-        let simplifiedValues = reportsList.map(d => {
-          return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
-        })
-        let tasks = reportsList.map(d => d.tasks)
-        tasks = [].concat
-          .apply([], tasks)
-          .filter(
-            (item, index, d) =>
-              d.findIndex(t => {
-                return t.uuid === item.uuid
-              }) === index
-          )
-          .sort((a, b) => a.shortName.localeCompare(b.shortName))
-        // add No Task item, in order to relate to reports without Tasks
-        tasks.push(noTask)
-        graphData = tasks.map(d => {
-          let r = {}
-          r.task = d
-          r.reportsCount =
-            d.uuid === noTask.uuid
-              ? simplifiedValues.filter(item => item.tasks.length === 0).length
-              : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
-                .length
-          return r
-        })
-      }
-      this.setState({
-        isLoading: false,
-        updateChart: true, // update chart after fetching the data
-        graphData: graphData
-      })
-    })
-  }
-
-  @autobind
-  updateHighlight(focusedSelection, clear) {
-    super.updateHighlight(
-      focusedSelection ? focusedSelection.task.uuid : "",
-      clear
-    )
+  function getAdditionalReportParams() {
+    return { taskUuid: focusedSelection.task.uuid }
   }
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportsByTask)
+ReportsByTask.propTypes = {
+  queryParams: PropTypes.object,
+  style: PropTypes.object
+}
+
+export default ReportsByTask

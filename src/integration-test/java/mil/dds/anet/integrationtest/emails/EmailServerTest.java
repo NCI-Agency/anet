@@ -8,7 +8,7 @@ import java.util.List;
 import mil.dds.anet.AnetApplication;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
-import mil.dds.anet.integrationtest.config.AnetITConfiguration;
+import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import org.junit.Before;
@@ -21,7 +21,7 @@ import org.junit.Test;
  * query the email server and parse the response. Web-interface available at
  * http://[smtp_adress]:[stmp_port]
  */
-public class EmailServerIT {
+public class EmailServerTest {
 
   @ClassRule
   public static final DropwizardAppRule<AnetConfiguration> RULE =
@@ -36,7 +36,7 @@ public class EmailServerIT {
   @Before
   public void setup() throws Exception {
     assumeTrue(Boolean.parseBoolean(
-        AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
   }
 
   /**

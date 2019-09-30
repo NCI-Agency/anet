@@ -2,11 +2,10 @@ import API from "api"
 import { gql } from "apollo-boost"
 import OrganizationAdvisorsTable from "components/AdvisorReports/OrganizationAdvisorsTable"
 import Toolbar from "components/AdvisorReports/Toolbar"
-import LoaderHOC, { mapDispatchToProps } from "HOC/LoaderHOC"
+import { mapDispatchToProps, useBoilerplate } from "components/Page"
 import _debounce from "lodash/debounce"
 import moment from "moment"
-import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
@@ -24,59 +23,52 @@ const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
 `
 
 const DEFAULT_WEEKS_AGO = 3
-const OrganizationAdvisorsTableWithLoader = connect(
-  null,
-  mapDispatchToProps
-)(LoaderHOC("isLoading")("data")(OrganizationAdvisorsTable))
 
-class FilterableAdvisorReportsTable extends Component {
-  static propTypes = {
-    showLoading: PropTypes.func.isRequired,
-    hideLoading: PropTypes.func.isRequired
+const FilterableAdvisorReportsTable = props => {
+  const [filterText, setFilterText] = useState("")
+  const [selectedData, setSelectedData] = useState([])
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_ADVISOR_REPORTS_INSIGHT
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  constructor() {
-    super()
-    this.state = {
-      filterText: "",
-      export: false,
-      data: [],
-      isLoading: false,
-      selectedData: []
-    }
-    this.handleFilterTextInput = this.handleFilterTextInput.bind(this)
-    this.handleExportButtonClick = this.handleExportButtonClick.bind(this)
-    this.handleRowSelection = this.handleRowSelection.bind(this)
+  const advisorReportInsights = data.advisorReportInsights
+  const handleFilterTextInput = _debounce(setFilterText, 300)
+  const columnGroups = getWeekColumns()
+
+  return (
+    <div>
+      <Toolbar
+        onFilterTextInput={handleFilterTextInput}
+        onExportButtonClick={handleExportButtonClick}
+      />
+      <OrganizationAdvisorsTable
+        data={advisorReportInsights}
+        columnGroups={columnGroups}
+        filterText={filterText}
+        onRowSelection={handleRowSelection}
+      />
+    </div>
+  )
+
+  function handleExportButtonClick() {
+    const exportData =
+      selectedData.length > 0 ? selectedData : advisorReportInsights
+    downloadCSV({ data: exportData })
   }
 
-  componentDidMount() {
-    this.setState({ isLoading: true })
-    this.props.showLoading()
-    API.query(GQL_GET_ADVISOR_REPORTS_INSIGHT).then(data => {
-      this.setState({
-        isLoading: false,
-        data: data.advisorReportInsights
-      })
-      this.props.hideLoading()
-    })
+  function handleRowSelection(data) {
+    setSelectedData(data)
   }
 
-  handleFilterTextInput(filterText) {
-    this.setState({ filterText: filterText })
-  }
-
-  handleExportButtonClick() {
-    let selectedData = this.state.selectedData
-    let allData = this.state.data
-    let exportData = selectedData.length > 0 ? selectedData : allData
-    this.downloadCSV({ data: exportData })
-  }
-
-  handleRowSelection(data) {
-    this.setState({ selectedData: data })
-  }
-
-  getWeekColumns() {
+  function getWeekColumns() {
     const dateEnd = moment().startOf("week")
     const dateStart = moment()
       .startOf("week")
@@ -90,7 +82,7 @@ class FilterableAdvisorReportsTable extends Component {
     return weekColumns
   }
 
-  convertArrayOfObjectsToCSV(args) {
+  function convertArrayOfObjectsToCSV(args) {
     let result, csvGroupCols, csvCols, columnDelimiter, lineDelimiter, data
 
     data = args.data || null
@@ -101,7 +93,7 @@ class FilterableAdvisorReportsTable extends Component {
     columnDelimiter = args.columnDelimiter || ","
     lineDelimiter = args.lineDelimiter || "\n"
 
-    let weekColumns = this.getWeekColumns()
+    let weekColumns = getWeekColumns()
     csvGroupCols = [""]
     weekColumns.forEach(column => {
       csvGroupCols.push(column)
@@ -140,9 +132,9 @@ class FilterableAdvisorReportsTable extends Component {
     return result
   }
 
-  downloadCSV(args) {
+  function downloadCSV(args) {
     let filename
-    let csv = this.convertArrayOfObjectsToCSV({
+    let csv = convertArrayOfObjectsToCSV({
       data: args.data
     })
     if (csv == null) return
@@ -166,28 +158,6 @@ class FilterableAdvisorReportsTable extends Component {
         document.body.removeChild(link)
       }
     }
-  }
-
-  render() {
-    const handleFilterTextInput = _debounce(filterText => {
-      this.handleFilterTextInput(filterText)
-    }, 300)
-    const columnGroups = this.getWeekColumns()
-    return (
-      <div>
-        <Toolbar
-          onFilterTextInput={handleFilterTextInput}
-          onExportButtonClick={this.handleExportButtonClick}
-        />
-        <OrganizationAdvisorsTableWithLoader
-          data={this.state.data}
-          columnGroups={columnGroups}
-          filterText={this.state.filterText}
-          onRowSelection={this.handleRowSelection}
-          isLoading={this.state.isLoading}
-        />
-      </div>
-    )
   }
 }
 

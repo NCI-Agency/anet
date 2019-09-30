@@ -1,9 +1,11 @@
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import React from "react"
 import { connect } from "react-redux"
@@ -27,38 +29,39 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   }
 `
 
-class AuthorizationGroups extends Page {
-  static propTypes = { ...pagePropTypes }
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      authorizationGroups: []
+const AuthorizationGroups = props => {
+  const query = {
+    pageSize: 0 // retrieve all
+  }
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_AUTHORIZATION_GROUP_LIST,
+    {
+      query
     }
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  fetchData(props) {
-    const query = {
-      pageSize: 0 // retrieve all
-    }
-    return API.query(GQL_GET_AUTHORIZATION_GROUP_LIST, { query }).then(data => {
-      this.setState({ authorizationGroups: data.authorizationGroupList.list })
-    })
-  }
+  const authorizationGroups = data ? data.authorizationGroupList.list : []
 
-  render() {
-    return (
-      <div>
-        <Fieldset title="Authorization Groups">
-          <AuthorizationGroupTable
-            authorizationGroups={this.state.authorizationGroups}
-          />
-        </Fieldset>
-      </div>
-    )
-  }
+  return (
+    <div>
+      <Fieldset title="Authorization Groups">
+        <AuthorizationGroupTable authorizationGroups={authorizationGroups} />
+      </Fieldset>
+    </div>
+  )
 }
+
+AuthorizationGroups.propTypes = { ...pagePropTypes }
 
 export default connect(
   null,
