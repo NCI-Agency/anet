@@ -20,7 +20,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.integrationtest.config.AnetITConfiguration;
+import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import mil.dds.anet.integrationtest.utils.TestBeans;
@@ -31,7 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public class FutureEngagementWorkerIT {
+public class FutureEngagementWorkerTest {
   @ClassRule
   public static final DropwizardAppRule<AnetConfiguration> app =
       new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
@@ -48,7 +48,7 @@ public class FutureEngagementWorkerIT {
   @SuppressWarnings("unchecked")
   public static void setUpClass() throws Exception {
     executeEmailServerTests = Boolean.parseBoolean(
-        AnetITConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
     whitelistedEmail =
         "test@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
