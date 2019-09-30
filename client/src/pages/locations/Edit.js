@@ -1,9 +1,10 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -26,50 +27,48 @@ const GQL_GET_LOCATION = gql`
   }
 `
 
-class LocationEdit extends Page {
-  static propTypes = {
-    ...pagePropTypes
+const LocationEdit = props => {
+  const uuid = props.match.params.uuid
+  const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Location",
+    uuid,
+    pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "Location"
+  const location = new Location(data ? data.location : {})
 
-  state = {
-    location: new Location()
-  }
-
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  fetchData(props) {
-    return API.query(GQL_GET_LOCATION, { uuid: props.match.params.uuid }).then(
-      data => {
-        this.setState({ location: new Location(data.location) })
-      }
-    )
-  }
-
-  render() {
-    const { location } = this.state
-    return (
-      <div>
-        <RelatedObjectNotes
-          notes={location.notes}
-          relatedObject={
-            location.uuid && {
-              relatedObjectType: "locations",
-              relatedObjectUuid: location.uuid
-            }
+  return (
+    <div>
+      <RelatedObjectNotes
+        notes={location.notes}
+        relatedObject={
+          location.uuid && {
+            relatedObjectType: "locations",
+            relatedObjectUuid: location.uuid
           }
-        />
-        <LocationForm
-          edit
-          initialValues={location}
-          title={`Location ${location.name}`}
-        />
-      </div>
-    )
-  }
+        }
+      />
+      <LocationForm
+        edit
+        initialValues={location}
+        title={`Location ${location.name}`}
+      />
+    </div>
+  )
+}
+
+LocationEdit.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

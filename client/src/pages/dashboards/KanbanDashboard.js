@@ -1,12 +1,15 @@
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Kanban from "components/Kanban"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import { Task } from "models"
-import React from "react"
+import PropTypes from "prop-types"
+import React, { useEffect, useState } from "react"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import { LAST_MONTH } from "dateUtils"
@@ -48,41 +51,56 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 
-class KanbanDashboard extends Page {
-  static propTypes = { ...pagePropTypes }
-
-  constructor(props) {
-    super(props)
-    this.state = { tasks: [] }
-  }
-
-  fetchData(props) {
-    const taskQuery = {
-      pageNum: 0,
-      pageSize: 0,
-      status: Task.STATUS.ACTIVE
+const KanbanDashboard = props => {
+  const dashboardSettings = Settings.dashboards.find(
+    o => o.label === props.match.params.dashboard
+  )
+  const [dashboardData, setDashboardData] = useState({})
+  useEffect(() => {
+    async function fetchData() {
+      await fetch(dashboardSettings.data)
+        .then(response => response.json())
+        .then(setDashboardData)
     }
+    fetchData()
+  }, [dashboardSettings.data])
 
-    const dashboardSettings = Settings.dashboards.find(
-      o => o.label === this.props.match.params.dashboard
-    )
+  return <KanbanDashboardImpl dashboardData={dashboardData} {...props} />
+}
 
-    fetch(dashboardSettings.data)
-      .then(response => response.json())
-      .then(dashboardData =>
-        API.query(GQL_GET_TASK_LIST, { taskQuery }).then(data => {
-          const tasks = data.taskList.list
-          this.setState({
-            tasks: tasks,
-            ...dashboardData
-          })
-        })
-      )
+KanbanDashboard.propTypes = { ...pagePropTypes }
+
+const KanbanDashboardImpl = props => {
+  const { dashboardData } = props
+  const taskQuery = {
+    pageNum: 0,
+    pageSize: 0,
+    status: Task.STATUS.ACTIVE
+  }
+  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
+    taskQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  render() {
-    return this.state.title ? <Kanban {...{ ...this.state }} /> : null
-  }
+  const tasks = data ? data.taskList.list : []
+
+  return !dashboardData.title ? null : (
+    <Kanban tasks={tasks} {...dashboardData} />
+  )
+}
+
+KanbanDashboardImpl.propTypes = {
+  ...pagePropTypes,
+  dashboardData: PropTypes.object
 }
 
 export default connect(

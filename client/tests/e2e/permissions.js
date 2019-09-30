@@ -241,8 +241,8 @@ async function validateUserCanEditUserForCurrentPage(t) {
   )
   let originalBioText = await $bioTextArea.getText()
 
-  let fakeBioText = `fake bio ${uuidv4()} `
-  await $bioTextArea.sendKeys(fakeBioText)
+  let fakeBioText = ` fake bio ${uuidv4()}`
+  await $bioTextArea.sendKeys(t.context.Key.END + fakeBioText)
   // wait for component to update (internal) state
   await t.context.driver.sleep(shortWaitMs)
 
@@ -253,7 +253,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
   await assertElementText(
     t,
     await $(".biography p"),
-    fakeBioText + originalBioText
+    originalBioText + fakeBioText
   )
 }
 

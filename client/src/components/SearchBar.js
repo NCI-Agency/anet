@@ -1,13 +1,8 @@
-import {
-  resetPagination,
-  SEARCH_OBJECT_LABELS,
-  SEARCH_OBJECT_TYPES,
-  setSearchQuery
-} from "actions"
+import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import autobind from "autobind-decorator"
 import AdvancedSearch from "components/AdvancedSearch"
 import { routerRelatedPropTypes } from "components/Page"
-import searchFilters from "components/SearchFilters"
+import { SearchDescription } from "components/SearchFilters"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import {
@@ -44,7 +39,6 @@ class SearchBar extends Component {
       searchTerms: props.query.text,
       showAdvancedSearch: false
     }
-    this.ALL_FILTERS = searchFilters.searchFilters()
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -54,13 +48,6 @@ class SearchBar extends Component {
   }
 
   render() {
-    const filterDefs =
-      this.props.query.objectType &&
-      SEARCH_OBJECT_TYPES[this.props.query.objectType]
-        ? this.ALL_FILTERS[SEARCH_OBJECT_TYPES[this.props.query.objectType]]
-          .filters
-        : {}
-    const filters = this.props.query.filters.filter(f => filterDefs[f.key])
     const placeholder = this.props.query.objectType
       ? "Filter " + SEARCH_OBJECT_LABELS[this.props.query.objectType]
       : "Search for " +
@@ -96,33 +83,7 @@ class SearchBar extends Component {
             })
           }
         >
-          <span className="asLink">
-            {this.props.query.objectType ? (
-              <React.Fragment>
-                <b>{SEARCH_OBJECT_LABELS[this.props.query.objectType]}</b>
-                {filters.length > 0 ? (
-                  <React.Fragment>
-                    <React.Fragment> filtered on </React.Fragment>
-                    {filters.map(
-                      (filter, i) =>
-                        filterDefs[filter.key] && (
-                          <SearchFilterDisplay
-                            key={filter.key}
-                            filter={filter}
-                            element={filterDefs[filter.key]}
-                            showSeparator={i !== filters.length - 1}
-                          />
-                        )
-                    )}
-                  </React.Fragment>
-                ) : (
-                  " - add filters"
-                )}
-              </React.Fragment>
-            ) : (
-              "Add filters"
-            )}
-          </span>
+          <SearchDescription query={this.props.query} showPlaceholders />
         </div>
         <Overlay
           show={this.state.showAdvancedSearch}
@@ -183,34 +144,3 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(withRouter(SearchBar))
-
-class SearchFilterDisplay extends Component {
-  static propTypes = {
-    filter: PropTypes.object,
-    element: PropTypes.shape({
-      component: PropTypes.func.isRequired,
-      props: PropTypes.object
-    }),
-    showSeparator: PropTypes.bool
-  }
-
-  render() {
-    const { filter, element } = this.props
-    const label = filter.key
-    const ChildComponent = element.component
-    const sep = this.props.showSeparator ? ", " : ""
-    return (
-      <React.Fragment>
-        <b>{label}</b>:{" "}
-        <em>
-          <ChildComponent
-            value={filter.value || ""}
-            asFormField={false}
-            {...element.props}
-          />
-        </em>
-        {sep}
-      </React.Fragment>
-    )
-  }
-}

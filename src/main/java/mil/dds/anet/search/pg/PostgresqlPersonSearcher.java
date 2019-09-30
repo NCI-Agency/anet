@@ -7,7 +7,7 @@ import mil.dds.anet.search.AbstractPersonSearcher;
 public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
 
   public PostgresqlPersonSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Person, PersonSearchQuery>(""));
+    super(new PostgresqlSearchQueryBuilder<Person, PersonSearchQuery>("PostgresqlPersonSearch"));
   }
 
   @Override

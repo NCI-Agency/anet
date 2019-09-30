@@ -318,16 +318,6 @@ button.home-tile.btn {
 	text-align: center;
 }
 
-.loading .anet section {
-	visibility: hidden;
-}
-
-.loading .anet section:before {
-	content: "Loading...";
-	visibility: visible;
-	font-size: 2rem;
-}
-
 .nav img {
 	width: 16px;
 	margin-right: 6px;
@@ -768,6 +758,18 @@ header.searchPagination {
 .scroll-anchor-container {
 	/* trick so we don't have no man's land between two scroll anchor containers */
 	padding-bottom: 1px;
+}
+
+.tooltip-top {
+  /*
+   * override if needed, use !important as described on:
+   *   https://github.com/wwayne/react-tooltip#options
+   */
+}
+
+.tooltip-top h4 {
+  width: 100%;
+  border-bottom: 1px solid white;
 }
 
 @keyframes flash {

@@ -1,6 +1,7 @@
 package mil.dds.anet.database;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -8,10 +9,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.ApprovalStepMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
@@ -22,11 +25,18 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
 
   public static final String TABLE_NAME = "approvalSteps";
 
+  public CompletableFuture<List<ApprovalStep>> getPlanningByAdvisorOrganizationUuid(
+      Map<String, Object> context, String aoUuid) {
+    return new ForeignKeyFetcher<ApprovalStep>().load(context,
+        FkDataLoaderKey.ORGANIZATION_PLANNING_APPROVAL_STEPS, aoUuid);
+  }
+
   public CompletableFuture<List<ApprovalStep>> getByAdvisorOrganizationUuid(
       Map<String, Object> context, String aoUuid) {
     return new ForeignKeyFetcher<ApprovalStep>().load(context,
         FkDataLoaderKey.ORGANIZATION_APPROVAL_STEPS, aoUuid);
   }
+
 
   @Override
   public ApprovalStep getByUuid(String uuid) {
@@ -67,13 +77,38 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
     return approversBatcher.getByForeignKeys(foreignKeys);
   }
 
+  static class PlanningApprovalStepsBatcher extends ForeignKeyBatcher<ApprovalStep> {
+    private static final String sql =
+        "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
+    private static final Map<String, Object> additionalParams = new HashMap<>();
+    static {
+      additionalParams.put("type", DaoUtils.getEnumId(ApprovalStepType.PLANNING_APPROVAL));
+    }
+
+    public PlanningApprovalStepsBatcher() {
+      super(sql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid",
+          additionalParams);
+    }
+  }
+
   static class ApprovalStepsBatcher extends ForeignKeyBatcher<ApprovalStep> {
     private static final String sql =
-        "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> )";
+        "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
+    private static final Map<String, Object> additionalParams = new HashMap<>();
+    static {
+      additionalParams.put("type", DaoUtils.getEnumId(ApprovalStepType.REPORT_APPROVAL));
+    }
 
     public ApprovalStepsBatcher() {
-      super(sql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid");
+      super(sql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid",
+          additionalParams);
     }
+  }
+
+  public List<List<ApprovalStep>> getPlanningApprovalSteps(List<String> foreignKeys) {
+    final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher = AnetObjectEngine.getInstance()
+        .getInjector().getInstance(PlanningApprovalStepsBatcher.class);
+    return organizationIdBatcher.getByForeignKeys(foreignKeys);
   }
 
   public List<List<ApprovalStep>> getApprovalSteps(List<String> foreignKeys) {
@@ -85,9 +120,9 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
   @Override
   public ApprovalStep insertInternal(ApprovalStep as) {
     getDbHandle().createUpdate(
-        "/* insertApprovalStep */ INSERT into \"approvalSteps\" (uuid, name, \"nextStepUuid\", \"advisorOrganizationUuid\") "
-            + "VALUES (:uuid, :name, :nextStepUuid, :advisorOrganizationUuid)")
-        .bindBean(as).execute();
+        "/* insertApprovalStep */ INSERT into \"approvalSteps\" (uuid, name, \"nextStepUuid\", \"advisorOrganizationUuid\", type) "
+            + "VALUES (:uuid, :name, :nextStepUuid, :advisorOrganizationUuid, :type)")
+        .bindBean(as).bind("type", DaoUtils.getEnumId(as.getType())).execute();
 
     if (as.getApprovers() != null) {
       for (Position approver : as.getApprovers()) {
@@ -110,11 +145,12 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
     as = insert(as);
 
     // Add this Step to the current org list.
-    getDbHandle().createUpdate(
-        "/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepUuid\" = :uuid "
-            + "WHERE \"advisorOrganizationUuid\" = :advisorOrganizationUuid "
-            + "AND \"nextStepUuid\" IS NULL AND uuid != :uuid")
-        .bindBean(as).execute();
+    getDbHandle()
+        .createUpdate(
+            "/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepUuid\" = :uuid "
+                + "WHERE \"advisorOrganizationUuid\" = :advisorOrganizationUuid "
+                + "AND type = :type AND \"nextStepUuid\" IS NULL AND uuid != :uuid")
+        .bindBean(as).bind("type", DaoUtils.getEnumId(as.getType())).execute();
     return as;
   }
 
@@ -167,7 +203,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
   }
 
   /**
-   * Check whether the Approval Step is being by a report.
+   * Check whether the Approval Step is being used by a report.
    */
   public boolean isStepInUse(String uuid) {
     List<Map<String, Object>> rs = getDbHandle().select(

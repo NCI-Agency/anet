@@ -1,20 +1,24 @@
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
+  DEFAULT_SEARCH_QUERY,
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import Page, {
+import {
+  getSearchQuery,
   mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
+import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Panel, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
@@ -86,259 +90,287 @@ const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
 })
 
-class DecisivesDashboard extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    setSearchQuery: PropTypes.func.isRequired
+const DecisivesDashboard = props => {
+  const dashboardSettings = Settings.dashboards.find(
+    o => o.label === props.match.params.dashboard
+  )
+  const [dashboardData, setDashboardData] = useState([])
+  useEffect(() => {
+    async function fetchData() {
+      await fetch(dashboardSettings.data)
+        .then(response => response.json())
+        .then(setDashboardData)
+    }
+    fetchData()
+  }, [dashboardSettings.data])
+
+  return <DecisivesDashboardStatic dashboardData={dashboardData} {...props} />
+}
+
+DecisivesDashboard.propTypes = { ...pagePropTypes }
+
+const DecisivesDashboardStatic = props => {
+  const { dashboardData } = props
+  const { loading, error, data } = API.useApiQuery(GQL_GET_STATIC_DATA, {
+    positionQuery: {
+      // TODO: make this work with AbstractSearchQueryInput
+      pageNum: 0,
+      pageSize: 0,
+      status: "ACTIVE"
+    },
+    locationQuery: {
+      pageNum: 0,
+      pageSize: 0,
+      status: "ACTIVE"
+    },
+    taskQuery: {
+      pageNum: 0,
+      pageSize: 0,
+      status: "ACTIVE"
+    }
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  const decisives = useMemo(() => {
+    if (!data || !dashboardData) {
+      return []
+    }
+    return dashboardData.map(decisive => {
+      return {
+        label: decisive.label,
+        positions: data.positionList.list.filter(item =>
+          decisive.positions.includes(item.uuid)
+        ),
+        tasks: data.taskList.list.filter(item =>
+          decisive.tasks.includes(item.uuid)
+        ),
+        locations: data.locationList.list.filter(item =>
+          decisive.locations.includes(item.uuid)
+        )
+      }
+    })
+  }, [dashboardData, data])
+  if (done) {
+    return result
   }
 
-  constructor(props) {
-    super(props, DEFAULT_PAGE_PROPS, _SEARCH_PROPS)
+  return _isEmpty(dashboardData) ? null : (
+    <DecisivesDashboardImpl decisives={decisives} {...props} />
+  )
+}
+
+DecisivesDashboardStatic.propTypes = {
+  ...pagePropTypes,
+  dashboardData: PropTypes.array
+}
+
+const DecisivesDashboardImpl = props => {
+  const { decisives, searchQuery } = props
+  let queryParams
+  if (searchQuery === DEFAULT_SEARCH_QUERY) {
+    // when going from a different page to the decisives page, use the default
+    // decisives search query
+    queryParams = setDecisivesDefaultSearchQuery()
+  } else {
+    queryParams = getSearchQuery(searchQuery)
+  }
+  const prevQueryParams = {
+    ...queryParams,
+    engagementDateEnd: queryParams.engagementDateStart,
+    engagementDateStart:
+      2 * queryParams.engagementDateStart - queryParams.engagementDateEnd
+  }
+  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LISTS, {
+    reportQuery: {
+      pageNum: 0,
+      pageSize: 0,
+      ...queryParams
+    },
+    reportPreviousQuery: {
+      pageNum: 0,
+      pageSize: 0,
+      ...prevQueryParams
+    }
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: _SEARCH_PROPS,
+    ...props
+  })
+  const [reportStats, prevReportStats] = useMemo(() => {
+    if (!data) {
+      return []
+    }
+    const currentReports = data.currentList.list || []
+    const currentStats = currentReports.reduce(
+      (counter, report) => {
+        counter.locationStats[report.location.uuid] =
+          ++counter.locationStats[report.location.uuid] || 1
+        report.attendees.reduce((counterNested, attendee) => {
+          if (attendee.position) {
+            counterNested.positionStats[attendee.position.uuid] =
+              ++counterNested.positionStats[attendee.position.uuid] || 1
+          }
+          return counterNested
+        }, counter)
+        return counter
+      },
+      { locationStats: {}, positionStats: {} }
+    )
+    const previousReports = data.previousList.list || []
+    const previousStats = previousReports.reduce(
+      (counter, report) => {
+        counter.locationStats[report.location.uuid] =
+          ++counter.locationStats[report.location.uuid] || 1
+        report.attendees.reduce((counterNested, attendee) => {
+          if (attendee.position) {
+            counterNested.positionStats[attendee.position.uuid] =
+              ++counterNested.positionStats[attendee.position.uuid] || 1
+          }
+          return counterNested
+        }, counter)
+        return counter
+      },
+      { locationStats: {}, positionStats: {} }
+    )
+    return [currentStats, previousStats]
+  }, [data])
+  if (done) {
+    return result
+  }
+  if (!data) {
+    return null
   }
 
-  componentDidMount() {
-    this.setState({ isLoading: true })
-    super.componentDidMount()
+  return (
+    <>
+      <Panel>
+        <Panel.Heading>
+          <Panel.Title componentClass="h3">People</Panel.Title>
+        </Panel.Heading>
+        <Panel.Body>
+          {decisives.map(decisive => (
+            <StatsTable
+              label={decisive.label}
+              key={decisive.label}
+              data={decisive.positions}
+              contentData={reportStats.positionStats}
+              prevContentData={prevReportStats.positionStats}
+              itemLabel={item => <LinkTo position={item}>{item.name}</LinkTo>}
+            />
+          ))}
+        </Panel.Body>
+      </Panel>
+      <Panel>
+        <Panel.Heading>
+          <Panel.Title componentClass="h3">Places</Panel.Title>
+        </Panel.Heading>
+        <Panel.Body>
+          {decisives.map(decisive => (
+            <StatsTable
+              label={decisive.label}
+              key={decisive.label}
+              data={decisive.locations}
+              contentData={reportStats.locationStats}
+              prevContentData={prevReportStats.locationStats}
+              itemLabel={item => (
+                <LinkTo anetLocation={item}>{item.name}</LinkTo>
+              )}
+            />
+          ))}
+        </Panel.Body>
+      </Panel>
+      <Panel>
+        <Panel.Heading>
+          <Panel.Title componentClass="h3">Processes</Panel.Title>
+        </Panel.Heading>
+        <Panel.Body>{/* <StatsTable data={[]} /> */}</Panel.Body>
+      </Panel>
+    </>
+  )
+
+  function setDecisivesDefaultSearchQuery() {
+    const queryParams = {
+      state: [Report.STATE.PUBLISHED],
+      engagementDateStart: moment()
+        .subtract(8, "d")
+        .endOf("day")
+        .valueOf(),
+      engagementDateEnd: moment()
+        .subtract(1, "d")
+        .endOf("day")
+        .valueOf()
+    }
     deserializeQueryParams(
       SEARCH_OBJECT_TYPES.REPORTS,
-      {
-        state: [Report.STATE.PUBLISHED],
-        engagementDateStart: moment()
-          .subtract(8, "d")
-          .endOf("day")
-          .valueOf(),
-        engagementDateEnd: moment()
-          .subtract(1, "d")
-          .endOf("day")
-          .valueOf()
-      },
-      this.deserializeCallback
+      queryParams,
+      deserializeCallback
     )
-    this.fetchStaticData()
+    return queryParams
   }
 
-  deserializeCallback = (objectType, filters, text) =>
+  function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
-    this.props.setSearchQuery({
+    props.setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
     })
-
-  fetchData(props) {
-    const searchQuery = this.getSearchQuery()
-    const searchPreviousQuery = {
-      ...searchQuery,
-      engagementDateEnd: searchQuery.engagementDateStart,
-      engagementDateStart:
-        2 * searchQuery.engagementDateStart - searchQuery.engagementDateEnd
-    }
-
-    API.query(GQL_GET_REPORT_LISTS, {
-      reportQuery: {
-        pageNum: 0,
-        pageSize: 0,
-        ...searchQuery
-      },
-      reportPreviousQuery: {
-        pageNum: 0,
-        pageSize: 0,
-        ...searchPreviousQuery
-      }
-    }).then(data => {
-      const reports = data.currentList.list
-      const reportStats = reports.reduce(
-        (counter, report) => {
-          counter.locationStats[report.location.uuid] =
-            ++counter.locationStats[report.location.uuid] || 1
-          report.attendees.reduce((counterNested, attendee) => {
-            if (attendee.position) {
-              counterNested.positionStats[attendee.position.uuid] =
-                ++counterNested.positionStats[attendee.position.uuid] || 1
-            }
-            return counterNested
-          }, counter)
-          return counter
-        },
-        { locationStats: {}, positionStats: {} }
-      )
-
-      const prevReportStats = data.previousList.list.reduce(
-        (counter, report) => {
-          counter.locationStats[report.location.uuid] =
-            ++counter.locationStats[report.location.uuid] || 1
-          report.attendees.reduce((counterNested, attendee) => {
-            if (attendee.position) {
-              counterNested.positionStats[attendee.position.uuid] =
-                ++counterNested.positionStats[attendee.position.uuid] || 1
-            }
-            return counterNested
-          }, counter)
-          return counter
-        },
-        { locationStats: {}, positionStats: {} }
-      )
-
-      this.setState({
-        reports: reports,
-        locationStats: reportStats.locationStats,
-        positionStats: reportStats.positionStats,
-        prevLocationStats: prevReportStats.locationStats,
-        prevPositionStats: prevReportStats.positionStats,
-        isLoading: !this.state.decisives
-      })
-    })
-  }
-
-  fetchStaticData() {
-    const dashboardSettings = Settings.dashboards.find(
-      o => o.label === this.props.match.params.dashboard
-    )
-
-    fetch(dashboardSettings.data)
-      .then(response => response.json())
-      .then(dashboardData =>
-        API.query(GQL_GET_STATIC_DATA, {
-          positionQuery: {
-            // TODO: make this work with AbstractSearchQueryInput
-            pageNum: 0,
-            pageSize: 0,
-            status: "ACTIVE"
-          },
-          locationQuery: {
-            pageNum: 0,
-            pageSize: 0,
-            status: "ACTIVE"
-          },
-          taskQuery: {
-            pageNum: 0,
-            pageSize: 0,
-            status: "ACTIVE"
-          }
-        }).then(data => {
-          this.setState({
-            decisives:
-              dashboardData &&
-              dashboardData.map(decisive => {
-                return {
-                  label: decisive.label,
-                  positions: data.positionList.list.filter(item =>
-                    decisive.positions.includes(item.uuid)
-                  ),
-                  tasks: data.taskList.list.filter(item =>
-                    decisive.tasks.includes(item.uuid)
-                  ),
-                  locations: data.locationList.list.filter(item =>
-                    decisive.locations.includes(item.uuid)
-                  )
-                }
-              }),
-            isLoading: !this.state.reports
-          })
-        })
-      )
-  }
-
-  render() {
-    if (!this.state.decisives || !this.state.reports) return null
-    return (
-      <>
-        <Panel>
-          <Panel.Heading>
-            <Panel.Title componentClass="h3">People</Panel.Title>
-          </Panel.Heading>
-          <Panel.Body>
-            {this.state.decisives.map(decisive => (
-              <StatsTable
-                label={decisive.label}
-                key={decisive.label}
-                data={decisive.positions}
-                contentData={this.state.positionStats}
-                prevContentData={this.state.prevPositionStats}
-                itemLabel={item => <LinkTo position={item}>{item.name}</LinkTo>}
-              />
-            ))}
-          </Panel.Body>
-        </Panel>
-        <Panel>
-          <Panel.Heading>
-            <Panel.Title componentClass="h3">Places</Panel.Title>
-          </Panel.Heading>
-          <Panel.Body>
-            {this.state.decisives.map(decisive => (
-              <StatsTable
-                label={decisive.label}
-                key={decisive.label}
-                data={decisive.locations}
-                contentData={this.state.locationStats}
-                prevContentData={this.state.prevLocationStats}
-                itemLabel={item => (
-                  <LinkTo anetLocation={item}>{item.name}</LinkTo>
-                )}
-              />
-            ))}
-          </Panel.Body>
-        </Panel>
-        <Panel>
-          <Panel.Heading>
-            <Panel.Title componentClass="h3">Processes</Panel.Title>
-          </Panel.Heading>
-          <Panel.Body>{/* <StatsTable data={[]} /> */}</Panel.Body>
-        </Panel>
-      </>
-    )
   }
 }
 
-class StatsTable extends React.Component {
-  static propTypes = {
-    data: PropTypes.array.isRequired,
-    itemLabel: PropTypes.func.isRequired,
-    label: PropTypes.string.isRequired,
-    contentData: PropTypes.object.isRequired,
-    prevContentData: PropTypes.object.isRequired
-  }
+DecisivesDashboardImpl.propTypes = {
+  ...pagePropTypes,
+  setSearchQuery: PropTypes.func.isRequired,
+  decisives: PropTypes.array
+}
 
-  constructor(props, context) {
-    super(props, context)
+const StatsTable = props => {
+  return (
+    <Table responsive>
+      <thead>
+        <tr>
+          <th>{props.label}</th>
+          {props.data.map(item => (
+            <th key={item.uuid}>{props.itemLabel(item)}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td />
+          {props.data.map(item => {
+            const previous = props.prevContentData[item.uuid] || 0
+            const current = props.contentData[item.uuid] || 0
+            const color =
+              current > 1.3 * previous
+                ? "green"
+                : current < 0.7 * previous
+                  ? "red"
+                  : "white"
+            return (
+              <td bgcolor={color} key={item.uuid}>
+                {current}/{previous}
+              </td>
+            )
+          })}
+        </tr>
+      </tbody>
+    </Table>
+  )
+}
 
-    this.state = { open: false }
-  }
-
-  render() {
-    return (
-      <Table responsive>
-        <thead>
-          <tr>
-            <th>{this.props.label}</th>
-            {this.props.data.map(item => (
-              <th key={item.uuid}>{this.props.itemLabel(item)}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td />
-            {this.props.data.map(item => {
-              const previous = this.props.prevContentData[item.uuid] || 0
-              const current = this.props.contentData[item.uuid] || 0
-              const color =
-                current > 1.3 * previous
-                  ? "green"
-                  : current < 0.7 * previous
-                    ? "red"
-                    : "white"
-              return (
-                <td bgcolor={color} key={item.uuid}>
-                  {current}/{previous}
-                </td>
-              )
-            })}
-          </tr>
-        </tbody>
-      </Table>
-    )
-  }
+StatsTable.propTypes = {
+  data: PropTypes.array.isRequired,
+  itemLabel: PropTypes.func.isRequired,
+  label: PropTypes.string.isRequired,
+  contentData: PropTypes.object.isRequired,
+  prevContentData: PropTypes.object.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({

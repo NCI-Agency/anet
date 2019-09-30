@@ -1,9 +1,10 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Page, {
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -27,6 +28,21 @@ const GQL_GET_ORGANIZATION = gql`
         shortName
         longName
         identificationCode
+      }
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
       }
       approvalSteps {
         uuid
@@ -53,55 +69,48 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-class OrganizationEdit extends Page {
-  static propTypes = {
-    ...pagePropTypes
+const OrganizationEdit = props => {
+  const uuid = props.match.params.uuid
+  const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Organization",
+    uuid,
+    pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  static modelName = "Organization"
+  const organization = new Organization(data ? data.organization : {})
 
-  state = {
-    organization: new Organization()
-  }
-
-  static modelName = "Organization"
-
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
-
-  fetchData(props) {
-    return API.query(GQL_GET_ORGANIZATION, {
-      uuid: props.match.params.uuid
-    }).then(data => {
-      this.setState({
-        organization: new Organization(data.organization)
-      })
-    })
-  }
-
-  render() {
-    const { organization } = this.state
-
-    return (
-      <div>
-        <RelatedObjectNotes
-          notes={organization.notes}
-          relatedObject={
-            organization.uuid && {
-              relatedObjectType: "organizations",
-              relatedObjectUuid: organization.uuid
-            }
+  return (
+    <div>
+      <RelatedObjectNotes
+        notes={organization.notes}
+        relatedObject={
+          organization.uuid && {
+            relatedObjectType: "organizations",
+            relatedObjectUuid: organization.uuid
           }
-        />
-        <OrganizationForm
-          edit
-          initialValues={organization}
-          title={`Organization ${organization.shortName}`}
-        />
-      </div>
-    )
-  }
+        }
+      />
+      <OrganizationForm
+        edit
+        initialValues={organization}
+        title={`Organization ${organization.shortName}`}
+      />
+    </div>
+  )
+}
+
+OrganizationEdit.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

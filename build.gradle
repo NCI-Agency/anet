@@ -103,7 +103,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
+	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.12.0'
 
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
@@ -416,6 +416,7 @@ task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container
 
 // Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
 task integrationTest(type: Test) {
+	description = "Runs the integration tests."
 	testClassesDirs = sourceSets.integrationTest.output.classesDirs
 	classpath = sourceSets.integrationTest.runtimeClasspath
 	outputs.upToDateWhen { false }
@@ -463,7 +464,7 @@ buildscript {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:5.0.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.24.2"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.24.3"
 	}
 }
 

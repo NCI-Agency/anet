@@ -11,9 +11,10 @@ import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location, Person } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
+import { Coordinate } from "./Show"
 
 const GQL_CREATE_LOCATION = gql`
   mutation($location: LocationInput!) {
@@ -28,22 +29,12 @@ const GQL_UPDATE_LOCATION = gql`
   }
 `
 
-class BaseLocationForm extends Component {
-  static propTypes = {
-    initialValues: PropTypes.instanceOf(Location).isRequired,
-    title: PropTypes.string,
-    edit: PropTypes.bool,
-    currentUser: PropTypes.instanceOf(Person),
-    ...routerRelatedPropTypes
-  }
-
-  static defaultProps = {
-    initialValues: new Location(),
-    title: "",
-    edit: false
-  }
-
-  statusButtons = [
+const BaseLocationForm = props => {
+  const { currentUser, edit, title, ...myFormProps } = props
+  const [error, setError] = useState(null)
+  const canEditName =
+    (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
+  const statusButtons = [
     {
       id: "statusActiveButton",
       value: Location.STATUS.ACTIVE,
@@ -55,172 +46,168 @@ class BaseLocationForm extends Component {
       label: "Inactive"
     }
   ]
-  state = {
-    error: null
-  }
 
-  render() {
-    const { currentUser, edit, title, ...myFormProps } = this.props
-    const canEditName =
-      (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
+  return (
+    <Formik
+      enableReinitialize
+      onSubmit={onSubmit}
+      validationSchema={Location.yupSchema}
+      isInitialValid
+      {...myFormProps}
+    >
+      {({
+        handleSubmit,
+        isSubmitting,
+        dirty,
+        errors,
+        setFieldValue,
+        values,
+        submitForm
+      }) => {
+        const marker = {
+          id: values.uuid || 0,
+          name: _escape(values.name) || "", // escape HTML in location name!
+          draggable: true,
+          autoPan: true,
+          onMove: (event, map) => onMarkerMove(event, map, setFieldValue)
+        }
+        if (Location.hasCoordinates(values.coord)) {
+          Object.assign(marker, {
+            lat: values.lat,
+            lng: values.lng
+          })
+        }
+        const action = (
+          <div>
+            <Button
+              key="submit"
+              bsStyle="primary"
+              type="button"
+              onClick={submitForm}
+              disabled={isSubmitting}
+            >
+              Save Location
+            </Button>
+          </div>
+        )
+        return (
+          <div>
+            <NavigationWarning isBlocking={dirty} />
+            <Messages error={error} />
+            <Form className="form-horizontal" method="post">
+              <Fieldset title={title} action={action} />
+              <Fieldset>
+                <Field
+                  name="name"
+                  component={FieldHelper.renderInputField}
+                  disabled={!canEditName}
+                />
 
-    function Coordinate(props) {
-      const coord =
-        typeof props.coord === "number"
-          ? Math.round(props.coord * 1000) / 1000
-          : "?"
-      return <span>{coord}</span>
-    }
+                <Field
+                  name="status"
+                  component={FieldHelper.renderButtonToggleGroup}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
 
-    return (
-      <Formik
-        enableReinitialize
-        onSubmit={this.onSubmit}
-        validationSchema={Location.yupSchema}
-        isInitialValid
-        {...myFormProps}
-      >
-        {({
-          handleSubmit,
-          isSubmitting,
-          dirty,
-          errors,
-          setFieldValue,
-          values,
-          submitForm
-        }) => {
-          const marker = {
-            id: values.uuid || 0,
-            name: _escape(values.name) || "", // escape HTML in location name!
-            draggable: true,
-            autoPan: true,
-            onMove: (event, map) => this.onMarkerMove(event, map, setFieldValue)
-          }
-          if (Location.hasCoordinates(values)) {
-            Object.assign(marker, {
-              lat: values.lat,
-              lng: values.lng
-            })
-          }
-          const action = (
-            <div>
-              <Button
-                key="submit"
-                bsStyle="primary"
-                type="button"
-                onClick={submitForm}
-                disabled={isSubmitting}
-              >
-                Save Location
-              </Button>
-            </div>
-          )
-          return (
-            <div>
-              <NavigationWarning isBlocking={dirty} />
-              <Messages error={this.state.error} />
-              <Form className="form-horizontal" method="post">
-                <Fieldset title={title} action={action} />
-                <Fieldset>
-                  <Field
-                    name="name"
-                    component={FieldHelper.renderInputField}
-                    disabled={!canEditName}
-                  />
+                <Field
+                  name="location"
+                  component={FieldHelper.renderReadonlyField}
+                  humanValue={
+                    <React.Fragment>
+                      <Coordinate coord={values.lat} />,{" "}
+                      <Coordinate coord={values.lng} />
+                    </React.Fragment>
+                  }
+                />
+              </Fieldset>
 
-                  <Field
-                    name="status"
-                    component={FieldHelper.renderButtonToggleGroup}
-                    buttons={this.statusButtons}
-                    onChange={value => setFieldValue("status", value)}
-                  />
+              <h3>Drag the marker below to set the location</h3>
+              <Leaflet markers={[marker]} />
 
-                  <Field
-                    name="location"
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={
-                      <React.Fragment>
-                        <Coordinate coord={values.lat} />,{" "}
-                        <Coordinate coord={values.lng} />
-                      </React.Fragment>
-                    }
-                  />
-                </Fieldset>
-
-                <h3>Drag the marker below to set the location</h3>
-                <Leaflet markers={[marker]} />
-
-                <div className="submit-buttons">
-                  <div>
-                    <Button onClick={this.onCancel}>Cancel</Button>
-                  </div>
-                  <div>
-                    <Button
-                      id="formBottomSubmit"
-                      bsStyle="primary"
-                      type="button"
-                      onClick={submitForm}
-                      disabled={isSubmitting}
-                    >
-                      Save Location
-                    </Button>
-                  </div>
+              <div className="submit-buttons">
+                <div>
+                  <Button onClick={onCancel}>Cancel</Button>
                 </div>
-              </Form>
-            </div>
-          )
-        }}
-      </Formik>
-    )
-  }
+                <div>
+                  <Button
+                    id="formBottomSubmit"
+                    bsStyle="primary"
+                    type="button"
+                    onClick={submitForm}
+                    disabled={isSubmitting}
+                  >
+                    Save Location
+                  </Button>
+                </div>
+              </div>
+            </Form>
+          </div>
+        )
+      }}
+    </Formik>
+  )
 
-  onMarkerMove = (event, map, setFieldValue) => {
+  function onMarkerMove(event, map, setFieldValue) {
     const latLng = map.wrapLatLng(event.latlng)
     setFieldValue("lat", latLng.lat)
     setFieldValue("lng", latLng.lng)
   }
 
-  onCancel = () => {
-    this.props.history.goBack()
+  function onCancel() {
+    props.history.goBack()
   }
 
-  onSubmit = (values, form) => {
-    return this.save(values, form)
-      .then(response => this.onSubmitSuccess(response, values, form))
+  function onSubmit(values, form) {
+    return save(values, form)
+      .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
-        this.setState({ error }, () => {
-          form.setSubmitting(false)
-          jumpToTop()
-        })
+        setError(error)
+        form.setSubmitting(false)
+        jumpToTop()
       })
   }
 
-  onSubmitSuccess = (response, values, form) => {
-    const { edit } = this.props
+  function onSubmitSuccess(response, values, form) {
+    const { edit } = props
     const operation = edit ? "updateLocation" : "createLocation"
     const location = new Location({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : this.props.initialValues.uuid
+        : props.initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      this.props.history.replace(Location.pathForEdit(location))
+      props.history.replace(Location.pathForEdit(location))
     }
-    this.props.history.push(Location.pathFor(location), {
+    props.history.push(Location.pathFor(location), {
       success: "Location saved"
     })
   }
 
-  save = (values, form) => {
+  function save(values, form) {
     const location = Object.without(new Location(values), "notes")
     return API.mutation(
-      this.props.edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION,
+      props.edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION,
       { location }
     )
   }
+}
+
+BaseLocationForm.propTypes = {
+  initialValues: PropTypes.instanceOf(Location).isRequired,
+  title: PropTypes.string,
+  edit: PropTypes.bool,
+  currentUser: PropTypes.instanceOf(Person),
+  ...routerRelatedPropTypes
+}
+
+BaseLocationForm.defaultProps = {
+  initialValues: new Location(),
+  title: "",
+  edit: false
 }
 
 const LocationForm = props => (
