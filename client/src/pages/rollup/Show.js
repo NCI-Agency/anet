@@ -475,11 +475,16 @@ const BaseRollupShow = props => {
   }
 
   function changeRollupDate(dateRange) {
+    const startDate = dateRange[0] && dateRange[0].valueOf()
+    const endDate = dateRange[1] && dateRange[1].valueOf()
+    if (!startDate || !endDate) {
+      return
+    }
     props.history.replace({
       pathname: "rollup",
       search: utils.formatQueryString({
-        startDate: dateRange[0].valueOf(),
-        endDate: dateRange[1].valueOf()
+        startDate,
+        endDate
       })
     })
   }
