@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -60,6 +61,8 @@ const BaseLocationShow = props => {
     error,
     modelName: "Location",
     uuid,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
   if (done) {

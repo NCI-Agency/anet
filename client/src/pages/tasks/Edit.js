@@ -1,4 +1,4 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import {
@@ -71,6 +71,7 @@ const TaskEdit = props => {
     modelName: "Task",
     uuid,
     pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
   if (done) {

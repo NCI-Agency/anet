@@ -1,4 +1,9 @@
-import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  SEARCH_OBJECT_LABELS,
+  SEARCH_OBJECT_TYPES
+} from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
@@ -676,6 +681,11 @@ const Search = props => {
     queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && numLocations > 0
   const hasReportsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && numReports > 0
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
 
   return (
     <div>

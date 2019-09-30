@@ -2,6 +2,7 @@ import "@blueprintjs/core/lib/css/blueprint.css"
 import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -262,6 +263,11 @@ const BaseRollupShow = props => {
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const previewPlaceholderUrl = API.addAuthParams("/help")
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
 
   const VISUALIZATIONS = [
     {

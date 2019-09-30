@@ -1,4 +1,4 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import AppContext from "components/AppContext"
 import GuidedTour from "components/GuidedTour"
 import {
@@ -16,6 +16,7 @@ import ReportForm from "./Form"
 const BaseReportNew = props => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
 

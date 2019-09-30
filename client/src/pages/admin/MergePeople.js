@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -8,7 +9,8 @@ import Messages from "components/Messages"
 import {
   jumpToTop,
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -70,6 +72,11 @@ const MergePeople = props => {
             : true
         }
       )
+  })
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
   })
 
   const personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,

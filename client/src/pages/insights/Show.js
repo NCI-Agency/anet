@@ -1,4 +1,5 @@
 import {
+  DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   DEFAULT_SEARCH_QUERY,
   SEARCH_OBJECT_TYPES,
@@ -150,6 +151,7 @@ const BaseInsightsShow = props => {
   const insightConfig = INSIGHT_DETAILS[props.match.params.insight]
   const InsightComponent = insightConfig.component
   useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
     searchProps: insightConfig.searchProps,
     ...props
   })

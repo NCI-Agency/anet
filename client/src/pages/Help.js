@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -85,6 +86,8 @@ const BaseHelpConditional = props => {
     error,
     modelName: "Organization",
     uuid: orgUuid,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
     ...otherProps
   })
   if (done) {
