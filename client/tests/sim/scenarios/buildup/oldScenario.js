@@ -6,7 +6,7 @@ import {
   updateAssociatedPosition
 } from "../../stories/PositionStories"
 
-const buildup = [
+const buildupOld = [
   {
     name: "Create person",
     number: 100,
@@ -39,4 +39,4 @@ const buildup = [
   }
 ]
 
-export default buildup
+export default buildupOld

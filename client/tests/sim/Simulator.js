@@ -1,7 +1,7 @@
 import Aigle from "aigle"
 import colors from "colors"
 import faker from "faker"
-import scenarioMapping from "./scenarios/scenarioMapping"
+import scenarioMapping from "./scenarios/scenarios"
 import { fuzzy, normalCDF, normalPPF } from "./simutils"
 
 const DEFAULT_SCENARIO_NAME = "default"

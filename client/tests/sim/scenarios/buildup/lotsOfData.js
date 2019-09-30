@@ -3,7 +3,7 @@ import { createHiearchy } from "../../stories/OrganizationStories"
 import { createPerson } from "../../stories/PersonStories"
 import { createReport } from "../../stories/ReportStories"
 
-const buildup = [
+const buildupLotsOfData = [
   {
     name: "Create active advisor",
     number: 2000,
@@ -63,4 +63,4 @@ const buildup = [
   }
 ]
 
-export default buildup
+export default buildupLotsOfData
