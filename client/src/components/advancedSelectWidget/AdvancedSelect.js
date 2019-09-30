@@ -7,13 +7,7 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import {
-  Button,
-  Col,
-  FormControl,
-  InputGroup,
-  Row
-} from "react-bootstrap"
+import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
 import { Popover, Position, PopoverInteractionKind } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import ContainerDimensions from "react-container-dimensions"
