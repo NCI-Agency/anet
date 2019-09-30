@@ -175,21 +175,21 @@ const Organizations = props => {
   } = props
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    _isEqual(latestQueryParams.current, queryParams) &&
-      pagination[paginationKey]
+    queryParamsUnchanged && pagination[paginationKey]
       ? pagination[paginationKey].pageNum
       : 0
   )
   useEffect(() => {
-    if (!_isEqual(latestQueryParams.current, queryParams)) {
+    if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
     }
-  }, [queryParams, setPagination, paginationKey])
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const organizationQuery = Object.assign({}, queryParams, {
-    pageNum: _isEqual(latestQueryParams.current, queryParams) ? pageNum : 0,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION_LIST, {
@@ -273,21 +273,21 @@ const People = props => {
   } = props
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    _isEqual(latestQueryParams.current, queryParams) &&
-      pagination[paginationKey]
+    queryParamsUnchanged && pagination[paginationKey]
       ? pagination[paginationKey].pageNum
       : 0
   )
   useEffect(() => {
-    if (!_isEqual(latestQueryParams.current, queryParams)) {
+    if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
     }
-  }, [queryParams, setPagination, paginationKey])
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const personQuery = Object.assign({}, queryParams, {
-    pageNum: _isEqual(latestQueryParams.current, queryParams) ? pageNum : 0,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON_LIST, {
@@ -384,21 +384,21 @@ const Positions = props => {
   } = props
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    _isEqual(latestQueryParams.current, queryParams) &&
-      pagination[paginationKey]
+    queryParamsUnchanged && pagination[paginationKey]
       ? pagination[paginationKey].pageNum
       : 0
   )
   useEffect(() => {
-    if (!_isEqual(latestQueryParams.current, queryParams)) {
+    if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
     }
-  }, [queryParams, setPagination, paginationKey])
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const positionQuery = Object.assign({}, queryParams, {
-    pageNum: _isEqual(latestQueryParams.current, queryParams) ? pageNum : 0,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
@@ -460,21 +460,21 @@ const Tasks = props => {
   } = props
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    _isEqual(latestQueryParams.current, queryParams) &&
-      pagination[paginationKey]
+    queryParamsUnchanged && pagination[paginationKey]
       ? pagination[paginationKey].pageNum
       : 0
   )
   useEffect(() => {
-    if (!_isEqual(latestQueryParams.current, queryParams)) {
+    if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
     }
-  }, [queryParams, setPagination, paginationKey])
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const taskQuery = Object.assign({}, queryParams, {
-    pageNum: _isEqual(latestQueryParams.current, queryParams) ? pageNum : 0,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
@@ -553,21 +553,21 @@ const Locations = props => {
   } = props
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
   const [pageNum, setPageNum] = useState(
-    _isEqual(latestQueryParams.current, queryParams) &&
-      pagination[paginationKey]
+    queryParamsUnchanged && pagination[paginationKey]
       ? pagination[paginationKey].pageNum
       : 0
   )
   useEffect(() => {
-    if (!_isEqual(latestQueryParams.current, queryParams)) {
+    if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
     }
-  }, [queryParams, setPagination, paginationKey])
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const locationQuery = Object.assign({}, queryParams, {
-    pageNum: _isEqual(latestQueryParams.current, queryParams) ? pageNum : 0,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION_LIST, {
