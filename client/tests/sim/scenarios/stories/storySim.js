@@ -1,9 +1,9 @@
-import { createHiearchy } from "../../../stories/OrganizationStories"
+import { createHiearchy } from "../../stories/OrganizationStories"
 import {
   createPerson,
   deletePerson,
   updatePerson
-} from "../../../stories/PersonStories"
+} from "../../stories/PersonStories"
 import {
   createPosition,
   deletePersonFromPosition,
@@ -12,13 +12,13 @@ import {
   removeAssociatedPosition,
   updateAssociatedPosition,
   updatePosition
-} from "../../../stories/PositionStories"
+} from "../../stories/PositionStories"
 import {
   approveReport,
   createReport,
   submitDraftReport,
   updateDraftReport
-} from "../../../stories/ReportStories"
+} from "../../stories/ReportStories"
 
 const stories = [
   {

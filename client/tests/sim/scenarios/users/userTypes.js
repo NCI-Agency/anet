@@ -1,6 +1,6 @@
 import faker from "faker"
 import { Position } from "models"
-import { runGQL, specialUser } from "../../../simutils"
+import { runGQL, specialUser } from "../../simutils"
 
 const userTypes = [
   {

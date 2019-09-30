@@ -1,10 +1,10 @@
-import { createHiearchy } from "../../../stories/OrganizationStories"
-import { createPerson } from "../../../stories/PersonStories"
+import { createHiearchy } from "../../stories/OrganizationStories"
+import { createPerson } from "../../stories/PersonStories"
 import {
   createPosition,
   putPersonInPosition,
   updateAssociatedPosition
-} from "../../../stories/PositionStories"
+} from "../../stories/PositionStories"
 
 const buildup = [
   {

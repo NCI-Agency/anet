@@ -1,7 +1,7 @@
 import { Person, Organization, Report } from "models"
-import { createHiearchy } from "../../../stories/OrganizationStories"
-import { createPerson } from "../../../stories/PersonStories"
-import { createReport } from "../../../stories/ReportStories"
+import { createHiearchy } from "../../stories/OrganizationStories"
+import { createPerson } from "../../stories/PersonStories"
+import { createReport } from "../../stories/ReportStories"
 
 const buildup = [
   {
