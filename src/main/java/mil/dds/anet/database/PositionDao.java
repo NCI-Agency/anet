@@ -244,13 +244,16 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("positionUuid", positionUuid).execute();
 
     final String updateSql;
+    // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
+    // (i.e. with both a position and a person).
     if (DaoUtils.isMsSql()) {
       updateSql =
           "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
               + "(SELECT TOP(1) * FROM \"peoplePositions\""
               + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
               + " ORDER BY \"createdAt\" DESC) AS t "
-              + "WHERE t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
               + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
               + "      \"peoplePositions\".\"endedAt\" IS NULL";
     } else {
@@ -259,7 +262,8 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
               + "(SELECT * FROM \"peoplePositions\""
               + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
               + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
-              + "WHERE t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
               + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
               + "      \"peoplePositions\".\"endedAt\" IS NULL";
     }
