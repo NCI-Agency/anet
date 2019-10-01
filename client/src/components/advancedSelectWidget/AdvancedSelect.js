@@ -16,23 +16,6 @@ import "../BlueprintOverrides.css"
 
 const MOBILE_WIDTH = 733
 
-const AdvancedSelectTarget = ({ overlayRef }) => (
-  <Row>
-    <Col
-      sm={12}
-      lg={12}
-      className="form-group"
-      ref={overlayRef}
-      style={{ position: "relative", marginBottom: 0 }}
-    />
-  </Row>
-)
-AdvancedSelectTarget.propTypes = {
-  overlayRef: PropTypes.shape({
-    current: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
-  })
-}
-
 const FilterList = props => {
   const { items, currentFilter, handleOnClick } = props
   return (
