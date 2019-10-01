@@ -191,7 +191,7 @@ export default class AdvancedSelect extends Component {
           interactionKind={PopoverInteractionKind.CLICK}
           fill="true"
           usePortal={false}
-          popoverClassName="advancedSelectPopover"
+          className="advancedSelectPopover"
           modifiers={{
             shift: { enabled: false },
             flip: { enabled: false },
