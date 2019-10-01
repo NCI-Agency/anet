@@ -456,9 +456,7 @@ distributions {
 //Add gradle plugin repos
 buildscript {
 	repositories {
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
+		gradlePluginPortal()
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
