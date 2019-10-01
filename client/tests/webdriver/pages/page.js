@@ -13,6 +13,9 @@ class Page {
 
   _open(pathName, credentials) {
     browser.url(this._buildUrl(pathName, credentials))
+    browser
+      .$("span.loading")
+      .waitForExist(30000, true, "Expected everything to be loaded by now")
   }
 
   open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {
