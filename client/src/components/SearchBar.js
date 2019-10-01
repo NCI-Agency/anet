@@ -5,14 +5,7 @@ import { routerRelatedPropTypes } from "components/Page"
 import { SearchDescription } from "components/SearchFilters"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import {
-  Button,
-  Form,
-  FormControl,
-  InputGroup,
-  Overlay,
-  Popover
-} from "react-bootstrap"
+import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
@@ -85,21 +78,13 @@ class SearchBar extends Component {
         >
           <SearchDescription query={this.props.query} showPlaceholders />
         </div>
-        <Overlay
-          show={this.state.showAdvancedSearch}
-          onHide={() => this.setState({ showAdvancedSearch: false })}
-          placement="bottom"
-          target={this.advancedSearchLink.current}
-          rootClose
-        >
-          <Popover id="advanced-search" placement="bottom" title="Filters">
-            <AdvancedSearch
-              onSearch={this.runAdvancedSearch}
-              onCancel={() => this.setState({ showAdvancedSearch: false })}
-              text={this.state.searchTerms}
-            />
-          </Popover>
-        </Overlay>
+        {this.state.showAdvancedSearch && (
+          <AdvancedSearch
+            onSearch={this.runAdvancedSearch}
+            onCancel={() => this.setState({ showAdvancedSearch: false })}
+            text={this.state.searchTerms}
+          />
+        )}
       </div>
     )
   }

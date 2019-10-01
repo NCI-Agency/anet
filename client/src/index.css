@@ -233,16 +233,6 @@ span.asLink:focus {
 	z-index: 10;
 }
 
-#advanced-search.popover {
-	max-width: 100%;
-}
-
-@media (min-width: 768px) {
-	#advanced-search.popover {
-		width: 750px;
-	}
-}
-
 .graphiql-container {
 	min-height: 600px;
 }

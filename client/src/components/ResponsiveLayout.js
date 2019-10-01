@@ -10,7 +10,7 @@ const anetContainer = {
   display: "flex",
   flexDirection: "column",
   height: "100vh",
-  overflow: "hidden"
+  overflow: "auto"
 }
 const contentContainer = {
   flex: "1 1 auto",

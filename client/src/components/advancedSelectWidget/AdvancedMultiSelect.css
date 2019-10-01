@@ -47,21 +47,16 @@
   vertical-align: middle;
 }
 
-.popover-content {
-  height:100%;
-  overflow: auto;
-}
 
 .bp3-popover.advancedSelectPopover {
   width: 100%;
   height:100%;
   overflow: auto;
 }
-
 .bp3-popover.advancedSelectPopover .bp3-popover-content {
   box-shadow: 0 6px 20px hsla(0, 0%, 0%, 0.4);
   padding: 15px;
 }
 .bp3-transition-container {
-  width: 120%;
+  width: 100%;
 }

@@ -195,8 +195,8 @@ export default class AdvancedSelect extends Component {
           modifiers={{
             shift: { enabled: false },
             flip: { enabled: false },
-            preventOverflow: { enabled: false },
-            offset: { offset: "-10% - 15px" }
+            preventOverflow: { enabled: false }
+
           }}
         >
           <InputGroup>
