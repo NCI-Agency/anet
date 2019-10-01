@@ -1,4 +1,4 @@
-import { createHiearchy } from "../../stories/OrganizationStories"
+import { createHierarchy } from "../../stories/OrganizationStories"
 import {
   createPerson,
   deletePerson,
@@ -78,7 +78,7 @@ const stories = [
     frequency: 1 / 10,
     mean: 100,
     stddev: 1 / 10,
-    runnable: createHiearchy,
+    runnable: createHierarchy,
     userTypes: ["existingAdmin"]
   },
   {

@@ -48,15 +48,15 @@ function randomOrganization() {
 }
 
 /**
- * Creates an organization with a hiearchical structure for sub-organizations
+ * Creates an organization with a hierarchical structure for sub-organizations
  * @param {*} user The user that will insert the organization into the database
  */
-async function createHiearchy(user, grow, args) {
+async function createHierarchy(user, grow, args) {
   if (grow) {
     const count = await countOrganizations(user)
     if (!grow(count)) {
       console.debug(
-        `Skipping create organization hiearchy (${count} organizations exist)`
+        `Skipping create organization hierarchy (${count} organizations exist)`
       )
       return "(skipped)"
     }
@@ -102,7 +102,7 @@ async function createHiearchy(user, grow, args) {
 
   /**
    * Creates sub-organization for some parent
-   * @param {*} parentOrg The parent organization or undefined if top of hiearchy
+   * @param {*} parentOrg The parent organization or undefined if top of hierarchy
    * @param {*} path Path with child-indicator to this sub-organization. Used for generating short-names
    */
   async function createSubOrg(parentOrg, path) {
@@ -242,7 +242,7 @@ const organizationsBuildup = async function(user, number) {
   }
 
   if ((await count()) < number) {
-    await createHiearchy(user)
+    await createHierarchy(user)
   }
 }
 
@@ -262,4 +262,4 @@ async function countOrganizations(user) {
   })).data.organizationList.totalCount
 }
 
-export { organizationsBuildup, createOrganization, createHiearchy }
+export { organizationsBuildup, createOrganization, createHierarchy }

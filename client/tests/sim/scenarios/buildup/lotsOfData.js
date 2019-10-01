@@ -1,5 +1,5 @@
 import { Person, Organization, Report } from "models"
-import { createHiearchy } from "../../stories/OrganizationStories"
+import { createHierarchy } from "../../stories/OrganizationStories"
 import { createPerson } from "../../stories/PersonStories"
 import { createReport } from "../../stories/ReportStories"
 
@@ -35,7 +35,7 @@ const buildupLotsOfData = [
   {
     name: "Create advisor organization",
     number: 200,
-    runnable: createHiearchy,
+    runnable: createHierarchy,
     userTypes: ["existingAdmin"],
     arguments: {
       type: Organization.TYPE.ADVISOR_ORG,
@@ -46,7 +46,7 @@ const buildupLotsOfData = [
   {
     name: "Create principal organization",
     number: 1000,
-    runnable: createHiearchy,
+    runnable: createHierarchy,
     userTypes: ["existingAdmin"],
     arguments: {
       type: Organization.TYPE.PRINCIPAL_ORG,

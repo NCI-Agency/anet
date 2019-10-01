@@ -1,4 +1,4 @@
-import { createHiearchy } from "../../stories/OrganizationStories"
+import { createHierarchy } from "../../stories/OrganizationStories"
 import { createPerson } from "../../stories/PersonStories"
 import {
   createPosition,
@@ -16,7 +16,7 @@ const buildupOld = [
   {
     name: "Create organization",
     number: 50,
-    runnable: createHiearchy,
+    runnable: createHierarchy,
     userTypes: ["existingAdmin"]
   },
   {
