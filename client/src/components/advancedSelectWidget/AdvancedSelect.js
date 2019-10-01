@@ -16,7 +16,7 @@ import "../BlueprintOverrides.css"
 
 const MOBILE_WIDTH = 733
 
-const FilterList = props => {
+const FilterAsNav = props => {
   const { items, currentFilter, handleOnClick } = props
   return (
     <ul className="advancedSelectFilters">
@@ -33,13 +33,13 @@ const FilterList = props => {
     </ul>
   )
 }
-FilterList.propTypes = {
+FilterAsNav.propTypes = {
   items: PropTypes.object,
   currentFilter: PropTypes.string,
   handleOnClick: PropTypes.func
 }
 
-const SelectFilterInputField = props => {
+const FilterAsDropdown = props => {
   const { items, handleOnChange } = props
   return (
     <React.Fragment>
@@ -56,7 +56,7 @@ const SelectFilterInputField = props => {
     </React.Fragment>
   )
 }
-SelectFilterInputField.propTypes = {
+FilterAsDropdown.propTypes = {
   items: PropTypes.object,
   handleOnChange: PropTypes.func
 }
@@ -207,7 +207,7 @@ export default class AdvancedSelect extends Component {
                   {hasLeftNav && (
                     <Col sm={4} md={3}>
                       <div>
-                        <FilterList
+                        <FilterAsNav
                           items={filterDefs}
                           currentFilter={this.state.filterType}
                           handleOnClick={this.changeFilterType}
@@ -223,7 +223,7 @@ export default class AdvancedSelect extends Component {
                   >
                     {hasTopNav && (
                       <div>
-                        <SelectFilterInputField
+                        <FilterAsDropdown
                           items={filterDefs}
                           handleOnChange={this.handleOnChangeSelect}
                         />
