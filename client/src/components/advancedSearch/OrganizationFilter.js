@@ -7,7 +7,7 @@ import _isEqualWith from "lodash/isEqualWith"
 import { Organization } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Checkbox, FormGroup } from "react-bootstrap"
+import { Checkbox } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
 
@@ -94,7 +94,7 @@ export default class OrganizationFilter extends Component {
     return !this.props.asFormField ? (
       <React.Fragment>{msg}</React.Fragment>
     ) : (
-      <FormGroup>
+      <div>
         <AdvancedSingleSelect
           {...advancedSelectProps}
           fieldName={this.props.queryKey}
@@ -110,14 +110,16 @@ export default class OrganizationFilter extends Component {
           onChange={this.onChange}
           value={this.state.value}
         />
-        <Checkbox
-          inline
-          checked={this.state.includeChildOrgs}
-          onChange={this.changeIncludeChildren}
-        >
-          Include sub-organizations
-        </Checkbox>
-      </FormGroup>
+        <div>
+          <Checkbox
+            inline
+            checked={this.state.includeChildOrgs}
+            onChange={this.changeIncludeChildren}
+          >
+            Include sub-organizations
+          </Checkbox>
+        </div>
+      </div>
     )
   }
 

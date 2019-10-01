@@ -5,7 +5,6 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 export default class AdvancedSelectFilter extends Component {
@@ -62,7 +61,7 @@ export default class AdvancedSelectFilter extends Component {
     return !this.props.asFormField ? (
       <React.Fragment>{this.props.value[this.props.valueKey]}</React.Fragment>
     ) : (
-      <FormGroup>
+      <div>
         <AdvancedSingleSelect
           {...advancedSelectProps}
           fieldName={this.props.queryKey}
@@ -71,7 +70,7 @@ export default class AdvancedSelectFilter extends Component {
           value={this.state.value}
           smallOverlay
         />
-      </FormGroup>
+      </div>
     )
   }
 

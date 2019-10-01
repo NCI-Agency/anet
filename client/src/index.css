@@ -193,16 +193,12 @@ fieldset.danger {
 	background-color: #e0e0e0;
 }
 
-.header .logo img, .header input, .header button {
+.header .logo img, .header button {
 	height: 38px;
 }
 
 .header button {
 	font-weight: bold;
-}
-
-.header .row > div * {
-	margin: 0;
 }
 
 .header small span {
@@ -689,6 +685,10 @@ header.searchPagination {
 .graph-legend {
 	margin-top: 4px;
 	font-size: 0.8em;
+}
+
+.advanced-search  {
+  padding-top: 15px;
 }
 
 .advanced-search .col-xs-3 select {

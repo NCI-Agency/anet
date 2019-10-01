@@ -196,7 +196,6 @@ export default class AdvancedSelect extends Component {
             shift: { enabled: false },
             flip: { enabled: false },
             preventOverflow: { enabled: false }
-
           }}
         >
           <InputGroup>

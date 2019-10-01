@@ -2,7 +2,6 @@ import autobind from "autobind-decorator"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 export default class SelectSearchFilter extends Component {
@@ -60,7 +59,7 @@ export default class SelectSearchFilter extends Component {
         {labels[values.indexOf(this.state.value.value)]}
       </React.Fragment>
     ) : (
-      <FormGroup>
+      <div>
         <select value={this.state.value.value} onChange={this.onChange}>
           {values.map((v, idx) => (
             <option key={idx} value={v}>
@@ -68,7 +67,7 @@ export default class SelectSearchFilter extends Component {
             </option>
           ))}
         </select>
-      </FormGroup>
+      </div>
     )
   }
 

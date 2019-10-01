@@ -18,7 +18,6 @@ import _uniqueId from "lodash/uniqueId"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 const DATE_FORMAT = "YYYY-MM-DD"
@@ -131,34 +130,32 @@ export default class DateRangeSearch extends Component {
     return !this.props.asFormField ? (
       dateRangeDisplay
     ) : (
-      <FormGroup>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center"
-          }}
-        >
-          {this.selectMenu(this.props.onlyBetween)}
-          {(value.relative === BETWEEN || value.relative === AFTER) && (
-            <CustomDateInput
-              showIcon={false}
-              value={dateStart}
-              onChange={this.onChangeStart}
-            />
-          )}
-          {value.relative === BETWEEN && (
-            <span style={{ marginLeft: 5, marginRight: 5 }}>and</span>
-          )}
-          {(value.relative === BETWEEN || value.relative === BEFORE) && (
-            <CustomDateInput
-              showIcon={false}
-              value={dateEnd}
-              onChange={this.onChangeEnd}
-            />
-          )}
-        </div>
-      </FormGroup>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center"
+        }}
+      >
+        {this.selectMenu(this.props.onlyBetween)}
+        {(value.relative === BETWEEN || value.relative === AFTER) && (
+          <CustomDateInput
+            showIcon={false}
+            value={dateStart}
+            onChange={this.onChangeStart}
+          />
+        )}
+        {value.relative === BETWEEN && (
+          <span style={{ marginLeft: 5, marginRight: 5 }}>and</span>
+        )}
+        {(value.relative === BETWEEN || value.relative === BEFORE) && (
+          <CustomDateInput
+            showIcon={false}
+            value={dateEnd}
+            onChange={this.onChangeEnd}
+          />
+        )}
+      </div>
     )
   }
 

@@ -139,7 +139,7 @@ class AdvancedSearch extends Component {
           <div className="advanced-search form-horizontal">
             <Form onSubmit={this.onSubmit}>
               <FormGroup>
-                <Col xs={11} style={{ textAlign: "center" }}>
+                <Col xs={11}>
                   <ButtonToggleGroup
                     value={objectType}
                     onChange={this.changeObjectType}
@@ -177,7 +177,7 @@ class AdvancedSearch extends Component {
               )}
 
               <Row>
-                <Col xs={6} xsOffset={3}>
+                <Col xs={12}>
                   {!this.state.objectType ? (
                     "To add filters, first pick a type above"
                   ) : !moreFiltersAvailable ? (
@@ -326,17 +326,17 @@ class SearchFilter extends Component {
 
     return (
       <FormGroup>
-        <Col xs={3}>
+        <Col xs={1} sm={2}>
           <ControlLabel>{label}</ControlLabel>
         </Col>
-        <Col xs={8}>
+        <Col xs={10} sm={9}>
           <ChildComponent
             value={filter.value || ""}
             onChange={this.onChange}
             {...element.props}
           />
         </Col>
-        <Col xs={1}>
+        <Col xs={1} sm={1}>
           <Button bsStyle="link" onClick={() => onRemove(this.props.filter)}>
             <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
           </Button>
