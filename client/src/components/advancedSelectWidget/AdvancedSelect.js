@@ -108,16 +108,14 @@ export const propTypes = {
   // Optional: GraphQL string of fields to return from search.
   fields: PropTypes.string,
   handleAddItem: PropTypes.func,
-  handleRemoveItem: PropTypes.func,
-  smallOverlay: PropTypes.bool // set to true if you want to display the filters on top
+  handleRemoveItem: PropTypes.func
 }
 
 export default class AdvancedSelect extends Component {
   static defaultProps = {
     filterDefs: {},
     closeOverlayOnAdd: false,
-    searchTerms: "",
-    smallOverlay: false
+    searchTerms: ""
   }
 
   state = {
@@ -174,8 +172,7 @@ export default class AdvancedSelect extends Component {
       overlayTableClassName,
       overlayColumns,
       overlayRenderRow,
-      filterDefs,
-      smallOverlay
+      filterDefs
     } = overlayProps
     const { results, filterType, isLoading } = this.state
     const renderSelectedWithDelete = renderSelected
@@ -220,7 +217,7 @@ export default class AdvancedSelect extends Component {
               const hasLeftNav =
                 width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
               const hasTopNav =
-                (width < MOBILE_WIDTH || smallOverlay) &&
+                (width < MOBILE_WIDTH) &&
                 Object.keys(filterDefs).length > 1
               return (
                 <Row className="border-between">

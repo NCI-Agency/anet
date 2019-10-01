@@ -68,7 +68,6 @@ export default class AdvancedSelectFilter extends Component {
           showRemoveButton={false}
           onChange={this.onChange}
           value={this.state.value}
-          smallOverlay
         />
       </div>
     )
