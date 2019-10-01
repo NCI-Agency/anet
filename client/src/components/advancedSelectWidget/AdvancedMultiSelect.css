@@ -18,26 +18,23 @@
   display: none;
 }
 
-.border-between {
-}
-
-.overlayFilters {
+.advancedSelectFilters {
   list-style-type: none;
 }
-.overlayFilters > li > button {
+.advancedSelectFilters > li > button {
   text-decoration: none;
   text-align: right;
   border-radius: 4px;
 }
-.overlayFilters > li > button:hover,
-.overlayFilters > li > button:focus {
+.advancedSelectFilters > li > button:hover,
+.advancedSelectFilters > li > button:focus {
   text-decoration: none;
   outline: none;
 }
-.overlayFilters > li > button:hover {
+.advancedSelectFilters > li > button:hover {
   background-color: #e0e0e0;
 }
-.overlayFilters > li.active > button {
+.advancedSelectFilters > li.active > button {
   border: 2px solid #1772B8;
 }
 

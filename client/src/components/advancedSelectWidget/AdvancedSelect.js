@@ -36,7 +36,7 @@ AdvancedSelectTarget.propTypes = {
 const FilterList = props => {
   const { items, currentFilter, handleOnClick } = props
   return (
-    <ul className="overlayFilters">
+    <ul className="advancedSelectFilters">
       {Object.keys(items).map(filterType => (
         <li
           key={filterType}
