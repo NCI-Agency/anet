@@ -180,7 +180,7 @@ const BaseNav = props => {
             <Link
               to={"/insights/" + insight}
               key={insight}
-              onClick={resetPages}
+              onClick={props.clearSearchQuery}
             >
               <MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
             </Link>
@@ -194,7 +194,7 @@ const BaseNav = props => {
             <Link
               to={`/dashboards/${dashboard.type}/${dashboard.label}`}
               key={dashboard.label}
-              onClick={resetPages}
+              onClick={props.clearSearchQuery}
             >
               <MenuItem>{dashboard.label}</MenuItem>
             </Link>
