@@ -270,7 +270,8 @@ public class ReportResource {
           Optional<ReportPerson> existingPerson =
               existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
           if (existingPerson.isPresent()) {
-            if (existingPerson.get().isPrimary() != rp.isPrimary()) {
+            if (existingPerson.get().isPrimary() != rp.isPrimary()
+                || existingPerson.get().isSensitive() != rp.isSensitive()) {
               dao.updateAttendeeOnReport(rp, r);
             }
             existingPeople.remove(existingPerson.get());

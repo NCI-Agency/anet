@@ -225,6 +225,7 @@ const updateDraftReport = async function(user) {
             attendees {
               uuid
               primary
+              sensitive
             }
           }
         }

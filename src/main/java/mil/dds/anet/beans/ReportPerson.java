@@ -6,6 +6,7 @@ import java.util.Objects;
 public class ReportPerson extends Person {
 
   boolean primary;
+  boolean sensitive;
 
   public ReportPerson() {
     this.primary = false; // Default
@@ -20,18 +21,28 @@ public class ReportPerson extends Person {
     this.primary = primary;
   }
 
+  @GraphQLQuery(name = "sensitive")
+  public boolean isSensitive() {
+    return sensitive;
+  }
+
+  public void setSensitive(boolean sensitive) {
+    this.sensitive = sensitive;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof ReportPerson)) {
       return false;
     }
     ReportPerson rp = (ReportPerson) o;
-    return super.equals(o) && Objects.equals(rp.isPrimary(), primary);
+    return super.equals(o) && Objects.equals(rp.isPrimary(), primary)
+        && Objects.equals(rp.isSensitive(), sensitive);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), primary);
+    return Objects.hash(super.hashCode(), primary, sensitive);
   }
 
 }

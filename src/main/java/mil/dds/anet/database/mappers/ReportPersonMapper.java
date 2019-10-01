@@ -12,6 +12,7 @@ public class ReportPersonMapper implements RowMapper<ReportPerson> {
   public ReportPerson map(ResultSet r, StatementContext ctx) throws SQLException {
     ReportPerson rp = PersonMapper.fillInFields(new ReportPerson(), r);
     rp.setPrimary(r.getBoolean("isPrimary"));
+    rp.setSensitive(r.getBoolean("isSensitive"));
     return rp;
   }
 

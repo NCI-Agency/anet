@@ -2,9 +2,10 @@ import LinkTo from "components/LinkTo"
 import { Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { Button, Label, Radio, Table } from "react-bootstrap"
+import { Button, Label, Radio, Table, Checkbox } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import "./AttendeesTable.css"
+import { toast } from "react-toastify"
 
 const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
@@ -43,6 +44,9 @@ const TableHeader = props => {
         <th className="col-xs-3">{!hide && "Position"}</th>
         <th className="col-xs-2">{!hide && "Location"}</th>
         <th className="col-xs-2">{!hide && "Organization"}</th>
+        <th className="col-xs-1" style={{ textAlign: "center" }}>
+          {!hide && "Sensitive"}
+        </th>
         {showDelete && <th className="col-xs-1" />}
       </tr>
     </thead>
@@ -104,6 +108,34 @@ RadioButton.propTypes = {
   handleOnChange: PropTypes.func
 }
 
+const SensitiveCheckBox = props => {
+  const { person, disabled, handleOnChange } = props
+  return (
+    <Checkbox
+      // inline-block
+      className="sensitive-checkbox"
+      checked={person.sensitive}
+      disabled={disabled}
+      onChange={event => {
+        !disabled && handleOnChange(person, event.target.checked)
+        !disabled &&
+          person.sensitive &&
+          toast.info(
+            "You are restricting the visibility of the attendee to only authorized personnel. This will exclude that information from all reporting capabilities. Please do this only when necessary."
+          )
+      }}
+    >
+      {person.sensitive && <Label bsStyle="primary">Sensitive</Label>}
+    </Checkbox>
+  )
+}
+
+SensitiveCheckBox.propTypes = {
+  person: PropTypes.object,
+  disabled: PropTypes.bool,
+  handleOnChange: PropTypes.func
+}
+
 const AttendeesTable = props => {
   const { attendees, disabled, onChange, showDelete, onDelete } = props
 
@@ -160,6 +192,13 @@ const AttendeesTable = props => {
             organization={person.position && person.position.organization}
           />{" "}
         </td>
+        <td className="sensitive-attendee">
+          <SensitiveCheckBox
+            person={person}
+            handleOnChange={setSensitiveAttendee}
+            disabled={disabled}
+          />
+        </td>
         {showDelete && (
           <td>
             <RemoveButton
@@ -178,6 +217,15 @@ const AttendeesTable = props => {
         attendee.primary = true
       } else if (attendee.role === person.role) {
         attendee.primary = false
+      }
+    })
+    onChange(attendees)
+  }
+
+  function setSensitiveAttendee(person, isSensitive) {
+    attendees.forEach(attendee => {
+      if (Person.isEqual(attendee, person)) {
+        attendee.sensitive = isSensitive
       }
     })
     onChange(attendees)

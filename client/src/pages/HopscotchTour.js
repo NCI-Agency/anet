@@ -173,6 +173,12 @@ const reportTour = (currentUser, history) => {
         placement: "bottom"
       },
       {
+        title: `Sensitive ${advisorSingular} or ${principalSingular}`,
+        content: `Use these check boxes to restrict the visibility of ${advisorPlural} and ${principalPlural} to only authorized personnel.`,
+        target: "#sensitive-checkbox checkbox",
+        placement: "bottom"
+      },
+      {
         title: taskShortLabelPlural,
         content: `Search for the ${taskShortLabelPlural} that apply to this engagement. You can search for ${taskShortLabelPlural} in any organization, including your organization and its sub-organizations. ${taskShortLabelPlural} are not required.`,
         target: "#tasks",

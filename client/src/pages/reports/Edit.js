@@ -44,6 +44,7 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         primary
+        sensitive
         rank
         role
         status

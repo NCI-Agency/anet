@@ -856,6 +856,8 @@ const BaseReportForm = props => {
         // Make sure field is 'controlled' by defining a value
         attendee.primary = attendee.primary || false
       }
+      // Make sure field is 'controlled' by defining a value
+      attendee.sensitive = attendee.sensitive || false
     })
     setFieldValue(field, attendees)
   }

@@ -2719,4 +2719,10 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
+	<changeSet id="add-sensitive-attendee-to-ReportPeople" author="jose-west">
+		<addColumn tableName="reportPeople">
+			<column name="isSensitive" type="boolean" defaultValue="false" />
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

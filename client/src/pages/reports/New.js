@@ -24,6 +24,7 @@ const BaseReportNew = props => {
   if (props.currentUser && props.currentUser.uuid) {
     let person = new Person(props.currentUser)
     person.primary = true
+    person.sensitive = false
     report.attendees.push(person)
   }
 
