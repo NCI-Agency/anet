@@ -65,7 +65,7 @@ export default class Organization extends Model {
           yup.object().shape({
             name: yup
               .string()
-              .required()
+              .required("You must provide the step name")
               .default(""),
             type: yup
               .string()
@@ -73,7 +73,7 @@ export default class Organization extends Model {
               .default(() => Organization.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
             approvers: yup
               .array()
-              .required()
+              .required("You must select at least one approver")
               .default([])
           })
         )
@@ -85,7 +85,7 @@ export default class Organization extends Model {
           yup.object().shape({
             name: yup
               .string()
-              .required()
+              .required("You must provide the step name")
               .default(""),
             type: yup
               .string()
@@ -93,7 +93,7 @@ export default class Organization extends Model {
               .default(() => Organization.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
             approvers: yup
               .array()
-              .required()
+              .required("You must select at least one approver")
               .default([])
           })
         )
