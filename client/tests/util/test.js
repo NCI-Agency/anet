@@ -282,6 +282,7 @@ test.beforeEach(t => {
       let $advancedSelectInput = await t.context.$(inputSelector)
       await $advancedSelectInput.sendKeys(text)
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
+      t.context.waitForLoadingFinished()
       let $advancedSelectSuggestion = await t.context.$(
         `${popoverSelector} tbody tr:first-child td input`
       )
