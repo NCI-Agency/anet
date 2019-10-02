@@ -19,6 +19,7 @@ import {
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
 import { LAST_WEEK } from "dateUtils"
+import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
@@ -309,7 +310,13 @@ const SavedSearches = props => {
   let savedSearches = []
   if (data) {
     savedSearches = data.savedSearches
-    if (savedSearches && savedSearches.length > 0 && !selectedSearch) {
+    if (_isEmpty(savedSearches)) {
+      if (selectedSearch) {
+        // Clear selection
+        setSelectedSearch(null)
+      }
+    } else if (!savedSearches.includes(selectedSearch)) {
+      // Select first one
       setSelectedSearch(savedSearches[0])
     }
   }
@@ -376,7 +383,6 @@ const SavedSearches = props => {
   function onConfirmDelete() {
     return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: selectedSearch.uuid })
       .then(data => {
-        setSelectedSearch(null)
         refetch()
       })
       .catch(error => {
