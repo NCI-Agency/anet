@@ -394,7 +394,14 @@ const ReportMinimal = props => {
               </Fieldset>
 
               <Fieldset title="Meeting attendees">
-                <AttendeesTable attendees={report.attendees} disabled />
+                <AttendeesTable
+                  attendees={report.attendees}
+                  disabled
+                  showSensitive={
+                    report.reportSensitiveInformation &&
+                    report.reportSensitiveInformation.text
+                  }
+                />
               </Fieldset>
 
               <Fieldset title={Settings.fields.task.longLabel}>
@@ -488,7 +495,7 @@ const ReportMinimal = props => {
     }
     return (
       <Alert bsStyle="warning">
-        The following warnings should be addressed before {submitType} this
+        The following warnings should be addressed before {submitType} this{" "}
         {reportType}:
         <ul>
           {validationWarnings.map((warning, idx) => (

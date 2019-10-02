@@ -595,6 +595,7 @@ const BaseReportForm = props => {
                       attendees={values.attendees}
                       onChange={value => setFieldValue("attendees", value)}
                       showDelete
+                      showSensitive={showSensitiveInfo}
                     />
                   }
                   overlayColumns={[

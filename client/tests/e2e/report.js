@@ -609,7 +609,8 @@ test("Verify that validation and other reports/new interactions work", async t =
     $advisorName,
     $advisorPosition,
     /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,
-    $advisorOrg
+    $advisorOrg,
+    /* eslint-disable no-unused-vars */ $advisorSensitiveCheckbox /* eslint-enable no-unused-vars */
   ] = await $$(".advisorAttendeesTable tbody tr:first-child td")
 
   t.is(

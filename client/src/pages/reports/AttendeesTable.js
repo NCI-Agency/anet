@@ -137,7 +137,14 @@ SensitiveCheckBox.propTypes = {
 }
 
 const AttendeesTable = props => {
-  const { attendees, disabled, onChange, showDelete, onDelete } = props
+  const {
+    attendees,
+    disabled,
+    onChange,
+    showDelete,
+    onDelete,
+    showSensitive
+  } = props
 
   return (
     <div id="attendeesContainer">
@@ -162,6 +169,9 @@ const AttendeesTable = props => {
   )
 
   function renderAttendeeRow(person) {
+    if (person.sensitive && !showSensitive) {
+      return
+    }
     return (
       <tr key={person.uuid}>
         <td className="primary-attendee">
@@ -237,7 +247,8 @@ AttendeesTable.propTypes = {
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   showDelete: PropTypes.bool,
-  onDelete: PropTypes.func
+  onDelete: PropTypes.func,
+  showSensitive: PropTypes.bool
 }
 
 export default AttendeesTable

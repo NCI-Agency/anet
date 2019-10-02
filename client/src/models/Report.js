@@ -259,17 +259,45 @@ export default class Report extends Model {
       .object()
       .nullable()
       .default({}),
+    attendees: yup
+      .array()
+      .nullable()
+      .default({}),
     authorizationGroups: yup
       .array()
       .nullable()
       .when(
-        ["reportSensitiveInformation", "reportSensitiveInformation.text"],
-        (reportSensitiveInformation, reportSensitiveInformationText, schema) =>
-          _isEmpty(reportSensitiveInformation) ||
-          _isEmpty(reportSensitiveInformationText)
-            ? schema.nullable()
-            : schema.required(`You should provide authorization groups who can access the sensitive information.
-            If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
+        [
+          "reportSensitiveInformation",
+          "reportSensitiveInformation.text",
+          "attendees"
+        ],
+        (
+          reportSensitiveInformation,
+          reportSensitiveInformationText,
+          attendees,
+          schema
+        ) => {
+          let msgs = []
+          if (
+            !(
+              _isEmpty(reportSensitiveInformation) ||
+              _isEmpty(reportSensitiveInformationText)
+            )
+          ) {
+            msgs.push(
+              "You should provide authorization groups who can access the sensitive information. If you do not do so, you will remain the only one authorized to see the sensitive information you have entered"
+            )
+          }
+
+          if (attendees.some(a => a.sensitive)) {
+            msgs.push(
+              "You should provide authorization groups who can view the sensitive attendees. If you do not do so, you will remain the only one authorized to see the sensitive attendees you have entered"
+            )
+          }
+
+          return msgs.length === 0 ? schema.nullable() : schema.required(msgs)
+        }
       )
   })
 
