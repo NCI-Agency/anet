@@ -1,3 +1,4 @@
+import _get from "lodash/get"
 import React from "react"
 import {
   Col,
@@ -25,15 +26,15 @@ const getHumanValue = (field, humanValue) => {
 
 const getFormGroupValidationState = (field, form) => {
   const { touched, errors } = form
-  const fieldTouched = touched[field.name]
-  const fieldError = errors[field.name]
+  const fieldTouched = _get(touched, field.name)
+  const fieldError = _get(errors, field.name)
   return (fieldTouched && (fieldError ? "error" : null)) || null
 }
 
 const getHelpBlock = (field, form) => {
   const { touched, errors } = form
-  const fieldTouched = touched[field.name]
-  const fieldError = errors[field.name]
+  const fieldTouched = _get(touched, field.name)
+  const fieldError = _get(errors, field.name)
   return fieldTouched && fieldError && <HelpBlock>{fieldError}</HelpBlock>
 }
 
