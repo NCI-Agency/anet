@@ -111,7 +111,7 @@ test.beforeEach(t => {
   t.context.waitForLoadingFinished = async() => {
     await t.context.assertElementNotPresent(
       t,
-      "span.loading",
+      "div.loader",
       "Loading indicator should disappear",
       mediumWaitMs
     )

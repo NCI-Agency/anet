@@ -14,7 +14,7 @@ class Page {
   _open(pathName, credentials) {
     browser.url(this._buildUrl(pathName, credentials))
     browser
-      .$("span.loading")
+      .$("div.loader")
       .waitForExist(30000, true, "Expected everything to be loaded by now")
   }
 

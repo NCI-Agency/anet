@@ -82,7 +82,7 @@ const HomeTile = props => {
       onClick={event => onClickDashboard(query, event)}
       className="home-tile"
     >
-      {(done && <p>{result}</p>) || <h1>{totalCount}</h1>}
+      {(done && result) || <h1>{totalCount}</h1>}
       {query.title}
     </Button>
   )
