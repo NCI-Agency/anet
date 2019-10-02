@@ -1,8 +1,15 @@
+import { Settings } from "api"
 import faker from "faker"
+import Faker from "faker/lib"
+import { getAlpha2Code } from "i18n-iso-countries"
+import { countries } from "countries-list"
 import { Person } from "models"
 import { fuzzy, identity, populate, runGQL } from "../simutils"
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
+
+const availableLocales = Object.keys(faker.locales)
+const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 
 function principalName(_gender) {
   const gender = _gender === "MALE" ? "m" : "f"
@@ -15,11 +22,12 @@ function principalName(_gender) {
   return result
 }
 
-function advisorName(gender) {
+function advisorName(gender, locale) {
+  const localizedFaker = new Faker({ locale: locale, locales: faker.locales })
   const genderInt = gender === "MALE" ? 0 : 1
   return {
-    firstName: faker.name.firstName(genderInt),
-    lastName: faker.name.lastName(genderInt)
+    firstName: localizedFaker.name.firstName(genderInt),
+    lastName: localizedFaker.name.lastName(genderInt)
   }
 }
 
@@ -31,22 +39,61 @@ function randomPerson(role, status) {
       Person.ROLE.ADVISOR
     ])
   }
-  const name = (role === Person.ROLE.PRINCIPAL ? principalName : advisorName)(
-    gender
+  const defaultLangCode = "en"
+  const country = faker.random.arrayElement(
+    role === Person.ROLE.PRINCIPAL
+      ? Settings.fields.principal.person.countries
+      : Settings.fields.advisor.person.countries
   )
+  // Countries in the Settings from anet.yml are in English
+  const countryCode = getAlpha2Code(country, "en")
+  const countryByCode = countries[countryCode]
+  // Some hacks for picking country-specific languages supported by faker
+  const fakerHacks = {
+    AT: "de_AT",
+    AU: "en_AU",
+    BE: "nl_BE",
+    GB: "en_GB",
+    NO: "nb_NO",
+    PT: "pt_PT",
+    US: "en_US"
+  }
+  const langCode =
+    fakerHacks[countryCode] ||
+    (countryByCode
+      ? faker.random.arrayElement(countryByCode.languages)
+      : defaultLangCode)
+  const locale = availableLocales.includes(langCode)
+    ? langCode
+    : defaultLangCode
+  const name = (role === Person.ROLE.PRINCIPAL ? principalName : advisorName)(
+    gender,
+    locale
+  )
+  const rank = faker.random.arrayElement(availableRanks)
+  let email = ""
+  if (role === Person.ROLE.ADVISOR) {
+    let domainName = faker.random.arrayElement(Settings.domainNames)
+    if (domainName.startsWith("*")) {
+      domainName = faker.internet.domainWord() + domainName.slice(1)
+    }
+    email = faker.internet.email(name.firstName, name.lastName, domainName)
+  } else if (fuzzy.withProbability(0.25)) {
+    email = faker.internet.email(name.firstName, name.lastName)
+  }
 
   return {
     name: () => Person.fullName(name, true),
     status: () => status || Person.STATUS.ACTIVE,
-    country: identity,
-    rank: identity,
+    country: () => country,
+    rank: () => rank,
     gender: () => gender,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
     biography: () => faker.lorem.paragraphs(),
     role: () => role,
     position: identity,
-    emailAddress: () => faker.internet.email(name.firstName, name.lastName)
+    emailAddress: () => email
   }
 }
 
@@ -81,6 +128,7 @@ const _createPerson = async function(user, role, status) {
     .gender.always()
     .endOfTourDate.always()
     .biography.always()
+    .emailAddress.always()
 
   console.debug(
     `Creating ${person.gender.toLowerCase().green} ${
