@@ -39,7 +39,7 @@ AdvancedSelectTarget.propTypes = {
 const FilterAsNav = props => {
   const { items, currentFilter, handleOnClick } = props
   return (
-    <ul className="advancedSelectFilters">
+    <ul className="advanced-select-filters">
       {Object.keys(items).map(filterType => (
         <li
           key={filterType}
@@ -213,6 +213,7 @@ export default class AdvancedSelect extends Component {
         >
           <Popover
             id={`${fieldName}-popover`}
+            className="advanced-select-popover"
             title={null}
             placement="bottom"
             style={{
