@@ -217,22 +217,27 @@ const BasePositionForm = props => {
                   )}
                 </Field>
 
-                <AdvancedSingleSelect
-                  fieldName="organization"
-                  fieldLabel="Organization"
-                  placeholder="Search the organization for this position..."
-                  value={values.organization}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={OrganizationOverlayRow}
-                  filterDefs={organizationFilters}
+                <Field
+                  name="organization"
+                  label="Organization"
+                  component={FieldHelper.renderSpecialField}
                   onChange={value => setFieldValue("organization", value)}
-                  objectType={Organization}
-                  fields={Organization.autocompleteQuery}
-                  queryParams={orgSearchQuery}
-                  valueKey="shortName"
-                  addon={ORGANIZATIONS_ICON}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="organization"
+                      placeholder="Search the organization for this position..."
+                      value={values.organization}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={orgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
                 />
-
                 <CodeFieldWithLabel
                   dictProps={positionSettings.code}
                   name="code"
