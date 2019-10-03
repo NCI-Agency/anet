@@ -28,17 +28,17 @@ export default class AdvancedMultiSelect extends Component {
 
   handleAddItem = newItem => {
     FieldHelper.handleMultiSelectAddItem(
-      this.props.value,
       newItem,
-      this.props.onChange
+      this.props.onChange,
+      this.props.value
     )
   }
 
   handleRemoveItem = oldItem => {
     FieldHelper.handleMultiSelectRemoveItem(
-      this.props.value,
       oldItem,
-      this.props.onChange
+      this.props.onChange,
+      this.props.value
     )
   }
 }

@@ -309,7 +309,7 @@ FieldAddon.propTypes = {
   ])
 }
 
-export function handleMultiSelectAddItem(curValue, newItem, onChange) {
+export function handleMultiSelectAddItem(newItem, onChange, curValue) {
   if (!newItem || !newItem.uuid) {
     return
   }
@@ -320,7 +320,7 @@ export function handleMultiSelectAddItem(curValue, newItem, onChange) {
   }
 }
 
-export function handleMultiSelectRemoveItem(curValue, oldItem, onChange) {
+export function handleMultiSelectRemoveItem(oldItem, onChange, curValue) {
   if (curValue.find(obj => obj.uuid === oldItem.uuid)) {
     const value = _cloneDeep(curValue)
     const index = value.findIndex(item => item.uuid === oldItem.uuid)
@@ -329,14 +329,14 @@ export function handleMultiSelectRemoveItem(curValue, oldItem, onChange) {
   }
 }
 
-export function handleSingleSelectAddItem(curValue, newItem, onChange) {
+export function handleSingleSelectAddItem(newItem, onChange, curValue) {
   if (!newItem || !newItem.uuid) {
     return
   }
   onChange(newItem)
 }
 
-export function handleSingleSelectRemoveItem(curValue, oldItem, onChange) {
+export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
   onChange(null)
 }
 
@@ -365,7 +365,7 @@ export const FieldShortcuts = props => {
             <Button
               key={shortcut.uuid}
               bsStyle="link"
-              onClick={() => handleAddItem(curValue, shortcut, onChange)}
+              onClick={() => handleAddItem(shortcut, onChange, curValue)}
             >
               Add <LinkTo {...shortcutLinkProps} />
             </Button>
