@@ -1,18 +1,14 @@
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
-import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
-import { routerRelatedPropTypes } from "components/Page"
 import searchFilters, {
   POSTITION_ORGANIZATION_FILTER_KEY,
   POSTITION_POSITION_TYPE_FILTER_KEY
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
-import _isEqual from "lodash/isEqual"
-import _isEqualWith from "lodash/isEqualWith"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import {
   Button,
   Col,
@@ -24,9 +20,8 @@ import {
   Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
-import utils from "utils"
 
 function updateOrganizationFilterState(organizationFilter, positionType) {
   if (organizationFilter) {
@@ -44,243 +39,175 @@ function updateOrganizationFilterState(organizationFilter, positionType) {
   }
 }
 
-class AdvancedSearch extends Component {
-  static propTypes = {
-    onSearch: PropTypes.func,
-    onCancel: PropTypes.func,
-    setSearchQuery: PropTypes.func.isRequired,
-    resetPagination: PropTypes.func.isRequired,
-    query: PropTypes.shape({
-      text: PropTypes.string,
-      filters: PropTypes.any,
-      objectType: PropTypes.string
-    }),
-    onSearchGoToSearchPage: PropTypes.bool,
-    searchObjectTypes: PropTypes.array,
-    text: PropTypes.string,
-    ...routerRelatedPropTypes
+const AdvancedSearch = props => {
+  const { query, text } = props
+  const history = useHistory()
+  const [objectType, setObjectType] = useState(query.objectType)
+  const [filters, setFilters] = useState(
+    query.filters ? query.filters.slice() : []
+  )
+  const [positionTypeFilter, setPositionTypeFilter] = useState(null)
+  const [organizationFilter, setOrganizationFilter] = useState(null)
+
+  const ALL_FILTERS = searchFilters.searchFilters(
+    changePositionTypeFilter,
+    changeOrganizationFilter
+  )
+  // console.log("RENDER AdvancedSearch", objectType, text, filters)
+  const filterDefs = objectType ? ALL_FILTERS[objectType].filters : {}
+  const existingKeys = filters.map(f => f.key)
+  const moreFiltersAvailable =
+    existingKeys.length < Object.keys(filterDefs).length
+  return (
+    <Formik>
+      {() => (
+        <div className="advanced-search form-horizontal">
+          <Form onSubmit={onSubmit}>
+            <FormGroup>
+              <Col xs={11} style={{ textAlign: "center" }}>
+                <ButtonToggleGroup
+                  value={objectType}
+                  onChange={changeObjectType}
+                >
+                  {Object.keys(ALL_FILTERS).map(
+                    type =>
+                      props.searchObjectTypes.indexOf(type) !== -1 && (
+                        <Button key={type} value={type}>
+                          {SEARCH_OBJECT_LABELS[type]}
+                        </Button>
+                      )
+                  )}
+                </ButtonToggleGroup>
+              </Col>
+              <Col xs={1}>
+                <Button bsStyle="link" onClick={clearObjectType}>
+                  <img src={REMOVE_ICON} height={14} alt="Clear type" />
+                </Button>
+              </Col>
+            </FormGroup>
+
+            <FormControl defaultValue={text} className="hidden" />
+
+            {filters.map(
+              filter =>
+                filterDefs[filter.key] && (
+                  <SearchFilter
+                    key={filter.key}
+                    filter={filter}
+                    onRemove={removeFilter}
+                    element={filterDefs[filter.key]}
+                    organizationFilter={organizationFilter}
+                  />
+                )
+            )}
+
+            <Row>
+              <Col xs={6} xsOffset={3}>
+                {!objectType ? (
+                  "To add filters, first pick a type above"
+                ) : !moreFiltersAvailable ? (
+                  "No additional filters available"
+                ) : (
+                  <DropdownButton
+                    bsStyle="link"
+                    title="+ Add another filter"
+                    onSelect={addFilter}
+                    id="addFilterDropdown"
+                  >
+                    {Object.keys(filterDefs).map(filterKey => (
+                      <MenuItem
+                        disabled={existingKeys.indexOf(filterKey) > -1}
+                        eventKey={filterKey}
+                        key={filterKey}
+                      >
+                        {filterKey}
+                      </MenuItem>
+                    ))}
+                  </DropdownButton>
+                )}
+              </Col>
+            </Row>
+
+            <Row>
+              <div className="pull-right">
+                <Button onClick={props.onCancel} style={{ marginRight: 20 }}>
+                  Cancel
+                </Button>
+                <Button
+                  bsStyle="primary"
+                  type="submit"
+                  onClick={onSubmit}
+                  style={{ marginRight: 20 }}
+                >
+                  Search
+                </Button>
+              </div>
+            </Row>
+          </Form>
+        </div>
+      )}
+    </Formik>
+  )
+
+  function changePositionTypeFilter(positionTypeFilter) {
+    updateOrganizationFilter(positionTypeFilter, organizationFilter)
+    setPositionTypeFilter(positionTypeFilter)
   }
 
-  @autobind
-  setPositionTypeFilter(positionTypeFilter) {
-    this.updateOrganizationFilter(
-      positionTypeFilter,
-      this.state.organizationFilter
-    )
-    this.setState({ positionTypeFilter: positionTypeFilter })
+  function changeOrganizationFilter(organizationFilter) {
+    updateOrganizationFilter(positionTypeFilter, organizationFilter)
+    setOrganizationFilter(organizationFilter)
   }
 
-  @autobind
-  setOrganizationFilter(organizationFilter) {
-    this.updateOrganizationFilter(
-      this.state.positionTypeFilter,
-      organizationFilter
-    )
-    this.setState({ organizationFilter: organizationFilter })
-  }
-
-  @autobind
-  updateOrganizationFilter(positionTypeFilter, organizationFilter) {
+  function updateOrganizationFilter(positionTypeFilter, organizationFilter) {
     const positionType = positionTypeFilter
       ? positionTypeFilter.state.value.value
       : ""
     updateOrganizationFilterState(organizationFilter, positionType)
   }
 
-  constructor(props) {
-    super(props)
-
-    this.ALL_FILTERS = searchFilters.searchFilters(
-      this.setPositionTypeFilter,
-      this.setOrganizationFilter
-    )
-    this.state = {
-      objectType: "",
-      text: "",
-      filters: []
-    }
+  function changeObjectType(objectType) {
+    setObjectType(objectType)
+    setFilters([])
   }
 
-  componentDidMount() {
-    this.setState({
-      objectType: this.props.query.objectType,
-      text: this.props.text,
-      filters: this.props.query.filters ? this.props.query.filters.slice() : []
-    })
+  function clearObjectType() {
+    changeObjectType("")
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      !_isEqualWith(
-        prevProps.query,
-        this.props.query,
-        utils.treatFunctionsAsEqual
-      )
-    ) {
-      this.setState(this.props.query)
-    }
-    if (!_isEqual(prevProps.text, this.props.text)) {
-      this.setState({ text: this.props.text })
-    }
-  }
-
-  render() {
-    const { objectType, filters } = this.state
-    // console.log("RENDER AdvancedSearch", objectType, text, filters)
-    const filterDefs = this.state.objectType
-      ? this.ALL_FILTERS[this.state.objectType].filters
-      : {}
-    const existingKeys = filters.map(f => f.key)
-    const moreFiltersAvailable =
-      existingKeys.length < Object.keys(filterDefs).length
-    return (
-      <Formik>
-        {() => (
-          <div className="advanced-search form-horizontal">
-            <Form onSubmit={this.onSubmit}>
-              <FormGroup>
-                <Col xs={11} style={{ textAlign: "center" }}>
-                  <ButtonToggleGroup
-                    value={objectType}
-                    onChange={this.changeObjectType}
-                  >
-                    {Object.keys(this.ALL_FILTERS).map(
-                      type =>
-                        this.props.searchObjectTypes.indexOf(type) !== -1 && (
-                          <Button key={type} value={type}>
-                            {SEARCH_OBJECT_LABELS[type]}
-                          </Button>
-                        )
-                    )}
-                  </ButtonToggleGroup>
-                </Col>
-                <Col xs={1}>
-                  <Button bsStyle="link" onClick={this.clearObjectType}>
-                    <img src={REMOVE_ICON} height={14} alt="Clear type" />
-                  </Button>
-                </Col>
-              </FormGroup>
-
-              <FormControl defaultValue={this.props.text} className="hidden" />
-
-              {filters.map(
-                filter =>
-                  filterDefs[filter.key] && (
-                    <SearchFilter
-                      key={filter.key}
-                      filter={filter}
-                      onRemove={this.removeFilter}
-                      element={filterDefs[filter.key]}
-                      organizationFilter={this.state.organizationFilter}
-                    />
-                  )
-              )}
-
-              <Row>
-                <Col xs={6} xsOffset={3}>
-                  {!this.state.objectType ? (
-                    "To add filters, first pick a type above"
-                  ) : !moreFiltersAvailable ? (
-                    "No additional filters available"
-                  ) : (
-                    <DropdownButton
-                      bsStyle="link"
-                      title="+ Add another filter"
-                      onSelect={this.addFilter}
-                      id="addFilterDropdown"
-                    >
-                      {Object.keys(filterDefs).map(filterKey => (
-                        <MenuItem
-                          disabled={existingKeys.indexOf(filterKey) > -1}
-                          eventKey={filterKey}
-                          key={filterKey}
-                        >
-                          {filterKey}
-                        </MenuItem>
-                      ))}
-                    </DropdownButton>
-                  )}
-                </Col>
-              </Row>
-
-              <Row>
-                <div className="pull-right">
-                  <Button
-                    onClick={this.props.onCancel}
-                    style={{ marginRight: 20 }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    bsStyle="primary"
-                    type="submit"
-                    onClick={this.onSubmit}
-                    style={{ marginRight: 20 }}
-                  >
-                    Search
-                  </Button>
-                </div>
-              </Row>
-            </Form>
-          </div>
-        )}
-      </Formik>
-    )
-  }
-
-  @autobind
-  changeObjectType(objectType) {
-    this.setState({ objectType, filters: [] }, () => this.addFilter())
-  }
-
-  @autobind
-  clearObjectType() {
-    this.changeObjectType("")
-  }
-
-  @autobind
-  addFilter(filterKey) {
+  function addFilter(filterKey) {
     if (filterKey) {
-      let { filters } = this.state
       const newFilters = filters.slice()
       newFilters.push({ key: filterKey })
-      this.setState({ filters: newFilters })
+      setFilters(newFilters)
     }
   }
 
-  @autobind
-  removeFilter(filter) {
-    let { filters } = this.state
+  function removeFilter(filter) {
     const newFilters = filters.slice()
     newFilters.splice(newFilters.indexOf(filter), 1)
-    this.setState({ filters: newFilters })
+    setFilters(newFilters)
 
     if (filter.key === POSTITION_ORGANIZATION_FILTER_KEY) {
-      this.setOrganizationFilter(null)
+      changeOrganizationFilter(null)
     } else if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
-      this.setPositionTypeFilter(null)
+      changePositionTypeFilter(null)
     }
   }
 
-  @autobind
-  setText(event) {
-    this.setState({ text: event.target.value })
-  }
-
-  @autobind
-  onSubmit(event) {
-    if (typeof this.props.onSearch === "function") {
-      this.props.onSearch()
+  function onSubmit(event) {
+    if (typeof props.onSearch === "function") {
+      props.onSearch()
     }
     // We only update the Redux state on submit
-    this.props.resetPagination()
-    this.props.setSearchQuery({
-      objectType: this.state.objectType,
-      filters: this.state.filters,
-      text: this.state.text
+    props.resetPagination()
+    props.setSearchQuery({
+      objectType,
+      filters,
+      text
     })
-    if (this.props.onSearchGoToSearchPage) {
-      this.props.history.push({
+    if (props.onSearchGoToSearchPage) {
+      history.push({
         pathname: "/search"
       })
     }
@@ -297,6 +224,21 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
+AdvancedSearch.propTypes = {
+  onSearch: PropTypes.func,
+  onCancel: PropTypes.func,
+  setSearchQuery: PropTypes.func.isRequired,
+  resetPagination: PropTypes.func.isRequired,
+  query: PropTypes.shape({
+    text: PropTypes.string,
+    filters: PropTypes.any,
+    objectType: PropTypes.string
+  }),
+  onSearchGoToSearchPage: PropTypes.bool,
+  searchObjectTypes: PropTypes.array,
+  text: PropTypes.string
+}
+
 const mapDispatchToProps = (dispatch, ownProps) => ({
   setSearchQuery: advancedSearchQuery =>
     dispatch(setSearchQuery(advancedSearchQuery)),
@@ -306,55 +248,51 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(AdvancedSearch))
+)(AdvancedSearch)
 
-class SearchFilter extends Component {
-  static propTypes = {
-    onRemove: PropTypes.func,
-    filter: PropTypes.object,
-    organizationFilter: PropTypes.object,
-    element: PropTypes.shape({
-      component: PropTypes.func.isRequired,
-      props: PropTypes.object
-    })
-  }
+const SearchFilter = props => {
+  const { onRemove, filter, element } = props
+  const label = filter.key
+  const ChildComponent = element.component
 
-  render() {
-    const { onRemove, filter, element } = this.props
-    const label = filter.key
-    const ChildComponent = element.component
+  return (
+    <FormGroup>
+      <Col xs={3}>
+        <ControlLabel>{label}</ControlLabel>
+      </Col>
+      <Col xs={8}>
+        <ChildComponent
+          value={filter.value || ""}
+          onChange={onChange}
+          {...element.props}
+        />
+      </Col>
+      <Col xs={1}>
+        <Button bsStyle="link" onClick={() => onRemove(filter)}>
+          <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
+        </Button>
+      </Col>
+    </FormGroup>
+  )
 
-    return (
-      <FormGroup>
-        <Col xs={3}>
-          <ControlLabel>{label}</ControlLabel>
-        </Col>
-        <Col xs={8}>
-          <ChildComponent
-            value={filter.value || ""}
-            onChange={this.onChange}
-            {...element.props}
-          />
-        </Col>
-        <Col xs={1}>
-          <Button bsStyle="link" onClick={() => onRemove(this.props.filter)}>
-            <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
-          </Button>
-        </Col>
-      </FormGroup>
-    )
-  }
-
-  @autobind
-  onChange(value) {
-    const filter = this.props.filter
+  function onChange(value) {
     filter.value = value
 
     if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
       updateOrganizationFilterState(
-        this.props.organizationFilter,
+        props.organizationFilter,
         filter.value.value || ""
       )
     }
   }
+}
+
+SearchFilter.propTypes = {
+  onRemove: PropTypes.func,
+  filter: PropTypes.object,
+  organizationFilter: PropTypes.object,
+  element: PropTypes.shape({
+    component: PropTypes.func.isRequired,
+    props: PropTypes.object
+  })
 }

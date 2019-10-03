@@ -21,6 +21,7 @@ import { AuthorizationGroup, Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { useLocation, useParams } from "react-router-dom"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`
   query($uuid: String) {
@@ -53,7 +54,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
 `
 
 const BaseAuthorizationGroupShow = props => {
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
+  const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP,
     { uuid }
@@ -74,8 +76,8 @@ const BaseAuthorizationGroupShow = props => {
   const authorizationGroup = new AuthorizationGroup(
     data ? data.authorizationGroup : {}
   )
-  const stateSuccess = props.location.state && props.location.state.success
-  const stateError = props.location.state && props.location.state.error
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const stateError = routerLocation.state && routerLocation.state.error
   const { currentUser, ...myFormProps } = props
   const canEdit = currentUser.isSuperUser()
 

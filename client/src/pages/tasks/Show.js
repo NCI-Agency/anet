@@ -11,18 +11,19 @@ import {
   propTypes as pagePropTypes,
   useBoilerplate
 } from "components/Page"
+import PositionTable from "components/PositionTable"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Person, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
-import _isEmpty from "lodash/isEmpty"
-import PositionTable from "components/PositionTable"
+import { useLocation, useParams } from "react-router-dom"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -72,7 +73,8 @@ const GQL_GET_TASK = gql`
 `
 
 const BaseTaskShow = props => {
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
+  const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
@@ -99,8 +101,8 @@ const BaseTaskShow = props => {
   const TaskCustomFieldEnum1 = DictionaryField(Field)
   const TaskCustomFieldEnum2 = DictionaryField(Field)
 
-  const stateSuccess = props.location.state && props.location.state.success
-  const stateError = props.location.state && props.location.state.error
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const stateError = routerLocation.state && routerLocation.state.error
   const { currentUser, ...myFormProps } = props
 
   // Admins can edit tasks or users in positions related to the task

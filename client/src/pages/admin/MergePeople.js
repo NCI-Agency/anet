@@ -19,7 +19,7 @@ import moment from "moment"
 import React, { useState } from "react"
 import { Alert, Button, Checkbox, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
 import * as yup from "yup"
 
@@ -34,6 +34,7 @@ const GQL_MERGE_PEOPLE = gql`
 `
 
 const MergePeople = props => {
+  const history = useHistory()
   const [saveError, setSaveError] = useState(null)
   const yupSchema = yup.object().shape({
     loser: yup
@@ -338,7 +339,7 @@ const MergePeople = props => {
 
   function onSubmitSuccess(response, values, form) {
     if (response.mergePeople) {
-      props.history.push(Person.pathFor(values.winner), {
+      history.push(Person.pathFor(values.winner), {
         success: "People merged"
       })
     }
@@ -359,4 +360,4 @@ MergePeople.propTypes = { ...pagePropTypes }
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(MergePeople))
+)(MergePeople)

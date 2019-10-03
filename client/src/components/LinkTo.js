@@ -29,7 +29,11 @@ const modelPropTypes = MODEL_NAMES.reduce(
 
 export default class LinkTo extends Component {
   static propTypes = {
-    componentClass: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+    componentClass: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.func,
+      PropTypes.object
+    ]),
     className: PropTypes.string,
 
     showIcon: PropTypes.bool,

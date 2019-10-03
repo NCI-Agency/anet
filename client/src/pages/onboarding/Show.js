@@ -7,7 +7,7 @@ import {
 import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 
 const OnboardingShow = props => {
   useBoilerplate({
@@ -15,6 +15,7 @@ const OnboardingShow = props => {
     searchProps: DEFAULT_SEARCH_PROPS,
     ...props
   })
+  const history = useHistory()
 
   return (
     <div className="onboarding-new">
@@ -36,7 +37,7 @@ const OnboardingShow = props => {
   )
 
   function onCreateAccountClick() {
-    props.history.push("/onboarding/edit")
+    history.push("/onboarding/edit")
   }
 }
 
@@ -45,4 +46,4 @@ OnboardingShow.propTypes = { ...pagePropTypes }
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(OnboardingShow))
+)(OnboardingShow)

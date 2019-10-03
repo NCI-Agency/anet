@@ -1,10 +1,8 @@
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
-import autobind from "autobind-decorator"
 import AdvancedSearch from "components/AdvancedSearch"
-import { routerRelatedPropTypes } from "components/Page"
 import { SearchDescription } from "components/SearchFilters"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useRef, useState } from "react"
 import {
   Button,
   Form,
@@ -14,119 +12,103 @@ import {
   Popover
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
 
-class SearchBar extends Component {
-  static propTypes = {
-    setSearchQuery: PropTypes.func.isRequired,
-    onSearchGoToSearchPage: PropTypes.bool,
-    query: PropTypes.shape({
-      text: PropTypes.string,
-      filters: PropTypes.any,
-      objectType: PropTypes.string
-    }),
-    searchObjectTypes: PropTypes.array,
-    resetPagination: PropTypes.func,
-    ...routerRelatedPropTypes
-  }
+const SearchBar = props => {
+  const {
+    query,
+    searchObjectTypes,
+    resetPagination,
+    setSearchQuery,
+    onSearchGoToSearchPage
+  } = props
+  const history = useHistory()
+  const advancedSearchLink = useRef()
+  const [searchTerms, setSearchTerms] = useState(query.text)
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
+  const placeholder = query.objectType
+    ? "Filter " + SEARCH_OBJECT_LABELS[query.objectType]
+    : "Search for " +
+      searchObjectTypes.map(type => SEARCH_OBJECT_LABELS[type]).join(", ")
 
-  advancedSearchLink = React.createRef()
+  return (
+    <div>
+      <Form onSubmit={onSubmit}>
+        <InputGroup>
+          <FormControl
+            value={searchTerms}
+            placeholder={placeholder}
+            onChange={onChange}
+            id="searchBarInput"
+          />
+          {!showAdvancedSearch && (
+            <InputGroup.Button>
+              <Button onClick={onSubmit} id="searchBarSubmit">
+                <img src={SEARCH_ICON} height={16} alt="Search" />
+              </Button>
+            </InputGroup.Button>
+          )}
+        </InputGroup>
+      </Form>
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      searchTerms: props.query.text,
-      showAdvancedSearch: false
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.query.text !== this.props.query.text) {
-      this.setState({ searchTerms: this.props.query.text })
-    }
-  }
-
-  render() {
-    const placeholder = this.props.query.objectType
-      ? "Filter " + SEARCH_OBJECT_LABELS[this.props.query.objectType]
-      : "Search for " +
-        this.props.searchObjectTypes
-          .map(type => SEARCH_OBJECT_LABELS[type])
-          .join(", ")
-    return (
-      <div>
-        <Form onSubmit={this.onSubmit}>
-          <InputGroup>
-            <FormControl
-              value={this.state.searchTerms}
-              placeholder={placeholder}
-              onChange={this.onChange}
-              id="searchBarInput"
-            />
-            {!this.state.showAdvancedSearch && (
-              <InputGroup.Button>
-                <Button onClick={this.onSubmit} id="searchBarSubmit">
-                  <img src={SEARCH_ICON} height={16} alt="Search" />
-                </Button>
-              </InputGroup.Button>
-            )}
-          </InputGroup>
-        </Form>
-
-        <div
-          className="add-search-filter"
-          ref={this.advancedSearchLink}
-          onClick={() =>
-            this.setState({
-              showAdvancedSearch: !this.state.showAdvancedSearch
-            })
-          }
-        >
-          <SearchDescription query={this.props.query} showPlaceholders />
-        </div>
-        <Overlay
-          show={this.state.showAdvancedSearch}
-          onHide={() => this.setState({ showAdvancedSearch: false })}
-          placement="bottom"
-          target={this.advancedSearchLink.current}
-          rootClose
-        >
-          <Popover id="advanced-search" placement="bottom" title="Filters">
-            <AdvancedSearch
-              onSearch={this.runAdvancedSearch}
-              onCancel={() => this.setState({ showAdvancedSearch: false })}
-              text={this.state.searchTerms}
-            />
-          </Popover>
-        </Overlay>
+      <div
+        className="add-search-filter"
+        ref={advancedSearchLink}
+        onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+      >
+        <SearchDescription query={query} showPlaceholders />
       </div>
-    )
+      <Overlay
+        show={showAdvancedSearch}
+        onHide={() => setShowAdvancedSearch(false)}
+        placement="bottom"
+        target={advancedSearchLink.current}
+        rootClose
+      >
+        <Popover id="advanced-search" placement="bottom" title="Filters">
+          <AdvancedSearch
+            onSearch={runAdvancedSearch}
+            onCancel={() => setShowAdvancedSearch(false)}
+            text={searchTerms}
+          />
+        </Popover>
+      </Overlay>
+    </div>
+  )
+
+  function onChange(event) {
+    setSearchTerms(event.target.value)
   }
 
-  @autobind
-  onChange(event) {
-    this.setState({ searchTerms: event.target.value })
-  }
-
-  @autobind
-  onSubmit(event) {
-    if (!this.state.showAdvancedSearch) {
+  function onSubmit(event) {
+    if (!showAdvancedSearch) {
       // We only update the Redux state on submit
-      this.props.resetPagination()
-      this.props.setSearchQuery({ text: this.state.searchTerms })
-      if (this.props.onSearchGoToSearchPage) {
-        this.props.history.push("/search")
+      resetPagination()
+      setSearchQuery({ text: searchTerms })
+      if (onSearchGoToSearchPage) {
+        history.push("/search")
       }
     }
     event.preventDefault()
     event.stopPropagation()
   }
 
-  @autobind
-  runAdvancedSearch() {
-    this.setState({ showAdvancedSearch: false })
+  function runAdvancedSearch() {
+    setShowAdvancedSearch(false)
   }
+}
+
+SearchBar.propTypes = {
+  setSearchQuery: PropTypes.func.isRequired,
+  onSearchGoToSearchPage: PropTypes.bool,
+  query: PropTypes.shape({
+    text: PropTypes.string,
+    filters: PropTypes.any,
+    objectType: PropTypes.string
+  }),
+  searchObjectTypes: PropTypes.array,
+  resetPagination: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -143,4 +125,4 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(SearchBar))
+)(SearchBar)
