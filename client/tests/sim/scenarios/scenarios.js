@@ -11,7 +11,7 @@ const scenario1 = {
   stories: stories
 }
 
-// Original scenario which runs stories for ma certain amount of time
+// Original scenario which runs stories for a certain amount of time
 const scenario2 = {
   description: "Run a set of scenario stories",
   userTypes: userTypes,

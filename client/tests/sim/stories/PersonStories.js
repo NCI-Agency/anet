@@ -145,12 +145,30 @@ const _createPerson = async function(user, role, status) {
 }
 
 const updatePerson = async function(user) {
-  const people = (await runGQL(user, {
+  const totalCount = (await runGQL(user, {
     query: `
       query {
         personList(query: {
           pageNum: 0,
-          pageSize: 0,
+          pageSize: 1,
+          status: ${Person.STATUS.ACTIVE}
+        }) {
+          totalCount
+        }
+      }
+    `,
+    variables: {}
+  })).data.personList.totalCount
+  if (totalCount === 0) {
+    return null
+  }
+  const random = faker.random.number({ max: totalCount - 1 })
+  const people = (await runGQL(user, {
+    query: `
+      query {
+        personList(query: {
+          pageNum: ${random},
+          pageSize: 1,
           status: ${Person.STATUS.ACTIVE}
         }) {
           list {
@@ -162,7 +180,7 @@ const updatePerson = async function(user) {
     variables: {}
   })).data.personList.list
 
-  let person = faker.random.arrayElement(people)
+  let person = people && people[0]
   person = (await runGQL(user, {
     query: `
       query {
@@ -203,27 +221,51 @@ const updatePerson = async function(user) {
 }
 
 const _deletePerson = async function(user) {
-  const people = (await runGQL(user, {
+  const totalCount = (await runGQL(user, {
     query: `
       query {
         personList(query: {
           pageNum: 0,
-          pageSize: 0,
+          pageSize: 1,
           status: ${Person.STATUS.ACTIVE}
       }) {
-        list {
-          uuid
-          name
-          position {
-            uuid
-          }
-        }
+        totalCount
       }
     }
   `,
     variables: {}
-  })).data.personList.list.filter(p => !p.position)
-  const person0 = faker.random.arrayElement(people)
+  })).data.personList.totalCount
+  if (totalCount === 0) {
+    return null
+  }
+  let person0
+  for (let i = 0; i < Math.max(totalCount, 10); i++) {
+    const random = faker.random.number({ max: totalCount - 1 })
+    const people = (await runGQL(user, {
+      query: `
+        query {
+          personList(query: {
+            pageNum: ${random},
+            pageSize: 1,
+            status: ${Person.STATUS.ACTIVE}
+        }) {
+          list {
+            uuid
+            name
+            position {
+              uuid
+            }
+          }
+        }
+      }
+    `,
+      variables: {}
+    })).data.personList.list.filter(p => !p.position)
+    person0 = people && people[0]
+    if (person0) {
+      break
+    }
+  }
   if (person0) {
     const person = (await runGQL(user, {
       query: `
@@ -284,7 +326,7 @@ const createPerson = async function(user, grow, args) {
       return "(skipped)"
     }
   }
-  return _createPerson(user, args.role, args.status)
+  return _createPerson(user, args && args.role, args && args.status)
 }
 
 const deletePerson = async function(user, grow) {

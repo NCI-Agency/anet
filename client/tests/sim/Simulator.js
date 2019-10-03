@@ -54,7 +54,9 @@ const simulate = async args => {
     if (!givenScenario) {
       console.log(
         colors.red(
-          `Scenario with name ${givenScenarioName} not found. Aborting...`
+          `Scenario with name ${givenScenarioName} not found; possible scenarios are: ${Object.keys(
+            scenarioMapping
+          )}. Aborting...`
         )
       )
       return

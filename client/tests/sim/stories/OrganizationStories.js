@@ -230,7 +230,7 @@ const organizationsBuildup = async function(user, number) {
         query {
           organizationList(query: {
             pageNum: 0,
-            pageSize: 0,
+            pageSize: 1,
             status: ${Organization.STATUS.ACTIVE}
           }) {
             totalCount
