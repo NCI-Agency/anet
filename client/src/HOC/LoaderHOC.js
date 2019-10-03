@@ -2,7 +2,6 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
-import "./LoaderHOC.css"
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
   showLoading: () => dispatch(showLoading()),
