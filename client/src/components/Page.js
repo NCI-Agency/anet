@@ -74,7 +74,7 @@ export const useBoilerplate = props => {
     [props.loading] // eslint-disable-line react-hooks/exhaustive-deps
   )
   if (props.loading) {
-    return { done: true, result: <span className="loading">Loading…</span> }
+    return { done: true, result: <div className="loader" /> }
   }
   if (props.error) {
     return {
