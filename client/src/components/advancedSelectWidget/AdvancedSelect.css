@@ -43,17 +43,3 @@
 .principalAttendeesTable.table > tbody > tr > td  {
   vertical-align: middle;
 }
-
-
-.advancedSelectPopover .bp3-transition-container .bp3-popover{
-  width: 100%;
-  height:100%;
-
-}
-.advancedSelectPopover .bp3-popover-content {
-  box-shadow: 0 6px 20px hsla(0, 0%, 0%, 0.4);
-  padding: 15px;
-}
-.advancedSelectPopover .bp3-transition-container {
-  width: 100%;
-}

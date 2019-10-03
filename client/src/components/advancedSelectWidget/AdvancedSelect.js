@@ -7,14 +7,34 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
-import { Popover, Position, PopoverInteractionKind } from "@blueprintjs/core"
-import "@blueprintjs/core/lib/css/blueprint.css"
+import {
+  Button,
+  Col,
+  FormControl,
+  InputGroup,
+  Overlay,
+  Popover,
+  Row
+} from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import "./AdvancedSelect.css"
-import "../BlueprintOverrides.css"
 
 const MOBILE_WIDTH = 733
+
+const AdvancedSelectTarget = ({ overlayRef }) => (
+  <Row>
+    <Col
+      className="form-group"
+      ref={overlayRef}
+      style={{ position: "relative", marginBottom: 0 }}
+    />
+  </Row>
+)
+AdvancedSelectTarget.propTypes = {
+  overlayRef: PropTypes.shape({
+    current: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
+  })
+}
 
 const FilterAsNav = props => {
   const { items, currentFilter, handleOnClick } = props
@@ -164,96 +184,103 @@ export default class AdvancedSelect extends Component {
     const items = results && results[filterType] ? results[filterType].list : []
     return (
       <React.Fragment>
-        <Popover
-          id={`${fieldName}-popover`}
-          title={null}
-          position={Position.BOTTOM_RIGHT}
-          interactionKind={PopoverInteractionKind.CLICK}
-          fill="true"
-          usePortal={false}
-          className="advancedSelectPopover"
-          modifiers={{
-            shift: { enabled: false },
-            flip: { enabled: false },
-            preventOverflow: { enabled: false }
-          }}
+        <InputGroup>
+          <FormControl
+            name={fieldName}
+            value={
+              this.state.searchTerms === null ? "" : this.state.searchTerms
+            }
+            placeholder={placeholder}
+            onChange={this.changeSearchTerms}
+            onFocus={this.handleInputFocus}
+            onBlur={this.handleInputBlur}
+            innerRef={this.overlayTarget}
+          />
+          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+          {addon && (
+            <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+          )}
+        </InputGroup>
+        <Overlay
+          show={this.state.showOverlay}
+          container={this.overlayContainer.current}
+          target={this.overlayTarget.current}
+          rootClose
+          onHide={this.handleHideOverlay}
+          placement="bottom"
+          animation={false}
+          delayHide={200}
         >
-          <InputGroup>
-            <FormControl
-              name={fieldName}
-              value={
-                this.state.searchTerms === null ? "" : this.state.searchTerms
-              }
-              placeholder={placeholder}
-              onChange={this.changeSearchTerms}
-              onFocus={this.handleInputFocus}
-              onBlur={this.handleInputBlur}
-              ref={this.overlayTarget}
-            />
-            {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-            {addon && (
-              <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-            )}
-          </InputGroup>
-          <ContainerDimensions>
-            {({ width }) => {
-              const hasLeftNav =
-                width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
-              const hasTopNav =
-                (width < MOBILE_WIDTH) &&
-                Object.keys(filterDefs).length > 1
-              return (
-                <Row className="border-between">
-                  {hasLeftNav && (
-                    <Col sm={4} md={3}>
-                      <div>
-                        <FilterAsNav
-                          items={filterDefs}
-                          currentFilter={this.state.filterType}
-                          handleOnClick={this.changeFilterType}
-                        />
-                      </div>
-                    </Col>
-                  )}
-
-                  <Col
-                    sm={hasLeftNav ? 8 : 12}
-                    md={hasLeftNav ? 9 : 12}
-                    style={{ minHeight: "80px" }}
-                  >
-                    {hasTopNav && (
-                      <div>
-                        <FilterAsDropdown
-                          items={filterDefs}
-                          handleOnChange={this.handleOnChangeSelect}
-                        />
-                      </div>
-                    )}
-                    <this.props.overlayTable
-                      fieldName={fieldName}
-                      items={items}
-                      selectedItems={value}
-                      handleAddItem={item => {
-                        handleAddItem(item)
-                        if (this.props.closeOverlayOnAdd) {
-                          this.handleHideOverlay()
-                        }
-                      }}
-                      handleRemoveItem={handleRemoveItem}
-                      objectType={objectType}
-                      columns={[""].concat(overlayColumns)}
-                      renderRow={overlayRenderRow}
-                      isLoading={isLoading}
-                      loaderMessage={"No results found"}
-                      tableClassName={overlayTableClassName}
-                    />
-                    {this.paginationFor(filterType)}
-                  </Col>
-                </Row>
-              )
+          <Popover
+            id={`${fieldName}-popover`}
+            title={null}
+            placement="bottom"
+            style={{
+              width: "100%",
+              maxWidth: "100%",
+              boxShadow: "0 6px 20px hsla(0, 0%, 0%, 0.4)"
             }}
-          </ContainerDimensions>
-        </Popover>
+          >
+            {" "}
+            <ContainerDimensions>
+              {({ width }) => {
+                const hasLeftNav =
+                  width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
+                const hasTopNav =
+                  width < MOBILE_WIDTH && Object.keys(filterDefs).length > 1
+                return (
+                  <Row className="border-between">
+                    {hasLeftNav && (
+                      <Col sm={4} md={3}>
+                        <div>
+                          <FilterAsNav
+                            items={filterDefs}
+                            currentFilter={this.state.filterType}
+                            handleOnClick={this.changeFilterType}
+                          />
+                        </div>
+                      </Col>
+                    )}
+                    <Col
+                      sm={hasLeftNav ? 8 : 12}
+                      md={hasLeftNav ? 9 : 12}
+                      style={{ minHeight: "80px" }}
+                    >
+                      {hasTopNav && (
+                        <div>
+                          <FilterAsDropdown
+                            items={filterDefs}
+                            handleOnChange={this.handleOnChangeSelect}
+                          />
+                        </div>
+                      )}
+                      <this.props.overlayTable
+                        fieldName={fieldName}
+                        items={items}
+                        selectedItems={value}
+                        handleAddItem={item => {
+                          handleAddItem(item)
+                          if (this.props.closeOverlayOnAdd) {
+                            this.handleHideOverlay()
+                          }
+                        }}
+                        handleRemoveItem={handleRemoveItem}
+                        objectType={objectType}
+                        columns={[""].concat(overlayColumns)}
+                        renderRow={overlayRenderRow}
+                        isLoading={isLoading}
+                        loaderMessage={"No results found"}
+                        tableClassName={overlayTableClassName}
+                      />
+                      {this.paginationFor(filterType)}
+                    </Col>
+                  </Row>
+                )
+              }}
+            </ContainerDimensions>
+          </Popover>
+        </Overlay>
+        <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
           <Col sm={12}>{renderSelectedWithDelete}</Col>
         </Row>
