@@ -1,4 +1,6 @@
 import LinkTo from "components/LinkTo"
+import _cloneDeep from "lodash/cloneDeep"
+import _get from "lodash/get"
 import PropTypes from "prop-types"
 import React from "react"
 import {
@@ -12,7 +14,6 @@ import {
   ToggleButton,
   ToggleButtonGroup
 } from "react-bootstrap"
-import _cloneDeep from "lodash/cloneDeep"
 import utils from "utils"
 
 const getFieldId = field => field.id || field.name // name property is required
@@ -29,15 +30,15 @@ const getHumanValue = (field, humanValue) => {
 
 const getFormGroupValidationState = (field, form) => {
   const { touched, errors } = form
-  const fieldTouched = touched[field.name]
-  const fieldError = errors[field.name]
+  const fieldTouched = _get(touched, field.name)
+  const fieldError = _get(errors, field.name)
   return (fieldTouched && (fieldError ? "error" : null)) || null
 }
 
 const getHelpBlock = (field, form) => {
   const { touched, errors } = form
-  const fieldTouched = touched[field.name]
-  const fieldError = errors[field.name]
+  const fieldTouched = _get(touched, field.name)
+  const fieldError = _get(errors, field.name)
   return fieldTouched && fieldError && <HelpBlock>{fieldError}</HelpBlock>
 }
 
