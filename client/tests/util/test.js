@@ -111,7 +111,7 @@ test.beforeEach(t => {
   t.context.waitForLoadingFinished = async() => {
     await t.context.assertElementNotPresent(
       t,
-      "span.loading",
+      "div.loader",
       "Loading indicator should disappear",
       mediumWaitMs
     )
@@ -282,6 +282,7 @@ test.beforeEach(t => {
       let $advancedSelectInput = await t.context.$(inputSelector)
       await $advancedSelectInput.sendKeys(text)
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
+      t.context.waitForLoadingFinished()
       let $advancedSelectSuggestion = await t.context.$(
         `${popoverSelector} tbody tr:first-child td input`
       )
@@ -318,12 +319,13 @@ test.beforeEach(t => {
       )
       for (let $row of $supportedPositionsRows) {
         let [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
+        await t.context.driver.wait(until.elementIsVisible($billetCell))
         await $billetCell.getText()
+        await t.context.driver.wait(until.elementIsVisible($advisorCell))
         let advisorText = await $advisorCell.getText()
-
         if (advisorText === personName) {
-          await t.context.driver.wait(until.elementIsVisible($advisorCell))
           let $advisorLink = await $advisorCell.findElement(By.css("a"))
+          await t.context.driver.wait(until.elementIsVisible($advisorLink))
           await $advisorLink.click()
           await t.context.driver.wait(until.stalenessOf($advisorLink))
           return
