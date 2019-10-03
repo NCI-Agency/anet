@@ -329,14 +329,14 @@ export function handleMultiSelectRemoveItem(curValue, oldItem, onChange) {
   }
 }
 
-export function handleSingleSelectAddItem(newItem, onChange) {
+export function handleSingleSelectAddItem(curValue, newItem, onChange) {
   if (!newItem || !newItem.uuid) {
     return
   }
   onChange(newItem)
 }
 
-export function handleSingleSelectRemoveItem(oldItem, onChange) {
+export function handleSingleSelectRemoveItem(curValue, oldItem, onChange) {
   onChange(null)
 }
 
