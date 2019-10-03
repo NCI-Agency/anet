@@ -34,7 +34,7 @@ import React, { useMemo, useState } from "react"
 import { Button, HelpBlock, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory, useLocation } from "react-router-dom"
 import utils from "utils"
 
 const GQL_ROLLUP_GRAPH = gql`
@@ -256,7 +256,9 @@ Map.propTypes = {
 
 const BaseRollupShow = props => {
   const { appSettings, searchQuery } = props
-  const { startDate, endDate } = getDateRangeFromQS(props.location.search)
+  const history = useHistory()
+  const routerLocation = useLocation()
+  const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [orgType, setOrgType] = useState(Organization.TYPE.ADVISOR_ORG)
   const [focusedOrg, setFocusedOrg] = useState(null)
@@ -486,7 +488,7 @@ const BaseRollupShow = props => {
     if (!startDate || !endDate) {
       return
     }
-    props.history.replace({
+    history.replace({
       pathname: "rollup",
       search: utils.formatQueryString({
         startDate,
@@ -658,4 +660,4 @@ const RollupShow = props => (
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(RollupShow))
+)(RollupShow)

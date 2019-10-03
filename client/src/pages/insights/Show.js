@@ -27,6 +27,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { useParams } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
 
 export const NOT_APPROVED_REPORTS = "not-approved-reports"
@@ -91,6 +92,7 @@ export const INSIGHT_DETAILS = {
 
 const BaseInsightsShow = props => {
   const { appSettings, searchQuery } = props
+  const { insight } = useParams()
   const flexStyle = {
     display: "flex",
     flexDirection: "column",
@@ -148,7 +150,7 @@ const BaseInsightsShow = props => {
   } else {
     queryParams = getSearchQuery(searchQuery)
   }
-  const insightConfig = INSIGHT_DETAILS[props.match.params.insight]
+  const insightConfig = INSIGHT_DETAILS[insight]
   const InsightComponent = insightConfig.component
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
@@ -156,17 +158,12 @@ const BaseInsightsShow = props => {
     ...props
   })
   const hasSearchCriteria =
-    _isEmpty(insightDefaultQueryParams[props.match.params.insight]) ||
-    !_isEmpty(queryParams)
+    _isEmpty(insightDefaultQueryParams[insight]) || !_isEmpty(queryParams)
 
   return (
     <div style={flexStyle}>
       {hasSearchCriteria ? (
-        <Fieldset
-          id={props.match.params.insight}
-          title={insightConfig.title}
-          style={flexStyle}
-        >
+        <Fieldset id={insight} title={insightConfig.title} style={flexStyle}>
           <InsightComponent
             style={mosaicLayoutStyle}
             queryParams={queryParams}
@@ -202,7 +199,7 @@ const BaseInsightsShow = props => {
   }
 
   function setInsightDefaultSearchQuery() {
-    const queryParams = insightDefaultQueryParams[props.match.params.insight]
+    const queryParams = insightDefaultQueryParams[insight]
     deserializeQueryParams(
       SEARCH_OBJECT_TYPES.REPORTS,
       queryParams,

@@ -15,11 +15,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import {
-  jumpToTop,
-  routerRelatedPropTypes,
-  useBoilerplate
-} from "components/Page"
+import { jumpToTop, useBoilerplate } from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
@@ -32,7 +28,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -143,6 +139,7 @@ const GQL_DELETE_REPORT = gql`
 
 const BaseReportForm = props => {
   const { currentUser, edit, title, initialValues, ...myFormProps } = props
+  const history = useHistory()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(
     props.showSensitiveInfo
   )
@@ -939,7 +936,7 @@ const BaseReportForm = props => {
         // After successful delete, reset the form in order to make sure the dirty
         // prop is also reset (otherwise we would get a blocking navigation warning)
         resetForm()
-        props.history.push("/", { success: "Report deleted" })
+        history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
         setSaveError(error)
@@ -948,7 +945,7 @@ const BaseReportForm = props => {
   }
 
   function onCancel() {
-    props.history.goBack()
+    history.goBack()
   }
 
   function onSubmit(values, form) {
@@ -973,9 +970,9 @@ const BaseReportForm = props => {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     resetForm()
     if (!edit) {
-      props.history.replace(Report.pathForEdit(report))
+      history.replace(Report.pathForEdit(report))
     }
-    props.history.push(Report.pathFor(report), {
+    history.push(Report.pathFor(report), {
       success: `${getReportTypeUpperFirst(values)} saved`
     })
   }
@@ -1028,8 +1025,7 @@ BaseReportForm.propTypes = {
   title: PropTypes.string,
   edit: PropTypes.bool,
   showSensitiveInfo: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person),
-  ...routerRelatedPropTypes
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 BaseReportForm.defaultProps = {
@@ -1044,4 +1040,4 @@ const ReportForm = props => (
   </AppContext.Consumer>
 )
 
-export default withRouter(ReportForm)
+export default ReportForm

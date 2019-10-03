@@ -12,6 +12,7 @@ import RelatedObjectNotes, {
 import { Organization } from "models"
 import React from "react"
 import { connect } from "react-redux"
+import { useParams } from "react-router-dom"
 import OrganizationForm from "./Form"
 
 const GQL_GET_ORGANIZATION = gql`
@@ -70,7 +71,7 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const OrganizationEdit = props => {
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
   })

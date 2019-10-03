@@ -13,7 +13,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+import { jumpToTop } from "components/Page"
 import TaskTable from "components/TaskTable"
 import { Field, FieldArray, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
@@ -21,7 +21,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal, Table } from "react-bootstrap"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -86,6 +86,7 @@ ApproverTable.propTypes = {
 
 const BaseOrganizationForm = props => {
   const { currentUser, edit, title, initialValues, ...myFormProps } = props
+  const history = useHistory()
   const [error, setError] = useState(null)
   const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] = useState(
     false
@@ -628,7 +629,7 @@ const BaseOrganizationForm = props => {
   }
 
   function onCancel() {
-    props.history.goBack()
+    history.goBack()
   }
 
   function onSubmit(values, form) {
@@ -653,9 +654,9 @@ const BaseOrganizationForm = props => {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      props.history.replace(Organization.pathForEdit(organization))
+      history.replace(Organization.pathForEdit(organization))
     }
-    props.history.push(Organization.pathFor(organization), {
+    history.push(Organization.pathFor(organization), {
       success: "Organization saved"
     })
   }
@@ -679,8 +680,7 @@ BaseOrganizationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Organization).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person),
-  ...routerRelatedPropTypes
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 BaseOrganizationForm.defaultProps = {
@@ -696,4 +696,4 @@ const OrganizationForm = props => (
   </AppContext.Consumer>
 )
 
-export default withRouter(OrganizationForm)
+export default OrganizationForm

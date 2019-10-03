@@ -36,7 +36,7 @@ import React, { useState } from "react"
 import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
 import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { deserializeQueryParams } from "searchUtils"
 import utils from "utils"
@@ -261,10 +261,11 @@ const GQL_APPROVE_REPORT = gql`
 `
 
 const BaseReportShow = props => {
+  const history = useHistory()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
@@ -772,7 +773,7 @@ const BaseReportShow = props => {
   function onConfirmDelete() {
     API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
-        props.history.push("/", {
+        history.push("/", {
           success: `${reportTypeUpperFirst} deleted`
         })
       })
@@ -1018,7 +1019,7 @@ const BaseReportShow = props => {
       text: text
     })
     toast.success(message, { toastId: "success-message" })
-    props.history.push("/search")
+    history.push("/search")
   }
 
   function approveReport(text) {
@@ -1270,4 +1271,4 @@ const ReportShow = props => (
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(ReportShow))
+)(ReportShow)

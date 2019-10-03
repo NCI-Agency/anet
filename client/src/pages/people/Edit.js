@@ -13,6 +13,7 @@ import { Person } from "models"
 import moment from "moment"
 import React from "react"
 import { connect } from "react-redux"
+import { useParams } from "react-router-dom"
 import PersonForm from "./Form"
 
 const GQL_GET_PERSON = gql`
@@ -47,7 +48,7 @@ const GQL_GET_PERSON = gql`
 `
 
 const PersonEdit = props => {
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
