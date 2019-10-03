@@ -245,7 +245,7 @@ const _deletePerson = async function(user) {
       `,
       variables: {}
     })).data.person
-    person.status = Person.STATUS.ACTIVE
+    person.status = Person.STATUS.INACTIVE
 
     console.debug(`Deleting/Deactivating ${person.name.green}`)
     // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.
