@@ -119,7 +119,7 @@ const SensitiveCheckBox = props => {
       onChange={event => {
         !disabled && handleOnChange(person, event.target.checked)
         !disabled &&
-          person.sensitive &&
+          event.target.checked &&
           toast.info(
             "You are restricting the visibility of the attendee to only authorized personnel. This will exclude that information from all reporting capabilities. Please do this only when necessary."
           )
