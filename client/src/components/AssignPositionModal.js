@@ -4,15 +4,22 @@ import autobind from "autobind-decorator"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { Field } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  ControlLabel,
+  FormGroup,
+  Grid,
+  Modal,
+  Row,
+  Table
+} from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
@@ -106,33 +113,28 @@ class BaseAssignPositionModal extends Component {
           <Grid fluid>
             <Row>
               <Col md={12}>
-                <Field
-                  name="person"
-                  label="Select a position"
-                  component={FieldHelper.renderSpecialField}
-                  onChange={this.handlePositionChange}
-                  vertical
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="position"
-                      placeholder="Select a position for this person"
-                      value={this.state.position}
-                      overlayColumns={[
-                        "Position",
-                        "Organization",
-                        "Current Occupant"
-                      ]}
-                      overlayRenderRow={PositionOverlayRow}
-                      filterDefs={positionsFilters}
-                      objectType={Position}
-                      valueKey="name"
-                      fields={
-                        "uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
-                      }
-                      addon={POSITIONS_ICON}
-                    />
-                  }
-                />
+                <FormGroup controlId="position">
+                  <ControlLabel>Select a position</ControlLabel>
+                  <AdvancedSingleSelect
+                    fieldName="position"
+                    placeholder="Select a position for this person"
+                    value={this.state.position}
+                    overlayColumns={[
+                      "Position",
+                      "Organization",
+                      "Current Occupant"
+                    ]}
+                    overlayRenderRow={PositionOverlayRow}
+                    filterDefs={positionsFilters}
+                    onChange={this.handlePositionChange}
+                    objectType={Position}
+                    valueKey="name"
+                    fields={
+                      "uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
+                    }
+                    addon={POSITIONS_ICON}
+                  />
+                </FormGroup>
               </Col>
             </Row>
             {newPosition && newPosition.uuid && (

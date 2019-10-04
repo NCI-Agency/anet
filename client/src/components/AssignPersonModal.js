@@ -3,15 +3,22 @@ import { gql } from "apollo-boost"
 import autobind from "autobind-decorator"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { Field } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  ControlLabel,
+  FormGroup,
+  Grid,
+  Modal,
+  Row,
+  Table
+} from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
@@ -87,29 +94,25 @@ export default class AssignPersonModal extends Component {
           <Grid fluid>
             <Row>
               <Col md={12}>
-                <Field
-                  name="person"
-                  label="Select a person"
-                  component={FieldHelper.renderSpecialField}
-                  onChange={this.handleChangePerson}
-                  vertical
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="person"
-                      placeholder="Select a person for this position"
-                      value={this.state.person}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={PersonSimpleOverlayRow}
-                      filterDefs={personFilters}
-                      objectType={Person}
-                      valueKey="name"
-                      fields={
-                        "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
-                      }
-                      addon={PEOPLE_ICON}
-                    />
-                  }
-                />
+                <FormGroup controlId="person">
+                  <ControlLabel>Select a person</ControlLabel>
+                  <AdvancedSingleSelect
+                    fieldName="person"
+                    id="person"
+                    placeholder="Select a person for this position"
+                    value={this.state.person}
+                    overlayColumns={["Name"]}
+                    overlayRenderRow={PersonSimpleOverlayRow}
+                    filterDefs={personFilters}
+                    onChange={this.handleChangePerson}
+                    objectType={Person}
+                    valueKey="name"
+                    fields={
+                      "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
+                    }
+                    addon={PEOPLE_ICON}
+                  />
+                </FormGroup>
               </Col>
             </Row>
             {newPerson && newPerson.uuid && (
@@ -193,9 +196,8 @@ export default class AssignPersonModal extends Component {
     this.props.onCancel()
   }
 
-  @autobind
-  handleChangePerson(person) {
-    this.setState({ person }, () => this.updateAlert())
+  handleChangePerson = person => {
+    this.setState({ person: person }, () => this.updateAlert())
   }
 
   @autobind

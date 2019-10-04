@@ -30,6 +30,9 @@ test("Draft and submit a report", async t => {
 
   await pageHelpers.clickTodayButton()
 
+  let $intent = await $("#intent")
+  await $intent.click() // click intent to make sure the date picker is being closed
+
   let $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
     "general hospita"
@@ -49,8 +52,9 @@ test("Draft and submit a report", async t => {
     "topferness, christopf"
   )
 
-  let $attendeesShortcutTitle = await $("#attendees-shortcut-title")
-  await $attendeesShortcutTitle.click()
+  // click outside the overlay to make sure the $attendeesShortcutList closes
+  let $attendeesShortcutList = await $("#tasks-shortcut-list")
+  await $attendeesShortcutList.click()
 
   t.is(
     await $attendeesAdvancedSelect.getAttribute("value"),
@@ -83,8 +87,9 @@ test("Draft and submit a report", async t => {
     "1.1.B"
   )
 
-  let $tasksShortcutTitle = await $("#tasks-shortcut-title")
-  await $tasksShortcutTitle.click()
+  // click outside the overlay to make sure the $tasksAdvancedSelect closes
+  let $tasksShortcutList = await $("#tasks-shortcut-list")
+  await $tasksShortcutList.click()
 
   t.is(
     await $tasksAdvancedSelect.getAttribute("value"),
