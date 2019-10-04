@@ -221,26 +221,30 @@ export default class DateRangeSearch extends Component {
     const endKey = dateRangeEndKey(this.props.queryKey)
     const toQueryValue = {}
     const filterValue = {}
-    if (query[startKey] && query[endKey]) {
-      filterValue.relative = BETWEEN
-      filterValue.start = moment(query[startKey]).format(DATE_FORMAT)
-      filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
-      toQueryValue[startKey] = query[startKey]
-      toQueryValue[endKey] = query[endKey]
-    } else if (query[startKey]) {
+
+    if (query[startKey]) {
       toQueryValue[startKey] = query[startKey]
       const lastValues = [LAST_DAY, LAST_WEEK, LAST_MONTH]
       if (lastValues.indexOf(+query[startKey]) !== -1) {
         filterValue.relative = query[startKey]
       } else {
-        filterValue.relative = AFTER
         filterValue.start = moment(query[startKey]).format(DATE_FORMAT)
+        if (query[endKey]) {
+          filterValue.relative = BETWEEN
+        } else {
+          filterValue.relative = AFTER
+        }
       }
-    } else if (query[endKey]) {
-      filterValue.relative = BEFORE
+    }
+
+    if (query[endKey]) {
       filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
       toQueryValue[endKey] = query[endKey]
+      if (!query[startKey]) {
+        filterValue.relative = BEFORE
+      }
     }
+
     if (Object.keys(filterValue).length) {
       return {
         key: key,
