@@ -339,7 +339,7 @@ const BaseOrganizationForm = props => {
                               )
                             }
                             bsStyle="primary"
-                            id="addApprovalStepButton"
+                            id="addPlanningApprovalStepButton"
                           >
                             Add a Planning Approval Step
                           </Button>
@@ -572,7 +572,7 @@ const BaseOrganizationForm = props => {
           label="Step name"
         />
         <Field
-          name={`approvalSteps.${index}.approvers`}
+          name={`${fieldName}.${index}.approvers`}
           label="Add an approver"
           component={FieldHelper.renderSpecialField}
           onChange={value =>
@@ -580,7 +580,7 @@ const BaseOrganizationForm = props => {
           }
           widget={
             <AdvancedMultiSelect
-              fieldName={`approvalSteps.${index}.approvers`}
+              fieldName={`${fieldName}.${index}.approvers`}
               placeholder="Search for the approver's position..."
               value={approvers}
               renderSelected={<ApproverTable approvers={approvers} />}
