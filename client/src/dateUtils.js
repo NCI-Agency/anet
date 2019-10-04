@@ -48,7 +48,7 @@ export function dateToQuery(queryKey, value) {
     // LAST_DAY, LAST_WEEK, LAST_MONTH => Time relative to now, up till now
     return {
       [startKey]: parseInt(value.relative),
-      [endKey]: moment()
+      [endKey]: moment().endOf("day")
     }
   }
 }
