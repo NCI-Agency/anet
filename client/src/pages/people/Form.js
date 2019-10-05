@@ -8,7 +8,7 @@ import Messages from "components/Messages"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
-import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import AvatarEditModal from "components/AvatarEditModal"
@@ -27,7 +27,7 @@ import {
   HelpBlock,
   Radio
 } from "react-bootstrap"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 const GQL_CREATE_PERSON = gql`
@@ -52,6 +52,7 @@ const BasePersonForm = props => {
     initialValues,
     ...myFormProps
   } = props
+  const history = useHistory()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
   const [currentAvatar, setCurrentAvatar] = useState(initialValues.avatar)
@@ -521,7 +522,7 @@ const BasePersonForm = props => {
   }
 
   function onCancel() {
-    props.history.goBack()
+    history.goBack()
   }
 
   function onSubmit(values, form) {
@@ -542,7 +543,7 @@ const BasePersonForm = props => {
       localStorage.clear()
       localStorage.newUser = "true"
       props.loadAppData()
-      props.history.push("/")
+      history.push("/")
     } else {
       // After successful submit, reset the form in order to make sure the dirty
       // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -558,9 +559,9 @@ const BasePersonForm = props => {
         props.loadAppData()
       }
       if (!edit) {
-        props.history.replace(Person.pathForEdit(person))
+        history.replace(Person.pathForEdit(person))
       }
-      props.history.push(Person.pathFor(person), {
+      history.push(Person.pathFor(person), {
         success: "Person saved"
       })
     }
@@ -615,8 +616,7 @@ BasePersonForm.propTypes = {
   edit: PropTypes.bool,
   saveText: PropTypes.string,
   currentUser: PropTypes.instanceOf(Person),
-  loadAppData: PropTypes.func,
-  ...routerRelatedPropTypes
+  loadAppData: PropTypes.func
 }
 
 BasePersonForm.defaultProps = {
@@ -637,4 +637,4 @@ const PersonForm = props => (
   </AppContext.Consumer>
 )
 
-export default withRouter(PersonForm)
+export default PersonForm

@@ -9,11 +9,15 @@ describe("Print rollup page", () => {
 
   describe("When clicking the print button, the daily rollup should be generated", () => {
     it("Should show the correct header for the rollup", () => {
-      Rollup.printButton.waitForDisplayed(5000)
+      Rollup.printButton.waitForDisplayed()
       Rollup.printButton.click()
 
+      const currentHandle = browser.getWindowHandle()
       const handles = browser.getWindowHandles()
-      const switchHandle = handles.pop()
+      // Find new window handle; NOTE: https://w3c.github.io/webdriver/#dfn-get-window-handles
+      // "The order in which the window handles are returned is arbitrary."
+      let switchHandle
+      while ((switchHandle = handles.pop()) === currentHandle) {}
       browser.switchToWindow(switchHandle)
 
       browser.waitUntil(
@@ -26,6 +30,7 @@ describe("Print rollup page", () => {
         3000,
         "Expected classification"
       )
+      browser.closeWindow()
     })
   })
 })

@@ -11,7 +11,7 @@ import { Task } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { LAST_MONTH } from "dateUtils"
 
 const GQL_GET_TASK_LIST = gql`
@@ -52,9 +52,8 @@ const GQL_GET_TASK_LIST = gql`
 `
 
 const KanbanDashboard = props => {
-  const dashboardSettings = Settings.dashboards.find(
-    o => o.label === props.match.params.dashboard
-  )
+  const { dashboard } = useParams()
+  const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dashboardData, setDashboardData] = useState({})
   useEffect(() => {
     async function fetchData() {
@@ -106,4 +105,4 @@ KanbanDashboardImpl.propTypes = {
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(KanbanDashboard))
+)(KanbanDashboard)

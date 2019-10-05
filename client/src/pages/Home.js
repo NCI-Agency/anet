@@ -19,6 +19,7 @@ import {
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
 import { LAST_WEEK } from "dateUtils"
+import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
@@ -32,7 +33,7 @@ import {
   Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory, useLocation } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
 
 const GQL_GET_SAVED_SEARCHES = gql`
@@ -61,7 +62,8 @@ const GQL_GET_REPORT_COUNT = gql`
 `
 
 const HomeTile = props => {
-  const { query, setSearchQuery, history } = props
+  const { query, setSearchQuery } = props
+  const history = useHistory()
   const reportQuery = Object.assign({}, query.query, {
     // we're only interested in the totalCount, so just get at most one report
     pageSize: 1
@@ -82,7 +84,7 @@ const HomeTile = props => {
       onClick={event => onClickDashboard(query, event)}
       className="home-tile"
     >
-      {(done && <p>{result}</p>) || <h1>{totalCount}</h1>}
+      {(done && result) || <h1>{totalCount}</h1>}
       {query.title}
     </Button>
   )
@@ -110,12 +112,11 @@ const HomeTile = props => {
 
 HomeTile.propTypes = {
   query: PropTypes.object.isRequired,
-  setSearchQuery: PropTypes.func.isRequired,
-  history: PropTypes.object.isRequired
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const HomeTiles = props => {
-  const { currentUser, setSearchQuery, history } = props
+  const { currentUser, setSearchQuery } = props
   // queries will contain the queries that will show up on the home tiles
   // Based on the users role. They are all report searches
   const queries = getQueriesForUser(currentUser)
@@ -124,12 +125,7 @@ const HomeTiles = props => {
     <Grid fluid>
       <Row>
         {queries.map((query, index) => (
-          <HomeTile
-            key={index}
-            query={query}
-            setSearchQuery={setSearchQuery}
-            history={history}
-          />
+          <HomeTile key={index} query={query} setSearchQuery={setSearchQuery} />
         ))}
       </Row>
     </Grid>
@@ -292,6 +288,7 @@ HomeTiles.propTypes = {
 }
 
 const SavedSearches = props => {
+  const history = useHistory()
   const [stateError, setStateError] = useState(null)
   const [selectedSearch, setSelectedSearch] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -309,7 +306,13 @@ const SavedSearches = props => {
   let savedSearches = []
   if (data) {
     savedSearches = data.savedSearches
-    if (savedSearches && savedSearches.length > 0 && !selectedSearch) {
+    if (_isEmpty(savedSearches)) {
+      if (selectedSearch) {
+        // Clear selection
+        setSelectedSearch(null)
+      }
+    } else if (!savedSearches.includes(selectedSearch)) {
+      // Select first one
       setSelectedSearch(savedSearches[0])
     }
   }
@@ -370,13 +373,12 @@ const SavedSearches = props => {
       filters: filters,
       text: text
     })
-    props.history.push("/search")
+    history.push("/search")
   }
 
   function onConfirmDelete() {
     return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: selectedSearch.uuid })
       .then(data => {
-        setSelectedSearch(null)
         refetch()
       })
       .catch(error => {
@@ -393,7 +395,8 @@ SavedSearches.propTypes = {
 
 const BaseHome = props => {
   const { currentUser } = props
-  const stateSuccess = props.location.state && props.location.state.success
+  const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
   const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
@@ -478,4 +481,4 @@ const Home = props => (
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(Home))
+)(Home)

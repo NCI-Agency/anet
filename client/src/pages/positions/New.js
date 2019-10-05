@@ -10,6 +10,7 @@ import { Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { useLocation } from "react-router-dom"
 import utils from "utils"
 import PositionForm from "./Form"
 
@@ -26,7 +27,8 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const PositionNew = props => {
-  const qs = utils.parseQueryString(props.location.search)
+  const routerLocation = useLocation()
+  const qs = utils.parseQueryString(routerLocation.search)
   if (qs.organizationUuid) {
     // If an organizationUuid was given in query parameters,
     // then look that org up and pre-populate the field.
