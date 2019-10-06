@@ -24,6 +24,9 @@ developmentMode: true
 redirectToHttps: false
 
 assets:
+  cacheControlHeader: max-age=259200, public
+  mimeTypes:
+    ".js.map": application/json
   overrides:
     /imagery: imagery
     /data: data
