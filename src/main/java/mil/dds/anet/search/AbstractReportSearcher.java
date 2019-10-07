@@ -66,21 +66,17 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
-    qb.addDateClause("startDate", "reports.\"engagementDate\"", Comparison.AFTER,
-        query.getEngagementDateStart());
-    qb.addDateClause("endDate", "reports.\"engagementDate\"", Comparison.BEFORE,
+    qb.addDateRangeClause("startDate", "reports.\"engagementDate\"", Comparison.AFTER,
+        query.getEngagementDateStart(), "endDate", "reports.\"engagementDate\"", Comparison.BEFORE,
         query.getEngagementDateEnd());
-    qb.addDateClause("startCreatedAt", "reports.\"createdAt\"", Comparison.AFTER,
-        query.getCreatedAtStart());
-    qb.addDateClause("endCreatedAt", "reports.\"createdAt\"", Comparison.BEFORE,
+    qb.addDateRangeClause("startCreatedAt", "reports.\"createdAt\"", Comparison.AFTER,
+        query.getCreatedAtStart(), "endCreatedAt", "reports.\"createdAt\"", Comparison.BEFORE,
         query.getCreatedAtEnd());
-    qb.addDateClause("updatedAtStart", "reports.\"updatedAt\"", Comparison.AFTER,
-        query.getUpdatedAtStart());
-    qb.addDateClause("updatedAtEnd", "reports.\"updatedAt\"", Comparison.BEFORE,
+    qb.addDateRangeClause("updatedAtStart", "reports.\"updatedAt\"", Comparison.AFTER,
+        query.getUpdatedAtStart(), "updatedAtEnd", "reports.\"updatedAt\"", Comparison.BEFORE,
         query.getUpdatedAtEnd());
-    qb.addDateClause("releasedAtStart", "reports.\"releasedAt\"", Comparison.AFTER,
-        query.getReleasedAtStart());
-    qb.addDateClause("releasedAtEnd", "reports.\"releasedAt\"", Comparison.BEFORE,
+    qb.addDateRangeClause("releasedAtStart", "reports.\"releasedAt\"", Comparison.AFTER,
+        query.getReleasedAtStart(), "releasedAtEnd", "reports.\"releasedAt\"", Comparison.BEFORE,
         query.getReleasedAtEnd());
 
     if (query.getIncludeEngagementDayOfWeek()) {

@@ -143,11 +143,24 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     batchParams.addQuery(outerQb, this);
   }
 
-  public final void addDateClause(String paramName, String fieldName, Comparison comp,
-      Instant fieldValue) {
-    if (fieldValue != null) {
-      whereClauses.add(String.format("%s %s :%s", fieldName, comp.getOperator(), paramName));
-      DaoUtils.addInstantAsLocalDateTime(sqlArgs, paramName, fieldValue);
+  public final void addDateRangeClause(String startParamName, String startFieldName,
+      Comparison startComp, Instant startFieldValue, String endParamName, String endFieldName,
+      Comparison endComp, Instant endFieldValue) {
+    if (startFieldValue != null) {
+      whereClauses
+          .add(String.format("%s %s :%s", startFieldName, startComp.getOperator(), startParamName));
+      DaoUtils.addInstantAsLocalDateTime(sqlArgs, startParamName, startFieldValue);
+      if (endFieldValue == null && DaoUtils.isRelativeDate(startFieldValue)
+          && startComp == Comparison.AFTER) {
+        whereClauses.add(String.format("%s %s :%s", endFieldName, Comparison.BEFORE.getOperator(),
+            endParamName));
+        DaoUtils.addInstantAsLocalDateTime(sqlArgs, endParamName, Instant.now());
+      }
+    }
+    if (endFieldValue != null) {
+      whereClauses
+          .add(String.format("%s %s :%s", endFieldName, endComp.getOperator(), endParamName));
+      DaoUtils.addInstantAsLocalDateTime(sqlArgs, endParamName, endFieldValue);
     }
   }
 
