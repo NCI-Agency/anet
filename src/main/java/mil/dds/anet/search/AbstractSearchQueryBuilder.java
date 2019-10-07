@@ -150,17 +150,15 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
       whereClauses
           .add(String.format("%s %s :%s", startFieldName, startComp.getOperator(), startParamName));
       DaoUtils.addInstantAsLocalDateTime(sqlArgs, startParamName, startFieldValue);
-      if (endFieldValue == null && DaoUtils.isRelativeDate(startFieldValue)
-          && startComp == Comparison.AFTER) {
-        whereClauses.add(String.format("%s %s :%s", endFieldName, Comparison.BEFORE.getOperator(),
-            endParamName));
-        DaoUtils.addInstantAsLocalDateTime(sqlArgs, endParamName, Instant.now());
-      }
     }
     if (endFieldValue != null) {
       whereClauses
           .add(String.format("%s %s :%s", endFieldName, endComp.getOperator(), endParamName));
       DaoUtils.addInstantAsLocalDateTime(sqlArgs, endParamName, endFieldValue);
+    } else if (DaoUtils.isRelativeDate(startFieldValue) && startComp == Comparison.AFTER) {
+      whereClauses.add(
+          String.format("%s %s :%s", endFieldName, Comparison.BEFORE.getOperator(), endParamName));
+      DaoUtils.addInstantAsLocalDateTime(sqlArgs, endParamName, Instant.now());
     }
   }
 

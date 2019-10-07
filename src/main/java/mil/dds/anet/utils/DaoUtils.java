@@ -202,6 +202,9 @@ public class DaoUtils {
   private static final long MILLIS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
 
   public static boolean isRelativeDate(Instant input) {
+    if (input == null) {
+      return false;
+    }
     final Long millis = input.toEpochMilli();
     return millis < MILLIS_IN_YEAR;
   }
