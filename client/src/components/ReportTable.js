@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import { mapDispatchToProps, useBoilerplate } from "components/Page"
-import UltimatePagination from "components/UltimatePagination"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
 import { Report } from "models"
@@ -154,50 +154,51 @@ const ReportTable = props => {
 
   const { pageSize, totalCount } = data.reportList
 
+  const tableElement = (
+    <Table striped>
+      <thead>
+        <tr>
+          {showAuthors && <th>Author</th>}
+          <th>Organization</th>
+          <th>Summary</th>
+          {showStatus && <th>Status</th>}
+          <th>Engagement Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {reports.map(report => (
+          <tr key={report.uuid}>
+            {showAuthors && (
+              <td>
+                <LinkTo person={report.author} />
+              </td>
+            )}
+            <td>{<LinkTo organization={report.advisorOrg} />}</td>
+            <td>{<LinkTo report={report} className="read-report-button" />}</td>
+            {showStatus && <td>{report.state}</td>}
+            <td>
+              {moment(report.engagementDate).format(
+                Report.getEngagementDateFormat()
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+
   return (
-    <>
-      <UltimatePagination
-        Component="header"
+    <div>
+      <UltimatePaginationTopDown
         className="pull-right"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPage}
+        contentElement={tableElement}
       />
-      <Table striped>
-        <thead>
-          <tr>
-            {showAuthors && <th>Author</th>}
-            <th>Organization</th>
-            <th>Summary</th>
-            {showStatus && <th>Status</th>}
-            <th>Engagement Date</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {reports.map(report => (
-            <tr key={report.uuid}>
-              {showAuthors && (
-                <td>
-                  <LinkTo person={report.author} />
-                </td>
-              )}
-              <td>{<LinkTo organization={report.advisorOrg} />}</td>
-              <td>
-                {<LinkTo report={report} className="read-report-button" />}
-              </td>
-              {showStatus && <td>{report.state}</td>}
-              <td>
-                {moment(report.engagementDate).format(
-                  Report.getEngagementDateFormat()
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </>
+    </div>
   )
 
   function setPage(pageNum) {
