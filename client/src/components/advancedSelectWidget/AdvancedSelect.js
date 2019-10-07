@@ -194,7 +194,6 @@ export default class AdvancedSelect extends Component {
             onChange={this.changeSearchTerms}
             onFocus={this.handleInputFocus}
             onBlur={this.handleInputBlur}
-            innerRef={this.overlayTarget}
           />
           {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
           {addon && (

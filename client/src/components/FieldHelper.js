@@ -129,7 +129,6 @@ export const renderInputField = ({
     extraColElem,
     addon,
     vertical,
-    innerRef,
     extraAddon,
     ...otherProps
   } = props
@@ -137,7 +136,6 @@ export const renderInputField = ({
     <FormControl
       {...Object.without(field, "value")}
       value={field.value === null ? "" : field.value}
-      ref={innerRef}
       {...otherProps}
     />
   )
