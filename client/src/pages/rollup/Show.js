@@ -94,9 +94,7 @@ const GQL_EMAIL_ROLLUP = gql`
       principalOrganizationUuid: $principalOrganizationUuid
       advisorOrganizationUuid: $advisorOrganizationUuid
       orgType: $orgType
-    ) {
-      uuid
-    }
+    )
   }
 `
 
