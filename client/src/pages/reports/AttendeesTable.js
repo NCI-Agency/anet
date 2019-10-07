@@ -185,7 +185,9 @@ const AttendeesTable = props => {
           <LinkTo person={person} showIcon={false} />
         </td>
         <td>
-          <LinkTo position={person.position} />
+          {person.position && person.position.uuid && (
+            <LinkTo position={person.position} />
+          )}
           {person.position && person.position.code
             ? `, ${person.position.code}`
             : ""}
@@ -200,7 +202,7 @@ const AttendeesTable = props => {
           <LinkTo
             whenUnspecified=""
             organization={person.position && person.position.organization}
-          />{" "}
+          />
         </td>
         <td className="sensitive-attendee">
           <SensitiveCheckBox

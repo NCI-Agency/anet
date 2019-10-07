@@ -21,7 +21,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useState } from "react"
 import { Panel, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
 
 const GQL_GET_REPORT_LISTS = gql`
@@ -91,9 +91,8 @@ const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
 })
 
 const DecisivesDashboard = props => {
-  const dashboardSettings = Settings.dashboards.find(
-    o => o.label === props.match.params.dashboard
-  )
+  const { dashboard } = useParams()
+  const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dashboardData, setDashboardData] = useState([])
   useEffect(() => {
     async function fetchData() {
@@ -388,4 +387,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(DecisivesDashboard))
+)(DecisivesDashboard)

@@ -19,7 +19,7 @@ test("Draft and submit a report", async t => {
     shortWaitMs
   } = t.context
 
-  httpRequestSmtpServer("DELETE")
+  await httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await pageHelpers.writeInForm("#intent", "meeting goal")
@@ -190,7 +190,7 @@ test("Publish report chain", async t => {
     longWaitMs
   } = t.context
 
-  httpRequestSmtpServer("DELETE")
+  await httpRequestSmtpServer("DELETE")
 
   // Try to have Erin approve her own report
   await t.context.get("/", "erin")
@@ -388,7 +388,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     By
   } = t.context
 
-  httpRequestSmtpServer("DELETE")
+  await httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await assertElementText(

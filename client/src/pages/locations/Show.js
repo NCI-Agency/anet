@@ -27,6 +27,7 @@ import { Location, Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { useLocation, useParams } from "react-router-dom"
 
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
@@ -52,7 +53,8 @@ Coordinate.propTypes = {
 }
 
 const BaseLocationShow = props => {
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
+  const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
@@ -70,8 +72,8 @@ const BaseLocationShow = props => {
   }
 
   const location = new Location(data ? data.location : {})
-  const stateSuccess = props.location.state && props.location.state.success
-  const stateError = props.location.state && props.location.state.error
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const stateError = routerLocation.state && routerLocation.state.error
   const { currentUser, ...myFormProps } = props
   const canEdit = currentUser.isSuperUser()
 
