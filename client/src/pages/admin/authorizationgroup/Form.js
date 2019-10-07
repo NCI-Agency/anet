@@ -6,14 +6,14 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_CREATE_AUTHORIZATION_GROUP = gql`
@@ -31,6 +31,7 @@ const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
 
 const AuthorizationGroupForm = props => {
   const { edit, title, ...myFormProps } = props
+  const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
@@ -189,7 +190,7 @@ const AuthorizationGroupForm = props => {
   }
 
   function onCancel() {
-    props.history.goBack()
+    history.goBack()
   }
 
   function onSubmit(values, form) {
@@ -216,9 +217,9 @@ const AuthorizationGroupForm = props => {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
+      history.replace(AuthorizationGroup.pathForEdit(authGroup))
     }
-    props.history.push(AuthorizationGroup.pathFor(authGroup), {
+    history.push(AuthorizationGroup.pathFor(authGroup), {
       success: "Authorization Group saved"
     })
   }
@@ -240,8 +241,7 @@ const AuthorizationGroupForm = props => {
 AuthorizationGroupForm.propTypes = {
   initialValues: PropTypes.instanceOf(AuthorizationGroup).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  ...routerRelatedPropTypes
+  edit: PropTypes.bool
 }
 
 AuthorizationGroupForm.defaultProps = {
@@ -249,4 +249,4 @@ AuthorizationGroupForm.defaultProps = {
   edit: false
 }
 
-export default withRouter(AuthorizationGroupForm)
+export default AuthorizationGroupForm

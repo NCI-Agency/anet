@@ -14,6 +14,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { Redirect } from "react-router"
+import { useHistory, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import ReactTooltip from "react-tooltip"
@@ -94,6 +95,8 @@ const GQL_GET_APP_DATA = gql`
 
 const App = props => {
   let appState = processData(window.ANET_DATA)
+  const history = useHistory()
+  const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
   const { done, result } = useBoilerplate({
     loading,
@@ -113,12 +116,12 @@ const App = props => {
   // if this is a new user, redirect to onboarding
   if (
     appState.currentUser.isNewUser() &&
-    !props.location.pathname.startsWith("/onboarding")
+    !routerLocation.pathname.startsWith("/onboarding")
   ) {
     return <Redirect to="/onboarding" />
   }
 
-  const { pageProps, history, location } = props
+  const { pageProps } = props
 
   return (
     <AppContext.Provider
@@ -131,7 +134,7 @@ const App = props => {
       <ResponsiveLayout
         pageProps={pageProps}
         pageHistory={history}
-        location={location}
+        location={routerLocation}
         sidebarData={appState.organizations}
       >
         <ToastContainer />

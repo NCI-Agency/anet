@@ -10,6 +10,7 @@ import { Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { useLocation } from "react-router-dom"
 import utils from "utils"
 import TaskForm from "./Form"
 
@@ -26,7 +27,8 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const TaskNew = props => {
-  const qs = utils.parseQueryString(props.location.search)
+  const routerLocation = useLocation()
+  const qs = utils.parseQueryString(routerLocation.search)
   if (qs.responsibleOrgUuid) {
     const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
       uuid: qs.responsibleOrgUuid

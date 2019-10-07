@@ -28,7 +28,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory, useLocation, useParams } from "react-router-dom"
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
@@ -94,16 +94,18 @@ const GQL_DELETE_POSITION = gql`
 `
 
 const BasePositionShow = props => {
+  const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
   const [
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
-  const stateSuccess = props.location.state && props.location.state.success
+  const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
   const [stateError, setStateError] = useState(
-    props.location.state && props.location.state.error
+    routerLocation.state && routerLocation.state.error
   )
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_POSITION, {
     uuid
   })
@@ -417,7 +419,7 @@ const BasePositionShow = props => {
     const { uuid } = position
     API.mutation(GQL_DELETE_POSITION, { uuid })
       .then(data => {
-        props.history.push("/", { success: "Position deleted" })
+        history.push("/", { success: "Position deleted" })
       })
       .catch(error => {
         setStateError(error)
@@ -442,4 +444,4 @@ BasePositionShow.propTypes = {
 export default connect(
   null,
   mapDispatchToProps
-)(withRouter(PositionShow))
+)(PositionShow)

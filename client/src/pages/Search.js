@@ -43,7 +43,7 @@ import {
   Table
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import DOWNLOAD_ICON from "resources/download.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -645,6 +645,7 @@ const sum = (...args) => {
 
 const Search = props => {
   const { searchQuery, pagination, setPagination } = props
+  const history = useHistory()
   const [error, setError] = useState(null)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
   const [numOrganizations, setNumOrganizations] = useState(null)
@@ -691,7 +692,7 @@ const Search = props => {
     <div>
       <SubNav subnavElemId="search-nav">
         <div>
-          <Button onClick={props.history.goBack} bsStyle="link">
+          <Button onClick={history.goBack} bsStyle="link">
             &lt; Return to previous page
           </Button>
         </div>
@@ -1023,4 +1024,4 @@ const mapStateToProps = (state, ownProps) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(Search))
+)(Search)

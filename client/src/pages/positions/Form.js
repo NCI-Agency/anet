@@ -11,14 +11,14 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+import { jumpToTop } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
@@ -38,6 +38,7 @@ const GQL_UPDATE_POSITION = gql`
 
 const BasePositionForm = props => {
   const { currentUser, edit, title, initialValues, ...myFormProps } = props
+  const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
@@ -309,7 +310,7 @@ const BasePositionForm = props => {
   )
 
   function onCancel() {
-    props.history.goBack()
+    history.goBack()
   }
 
   function onSubmit(values, form) {
@@ -334,9 +335,9 @@ const BasePositionForm = props => {
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
     if (!edit) {
-      props.history.replace(Position.pathForEdit(position))
+      history.replace(Position.pathForEdit(position))
     }
-    props.history.push(Position.pathFor(position), {
+    history.push(Position.pathFor(position), {
       success: "Position saved"
     })
   }
@@ -364,8 +365,7 @@ BasePositionForm.propTypes = {
   initialValues: PropTypes.instanceOf(Position).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person),
-  ...routerRelatedPropTypes
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 BasePositionForm.defaultProps = {
@@ -381,4 +381,4 @@ const PositionForm = props => (
   </AppContext.Consumer>
 )
 
-export default withRouter(PositionForm)
+export default PositionForm

@@ -31,6 +31,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
+import { useLocation, useParams } from "react-router-dom"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
@@ -123,8 +124,9 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const BaseOrganizationShow = props => {
+  const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
   })
@@ -142,8 +144,8 @@ const BaseOrganizationShow = props => {
   }
 
   const organization = new Organization(data ? data.organization : {})
-  const stateSuccess = props.location.state && props.location.state.success
-  const stateError = props.location.state && props.location.state.error
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const stateError = routerLocation.state && routerLocation.state.error
   const { currentUser, ...myFormProps } = props
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)

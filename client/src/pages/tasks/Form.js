@@ -14,7 +14,7 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, routerRelatedPropTypes } from "components/Page"
+import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
@@ -22,7 +22,7 @@ import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -47,6 +47,7 @@ const GQL_UPDATE_TASK = gql`
 
 const BaseTaskForm = props => {
   const { currentUser, edit, title, initialValues, ...myFormProps } = props
+  const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
@@ -374,7 +375,7 @@ const BaseTaskForm = props => {
   }
 
   function onCancel() {
-    props.history.goBack()
+    history.goBack()
   }
 
   function onSubmit(values, form) {
@@ -398,11 +399,11 @@ const BaseTaskForm = props => {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    props.history.replace(Task.pathForEdit(task))
+    history.replace(Task.pathForEdit(task))
     if (!edit) {
-      props.history.replace(Task.pathForEdit(task))
+      history.replace(Task.pathForEdit(task))
     }
-    props.history.push(Task.pathFor(task), {
+    history.push(Task.pathFor(task), {
       success: "Task saved"
     })
   }
@@ -448,8 +449,7 @@ BaseTaskForm.propTypes = {
   initialValues: PropTypes.instanceOf(Task).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person),
-  ...routerRelatedPropTypes
+  currentUser: PropTypes.instanceOf(Person)
 }
 
 BaseTaskForm.defaultProps = {
@@ -463,4 +463,4 @@ const TaskForm = props => (
   </AppContext.Consumer>
 )
 
-export default withRouter(TaskForm)
+export default TaskForm

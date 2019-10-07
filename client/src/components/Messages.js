@@ -3,12 +3,6 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Alert } from "react-bootstrap"
 
-export function setMessages(props, state) {
-  Object.assign(state, {
-    success: props.location.state && props.location.state.success,
-    error: props.location.state && props.location.state.error
-  })
-}
 export default class Messages extends Component {
   static propTypes = {
     error: PropTypes.object,

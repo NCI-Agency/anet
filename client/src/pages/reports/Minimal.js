@@ -20,6 +20,7 @@ import moment from "moment"
 import React from "react"
 import { Alert } from "react-bootstrap"
 import { connect } from "react-redux"
+import { useParams } from "react-router-dom"
 import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 
@@ -188,7 +189,7 @@ const GQL_GET_REPORT = gql`
 `
 
 const ReportMinimal = props => {
-  const uuid = props.match.params.uuid
+  const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
