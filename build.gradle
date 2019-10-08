@@ -423,6 +423,17 @@ task integrationTest(type: Test) {
 	environment(run.environment)
 }
 
+// Create the task that runs the migration script for empty HTML biography fields of persons
+task dbClearBiographies(dependsOn: 'compileJava', type: JavaExec) {
+    group = "database"
+    description = "Runs the ANET clearBiographies command."
+    classpath = sourceSets.main.runtimeClasspath
+    environment(run.environment)
+    main = mainClassName
+    args = ["clearBiographies", anetConfig]
+    standardInput = System.in
+}
+
 classes.dependsOn buildClient
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
