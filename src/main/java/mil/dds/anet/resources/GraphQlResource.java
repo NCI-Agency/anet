@@ -201,8 +201,8 @@ public class GraphQlResource {
 
   private ExecutionResult dispatchRequest(Person user, String operationName, String query,
       Map<String, Object> variables) {
-    final DataLoaderRegistry dataLoaderRegistry =
-        BatchingUtils.registerDataLoaders(engine, true, true);
+    final BatchingUtils batchingUtils = new BatchingUtils(engine, true, true);
+    final DataLoaderRegistry dataLoaderRegistry = batchingUtils.getDataLoaderRegistry();
     final Map<String, Object> context = new HashMap<>();
     context.put("user", user);
     context.put("dataLoaderRegistry", dataLoaderRegistry);
@@ -242,7 +242,8 @@ public class GraphQlResource {
     } catch (InterruptedException | ExecutionException e) {
       throw new WebApplicationException("failed to complete graphql request", e);
     } finally {
-      BatchingUtils.updateStats(metricRegistry, dataLoaderRegistry);
+      batchingUtils.updateStats(metricRegistry, dataLoaderRegistry);
+      batchingUtils.shutdown();
     }
   }
 
