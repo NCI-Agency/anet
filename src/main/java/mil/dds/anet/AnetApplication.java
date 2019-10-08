@@ -272,7 +272,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
             ImmutableList.of(reportResource, personResource, positionResource, locationResource,
                 orgResource, taskResource, adminResource, savedSearchResource, tagResource,
                 authorizationGroupResource, noteResource),
-            metricRegistry, configuration.isDevelopmentMode()));
+            metricRegistry));
   }
 
   protected static JSONObject getDictionary(AnetConfiguration configuration)
