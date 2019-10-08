@@ -35,9 +35,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       addTextQuery(query);
     }
 
-    qb.addDateClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,
-        query.getEndOfTourDateStart());
-    qb.addDateClause("endDate", "people.\"endOfTourDate\"", Comparison.BEFORE,
+    qb.addDateRangeClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,
+        query.getEndOfTourDateStart(), "endDate", "people.\"endOfTourDate\"", Comparison.BEFORE,
         query.getEndOfTourDateEnd());
     qb.addEqualsClause("role", "people.role", query.getRole());
     qb.addInClause("statuses", "people.status", query.getStatus());
