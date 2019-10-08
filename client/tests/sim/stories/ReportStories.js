@@ -197,7 +197,7 @@ async function populateReport(report, user, args) {
   const tasks = await getTasks()
   const template = {
     intent: () => faker.lorem.paragraph(),
-    engagementDate: () => faker.date.recent().toISOString(),
+    engagementDate: () => faker.date.recent(365).toISOString(),
     duration: () => faker.random.number({ min: 1, max: 480 }),
     cancelledReason: () =>
       faker.random.arrayElement([
