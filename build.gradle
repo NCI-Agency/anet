@@ -98,7 +98,7 @@ dependencies {
 	compile 'com.github.waffle:waffle-jna:1.9.1'
 	compile 'com.graphql-java:java-dataloader:2.2.3'
 	compile 'io.leangen.graphql:spqr:0.10.0'
-	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190610.1'
+	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20191001.1'
 
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
