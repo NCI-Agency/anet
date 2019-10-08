@@ -244,7 +244,7 @@ async function populateReport(report, user, args) {
   return report
 }
 
-const createReport = async function(user, args) {
+const createReport = async function(user, grow, args) {
   const report = new Report()
   if (await populateReport(report, user, args)) {
     console.debug(`Creating report ${report.intent.green}`)
