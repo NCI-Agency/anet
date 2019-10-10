@@ -117,7 +117,7 @@
     "email-addresses": "^3.0.2",
     "file-saver": "^2.0.2",
     "formik": "^1.5.8",
-    "graphiql": "^0.14.2",
+    "graphiql": "^0.15.1",
     "graphql": "^14.5.8",
     "hopscotch": "^0.3.1",
     "jsonpath-plus": "^1.1.0",
