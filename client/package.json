@@ -46,7 +46,7 @@
     "config": "^3.2.3",
     "copy-webpack-plugin": "^5.0.4",
     "cross-fetch": "^3.0.4",
-    "cross-spawn": "^7.0.0",
+    "cross-spawn": "^7.0.1",
     "css-loader": "^3.2.0",
     "dotenv": "^8.1.0",
     "eslint": "^5.16.0",
