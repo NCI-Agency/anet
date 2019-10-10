@@ -199,9 +199,11 @@ async function populateReport(report, user, args) {
     return [..._uniqWith(reportTasks, _isEqual)]
   }
   const tasks = await getTasks()
+  const engagementDate = faker.date.recent(365)
+
   const template = {
     intent: () => faker.lorem.paragraph(),
-    engagementDate: () => faker.date.recent(365).toISOString(),
+    engagementDate: engagementDate.toISOString(),
     duration: () => faker.random.number({ min: 1, max: 480 }),
     cancelledReason: () =>
       faker.random.arrayElement([
@@ -224,7 +226,16 @@ async function populateReport(report, user, args) {
     tags: emptyArray,
     reportSensitiveInformation: () => null,
     authorizationGroups: emptyArray,
-    state: (args && args.state) || Report.STATE.DRAFT
+    state: (args && args.state) || Report.STATE.DRAFT,
+    releasedAt: () => {
+      // Set the releasedAt value on a random date between 1 and 7 days after the engagement
+      let result = new Date(engagementDate)
+      result.setSeconds(
+        result.getSeconds() +
+          (Math.floor(Math.random() * (60 * 60 * 24 * 7)) + 1)
+      )
+      return result
+    }
   }
 
   populate(report, template)
@@ -244,6 +255,7 @@ async function populateReport(report, user, args) {
     .reportSensitiveInformation.and()
     .authorizationGroups.rarely()
     .state.always()
+    .releasedAt.always()
 
   return report
 }
