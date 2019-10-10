@@ -3,7 +3,7 @@ import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
-import { runGQL, populate } from "../simutils"
+import { fuzzy, runGQL, populate } from "../simutils"
 
 async function getRandomPerson(user, variables) {
   const positionsQuery = Object.assign({}, variables, {
@@ -200,20 +200,26 @@ async function populateReport(report, user, args) {
   }
   const tasks = await getTasks()
   const engagementDate = faker.date.recent(365)
-
-  const template = {
-    intent: () => faker.lorem.paragraph(),
-    engagementDate: engagementDate.toISOString(),
-    duration: () => faker.random.number({ min: 1, max: 480 }),
-    cancelledReason: () =>
-      faker.random.arrayElement([
+  const state = fuzzy.withProbability(0.05)
+    ? Report.STATE.CANCELLED
+    : (args && args.state) || Report.STATE.DRAFT
+  const cancelledReason =
+    state !== Report.STATE.CANCELLED
+      ? null
+      : faker.random.arrayElement([
         "CANCELLED_BY_ADVISOR",
         "CANCELLED_BY_PRINCIPAL",
         "CANCELLED_DUE_TO_TRANSPORTATION",
         "CANCELLED_DUE_TO_FORCE_PROTECTION",
         "CANCELLED_DUE_TO_ROUTES",
         "CANCELLED_DUE_TO_THREAT"
-      ]),
+      ])
+
+  const template = {
+    intent: () => faker.lorem.paragraph(),
+    engagementDate: engagementDate.toISOString(),
+    duration: () => faker.random.number({ min: 1, max: 480 }),
+    cancelledReason,
     atmosphere: () =>
       faker.random.arrayElement(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
     atmosphereDetails: () => faker.lorem.sentence(),
@@ -226,7 +232,7 @@ async function populateReport(report, user, args) {
     tags: emptyArray,
     reportSensitiveInformation: () => null,
     authorizationGroups: emptyArray,
-    state: (args && args.state) || Report.STATE.DRAFT,
+    state,
     releasedAt: () => {
       // Set the releasedAt value on a random date between 1 and 7 days after the engagement
       let result = new Date(engagementDate)
@@ -242,7 +248,7 @@ async function populateReport(report, user, args) {
     .intent.always()
     .engagementDate.always()
     .duration.often()
-    .cancelledReason.often()
+    .cancelledReason.always()
     .atmosphere.always()
     .atmosphereDetails.always()
     .location.always()
