@@ -164,19 +164,23 @@ async function populateReport(report, user, args) {
   async function getAttendees() {
     const attendees = []
     const nbOfAdvisors = faker.random.number({ min: 1, max: 5 })
+    let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
       const advisor = await randomAdvisor(user)
       if (advisor) {
-        advisor.primary = i === 0
+        advisor.primary = primary
+        primary = false
         attendees.push(advisor)
       }
     }
 
     const nbOfPrincipals = faker.random.number({ min: 1, max: 5 })
+    primary = true
     for (let i = 0; i < nbOfPrincipals; i++) {
       const principal = await randomPrincipal(user)
       if (principal) {
-        principal.primary = i === 0
+        principal.primary = primary
+        primary = false
         attendees.push(principal)
       }
     }
