@@ -34,7 +34,7 @@
     "@wdio/sync": "^5.14.3",
     "aigle": "^1.14.1",
     "autobind-decorator": "^2.4.0",
-    "autoprefixer": "^9.6.1",
+    "autoprefixer": "^9.6.4",
     "ava": "^2.4.0",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
