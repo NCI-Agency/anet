@@ -17,17 +17,6 @@ const GQL_GET_REPORT_LIST = gql`
       list {
         uuid
         intent
-        primaryAdvisor {
-          uuid
-          name
-        }
-        principalOrg {
-          uuid
-          shortName
-        }
-        engagementDate
-        duration
-        state
         location {
           uuid
           name
