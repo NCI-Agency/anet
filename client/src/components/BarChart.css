@@ -33,6 +33,7 @@
 
 .bar-label {
   fill: #000;
+  pointer-events: none;
 }
 
 .bars-group {

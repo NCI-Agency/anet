@@ -11,13 +11,11 @@ import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -171,16 +169,46 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   public int setPersonInPosition(String personUuid, String positionUuid) {
-    Instant now = Instant.now();
+    // If the position is already assigned to another person, remove the person from the position
+    AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(positionUuid);
+
     // If this person is in a position already, we need to remove them.
     Position currPos = getDbHandle()
         .createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
             + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
+    // Get timestamp *after* remove to preserve correct order
+    final Instant now = Instant.now();
     if (currPos != null) {
+      final String sql;
+      if (DaoUtils.isMsSql()) {
+        sql =
+            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+                + "(SELECT TOP(1) * FROM \"peoplePositions\""
+                + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+                + " ORDER BY \"createdAt\" DESC) AS t "
+                + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+                + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+                + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+                + "      \"peoplePositions\".\"endedAt\" IS NULL";
+      } else {
+        sql =
+            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+                + "(SELECT * FROM \"peoplePositions\""
+                + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+                + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+                + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+                + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+                + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+                + "      \"peoplePositions\".\"endedAt\" IS NULL";
+      }
+      getDbHandle().createUpdate(sql).bind("personUuid", personUuid)
+          .bind("positionUuid", currPos.getUuid()).bind("endedAt", DaoUtils.asLocalDateTime(now))
+          .execute();
+
       getDbHandle()
           .createUpdate(
-              "/* positionSetPerson.remove1 */ UPDATE positions set \"currentPersonUuid\" = null "
+              "/* positionSetPerson.remove1 */ UPDATE positions set \"currentPersonUuid\" = NULL "
                   + "WHERE \"currentPersonUuid\" = :personUuid")
           .bind("personUuid", personUuid).execute();
 
@@ -215,81 +243,57 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         .bind("personUuid", (Integer) null).bind("updatedAt", DaoUtils.asLocalDateTime(now))
         .bind("positionUuid", positionUuid).execute();
 
-    String sql;
+    final String updateSql;
+    // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
+    // (i.e. with both a position and a person).
     if (DaoUtils.isMsSql()) {
-      sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
-          + "(SELECT TOP(1)\"personUuid\" FROM \"peoplePositions\" "
-          + "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), :createdAt)";
+      updateSql =
+          "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+              + "(SELECT TOP(1) * FROM \"peoplePositions\""
+              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+              + " ORDER BY \"createdAt\" DESC) AS t "
+              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+              + "      \"peoplePositions\".\"endedAt\" IS NULL";
     } else {
-      sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(null, "
-          + "(SELECT \"personUuid\" FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
-          + "ORDER BY \"createdAt\" DESC LIMIT 1), :createdAt)";
+      updateSql =
+          "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+              + "(SELECT * FROM \"peoplePositions\""
+              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+              + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+              + "      \"peoplePositions\".\"endedAt\" IS NULL";
     }
-    getDbHandle().createUpdate(sql).bind("positionUuid", positionUuid)
+    getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
+        .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
+
+    String insertSql;
+    if (DaoUtils.isMsSql()) {
+      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(NULL, "
+          + "(SELECT TOP(1) \"personUuid\" FROM \"peoplePositions\""
+          + " WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC),"
+          + " :createdAt)";
+    } else {
+      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(NULL, "
+          + "(SELECT \"personUuid\" FROM \"peoplePositions\""
+          + " WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC LIMIT 1),"
+          + " :createdAt)";
+    }
+    getDbHandle().createUpdate(insertSql).bind("positionUuid", positionUuid)
         .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
 
     return getDbHandle()
         .createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-            + "VALUES (:positionUuid, null, :createdAt)")
-        .bind("positionUuid", positionUuid).bind("createdAt", DaoUtils.asLocalDateTime(now))
-        .execute();
-  }
-
-  public Person getPersonInPositionNow(String personUuid) {
-    if (personUuid == null) {
-      return null;
-    } // No person currently in position.
-    List<Person> people = getDbHandle()
-        .createQuery("/* positionFindCurrentPerson */ SELECT " + PersonDao.PERSON_FIELDS
-            + " FROM people WHERE uuid = :personUuid")
-        .bind("personUuid", personUuid).map(new PersonMapper()).list();
-    if (people.size() == 0) {
-      return null;
-    }
-    return people.get(0);
-  }
-
-  public Person getPersonInPosition(String positionUuid, Instant dtg) {
-    String sql;
-    if (DaoUtils.isMsSql()) {
-      sql = "/* positionFindPerson */ SELECT TOP(1) " + PersonDao.PERSON_FIELDS
-          + " FROM \"peoplePositions\" "
-          + "LEFT JOIN people ON people.uuid = \"peoplePositions\".\"personUuid\" "
-          + "WHERE \"peoplePositions\".\"positionUuid\" = :positionUuid "
-          + "AND \"peoplePositions\".\"createdAt\" < :dtg "
-          + "ORDER BY \"peoplePositions\".\"createdAt\" DESC";
-    } else {
-      sql = "/* positionFindPerson */ SELECT " + PersonDao.PERSON_FIELDS
-          + " FROM \"peoplePositions\" "
-          + "LEFT JOIN people ON people.uuid = \"peoplePositions\".\"personUuid\" "
-          + "WHERE \"peoplePositions\".\"positionUuid\" = :positionUuid "
-          + "AND \"peoplePositions\".\"createdAt\" < :dtg "
-          + "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
-    }
-    List<Person> results = getDbHandle().createQuery(sql).bind("positionUuid", positionUuid)
-        .bind("dtg", dtg).map(new PersonMapper()).list();
-    if (results.size() == 0) {
-      return null;
-    }
-    return results.get(0);
-  }
-
-  public List<Person> getPeoplePreviouslyInPosition(String positionUuid) {
-    List<Person> people = getDbHandle()
-        .createQuery("/* positionFindPreviousPeople */ SELECT " + PersonDao.PERSON_FIELDS
-            + "FROM \"peoplePositions\" "
-            + "LEFT JOIN people ON \"peoplePositions\".\"personUuid\" = people.uuid "
-            + "WHERE \"peoplePositions\".\"positionUuid\" = :positionUuid "
-            + "AND \"peoplePositions\".\"personUuid\" IS NOT NULL ORDER BY \"createdAt\" DESC")
-        .bind("positionUuid", positionUuid).map(new PersonMapper()).list();
-    // remove the last person, as that's the current position holder
-    if (people.size() > 0) {
-      people.remove(people.size() - 1);
-    }
-    return people;
+            + "VALUES (:positionUuid, NULL, :createdAt)")
+        .bind("positionUuid", positionUuid)
+        // Need to ensure this timestamp is greater than previous INSERT.
+        .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
   }
 
   public CompletableFuture<List<Position>> getAssociatedPositions(Map<String, Object> context,

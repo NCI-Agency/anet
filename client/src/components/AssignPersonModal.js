@@ -52,7 +52,7 @@ export default class AssignPersonModal extends Component {
     let newPerson = this.state.person
 
     let personSearchQuery = {
-      status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]
+      status: [Person.STATUS.ACTIVE]
     }
     if (position.type === Position.TYPE.PRINCIPAL) {
       personSearchQuery.role = Person.ROLE.PRINCIPAL
@@ -137,11 +137,7 @@ export default class AssignPersonModal extends Component {
           <Button className="pull-left" onClick={this.close}>
             Cancel
           </Button>
-          <Button
-            onClick={this.save}
-            bsStyle={"primary"}
-            className="save-button"
-          >
+          <Button onClick={this.save} bsStyle="primary" className="save-button">
             Save
           </Button>
         </Modal.Footer>
@@ -199,11 +195,11 @@ export default class AssignPersonModal extends Component {
       this.state.person.position.uuid !== this.props.position.uuid
     ) {
       const errorMessage = (
-        <React.Fragment>
+        <>
           This person is currently in another position. By selecting this
           person, <b>{this.state.person.position.name}</b> will be left
           unfilled.
-        </React.Fragment>
+        </>
       )
       error = { message: errorMessage }
     }

@@ -1,30 +1,28 @@
-import { PAGE_PROPS_NO_NAV } from "actions"
-import Page, {
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import { Person } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import PersonForm from "./Form"
 
-class PersonNew extends Page {
-  static propTypes = {
-    ...pagePropTypes
-  }
+const PersonNew = props => {
+  useBoilerplate({
+    pageProps: PAGE_PROPS_NO_NAV,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
 
-  state = {
-    person: new Person()
-  }
+  const person = new Person()
 
-  constructor(props) {
-    super(props, PAGE_PROPS_NO_NAV)
-  }
+  return <PersonForm initialValues={person} title="Create a new Person" />
+}
 
-  render() {
-    const { person } = this.state
-    return <PersonForm initialValues={person} title="Create a new Person" />
-  }
+PersonNew.propTypes = {
+  ...pagePropTypes
 }
 
 export default connect(

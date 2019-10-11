@@ -1,13 +1,49 @@
-import { Settings } from "api"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AdvisorReportsRow from "components/AdvisorReports/AdvisorReportsRow"
 import AdvisorReportsTableHead from "components/AdvisorReports/AdvisorReportsTableHead"
+import { mapDispatchToProps, useBoilerplate } from "components/Page"
 import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
+import { connect } from "react-redux"
+
+const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
+  query($orgUuid: String!) {
+    advisorReportInsights(orgUuid: $orgUuid) {
+      uuid
+      name
+      stats {
+        week
+        nrReportsSubmitted
+        nrEngagementsAttended
+      }
+    }
+  }
+`
 
 const AdvisorReportsTable = props => {
-  let rows = props.data.map(advisor => {
+  const orgUuid = props.orgUuid
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_ADVISOR_REPORTS_INSIGHT,
+    {
+      orgUuid
+    }
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Organization",
+    orgUuid,
+    ...props
+  })
+  if (done) {
+    return result
+  }
+
+  const advisors = data.advisorReportInsights
+  const rows = advisors.map(advisor => {
     return (
       <AdvisorReportsRow
         row={advisor}
@@ -16,6 +52,7 @@ const AdvisorReportsTable = props => {
       />
     )
   })
+
   return (
     <Table striped bordered condensed hover responsive>
       <caption>
@@ -33,7 +70,10 @@ const AdvisorReportsTable = props => {
 
 AdvisorReportsTable.propTypes = {
   columnGroups: PropTypes.array,
-  data: PropTypes.array
+  orgUuid: PropTypes.string
 }
 
-export default AdvisorReportsTable
+export default connect(
+  null,
+  mapDispatchToProps
+)(AdvisorReportsTable)

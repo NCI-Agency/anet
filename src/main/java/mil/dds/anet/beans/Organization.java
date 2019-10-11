@@ -42,6 +42,7 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
   OrganizationType type;
 
   /* The following are all Lazy Loaded */
+  List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Org */
   List<ApprovalStep> approvalSteps; /* Approval process for this Org */
   List<Task> tasks;
 
@@ -136,6 +137,28 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
         new FkBatchParams<Position, PositionSearchQuery>("positions", "\"organizationUuid\""));
     return AnetObjectEngine.getInstance().getPositionDao().getPositionsBySearch(context, uuid,
         query);
+  }
+
+  @GraphQLQuery(name = "planningApprovalSteps")
+  public CompletableFuture<List<ApprovalStep>> loadPlanningApprovalSteps(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (planningApprovalSteps != null) {
+      return CompletableFuture.completedFuture(planningApprovalSteps);
+    }
+    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForOrg(context, uuid)
+        .thenApply(o -> {
+          planningApprovalSteps = o;
+          return o;
+        });
+  }
+
+  @GraphQLIgnore
+  public List<ApprovalStep> getPlanningApprovalSteps() {
+    return planningApprovalSteps;
+  }
+
+  public void setPlanningApprovalSteps(List<ApprovalStep> steps) {
+    this.planningApprovalSteps = steps;
   }
 
   @GraphQLQuery(name = "approvalSteps")

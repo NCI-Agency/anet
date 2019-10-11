@@ -195,6 +195,12 @@ public class AnetObjectEngine {
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
+  public CompletableFuture<List<ApprovalStep>> getPlanningApprovalStepsForOrg(
+      Map<String, Object> context, String aoUuid) {
+    return asDao.getPlanningByAdvisorOrganizationUuid(context, aoUuid)
+        .thenApply(unordered -> orderSteps(unordered));
+  }
+
   public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context,
       String aoUuid) {
     return asDao.getByAdvisorOrganizationUuid(context, aoUuid)
@@ -302,7 +308,8 @@ public class AnetObjectEngine {
     if (context == null) {
       final Map<String, Object> ctx = new HashMap<>();
       // FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache?
-      ctx.put("dataLoaderRegistry", BatchingUtils.registerDataLoaders(this, false, false));
+      final BatchingUtils batchingUtils = new BatchingUtils(this, false, false);
+      ctx.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
       context = ThreadLocal.withInitial(() -> ctx);
     }
     return context.get();

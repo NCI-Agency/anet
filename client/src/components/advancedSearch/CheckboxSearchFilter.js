@@ -32,7 +32,7 @@ export default class CheckboxSearchFilter extends Component {
 
   render() {
     return !this.props.asFormField ? (
-      <React.Fragment>{this.props.msg}</React.Fragment>
+      <>{this.props.msg}</>
     ) : (
       <FormGroup>
         <Checkbox readOnly checked={this.state.value.value}>

@@ -1,7 +1,7 @@
 let test = require("../util/test")
 
 test("Move someone in and out of a position", async t => {
-  t.plan(9)
+  t.plan(11)
 
   let {
     $,
@@ -120,6 +120,27 @@ test("Move someone in and out of a position", async t => {
   )
 
   await assertElementText(t, await $(".position-name"), positionName)
+
+  // The change in position is also visible in the Previous positions
+  let $previousPositionsRows = await $$("#previous-positions table tbody tr")
+  let $lastRow = $previousPositionsRows.pop()
+  let [
+    /* eslint-disable no-unused-vars */ $positionCell1 /* eslint-enable no-unused-vars */,
+    $datesCell1
+  ] = await $lastRow.findElements(By.css("td"))
+  let datesCell1Text = await $datesCell1.getText()
+  t.regex(datesCell1Text, /[0-9a-f\s]+-[\s]?/i, "Last cell has no end date")
+  let $beforeLastRow = $previousPositionsRows.pop()
+  let [
+    /* eslint-disable no-unused-vars */ $positionCell2 /* eslint-enable no-unused-vars */,
+    $datesCell2
+  ] = await $beforeLastRow.findElements(By.css("td"))
+  let datesCell2Text = await $datesCell2.getText()
+  t.regex(
+    datesCell2Text,
+    /[0-9a-f\s]+-[0-9a-f\s]+/i,
+    "One before last cell has an end date"
+  )
 
   await t.context.pageHelpers.clickMyOrgLink()
 

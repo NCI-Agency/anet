@@ -34,12 +34,13 @@ import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.junit.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
-
   private static final String ORGANIZATION_FIELDS = "uuid shortName";
   private static final String PERSON_FIELDS = "uuid name role";
   private static final String POSITION_FIELDS = "uuid name code type status";
   private static final String FIELDS = POSITION_FIELDS + " person { " + PERSON_FIELDS
       + " } organization { " + ORGANIZATION_FIELDS + " }";
+  private static final String PREVIOUS_PEOPLE_FIELDS =
+      " previousPeople { startTime endTime position { uuid } person { uuid name rank role } }";
 
   @Test
   public void positionTest() throws ExecutionException, InterruptedException {
@@ -153,9 +154,9 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(last.getPerson()).isNotNull();
     assertThat(last.getPersonUuid()).isEqualTo(jack.getUuid());
 
-    created = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(),
-        new TypeReference<GraphQlResponse<Position>>() {});
-    List<PersonPositionHistory> history = created.loadPreviousPeople(context).get();
+    created = graphQLHelper.getObjectById(jack, "position", FIELDS + PREVIOUS_PEOPLE_FIELDS,
+        created.getUuid(), new TypeReference<GraphQlResponse<Position>>() {});
+    List<PersonPositionHistory> history = created.getPreviousPeople();
     assertThat(history.size()).isEqualTo(2);
     assertThat(history.get(0).getPositionUuid()).isEqualTo(created.getUuid());
     assertThat(history.get(0).getPersonUuid()).isEqualTo(jack.getUuid());
@@ -163,7 +164,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(history.get(0).getEndTime()).isNotNull();
     assertThat(history.get(0).getStartTime()).isBefore(history.get(0).getEndTime());
 
-    assertThat(history.get(1).loadPerson(context).get()).isEqualTo(steve);
+    assertThat(history.get(1).getPersonUuid()).isEqualTo(steve.getUuid());
     assertThat(history.get(1).getEndTime()).isNotNull();
     assertThat(history.get(1).getStartTime()).isBefore(history.get(1).getEndTime());
 
@@ -584,9 +585,9 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(currPos.getPerson()).isNull();
 
     // Pull the history of newbPosition
-    newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getUuid(),
-        new TypeReference<GraphQlResponse<Position>>() {});
-    List<PersonPositionHistory> history = newbPosition.loadPreviousPeople(context).get();
+    newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS + PREVIOUS_PEOPLE_FIELDS,
+        newbPosition.getUuid(), new TypeReference<GraphQlResponse<Position>>() {});
+    List<PersonPositionHistory> history = newbPosition.getPreviousPeople();
     assertThat(history.size()).isEqualTo(2);
     assertThat(history.get(0).getPersonUuid()).isEqualTo(newb.getUuid());
     assertThat(history.get(1).getPersonUuid()).isEqualTo(prin2.getUuid());

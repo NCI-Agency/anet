@@ -1,9 +1,9 @@
 import Nav from "components/Nav"
 import TopBar from "components/TopBar"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useEffect, useState } from "react"
 import LoadingBar from "react-redux-loading-bar"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import { Element } from "react-scroll"
 
 const anetContainer = {
@@ -31,8 +31,8 @@ const mainViewportContainer = {
 }
 const notesViewportContainer = {
   paddingTop: 18,
-  maxWidth: "33%",
-  overflow: "auto"
+  maxWidth: "35%",
+  overflowY: "auto"
 }
 const sidebarContainer = {
   position: "relative",
@@ -65,102 +65,88 @@ const loadingBar = {
 
 export const ResponsiveLayoutContext = React.createContext()
 
-class ResponsiveLayout extends Component {
-  static propTypes = {
-    pageProps: PropTypes.shape({
-      minimalHeader: PropTypes.bool,
-      useNavigation: PropTypes.bool
-    }).isRequired,
-    pageHistory: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    sidebarData: PropTypes.array,
-    children: PropTypes.node
-  }
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      floatingMenu: false,
-      topbarHeight: 0
-    }
-  }
-
-  componentDidMount() {
+const ResponsiveLayout = props => {
+  const { pageProps, sidebarData, children } = props
+  const history = useHistory()
+  const [floatingMenu, setFloatingMenu] = useState(false)
+  const [topbarHeight, setTopbarHeight] = useState(0)
+  useEffect(() => {
     // We want to hide the floating menu on navigation events
-    this.unlistenHistory = this.props.pageHistory.listen((location, action) => {
-      this.showFloatingMenu(false)
+    const unlistenHistory = history.listen((location, action) => {
+      showFloatingMenu(false)
     })
-  }
 
-  componentWillUnmount() {
-    this.unlistenHistory()
-  }
+    return () => unlistenHistory()
+  }, [history])
 
-  handleTopbarHeight = topbarHeight => {
-    this.setState({ topbarHeight })
-  }
+  const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
 
-  showFloatingMenu = floatingMenu => {
-    this.setState({ floatingMenu: floatingMenu })
-  }
-
-  render() {
-    const { floatingMenu, topbarHeight } = this.state
-    const { pageProps, location, sidebarData, children } = this.props
-    const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
-
-    return (
-      <ResponsiveLayoutContext.Provider
-        value={{
-          showFloatingMenu: this.showFloatingMenu,
-          topbarOffset: topbarHeight
-        }}
-      >
-        <div style={anetContainer} className="anet">
-          <TopBar
-            topbarHeight={this.handleTopbarHeight}
-            minimalHeader={pageProps.minimalHeader}
-            location={location}
-            toggleMenuAction={() => {
-              this.showFloatingMenu(!floatingMenu)
+  return (
+    <ResponsiveLayoutContext.Provider
+      value={{
+        showFloatingMenu: showFloatingMenu,
+        topbarOffset: topbarHeight
+      }}
+    >
+      <div style={anetContainer} className="anet">
+        <TopBar
+          topbarHeight={handleTopbarHeight}
+          minimalHeader={pageProps.minimalHeader}
+          toggleMenuAction={() => {
+            showFloatingMenu(!floatingMenu)
+          }}
+        />
+        <div style={contentContainer} className="content-container">
+          <LoadingBar showFastActions style={loadingBar} />
+          <div
+            style={floatingMenu ? glassPane : null}
+            onClick={() => {
+              showFloatingMenu(false)
             }}
           />
-          <div style={contentContainer} className="content-container">
-            <LoadingBar showFastActions style={loadingBar} />
+          {(pageProps.useNavigation || floatingMenu) && (
             <div
-              style={floatingMenu ? glassPane : null}
-              onClick={() => {
-                this.showFloatingMenu(false)
-              }}
-            />
-            {(pageProps.useNavigation || floatingMenu) && (
-              <div
-                style={sidebarContainer}
-                className={`main-sidebar ${sidebarClass}`}
-              >
-                <div style={sidebar}>
-                  <Nav organizations={sidebarData} />
-                </div>
-              </div>
-            )}
-            <Element
-              style={mainViewportContainer}
-              name="mainViewport"
-              id="main-viewport"
+              style={sidebarContainer}
+              className={`main-sidebar ${sidebarClass}`}
             >
-              {children}
-            </Element>
-            <Element
-              style={notesViewportContainer}
-              name="notesView"
-              id="notes-view"
-            />
-          </div>
+              <div style={sidebar}>
+                <Nav organizations={sidebarData} />
+              </div>
+            </div>
+          )}
+          <Element
+            style={mainViewportContainer}
+            name="mainViewport"
+            id="main-viewport"
+          >
+            {children}
+          </Element>
+          <Element
+            style={notesViewportContainer}
+            name="notesView"
+            id="notes-view"
+          />
         </div>
-      </ResponsiveLayoutContext.Provider>
-    )
+      </div>
+    </ResponsiveLayoutContext.Provider>
+  )
+
+  function handleTopbarHeight(topbarHeight) {
+    setTopbarHeight(topbarHeight)
+  }
+
+  function showFloatingMenu(floatingMenu) {
+    setFloatingMenu(floatingMenu)
   }
 }
 
-export default withRouter(ResponsiveLayout)
+ResponsiveLayout.propTypes = {
+  pageProps: PropTypes.shape({
+    minimalHeader: PropTypes.bool,
+    useNavigation: PropTypes.bool
+  }).isRequired,
+  sidebarData: PropTypes.array,
+  children: PropTypes.node
+}
+
+export default ResponsiveLayout

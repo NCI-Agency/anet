@@ -163,35 +163,38 @@ INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 1 Manager'), (SELECT uuid from people where emailAddress = 'hunter+andrew@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+andrew@dds.mil') WHERE name = 'EF 1 Manager';
 
--- Put Bob into the Super User Billet in EF 1
+-- Put Bob into the Super User Billet in EF 1.1
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 1.1 SuperUser'), (SELECT uuid from people where emailAddress = 'hunter+bob@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+bob@dds.mil') WHERE name = 'EF 1.1 SuperUser';
 
--- Put Henry into the Super User Billet in EF 2
+-- Put Henry into the Super User Billet in EF 2.1
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 2.1 SuperUser'), (SELECT uuid from people where emailAddress = 'hunter+henry@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+henry@dds.mil') WHERE name = 'EF 2.1 SuperUser';
 
--- Rotate an advisor through a billet ending up with Jack in the EF 2 Advisor Billet
+-- Rotate an advisor through a billet ending up with Jack in the EF 2.1 Advisor B Billet
+DECLARE @positionTimestamp DATETIME;
+SET @positionTimestamp = CURRENT_TIMESTAMP;
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
-	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where emailAddress = 'hunter+erin@dds.mil'), CURRENT_TIMESTAMP);
+	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where emailAddress = 'hunter+erin@dds.mil'), @positionTimestamp);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+erin@dds.mil') WHERE name = 'EF 2.1 Advisor B';
+UPDATE peoplePositions SET endedAt = @positionTimestamp WHERE positionUuid = (SELECT uuid from positions where name = 'EF 2.1 Advisor B');
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
-	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where emailAddress = 'hunter+jack@dds.mil'), CURRENT_TIMESTAMP);
+	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where emailAddress = 'hunter+jack@dds.mil'), @positionTimestamp);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+jack@dds.mil') WHERE name = 'EF 2.1 Advisor B';
 
--- Put Elizabeth into the EF 1 Advisor Billet
+-- Put Elizabeth into the EF 1.1 Advisor A Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 1.1 Advisor A'), (SELECT uuid from people where emailAddress = 'hunter+liz@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+liz@dds.mil') WHERE name = 'EF 1.1 Advisor A';
 
--- Put Reina into the EF 2.2 Advisor Billet
+-- Put Reina into the EF 2.2 Advisor C Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor C'), (SELECT uuid from people where emailAddress = 'hunter+reina@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+reina@dds.mil') WHERE name = 'EF 2.2 Advisor C';
 
--- Put Erin into the EF 2.2 Advisor Billet
+-- Put Erin into the EF 2.2 Advisor D Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), (SELECT uuid from people where emailAddress = 'hunter+erin@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+erin@dds.mil') WHERE name = 'EF 2.2 Advisor D';
@@ -280,18 +283,18 @@ UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE sh
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName='ANET Administrators') where name = 'ANET Administrator';
 
 -- Create the EF 1.1 approval process
-INSERT INTO approvalSteps (uuid, advisorOrganizationUuid, name)
-	VALUES (lower(newid()), (SELECT uuid from organizations where shortName='EF 1.1'), 'EF 1.1 Approvers');
+INSERT INTO approvalSteps (uuid, advisorOrganizationUuid, name, type)
+	VALUES (lower(newid()), (SELECT uuid from organizations where shortName='EF 1.1'), 'EF 1.1 Approvers', 1);
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 SuperUser'));
 
 -- Create the EF 2.2 approval process
 DECLARE @approvalStepUuid varchar(36);
 SET @approvalStepUuid = lower(newid());
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid)
-	VALUES (@approvalStepUuid, 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where shortName='EF 2.2'));
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, nextStepUuid)
-	VALUES (lower(newid()), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where shortName='EF 2.2'), @approvalStepUuid);
+INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, type)
+	VALUES (@approvalStepUuid, 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where shortName='EF 2.2'), 1);
+INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, nextStepUuid, type)
+	VALUES (lower(newid()), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where shortName='EF 2.2'), @approvalStepUuid, 1);
 
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Super User'));
@@ -445,10 +448,10 @@ INSERT INTO locations (uuid, name, createdAt, updatedAt)
 	VALUES (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
-INSERT INTO organizations (uuid, shortName, longName, type, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoD', 'Ministry of Defense', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO organizations (uuid, shortName, longName, type, createdAt, updatedAt)
-	VALUES (lower(newid()), 'MoI', 'Ministry of Interior', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, shortName, longName, type, identificationCode, createdAt, updatedAt)
+	VALUES (lower(newid()), 'MoD', 'Ministry of Defense', 1, 'Z12345', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, shortName, longName, type, identificationCode, createdAt, updatedAt)
+	VALUES (lower(newid()), 'MoI', 'Ministry of Interior', 1, 'P12345', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO organizations (uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'MOD-F', 'Ministry of Defense Finances', 1,
@@ -471,7 +474,7 @@ INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organi
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
 	VALUES (N'731ee4f9-f21b-4166-b03d-d7ba5e7f735c', 'Chief of Police', 'MOI-Pol-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Put Steve into a Tashkil and associate with the EF 1 Advisor Billet
+-- Put Steve into a Tashkil and associate with the EF 1.1 Advisor A Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'Cost Adder - MoD'), (SELECT uuid from people where emailAddress = 'hunter+steve@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+steve@dds.mil') WHERE name = 'Cost Adder - MoD';
@@ -480,7 +483,7 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 	(SELECT uuid FROM positions WHERE name='Cost Adder - MoD'),
 	CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
--- But Roger in a Tashkil and associate with the EF 2 advisor billet
+-- But Roger in a Tashkil and associate with the EF 2.1 Advisor B Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'Chief of Police'), (SELECT uuid from people where emailAddress = 'hunter+roger@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+roger@dds.mil') WHERE name = 'Chief of Police';
@@ -489,7 +492,7 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 	(SELECT uuid from positions WHERE name ='Chief of Police'),
 	CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
--- But Christopf in a Tashkil
+-- But Christopf in a Tashkil and associate with the EF 2.2 Advisor D Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'Planning Captain'), (SELECT uuid from people where emailAddress = 'hunter+christopf@dds.mil'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+christopf@dds.mil') WHERE name = 'Planning Captain';
@@ -713,8 +716,8 @@ INSERT INTO reportTasks (taskUuid, reportUuid)
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;
 
 --Create the default Approval Step
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid)
-	VALUES (lower(newid()), 'Default Approvers', (select uuid from organizations where shortName='ANET Administrators'));
+INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, type)
+	VALUES (lower(newid()), 'Default Approvers', (select uuid from organizations where shortName='ANET Administrators'), 1);
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps where name = 'Default Approvers'), (SELECT uuid from positions where name = 'ANET Administrator'));
 
@@ -902,7 +905,8 @@ UPDATE positions SET
     updatedAt=cast(updatedAt as datetime2(3))
   ;
 UPDATE peoplePositions SET
-    createdAt=cast(createdAt as datetime2(3))
+    createdAt=cast(createdAt as datetime2(3)),
+    endedAt=cast(endedAt as datetime2(3))
   ;
 UPDATE organizations SET
     createdAt=cast(createdAt as datetime2(3)),

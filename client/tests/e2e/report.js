@@ -3,6 +3,8 @@ let _includes = require("lodash/includes")
 let moment = require("moment")
 let test = require("../util/test")
 
+var testReportURL = null
+
 test("Draft and submit a report", async t => {
   t.plan(14)
 
@@ -17,7 +19,7 @@ test("Draft and submit a report", async t => {
     shortWaitMs
   } = t.context
 
-  httpRequestSmtpServer("DELETE")
+  await httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await pageHelpers.writeInForm("#intent", "meeting goal")
@@ -141,6 +143,7 @@ test("Draft and submit a report", async t => {
     /reports\/[0-9a-f-]+/,
     "URL is updated to reports/show page"
   )
+  testReportURL = currentPathname
 
   let $submitReportButton = await $("#submitReportButton")
   await $submitReportButton.click()
@@ -180,7 +183,6 @@ test("Publish report chain", async t => {
     $,
     $$,
     assertElementText,
-    assertElementNotPresent,
     By,
     Key,
     until,
@@ -188,7 +190,7 @@ test("Publish report chain", async t => {
     longWaitMs
   } = t.context
 
-  httpRequestSmtpServer("DELETE")
+  await httpRequestSmtpServer("DELETE")
 
   // Try to have Erin approve her own report
   await t.context.get("/", "erin")
@@ -198,17 +200,18 @@ test("Publish report chain", async t => {
     $reportsPendingErin,
     /* eslint-disable no-unused-vars */
     $orgReportsErin,
-    $upcomingEngagementsErin
+    $plannedEngagementsErin
     /* eslint-enable no-unused-vars */
   ] = $homeTileErin
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
   await $reportsPendingErin.click()
   await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
-  await assertElementNotPresent(
+  let $reportCollection = await $(".report-collection em")
+  await assertElementText(
     t,
-    ".report-collection",
-    "Erin should not be allowed to approve her own reports",
-    shortWaitMs
+    $reportCollection,
+    "No reports found",
+    "Erin should not be allowed to approve her own reports"
   )
 
   // First Jacob needs to approve the report, then rebecca can approve the report
@@ -219,7 +222,7 @@ test("Publish report chain", async t => {
     $reportsPendingJacob,
     /* eslint-disable no-unused-vars */
     $orgReportsJacob,
-    $upcomingEngagementsJacob
+    $plannedEngagementsJacob
     /* eslint-enable no-unused-vars */
   ] = $homeTileJacob
   await t.context.driver.wait(until.elementIsVisible($reportsPendingJacob))
@@ -234,8 +237,11 @@ test("Publish report chain", async t => {
   )
   await $reportsPendingJacobSummaryTab.click()
 
-  let $firstReadReportButtonJacob = await $(".read-report-button")
-  await $firstReadReportButtonJacob.click()
+  let $readReportButtonJacob = await $(
+    ".read-report-button[href='" + testReportURL + "']"
+  )
+  await t.context.driver.wait(until.elementIsEnabled($readReportButtonJacob))
+  await $readReportButtonJacob.click()
   await pageHelpers.assertReportShowStatusText(
     t,
     "This report is PENDING approvals."
@@ -252,7 +258,7 @@ test("Publish report chain", async t => {
     $reportsPending,
     /* eslint-disable no-unused-vars */
     $orgReports,
-    $upcomingEngagements
+    $plannedEngagements
     /* eslint-enable no-unused-vars */
   ] = $homeTile
   await t.context.driver.wait(until.elementIsVisible($reportsPending))
@@ -267,9 +273,11 @@ test("Publish report chain", async t => {
   )
   await $reportsPendingRebeccaSummaryTab.click()
 
-  let $firstReadReportButton = await $(".read-report-button")
-  await t.context.driver.wait(until.elementIsEnabled($firstReadReportButton))
-  await $firstReadReportButton.click()
+  let $readReportButtonRebecca = await $(
+    ".read-report-button[href='" + testReportURL + "']"
+  )
+  await t.context.driver.wait(until.elementIsEnabled($readReportButtonRebecca))
+  await $readReportButtonRebecca.click()
 
   await pageHelpers.assertReportShowStatusText(
     t,
@@ -287,7 +295,7 @@ test("Publish report chain", async t => {
     $draftReportsArthur,
     $reportsPendingAll,
     $reportsPendingArthur,
-    $upcomingEngagementsArthur,
+    $plannedEngagementsArthur,
     $reportsSensitiveInfo,
     /* eslint-enable no-unused-vars */
     $approvedReports
@@ -296,16 +304,16 @@ test("Publish report chain", async t => {
   await $approvedReports.click()
   await t.context.driver.wait(until.stalenessOf($approvedReports))
 
-  let $reportsPendingArthurSummaryTab = await $(
+  let $reportsApprovedSummaryTab = await $(
     ".report-collection button[value='summary']"
   )
-  await $reportsPendingArthurSummaryTab.click()
+  await $reportsApprovedSummaryTab.click()
 
-  let $firstReadApprovedReportButton = await $(".read-report-button")
-  await t.context.driver.wait(
-    until.elementIsEnabled($firstReadApprovedReportButton)
+  let $readApprovedReportButton = await $(
+    ".read-report-button[href='" + testReportURL + "']"
   )
-  await $firstReadApprovedReportButton.click()
+  await t.context.driver.wait(until.elementIsEnabled($readApprovedReportButton))
+  await $readApprovedReportButton.click()
 
   await pageHelpers.assertReportShowStatusText(t, "This report is APPROVED.")
   let $arthurPublishButton = await $(".publish-button")
@@ -350,9 +358,9 @@ test("Publish report chain", async t => {
   let $rollupTableTab = await $(".report-collection button[value='table']")
   await $rollupTableTab.click()
 
-  let $reportCollection = await $(".report-collection table")
-  await t.context.driver.wait(until.elementIsVisible($reportCollection))
-  let $approvedIntent = await $reportCollection.findElement(
+  let $reportCollectionTable = await $(".report-collection table")
+  await t.context.driver.wait(until.elementIsVisible($reportCollectionTable))
+  let $approvedIntent = await $reportCollectionTable.findElement(
     By.linkText("meeting goal")
   )
   await assertElementText(
@@ -380,7 +388,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     By
   } = t.context
 
-  httpRequestSmtpServer("DELETE")
+  await httpRequestSmtpServer("DELETE")
 
   await pageHelpers.goHomeAndThenToReportsPage()
   await assertElementText(

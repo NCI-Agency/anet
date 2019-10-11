@@ -1,3 +1,4 @@
+import { ApolloProvider } from "@apollo/react-hooks"
 import API from "api"
 import "bootstrap/dist/css/bootstrap.css"
 import { jumpToTop } from "components/Page"
@@ -23,9 +24,11 @@ window.onerror = function(message, url, lineNumber, columnNumber) {
 ReactDOM.render(
   <Provider store={store}>
     <PersistGate persistor={persistor}>
-      <BrowserRouter onUpdate={jumpToTop}>
-        <Route path="/" component={App} />
-      </BrowserRouter>
+      <ApolloProvider client={API.client}>
+        <BrowserRouter onUpdate={jumpToTop}>
+          <Route path="/" component={App} />
+        </BrowserRouter>
+      </ApolloProvider>
     </PersistGate>
   </Provider>,
   document.getElementById("root")

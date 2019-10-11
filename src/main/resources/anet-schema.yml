@@ -431,6 +431,41 @@ properties:
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for a person inside a principal organization.
                   examples: [Netherlands]
+              assessment:
+                type: object
+                additionalProperties: false
+                required: [questions]
+                properties:
+                  questions:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [id,label,choice]
+                      properties:
+                        id:
+                          type: string
+                        test:
+                          type: string
+                        label:
+                          type: string
+                        choice:
+                          type: array
+                          uniqueItems: true
+                          minItems: 1
+                          items:
+                            type: object
+                            additionalProperties: false
+                            required: [value,label]
+                            properties:
+                              value:
+                                type: string
+                              label:
+                                type: string
+                              color:
+                                type: string
 
           position:
             type: object

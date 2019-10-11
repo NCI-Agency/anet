@@ -277,7 +277,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
                 orgResource, taskResource, adminResource, savedSearchResource, tagResource,
                 authorizationGroupResource, noteResource, subscriptionResource,
                 subscriptionUpdateResource),
-            metricRegistry, configuration.isDevelopmentMode()));
+            metricRegistry));
   }
 
   protected static JSONObject getDictionary(AnetConfiguration configuration)

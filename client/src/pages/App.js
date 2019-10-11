@@ -1,9 +1,11 @@
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
-import Page, {
+import Messages from "components/Messages"
+import {
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
@@ -11,8 +13,11 @@ import Routing from "pages/Routing"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { Redirect } from "react-router"
+import { useHistory, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import ReactTooltip from "react-tooltip"
 import "../components/reactToastify.css"
 
 const GQL_GET_APP_DATA = gql`
@@ -88,45 +93,58 @@ const GQL_GET_APP_DATA = gql`
   }
 `
 
-class App extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    pageProps: PropTypes.object,
-    searchProps: PropTypes.object
+const App = props => {
+  let appState = processData(window.ANET_DATA)
+  const history = useHistory()
+  const routerLocation = useLocation()
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      pageProps: props.pageProps,
-      currentUser: new Person(),
-      settings: {},
-      organizations: []
-    }
-
-    Object.assign(this.state, this.processData(window.ANET_DATA))
+  if (error || !data) {
+    return (
+      <Messages error={error || { message: "Could not load initial data" }} />
+    )
+  }
+  appState = processData(data)
+  // if this is a new user, redirect to onboarding
+  if (
+    appState.currentUser.isNewUser() &&
+    !routerLocation.pathname.startsWith("/onboarding")
+  ) {
+    return <Redirect to="/onboarding" />
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    // TODO: We should decide what to do here, e.g. when to call this.loadData()
-    // We do not want the behaviour of our super class Page, as that would
-    // mean this.loadData() is called with each change in props or location…
-  }
+  const { pageProps } = props
 
-  fetchData(props) {
-    return API.query(GQL_GET_APP_DATA).then(data => {
-      data.me._loaded = true
-      this.setState(this.processData(data), () => {
-        // if this is a new user, redirect to the create profile page
-        if (this.state.currentUser.isNewUser()) {
-          this.props.history.replace("/onboarding")
-        }
-      })
-    })
-  }
+  return (
+    <AppContext.Provider
+      value={{
+        appSettings: appState.settings,
+        currentUser: appState.currentUser,
+        loadAppData: refetch
+      }}
+    >
+      <ResponsiveLayout
+        pageProps={pageProps}
+        pageHistory={history}
+        location={routerLocation}
+        sidebarData={appState.organizations}
+      >
+        <ToastContainer />
+        <ReactTooltip id="tooltip-top" place="top" className="tooltip-top" />
+        <Routing />
+      </ResponsiveLayout>
+    </AppContext.Provider>
+  )
 
-  processData(data) {
+  function processData(data) {
     const currentUser = new Person(data.me)
     let organizations =
       (data.organizationTopLevelOrgs && data.organizationTopLevelOrgs.list) ||
@@ -134,46 +152,22 @@ class App extends Page {
     organizations = Organization.fromArray(organizations)
     organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
 
-    let settings = this.state.settings
+    let settings = {}
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
     )
 
     return { currentUser, settings, organizations }
   }
+}
 
-  render() {
-    const { currentUser, settings, organizations } = this.state
-    const { pageProps, history, location } = this.props
-    if (currentUser._loaded !== true) {
-      return null
-    }
-
-    return (
-      <AppContext.Provider
-        value={{
-          appSettings: settings,
-          currentUser: currentUser,
-          loadAppData: this.loadData
-        }}
-      >
-        <ResponsiveLayout
-          pageProps={pageProps}
-          pageHistory={history}
-          location={location}
-          sidebarData={organizations}
-        >
-          <ToastContainer />
-          <Routing />
-        </ResponsiveLayout>
-      </AppContext.Provider>
-    )
-  }
+App.propTypes = {
+  ...pagePropTypes,
+  pageProps: PropTypes.object
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  pageProps: state.pageProps,
-  searchProps: state.searchProps
+  pageProps: state.pageProps
 })
 
 export default connect(

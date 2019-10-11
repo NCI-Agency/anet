@@ -1,6 +1,9 @@
 #!/usr/bin/perl -p
 
 # Change variable setting to psql syntax
+s/^SET \@positionTimestamp = CURRENT_TIMESTAMP;/SELECT ('''' || CURRENT_TIMESTAMP || '''') AS positionTimestamp \\gset/;
+s/\@positionTimestamp/:positionTimestamp/;
+#
 s/^SET \@reportUuid = lower\(newid\(\)\);/SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \\gset/;
 s/\@reportUuid/:reportuuid/;
 #

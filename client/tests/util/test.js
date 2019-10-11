@@ -9,7 +9,8 @@ let _isRegExp = require("lodash/isRegExp")
 let chalk = require("chalk")
 
 let capabilities = {}
-let testEnv = (process.env.CI && "remote") || process.env.TEST_ENV || "local"
+let testEnv =
+  (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   // This gives us access to send Chrome commands.
   require("chromedriver")
@@ -76,6 +77,7 @@ test.beforeEach(t => {
     let urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
     debugLog("Getting URL", urlToGet)
     await t.context.driver.get(urlToGet)
+    await t.context.waitForLoadingFinished()
 
     // If we have a page-wide error message, we would like to cleanly fail the test on that.
     try {
@@ -104,6 +106,15 @@ test.beforeEach(t => {
         throw e
       }
     }
+  }
+
+  t.context.waitForLoadingFinished = async() => {
+    await t.context.assertElementNotPresent(
+      t,
+      "div.loader",
+      "Loading indicator should disappear",
+      mediumWaitMs
+    )
   }
 
   // For debugging purposes.
@@ -171,8 +182,9 @@ test.beforeEach(t => {
     try {
       await t.context.driver.wait(
         async() => {
+          const loopDelay = 250
           try {
-            return !(await t.context.$(cssSelector, waitTimeoutMs))
+            return !(await t.context.$(cssSelector, loopDelay))
           } catch (e) {
             // Hilariously, when Selenium can't find an element, sometimes it throws TimeoutError,
             // and sometimes it throws NoSuchElementError.
@@ -255,11 +267,22 @@ test.beforeEach(t => {
       )
       await $todayButton.click()
     },
+    async clickNextMonthDate() {
+      let $nextMonthButton = await t.context.driver.findElement(
+        By.xpath('//button/span[icon="chevron-right"]')
+      )
+      await $nextMonthButton.click()
+      let $nextMonthDate = await t.context.driver.findElement(
+        By.xpath('//div[class="DayPicker-Day--selected"]')
+      )
+      await $nextMonthDate.click()
+    },
     async chooseAdvancedSelectOption(inputSelector, text) {
       const popoverSelector = `${inputSelector}-popover`
       let $advancedSelectInput = await t.context.$(inputSelector)
       await $advancedSelectInput.sendKeys(text)
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
+      t.context.waitForLoadingFinished()
       let $advancedSelectSuggestion = await t.context.$(
         `${popoverSelector} tbody tr:first-child td input`
       )
@@ -281,6 +304,7 @@ test.beforeEach(t => {
       let $myOrgLink = await t.context.$("#my-organization")
       await t.context.driver.wait(t.context.until.elementIsVisible($myOrgLink))
       await $myOrgLink.click()
+      await t.context.waitForLoadingFinished()
     },
     async clickFormBottomSubmit() {
       let $formBottomSubmit = await t.context.$("#formBottomSubmit")
@@ -295,12 +319,13 @@ test.beforeEach(t => {
       )
       for (let $row of $supportedPositionsRows) {
         let [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
+        await t.context.driver.wait(until.elementIsVisible($billetCell))
         await $billetCell.getText()
+        await t.context.driver.wait(until.elementIsVisible($advisorCell))
         let advisorText = await $advisorCell.getText()
-
         if (advisorText === personName) {
-          await t.context.driver.wait(until.elementIsVisible($advisorCell))
           let $advisorLink = await $advisorCell.findElement(By.css("a"))
+          await t.context.driver.wait(until.elementIsVisible($advisorLink))
           await $advisorLink.click()
           await t.context.driver.wait(until.stalenessOf($advisorLink))
           return

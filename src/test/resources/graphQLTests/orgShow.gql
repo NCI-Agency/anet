@@ -24,7 +24,7 @@ organization(uuid:"${orgUuid}") {
     name
     code
     status
-    type,
+    type
     person {
       uuid
       name
@@ -43,6 +43,21 @@ organization(uuid:"${orgUuid}") {
         uuid
         name
         status
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+  }
+  planningApprovalSteps {
+    uuid
+    name
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
         rank
         role
         avatar(size: 32)

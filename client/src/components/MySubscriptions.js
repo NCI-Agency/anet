@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Page from "components/Page"
+import { getSubscriptionIcon, toggleSubscriptionCommon } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import moment from "moment"
@@ -140,7 +140,7 @@ class BaseMySubscriptions extends Component {
                   return (
                     <tr key={subscription.uuid}>
                       <td>
-                        {Page.getSubscriptionIcon(
+                        {getSubscriptionIcon(
                           true,
                           this.toggleSubscription.bind(
                             this,
@@ -199,7 +199,7 @@ class BaseMySubscriptions extends Component {
   }
 
   toggleSubscription = (subscribedObjectType, subscribedObjectUuid) => {
-    return Page.toggleSubscriptionCommon(
+    return toggleSubscriptionCommon(
       subscribedObjectType,
       subscribedObjectUuid,
       true,

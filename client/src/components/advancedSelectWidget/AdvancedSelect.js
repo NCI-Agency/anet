@@ -58,7 +58,7 @@ FilterList.propTypes = {
 const SelectFilterInputField = props => {
   const { items, handleOnChange } = props
   return (
-    <React.Fragment>
+    <>
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -69,7 +69,7 @@ const SelectFilterInputField = props => {
           ))}
         </select>
       </p>
-    </React.Fragment>
+    </>
   )
 }
 SelectFilterInputField.propTypes = {
@@ -195,7 +195,7 @@ export default class AdvancedSelect extends Component {
       : null
     const items = results && results[filterType] ? results[filterType].list : []
     return (
-      <React.Fragment>
+      <>
         <Field
           name={fieldName}
           label={fieldLabel}
@@ -280,12 +280,10 @@ export default class AdvancedSelect extends Component {
                         columns={[""].concat(overlayColumns)}
                         renderRow={overlayRenderRow}
                         isLoading={isLoading}
-                        loaderMessage={"No results found"}
+                        loaderMessage="No results found"
                         tableClassName={overlayTableClassName}
                       />
-                      <footer className="searchPagination">
-                        {this.paginationFor(filterType)}
-                      </footer>
+                      {this.paginationFor(filterType)}
                     </Col>
                   </Row>
                 )
@@ -298,14 +296,14 @@ export default class AdvancedSelect extends Component {
           {vertical ? (
             <Col sm={12}>{renderSelectedWithDelete}</Col>
           ) : (
-            <React.Fragment>
+            <>
               <Col sm={2} />
               <Col sm={7}>{renderSelectedWithDelete}</Col>
               <Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
-            </React.Fragment>
+            </>
           )}
         </Row>
-      </React.Fragment>
+      </>
     )
   }
 
@@ -454,21 +452,15 @@ export default class AdvancedSelect extends Component {
       results && results[filterType] ? results[filterType].pageNum : 0
     const totalCount =
       results && results[filterType] ? results[filterType].totalCount : 0
-    const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
-    if (numPages <= 1) {
-      return
-    }
     return (
       <UltimatePagination
+        Component="footer"
+        componentClassName="searchPagination"
         className="pull-right"
-        currentPage={pageNum + 1}
-        totalPages={numPages}
-        boundaryPagesRange={1}
-        siblingPagesRange={2}
-        hideEllipsis={false}
-        hidePreviousAndNextPageLinks={false}
-        hideFirstAndLastPageLinks
-        onChange={value => this.goToPage(value - 1)}
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={this.goToPage}
       />
     )
   }

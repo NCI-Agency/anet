@@ -1,7 +1,7 @@
 import LinkTo from "components/LinkTo"
 import { Person } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import "./AttendeesTable.css"
@@ -104,48 +104,38 @@ RadioButton.propTypes = {
   handleOnChange: PropTypes.func
 }
 
-export default class AttendeesTable extends Component {
-  static propTypes = {
-    attendees: PropTypes.array,
-    disabled: PropTypes.bool,
-    onChange: PropTypes.func,
-    showDelete: PropTypes.bool,
-    onDelete: PropTypes.func
-  }
+const AttendeesTable = props => {
+  const { attendees, disabled, onChange, showDelete, onDelete } = props
 
-  render() {
-    const { attendees } = this.props
-    return (
-      <div id="attendeesContainer">
-        <TableContainer className="advisorAttendeesTable">
-          <TableHeader showDelete={this.props.showDelete} />
-          <TableBody
-            attendees={attendees}
-            role={Person.ROLE.ADVISOR}
-            handleAttendeeRow={this.renderAttendeeRow}
-          />
-        </TableContainer>
-        <TableContainer className="principalAttendeesTable">
-          <TableHeader hide />
-          <TableBody
-            attendees={attendees}
-            role={Person.ROLE.PRINCIPAL}
-            handleAttendeeRow={this.renderAttendeeRow}
-            enableDivider
-          />
-        </TableContainer>
-      </div>
-    )
-  }
+  return (
+    <div id="attendeesContainer">
+      <TableContainer className="advisorAttendeesTable">
+        <TableHeader showDelete={showDelete} />
+        <TableBody
+          attendees={attendees}
+          role={Person.ROLE.ADVISOR}
+          handleAttendeeRow={renderAttendeeRow}
+        />
+      </TableContainer>
+      <TableContainer className="principalAttendeesTable">
+        <TableHeader hide />
+        <TableBody
+          attendees={attendees}
+          role={Person.ROLE.PRINCIPAL}
+          handleAttendeeRow={renderAttendeeRow}
+          enableDivider
+        />
+      </TableContainer>
+    </div>
+  )
 
-  renderAttendeeRow = person => {
-    const { disabled, showDelete, onDelete } = this.props
+  function renderAttendeeRow(person) {
     return (
       <tr key={person.uuid}>
         <td className="primary-attendee">
           <RadioButton
             person={person}
-            handleOnChange={this.setPrimaryAttendee}
+            handleOnChange={setPrimaryAttendee}
             disabled={disabled}
           />
         </td>
@@ -153,7 +143,9 @@ export default class AttendeesTable extends Component {
           <LinkTo person={person} showIcon={false} />
         </td>
         <td>
-          <LinkTo position={person.position} />
+          {person.position && person.position.uuid && (
+            <LinkTo position={person.position} />
+          )}
           {person.position && person.position.code
             ? `, ${person.position.code}`
             : ""}
@@ -168,7 +160,7 @@ export default class AttendeesTable extends Component {
           <LinkTo
             whenUnspecified=""
             organization={person.position && person.position.organization}
-          />{" "}
+          />
         </td>
         {showDelete && (
           <td>
@@ -182,14 +174,24 @@ export default class AttendeesTable extends Component {
     )
   }
 
-  setPrimaryAttendee = person => {
-    this.props.attendees.forEach(attendee => {
+  function setPrimaryAttendee(person) {
+    attendees.forEach(attendee => {
       if (Person.isEqual(attendee, person)) {
         attendee.primary = true
       } else if (attendee.role === person.role) {
         attendee.primary = false
       }
     })
-    this.props.onChange(this.props.attendees)
+    onChange(attendees)
   }
 }
+
+AttendeesTable.propTypes = {
+  attendees: PropTypes.array,
+  disabled: PropTypes.bool,
+  onChange: PropTypes.func,
+  showDelete: PropTypes.bool,
+  onDelete: PropTypes.func
+}
+
+export default AttendeesTable

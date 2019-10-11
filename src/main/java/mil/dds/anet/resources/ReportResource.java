@@ -109,19 +109,6 @@ public class ReportResource {
     return r;
   }
 
-  // Returns an instant representing the very end of today.
-  // Used to determine if a date is tomorrow or later.
-  private Instant tomorrow() {
-    return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59)
-        .withSecond(59).withNano(999999999).toInstant();
-  }
-
-  // Helper method to determine if a report should be pushed into FUTURE state.
-  private boolean shouldBeFuture(Report r) {
-    return r.getEngagementDate() != null && r.getEngagementDate().isAfter(tomorrow())
-        && r.getCancelledReason() == null;
-  }
-
   @GraphQLMutation(name = "createReport")
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
@@ -152,10 +139,6 @@ public class ReportResource {
       } catch (InterruptedException | ExecutionException e) {
         throw new WebApplicationException("failed to load Organization for PrimaryPrincipal", e);
       }
-    }
-
-    if (shouldBeFuture(r)) {
-      r.setState(ReportState.FUTURE);
     }
 
     r.setReportText(Utils.sanitizeHtml(r.getReportText()));
@@ -222,21 +205,18 @@ public class ReportResource {
     if (existing == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
+    // Certain properties may not be changed through an update request
     r.setState(existing.getState());
     r.setApprovalStepUuid(existing.getApprovalStepUuid());
     r.setAuthorUuid(existing.getAuthorUuid());
     assertCanUpdateReport(r, editor);
 
-    // If this report is in draft and in the future, set state to Future.
-    if (ReportState.DRAFT.equals(r.getState()) && shouldBeFuture(r)) {
-      r.setState(ReportState.FUTURE);
-    } else if (ReportState.FUTURE.equals(r.getState())
-        && (r.getEngagementDate() == null || r.getEngagementDate().isBefore(tomorrow()))) {
-      // This catches a user editing the report to change date back to the past.
+    boolean isAuthor = Objects.equals(r.getAuthorUuid(), editor.getUuid());
+    // State should not change when report is being edited by an approver
+    // State should change to draft when the report is being edited by its author
+    if (isAuthor) {
       r.setState(ReportState.DRAFT);
-    } else if (ReportState.FUTURE.equals(r.getState()) && r.getCancelledReason() != null) {
-      // Cancelled future engagements become draft.
-      r.setState(ReportState.DRAFT);
+      r.setApprovalStep(null);
     }
 
     // If there is a change to the primary advisor, change the advisor Org.
@@ -385,32 +365,35 @@ public class ReportResource {
   @SuppressWarnings("checkstyle:MissingSwitchDefault")
   private void assertCanUpdateReport(Report report, Person editor) {
     String permError = "You do not have permission to edit this report. ";
+    boolean isAuthor = Objects.equals(report.getAuthorUuid(), editor.getUuid());
     switch (report.getState()) {
       case DRAFT:
       case REJECTED:
-      case FUTURE:
+      case APPROVED:
+      case CANCELLED:
         // Must be the author
-        if (!Objects.equals(report.getAuthorUuid(), editor.getUuid())) {
+        if (!isAuthor) {
           throw new WebApplicationException(permError + "Must be the author of this report.",
               Status.FORBIDDEN);
         }
         break;
       case PENDING_APPROVAL:
-        // Only the approver
+        // Must be the author or the approver
         boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
             report.getApprovalStepUuid());
-        if (!canApprove) {
-          throw new WebApplicationException(permError + "Must be the current approver.",
+        if (!isAuthor && !canApprove) {
+          throw new WebApplicationException(
+              permError + "Must be the author of this report or the current approver.",
               Status.FORBIDDEN);
         }
         break;
-      case APPROVED:
       case PUBLISHED:
-      case CANCELLED:
         AnetAuditLogger.log(
             "attempt to edit published report {} by editor {} (uuid: {}) was forbidden",
             report.getUuid(), editor.getName(), editor.getUuid());
         throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
+      default:
+        throw new WebApplicationException("Unknown report state", Status.FORBIDDEN);
     }
   }
 
@@ -456,9 +439,6 @@ public class ReportResource {
 
     if (r.getEngagementDate() == null) {
       throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
-    } else if (r.getEngagementDate().isAfter(tomorrow()) && r.getCancelledReason() == null) {
-      throw new WebApplicationException(
-          "You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
     }
 
     final String orgUuid;
@@ -476,8 +456,12 @@ public class ReportResource {
     }
     List<ApprovalStep> steps = null;
     try {
-      steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
-      throwExceptionNoApprovalSteps(steps);
+      if (r.isFutureEngagement()) {
+        steps = engine.getPlanningApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+      } else {
+        steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+        throwExceptionNoApprovalSteps(steps);
+      }
     } catch (InterruptedException | ExecutionException e) {
       throw new WebApplicationException("failed to load Organization for Author", e);
     }
@@ -489,16 +473,29 @@ public class ReportResource {
     action.setType(ActionType.SUBMIT);
     engine.getReportActionDao().insert(action);
 
-    // Push the report into the first step of this workflow
-    r.setApprovalStep(steps.get(0));
-    r.setState(ReportState.PENDING_APPROVAL);
+    if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
+      // Future engagements for orgs without planning approval chain will be approved directly
+      // Write the approval action
+      ReportAction approval = new ReportAction();
+      approval.setReportUuid(r.getUuid());
+      approval.setPersonUuid(user.getUuid());
+      approval.setType(ActionType.APPROVE);
+      engine.getReportActionDao().insert(approval);
+      r.setState(ReportState.APPROVED);
+    } else {
+      // Push the report into the first step of this workflow
+      r.setApprovalStep(steps.get(0));
+      r.setState(ReportState.PENDING_APPROVAL);
+    }
     final int numRows = dao.update(r, user);
-    sendApprovalNeededEmail(r);
-    logger.info("Putting report {} into step {} because of org {} on author {}", r.getUuid(),
-        steps.get(0).getUuid(), orgUuid, r.getAuthorUuid());
-
     if (numRows != 1) {
       throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
+    }
+
+    if (!Utils.isEmptyOrNull(steps)) {
+      sendApprovalNeededEmail(r);
+      logger.info("Putting report {} into step {} because of org {} on author {}", r.getUuid(),
+          steps.get(0).getUuid(), orgUuid, r.getAuthorUuid());
     }
 
     AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(),
@@ -513,13 +510,17 @@ public class ReportResource {
    */
   private void throwExceptionNoApprovalSteps(List<ApprovalStep> steps) {
     if (Utils.isEmptyOrNull(steps)) {
-      final String supportEmailAddr = (String) this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
       final String messageBody =
           "Advisor organization is missing a report approval chain. In order to have an approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
-      final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody
-          : String.format("%s at %s", messageBody, supportEmailAddr);
-      throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
+      throwException(messageBody);
     }
+  }
+
+  private void throwException(String messageBody) {
+    final String supportEmailAddr = (String) this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
+    final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody
+        : String.format("%s at %s", messageBody, supportEmailAddr);
+    throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
   }
 
   private void sendApprovalNeededEmail(Report r) {
@@ -727,15 +728,15 @@ public class ReportResource {
     logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // Only admin may publish a report
-    if (!AuthUtils.isAdmin(user)) {
+    // Only admin may publish a report, and only for non future engagements
+    if (!AuthUtils.isAdmin(user) || r.isFutureEngagement()) {
       logger.info("User {} cannot publish report UUID {}", user.getUuid(), r.getUuid());
       throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
     }
 
     final int numRows = dao.publish(r, user);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
+      throw new WebApplicationException("Couldn't process report publication", Status.NOT_FOUND);
     }
 
     AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());
