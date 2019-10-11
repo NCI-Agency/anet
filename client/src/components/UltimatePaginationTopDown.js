@@ -10,7 +10,7 @@ const UltimatePaginationTopDown = props => {
     pageSize,
     totalCount,
     goToPage,
-    contentElement
+    children
   } = props
 
   return (
@@ -24,7 +24,7 @@ const UltimatePaginationTopDown = props => {
         totalCount={totalCount}
         goToPage={goToPage}
       />
-      {contentElement}
+      {children}
       <UltimatePagination
         Component="footer"
         componentClassName={componentClassName}
@@ -45,7 +45,7 @@ UltimatePaginationTopDown.propTypes = {
   pageSize: PropTypes.number,
   totalCount: PropTypes.number,
   goToPage: PropTypes.func,
-  contentElement: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
+  children: PropTypes.node
 }
 
 export default UltimatePaginationTopDown

@@ -62,28 +62,6 @@ const BaseOrganizationTasks = props => {
     )
   }
 
-  const tableElement = (
-    <Table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {Task.map(tasks, (task, idx) => (
-          <tr key={task.uuid} id={`task_${idx}`}>
-            <td>
-              <LinkTo task={task}>{task.shortName}</LinkTo>
-            </td>
-            <td>{task.longName}</td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  )
-
   return (
     <Fieldset
       id="tasks"
@@ -106,8 +84,27 @@ const BaseOrganizationTasks = props => {
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPageNum}
-        contentElement={tableElement}
-      />
+      >
+        <Table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {Task.map(tasks, (task, idx) => (
+              <tr key={task.uuid} id={`task_${idx}`}>
+                <td>
+                  <LinkTo task={task}>{task.shortName}</LinkTo>
+                </td>
+                <td>{task.longName}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </Fieldset>
   )
 }

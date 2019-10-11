@@ -165,10 +165,11 @@ const ReportSummary = props => {
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-        contentElement={reports.map(report => (
+      >
+        {reports.map(report => (
           <ReportSummaryRow report={report} key={report.uuid} />
         ))}
-      />
+      </UltimatePaginationTopDown>
     </div>
   )
 

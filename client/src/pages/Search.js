@@ -226,33 +226,30 @@ const Organizations = props => {
         pageSize={organizationQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-        contentElement={
-          <>
-            <Table responsive hover striped id="organizations-search-results">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Code</th>
-                  <th>Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Organization.map(organizations, org => (
-                  <tr key={org.uuid}>
-                    <td>
-                      <LinkTo organization={org} />
-                    </td>
-                    <td>{org.longName}</td>
-                    <td>{org.identificationCode}</td>
-                    <td>{org.humanNameOfType()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </>
-        }
-      />
+      >
+        <Table responsive hover striped id="organizations-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Code</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Organization.map(organizations, org => (
+              <tr key={org.uuid}>
+                <td>
+                  <LinkTo organization={org} />
+                </td>
+                <td>{org.longName}</td>
+                <td>{org.identificationCode}</td>
+                <td>{org.humanNameOfType()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -325,49 +322,44 @@ const People = props => {
         pageSize={personQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-        contentElement={
-          <>
-            <Table responsive hover striped id="people-search-results">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Position</th>
-                  <th>Location</th>
-                  <th>Organization</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Person.map(people, person => (
-                  <tr key={person.uuid}>
-                    <td>
-                      <LinkTo person={person} />
-                    </td>
-                    <td>
-                      <LinkTo position={person.position} />
-                      {person.position && person.position.code
-                        ? `, ${person.position.code}`
-                        : ""}
-                    </td>
-                    <td>
-                      <LinkTo
-                        whenUnspecified=""
-                        anetLocation={
-                          person.position && person.position.location
-                        }
-                      />
-                    </td>
-                    <td>
-                      {person.position && person.position.organization && (
-                        <LinkTo organization={person.position.organization} />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </>
-        }
-      />
+      >
+        <Table responsive hover striped id="people-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Location</th>
+              <th>Organization</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Person.map(people, person => (
+              <tr key={person.uuid}>
+                <td>
+                  <LinkTo person={person} />
+                </td>
+                <td>
+                  <LinkTo position={person.position} />
+                  {person.position && person.position.code
+                    ? `, ${person.position.code}`
+                    : ""}
+                </td>
+                <td>
+                  <LinkTo
+                    whenUnspecified=""
+                    anetLocation={person.position && person.position.location}
+                  />
+                </td>
+                <td>
+                  {person.position && person.position.organization && (
+                    <LinkTo organization={person.position.organization} />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -440,12 +432,9 @@ const Positions = props => {
         pageSize={positionQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-        contentElement={
-          <>
-            <PositionTable positions={positions} />
-          </>
-        }
-      />
+      >
+        <PositionTable positions={positions} />
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -518,29 +507,26 @@ const Tasks = props => {
         pageSize={taskQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-        contentElement={
-          <>
-            <Table responsive hover striped id="tasks-search-results">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Task.map(tasks, task => (
-                  <tr key={task.uuid}>
-                    <td>
-                      <LinkTo task={task}>
-                        {task.shortName} {task.longName}
-                      </LinkTo>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </>
-        }
-      />
+      >
+        <Table responsive hover striped id="tasks-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Task.map(tasks, task => (
+              <tr key={task.uuid}>
+                <td>
+                  <LinkTo task={task}>
+                    {task.shortName} {task.longName}
+                  </LinkTo>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -613,27 +599,24 @@ const Locations = props => {
         pageSize={locationQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-        contentElement={
-          <>
-            <Table responsive hover striped id="locations-search-results">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                {locations.map(loc => (
-                  <tr key={loc.uuid}>
-                    <td>
-                      <LinkTo anetLocation={loc} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </>
-        }
-      />
+      >
+        <Table responsive hover striped id="locations-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {locations.map(loc => (
+              <tr key={loc.uuid}>
+                <td>
+                  <LinkTo anetLocation={loc} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 

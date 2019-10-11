@@ -154,44 +154,6 @@ const ReportTable = props => {
 
   const { pageSize, totalCount } = data.reportList
 
-  const tableElement = (
-    <Table striped>
-      <thead>
-        <tr>
-          {showAuthors && <th>Author</th>}
-          <th>Organization</th>
-          <th>Summary</th>
-          {showStatus && <th>Status</th>}
-          <th>Engagement Date</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {reports.map(report => (
-          <tr key={report.uuid}>
-            {showAuthors && (
-              <td>
-                <LinkTo person={report.author} />
-              </td>
-            )}
-            <td>
-              <LinkTo organization={report.advisorOrg} />
-            </td>
-            <td>
-              <LinkTo report={report} className="read-report-button" />
-            </td>
-            {showStatus && <td>{report.state}</td>}
-            <td>
-              {moment(report.engagementDate).format(
-                Report.getEngagementDateFormat()
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  )
-
   return (
     <div>
       <UltimatePaginationTopDown
@@ -200,8 +162,43 @@ const ReportTable = props => {
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-        contentElement={tableElement}
-      />
+      >
+        <Table striped>
+          <thead>
+            <tr>
+              {showAuthors && <th>Author</th>}
+              <th>Organization</th>
+              <th>Summary</th>
+              {showStatus && <th>Status</th>}
+              <th>Engagement Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {reports.map(report => (
+              <tr key={report.uuid}>
+                {showAuthors && (
+                  <td>
+                    <LinkTo person={report.author} />
+                  </td>
+                )}
+                <td>
+                  <LinkTo organization={report.advisorOrg} />
+                </td>
+                <td>
+                  <LinkTo report={report} className="read-report-button" />
+                </td>
+                {showStatus && <td>{report.state}</td>}
+                <td>
+                  {moment(report.engagementDate).format(
+                    Report.getEngagementDateFormat()
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
