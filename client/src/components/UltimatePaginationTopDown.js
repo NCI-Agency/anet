@@ -16,7 +16,7 @@ const UltimatePaginationTopDown = props => {
   return (
     <>
       <UltimatePagination
-        Component={"header"}
+        Component="header"
         componentClassName={componentClassName}
         className={className}
         pageNum={pageNum}
@@ -26,7 +26,7 @@ const UltimatePaginationTopDown = props => {
       />
       {contentElement}
       <UltimatePagination
-        Component={"footer"}
+        Component="footer"
         componentClassName={componentClassName}
         className={className}
         pageNum={pageNum}

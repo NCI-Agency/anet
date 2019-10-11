@@ -174,8 +174,12 @@ const ReportTable = props => {
                 <LinkTo person={report.author} />
               </td>
             )}
-            <td>{<LinkTo organization={report.advisorOrg} />}</td>
-            <td>{<LinkTo report={report} className="read-report-button" />}</td>
+            <td>
+              <LinkTo organization={report.advisorOrg} />
+            </td>
+            <td>
+              <LinkTo report={report} className="read-report-button" />
+            </td>
             {showStatus && <td>{report.state}</td>}
             <td>
               {moment(report.engagementDate).format(

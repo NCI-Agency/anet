@@ -163,7 +163,7 @@ const BasePersonForm = props => {
             ? "Yes, I would like to inactivate my predecessor's account and set up a new one for myself"
             : "Yes, I would like to inactivate this account"
         const action = (
-          <React.Fragment>
+          <>
             <Button
               key="submit"
               bsStyle="primary"
@@ -173,11 +173,11 @@ const BasePersonForm = props => {
             >
               {saveText}
             </Button>
-          </React.Fragment>
+          </>
         )
 
         return (
-          <React.Fragment>
+          <>
             <NavigationWarning isBlocking={dirty} />
             <Form className="form-horizontal" method="post">
               <Messages error={error} />
@@ -223,7 +223,7 @@ const BasePersonForm = props => {
                   </Col>
 
                   {edit && (
-                    <React.Fragment>
+                    <>
                       <TriggerableConfirm
                         onConfirm={async() => {
                           // Have to wait until field value is updated before we can submit the form
@@ -252,11 +252,9 @@ const BasePersonForm = props => {
                         title={modalTitle}
                         showModal={showWrongPersonModal}
                         onCancel={optionValue =>
-                          hideWrongPersonModal(optionValue)
-                        }
+                          hideWrongPersonModal(optionValue)}
                         onSuccess={optionValue =>
-                          hideWrongPersonModal(optionValue)
-                        }
+                          hideWrongPersonModal(optionValue)}
                       >
                         {(isSelf && (
                           <div>
@@ -299,7 +297,7 @@ const BasePersonForm = props => {
                           </div>
                         )}
                       </OptionListModal>
-                    </React.Fragment>
+                    </>
                   )}
                 </FormGroup>
 
@@ -492,7 +490,7 @@ const BasePersonForm = props => {
                 </div>
               </div>
             </Form>
-          </React.Fragment>
+          </>
         )
       }}
     </Formik>

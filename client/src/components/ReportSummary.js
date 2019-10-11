@@ -204,7 +204,8 @@ const ReportSummaryRow = props => {
                   Settings.dateFormats.forms.displayShort.withTime
                 )}
               </span>
-            )}
+            )
+          }
         </p>
       )}
 
@@ -230,7 +231,7 @@ const ReportSummaryRow = props => {
       )}
 
       {report.isPending() && (
-        <React.Fragment>
+        <>
           <p className="report-pending">
             <strong>Pending Approval</strong>
           </p>
@@ -239,7 +240,7 @@ const ReportSummaryRow = props => {
               <ReportCompactWorkflow workflow={report.workflow} />
             </Col>
           </Row>
-        </React.Fragment>
+        </>
       )}
       <Row>
         <Col md={12}>

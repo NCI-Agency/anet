@@ -52,7 +52,6 @@ public class GraphQlResource {
 
   private final AnetObjectEngine engine;
   private final List<Object> resources;
-  private final boolean developmentMode;
   private final MetricRegistry metricRegistry;
 
   private GraphQLSchema graphqlSchema;
@@ -79,11 +78,10 @@ public class GraphQlResource {
       };
 
   public GraphQlResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
-      MetricRegistry metricRegistry, boolean developmentMode) {
+      MetricRegistry metricRegistry) {
     this.engine = engine;
     this.resources = resources;
     this.metricRegistry = metricRegistry;
-    this.developmentMode = developmentMode;
 
     resourceTransformers.add(GraphQlResource.jsonTransformer);
     resourceTransformers.add(new ResourceTransformer("xml", MediaType.APPLICATION_XML) {
@@ -176,10 +174,6 @@ public class GraphQlResource {
 
   protected Response graphql(@Auth Person user, String operationName, String query,
       Map<String, Object> variables, String output) {
-    if (developmentMode) {
-      buildGraph();
-    }
-
     final ExecutionResult executionResult = dispatchRequest(user, operationName, query, variables);
     final Map<String, Object> result = executionResult.toSpecification();
     if (executionResult.getErrors().size() > 0) {
@@ -207,8 +201,8 @@ public class GraphQlResource {
 
   private ExecutionResult dispatchRequest(Person user, String operationName, String query,
       Map<String, Object> variables) {
-    final DataLoaderRegistry dataLoaderRegistry =
-        BatchingUtils.registerDataLoaders(engine, true, true);
+    final BatchingUtils batchingUtils = new BatchingUtils(engine, true, true);
+    final DataLoaderRegistry dataLoaderRegistry = batchingUtils.getDataLoaderRegistry();
     final Map<String, Object> context = new HashMap<>();
     context.put("user", user);
     context.put("dataLoaderRegistry", dataLoaderRegistry);
@@ -248,7 +242,8 @@ public class GraphQlResource {
     } catch (InterruptedException | ExecutionException e) {
       throw new WebApplicationException("failed to complete graphql request", e);
     } finally {
-      BatchingUtils.updateStats(metricRegistry, dataLoaderRegistry);
+      batchingUtils.updateStats(metricRegistry, dataLoaderRegistry);
+      batchingUtils.shutdown();
     }
   }
 
