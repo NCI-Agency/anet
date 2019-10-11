@@ -2,16 +2,19 @@ import API from "api"
 import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { getSubscriptionIcon, toggleSubscriptionCommon } from "components/Page"
+import {
+  getSubscriptionIcon,
+  mapDispatchToProps,
+  toggleSubscription,
+  useBoilerplate
+} from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
 import moment from "moment"
 import pluralize from "pluralize"
-import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { hideLoading, showLoading } from "react-redux-loading-bar"
 
 const GQL_GET_MY_SUBSCRIPTIONS = gql`
   query($subscriptionsQuery: SubscriptionSearchQueryInput) {
@@ -54,171 +57,118 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
   }
 `
 
-class BaseMySubscriptions extends Component {
-  static propTypes = {
-    showLoading: PropTypes.func.isRequired,
-    hideLoading: PropTypes.func.isRequired
+const BaseMySubscriptions = props => {
+  const [pageNum, setPageNum] = useState(0)
+  const subscriptionsQuery = {
+    pageNum: pageNum,
+    pageSize: 10
   }
-
-  state = {
-    mySubscriptions: []
-  }
-
-  render() {
-    let subscriptions
-    let numPages = 0
-    if (this.state.mySubscriptions) {
-      var { pageSize, pageNum, totalCount } = this.state.mySubscriptions
-      numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
-      subscriptions = this.state.mySubscriptions.list
-      pageNum++
-    }
-    let subscriptionsExist = _get(subscriptions, "length", 0) > 0
-    return (
-      <Fieldset title="My Subscriptions">
-        {subscriptionsExist ? (
-          <div>
-            {numPages > 1 && (
-              <header className="searchPagination">
-                <UltimatePagination
-                  className="pull-right"
-                  currentPage={pageNum}
-                  totalPages={numPages}
-                  boundaryPagesRange={1}
-                  siblingPagesRange={2}
-                  hideEllipsis={false}
-                  hidePreviousAndNextPageLinks={false}
-                  hideFirstAndLastPageLinks
-                  onChange={value => this.goToPage(value - 1)}
-                />
-              </header>
-            )}
-
-            <Table
-              striped
-              condensed
-              hover
-              responsive
-              className="subscriptions_table"
-            >
-              <thead>
-                <tr>
-                  <th />
-                  <th>Subscribed</th>
-                  <th>Subscription</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subscriptions.map(subscription => {
-                  const createdAt = moment(subscription.createdAt).fromNow()
-                  let objectType = pluralize.singular(
-                    subscription.subscribedObjectType
-                  )
-                  if (objectType === "location") {
-                    objectType = "anetLocation"
-                  }
-                  let linkTo
-                  if (subscription.subscribedObject) {
-                    const linkToProps = {
-                      [objectType]: {
-                        uuid: subscription.subscribedObjectUuid,
-                        ...subscription.subscribedObject
-                      }
-                    }
-                    linkTo = <LinkTo {...linkToProps} />
-                  } else {
-                    const linkToProps = {
-                      componentClass: "span",
-                      [objectType]: {
-                        uuid: subscription.subscribedObjectUuid
-                      }
-                    }
-                    linkTo = (
-                      <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
-                    )
-                  }
-                  return (
-                    <tr key={subscription.uuid}>
-                      <td>
-                        {getSubscriptionIcon(
-                          true,
-                          this.toggleSubscription.bind(
-                            this,
-                            subscription.subscribedObjectType,
-                            subscription.subscribedObjectUuid
-                          )
-                        )}
-                      </td>
-                      <td>{createdAt}</td>
-                      <td>{linkTo}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
-          </div>
-        ) : (
-          <em>No subscriptions found</em>
-        )}
-      </Fieldset>
-    )
-  }
-
-  fetchData() {
-    this.props.showLoading()
-    Promise.all([this.fetchSubscriptions()]).then(() =>
-      this.props.hideLoading()
-    )
-  }
-
-  fetchSubscriptions = () => {
-    const subscriptionsQuery = {
-      pageNum: this.state.pageNum,
-      pageSize: 10
-    }
-    return API.query(GQL_GET_MY_SUBSCRIPTIONS, {
+  const { loading, error, data, refetch } = API.useApiQuery(
+    GQL_GET_MY_SUBSCRIPTIONS,
+    {
       subscriptionsQuery
-    }).then(data =>
-      this.setState({
-        mySubscriptions: data.mySubscriptions
-      })
-    )
+    }
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  goToPage = newPage => {
-    this.setState({ pageNum: newPage }, () => this.fetchSubscriptions())
-  }
+  const paginatedSubscriptions = data.mySubscriptions
+  const subscriptions = paginatedSubscriptions
+    ? paginatedSubscriptions.list
+    : []
+  const { pageSize, totalCount } = paginatedSubscriptions
+  const subscriptionsExist = _get(subscriptions, "length", 0) > 0
 
-  componentDidMount() {
-    this.setState(
-      {
-        pageNum: 0
-      },
-      () => this.fetchData()
-    )
-  }
+  return (
+    <Fieldset title="My Subscriptions">
+      {subscriptionsExist ? (
+        <div>
+          <UltimatePagination
+            Component="header"
+            componentClassName="searchPagination"
+            className="pull-right"
+            pageNum={pageNum}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            goToPage={setPageNum}
+          />
 
-  toggleSubscription = (subscribedObjectType, subscribedObjectUuid) => {
-    return toggleSubscriptionCommon(
-      subscribedObjectType,
-      subscribedObjectUuid,
-      true,
-      null
-    ).then(data => {
-      this.setState(
-        {
-          pageNum: 0
-        },
-        () => this.fetchData()
-      )
-    })
-  }
+          <Table
+            striped
+            condensed
+            hover
+            responsive
+            className="subscriptions_table"
+          >
+            <thead>
+              <tr>
+                <th />
+                <th>Subscribed</th>
+                <th>Subscription</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subscriptions.map(subscription => {
+                const createdAt = moment(subscription.createdAt).fromNow()
+                let objectType = pluralize.singular(
+                  subscription.subscribedObjectType
+                )
+                if (objectType === "location") {
+                  objectType = "anetLocation"
+                }
+                let linkTo
+                if (subscription.subscribedObject) {
+                  const linkToProps = {
+                    [objectType]: {
+                      uuid: subscription.subscribedObjectUuid,
+                      ...subscription.subscribedObject
+                    }
+                  }
+                  linkTo = <LinkTo {...linkToProps} />
+                } else {
+                  const linkToProps = {
+                    componentClass: "span",
+                    [objectType]: {
+                      uuid: subscription.subscribedObjectUuid
+                    }
+                  }
+                  linkTo = (
+                    <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
+                  )
+                }
+                return (
+                  <tr key={subscription.uuid}>
+                    <td>
+                      {getSubscriptionIcon(true, () =>
+                        toggleSubscription(
+                          subscription.subscribedObjectType,
+                          subscription.subscribedObjectUuid,
+                          true,
+                          null,
+                          refetch
+                        )
+                      )}
+                    </td>
+                    <td>{createdAt}</td>
+                    <td>{linkTo}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </Table>
+        </div>
+      ) : (
+        <em>No subscriptions found</em>
+      )}
+    </Fieldset>
+  )
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  showLoading: () => dispatch(showLoading()),
-  hideLoading: () => dispatch(hideLoading())
-})
 
 export default connect(
   null,

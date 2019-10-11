@@ -12,7 +12,7 @@ import {
   getSubscriptionIcon,
   mapDispatchToProps,
   propTypes as pagePropTypes,
-  toggleSubscriptionCommon,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -131,9 +131,12 @@ const BaseOrganizationShow = props => {
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const { uuid } = useParams()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
-    uuid
-  })
+  const { loading, error, data, refetch } = API.useApiQuery(
+    GQL_GET_ORGANIZATION,
+    {
+      uuid
+    }
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -258,9 +261,14 @@ const BaseOrganizationShow = props => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      organization.isSubscribed,
-                      toggleSubscription
+                    {getSubscriptionIcon(organization.isSubscribed, () =>
+                      toggleSubscription(
+                        "organizations",
+                        organization.uuid,
+                        organization.isSubscribed,
+                        organization.updatedAt,
+                        refetch
+                      )
                     )}{" "}
                     Organization {organization.shortName}
                   </>
@@ -411,17 +419,6 @@ const BaseOrganizationShow = props => {
 
   function togglePendingApprovalFilter() {
     setFilterPendingApproval(!filterPendingApproval)
-  }
-
-  function toggleSubscription() {
-    return toggleSubscriptionCommon(
-      "organizations",
-      organization.uuid,
-      organization.isSubscribed,
-      organization.updatedAt
-    ).then(data => {
-      organization.isSubscribed = !organization.isSubscribed
-    })
   }
 }
 

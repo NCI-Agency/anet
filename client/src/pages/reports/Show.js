@@ -18,7 +18,7 @@ import {
   jumpToTop,
   mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes,
-  toggleSubscriptionCommon,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -479,9 +479,14 @@ const BaseReportShow = props => {
                 title={
                   <>
                     {(report.isPublished() || report.isCancelled()) &&
-                      getSubscriptionIcon(
-                        report.isSubscribed,
-                        toggleSubscription
+                      getSubscriptionIcon(report.isSubscribed, () =>
+                        toggleSubscription(
+                          "reports",
+                          report.uuid,
+                          report.isSubscribed,
+                          report.updatedAt,
+                          refetch
+                        )
                       )}{" "}
                     Report #{report.uuid}
                   </>
@@ -1260,17 +1265,6 @@ const BaseReportShow = props => {
         </ul>
       </Alert>
     )
-  }
-
-  function toggleSubscription() {
-    return toggleSubscriptionCommon(
-      "reports",
-      report.uuid,
-      report.isSubscribed,
-      report.updatedAt
-    ).then(data => {
-      report.isSubscribed = !report.isSubscribed
-    })
   }
 }
 

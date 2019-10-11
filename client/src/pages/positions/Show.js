@@ -15,7 +15,7 @@ import {
   jumpToTop,
   mapDispatchToProps,
   propTypes as pagePropTypes,
-  toggleSubscriptionCommon,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -193,9 +193,14 @@ const BasePositionShow = props => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      position.isSubscribed,
-                      toggleSubscription
+                    {getSubscriptionIcon(position.isSubscribed, () =>
+                      toggleSubscription(
+                        "positions",
+                        position.uuid,
+                        position.isSubscribed,
+                        position.updatedAt,
+                        refetch
+                      )
                     )}{" "}
                     Position {position.name}
                   </>
@@ -440,17 +445,6 @@ const BasePositionShow = props => {
         setStateError(error)
         jumpToTop()
       })
-  }
-
-  function toggleSubscription() {
-    return toggleSubscriptionCommon(
-      "positions",
-      position.uuid,
-      position.isSubscribed,
-      position.updatedAt
-    ).then(data => {
-      position.isSubscribed = !position.isSubscribed
-    })
   }
 }
 

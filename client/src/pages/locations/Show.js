@@ -11,7 +11,7 @@ import {
   getSubscriptionIcon,
   mapDispatchToProps,
   propTypes as pagePropTypes,
-  toggleSubscriptionCommon,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -59,7 +59,7 @@ Coordinate.propTypes = {
 const BaseLocationShow = props => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
   const { done, result } = useBoilerplate({
@@ -115,9 +115,14 @@ const BaseLocationShow = props => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      location.isSubscribed,
-                      toggleSubscription
+                    {getSubscriptionIcon(location.isSubscribed, () =>
+                      toggleSubscription(
+                        "locations",
+                        location.uuid,
+                        location.isSubscribed,
+                        location.updatedAt,
+                        refetch
+                      )
                     )}{" "}
                     Location {location.name}
                   </>
@@ -169,17 +174,6 @@ const BaseLocationShow = props => {
       }}
     </Formik>
   )
-
-  function toggleSubscription() {
-    return toggleSubscriptionCommon(
-      "locations",
-      location.uuid,
-      location.isSubscribed,
-      location.updatedAt
-    ).then(data => {
-      location.isSubscribed = !location.isSubscribed
-    })
-  }
 }
 
 BaseLocationShow.propTypes = {

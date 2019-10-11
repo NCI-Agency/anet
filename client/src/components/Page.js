@@ -183,11 +183,12 @@ export const getSubscriptionIcon = (isSubscribed, onClick) => {
   )
 }
 
-export const toggleSubscriptionCommon = (
+export const toggleSubscription = (
   subscribedObjectType,
   subscribedObjectUuid,
   isSubscribed,
-  updatedAt
+  updatedAt,
+  refetch
 ) => {
   const variables = isSubscribed
     ? { subscribedObjectUuid }
@@ -201,7 +202,7 @@ export const toggleSubscriptionCommon = (
   return API.mutation(
     isSubscribed ? GQL_DELETE_OBJECT_SUBSCRIPTION : GQL_CREATE_SUBSCRIPTION,
     variables
-  )
+  ).then(data => refetch())
 }
 
 export const usePrevious = value => {

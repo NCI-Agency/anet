@@ -10,7 +10,7 @@ import {
   getSubscriptionIcon,
   mapDispatchToProps,
   propTypes as pagePropTypes,
-  toggleSubscriptionCommon,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -79,7 +79,7 @@ const GQL_GET_TASK = gql`
 const BaseTaskShow = props => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
   const { done, result } = useBoilerplate({
@@ -143,7 +143,15 @@ const BaseTaskShow = props => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(task.isSubscribed, toggleSubscription)}{" "}
+                    {getSubscriptionIcon(task.isSubscribed, () =>
+                      toggleSubscription(
+                        "tasks",
+                        task.uuid,
+                        task.isSubscribed,
+                        task.updatedAt,
+                        refetch
+                      )
+                    )}{" "}
                     {Settings.fields.task.shortLabel} {task.shortName}
                   </>
                 }
@@ -278,17 +286,6 @@ const BaseTaskShow = props => {
       }}
     </Formik>
   )
-
-  function toggleSubscription() {
-    return toggleSubscriptionCommon(
-      "tasks",
-      task.uuid,
-      task.isSubscribed,
-      task.updatedAt
-    ).then(data => {
-      task.isSubscribed = !task.isSubscribed
-    })
-  }
 }
 
 BaseTaskShow.propTypes = {

@@ -15,7 +15,7 @@ import {
   getSubscriptionIcon,
   mapDispatchToProps,
   propTypes as pagePropTypes,
-  toggleSubscriptionCommon,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -197,9 +197,14 @@ const BasePersonShow = props => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      person.isSubscribed,
-                      toggleSubscription
+                    {getSubscriptionIcon(person.isSubscribed, () =>
+                      toggleSubscription(
+                        "people",
+                        person.uuid,
+                        person.isSubscribed,
+                        person.updatedAt,
+                        refetch
+                      )
                     )}{" "}
                     {person.rank} {person.name}
                   </>
@@ -509,17 +514,6 @@ const BasePersonShow = props => {
     if (success) {
       refetch()
     }
-  }
-
-  function toggleSubscription() {
-    return toggleSubscriptionCommon(
-      "people",
-      person.uuid,
-      person.isSubscribed,
-      person.updatedAt
-    ).then(data => {
-      person.isSubscribed = !person.isSubscribed
-    })
   }
 }
 
