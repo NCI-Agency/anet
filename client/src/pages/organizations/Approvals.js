@@ -33,7 +33,7 @@ const OrganizationApprovals = props => {
                     id={`step_${idx}_approver_${approverIdx}`}
                   >
                     {position.person && position.person.uuid ? (
-                      <td>{<LinkTo person={position.person} />}</td>
+                      <td><LinkTo person={position.person} /></td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}
@@ -72,7 +72,7 @@ const OrganizationApprovals = props => {
                     id={`step_${idx}_approver_${approverIdx}`}
                   >
                     {position.person && position.person.uuid ? (
-                      <td>{<LinkTo person={position.person} />}</td>
+                      <td><LinkTo person={position.person} /></td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}

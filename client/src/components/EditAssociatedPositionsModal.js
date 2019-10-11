@@ -145,8 +145,7 @@ class BaseEditAssociatedPositionsModal extends Component {
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           onChange={value =>
-                            setFieldValue("associatedPositions", value)
-                          }
+                            setFieldValue("associatedPositions", value)}
                           objectType={Position}
                           fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
                           addon={POSITIONS_ICON}
@@ -161,7 +160,7 @@ class BaseEditAssociatedPositionsModal extends Component {
                 <Button className="pull-left" onClick={this.close}>
                   Cancel
                 </Button>
-                <Button onClick={submitForm} bsStyle={"primary"}>
+                <Button onClick={submitForm} bsStyle="primary">
                   Save
                 </Button>
               </Modal.Footer>
