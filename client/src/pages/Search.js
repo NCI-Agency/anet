@@ -220,7 +220,6 @@ const Organizations = props => {
   return (
     <div>
       <UltimatePaginationTopDown
-        Component="header"
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
@@ -320,7 +319,6 @@ const People = props => {
   return (
     <div>
       <UltimatePaginationTopDown
-        Component="header"
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
@@ -436,7 +434,6 @@ const Positions = props => {
   return (
     <div>
       <UltimatePaginationTopDown
-        Component="header"
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
@@ -515,7 +512,6 @@ const Tasks = props => {
   return (
     <div>
       <UltimatePaginationTopDown
-        Component="header"
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
@@ -611,7 +607,6 @@ const Locations = props => {
   return (
     <div>
       <UltimatePaginationTopDown
-        Component="header"
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}

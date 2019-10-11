@@ -45,7 +45,7 @@ UltimatePaginationTopDown.propTypes = {
   pageSize: PropTypes.number,
   totalCount: PropTypes.number,
   goToPage: PropTypes.func,
-  contentElement: PropTypes.object
+  contentElement: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
 }
 
 export default UltimatePaginationTopDown

@@ -145,7 +145,6 @@ const BasePositionTable = props => {
   return (
     <div>
       <UltimatePaginationTopDown
-        Component="header"
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
