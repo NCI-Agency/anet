@@ -134,7 +134,7 @@ class LinkSource extends Component {
             <Button
               style={{ margin: "1rem 0", width: "200px" }}
               className="form-control"
-              bsStyle={"primary"}
+              bsStyle="primary"
               onClick={this.onConfirm}
             >
               Save

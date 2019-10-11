@@ -2,7 +2,7 @@ import { setPageProps, setPagination, setSearchProps } from "actions"
 import NotFound from "components/NotFound"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
 
@@ -143,4 +143,12 @@ export const getSearchQuery = searchQuery => {
     })
   }
   return query
+}
+
+export const usePrevious = value => {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value
+  })
+  return ref.current
 }

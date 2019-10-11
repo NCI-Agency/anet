@@ -31,7 +31,7 @@ export default class CheckboxSearchFilter extends Component {
   render() {
     const msg = "Authorized for me"
     return !this.props.asFormField ? (
-      <React.Fragment>{msg}</React.Fragment>
+      <>{msg}</>
     ) : (
       <FormGroup>
         <Checkbox readOnly checked={this.state.value.value}>
