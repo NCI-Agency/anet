@@ -62,7 +62,7 @@ class ApprovalStepModal extends Component {
     const step = action.step
     const actionTypeCss = ACTION_TYPE_DETAILS[action.type].cssClass
     return step ? (
-      <React.Fragment>
+      <>
         <Button className={actionTypeCss + " btn-sm"} onClick={this.openModal}>
           <span>{step.name}</span>
         </Button>
@@ -84,7 +84,7 @@ class ApprovalStepModal extends Component {
             <ApprovalStepModalStatus action={action} />
           </Modal.Footer>
         </Modal>
-      </React.Fragment>
+      </>
     ) : null
   }
 }
@@ -162,10 +162,10 @@ CompactReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-export const ReportFullWorkflow = ({ report }) => {
+export const ReportFullWorkflow = ({ workflow }) => {
   return (
     <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
-      {report.workflow.map(action => {
+      {workflow.map(action => {
         const key = action.step
           ? `${action.createdAt}-${action.step.uuid}`
           : action.createdAt
@@ -175,13 +175,13 @@ export const ReportFullWorkflow = ({ report }) => {
   )
 }
 ReportFullWorkflow.propTypes = {
-  report: PropTypes.object.isRequired
+  workflow: PropTypes.array.isRequired
 }
 
-export const ReportCompactWorkflow = ({ report }) => {
+export const ReportCompactWorkflow = ({ workflow }) => {
   return (
     <Fieldset className="workflow-fieldset compact" title="Workflow">
-      {report.workflow.map(action => {
+      {workflow.map(action => {
         const key = action.step
           ? `${action.createdAt}-${action.step.uuid}`
           : action.createdAt
@@ -191,5 +191,5 @@ export const ReportCompactWorkflow = ({ report }) => {
   )
 }
 ReportCompactWorkflow.propTypes = {
-  report: PropTypes.object.isRequired
+  workflow: PropTypes.array.isRequired
 }

@@ -139,7 +139,7 @@ export default class AssignPersonModal extends Component {
           </Button>
           <Button
             onClick={this.save}
-            bsStyle={"primary"}
+            bsStyle="primary"
             className="save-button"
           >
             Save
@@ -199,11 +199,11 @@ export default class AssignPersonModal extends Component {
       this.state.person.position.uuid !== this.props.position.uuid
     ) {
       const errorMessage = (
-        <React.Fragment>
+        <>
           This person is currently in another position. By selecting this
           person, <b>{this.state.person.position.name}</b> will be left
           unfilled.
-        </React.Fragment>
+        </>
       )
       error = { message: errorMessage }
     }

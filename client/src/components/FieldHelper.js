@@ -1,3 +1,4 @@
+import _get from "lodash/get"
 import React from "react"
 import {
   Col,
@@ -25,15 +26,15 @@ const getHumanValue = (field, humanValue) => {
 
 const getFormGroupValidationState = (field, form) => {
   const { touched, errors } = form
-  const fieldTouched = touched[field.name]
-  const fieldError = errors[field.name]
+  const fieldTouched = _get(touched, field.name)
+  const fieldError = _get(errors, field.name)
   return (fieldTouched && (fieldError ? "error" : null)) || null
 }
 
 const getHelpBlock = (field, form) => {
   const { touched, errors } = form
-  const fieldTouched = touched[field.name]
-  const fieldError = errors[field.name]
+  const fieldTouched = _get(touched, field.name)
+  const fieldError = _get(errors, field.name)
   return fieldTouched && fieldError && <HelpBlock>{fieldError}</HelpBlock>
 }
 
@@ -96,14 +97,14 @@ const renderField = (
   return (
     <FormGroup controlId={id} validationState={validationState}>
       {vertical ? (
-        <React.Fragment>
+        <>
           {label !== null && <ControlLabel>{label}</ControlLabel>}
           {widget}
           {getHelpBlock(field, form)}
           {children}
-        </React.Fragment>
+        </>
       ) : (
-        <React.Fragment>
+        <>
           {label !== null && (
             <Col sm={2} componentClass={ControlLabel}>
               {label}
@@ -116,7 +117,7 @@ const renderField = (
               {children}
             </div>
           </Col>
-        </React.Fragment>
+        </>
       )}
       {extraColElem && <Col sm={3} {...extraColElem.props} />}
     </FormGroup>
@@ -190,7 +191,7 @@ export const renderReadonlyField = ({
     ...otherProps
   } = props
   const widgetElem = (
-    <FormControl.Static componentClass={"div"} {...field} {...otherProps}>
+    <FormControl.Static componentClass="div" {...field} {...otherProps}>
       {getHumanValue(field, humanValue)}
     </FormControl.Static>
   )

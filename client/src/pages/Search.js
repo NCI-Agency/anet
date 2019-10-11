@@ -1,4 +1,9 @@
-import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  SEARCH_OBJECT_LABELS,
+  SEARCH_OBJECT_TYPES
+} from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
@@ -6,23 +11,27 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
-import Page, {
+import {
+  getSearchQuery,
   jumpToTop,
   mapDispatchToProps,
-  propTypes as pagePropTypes
+  propTypes as pagePropTypes,
+  useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import ReportCollection from "components/ReportCollection"
+import { SearchDescription } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import UltimatePagination from "components/UltimatePagination"
-import FileSaver from "file-saver"
+import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
-import GQL from "graphqlapi"
+import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {
   Alert,
   Badge,
@@ -34,7 +43,7 @@ import {
   Table
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import DOWNLOAD_ICON from "resources/download.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -51,539 +60,874 @@ const GQL_CREATE_SAVED_SEARCH = gql`
     }
   }
 `
+const GQL_GET_ORGANIZATION_LIST = gql`
+  query($organizationQuery: OrganizationSearchQueryInput) {
+    organizationList(query: $organizationQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+    }
+  }
+`
+const GQL_GET_PERSON_LIST = gql`
+  query($personQuery: PersonSearchQueryInput) {
+    personList(query: $personQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        rank
+        role
+        emailAddress
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          type
+          code
+          location {
+            uuid
+            name
+          }
+          organization {
+            uuid
+            shortName
+          }
+        }
+      }
+    }
+  }
+`
+const GQL_GET_POSITION_LIST = gql`
+  query($positionQuery: PositionSearchQueryInput) {
+    positionList(query: $positionQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        code
+        type
+        status
+        location {
+          uuid
+          name
+        }
+        organization {
+          uuid
+          shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+    }
+  }
+`
+const GQL_GET_TASK_LIST = gql`
+  query($taskQuery: TaskSearchQueryInput) {
+    taskList(query: $taskQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        shortName
+        longName
+      }
+    }
+  }
+`
+const GQL_GET_LOCATION_LIST = gql`
+  query($locationQuery: LocationSearchQueryInput) {
+    locationList(query: $locationQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        lat
+        lng
+      }
+    }
+  }
+`
 
-const SEARCH_CONFIG = {
-  [SEARCH_OBJECT_TYPES.REPORTS]: {
-    listName: `${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
-    listAllName: `all${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
-    sortBy: "ENGAGEMENT_DATE",
-    sortOrder: "DESC",
-    variableType: "ReportSearchQueryInput",
-    fields: ReportCollection.GQL_REPORT_FIELDS
-  },
-  [SEARCH_OBJECT_TYPES.PEOPLE]: {
-    listName: `${SEARCH_OBJECT_TYPES.PEOPLE}: personList`,
-    sortBy: "NAME",
-    sortOrder: "ASC",
-    variableType: "PersonSearchQueryInput",
-    fields:
-      "uuid, name, rank, role, emailAddress, avatar(size: 32), position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
-  },
-  [SEARCH_OBJECT_TYPES.POSITIONS]: {
-    listName: `${SEARCH_OBJECT_TYPES.POSITIONS}: positionList`,
-    sortBy: "NAME",
-    sortOrder: "ASC",
-    variableType: "PositionSearchQueryInput",
-    fields:
-      "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
-  },
-  [SEARCH_OBJECT_TYPES.TASKS]: {
-    listName: `${SEARCH_OBJECT_TYPES.TASKS}: taskList`,
-    sortBy: "NAME",
-    sortOrder: "ASC",
-    variableType: "TaskSearchQueryInput",
-    fields: "uuid, shortName, longName"
-  },
-  [SEARCH_OBJECT_TYPES.LOCATIONS]: {
-    listName: `${SEARCH_OBJECT_TYPES.LOCATIONS}: locationList`,
-    sortBy: "NAME",
-    sortOrder: "ASC",
-    variableType: "LocationSearchQueryInput",
-    fields: "uuid, name, lat, lng"
-  },
-  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: {
-    listName: `${SEARCH_OBJECT_TYPES.ORGANIZATIONS}: organizationList`,
-    sortBy: "NAME",
-    sortOrder: "ASC",
-    variableType: "OrganizationSearchQueryInput",
-    fields: "uuid, shortName, longName, identificationCode, type"
+const DEFAULT_PAGESIZE = 10
+
+const Organizations = props => {
+  const {
+    queryParams,
+    setTotalCount,
+    paginationKey,
+    pagination,
+    setPagination
+  } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const organizationQuery = Object.assign({}, queryParams, {
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION_LIST, {
+    organizationQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
+  }
+
+  const organizations = data ? data.organizationList.list : []
+  const totalCount =
+    data && data.organizationList && data.organizationList.totalCount
+  setTotalCount(totalCount)
+  if (_get(organizations, "length", 0) === 0) {
+    return <em>No organizations found</em>
+  }
+
+  return (
+    <div>
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={organizationQuery.pageSize}
+        totalCount={totalCount}
+        goToPage={setPage}
+      />
+      <br />
+      <Table responsive hover striped id="organizations-search-results">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Code</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Organization.map(organizations, org => (
+            <tr key={org.uuid}>
+              <td>
+                <LinkTo organization={org} />
+              </td>
+              <td>{org.longName}</td>
+              <td>{org.identificationCode}</td>
+              <td>{org.humanNameOfType()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
   }
 }
 
-class Search extends Page {
-  static propTypes = {
-    ...pagePropTypes,
-    setPagination: PropTypes.func.isRequired,
-    pagination: PropTypes.object
-  }
+Organizations.propTypes = {
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
 
-  componentPrefix = "SEARCH_"
-  successToastId = "success-message"
-  errorToastId = "error-message"
-  notify = success => {
-    if (!success) {
-      return
+const People = props => {
+  const {
+    queryParams,
+    setTotalCount,
+    paginationKey,
+    pagination,
+    setPagination
+  } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
     }
-    toast.success(success, {
-      toastId: this.successToastId
-    })
-  }
-  noResults = {
-    [SEARCH_OBJECT_TYPES.REPORTS]: null,
-    people: null,
-    organizations: null,
-    positions: null,
-    locations: null,
-    tasks: null
-  }
-
-  state = {
-    error: null,
-    didSearch: false,
-    query: this.props.searchQuery.text || null,
-    results: this.noResults,
-    showSaveSearch: false
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const personQuery = Object.assign({}, queryParams, {
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON_LIST, {
+    personQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  getPageNum = (type, pageNum = 0) => {
-    const { pagination } = this.props
-    const key = this.paginationKey(type)
-    const paginationInfo = pagination[key]
-    let goToPageNum = pageNum
-    if (paginationInfo !== undefined) {
-      goToPageNum = paginationInfo.pageNum
-    }
-    return goToPageNum
+  const people = data ? data.personList.list : []
+  const totalCount = data && data.personList && data.personList.totalCount
+  setTotalCount(totalCount)
+  if (_get(people, "length", 0) === 0) {
+    return <em>No people found</em>
   }
 
-  paginationKey = (type, prefix = this.componentPrefix) => {
-    return `${prefix}${type}`
-  }
-
-  getSearchPart(type, query, pageNum = 0, pageSize = 10, includeAll = false) {
-    const searchType = SEARCH_OBJECT_TYPES[type]
-    let subQuery = Object.assign({}, query)
-    subQuery.pageNum = pageNum
-    subQuery.pageSize = pageSize
-    let config = SEARCH_CONFIG[searchType]
-    if (config.sortBy) {
-      subQuery.sortBy = config.sortBy
-    }
-    if (config.sortOrder) {
-      subQuery.sortOrder = config.sortOrder
-    }
-    const queryVarName = `${searchType}Query${includeAll ? "All" : ""}`
-    const queryMethod = includeAll ? config.listAllName : config.listName
-    let gqlPart = new GQL.Part(/* GraphQL */ `
-      ${queryMethod}(query: $${queryVarName}) {
-        pageNum
-        pageSize
-        totalCount
-        list {
-          ${config.fields}
-        }
-      }
-    `).addVariable(queryVarName, config.variableType, subQuery)
-    return gqlPart
-  }
-
-  _dataFetcher = (props, callback, pageNum, pageSize) => {
-    const { searchQuery } = props
-    const queryTypes = searchQuery.objectType
-      ? { [SEARCH_OBJECT_TYPES[searchQuery.objectType]]: {} }
-      : SEARCH_CONFIG
-    const query = this.getSearchQuery(props)
-    if (!_isEmpty(query)) {
-      const parts = Object.keys(queryTypes).map(type => {
-        const goToPageNum = this.getPageNum(type, pageNum)
-        return this.getSearchPart(type, query, goToPageNum, pageSize)
-      })
-      if (Object.keys(queryTypes).includes(SEARCH_OBJECT_TYPES.REPORTS)) {
-        // add query for all reports
-        parts.push(
-          this.getSearchPart(SEARCH_OBJECT_TYPES.REPORTS, query, 0, 0, true)
-        )
-      }
-      return callback(parts)
-    } else {
-      this.setState({
-        didSearch: false,
-        results: this.noResults,
-        error: { message: "You did not enter any search criteria." }
-      })
-    }
-  }
-
-  _fetchDataCallback = parts => {
-    return GQL.run(parts)
-      .then(data => {
-        this.setState({
-          error: null,
-          results: data,
-          didSearch: true
-        })
-      })
-      .catch(error => this.setState({ error: error, didSearch: true }))
-  }
-
-  fetchData(props) {
-    return this._dataFetcher(props, this._fetchDataCallback)
-  }
-
-  render() {
-    const { results, error } = this.state
-    const numReports = results[SEARCH_OBJECT_TYPES.REPORTS]
-      ? results[SEARCH_OBJECT_TYPES.REPORTS].totalCount
-      : 0
-    const numPeople = results[SEARCH_OBJECT_TYPES.PEOPLE]
-      ? results[SEARCH_OBJECT_TYPES.PEOPLE].totalCount
-      : 0
-    const numPositions = results[SEARCH_OBJECT_TYPES.POSITIONS]
-      ? results[SEARCH_OBJECT_TYPES.POSITIONS].totalCount
-      : 0
-    const numTasks = results[SEARCH_OBJECT_TYPES.TASKS]
-      ? results[SEARCH_OBJECT_TYPES.TASKS].totalCount
-      : 0
-    const numLocations = results[SEARCH_OBJECT_TYPES.LOCATIONS]
-      ? results[SEARCH_OBJECT_TYPES.LOCATIONS].totalCount
-      : 0
-    const numOrganizations = results[SEARCH_OBJECT_TYPES.ORGANIZATIONS]
-      ? results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].totalCount
-      : 0
-
-    const numResults =
-      numReports +
-      numPeople +
-      numPositions +
-      numLocations +
-      numOrganizations +
-      numTasks
-    const noResults = numResults === 0
-
-    const taskShortLabel = Settings.fields.task.shortLabel
-    return (
-      <div>
-        <SubNav subnavElemId="search-nav">
-          <div>
-            <Button onClick={this.props.history.goBack} bsStyle="link">
-              &lt; Return to previous page
-            </Button>
-          </div>
-          <Nav stacked bsStyle="pills">
-            <AnchorNavItem to="organizations" disabled={!numOrganizations}>
-              <img src={ORGANIZATIONS_ICON} alt="" /> Organizations
-              {numOrganizations > 0 && (
-                <Badge pullRight>{numOrganizations}</Badge>
-              )}
-            </AnchorNavItem>
-
-            <AnchorNavItem to="people" disabled={!numPeople}>
-              <img src={PEOPLE_ICON} alt="" />{" "}
-              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}
-              {numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
-            </AnchorNavItem>
-
-            <AnchorNavItem to="positions" disabled={!numPositions}>
-              <img src={POSITIONS_ICON} alt="" />{" "}
-              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}
-              {numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
-            </AnchorNavItem>
-
-            <AnchorNavItem to="tasks" disabled={!numTasks}>
-              <img src={TASKS_ICON} alt="" />{" "}
-              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}
-              {numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
-            </AnchorNavItem>
-
-            <AnchorNavItem to="locations" disabled={!numLocations}>
-              <img src={LOCATIONS_ICON} alt="" />{" "}
-              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}
-              {numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
-            </AnchorNavItem>
-
-            <AnchorNavItem to="reports" disabled={!numReports}>
-              <img src={REPORTS_ICON} alt="" />{" "}
-              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}
-              {numReports > 0 && <Badge pullRight>{numReports}</Badge>}
-            </AnchorNavItem>
-          </Nav>
-        </SubNav>
-        <div className="pull-right">
-          {!noResults && (
-            <Dropdown id="dropdown-custom-1">
-              <Dropdown.Toggle>
-                Export{" "}
-                <img
-                  src={DOWNLOAD_ICON}
-                  height={16}
-                  alt="Export search results"
+  return (
+    <div>
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={personQuery.pageSize}
+        totalCount={totalCount}
+        goToPage={setPage}
+      />
+      <br />
+      <Table responsive hover striped id="people-search-results">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Location</th>
+            <th>Organization</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Person.map(people, person => (
+            <tr key={person.uuid}>
+              <td>
+                <LinkTo person={person} />
+              </td>
+              <td>
+                <LinkTo position={person.position} />
+                {person.position && person.position.code
+                  ? `, ${person.position.code}`
+                  : ""}
+              </td>
+              <td>
+                <LinkTo
+                  whenUnspecified=""
+                  anetLocation={person.position && person.position.location}
                 />
-              </Dropdown.Toggle>
-              <Dropdown.Menu className="super-colors">
-                <MenuItem onClick={this.createExportResultsFunctionFor("xlsx")}>
-                  Excel (xlsx)
-                </MenuItem>
-                <MenuItem onClick={this.createExportResultsFunctionFor("kml")}>
-                  Google Earth (kml)
-                </MenuItem>
-                <MenuItem onClick={this.createExportResultsFunctionFor("nvg")}>
-                  NATO Vector Graphics (nvg)
-                </MenuItem>
-              </Dropdown.Menu>
-            </Dropdown>
-          )}
-          {this.state.didSearch && (
-            <Button
-              onClick={this.openSaveModal}
-              id="saveSearchButton"
-              style={{ marginRight: 12 }}
-            >
-              Save search
-            </Button>
-          )}
-        </div>
-        <Messages error={error} /> {/* success is shown through toast */}
-        {this.state.query && (
-          <h2 className="only-show-for-print">
-            Search query: '{this.state.query}'
-          </h2>
-        )}
-        {this.state.didSearch && noResults && (
-          <Alert bsStyle="warning">
-            <b>No search results found!</b>
-          </Alert>
-        )}
-        {numOrganizations > 0 && (
-          <Fieldset id="organizations" title="Organizations">
-            {this.renderOrgs()}
-          </Fieldset>
-        )}
-        {numPeople > 0 && (
-          <Fieldset id="people" title="People">
-            {this.renderPeople()}
-          </Fieldset>
-        )}
-        {numPositions > 0 && (
-          <Fieldset id="positions" title="Positions">
-            {this.renderPositions()}
-          </Fieldset>
-        )}
-        {numTasks > 0 && (
-          <Fieldset id="tasks" title={pluralize(taskShortLabel)}>
-            {this.renderTasks()}
-          </Fieldset>
-        )}
-        {numLocations > 0 && (
-          <Fieldset id="locations" title="Locations">
-            {this.renderLocations()}
-          </Fieldset>
-        )}
-        {numReports > 0 && (
-          <Fieldset id="reports" title="Reports">
-            {this.renderReports()}
-          </Fieldset>
-        )}
-        {this.renderSaveModal()}
-      </div>
-    )
-  }
+              </td>
+              <td>
+                {person.position && person.position.organization && (
+                  <LinkTo organization={person.position.organization} />
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  )
 
-  paginationFor = type => {
-    const { pageSize, totalCount } = this.state.results[type]
-    const goToPage = this.getPageNum(type)
-    const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
-    if (numPages === 1) {
-      return
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
+}
+
+People.propTypes = {
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
+
+const Positions = props => {
+  const {
+    queryParams,
+    setTotalCount,
+    paginationKey,
+    pagination,
+    setPagination
+  } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
     }
-    return (
-      <header className="searchPagination">
-        <UltimatePagination
-          className="pull-right"
-          currentPage={goToPage + 1}
-          totalPages={numPages}
-          boundaryPagesRange={1}
-          siblingPagesRange={2}
-          hideEllipsis={false}
-          hidePreviousAndNextPageLinks={false}
-          hideFirstAndLastPageLinks
-          onChange={value => this.goToPage(type, value - 1)}
-        />
-      </header>
-    )
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const positionQuery = Object.assign({}, queryParams, {
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
+    positionQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  goToPage = (type, pageNum) => {
-    const { setPagination } = this.props
-    const query = this.getSearchQuery()
-    const part = this.getSearchPart(type, query, pageNum)
-    GQL.run([part])
-      .then(data => {
-        let results = this.state.results // TODO: @nickjs this feels wrong, help!
-        results[type] = data[type]
-        this.setState({ results }, () =>
-          setPagination(this.paginationKey(type), pageNum)
-        )
-      })
-      .catch(error => this.setState({ error: error }))
+  const positions = data ? data.positionList.list : []
+  const totalCount = data && data.positionList && data.positionList.totalCount
+  setTotalCount(totalCount)
+  if (_get(positions, "length", 0) === 0) {
+    return <em>No positions found</em>
   }
 
-  renderReports() {
-    const { results } = this.state
-    const reports = results[SEARCH_OBJECT_TYPES.REPORTS]
-    const allReports = results["all" + SEARCH_OBJECT_TYPES.REPORTS].list
-    const goToPageNum = this.getPageNum(SEARCH_OBJECT_TYPES.REPORTS)
-    const paginatedReports = Object.assign(reports, { pageNum: goToPageNum })
+  return (
+    <div>
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={positionQuery.pageSize}
+        totalCount={totalCount}
+        goToPage={setPage}
+      />
+      <br />
+      <PositionTable positions={positions} />
+    </div>
+  )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
+}
+
+Positions.propTypes = {
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
+
+const Tasks = props => {
+  const {
+    queryParams,
+    setTotalCount,
+    paginationKey,
+    pagination,
+    setPagination
+  } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const taskQuery = Object.assign({}, queryParams, {
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
+    taskQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
+  }
+
+  const tasks = data ? data.taskList.list : []
+  const totalCount = data && data.taskList && data.taskList.totalCount
+  setTotalCount(totalCount)
+  if (_get(tasks, "length", 0) === 0) {
+    return <em>No tasks found</em>
+  }
+
+  return (
+    <div>
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={taskQuery.pageSize}
+        totalCount={totalCount}
+        goToPage={setPage}
+      />
+      <br />
+      <Table responsive hover striped id="tasks-search-results">
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Task.map(tasks, task => (
+            <tr key={task.uuid}>
+              <td>
+                <LinkTo task={task}>
+                  {task.shortName} {task.longName}
+                </LinkTo>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
+}
+
+Tasks.propTypes = {
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
+
+const Locations = props => {
+  const {
+    queryParams,
+    setTotalCount,
+    paginationKey,
+    pagination,
+    setPagination
+  } = props
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const locationQuery = Object.assign({}, queryParams, {
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION_LIST, {
+    locationQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
+  }
+
+  const locations = data ? data.locationList.list : []
+  const totalCount = data && data.locationList && data.locationList.totalCount
+  setTotalCount(totalCount)
+  if (_get(locations, "length", 0) === 0) {
+    return <em>No locations found</em>
+  }
+
+  return (
+    <div>
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={locationQuery.pageSize}
+        totalCount={totalCount}
+        goToPage={setPage}
+      />
+      <br />
+      <Table responsive hover striped id="locations-search-results">
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {locations.map(loc => (
+            <tr key={loc.uuid}>
+              <td>
+                <LinkTo anetLocation={loc} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
+}
+
+Locations.propTypes = {
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
+
+const sum = (...args) => {
+  return args.reduce((prev, curr) => (curr === null ? prev : prev + curr))
+}
+
+const Search = props => {
+  const { searchQuery, pagination, setPagination } = props
+  const history = useHistory()
+  const [error, setError] = useState(null)
+  const [showSaveSearch, setShowSaveSearch] = useState(false)
+  const [numOrganizations, setNumOrganizations] = useState(null)
+  const [numPeople, setNumPeople] = useState(null)
+  const [numPositions, setNumPositions] = useState(null)
+  const [numTasks, setNumTasks] = useState(null)
+  const [numLocations, setNumLocations] = useState(null)
+  const [numReports, setNumReports] = useState(null)
+  const numResults = sum(
+    numOrganizations,
+    numPeople,
+    numPositions,
+    numTasks,
+    numLocations,
+    numReports
+  )
+  const taskShortLabel = Settings.fields.task.shortLabel
+  const searchQueryParams = getSearchQuery(searchQuery)
+  const queryTypes = _isEmpty(searchQueryParams)
+    ? []
+    : searchQuery.objectType
+      ? [searchQuery.objectType]
+      : Object.keys(SEARCH_OBJECT_TYPES)
+  const hasOrganizationsResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) &&
+    numOrganizations > 0
+  const hasPeopleResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && numPeople > 0
+  const hasPositionsResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && numPositions > 0
+  const hasTasksResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && numTasks > 0
+  const hasLocationsResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && numLocations > 0
+  const hasReportsResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && numReports > 0
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    ...props
+  })
+
+  return (
+    <div>
+      <SubNav subnavElemId="search-nav">
+        <div>
+          <Button onClick={history.goBack} bsStyle="link">
+            &lt; Return to previous page
+          </Button>
+        </div>
+        <Nav stacked bsStyle="pills">
+          <AnchorNavItem to="organizations" disabled={!hasOrganizationsResults}>
+            <img src={ORGANIZATIONS_ICON} alt="" /> Organizations
+            {hasOrganizationsResults && (
+              <Badge pullRight>{numOrganizations}</Badge>
+            )}
+          </AnchorNavItem>
+
+          <AnchorNavItem to="people" disabled={!hasPeopleResults}>
+            <img src={PEOPLE_ICON} alt="" />{" "}
+            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}
+            {hasPeopleResults && <Badge pullRight>{numPeople}</Badge>}
+          </AnchorNavItem>
+
+          <AnchorNavItem to="positions" disabled={!hasPositionsResults}>
+            <img src={POSITIONS_ICON} alt="" />{" "}
+            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}
+            {hasPositionsResults && <Badge pullRight>{numPositions}</Badge>}
+          </AnchorNavItem>
+
+          <AnchorNavItem to="tasks" disabled={!hasTasksResults}>
+            <img src={TASKS_ICON} alt="" />{" "}
+            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}
+            {hasTasksResults && <Badge pullRight>{numTasks}</Badge>}
+          </AnchorNavItem>
+
+          <AnchorNavItem to="locations" disabled={!hasLocationsResults}>
+            <img src={LOCATIONS_ICON} alt="" />{" "}
+            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}
+            {hasLocationsResults && <Badge pullRight>{numLocations}</Badge>}
+          </AnchorNavItem>
+
+          <AnchorNavItem to="reports" disabled={!hasReportsResults}>
+            <img src={REPORTS_ICON} alt="" />{" "}
+            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}
+            {hasReportsResults && <Badge pullRight>{numReports}</Badge>}
+          </AnchorNavItem>
+        </Nav>
+      </SubNav>
+      <div className="pull-right">
+        {numResults > 0 && (
+          <Dropdown id="dropdown-custom-1">
+            <Dropdown.Toggle>
+              Export{" "}
+              <img
+                src={DOWNLOAD_ICON}
+                height={16}
+                alt="Export search results"
+              />
+            </Dropdown.Toggle>
+            {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
+            <Dropdown.Menu className="super-colors">
+              <MenuItem
+                onClick={() =>
+                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
+              >
+                Excel (xlsx)
+              </MenuItem>
+              <MenuItem
+                onClick={() =>
+                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
+              >
+                Google Earth (kml)
+              </MenuItem>
+              <MenuItem
+                onClick={() =>
+                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
+              >
+                NATO Vector Graphics (nvg)
+              </MenuItem>
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
+        {!_isEmpty(searchQueryParams) && numResults >= 0 && (
+          <Button
+            onClick={openSaveModal}
+            id="saveSearchButton"
+            style={{ marginRight: 12 }}
+          >
+            Save search
+          </Button>
+        )}
+      </div>
+      <Messages error={error} /> {/* success is shown through toast */}
+      {!_isEmpty(searchQueryParams) && (
+        <h2 className="only-show-for-print">
+          Search query: {searchQuery.text}
+          <br />
+          Filters: <SearchDescription query={searchQuery} />
+        </h2>
+      )}
+      {_isEmpty(searchQueryParams) && (
+        <Alert bsStyle="warning">
+          <b>You did not enter any search criteria.</b>
+        </Alert>
+      )}
+      {!_isEmpty(searchQueryParams) && numResults === 0 && (
+        <Alert bsStyle="warning">
+          <b>No search results found!</b>
+        </Alert>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) && (
+        <Fieldset id="organizations" title="Organizations">
+          {renderOrganizations(searchQueryParams)}
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && (
+        <Fieldset id="people" title="People">
+          {renderPeople(searchQueryParams)}
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && (
+        <Fieldset id="positions" title="Positions">
+          {renderPositions(searchQueryParams)}
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && (
+        <Fieldset id="tasks" title={pluralize(taskShortLabel)}>
+          {renderTasks(searchQueryParams)}
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && (
+        <Fieldset id="locations" title="Locations">
+          {renderLocations(searchQueryParams)}
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && (
+        <Fieldset id="reports" title="Reports">
+          {renderReports(searchQueryParams)}
+        </Fieldset>
+      )}
+      {renderSaveModal()}
+    </div>
+  )
+
+  function renderOrganizations(searchQueryParams) {
+    const queryParams = Object.assign({}, searchQueryParams, {
+      sortBy: "NAME",
+      sortOrder: "ASC"
+    })
     return (
-      <ReportCollection
-        paginatedReports={paginatedReports}
-        reports={allReports}
-        goToPage={value => this.goToPage(SEARCH_OBJECT_TYPES.REPORTS, value)}
+      <Organizations
+        queryParams={queryParams}
+        setTotalCount={setNumOrganizations}
+        paginationKey="SEARCH_organizations"
+        pagination={pagination}
+        setPagination={setPagination}
       />
     )
   }
 
-  renderPeople() {
+  function renderPeople(searchQueryParams) {
+    const queryParams = Object.assign({}, searchQueryParams, {
+      sortBy: "NAME",
+      sortOrder: "ASC"
+    })
     return (
-      <div>
-        {this.paginationFor(SEARCH_OBJECT_TYPES.PEOPLE)}
-        <br />
-        <Table responsive hover striped id="people-search-results">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Location</th>
-              <th>Organization</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Person.map(
-              this.state.results[SEARCH_OBJECT_TYPES.PEOPLE].list,
-              person => (
-                <tr key={person.uuid}>
-                  <td>
-                    <LinkTo person={person} />
-                  </td>
-                  <td>
-                    <LinkTo position={person.position} />
-                    {person.position && person.position.code
-                      ? `, ${person.position.code}`
-                      : ""}
-                  </td>
-                  <td>
-                    <LinkTo
-                      whenUnspecified=""
-                      anetLocation={person.position && person.position.location}
-                    />
-                  </td>
-                  <td>
-                    {person.position && person.position.organization && (
-                      <LinkTo organization={person.position.organization} />
-                    )}
-                  </td>
-                </tr>
-              )
-            )}
-          </tbody>
-        </Table>
-      </div>
+      <People
+        queryParams={queryParams}
+        setTotalCount={setNumPeople}
+        paginationKey="SEARCH_people"
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     )
   }
 
-  renderOrgs() {
+  function renderPositions(searchQueryParams) {
+    const queryParams = Object.assign({}, searchQueryParams, {
+      sortBy: "NAME",
+      sortOrder: "ASC"
+    })
     return (
-      <div>
-        {this.paginationFor(SEARCH_OBJECT_TYPES.ORGANIZATIONS)}
-        <br />
-        <Table responsive hover striped id="organizations-search-results">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Code</th>
-              <th>Type</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Organization.map(
-              this.state.results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].list,
-              org => (
-                <tr key={org.uuid}>
-                  <td>
-                    <LinkTo organization={org} />
-                  </td>
-                  <td>{org.longName}</td>
-                  <td>{org.identificationCode}</td>
-                  <td>{org.humanNameOfType()}</td>
-                </tr>
-              )
-            )}
-          </tbody>
-        </Table>
-      </div>
+      <Positions
+        queryParams={queryParams}
+        setTotalCount={setNumPositions}
+        paginationKey="SEARCH_positions"
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     )
   }
 
-  renderPositions() {
+  function renderTasks(searchQueryParams) {
+    const queryParams = Object.assign({}, searchQueryParams, {
+      sortBy: "NAME",
+      sortOrder: "ASC"
+    })
     return (
-      <div>
-        {this.paginationFor(SEARCH_OBJECT_TYPES.POSITIONS)}
-        <br />
-        <PositionTable
-          positions={this.state.results[SEARCH_OBJECT_TYPES.POSITIONS].list}
-        />
-      </div>
+      <Tasks
+        queryParams={queryParams}
+        setTotalCount={setNumTasks}
+        paginationKey="SEARCH_tasks"
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     )
   }
 
-  renderLocations() {
+  function renderLocations(searchQueryParams) {
+    const queryParams = Object.assign({}, searchQueryParams, {
+      sortBy: "NAME",
+      sortOrder: "ASC"
+    })
     return (
-      <div>
-        {this.paginationFor(SEARCH_OBJECT_TYPES.LOCATIONS)}
-        <br />
-        <Table responsive hover striped id="locations-search-results">
-          <thead>
-            <tr>
-              <th>Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.results[SEARCH_OBJECT_TYPES.LOCATIONS].list.map(loc => (
-              <tr key={loc.uuid}>
-                <td>
-                  <LinkTo anetLocation={loc} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
+      <Locations
+        queryParams={queryParams}
+        setTotalCount={setNumLocations}
+        paginationKey="SEARCH_locations"
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     )
   }
 
-  renderTasks() {
+  function renderReports(searchQueryParams) {
+    const queryParams = Object.assign({}, searchQueryParams, {
+      sortBy: "ENGAGEMENT_DATE",
+      sortOrder: "DESC"
+    })
     return (
-      <div>
-        {this.paginationFor(SEARCH_OBJECT_TYPES.TASKS)}
-        <br />
-        <Table responsive hover striped id="tasks-search-results">
-          <thead>
-            <tr>
-              <th>Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Task.map(
-              this.state.results[SEARCH_OBJECT_TYPES.TASKS].list,
-              task => (
-                <tr key={task.uuid}>
-                  <td>
-                    <LinkTo task={task}>
-                      {task.shortName} {task.longName}
-                    </LinkTo>
-                  </td>
-                </tr>
-              )
-            )}
-          </tbody>
-        </Table>
-      </div>
+      <ReportCollection
+        queryParams={queryParams}
+        setTotalCount={setNumReports}
+        paginationKey="SEARCH_reports"
+      />
     )
   }
 
-  renderSaveModal() {
+  function renderSaveModal() {
     return (
-      <Modal show={this.state.showSaveSearch} onHide={this.closeSaveModal}>
+      <Modal show={showSaveSearch} onHide={closeSaveModal}>
         <Modal.Header closeButton>
           <Modal.Title>Save search</Modal.Title>
         </Modal.Header>
@@ -591,7 +935,7 @@ class Search extends Page {
         <Modal.Body>
           <Formik
             enableReinitialize
-            onSubmit={this.onSubmitSaveSearch}
+            onSubmit={onSubmitSaveSearch}
             initialValues={{ name: "" }}
           >
             {({ values, submitForm }) => {
@@ -624,65 +968,49 @@ class Search extends Page {
     )
   }
 
-  onSubmitSaveSearch = (values, form) => {
-    this.saveSearch(values, form)
-      .then(response => this.onSubmitSaveSearchSuccess(response, values, form))
+  function onSubmitSaveSearch(values, form) {
+    saveSearch(values, form)
+      .then(response => onSubmitSaveSearchSuccess(response, values, form))
       .catch(error => {
-        this.setState(
-          {
-            error: error,
-            showSaveSearch: false
-          },
-          () => {
-            form.setSubmitting(false)
-            jumpToTop()
-          }
-        )
+        setError(error)
+        setShowSaveSearch(false)
+        form.setSubmitting(false)
+        jumpToTop()
       })
   }
 
-  onSubmitSaveSearchSuccess = (response, values, form) => {
+  function onSubmitSaveSearchSuccess(response, values, form) {
     if (response.createSavedSearch.uuid) {
       toast.success("Search saved")
-      this.setState({
-        error: null,
-        showSaveSearch: false
-      })
+      setError(null)
+      setShowSaveSearch(false)
     }
   }
 
-  saveSearch = (values, form) => {
+  function saveSearch(values, form) {
     const savedSearch = {
       name: values.name,
-      query: JSON.stringify(this.getSearchQuery())
+      query: JSON.stringify(getSearchQuery(searchQuery))
     }
-    if (this.props.searchQuery.objectType) {
-      savedSearch.objectType =
-        SEARCH_OBJECT_TYPES[this.props.searchQuery.objectType]
+    if (searchQuery.objectType) {
+      savedSearch.objectType = SEARCH_OBJECT_TYPES[searchQuery.objectType]
     }
     return API.mutation(GQL_CREATE_SAVED_SEARCH, { savedSearch })
   }
 
-  openSaveModal = () => {
-    this.setState({ showSaveSearch: true })
+  function openSaveModal() {
+    setShowSaveSearch(true)
   }
 
-  closeSaveModal = () => {
-    this.setState({ showSaveSearch: false })
+  function closeSaveModal() {
+    setShowSaveSearch(false)
   }
+}
 
-  createExportResultsFunctionFor = exportType => () =>
-    this._dataFetcher(
-      this.props,
-      parts =>
-        GQL.runExport(parts, exportType)
-          .then(blob => {
-            FileSaver.saveAs(blob, `anet_export.${exportType}`)
-          })
-          .catch(error => this.setState({ error: error })),
-      0,
-      0
-    )
+Search.propTypes = {
+  ...pagePropTypes,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -693,4 +1021,4 @@ const mapStateToProps = (state, ownProps) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withRouter(Search))
+)(Search)

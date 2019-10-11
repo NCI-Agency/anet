@@ -42,7 +42,7 @@ const LastPageLink = ({ isActive, onClick }) => (
 )
 LastPageLink.propTypes = paginationLinkPropTypes
 
-export default createUltimatePagination({
+const WrappedPagination = createUltimatePagination({
   WrapperComponent: Pagination,
   itemTypeToComponent: {
     [ITEM_TYPES.PAGE]: PageLink,
@@ -53,3 +53,46 @@ export default createUltimatePagination({
     [ITEM_TYPES.LAST_PAGE_LINK]: LastPageLink
   }
 })
+
+const UltimatePagination = props => {
+  const {
+    Component,
+    componentClassName,
+    className,
+    pageNum,
+    pageSize,
+    totalCount,
+    goToPage
+  } = props
+  const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
+  if (numPages < 2) {
+    return null
+  }
+  return (
+    <Component className={componentClassName}>
+      <WrappedPagination
+        className={className}
+        currentPage={pageNum + 1}
+        totalPages={numPages}
+        boundaryPagesRange={1}
+        siblingPagesRange={2}
+        hideEllipsis={false}
+        hidePreviousAndNextPageLinks={false}
+        hideFirstAndLastPageLinks
+        onChange={value => goToPage(value - 1)}
+      />
+    </Component>
+  )
+}
+
+UltimatePagination.propTypes = {
+  Component: PropTypes.string,
+  componentClassName: PropTypes.string,
+  className: PropTypes.string,
+  pageNum: PropTypes.number,
+  pageSize: PropTypes.number,
+  totalCount: PropTypes.number,
+  goToPage: PropTypes.func
+}
+
+export default UltimatePagination

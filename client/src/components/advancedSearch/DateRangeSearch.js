@@ -11,6 +11,7 @@ import {
   LAST_DAY,
   LAST_MONTH,
   LAST_WEEK,
+  ON,
   RANGE_TYPE_LABELS
 } from "dateUtils"
 import _isEqualWith from "lodash/isEqualWith"
@@ -64,6 +65,7 @@ export default class DateRangeSearch extends Component {
         between: _uniqueId("dateRange_"),
         before: _uniqueId("dateRange_"),
         after: _uniqueId("dateRange_"),
+        on: _uniqueId("dateRange_"),
         last_day: _uniqueId("dateRange_"),
         last_week: _uniqueId("dateRange_"),
         last_month: _uniqueId("dateRange_")
@@ -83,6 +85,9 @@ export default class DateRangeSearch extends Component {
       </option>,
       <option key={this.state.ids.after} value={AFTER}>
         {RANGE_TYPE_LABELS[AFTER]}
+      </option>,
+      <option key={this.state.ids.on} value={ON}>
+        {RANGE_TYPE_LABELS[ON]}
       </option>,
       <option key={this.state.ids.last_day} value={LAST_DAY}>
         {RANGE_TYPE_LABELS[LAST_DAY]}
@@ -113,7 +118,11 @@ export default class DateRangeSearch extends Component {
   render() {
     let { value } = this.state
     let dateRangeDisplay = RANGE_TYPE_LABELS[value.relative].concat(" ")
-    if (value.relative === BETWEEN || value.relative === AFTER) {
+    if (
+      value.relative === BETWEEN ||
+      value.relative === AFTER ||
+      value.relative === ON
+    ) {
       dateRangeDisplay = dateRangeDisplay.concat(
         moment(value.start).format(Settings.dateFormats.forms.displayShort.date)
       )
@@ -140,12 +149,14 @@ export default class DateRangeSearch extends Component {
           }}
         >
           {this.selectMenu(this.props.onlyBetween)}
-          {(value.relative === BETWEEN || value.relative === AFTER) && (
+          {(value.relative === BETWEEN ||
+            value.relative === AFTER ||
+            value.relative === ON) && (
             <CustomDateInput
-              showIcon={false}
-              value={dateStart}
-              onChange={this.onChangeStart}
-            />
+                showIcon={false}
+                value={dateStart}
+                onChange={this.onChangeStart}
+              />
           )}
           {value.relative === BETWEEN && (
             <span style={{ marginLeft: 5, marginRight: 5 }}>and</span>
@@ -221,26 +232,30 @@ export default class DateRangeSearch extends Component {
     const endKey = dateRangeEndKey(this.props.queryKey)
     const toQueryValue = {}
     const filterValue = {}
-    if (query[startKey] && query[endKey]) {
-      filterValue.relative = BETWEEN
-      filterValue.start = moment(query[startKey]).format(DATE_FORMAT)
-      filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
-      toQueryValue[startKey] = query[startKey]
-      toQueryValue[endKey] = query[endKey]
-    } else if (query[startKey]) {
+
+    if (query[startKey]) {
       toQueryValue[startKey] = query[startKey]
       const lastValues = [LAST_DAY, LAST_WEEK, LAST_MONTH]
       if (lastValues.indexOf(+query[startKey]) !== -1) {
         filterValue.relative = query[startKey]
       } else {
-        filterValue.relative = AFTER
         filterValue.start = moment(query[startKey]).format(DATE_FORMAT)
+        if (query[endKey]) {
+          filterValue.relative = BETWEEN
+        } else {
+          filterValue.relative = AFTER
+        }
       }
-    } else if (query[endKey]) {
-      filterValue.relative = BEFORE
+    }
+
+    if (query[endKey]) {
       filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
       toQueryValue[endKey] = query[endKey]
+      if (!query[startKey]) {
+        filterValue.relative = BEFORE
+      }
     }
+
     if (Object.keys(filterValue).length) {
       return {
         key: key,

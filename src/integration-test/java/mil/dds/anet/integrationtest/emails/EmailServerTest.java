@@ -2,13 +2,16 @@ package mil.dds.anet.integrationtest.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assume.assumeTrue;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.List;
 import mil.dds.anet.AnetApplication;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
+import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -18,7 +21,7 @@ import org.junit.Test;
  * query the email server and parse the response. Web-interface available at
  * http://[smtp_adress]:[stmp_port]
  */
-public class EmailServerIT {
+public class EmailServerTest {
 
   @ClassRule
   public static final DropwizardAppRule<AnetConfiguration> RULE =
@@ -28,6 +31,12 @@ public class EmailServerIT {
   @BeforeClass
   public static void setUpClass() {
     smtpConfig = RULE.getConfiguration().getSmtp();
+  }
+
+  @Before
+  public void setup() throws Exception {
+    assumeTrue(Boolean.parseBoolean(
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
   }
 
   /**

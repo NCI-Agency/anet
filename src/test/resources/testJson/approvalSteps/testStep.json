@@ -2,5 +2,6 @@
 	"uuid" : "42",
 	"advisorOrganizationUuid" : "22",
 	"approvers" : [],
-	"nextStepUuid" : "9292"
+	"nextStepUuid" : "9292",
+	"type": 1
 }

@@ -13,6 +13,10 @@ import mil.dds.anet.beans.Report.ReportState;
 
 public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
 
+  public static enum EngagementStatus {
+    HAPPENED, FUTURE, CANCELLED
+  }
+
   String authorUuid;
   Instant engagementDateStart;
   Instant engagementDateEnd;
@@ -42,6 +46,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   String taskUuid;
   String pendingApprovalOf;
   List<ReportState> state;
+  List<EngagementStatus> engagementStatus;
   ReportCancelledReason cancelledReason;
   private String tagUuid;
   private String authorPositionUuid;
@@ -241,6 +246,14 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     this.state = state;
   }
 
+  public List<EngagementStatus> getEngagementStatus() {
+    return engagementStatus;
+  }
+
+  public void setEngagementStatus(List<EngagementStatus> engagementStatus) {
+    this.engagementStatus = engagementStatus;
+  }
+
   public ReportCancelledReason getCancelledReason() {
     return cancelledReason;
   }
@@ -320,8 +333,8 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
         orgUuid, includeOrgChildren, locationUuid, taskUuid, pendingApprovalOf, state,
-        cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid, authorizationGroupUuid,
-        sensitiveInfo, user, systemSearch);
+        engagementStatus, cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid,
+        authorizationGroupUuid, sensitiveInfo, user, systemSearch);
   }
 
   @Override
@@ -353,6 +366,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getTaskUuid(), other.getTaskUuid())
         && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())
         && Objects.equals(getState(), other.getState())
+        && Objects.equals(getEngagementStatus(), other.getEngagementStatus())
         && Objects.equals(getCancelledReason(), other.getCancelledReason())
         && Objects.equals(getTagUuid(), other.getTagUuid())
         && Objects.equals(getAuthorPositionUuid(), other.getAuthorPositionUuid())
@@ -368,6 +382,9 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     final ReportSearchQuery clone = (ReportSearchQuery) super.clone();
     if (state != null) {
       clone.setState(new ArrayList<>(state));
+    }
+    if (engagementStatus != null) {
+      clone.setEngagementStatus(new ArrayList<>(engagementStatus));
     }
     if (authorizationGroupUuid != null) {
       clone.setAuthorizationGroupUuid(new ArrayList<>(authorizationGroupUuid));

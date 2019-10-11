@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -19,6 +20,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
+import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -37,7 +39,10 @@ public class FakeSmtpServer {
   private final String httpIP;
   private final String httpPort;
 
-  public FakeSmtpServer(SmtpConfiguration smtpConfig) {
+  private final int waitBeforeActionMs;
+  private final int maxRetriesClear;
+
+  public FakeSmtpServer(SmtpConfiguration smtpConfig) throws Exception {
     smtpIP = smtpConfig.getHostname();
     smtpPort = Integer.toString(smtpConfig.getPort());
     smtpUsername = smtpConfig.getUsername();
@@ -45,8 +50,17 @@ public class FakeSmtpServer {
     sslTrust = smtpConfig.getSslTrust();
     startTls = Boolean.toString(smtpConfig.getStartTls());
     httpIP = smtpConfig.getHostname();
-    // not in config
+
+    // Not in config
     httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
+
+    // Read from test config
+    waitBeforeActionMs = Integer
+        .parseInt(AnetTestConfiguration.getConfiguration().get("emailWaitBeforeAction").toString());
+    maxRetriesClear = Integer.parseInt(
+        AnetTestConfiguration.getConfiguration().get("emailMaxWaitRetriesOnClear").toString());
+
+    clearEmailServer();
   }
 
   /**
@@ -54,9 +68,12 @@ public class FakeSmtpServer {
    * 
    * @return All emails from the server
    * @throws IOException If the request fails
+   * @throws InterruptedException If the wait timer fails
    */
-  public List<EmailResponse> requestAllEmailsFromServer() throws IOException {
-    return requestEmailsFromServer(new QueryFilter(null, null, null, null));
+  public List<EmailResponse> requestAllEmailsFromServer() throws IOException, InterruptedException {
+    TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
+
+    return requestEmailsFromServer(new QueryFilter());
   }
 
   /**
@@ -65,8 +82,12 @@ public class FakeSmtpServer {
    * @param queryFilter The filter to use
    * @return All filtered emails from the server
    * @throws IOException If the request fails
+   * @throws InterruptedException If the wait timer fails
    */
-  public List<EmailResponse> requestEmailsFromServer(QueryFilter queryFilter) throws IOException {
+  public List<EmailResponse> requestEmailsFromServer(QueryFilter queryFilter)
+      throws IOException, InterruptedException {
+    TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
+
     final String request = queryFilter.createFilteredServerQuery(httpIP, httpPort);
     final String response = sendServerRequest(request, "GET");
     System.out.println(response);
@@ -75,10 +96,23 @@ public class FakeSmtpServer {
 
   /**
    * Clears all emails from the server.
+   * 
+   * @throws Exception If the request or wait timer fails
    */
-  public void clearEmailServer() throws IOException {
+  public void clearEmailServer() throws Exception {
+    TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
+
     final String request = String.format("http://%s:%s/api/emails", httpIP, httpPort);
+
     sendServerRequest(request, "DELETE");
+
+    for (int i = 0; i < maxRetriesClear; i++) {
+      if (i == maxRetriesClear) {
+        throw new Exception("Email server not responding");
+      } else if (requestAllEmailsFromServer().size() == 0) {
+        break;
+      }
+    }
   }
 
   private static List<EmailResponse> parseServeResponse(String serverResponse) {
@@ -166,26 +200,34 @@ public class FakeSmtpServer {
    * A filter for the queries to the email server.
    */
   public class QueryFilter {
-    public final String from;
-    public final String to;
-    public final String since;
-    public final String until;
+    public String from = "";
+    public String to = "";
+    public String since = "";
+    public String until = "";
 
-    public QueryFilter(String from, String to, String since, String until) {
-      this.from = from;
-      this.to = to;
-      this.since = since;
-      this.until = until;
+    public QueryFilter withFrom(String value) {
+      this.from = "?from=" + value;
+      return this;
+    }
+
+    public QueryFilter withTo(String value) {
+      this.to = "?to=" + value;
+      return this;
+    }
+
+    public QueryFilter withSince(String value) {
+      this.since = "?since=" + value;
+      return this;
+    }
+
+    public QueryFilter withUntil(String value) {
+      this.until = "?until=" + value;
+      return this;
     }
 
     public String createFilteredServerQuery(String serverHost, String serverPort) {
-      final String fromFilter = this.from == null ? "" : "?from=" + this.from;
-      final String toFilter = this.to == null ? "" : "?to=" + this.to;
-      final String sinceFilter = this.since == null ? "" : "?since=" + this.since;
-      final String untilFilter = this.until == null ? "" : "?until=" + this.until;
-
-      return String.format("http://%s:%s/api/emails%s%s%s%s", serverHost, serverPort, fromFilter,
-          toFilter, sinceFilter, untilFilter);
+      return String.format("http://%s:%s/api/emails%s%s%s%s", serverHost, serverPort, this.from,
+          this.to, this.since, this.until);
     }
   }
 

@@ -76,11 +76,11 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.3.14'
-	compile group: 'io.dropwizard', name: 'dropwizard-jdbi3', version: '1.3.14'
-	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.3.14'
-	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.3.14'
-	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.3.14'
+	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.3.15'
+	compile group: 'io.dropwizard', name: 'dropwizard-jdbi3', version: '1.3.15'
+	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.3.15'
+	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.3.15'
+	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.3.15'
 	compile group: 'io.dropwizard-bundles', name: 'dropwizard-configurable-assets-bundle', version: '1.3.5'
 
 	compile 'ru.vyarus.guicey:guicey-jdbi3:0.7.0'
@@ -88,7 +88,7 @@ dependencies {
 
 	// Supported databases:
 	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.7' // If using postgresql
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.0' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
@@ -98,12 +98,12 @@ dependencies {
 	compile 'com.github.waffle:waffle-jna:1.9.1'
 	compile 'com.graphql-java:java-dataloader:2.2.3'
 	compile 'io.leangen.graphql:spqr:0.10.0'
-	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190610.1'
+	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20191001.1'
 
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
+	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.12.0'
 
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
@@ -115,8 +115,8 @@ dependencies {
 	// For fast and simple image scaling
 	compile group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
 
-	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.3.14'
-	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.3.14'
+	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.3.15'
+	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.3.15'
 	testCompile 'org.apache.commons:commons-io:1.3.2'
 	
 	testCompile 'junit:junit:4.12'
@@ -416,6 +416,7 @@ task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container
 
 // Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
 task integrationTest(type: Test) {
+	description = "Runs the integration tests."
 	testClassesDirs = sourceSets.integrationTest.output.classesDirs
 	classpath = sourceSets.integrationTest.runtimeClasspath
 	outputs.upToDateWhen { false }
@@ -455,15 +456,13 @@ distributions {
 //Add gradle plugin repos
 buildscript {
 	repositories {
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
+		gradlePluginPortal()
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:5.0.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:5.2.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.24.2"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.25.0"
 	}
 }
 

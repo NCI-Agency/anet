@@ -27,7 +27,7 @@ const userTour = (currentUser, history) => {
       {
         title: "My ANET snapshot",
         content:
-          "This area shows you how many reports you've drafted but haven't submitted, the number of your reports waiting for approval from your organization's approval chain, and your organization's reports published in the last 7 days and upcoming engagements.",
+          "This area shows you how many reports you've drafted but haven't submitted, the number of your reports waiting for approval from your organization's approval chain, and your organization's reports published in the last 7 days and planned engagements.",
         target: ".home-tile-row",
         placement: "bottom"
       },
@@ -96,7 +96,7 @@ const superUserTour = (currentUser, history) => {
       {
         title: "My ANET snapshot",
         content:
-          "This area shows you the reports that need your approval as well as your organization's draft reports, reports submitted in the last 7 days, and upcoming engagements.",
+          "This area shows you the reports that need your approval as well as your organization's draft reports, reports submitted in the last 7 days, and planned engagements.",
         target: ".home-tile-row",
         placement: "bottom"
       },
@@ -137,7 +137,7 @@ const reportTour = (currentUser, history) => {
       {
         title: "Engagement date",
         content:
-          "When did this engagement happen, or when will it take place? Choosing a date in the future will create an upcoming engagement. On the day of your upcoming engagement you'll get an email letting you know that the report you started moved back to your drafts.",
+          "When did this engagement happen, or when will it take place? Choosing a date in the future will create an planned engagement. On the day of your planned engagement you'll get an email letting you know that the report you started moved back to your drafts.",
         target: "#engagementDate",
         placement: "right"
       },
@@ -255,9 +255,16 @@ const orgTour = (currentUser, history) => {
         placement: "top"
       },
       {
-        title: "Approval process",
+        title: "Engagement planning approval process",
         content:
-          "Set up or update the approval process for reports authored in your organization by clicking \"Edit\" on the top of the page. We recommend having more than one approver in each step so that either person can approve the report. When a report has gone through every step in your approval chain, it will automatically go into that day's daily rollup. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you'll need to set up an approval chain for each sub-organization as well.",
+          'Set up or update the approval process for planning of future engagements authored in your organization by clicking "Edit" on the top of the page. We recommend having more than one approver in each step so that either person can approve the planning of the engagement. When a future engagement has gone through every step in your approval chain, it will automatically be published on ANET. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you\'ll need to set up an approval chain for each sub-organization as well.',
+        target: "#planningApprovals h2",
+        placement: "top"
+      },
+      {
+        title: "Report publication approval process",
+        content:
+          "Set up or update the approval process for publication of reports authored in your organization by clicking \"Edit\" on the top of the page. We recommend having more than one approver in each step so that either person can approve the report. When a report has gone through every step in your approval chain, it will automatically go into that day's daily rollup. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you'll need to set up an approval chain for each sub-organization as well.",
         target: "#approvals h2",
         placement: "top"
       },

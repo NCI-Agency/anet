@@ -26,7 +26,10 @@ import mil.dds.anet.views.UuidFetcher;
 public class Report extends AbstractAnetBean {
 
   public enum ReportState {
-    DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, FUTURE, APPROVED
+    DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, // -
+    @Deprecated
+    FUTURE, // Should no longer be used but remain in place to keep the correct values
+    APPROVED
   }
 
   public enum Atmosphere {
@@ -492,12 +495,22 @@ public class Report extends AbstractAnetBean {
         workflow = actions;
         return CompletableFuture.completedFuture(workflow);
       } else {
-        return getWorkflowForOrg(context, engine, getAdvisorOrgUuid()).thenCompose(steps -> {
+        CompletableFuture<List<ApprovalStep>> w;
+        if (isFutureEngagement()) {
+          w = getPlanningWorkflowForOrg(context, engine, getAdvisorOrgUuid());
+        } else {
+          w = getWorkflowForOrg(context, engine, getAdvisorOrgUuid());
+        }
+        return w.thenCompose(steps -> {
           if (Utils.isEmptyOrNull(steps)) {
             final String defaultOrgUuid = engine.getDefaultOrgUuid();
             if (getAdvisorOrgUuid() == null
                 || !Objects.equals(getAdvisorOrgUuid(), defaultOrgUuid)) {
-              return getDefaultWorkflow(context, engine, defaultOrgUuid);
+              if (isFutureEngagement()) {
+                return getDefaultPlanningWorkflow(context, engine, defaultOrgUuid);
+              } else {
+                return getDefaultWorkflow(context, engine, defaultOrgUuid);
+              }
             }
           }
           return CompletableFuture.completedFuture(steps);
@@ -544,6 +557,15 @@ public class Report extends AbstractAnetBean {
     return newActions;
   }
 
+  private CompletableFuture<List<ApprovalStep>> getPlanningWorkflowForOrg(
+      Map<String, Object> context, AnetObjectEngine engine, String aoUuid) {
+    if (aoUuid == null) {
+      return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
+    }
+
+    return engine.getPlanningApprovalStepsForOrg(context, aoUuid);
+  }
+
   private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context,
       AnetObjectEngine engine, String aoUuid) {
     if (aoUuid == null) {
@@ -551,6 +573,14 @@ public class Report extends AbstractAnetBean {
     }
 
     return engine.getApprovalStepsForOrg(context, aoUuid);
+  }
+
+  private CompletableFuture<List<ApprovalStep>> getDefaultPlanningWorkflow(
+      Map<String, Object> context, AnetObjectEngine engine, String defaultOrgUuid) {
+    if (defaultOrgUuid == null) {
+      throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
+    }
+    return getPlanningWorkflowForOrg(context, engine, defaultOrgUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getDefaultWorkflow(Map<String, Object> context,
@@ -633,6 +663,12 @@ public class Report extends AbstractAnetBean {
   @GraphQLIgnore
   public List<AuthorizationGroup> getAuthorizationGroups() {
     return authorizationGroups;
+  }
+
+  @JsonIgnore
+  @GraphQLIgnore
+  public boolean isFutureEngagement() {
+    return engagementDate != null && engagementDate.isAfter(Utils.endOfToday());
   }
 
   @Override

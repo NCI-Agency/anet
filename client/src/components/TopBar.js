@@ -26,8 +26,7 @@ class BaseTopBar extends Component {
     topbarHeight: PropTypes.func.isRequired,
     resetPages: PropTypes.func.isRequired,
     minimalHeader: PropTypes.bool,
-    toggleMenuAction: PropTypes.func,
-    location: PropTypes.object
+    toggleMenuAction: PropTypes.func
   }
 
   constructor(props) {
@@ -111,18 +110,13 @@ class BaseTopBar extends Component {
   }
 
   render() {
-    const {
-      currentUser,
-      minimalHeader,
-      toggleMenuAction,
-      location
-    } = this.props
+    const { currentUser, minimalHeader, toggleMenuAction } = this.props
 
     return (
       <div style={{ flex: "0 0 auto", zIndex: 100 }} ref={this.topbarDiv}>
         <div id="topbar">
           <GeneralBanner options={this.bannerOptions()} />
-          <SecurityBanner location={location} />
+          <SecurityBanner />
           {currentUser &&
             !currentUser.hasActivePosition() &&
             !currentUser.isNewUser() && <NoPositionBanner />}

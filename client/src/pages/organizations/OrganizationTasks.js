@@ -1,110 +1,115 @@
-import { Settings } from "api"
-import autobind from "autobind-decorator"
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import { mapDispatchToProps, useBoilerplate } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import { Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Table } from "react-bootstrap"
+import { connect } from "react-redux"
 
-class BaseOrganizationTasks extends Component {
-  static propTypes = {
-    currentUser: PropTypes.instanceOf(Person)
+const GQL_GET_TASK_LIST = gql`
+  query($taskQuery: TaskSearchQueryInput) {
+    taskList(query: $taskQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        shortName
+        longName
+      }
+    }
+  }
+`
+
+const BaseOrganizationTasks = props => {
+  const { queryParams } = props
+  const [pageNum, setPageNum] = useState(0)
+  const taskQuery = Object.assign({}, queryParams, { pageNum })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
+    taskQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
+  if (done) {
+    return result
   }
 
-  render() {
-    const { currentUser } = this.props
-    const org = this.props.organization
+  const paginatedTasks = data.taskList
+  const tasks = paginatedTasks ? paginatedTasks.list : []
+  const { currentUser, organization } = props
+  const isAdminUser = currentUser && currentUser.isAdmin()
+  const taskShortLabel = Settings.fields.task.shortLabel
 
-    if (!org.isAdvisorOrg()) {
-      return <div />
-    }
+  if (!organization.isAdvisorOrg()) {
+    return <div />
+  }
 
-    const tasks = this.props.tasks.list || []
-    const isAdminUser = currentUser && currentUser.isAdmin()
-    const taskShortLabel = Settings.fields.task.shortLabel
+  const { pageSize, totalCount } = paginatedTasks
 
-    return (
-      <Fieldset
-        id="tasks"
-        title={pluralize(taskShortLabel)}
-        action={
-          isAdminUser && (
-            <LinkTo
-              task={Task.pathForNew({ responsibleOrgUuid: org.uuid })}
-              button
-            >
-              Create {taskShortLabel}
-            </LinkTo>
-          )
-        }
-      >
-        {this.pagination()}
-        <Table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
+  return (
+    <Fieldset
+      id="tasks"
+      title={pluralize(taskShortLabel)}
+      action={
+        isAdminUser && (
+          <LinkTo
+            task={Task.pathForNew({ responsibleOrgUuid: organization.uuid })}
+            button
+          >
+            Create {taskShortLabel}
+          </LinkTo>
+        )
+      }
+    >
+      <UltimatePagination
+        Component="header"
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={setPageNum}
+      />
+      <Table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {Task.map(tasks, (task, idx) => (
+            <tr key={task.uuid} id={`task_${idx}`}>
+              <td>
+                <LinkTo task={task}>{task.shortName}</LinkTo>
+              </td>
+              <td>{task.longName}</td>
             </tr>
-          </thead>
+          ))}
+        </tbody>
+      </Table>
 
-          <tbody>
-            {Task.map(tasks, (task, idx) => (
-              <tr key={task.uuid} id={`task_${idx}`}>
-                <td>
-                  <LinkTo task={task}>{task.shortName}</LinkTo>
-                </td>
-                <td>{task.longName}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-
-        {tasks.length === 0 && (
-          <em>
-            This organization doesn't have any {pluralize(taskShortLabel)}
-          </em>
-        )}
-      </Fieldset>
-    )
-  }
-
-  @autobind
-  pagination() {
-    let { pageSize, pageNum, totalCount } = this.props.tasks
-    let numPages = Math.ceil(totalCount / pageSize)
-    if (numPages < 2) {
-      return
-    }
-    return (
-      <header className="searchPagination">
-        <UltimatePagination
-          className="pull-right"
-          currentPage={pageNum + 1}
-          totalPages={numPages}
-          boundaryPagesRange={1}
-          siblingPagesRange={2}
-          hideEllipsis={false}
-          hidePreviousAndNextPageLinks={false}
-          hideFirstAndLastPageLinks
-          onChange={value => this.props.goToPage(value - 1)}
-        />
-      </header>
-    )
-  }
+      {tasks.length === 0 && (
+        <em>This organization doesn't have any {pluralize(taskShortLabel)}</em>
+      )}
+    </Fieldset>
+  )
 }
+
 BaseOrganizationTasks.propTypes = {
+  currentUser: PropTypes.instanceOf(Person),
   organization: PropTypes.object.isRequired,
-  tasks: PropTypes.shape({
-    totalCount: PropTypes.number,
-    pageNum: PropTypes.number,
-    pageSize: PropTypes.number,
-    list: PropTypes.array.isRequired
-  }),
-  goToPage: PropTypes.func
+  queryParams: PropTypes.object
 }
 
 const OrganizationTasks = props => (
@@ -115,4 +120,7 @@ const OrganizationTasks = props => (
   </AppContext.Consumer>
 )
 
-export default OrganizationTasks
+export default connect(
+  null,
+  mapDispatchToProps
+)(OrganizationTasks)

@@ -7,7 +7,8 @@ import mil.dds.anet.search.AbstractPositionSearcher;
 public class PostgresqlPositionSearcher extends AbstractPositionSearcher {
 
   public PostgresqlPositionSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Position, PositionSearchQuery>(""));
+    super(new PostgresqlSearchQueryBuilder<Position, PositionSearchQuery>(
+        "PostgresqlPositionSearch"));
   }
 
   @Override
