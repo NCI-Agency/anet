@@ -98,7 +98,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
   protected void addDefaultCommands(Bootstrap<AnetConfiguration> bootstrap) {
     bootstrap.addCommand(new ServerCommand<>(this));
     bootstrap.addCommand(new AnetCheckCommand(this));
-    bootstrap.addCommand(new ClearBiographiesCommand(this));
+    bootstrap.addCommand(new ClearEmptyBiographiesCommand(this));
   }
 
   @Override

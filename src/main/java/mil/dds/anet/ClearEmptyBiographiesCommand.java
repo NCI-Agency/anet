@@ -6,10 +6,10 @@ import io.dropwizard.setup.Environment;
 import mil.dds.anet.config.AnetConfiguration;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-public class ClearBiographiesCommand extends EnvironmentCommand<AnetConfiguration> {
+public class ClearEmptyBiographiesCommand extends EnvironmentCommand<AnetConfiguration> {
 
-  public ClearBiographiesCommand(Application<AnetConfiguration> application) {
-    super(application, "clearBiographies",
+  public ClearEmptyBiographiesCommand(Application<AnetConfiguration> application) {
+    super(application, "clearEmptyBiographies",
         "Set empty HTML biography field of people to null in the ANET Database");
   }
 
@@ -17,7 +17,7 @@ public class ClearBiographiesCommand extends EnvironmentCommand<AnetConfiguratio
   protected void run(Environment environment, Namespace namespace, AnetConfiguration configuration)
       throws Exception {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    engine.getPersonDao().clearBiographies();
+    engine.getPersonDao().clearEmptyBiographies();
     System.exit(0);
   }
 

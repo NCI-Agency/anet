@@ -424,13 +424,13 @@ task integrationTest(type: Test) {
 }
 
 // Create the task that runs the migration script for empty HTML biography fields of persons
-task dbClearBiographies(dependsOn: 'compileJava', type: JavaExec) {
+task dbClearEmptyBiographies(dependsOn: 'compileJava', type: JavaExec) {
     group = "database"
-    description = "Runs the ANET clearBiographies command."
+    description = "Runs the ANET clearEmptyBiographies command."
     classpath = sourceSets.main.runtimeClasspath
     environment(run.environment)
     main = mainClassName
-    args = ["clearBiographies", anetConfig]
+    args = ["clearEmptyBiographies", anetConfig]
     standardInput = System.in
 }
 
