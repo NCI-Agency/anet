@@ -645,7 +645,7 @@ public class ReportResource {
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
-    final ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
+    ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
     // Report author cannot reject own report, unless admin
     if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
       logger.info("Author {} cannot request changes to own report UUID {}", approver.getUuid(),
