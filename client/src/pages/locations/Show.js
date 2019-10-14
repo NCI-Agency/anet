@@ -125,10 +125,10 @@ const BaseLocationShow = props => {
                   name="location"
                   component={FieldHelper.renderReadonlyField}
                   humanValue={
-                    <React.Fragment>
+                    <>
                       <Coordinate coord={location.lat} />,{" "}
                       <Coordinate coord={location.lng} />
-                    </React.Fragment>
+                    </>
                   }
                 />
               </Fieldset>
@@ -136,7 +136,7 @@ const BaseLocationShow = props => {
               <Leaflet markers={[marker]} />
             </Form>
 
-            <Fieldset title={"Reports at this Location"}>
+            <Fieldset title="Reports at this Location">
               <ReportCollection
                 paginationKey={`r_${uuid}`}
                 queryParams={{ locationUuid: uuid }}

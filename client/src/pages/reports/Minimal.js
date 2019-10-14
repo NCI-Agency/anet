@@ -350,11 +350,11 @@ const ReportMinimal = props => {
                     label={Settings.fields.report.atmosphere}
                     component={FieldHelper.renderReadonlyField}
                     humanValue={
-                      <React.Fragment>
+                      <>
                         {utils.sentenceCase(report.atmosphere)}
                         {report.atmosphereDetails &&
                           ` – ${report.atmosphereDetails}`}
-                      </React.Fragment>
+                      </>
                     }
                   />
                 )}
@@ -419,12 +419,12 @@ const ReportMinimal = props => {
 
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
-                <Fieldset title="Sensitive information">
+                  <Fieldset title="Sensitive information">
                   <div
-                    dangerouslySetInnerHTML={{
+                      dangerouslySetInnerHTML={{
                       __html: report.reportSensitiveInformation.text
                     }}
-                  />
+                    />
                 </Fieldset>
               )}
 
@@ -463,10 +463,10 @@ const ReportMinimal = props => {
   function renderValidationMessages(submitType) {
     submitType = submitType || "submitting"
     return (
-      <React.Fragment>
+      <>
         {renderValidationErrors(submitType)}
         {renderValidationWarnings(submitType)}
-      </React.Fragment>
+      </>
     )
   }
 

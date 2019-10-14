@@ -62,7 +62,7 @@ class ApprovalStepModal extends Component {
     const step = action.step
     const actionTypeCss = ACTION_TYPE_DETAILS[action.type].cssClass
     return step ? (
-      <React.Fragment>
+      <>
         <Button className={actionTypeCss + " btn-sm"} onClick={this.openModal}>
           <span>{step.name}</span>
         </Button>
@@ -84,7 +84,7 @@ class ApprovalStepModal extends Component {
             <ApprovalStepModalStatus action={action} />
           </Modal.Footer>
         </Modal>
-      </React.Fragment>
+      </>
     ) : null
   }
 }

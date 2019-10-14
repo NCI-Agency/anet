@@ -433,16 +433,15 @@ const BaseReportForm = props => {
                       "intentCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )
-                  }
+                    )}
                   extraColElem={
-                    <React.Fragment>
+                    <>
                       <span id="intentCharsLeft">
                         {Settings.maxTextFieldLength -
                           initialValues.intent.length}
                       </span>{" "}
                       characters remaining
-                    </React.Fragment>
+                    </>
                   }
                   className="meeting-goal"
                 />
@@ -511,8 +510,7 @@ const BaseReportForm = props => {
                           setFieldValue(
                             "cancelledReason",
                             cancelledReasonOptions[0].value
-                          )
-                        }
+                          )}
                       >
                         This engagement was cancelled
                       </Checkbox>
@@ -552,13 +550,13 @@ const BaseReportForm = props => {
                 {!isFutureEngagement &&
                   !values.cancelled &&
                   values.atmosphere && (
-                  <Field
+                    <Field
                     name="atmosphereDetails"
                     label={Settings.fields.report.atmosphereDetails}
                     component={FieldHelper.renderInputField}
                     placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
                       values.atmosphere === "POSITIVE" ? "(optional)" : ""
-                    }`}
+                      }`}
                     className="atmosphere-details"
                   />
                 )}
@@ -604,8 +602,7 @@ const BaseReportForm = props => {
                   overlayRenderRow={PersonDetailedOverlayRow}
                   filterDefs={attendeesFilters}
                   onChange={value =>
-                    updateAttendees(setFieldValue, "attendees", value)
-                  }
+                    updateAttendees(setFieldValue, "attendees", value)}
                   objectType={Person}
                   queryParams={{
                     status: [Person.STATUS.ACTIVE]
@@ -675,16 +672,15 @@ const BaseReportForm = props => {
                         "keyOutcomesCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )
-                    }
+                      )}
                     extraColElem={
-                      <React.Fragment>
+                      <>
                         <span id="keyOutcomesCharsLeft">
                           {Settings.maxTextFieldLength -
                             initialValues.keyOutcomes.length}
                         </span>{" "}
                         characters remaining
-                      </React.Fragment>
+                      </>
                     }
                   />
                 )}
@@ -701,16 +697,15 @@ const BaseReportForm = props => {
                         "nextStepsCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )
-                    }
+                      )}
                     extraColElem={
-                      <React.Fragment>
+                      <>
                         <span id="nextStepsCharsLeft">
                           {Settings.maxTextFieldLength -
                             initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
-                      </React.Fragment>
+                      </>
                     }
                   />
                 )}
@@ -748,8 +743,7 @@ const BaseReportForm = props => {
                           setFieldValue(
                             "reportSensitiveInformation.text",
                             value
-                          )
-                        }
+                          )}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
@@ -757,8 +751,7 @@ const BaseReportForm = props => {
                               setFieldTouched(
                                 "reportSensitiveInformation.text",
                                 true
-                              )
-                            }
+                              )}
                           />
                         }
                       />
@@ -777,8 +770,7 @@ const BaseReportForm = props => {
                         overlayRenderRow={AuthorizationGroupOverlayRow}
                         filterDefs={authorizationGroupsFilters}
                         onChange={value =>
-                          setFieldValue("authorizationGroups", value)
-                        }
+                          setFieldValue("authorizationGroups", value)}
                         objectType={AuthorizationGroup}
                         queryParams={{
                           status: AuthorizationGroup.STATUS.ACTIVE
@@ -809,8 +801,7 @@ const BaseReportForm = props => {
                   {canDelete && (
                     <ConfirmDelete
                       onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)
-                      }
+                        onConfirmDelete(values.uuid, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
