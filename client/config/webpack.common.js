@@ -16,6 +16,13 @@ const commonConfig = {
         loader: "ignore-loader"
       },
       {
+        // work-around from https://github.com/graphql/graphiql/issues/617#issuecomment-539034320 ;
+        // TODO: may at some point be removed again
+        test: /\.(ts|ts\.map|js\.map)$/,
+        include: /node_modules\/graphql-language-service-interface/,
+        loader: "ignore-loader"
+      },
+      {
         test: /\.mjs$/,
         include: /node_modules/,
         type: "javascript/auto"
