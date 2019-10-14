@@ -7,6 +7,7 @@ import { Organization } from "models"
 import PropTypes from "prop-types"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import EXPAND_ICON from "resources/plus.png"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
@@ -72,7 +73,7 @@ export default class OrganizationalChart extends SVGCanvas {
     this.state = {
       root: null,
       orgs: [],
-      collapsed: [],
+      expanded: [],
       personnelDepth: 5
     }
 
@@ -126,11 +127,11 @@ export default class OrganizationalChart extends SVGCanvas {
     tree.nodeSize(this.getNodeSize())
 
     const root = d3.hierarchy(this.state.root, d =>
-      this.state.collapsed.includes(d.uuid)
-        ? []
-        : this.state.orgs.filter(org =>
+      this.state.expanded.includes(d.uuid)
+        ? this.state.orgs.filter(org =>
           d.childrenOrgs.map(org => org.uuid).includes(org.uuid)
         )
+        : []
     )
 
     const linkSelect = this.link.selectAll("path").data(tree(root).links())
@@ -179,38 +180,49 @@ export default class OrganizationalChart extends SVGCanvas {
     iconNodeG
       .filter(d => d.data.childrenOrgs.length > 0)
       .append("image")
+      .attr("class", "orgChildIcon")
       .attr("width", 12)
       .attr("height", 12)
       .attr("x", -15)
       .attr("y", 5)
-      .attr("href", ORGANIZATIONS_ICON)
       .on("click", d => {
-        const index = this.state.collapsed.indexOf(d.data.uuid)
-        let newCollapsed = this.state.collapsed.slice()
+        const index = this.state.expanded.indexOf(d.data.uuid)
+        let newExpanded = this.state.expanded.slice()
         if (index > -1) {
-          newCollapsed.splice(index, 1)
+          newExpanded.splice(index, 1)
         } else {
-          newCollapsed.push(d.data.uuid)
+          newExpanded.push(d.data.uuid)
         }
         this.setState({
-          collapsed: newCollapsed
+          expanded: newExpanded
         })
       })
 
-    iconNodeG.each(function(d) {
-      const positions = sortPositions(d.data.positions)
-      const unitcode = Settings.fields.person.ranks.find(
-        element => element.value === positions?.[0]?.person?.rank
-      )?.app6Modifier
-
-      const sym = new Symbol(
-        `S${
-          d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
-        }GPU------${unitcode || "-"}`,
-        { size: 22 }
+    this.node
+      .selectAll("image.orgChildIcon")
+      .attr("href", d =>
+        this.state.expanded.indexOf(d.data.uuid) > -1
+          ? ORGANIZATIONS_ICON
+          : EXPAND_ICON
       )
-      this.appendChild(sym.asDOM())
-    })
+
+    iconNodeG
+      .append("a")
+      .attr("href", d => `/organizations/${d.data.uuid}`)
+      .each(function(d) {
+        const positions = sortPositions(d.data.positions)
+        const unitcode = Settings.fields.person.ranks.find(
+          element => element.value === positions?.[0]?.person?.rank
+        )?.app6Modifier
+
+        const sym = new Symbol(
+          `S${
+            d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
+          }GPU------${unitcode || "-"}`,
+          { size: 22 }
+        )
+        this.appendChild(sym.asDOM())
+      })
 
     iconNodeG
       .append("a")
@@ -405,7 +417,7 @@ export default class OrganizationalChart extends SVGCanvas {
       this.setState({
         root: data.organization,
         orgs: data.organization.descendantOrgs,
-        collapsed: data.organization.childrenOrgs.map(d => d.uuid)
+        expanded: [data.organization.uuid]
       })
     )
   }
