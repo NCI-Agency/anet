@@ -2,9 +2,9 @@ let uuidv4 = require("uuid/v4")
 let test = require("../util/test")
 
 test("checking super user permissions", async t => {
-  t.plan(9)
+  t.plan(10)
 
-  let { pageHelpers } = t.context
+  let { pageHelpers, assertElementNotPresent, shortWaitMs } = t.context
 
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMyOrgLink()
@@ -16,9 +16,9 @@ test("checking super user permissions", async t => {
 
   await validateUserCanEditUserForCurrentPage(t)
 
-  // User is super user, only admins may edit position of type super user
-  await editAndSavePositionFromCurrentUserPage(t, false)
-  // We are now still on the edit position page
+  // User is super user, he/she may edit position of type super user for
+  // his/her own organization
+  await editAndSavePositionFromCurrentUserPage(t, true)
 
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMyOrgLink()
@@ -28,8 +28,28 @@ test("checking super user permissions", async t => {
 
   await validateUserCanEditUserForCurrentPage(t)
 
-  // User is super user, only admins may edit position of type super user
-  await editAndSavePositionFromCurrentUserPage(t, false)
+  // User is super user, he/she may edit position of type super user for
+  // his/her own organization
+  await editAndSavePositionFromCurrentUserPage(t, true)
+
+  // User is super user, he/she may edit positions only for his/her own organization
+  let $otherOrgPositionLink = await getFromSearchResults(
+    t,
+    "EF 1",
+    "EF 1 Manager",
+    "positions"
+  )
+  await $otherOrgPositionLink.click()
+  await t.context.driver.wait(
+    t.context.until.stalenessOf($otherOrgPositionLink)
+  )
+
+  await assertElementNotPresent(
+    t,
+    ".edit-position",
+    "super user should not be able to edit positions of another organization than his/her own",
+    shortWaitMs
+  )
 
   let $principalOrgLink = await getFromSearchResults(
     t,

@@ -51,10 +51,18 @@ public class PositionResource {
       throw new WebApplicationException("A Position must belong to an organization",
           Status.BAD_REQUEST);
     }
+    // only admins can make super user positions
+    if (!AuthUtils.isAdmin(user) && (pos.getType() == PositionType.SUPER_USER)) {
+      final Position existingPos = dao.getByUuid(pos.getUuid());
+      if (existingPos.getType() != PositionType.SUPER_USER) {
+        throw new WebApplicationException(
+            "You are not allowed to change the position type to SUPER USER", Status.FORBIDDEN);
+      }
+    }
   }
 
   private void assertCanUpdatePosition(Person user, Position pos) {
-    if (pos.getType() == PositionType.ADMINISTRATOR || pos.getType() == PositionType.SUPER_USER) {
+    if (pos.getType() == PositionType.ADMINISTRATOR) {
       AuthUtils.assertAdministrator(user);
     }
     AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
