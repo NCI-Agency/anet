@@ -411,12 +411,12 @@ const ReportMinimal = props => {
 
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
-                  <Fieldset title="Sensitive information">
+                <Fieldset title="Sensitive information">
                   <div
-                      dangerouslySetInnerHTML={{
+                    dangerouslySetInnerHTML={{
                       __html: report.reportSensitiveInformation.text
                     }}
-                    />
+                  />
                 </Fieldset>
               )}
 

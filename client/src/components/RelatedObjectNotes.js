@@ -223,7 +223,8 @@ class BaseRelatedObjectNotes extends Component {
             bsStyle="primary"
             style={{ margin: "5px" }}
             onClick={() =>
-              this.showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)}
+              this.showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)
+            }
           >
             Post new note
           </Button>
@@ -235,7 +236,8 @@ class BaseRelatedObjectNotes extends Component {
                 this.showRelatedObjectNoteModal(
                   "new",
                   NOTE_TYPE.PARTNER_ASSESSMENT
-                )}
+                )
+              }
             >
               Assess Person
             </Button>
@@ -345,7 +347,8 @@ class BaseRelatedObjectNotes extends Component {
                       <Button
                         title="Edit note"
                         onClick={() =>
-                          this.showRelatedObjectNoteModal(note.uuid)}
+                          this.showRelatedObjectNoteModal(note.uuid)
+                        }
                         bsSize="xsmall"
                         bsStyle="primary"
                       >

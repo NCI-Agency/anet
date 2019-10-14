@@ -343,7 +343,8 @@ const BaseRollupShow = props => {
                     str,
                     Settings.dateFormats.forms.input.date,
                     true
-                  ).toDate()}
+                  ).toDate()
+                }
                 placeholder={inputFormat}
                 maxDate={moment().toDate()}
                 allowSingleDayRange

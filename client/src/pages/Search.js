@@ -433,7 +433,8 @@ const Positions = props => {
         totalCount={totalCount}
         goToPage={setPage}
       >
-        <PositionTable positions={positions} />
+        <br />
+        <PositionTable positions={positions} id="positions-search-results" />
       </UltimatePaginationTopDown>
     </div>
   )
@@ -745,19 +746,22 @@ const Search = props => {
             <Dropdown.Menu className="super-colors">
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
+                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)
+                }
               >
                 Excel (xlsx)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
+                  exportResults(searchQueryParams, queryTypes, "kml", setError)
+                }
               >
                 Google Earth (kml)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
+                  exportResults(searchQueryParams, queryTypes, "nvg", setError)
+                }
               >
                 NATO Vector Graphics (nvg)
               </MenuItem>

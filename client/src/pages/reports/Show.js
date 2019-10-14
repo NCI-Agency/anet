@@ -605,18 +605,18 @@ const BaseReportShow = props => {
 
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
-                  <Fieldset title="Sensitive information">
+                <Fieldset title="Sensitive information">
                   <div
-                      dangerouslySetInnerHTML={{
+                    dangerouslySetInnerHTML={{
                       __html: report.reportSensitiveInformation.text
                     }}
-                    />
+                  />
                   {(hasAuthorizationGroups && (
-                      <div>
+                    <div>
                       <h5>Authorized groups:</h5>
                       <AuthorizationGroupTable
-                          authorizationGroups={values.authorizationGroups}
-                        />
+                        authorizationGroups={values.authorizationGroups}
+                      />
                     </div>
                   )) || <h5>No groups are authorized!</h5>}
                 </Fieldset>
@@ -690,7 +690,8 @@ const BaseReportShow = props => {
                     bsStyle="primary"
                     type="button"
                     onClick={() =>
-                      submitComment(values.newComment, setFieldValue)}
+                      submitComment(values.newComment, setFieldValue)
+                    }
                   >
                     Save comment
                   </Button>

@@ -109,7 +109,8 @@ const AuthorizationGroupForm = props => {
                       "descriptionCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )}
+                    )
+                  }
                   extraColElem={
                     <>
                       <span id="descriptionCharsLeft">

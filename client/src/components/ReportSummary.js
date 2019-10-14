@@ -205,8 +205,7 @@ const ReportSummaryRow = props => {
                   Settings.dateFormats.forms.displayShort.withTime
                 )}
               </span>
-            )
-          }
+            )}
         </p>
       )}
 

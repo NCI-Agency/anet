@@ -207,7 +207,8 @@ const BaseTaskForm = props => {
                   overlayRenderRow={PositionOverlayRow}
                   filterDefs={positionsFilters}
                   onChange={value =>
-                    setFieldValue("responsiblePositions", value)}
+                    setFieldValue("responsiblePositions", value)
+                  }
                   objectType={Position}
                   fields={Position.autocompleteQuery}
                   addon={POSITIONS_ICON}
@@ -246,7 +247,8 @@ const BaseTaskForm = props => {
                     name="plannedCompletion"
                     component={FieldHelper.renderSpecialField}
                     onChange={value =>
-                      setFieldValue("plannedCompletion", value)}
+                      setFieldValue("plannedCompletion", value)
+                    }
                     onBlur={() => setFieldTouched("plannedCompletion", true)}
                     widget={<CustomDateInput id="plannedCompletion" />}
                   />
@@ -258,7 +260,8 @@ const BaseTaskForm = props => {
                     name="projectedCompletion"
                     component={FieldHelper.renderSpecialField}
                     onChange={value =>
-                      setFieldValue("projectedCompletion", value)}
+                      setFieldValue("projectedCompletion", value)
+                    }
                     onBlur={() => setFieldTouched("projectedCompletion", true)}
                     widget={<CustomDateInput id="projectedCompletion" />}
                   />
@@ -277,7 +280,8 @@ const BaseTaskForm = props => {
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
-                        setFieldValue("customFieldEnum1", value)}
+                        setFieldValue("customFieldEnum1", value)
+                      }
                     />
                     {edit && (
                       <Field
@@ -285,7 +289,8 @@ const BaseTaskForm = props => {
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                         component={FieldHelper.renderSpecialField}
                         onChange={value =>
-                          setFieldValue("assessment_customFieldEnum1", value)}
+                          setFieldValue("assessment_customFieldEnum1", value)
+                        }
                         widget={
                           <RichTextEditor
                             className="textField"
@@ -293,7 +298,8 @@ const BaseTaskForm = props => {
                               setFieldTouched(
                                 "assessment_customFieldEnum1",
                                 true
-                              )}
+                              )
+                            }
                           />
                         }
                       />

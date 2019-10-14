@@ -111,7 +111,7 @@ export default class LinkTo extends Component {
     const avatarComponent = showAvatar &&
       !button &&
       modelFields.hasOwnProperty("avatar") && (
-        <AvatarDisplayComponent
+      <AvatarDisplayComponent
         avatar={modelInstance.avatar}
         height={32}
         width={32}

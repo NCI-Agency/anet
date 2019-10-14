@@ -177,7 +177,8 @@ const BaseRouting = props => {
           ) : (
             // Redirect to home if user account exists already. Some users bookmark the onboarding - the very first page they hit
             <Redirect to="/" />
-          )}
+          )
+        }
       />
       <Route path="*" component={PageMissing} />
     </Switch>

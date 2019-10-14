@@ -252,9 +252,11 @@ const BasePersonForm = props => {
                         title={modalTitle}
                         showModal={showWrongPersonModal}
                         onCancel={optionValue =>
-                          hideWrongPersonModal(optionValue)}
+                          hideWrongPersonModal(optionValue)
+                        }
                         onSuccess={optionValue =>
-                          hideWrongPersonModal(optionValue)}
+                          hideWrongPersonModal(optionValue)
+                        }
                       >
                         {(isSelf && (
                           <div>

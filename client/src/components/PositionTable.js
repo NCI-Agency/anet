@@ -151,6 +151,22 @@ const BasePositionTable = props => {
                       </span>
                     </td>
                   )}
+                  <td>{pos.person && <LinkTo person={pos.person} />}</td>
+                  <td>{utils.sentenceCase(pos.status)}</td>
+                  {props.showDelete && (
+                    <td
+                      onClick={() => props.onDelete(pos)}
+                      id={"positionDelete_" + pos.uuid}
+                    >
+                      <span style={{ cursor: "pointer" }}>
+                        <img
+                          src={REMOVE_ICON}
+                          height={14}
+                          alt="Remove position"
+                        />
+                      </span>
+                    </td>
+                  )}
                 </tr>
               )
             })}
