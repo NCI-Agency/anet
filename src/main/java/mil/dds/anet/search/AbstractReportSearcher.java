@@ -50,7 +50,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     return result;
   }
 
-  @Override
   protected void buildQuery(ReportSearchQuery query) {
     qb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
     qb.addFromClause("reports");
