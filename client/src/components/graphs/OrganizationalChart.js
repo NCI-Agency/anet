@@ -304,8 +304,9 @@ export default class OrganizationalChart extends SVGCanvas {
       })
 
     const parent = this.svg.node()
-    const fullWidth = parent.clientWidth
-    const fullHeight = parent.clientHeight
+    const chartBox = parent.getBoundingClientRect()
+    const fullWidth = chartBox.width
+    const fullHeight = chartBox.height
 
     const bounds = this.calculateBounds(root)
 
