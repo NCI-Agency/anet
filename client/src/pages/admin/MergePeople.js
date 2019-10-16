@@ -279,7 +279,7 @@ const MergePeople = props => {
             person.createdAt &&
             moment(person.createdAt).format(
               Settings.dateFormats.forms.displayShort.withTime
-          )
+            )
           }
           vertical
         />
@@ -295,7 +295,7 @@ const MergePeople = props => {
           humanValue={
             person.position && (
               <LinkTo organization={person.position.organization} />
-          )
+            )
           }
           vertical
         />

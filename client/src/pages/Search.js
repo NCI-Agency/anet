@@ -437,7 +437,7 @@ const Positions = props => {
         goToPage={setPage}
       />
       <br />
-      <PositionTable positions={positions} />
+      <PositionTable positions={positions} id="positions-search-results" />
     </div>
   )
 
