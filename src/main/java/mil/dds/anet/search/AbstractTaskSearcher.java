@@ -23,7 +23,6 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     return qb.buildAndRun(getDbHandle(), query, new TaskMapper());
   }
 
-  @Override
   protected void buildQuery(TaskSearchQuery query) {
     qb.addSelectClause("tasks.*");
     qb.addTotalCount();

@@ -331,8 +331,7 @@ const BaseOrganizationForm = props => {
                               addApprovalStep(
                                 arrayHelpers,
                                 values.planningApprovalSteps
-                              )
-                            }
+                              )}
                             bsStyle="primary"
                             id="addApprovalStepButton"
                           >
@@ -411,8 +410,7 @@ const BaseOrganizationForm = props => {
                               addApprovalStep(
                                 arrayHelpers,
                                 values.approvalSteps
-                              )
-                            }
+                              )}
                             bsStyle="primary"
                             id="addApprovalStepButton"
                           >
@@ -570,8 +568,7 @@ const BaseOrganizationForm = props => {
           overlayRenderRow={ApproverOverlayRow}
           filterDefs={approversFilters}
           onChange={value =>
-            setFieldValue(`${fieldName}.${index}.approvers`, value)
-          }
+            setFieldValue(`${fieldName}.${index}.approvers`, value)}
           objectType={Position}
           queryParams={{
             status: Position.STATUS.ACTIVE,

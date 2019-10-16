@@ -327,18 +327,18 @@ const BaseOrganizationShow = props => {
 
                 {organization.childrenOrgs &&
                   organization.childrenOrgs.length > 0 && (
-                  <Field
+                    <Field
                     name="childrenOrgs"
                     component={FieldHelper.renderReadonlyField}
                     label="Sub organizations"
                     humanValue={
-                      <ListGroup>
+                        <ListGroup>
                         {organization.childrenOrgs.map(organization => (
-                          <ListGroupItem key={organization.uuid}>
+                            <ListGroupItem key={organization.uuid}>
                             <LinkTo organization={organization}>
-                              {organization.shortName} {organization.longName}{" "}
-                              {organization.identificationCode}
-                            </LinkTo>
+                                {organization.shortName} {organization.longName}{" "}
+                                {organization.identificationCode}
+                              </LinkTo>
                           </ListGroupItem>
                         ))}
                       </ListGroup>

@@ -186,6 +186,9 @@ const ReportTable = props => {
                   <LinkTo organization={report.advisorOrg} />
                 </td>
                 <td>
+                  <LinkTo organization={report.advisorOrg} />
+                </td>
+                <td>
                   <LinkTo report={report} className="read-report-button" />
                 </td>
                 {showStatus && <td>{report.state}</td>}
