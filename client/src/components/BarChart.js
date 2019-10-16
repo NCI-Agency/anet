@@ -113,7 +113,7 @@ const BarChart = props => {
 
     let chart = d3.select(node.current)
     let chartBox = node.current.getBoundingClientRect()
-    let chartWidth = isNumeric(width) ? width : chartBox.right - chartBox.left
+    let chartWidth = isNumeric(width) ? width : chartBox.width
     let chartHeight = isNumeric(height) ? height : 0.7 * chartWidth
     let xWidth = chartWidth - marginLeft - MARGIN.right
     let yHeight = chartHeight - MARGIN.top - marginBottom

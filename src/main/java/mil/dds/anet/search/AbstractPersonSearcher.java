@@ -7,6 +7,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, PersonSearchQuery>
     implements IPersonSearcher {
@@ -15,6 +16,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     super(qb);
   }
 
+  @InTransaction
   @Override
   public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
     buildQuery(query);
