@@ -679,3 +679,9 @@ properties:
           title: The list of ignored (email) domain names. These will not be affected by auto-inactivation or be sent email warnings.
           description: Valid email domain names for this ANET instance; may contain wildcards.
           examples: ["*.nato.int", dds.mil]
+      checkIntervalInSecs:
+        type: integer
+        minimum: 0
+        title: The checking interval expressed in seconds.
+        description: Used in the application to set the interval at which the deactivation (warning) checks will occur.
+        examples: [3600]

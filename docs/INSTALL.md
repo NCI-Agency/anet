@@ -415,6 +415,7 @@ dictionary:
   automaticallyInactivateUsers:
     emailRemindersDaysPrior: [15, 30, 45]
     ignoredDomainNames: []
+    checkIntervalInSecs: 3600  # 60 * 60
 
   dashboards:
     - label: dashboard0
