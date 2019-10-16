@@ -1,10 +1,14 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
+import { useBoilerplate } from "components/Page"
 import * as d3 from "d3"
+import _xor from "lodash/xor"
 import { Symbol } from "milsymbol"
-import { Organization } from "models"
+import { Organization, Position } from "models"
 import PropTypes from "prop-types"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import EXPAND_ICON from "resources/plus.png"
@@ -51,6 +55,7 @@ const GQL_GET_CHART_DATA = gql`
     }
   }
 `
+const transitionDuration = 200
 
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
@@ -63,78 +68,116 @@ const sortPositions = (positions, truncateLimit) => {
     : allResults
 }
 
-export default class OrganizationalChart extends SVGCanvas {
-  static propTypes = {
-    org: PropTypes.object.isRequired
-  }
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      root: null,
-      orgs: [],
-      expanded: [],
-      personnelDepth: 5
+const OrganizationalChart = props => {
+  const [expanded, setExpanded] = useState([])
+  const [personnelDepth, setPersonnelDepth] = useState(5)
+  const history = useHistory()
+  const svgContainer = useRef(null)
+  const canvas = useRef(null)
+  const link = useRef(null)
+  const node = useRef(null)
+  const getNodeSize = useCallback(() => [200, 100 + 11 * personnelDepth])
+  const calculateBounds = useCallback(root => {
+    const boundingBox = root.descendants().reduce(
+      (box, node) => {
+        return {
+          xmin: Math.min(box.xmin, node.x),
+          xmax: Math.max(box.xmax, node.x),
+          ymin: Math.min(box.ymin, node.y),
+          ymax: Math.max(box.ymax, node.y)
+        }
+      },
+      {
+        xmin: Number.MAX_SAFE_INTEGER,
+        xmax: Number.MIN_SAFE_INTEGER,
+        ymin: Number.MAX_SAFE_INTEGER,
+        ymax: Number.MIN_SAFE_INTEGER
+      }
+    )
+    return {
+      box: boundingBox,
+      size: [
+        boundingBox.xmax - boundingBox.xmin + getNodeSize()[0] + 100,
+        boundingBox.ymax - boundingBox.ymin + getNodeSize()[1]
+      ],
+      center: [
+        (boundingBox.xmax + boundingBox.xmin + getNodeSize()[0] - 50) / 2,
+        (boundingBox.ymax + boundingBox.ymin + getNodeSize()[1] - 50) / 2
+      ]
     }
+  })
 
-    this.tree = d3.tree()
-  }
+  const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
+    uuid: props.org.uuid
+  })
 
-  zoomFn(modifier) {
-    this.setState({
-      personnelDepth: Math.max(0, this.state.personnelDepth + modifier)
-    })
-  }
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    ...props
+  })
 
-  getNodeSize() {
-    return [200, 100 + 11 * this.state.personnelDepth]
-  }
-
-  componentDidMount() {
-    this.canvas = this.svg.append("g")
-
-    this.link = this.canvas
+  useEffect(() => {
+    if (!data) {
+      // TODO: make effect only happen on svgContainer.current change
+      return
+    }
+    canvas.current = d3.select(svgContainer.current).append("g")
+    link.current = canvas.current
       .append("g")
       .attr("fill", "none")
       .attr("stroke", "#555")
-
-    this.node = this.canvas
+    node.current = canvas.current
       .append("g")
       .attr("cursor", "pointer")
       .attr("pointer-events", "all")
+  }, [data])
 
-    this.update()
-  }
+  useEffect(() => {
+    if (!data) {
+      return
+    }
+    setExpanded([data.organization.uuid])
+  }, [data])
 
-  componentDidUpdate(prevProps, prevState) {
-    this.update(prevProps, prevState)
-  }
-
-  update(prevProps, prevState) {
-    if (!prevProps || prevProps.org.valueOf() !== this.props.org.valueOf()) {
-      this.fetchData()
+  useEffect(() => {
+    if (!svgContainer.current || !data?.organization) {
+      return
     }
 
-    this.canvas.attr(
+    const chartBox = svgContainer.current.getBoundingClientRect()
+    const fullWidth = chartBox.width
+    const fullHeight = chartBox.height
+
+    canvas.current.attr(
       "transform",
-      "translate(" + this.props.height / 2 + "," + 50 + ")"
+      "translate(" + fullHeight / 2 + "," + 50 + ")"
     )
 
-    if (!this.state.root) return
+    const tree = d3.tree().size(fullWidth, fullHeight)
 
-    const tree = d3.tree().size(this.props.width, this.props.height)
+    tree.nodeSize(getNodeSize())
 
-    tree.nodeSize(this.getNodeSize())
-
-    const root = d3.hierarchy(this.state.root, d =>
-      this.state.expanded.includes(d.uuid)
-        ? this.state.orgs.filter(org =>
+    const root = d3.hierarchy(data.organization, d =>
+      expanded.includes(d.uuid)
+        ? data.organization.descendantOrgs.filter(org =>
           d.childrenOrgs.map(org => org.uuid).includes(org.uuid)
         )
         : []
     )
 
-    const linkSelect = this.link.selectAll("path").data(tree(root).links())
+    const linkSelect = link.current.selectAll("path").data(tree(root).links())
+
+    linkSelect
+      .transition()
+      .duration(transitionDuration)
+      .attr(
+        "d",
+        d3
+          .linkVertical()
+          .x(d => d.x)
+          .y(d => d.y)
+      )
 
     linkSelect
       .enter()
@@ -151,17 +194,11 @@ export default class OrganizationalChart extends SVGCanvas {
 
     linkSelect.exit().remove()
 
-    linkSelect.attr(
-      "d",
-      d3
-        .linkVertical()
-        .x(d => d.x)
-        .y(d => d.y)
-    )
+    const nodeSelect = node.current.selectAll("g.org").data(root.descendants(), d => d.data.uuid)
 
-    const nodeSelect = this.node
-      .selectAll("g.org")
-      .data(root.descendants())
+    nodeSelect
+      .transition()
+      .duration(transitionDuration)
       .attr("transform", d => `translate(${d.x},${d.y})`)
 
     const nodeEnter = nodeSelect
@@ -185,30 +222,17 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("height", 12)
       .attr("x", -15)
       .attr("y", 5)
-      .on("click", d => {
-        const index = this.state.expanded.indexOf(d.data.uuid)
-        let newExpanded = this.state.expanded.slice()
-        if (index > -1) {
-          newExpanded.splice(index, 1)
-        } else {
-          newExpanded.push(d.data.uuid)
-        }
-        this.setState({
-          expanded: newExpanded
-        })
-      })
+      .on("click", d => setExpanded(expanded => _xor(expanded, [d.data.uuid])))
 
-    this.node
+    node.current
       .selectAll("image.orgChildIcon")
       .attr("href", d =>
-        this.state.expanded.indexOf(d.data.uuid) > -1
-          ? ORGANIZATIONS_ICON
-          : EXPAND_ICON
+        expanded.indexOf(d.data.uuid) > -1 ? ORGANIZATIONS_ICON : EXPAND_ICON
       )
 
     iconNodeG
-      .append("a")
-      .attr("href", d => `/organizations/${d.data.uuid}`)
+      .append("g")
+      .on("click", d => history.push(Organization.pathFor(d.data)))
       .each(function(d) {
         const positions = sortPositions(d.data.positions)
         const unitcode = Settings.fields.person.ranks.find(
@@ -225,9 +249,8 @@ export default class OrganizationalChart extends SVGCanvas {
       })
 
     iconNodeG
-      .append("a")
-      .attr("href", d => `/organizations/${d.data.uuid}`)
       .append("text")
+      .on("click", d => history.push(Organization.pathFor(d.data)))
       .attr("font-size", "20px")
       .attr("font-family", "monospace")
       .attr("font-weight", "bold")
@@ -240,9 +263,8 @@ export default class OrganizationalChart extends SVGCanvas {
       )
 
     iconNodeG
-      .append("a")
-      .attr("href", d => `/organizations/${d.data.uuid}`)
       .append("text")
+      .on("click", d => history.push(Organization.pathFor(d.data)))
       .attr("font-family", "monospace")
       .attr("dy", 45)
       .attr("x", -40)
@@ -255,11 +277,7 @@ export default class OrganizationalChart extends SVGCanvas {
     const headG = nodeSelect
       .selectAll("g.head")
       .data(
-        d =>
-          sortPositions(
-            d.data.positions,
-            Math.min(1, this.state.personnelDepth)
-          ) || [],
+        d => sortPositions(d.data.positions, Math.min(1, personnelDepth)) || [],
         d => d.uuid
       )
 
@@ -268,8 +286,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .append("g")
       .attr("class", "head")
       .attr("transform", "translate(-63, 65)")
-      .append("a")
-      .attr("href", d => `/positions/${d.uuid}`)
+      .on("click", d => history.push(Position.pathFor(d)))
 
     headG.exit().remove()
 
@@ -319,8 +336,7 @@ export default class OrganizationalChart extends SVGCanvas {
     const positionsG = nodeSelect
       .selectAll("g.position")
       .data(
-        d =>
-          sortPositions(d.data.positions, this.state.personnelDepth).slice(1),
+        d => sortPositions(d.data.positions, personnelDepth).slice(1),
         d => d.uuid
       )
 
@@ -331,8 +347,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .append("g")
       .attr("class", "position")
       .attr("transform", (d, i) => `translate(-63,${87 + i * 11})`)
-      .append("a")
-      .attr("href", d => `/positions/${d.uuid}`)
+      .on("click", d => history.push(Position.pathFor(d)))
 
     positionsGA
       .append("image")
@@ -361,65 +376,47 @@ export default class OrganizationalChart extends SVGCanvas {
         return result.length > 31 ? result.substring(0, 28) + "..." : result
       })
 
-    const parent = this.svg.node()
-    const chartBox = parent.getBoundingClientRect()
-    const fullWidth = chartBox.width
-    const fullHeight = chartBox.height
-
-    const bounds = this.calculateBounds(root)
+    const bounds = calculateBounds(root)
 
     const scale = Math.min(
       1.2,
       1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
     )
 
-    this.canvas.attr(
+    canvas.current.attr(
       "transform",
       `translate(${fullWidth / 2 - scale * bounds.center[0]},${fullHeight / 2 -
         scale * bounds.center[1]}) scale(${scale})`
     )
-    this.svg.attr("height", scale * bounds.size[1] + 50)
+    d3.select(svgContainer.current).attr("height", scale * bounds.size[1] + 50)
+  }, [
+    calculateBounds,
+    data,
+    expanded,
+    getNodeSize,
+    history,
+    personnelDepth,
+    svgContainer
+  ])
+
+  if (done) {
+    return result
   }
 
-  calculateBounds(root) {
-    const boundingBox = root.descendants().reduce(
-      (box, node) => {
-        return {
-          xmin: Math.min(box.xmin, node.x),
-          xmax: Math.max(box.xmax, node.x),
-          ymin: Math.min(box.ymin, node.y),
-          ymax: Math.max(box.ymax, node.y)
-        }
-      },
-      {
-        xmin: Number.MAX_SAFE_INTEGER,
-        xmax: Number.MIN_SAFE_INTEGER,
-        ymin: Number.MAX_SAFE_INTEGER,
-        ymax: Number.MIN_SAFE_INTEGER
-      }
-    )
-    return {
-      box: boundingBox,
-      size: [
-        boundingBox.xmax - boundingBox.xmin + this.getNodeSize()[0] + 100,
-        boundingBox.ymax - boundingBox.ymin + this.getNodeSize()[1]
-      ],
-      center: [
-        (boundingBox.xmax + boundingBox.xmin + this.getNodeSize()[0] - 50) / 2,
-        (boundingBox.ymax + boundingBox.ymin + this.getNodeSize()[1] - 50) / 2
-      ]
-    }
-  }
-
-  fetchData() {
-    if (!this.props.org || !this.props.org.uuid) return
-
-    API.query(GQL_GET_CHART_DATA, { uuid: this.props.org.uuid }).then(data =>
-      this.setState({
-        root: data.organization,
-        orgs: data.organization.descendantOrgs,
-        expanded: [data.organization.uuid]
-      })
-    )
-  }
+  return (
+    <SVGCanvas
+      size={props.size}
+      exportTitle={`${data.shortName} organization chart`}
+      ref={svgContainer}
+      zoomFn={increment =>
+        setPersonnelDepth(Math.max(0, personnelDepth + increment))}
+    />
+  )
 }
+
+OrganizationalChart.propTypes = {
+  org: PropTypes.object.isRequired,
+  size: PropTypes.object.isRequired
+}
+
+export default OrganizationalChart
