@@ -7,6 +7,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractPositionSearcher
     extends AbstractSearcher<Position, PositionSearchQuery> implements IPositionSearcher {
@@ -15,6 +16,7 @@ public abstract class AbstractPositionSearcher
     super(qb);
   }
 
+  @InTransaction
   @Override
   public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
     buildQuery(query);

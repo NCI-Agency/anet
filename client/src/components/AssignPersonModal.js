@@ -137,11 +137,7 @@ export default class AssignPersonModal extends Component {
           <Button className="pull-left" onClick={this.close}>
             Cancel
           </Button>
-          <Button
-            onClick={this.save}
-            bsStyle="primary"
-            className="save-button"
-          >
+          <Button onClick={this.save} bsStyle="primary" className="save-button">
             Save
           </Button>
         </Modal.Footer>
