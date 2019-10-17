@@ -55,9 +55,7 @@ export default class SelectSearchFilter extends Component {
     let values = this.props.values
     let labels = this.props.labels || values.map(v => utils.sentenceCase(v))
     return !this.props.asFormField ? (
-      <React.Fragment>
-        {labels[values.indexOf(this.state.value.value)]}
-      </React.Fragment>
+      <>{labels[values.indexOf(this.state.value.value)]}</>
     ) : (
       <div>
         <select value={this.state.value.value} onChange={this.onChange}>

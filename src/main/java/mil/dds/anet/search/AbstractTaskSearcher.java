@@ -23,7 +23,6 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     return qb.buildAndRun(getDbHandle(), query, new TaskMapper());
   }
 
-  @Override
   protected void buildQuery(TaskSearchQuery query) {
     qb.addSelectClause("tasks.*");
     qb.addTotalCount();
@@ -44,14 +43,12 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     qb.addEqualsClause("category", "tasks.category", query.getCategory());
     qb.addEqualsClause("status", "tasks.status", query.getStatus());
     qb.addLikeClause("projectStatus", "tasks.\"customFieldEnum1\"", query.getProjectStatus());
-    qb.addDateClause("plannedCompletionStart", "tasks.\"plannedCompletion\"", Comparison.AFTER,
-        query.getPlannedCompletionStart());
-    qb.addDateClause("plannedCompletionEnd", "tasks.\"plannedCompletion\"", Comparison.BEFORE,
-        query.getPlannedCompletionEnd());
-    qb.addDateClause("projectedCompletionStart", "tasks.\"projectedCompletion\"", Comparison.AFTER,
-        query.getProjectedCompletionStart());
-    qb.addDateClause("projectedCompletionEnd", "tasks.\"projectedCompletion\"", Comparison.BEFORE,
-        query.getProjectedCompletionEnd());
+    qb.addDateRangeClause("plannedCompletionStart", "tasks.\"plannedCompletion\"", Comparison.AFTER,
+        query.getPlannedCompletionStart(), "plannedCompletionEnd", "tasks.\"plannedCompletion\"",
+        Comparison.BEFORE, query.getPlannedCompletionEnd());
+    qb.addDateRangeClause("projectedCompletionStart", "tasks.\"projectedCompletion\"",
+        Comparison.AFTER, query.getProjectedCompletionStart(), "projectedCompletionEnd",
+        "tasks.\"projectedCompletion\"", Comparison.BEFORE, query.getProjectedCompletionEnd());
     qb.addLikeClause("customField", "tasks.\"customField\"", query.getCustomField());
 
     if (query.getCustomFieldRef1Uuid() != null) {

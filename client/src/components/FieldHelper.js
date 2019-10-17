@@ -91,14 +91,14 @@ const renderField = (
   return (
     <FormGroup controlId={id} validationState={validationState}>
       {vertical ? (
-        <React.Fragment>
+        <>
           {label !== null && <ControlLabel>{label}</ControlLabel>}
           {widget}
           {getHelpBlock(field, form)}
           {children}
-        </React.Fragment>
+        </>
       ) : (
-        <React.Fragment>
+        <>
           {label !== null && (
             <Col sm={2} componentClass={ControlLabel}>
               {label}
@@ -111,7 +111,7 @@ const renderField = (
               {children}
             </div>
           </Col>
-        </React.Fragment>
+        </>
       )}
       {extraColElem && <Col sm={3} {...extraColElem.props} />}
     </FormGroup>
@@ -183,7 +183,7 @@ export const renderReadonlyField = ({
     ...otherProps
   } = props
   const widgetElem = (
-    <FormControl.Static componentClass={"div"} {...field} {...otherProps}>
+    <FormControl.Static componentClass="div" {...field} {...otherProps}>
       {getHumanValue(field, humanValue)}
     </FormControl.Static>
   )

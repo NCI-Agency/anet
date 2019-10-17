@@ -92,7 +92,7 @@ export default class OrganizationFilter extends Component {
     }
 
     return !this.props.asFormField ? (
-      <React.Fragment>{msg}</React.Fragment>
+      <>{msg}</>
     ) : (
       <div>
         <AdvancedSingleSelect

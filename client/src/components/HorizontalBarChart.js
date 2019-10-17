@@ -87,7 +87,7 @@ const HorizontalBarChart = props => {
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
     let chartBox = node.current.getBoundingClientRect()
-    let chartWidth = isNumeric(width) ? width : chartBox.right - chartBox.left
+    let chartWidth = isNumeric(width) ? width : chartBox.width
     let chartData = data.data
     let categoryLabels = data.categoryLabels
     let leavesLabels = data.leavesLabels

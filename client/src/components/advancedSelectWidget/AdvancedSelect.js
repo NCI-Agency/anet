@@ -62,7 +62,7 @@ FilterAsNav.propTypes = {
 const FilterAsDropdown = props => {
   const { items, handleOnChange } = props
   return (
-    <React.Fragment>
+    <>
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -73,7 +73,7 @@ const FilterAsDropdown = props => {
           ))}
         </select>
       </p>
-    </React.Fragment>
+    </>
   )
 }
 FilterAsDropdown.propTypes = {
@@ -183,7 +183,7 @@ export default class AdvancedSelect extends Component {
       : null
     const items = results && results[filterType] ? results[filterType].list : []
     return (
-      <React.Fragment>
+      <>
         <InputGroup>
           <FormControl
             name={fieldName}
@@ -269,7 +269,7 @@ export default class AdvancedSelect extends Component {
                         columns={[""].concat(overlayColumns)}
                         renderRow={overlayRenderRow}
                         isLoading={isLoading}
-                        loaderMessage={"No results found"}
+                        loaderMessage="No results found"
                         tableClassName={overlayTableClassName}
                       />
                       {this.paginationFor(filterType)}
@@ -284,7 +284,7 @@ export default class AdvancedSelect extends Component {
         <Row>
           <Col sm={12}>{renderSelectedWithDelete}</Col>
         </Row>
-      </React.Fragment>
+      </>
     )
   }
 

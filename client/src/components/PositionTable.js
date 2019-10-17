@@ -111,7 +111,14 @@ const BasePositionTable = props => {
             />
           )}
 
-          <Table striped condensed hover responsive className="positions_table">
+          <Table
+            striped
+            condensed
+            hover
+            responsive
+            className="positions_table"
+            id={props.id}
+          >
             <thead>
               <tr>
                 <th>Name</th>
@@ -172,6 +179,7 @@ const BasePositionTable = props => {
 }
 
 BasePositionTable.propTypes = {
+  id: PropTypes.string,
   positions: PropTypes.array, // list of positions, when no pagination wanted
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,

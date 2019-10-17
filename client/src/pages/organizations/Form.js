@@ -225,7 +225,7 @@ const BaseOrganizationForm = props => {
               <Fieldset title={title} action={action} />
               <Fieldset>
                 {!isAdmin ? (
-                  <React.Fragment>
+                  <>
                     <Field
                       name="type"
                       component={FieldHelper.renderReadonlyField}
@@ -265,9 +265,9 @@ const BaseOrganizationForm = props => {
                       name="identificationCode"
                       component={FieldHelper.renderReadonlyField}
                     />
-                  </React.Fragment>
+                  </>
                 ) : (
-                  <React.Fragment>
+                  <>
                     <Field
                       name="type"
                       component={FieldHelper.renderButtonToggleGroup}
@@ -320,7 +320,7 @@ const BaseOrganizationForm = props => {
                       name="identificationCode"
                       component={FieldHelper.renderInputField}
                     />
-                  </React.Fragment>
+                  </>
                 )}
               </Fieldset>
 
@@ -337,8 +337,7 @@ const BaseOrganizationForm = props => {
                               addApprovalStep(
                                 arrayHelpers,
                                 values.planningApprovalSteps
-                              )
-                            }
+                              )}
                             bsStyle="primary"
                             id="addPlanningApprovalStepButton"
                           >
@@ -417,8 +416,7 @@ const BaseOrganizationForm = props => {
                               addApprovalStep(
                                 arrayHelpers,
                                 values.approvalSteps
-                              )
-                            }
+                              )}
                             bsStyle="primary"
                             id="addApprovalStepButton"
                           >
@@ -577,8 +575,7 @@ const BaseOrganizationForm = props => {
           label="Add an approver"
           component={FieldHelper.renderSpecialField}
           onChange={value =>
-            setFieldValue(`${fieldName}.${index}.approvers`, value)
-          }
+            setFieldValue(`${fieldName}.${index}.approvers`, value)}
           widget={
             <AdvancedMultiSelect
               fieldName={`${fieldName}.${index}.approvers`}

@@ -433,16 +433,15 @@ const BaseReportForm = props => {
                       "intentCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )
-                  }
+                    )}
                   extraColElem={
-                    <React.Fragment>
+                    <>
                       <span id="intentCharsLeft">
                         {Settings.maxTextFieldLength -
                           initialValues.intent.length}
                       </span>{" "}
                       characters remaining
-                    </React.Fragment>
+                    </>
                   }
                   className="meeting-goal"
                 />
@@ -526,8 +525,7 @@ const BaseReportForm = props => {
                           setFieldValue(
                             "cancelledReason",
                             cancelledReasonOptions[0].value
-                          )
-                        }
+                          )}
                       >
                         This engagement was cancelled
                       </Checkbox>
@@ -567,13 +565,13 @@ const BaseReportForm = props => {
                 {!isFutureEngagement &&
                   !values.cancelled &&
                   values.atmosphere && (
-                  <Field
+                    <Field
                     name="atmosphereDetails"
                     label={Settings.fields.report.atmosphereDetails}
                     component={FieldHelper.renderInputField}
                     placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
                       values.atmosphere === "POSITIVE" ? "(optional)" : ""
-                    }`}
+                      }`}
                     className="atmosphere-details"
                   />
                 )}
@@ -601,8 +599,7 @@ const BaseReportForm = props => {
                   name="attendees"
                   component={FieldHelper.renderSpecialField}
                   onChange={value =>
-                    updateAttendees(setFieldValue, "attendees", value)
-                  }
+                    updateAttendees(setFieldValue, "attendees", value)}
                   widget={
                     <AdvancedMultiSelect
                       fieldName="attendees"
@@ -640,8 +637,7 @@ const BaseReportForm = props => {
                         objectType={Person}
                         curValue={values.attendees}
                         onChange={value =>
-                          updateAttendees(setFieldValue, "attendees", value)
-                        }
+                          updateAttendees(setFieldValue, "attendees", value)}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
                     </>
@@ -725,16 +721,15 @@ const BaseReportForm = props => {
                         "keyOutcomesCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )
-                    }
+                      )}
                     extraColElem={
-                      <React.Fragment>
+                      <>
                         <span id="keyOutcomesCharsLeft">
                           {Settings.maxTextFieldLength -
                             initialValues.keyOutcomes.length}
                         </span>{" "}
                         characters remaining
-                      </React.Fragment>
+                      </>
                     }
                   />
                 )}
@@ -751,16 +746,15 @@ const BaseReportForm = props => {
                         "nextStepsCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )
-                    }
+                      )}
                     extraColElem={
-                      <React.Fragment>
+                      <>
                         <span id="nextStepsCharsLeft">
                           {Settings.maxTextFieldLength -
                             initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
-                      </React.Fragment>
+                      </>
                     }
                   />
                 )}
@@ -798,8 +792,7 @@ const BaseReportForm = props => {
                           setFieldValue(
                             "reportSensitiveInformation.text",
                             value
-                          )
-                        }
+                          )}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
@@ -807,8 +800,7 @@ const BaseReportForm = props => {
                               setFieldTouched(
                                 "reportSensitiveInformation.text",
                                 true
-                              )
-                            }
+                              )}
                           />
                         }
                       />
@@ -817,8 +809,7 @@ const BaseReportForm = props => {
                         label="Authorization Groups"
                         component={FieldHelper.renderSpecialField}
                         onChange={value =>
-                          setFieldValue("authorizationGroups", value)
-                        }
+                          setFieldValue("authorizationGroups", value)}
                         widget={
                           <AdvancedMultiSelect
                             fieldName="authorizationGroups"
@@ -849,8 +840,7 @@ const BaseReportForm = props => {
                               objectType={AuthorizationGroup}
                               curValue={values.authorizationGroups}
                               onChange={value =>
-                                setFieldValue("authorizationGroups", value)
-                              }
+                                setFieldValue("authorizationGroups", value)}
                               handleAddItem={
                                 FieldHelper.handleMultiSelectAddItem
                               }
@@ -879,8 +869,7 @@ const BaseReportForm = props => {
                   {canDelete && (
                     <ConfirmDelete
                       onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)
-                      }
+                        onConfirmDelete(values.uuid, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
