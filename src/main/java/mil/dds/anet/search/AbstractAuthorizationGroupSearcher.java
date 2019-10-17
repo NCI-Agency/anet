@@ -23,7 +23,6 @@ public abstract class AbstractAuthorizationGroupSearcher
     return qb.buildAndRun(getDbHandle(), query, new AuthorizationGroupMapper());
   }
 
-  @Override
   protected void buildQuery(AuthorizationGroupSearchQuery query) {
     qb.addSelectClause("\"authorizationGroups\".*");
     qb.addTotalCount();

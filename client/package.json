@@ -53,7 +53,7 @@
     "eslint": "^5.16.0",
     "eslint-config-react-app": "^3.0.8",
     "eslint-config-standard": "^12.0.0",
-    "eslint-config-standard-react": "^8.0.0",
+    "eslint-config-standard-react": "^9.2.0",
     "eslint-loader": "^3.0.2",
     "eslint-plugin-flowtype": "^3.13.0",
     "eslint-plugin-import": "^2.18.2",
@@ -119,7 +119,7 @@
     "email-addresses": "^3.0.2",
     "file-saver": "^2.0.2",
     "formik": "^1.5.8",
-    "graphiql": "^0.15.1",
+    "graphiql": "^0.14.2",
     "graphql": "^14.5.8",
     "hopscotch": "^0.3.1",
     "jsonpath-plus": "^1.1.0",
@@ -254,18 +254,6 @@
       "standard"
     ],
     "rules": {
-      "arrow-spacing": "warn",
-      "block-spacing": "warn",
-      "brace-style": "warn",
-      "camelcase": "warn",
-      "comma-dangle": "warn",
-      "comma-spacing": "warn",
-      "curly": "warn",
-      "dot-notation": "warn",
-      "eol-last": "warn",
-      "func-call-spacing": "warn",
-      "handle-callback-err": "warn",
-      "import/no-duplicates": "warn",
       "import/order": [
         "warn",
         {
@@ -284,29 +272,6 @@
         "warn",
         "prefer-double"
       ],
-      "key-spacing": "warn",
-      "keyword-spacing": "warn",
-      "new-cap": "warn",
-      "no-extra-boolean-cast": "warn",
-      "no-floating-decimal": "warn",
-      "no-irregular-whitespace": "warn",
-      "no-mixed-spaces-and-tabs": "warn",
-      "no-multi-spaces": "warn",
-      "no-multiple-empty-lines": "warn",
-      "no-return-assign": "warn",
-      "no-return-await": "warn",
-      "no-tabs": "warn",
-      "no-template-curly-in-string": "warn",
-      "no-trailing-spaces": "warn",
-      "no-unneeded-ternary": "warn",
-      "no-unused-vars": "warn",
-      "no-useless-return": "warn",
-      "node/no-deprecated-api": "warn",
-      "object-curly-spacing": "warn",
-      "object-property-newline": "warn",
-      "one-var": "warn",
-      "operator-linebreak": "warn",
-      "padded-blocks": "warn",
       "quote-props": [
         "warn",
         "as-needed"
@@ -320,33 +285,20 @@
       ],
       "react-hooks/exhaustive-deps": "warn",
       "react-hooks/rules-of-hooks": "error",
-      "react/jsx-boolean-value": "warn",
-      "react/jsx-curly-spacing": "warn",
-      "react/jsx-equals-spacing": "warn",
+      "react/jsx-closing-bracket-location": "warn",
+      "react/jsx-closing-tag-location": "warn",
+      "react/jsx-handler-names": "warn",
       "react/jsx-indent": "warn",
       "react/jsx-indent-props": "warn",
-      "react/jsx-no-bind": "warn",
-      "react/jsx-tag-spacing": "warn",
-      "react/no-did-update-set-state": "off",
-      "react/no-unused-prop-types": "warn",
-      "react/prop-types": "warn",
-      "react/self-closing-comp": "warn",
+      "react/no-did-update-set-state": "warn",
       "semi": [
         "warn",
         "never"
       ],
-      "space-before-blocks": "warn",
       "space-before-function-paren": [
         "warn",
         "never"
-      ],
-      "space-in-parens": "warn",
-      "space-infix-ops": "warn",
-      "spaced-comment": "warn",
-      "standard/computed-property-even-spacing": "warn",
-      "standard/no-callback-literal": "warn",
-      "standard/object-curly-even-spacing": "warn",
-      "template-curly-spacing": "warn"
+      ]
     }
   }
 }

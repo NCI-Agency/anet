@@ -216,7 +216,7 @@ const Collection = props => {
   return (
     <div className="scrollable">
       <ReportCollection
-        paginationKey={"r_rollup"}
+        paginationKey="r_rollup"
         queryParams={queryParams}
         viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
       />
@@ -343,8 +343,7 @@ const BaseRollupShow = props => {
                     str,
                     Settings.dateFormats.forms.input.date,
                     true
-                  ).toDate()
-                }
+                  ).toDate()}
                 placeholder={inputFormat}
                 maxDate={moment().toDate()}
                 allowSingleDayRange

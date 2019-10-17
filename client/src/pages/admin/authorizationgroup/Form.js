@@ -109,16 +109,15 @@ const AuthorizationGroupForm = props => {
                       "descriptionCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )
-                  }
+                    )}
                   extraColElem={
-                    <React.Fragment>
+                    <>
                       <span id="descriptionCharsLeft">
                         {Settings.maxTextFieldLength -
                           props.initialValues.description.length}
                       </span>{" "}
                       characters remaining
-                    </React.Fragment>
+                    </>
                   }
                 />
 

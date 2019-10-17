@@ -199,7 +199,7 @@ const MergePeople = props => {
                       !_isEmpty(loser.position) &&
                       winner &&
                       !_isEmpty(winner.position) && (
-                      <Alert bsStyle="danger">
+                        <Alert bsStyle="danger">
                         <b>Danger:</b> Position on Loser (
                         {loser.position.name}) will be left unfilled
                       </Alert>
@@ -229,7 +229,7 @@ const MergePeople = props => {
 
   function showPersonDetails(person) {
     return (
-      <React.Fragment>
+      <>
         <Field
           name="uuid"
           component={FieldHelper.renderReadonlyField}
@@ -317,7 +317,7 @@ const MergePeople = props => {
           }
           vertical
         />
-      </React.Fragment>
+      </>
     )
   }
 

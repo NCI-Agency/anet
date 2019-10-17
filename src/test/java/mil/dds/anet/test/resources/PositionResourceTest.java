@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
+import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -593,4 +595,102 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(history.get(1).getPersonUuid()).isEqualTo(prin2.getUuid());
   }
 
+  @Test
+  public void positionUpdateAdminPermissionTest() throws UnsupportedEncodingException {
+    updatePosition(admin);
+  }
+
+  @Test
+  public void positionUpdateSuperUserPermissionTest() throws UnsupportedEncodingException {
+    updatePosition(getSuperUser());
+  }
+
+  @Test
+  public void positionUpdateRegularUserPermissionTest() throws UnsupportedEncodingException {
+    updatePosition(getRegularUser());
+  }
+
+  private void updatePosition(Person user) {
+    final Position position = user.getPosition();
+    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
+
+    // try to update a position from the user's org
+    try {
+      List<Position> userOrgPositions =
+          position.getOrganization().loadPositions(context, null).get();
+      assertThat(userOrgPositions).isNotNull();
+      assertThat(userOrgPositions).isNotEmpty();
+      final Position p1 = userOrgPositions.get(0);
+      p1.loadOrganization(context).get();
+      try {
+        final Integer nrUpdated =
+            graphQLHelper.updateObject(user, "updatePosition", "position", "PositionInput", p1);
+        if (isAdmin) {
+          assertThat(nrUpdated).isEqualTo(1);
+        } else if (isSuperUser) {
+          assertThat(nrUpdated).isEqualTo(1);
+        } else {
+          fail("Expected ForbiddenException");
+        }
+      } catch (ForbiddenException expectedException) {
+        if (isAdmin || isSuperUser) {
+          fail("Unexpected ForbiddenException");
+        }
+      }
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    // create a regular position not related to the user's organization
+    Position newPosition = new Position();
+    newPosition.setName("A Test Position not related to the user's organization");
+    newPosition.setType(PositionType.ADVISOR);
+    newPosition.setStatus(PositionStatus.ACTIVE);
+    final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
+        "OrganizationInput", OrganizationTest.getTestAO(true),
+        new TypeReference<GraphQlResponse<Organization>>() {});
+    newPosition.setOrganization(createOrganizationWithUuid(aoUuid));
+    final String newPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
+        "PositionInput", newPosition, new TypeReference<GraphQlResponse<Position>>() {});
+    final Position p2 = graphQLHelper.getObjectById(admin, "position", FIELDS, newPositionUuid,
+        new TypeReference<GraphQlResponse<Position>>() {});
+
+    // try to update the new position (not related to the user's organization)
+    try {
+      final Integer nrUpdated =
+          graphQLHelper.updateObject(user, "updatePosition", "position", "PositionInput", p2);
+      if (isAdmin) {
+        assertThat(nrUpdated).isEqualTo(1);
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isAdmin) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+
+    // try to update a regular user position and make it super user
+    final Position p3 = graphQLHelper.getObjectById(admin, "position", FIELDS, newPositionUuid,
+        new TypeReference<GraphQlResponse<Position>>() {});
+    try {
+      p3.setType(PositionType.SUPER_USER);
+      final Integer nrUpdated =
+          graphQLHelper.updateObject(user, "updatePosition", "position", "PositionInput", p3);
+      if (isAdmin) {
+        assertThat(nrUpdated).isEqualTo(1);
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isAdmin) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+  }
 }

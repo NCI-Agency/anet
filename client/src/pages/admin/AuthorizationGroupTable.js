@@ -23,7 +23,9 @@ const AuthorizationGroupTable = props => {
       <tbody>
         {authorizationGroups.map(authorizationGroup => (
           <tr key={authorizationGroup.uuid}>
-            <td>{<LinkTo authorizationGroup={authorizationGroup} />}</td>
+            <td>
+              <LinkTo authorizationGroup={authorizationGroup} />
+            </td>
             <td>{authorizationGroup.description}</td>
             <td>
               {authorizationGroup.positions.map(position => (

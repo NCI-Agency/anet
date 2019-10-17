@@ -155,10 +155,10 @@ const BaseNav = props => {
 
       {inAdmin && (
         <BSNav>
-          <LinkContainer to={"/admin/mergePeople"} onClick={resetPages}>
+          <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
             <NavItem>Merge people</NavItem>
           </LinkContainer>
-          <LinkContainer to={"/admin/authorizationGroups"} onClick={resetPages}>
+          <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
             <NavItem>Authorization groups</NavItem>
           </LinkContainer>
         </BSNav>

@@ -59,7 +59,7 @@ export default class AdvancedSelectFilter extends Component {
       "onChange"
     )
     return !this.props.asFormField ? (
-      <React.Fragment>{this.props.value[this.props.valueKey]}</React.Fragment>
+      <>{this.props.value[this.props.valueKey]}</>
     ) : (
       <AdvancedSingleSelect
         {...advancedSelectProps}
