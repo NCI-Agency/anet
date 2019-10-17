@@ -8,6 +8,11 @@ import React, { Component } from "react"
 import REMOVE_ICON from "resources/delete.png"
 
 export default class AdvancedSingleSelect extends Component {
+  constructor(props) {
+    super(props)
+    this.child = React.createRef()
+  }
+
   static propTypes = {
     ...advancedSelectPropTypes,
     value: PropTypes.object
@@ -18,10 +23,15 @@ export default class AdvancedSingleSelect extends Component {
     showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
   }
 
+  componentDidMount() {
+    this.refreshSearch()
+  }
+
   render() {
     return (
       <AdvancedSelect
         {...this.props}
+        ref={this.child}
         handleAddItem={this.handleAddItem}
         handleRemoveItem={this.handleRemoveItem}
         closeOverlayOnAdd
@@ -53,5 +63,9 @@ export default class AdvancedSingleSelect extends Component {
 
   handleRemoveItem = oldItem => {
     this.props.onChange(null)
+  }
+
+  refreshSearch = () => {
+    this.child.current.refreshSearch()
   }
 }

@@ -129,6 +129,8 @@ class LinkSourceAnet extends Component {
       objectType: SEARCH_OBJECT_TYPES.REPORTS,
       advancedSelectProps: widgetPropsReport
     }
+
+    this.child = React.createRef()
   }
 
   onConfirm = value => {
@@ -145,7 +147,6 @@ class LinkSourceAnet extends Component {
         value.longName ||
         value.intent ||
         value.uuid,
-      // this.state.objectType + ":" + value.uuid,
       "MUTABLE"
     )
 
@@ -167,10 +168,18 @@ class LinkSourceAnet extends Component {
   }
 
   changeObjectType = objectType => {
+    if (this.state.objectType === objectType) {
+      // Skip unnecessary update
+      return
+    }
+
     this.setState({
       objectType: objectType,
       advancedSelectProps: widgetTypeMapping.get(objectType)
     })
+
+    // Filter and type changed, need to update search results
+    this.child.current.refreshSearch()
   }
 
   render() {
@@ -200,10 +209,12 @@ class LinkSourceAnet extends Component {
 
         <Modal.Footer>
           <AdvancedSingleSelect
+            ref={this.child}
             fieldName="entitySelect"
             fieldLabel="Search in ANET:"
             placeholder={"Search " + this.state.objectType.toLowerCase()}
             value={{}}
+            showEmbedded
             overlayColumns={this.state.advancedSelectProps.overlayColumns}
             overlayRenderRow={this.state.advancedSelectProps.overlayRenderRow}
             filterDefs={this.state.advancedSelectProps.filterDefs}

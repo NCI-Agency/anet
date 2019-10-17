@@ -113,7 +113,8 @@ export const propTypes = {
   handleAddItem: PropTypes.func,
   handleRemoveItem: PropTypes.func,
   smallOverlay: PropTypes.bool, // set to true if you want to display the filters on top
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  showEmbedded: PropTypes.bool // Whether to show the table embedded instead of a popover
 }
 
 export default class AdvancedSelect extends Component {
@@ -125,7 +126,8 @@ export default class AdvancedSelect extends Component {
     renderExtraCol: false,
     closeOverlayOnAdd: false,
     searchTerms: "",
-    smallOverlay: false
+    smallOverlay: false,
+    showEmbedded: false
   }
 
   state = {
@@ -180,6 +182,7 @@ export default class AdvancedSelect extends Component {
       extraAddon,
       handleAddItem,
       handleRemoveItem,
+      showEmbedded,
       ...overlayProps
     } = this.props
     const {
@@ -194,6 +197,68 @@ export default class AdvancedSelect extends Component {
       ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
       : null
     const items = results && results[filterType] ? results[filterType].list : []
+
+    const tableContainer = (
+      <ContainerDimensions>
+        {({ width }) => {
+          const hasLeftNav =
+            width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
+          const hasTopNav =
+            (width < MOBILE_WIDTH || smallOverlay) &&
+            Object.keys(filterDefs).length > 1
+          return (
+            <Row className="border-between">
+              {hasLeftNav && (
+                <Col sm={4} md={3}>
+                  <div>
+                    <FilterList
+                      items={filterDefs}
+                      currentFilter={this.state.filterType}
+                      handleOnClick={this.changeFilterType}
+                    />
+                  </div>
+                </Col>
+              )}
+
+              <Col
+                sm={hasLeftNav ? 8 : 12}
+                md={hasLeftNav ? 9 : 12}
+                style={{ minHeight: "80px" }}
+              >
+                {hasTopNav && (
+                  <div>
+                    <SelectFilterInputField
+                      items={filterDefs}
+                      handleOnChange={this.handleOnChangeSelect}
+                    />
+                  </div>
+                )}
+                <this.props.overlayTable
+                  fieldName={fieldName}
+                  items={items}
+                  selectedItems={value}
+                  handleAddItem={item => {
+                    handleAddItem(item)
+                    if (this.props.closeOverlayOnAdd) {
+                      this.handleHideOverlay()
+                    }
+                  }}
+                  handleRemoveItem={handleRemoveItem}
+                  objectType={objectType}
+                  columns={[""].concat(overlayColumns)}
+                  renderRow={overlayRenderRow}
+                  isLoading={isLoading}
+                  loaderMessage="No results found"
+                  tableClassName={overlayTableClassName}
+                />
+                {this.paginationFor(filterType)}
+              </Col>
+            </Row>
+          )
+        }}
+      </ContainerDimensions>
+    )
+
     return (
       <>
         <Field
@@ -211,86 +276,33 @@ export default class AdvancedSelect extends Component {
           extraAddon={extraAddon}
           vertical={vertical}
         />
-        <Overlay
-          show={this.state.showOverlay}
-          container={this.overlayContainer.current}
-          target={this.overlayTarget.current}
-          rootClose
-          onHide={this.handleHideOverlay}
-          placement="bottom"
-          animation={false}
-          delayHide={200}
-        >
-          <Popover
-            id={`${fieldName}-popover`}
-            title={null}
+        {showEmbedded ? (
+          tableContainer
+        ) : (
+          <Overlay
+            show={this.state.showOverlay}
+            container={this.overlayContainer.current}
+            target={this.overlayTarget.current}
+            rootClose
+            onHide={this.handleHideOverlay}
             placement="bottom"
-            style={{
-              width: "100%",
-              maxWidth: "100%",
-              boxShadow: "0 6px 20px hsla(0, 0%, 0%, 0.4)"
-            }}
+            animation={false}
+            delayHide={200}
           >
-            <ContainerDimensions>
-              {({ width }) => {
-                const hasLeftNav =
-                  width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
-                const hasTopNav =
-                  (width < MOBILE_WIDTH || smallOverlay) &&
-                  Object.keys(filterDefs).length > 1
-                return (
-                  <Row className="border-between">
-                    {hasLeftNav && (
-                      <Col sm={4} md={3}>
-                        <div>
-                          <FilterList
-                            items={filterDefs}
-                            currentFilter={this.state.filterType}
-                            handleOnClick={this.changeFilterType}
-                          />
-                        </div>
-                      </Col>
-                    )}
-
-                    <Col
-                      sm={hasLeftNav ? 8 : 12}
-                      md={hasLeftNav ? 9 : 12}
-                      style={{ minHeight: "80px" }}
-                    >
-                      {hasTopNav && (
-                        <div>
-                          <SelectFilterInputField
-                            items={filterDefs}
-                            handleOnChange={this.handleOnChangeSelect}
-                          />
-                        </div>
-                      )}
-                      <this.props.overlayTable
-                        fieldName={fieldName}
-                        items={items}
-                        selectedItems={value}
-                        handleAddItem={item => {
-                          handleAddItem(item)
-                          if (this.props.closeOverlayOnAdd) {
-                            this.handleHideOverlay()
-                          }
-                        }}
-                        handleRemoveItem={handleRemoveItem}
-                        objectType={objectType}
-                        columns={[""].concat(overlayColumns)}
-                        renderRow={overlayRenderRow}
-                        isLoading={isLoading}
-                        loaderMessage="No results found"
-                        tableClassName={overlayTableClassName}
-                      />
-                      {this.paginationFor(filterType)}
-                    </Col>
-                  </Row>
-                )
+            <Popover
+              id={`${fieldName}-popover`}
+              title={null}
+              placement="bottom"
+              style={{
+                width: "100%",
+                maxWidth: "100%",
+                boxShadow: "0 6px 20px hsla(0, 0%, 0%, 0.4)"
               }}
-            </ContainerDimensions>
-          </Popover>
-        </Overlay>
+            >
+              {tableContainer}
+            </Popover>
+          </Overlay>
+        )}
         <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
           {vertical ? (
@@ -333,8 +345,9 @@ export default class AdvancedSelect extends Component {
   }
 
   handleHideOverlay = () => {
-    if (this.state.inputFocused) {
-      // Do not hide the overlay when the trigger input has the focus
+    // Do not hide the overlay when the trigger input has the focus,
+    // or the table is embedded in the modal
+    if (this.state.inputFocused || this.props.showEmbedded) {
       return
     }
     this.setState({
@@ -352,6 +365,18 @@ export default class AdvancedSelect extends Component {
       {
         isLoading: true,
         searchTerms: event.target.value,
+        results: {}
+      },
+      () => this.fetchResultsDebounced()
+    )
+  }
+
+  refreshSearch = () => {
+    // Reset the search filters, results and fetch new results based on the current (new) criteria
+    this.setState(
+      {
+        filterType: Object.keys(this.props.filterDefs)[0],
+        isLoading: true,
         results: {}
       },
       () => this.fetchResultsDebounced()
