@@ -55,8 +55,57 @@ const buildupLotsOfData = [
     }
   },
   {
-    name: "Create published report",
-    number: 200000,
+    name: "Create published report #1",
+    number: 25000,
+    runnable: createReport,
+    userTypes: ["existingAdmin"],
+    arguments: { state: Report.STATE.PUBLISHED }
+  },
+  {
+    name: "Create published report #2",
+    number: 25000,
+    runnable: createReport,
+    userTypes: ["existingAdmin"],
+    arguments: { state: Report.STATE.PUBLISHED }
+  },
+  {
+    name: "Create published report #3",
+    number: 25000,
+    runnable: createReport,
+    userTypes: ["existingAdmin"],
+    arguments: { state: Report.STATE.PUBLISHED }
+  },
+  {
+    name: "Create published report #4",
+    number: 25000,
+    runnable: createReport,
+    userTypes: ["existingAdmin"],
+    arguments: { state: Report.STATE.PUBLISHED }
+  },
+  {
+    name: "Create published report #5",
+    number: 25000,
+    runnable: createReport,
+    userTypes: ["existingAdmin"],
+    arguments: { state: Report.STATE.PUBLISHED }
+  },
+  {
+    name: "Create published report #6",
+    number: 25000,
+    runnable: createReport,
+    userTypes: ["existingAdmin"],
+    arguments: { state: Report.STATE.PUBLISHED }
+  },
+  {
+    name: "Create published report #7",
+    number: 25000,
+    runnable: createReport,
+    userTypes: ["existingAdmin"],
+    arguments: { state: Report.STATE.PUBLISHED }
+  },
+  {
+    name: "Create published report #8",
+    number: 25000,
     runnable: createReport,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
