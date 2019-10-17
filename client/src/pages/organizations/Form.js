@@ -242,7 +242,7 @@ const BaseOrganizationForm = props => {
                             {values.parentOrg.longName}{" "}
                             {values.parentOrg.identificationCode}
                           </LinkTo>
-                      )
+                        )
                       }
                     />
                     <Field

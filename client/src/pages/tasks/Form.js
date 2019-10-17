@@ -293,7 +293,7 @@ const BaseTaskForm = props => {
                               setFieldTouched(
                                 "assessment_customFieldEnum1",
                                 true
-                            )}
+                              )}
                           />
                         }
                       />
