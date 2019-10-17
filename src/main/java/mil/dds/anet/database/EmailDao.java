@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import com.google.common.base.Joiner;
 import java.time.Instant;
 import java.util.List;
 import javax.inject.Inject;
@@ -35,10 +34,10 @@ public class EmailDao {
 
   public void deletePendingEmails(List<Integer> processedEmails) {
     if (!processedEmails.isEmpty()) {
-      final String emailIds = Joiner.on(", ").join(processedEmails);
-      getDbHandle().createUpdate(
-          "/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN (" + emailIds + ")")
-          .execute();
+      getDbHandle()
+          .createUpdate(
+              "/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN ( <emailIds> )")
+          .bindList("emailIds", processedEmails).execute();
     }
   }
 
