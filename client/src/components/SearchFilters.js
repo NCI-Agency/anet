@@ -493,7 +493,7 @@ const SearchFilterDisplay = props => {
   const ChildComponent = element.component
   const sep = props.showSeparator ? ", " : ""
   return (
-    <React.Fragment>
+    <>
       <b>{label}</b>:{" "}
       <em>
         <ChildComponent
@@ -503,7 +503,7 @@ const SearchFilterDisplay = props => {
         />
       </em>
       {sep}
-    </React.Fragment>
+    </>
   )
 }
 
@@ -527,11 +527,11 @@ export const SearchDescription = props => {
   return (
     <span className="asLink">
       {query.objectType ? (
-        <React.Fragment>
+        <>
           <b>{SEARCH_OBJECT_LABELS[query.objectType]}</b>
           {filters.length > 0 ? (
-            <React.Fragment>
-              <React.Fragment> filtered on </React.Fragment>
+            <>
+              <> filtered on </>
               {filters.map(
                 (filter, i) =>
                   filterDefs[filter.key] && (
@@ -543,11 +543,11 @@ export const SearchDescription = props => {
                     />
                   )
               )}
-            </React.Fragment>
+            </>
           ) : (
             showPlaceholders && " - add filters"
           )}
-        </React.Fragment>
+        </>
       ) : (
         showPlaceholders && "Add filters"
       )}

@@ -115,10 +115,10 @@ const BaseLocationForm = props => {
                   name="location"
                   component={FieldHelper.renderReadonlyField}
                   humanValue={
-                    <React.Fragment>
+                    <>
                       <Coordinate coord={values.lat} />,{" "}
                       <Coordinate coord={values.lng} />
-                    </React.Fragment>
+                    </>
                   }
                 />
               </Fieldset>
