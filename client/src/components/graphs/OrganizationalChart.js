@@ -7,7 +7,7 @@ import _xor from "lodash/xor"
 import { Symbol } from "milsymbol"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -39,6 +39,9 @@ const GQL_GET_CHART_DATA = gql`
         longName
         type
         childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+          uuid
+        }
+        parentOrg {
           uuid
         }
         positions {
@@ -76,15 +79,22 @@ const OrganizationalChart = props => {
   const canvas = useRef(null)
   const link = useRef(null)
   const node = useRef(null)
-  const getNodeSize = useCallback(() => [200, 100 + 11 * personnelDepth])
-  const calculateBounds = useCallback(root => {
-    const boundingBox = root.descendants().reduce(
-      (box, node) => {
+  const tree = useRef(d3.tree())
+  const [root, setRoot] = useState(null)
+  const getNodeSize = () => [200, 100 + 11 * personnelDepth]
+  const calculateBounds = rootArg => {
+    const boundingBox = rootArg.descendants().reduce(
+      (box, nodeArg) => {
+        console.log("----------")
+        console.dir(nodeArg)
+        console.log(nodeArg.x)
+        console.log(Object.keys(nodeArg))
+        console.log(Math.min(box.xmin, nodeArg.x))
         return {
-          xmin: Math.min(box.xmin, node.x),
-          xmax: Math.max(box.xmax, node.x),
-          ymin: Math.min(box.ymin, node.y),
-          ymax: Math.max(box.ymax, node.y)
+          xmin: Math.min(box.xmin, nodeArg.x),
+          xmax: Math.max(box.xmax, nodeArg.x),
+          ymin: Math.min(box.ymin, nodeArg.y),
+          ymax: Math.max(box.ymax, nodeArg.y)
         }
       },
       {
@@ -97,7 +107,7 @@ const OrganizationalChart = props => {
     return {
       box: boundingBox,
       size: [
-        boundingBox.xmax - boundingBox.xmin + getNodeSize()[0] + 100,
+        boundingBox.xmax - boundingBox.xmin + getNodeSize()[0],
         boundingBox.ymax - boundingBox.ymin + getNodeSize()[1]
       ],
       center: [
@@ -105,7 +115,7 @@ const OrganizationalChart = props => {
         (boundingBox.ymax + boundingBox.ymin + getNodeSize()[1] - 50) / 2
       ]
     }
-  })
+  }
 
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
     uuid: props.org.uuid
@@ -122,16 +132,65 @@ const OrganizationalChart = props => {
       // TODO: make effect only happen on svgContainer.current change
       return
     }
-    canvas.current = d3.select(svgContainer.current).append("g")
-    link.current = canvas.current
-      .append("g")
-      .attr("fill", "none")
-      .attr("stroke", "#555")
-    node.current = canvas.current
-      .append("g")
-      .attr("cursor", "pointer")
-      .attr("pointer-events", "all")
-  }, [data])
+    if (link.current == null) {
+      canvas.current = d3.select(svgContainer.current).append("g")
+      link.current = canvas.current
+        .append("g")
+        .attr("fill", "none")
+        .attr("stroke", "#555")
+      node.current = canvas.current
+        .append("g")
+        .attr("cursor", "pointer")
+        .attr("pointer-events", "all")
+    }
+    setRoot(
+      d3.hierarchy(data.organization, d =>
+        expanded.includes(d.uuid)
+          ? data.organization.descendantOrgs.filter(org =>
+            org.parentOrg?.uuid === d.uuid
+          )
+          : null
+      )
+    )
+  }, [data, expanded])
+
+  useEffect(() => {
+    if (!data || !root) {
+      return
+    }
+
+    const chartBox = svgContainer.current.getBoundingClientRect()
+
+    const fullWidth = chartBox.width
+    const fullHeight = chartBox.height
+
+    canvas.current.attr(
+      "transform",
+      "translate(" + fullHeight / 2 + "," + 50 + ")"
+    )
+
+    tree.current.size(fullWidth, fullHeight)
+    tree.current.nodeSize(getNodeSize())
+
+    const bounds = calculateBounds(root)
+
+    if (bounds) {
+      const scale = Math.min(
+        1.2,
+        1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
+      )
+      canvas.current.attr(
+        "transform",
+        `translate(${fullWidth / 2 - scale * bounds.center[0]},${fullHeight /
+          2 -
+          scale * bounds.center[1]}) scale(${scale})`
+      )
+      d3.select(svgContainer.current).attr(
+        "height",
+        scale * bounds.size[1] + 50
+      )
+    }
+  }, [data, root, expanded])
 
   useEffect(() => {
     if (!data) {
@@ -141,32 +200,18 @@ const OrganizationalChart = props => {
   }, [data])
 
   useEffect(() => {
-    if (!svgContainer.current || !data?.organization) {
+    if (
+      !svgContainer.current ||
+      !data?.organization ||
+      !tree.current ||
+      !root
+    ) {
       return
     }
 
-    const chartBox = svgContainer.current.getBoundingClientRect()
-    const fullWidth = chartBox.width
-    const fullHeight = chartBox.height
-
-    canvas.current.attr(
-      "transform",
-      "translate(" + fullHeight / 2 + "," + 50 + ")"
-    )
-
-    const tree = d3.tree().size(fullWidth, fullHeight)
-
-    tree.nodeSize(getNodeSize())
-
-    const root = d3.hierarchy(data.organization, d =>
-      expanded.includes(d.uuid)
-        ? data.organization.descendantOrgs.filter(org =>
-          d.childrenOrgs.map(org => org.uuid).includes(org.uuid)
-        )
-        : []
-    )
-
-    const linkSelect = link.current.selectAll("path").data(tree(root).links())
+    const linkSelect = link.current
+      .selectAll("path")
+      .data(tree.current(root).links())
 
     linkSelect
       .transition()
@@ -194,7 +239,9 @@ const OrganizationalChart = props => {
 
     linkSelect.exit().remove()
 
-    const nodeSelect = node.current.selectAll("g.org").data(root.descendants(), d => d.data.uuid)
+    const nodeSelect = node.current
+      .selectAll("g.org")
+      .data(root.descendants(), d => d.data.uuid)
 
     nodeSelect
       .transition()
@@ -375,28 +422,13 @@ const OrganizationalChart = props => {
         } ${d.name}`
         return result.length > 31 ? result.substring(0, 28) + "..." : result
       })
-
-    const bounds = calculateBounds(root)
-
-    const scale = Math.min(
-      1.2,
-      1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
-    )
-
-    canvas.current.attr(
-      "transform",
-      `translate(${fullWidth / 2 - scale * bounds.center[0]},${fullHeight / 2 -
-        scale * bounds.center[1]}) scale(${scale})`
-    )
-    d3.select(svgContainer.current).attr("height", scale * bounds.size[1] + 50)
   }, [
-    calculateBounds,
     data,
     expanded,
-    getNodeSize,
     history,
     personnelDepth,
-    svgContainer
+    svgContainer,
+    root
   ])
 
   if (done) {
