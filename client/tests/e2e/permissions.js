@@ -35,7 +35,7 @@ test("checking super user permissions", async t => {
   // User is super user, he/she may edit positions only for his/her own organization
   let $otherOrgPositionLink = await getFromSearchResults(
     t,
-    "EF 1",
+    "EF 1 Manager",
     "EF 1 Manager",
     "positions"
   )
