@@ -23,7 +23,7 @@ public class WaitForDbCommand extends ConfiguredCommand<AnetConfiguration> {
     subparser.addArgument("-d", "--delay").dest("dbConnectionDelay").type(Integer.class)
         .required(false).setDefault(500).help("Delay in ms between attempts. 500 by default");
 
-    addFileArgument(subparser);
+    super.configure(subparser);
   }
 
   @Override
