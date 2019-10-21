@@ -124,9 +124,15 @@ const HomeTiles = props => {
   return (
     <Grid fluid>
       <Row>
-        {queries.map((query, index) => (
-          <HomeTile key={index} query={query} setSearchQuery={setSearchQuery} />
-        ))}
+        {queries
+          .filter(q => q.query != null)
+          .map((query, index) => (
+            <HomeTile
+              key={index}
+              query={query}
+              setSearchQuery={setSearchQuery}
+            />
+          ))}
       </Row>
     </Grid>
   )
@@ -226,7 +232,7 @@ const HomeTiles = props => {
 
   function myOrgRecent(currentUser) {
     if (!currentUser.position || !currentUser.position.organization) {
-      return { query: {} }
+      return { query: null }
     }
     return {
       title:
@@ -247,7 +253,7 @@ const HomeTiles = props => {
 
   function myOrgFuture(currentUser) {
     if (!currentUser.position || !currentUser.position.organization) {
-      return { query: {} }
+      return { query: null }
     }
     return {
       title:
