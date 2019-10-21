@@ -23,18 +23,14 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 public class InitializationCommand extends EnvironmentCommand<AnetConfiguration> {
 
-  private final Application<AnetConfiguration> application;
-
   protected InitializationCommand(Application<AnetConfiguration> application) {
     super(application, "init", "Initializes the ANET Database");
-    this.application = application;
   }
 
   @Override
   protected void run(Environment environment, Namespace namespace, AnetConfiguration configuration)
       throws Exception {
-    final String dbUrl = configuration.getDataSourceFactory().getUrl();
-    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, application);
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
 
     System.out.println("-------- WELCOME TO ANET! --------");
     System.out.println("We're going to ask you a few questions to get ANET set up.");
