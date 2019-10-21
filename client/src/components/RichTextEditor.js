@@ -171,6 +171,7 @@ class RichTextEditor extends Component {
               onChange(toHTML(rawContent))
             }
           }}
+          stateSaveInterval={100}
           plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
           rawContentState={value ? fromHTML(value) : null}
           showUndoControl
