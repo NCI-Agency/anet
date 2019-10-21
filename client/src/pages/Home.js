@@ -125,7 +125,7 @@ const HomeTiles = props => {
     <Grid fluid>
       <Row>
         {queries
-          .filter(q => q.query != null)
+          .filter(q => q.query !== null)
           .map((query, index) => (
             <HomeTile
               key={index}
