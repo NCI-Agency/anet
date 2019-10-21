@@ -21,7 +21,6 @@ import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class ReportSensitiveInformationDao
     extends AnetBaseDao<ReportSensitiveInformation, AbstractSearchQuery<?>> {
 
@@ -64,6 +63,7 @@ public class ReportSensitiveInformationDao
     throw new UnsupportedOperationException();
   }
 
+  @InTransaction
   public ReportSensitiveInformation insert(ReportSensitiveInformation rsi, Person user,
       Report report) {
     if (rsi == null || !isAuthorized(user, report) || Utils.isEmptyHtml(rsi.getText())) {
@@ -86,6 +86,7 @@ public class ReportSensitiveInformationDao
     throw new UnsupportedOperationException();
   }
 
+  @InTransaction
   public int update(ReportSensitiveInformation rsi, Person user, Report report) {
     if (rsi == null || !isAuthorized(user, report)) {
       return 0;
@@ -111,6 +112,7 @@ public class ReportSensitiveInformationDao
     return (DaoUtils.getUuid(rsi) == null) ? insert(rsi, user, report) : update(rsi, user, report);
   }
 
+  @InTransaction
   public CompletableFuture<ReportSensitiveInformation> getForReport(Map<String, Object> context,
       Report report, Person user) {
     if (!isAuthorized(user, report)) {
