@@ -124,6 +124,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // Add the database script command
     bootstrap.addCommand(new DatabaseScriptCommand());
 
+    // Add the database maintenance command
+    bootstrap.addCommand(new MaintenanceCommand(this));
+
     // Serve assets on /assets
     bootstrap.addBundle(new ConfiguredAssetsBundle(ImmutableMap.<String, String>builder()
         .put("/assets/", "/assets/").put("/imagery/", "/imagery/").put("/data/", "/data/").build(),
