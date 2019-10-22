@@ -416,27 +416,16 @@ const Positions = props => {
     return result
   }
 
-  const positions = data ? data.positionList.list : []
-  const totalCount = data && data.positionList && data.positionList.totalCount
+  const paginatedPositions = data ? data.positionList : []
+  const totalCount = paginatedPositions && data.positionList.totalCount
   setTotalCount(totalCount)
-  if (_get(positions, "length", 0) === 0) {
-    return <em>No positions found</em>
-  }
 
   return (
-    <div>
-      <UltimatePaginationTopDown
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={positionQuery.pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
-      >
-        <br />
-        <PositionTable positions={positions} id="positions-search-results" />
-      </UltimatePaginationTopDown>
-    </div>
+    <PositionTable
+      paginatedPositions={paginatedPositions}
+      goToPage={setPage}
+      id="positions-search-results"
+    />
   )
 
   function setPage(pageNum) {
