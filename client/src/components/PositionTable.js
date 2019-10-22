@@ -92,92 +92,89 @@ const BasePositionTable = props => {
     positions = props.positions
   }
 
-  if (_get(positions, "length", 0) === 0) {
-    return <em>No positions found</em>
-  }
-
+  let positionsExist = _get(positions, "length", 0) > 0
   return (
     <div>
-      <UltimatePaginationTopDown
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={props.goToPage}
-      >
-        <Table striped condensed hover responsive className="positions_table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Location</th>
-              <th>Organization</th>
-              <th>Current Occupant</th>
-              <th>Status</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {Position.map(positions, pos => {
-              let nameComponents = []
-              pos.name && nameComponents.push(pos.name)
-              pos.code && nameComponents.push(pos.code)
-              return (
-                <tr key={pos.uuid}>
-                  <td>
-                    <LinkTo position={pos}>{nameComponents.join(" - ")}</LinkTo>
-                  </td>
-                  <td>
-                    <LinkTo anetLocation={pos.location} />
-                  </td>
-                  <td>
-                    {pos.organization && (
-                      <LinkTo organization={pos.organization} />
-                    )}
-                  </td>
-                  <td>{pos.person && <LinkTo person={pos.person} />}</td>
-                  <td>{utils.sentenceCase(pos.status)}</td>
-                  {props.showDelete && (
-                    <td
-                      onClick={() => props.onDelete(pos)}
-                      id={"positionDelete_" + pos.uuid}
-                    >
-                      <span style={{ cursor: "pointer" }}>
-                        <img
-                          src={REMOVE_ICON}
-                          height={14}
-                          alt="Remove position"
-                        />
-                      </span>
-                    </td>
-                  )}
-                  <td>{pos.person && <LinkTo person={pos.person} />}</td>
-                  <td>{utils.sentenceCase(pos.status)}</td>
-                  {props.showDelete && (
-                    <td
-                      onClick={() => props.onDelete(pos)}
-                      id={"positionDelete_" + pos.uuid}
-                    >
-                      <span style={{ cursor: "pointer" }}>
-                        <img
-                          src={REMOVE_ICON}
-                          height={14}
-                          alt="Remove position"
-                        />
-                      </span>
-                    </td>
-                  )}
+      {positionsExist ? (
+        <div>
+          <UltimatePaginationTopDown
+            componentClassName="searchPagination"
+            className="pull-right"
+            pageNum={pageNum}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            goToPage={props.goToPage}
+          >
+            <Table
+              striped
+              condensed
+              hover
+              responsive
+              className="positions_table"
+              id={props.id}
+            >
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Organization</th>
+                  <th>Current Occupant</th>
+                  <th>Status</th>
+                  <th />
                 </tr>
-              )
-            })}
-          </tbody>
-        </Table>
-      </UltimatePaginationTopDown>
+              </thead>
+              <tbody>
+                {Position.map(positions, pos => {
+                  let nameComponents = []
+                  pos.name && nameComponents.push(pos.name)
+                  pos.code && nameComponents.push(pos.code)
+                  return (
+                    <tr key={pos.uuid}>
+                      <td>
+                        <LinkTo position={pos}>
+                          {nameComponents.join(" - ")}
+                        </LinkTo>
+                      </td>
+                      <td>
+                        <LinkTo anetLocation={pos.location} />
+                      </td>
+                      <td>
+                        {pos.organization && (
+                          <LinkTo organization={pos.organization} />
+                        )}
+                      </td>
+                      <td>{pos.person && <LinkTo person={pos.person} />}</td>
+                      <td>{utils.sentenceCase(pos.status)}</td>
+                      {props.showDelete && (
+                        <td
+                          onClick={() => props.onDelete(pos)}
+                          id={"positionDelete_" + pos.uuid}
+                        >
+                          <span style={{ cursor: "pointer" }}>
+                            <img
+                              src={REMOVE_ICON}
+                              height={14}
+                              alt="Remove position"
+                            />
+                          </span>
+                        </td>
+                      )}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
+          </UltimatePaginationTopDown>
+        </div>
+      ) : (
+        <em>No positions found</em>
+      )}
     </div>
   )
 }
 
 BasePositionTable.propTypes = {
+  id: PropTypes.string,
   positions: PropTypes.array, // list of positions, when no pagination wanted
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
