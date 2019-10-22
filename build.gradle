@@ -120,9 +120,9 @@ dependencies {
 	testCompile 'org.apache.commons:commons-io:1.3.2'
 	
 	testCompile 'junit:junit:4.12'
-	testCompile 'org.powermock:powermock-api-mockito2:2.0.2'
-	testCompile 'org.powermock:powermock-module-junit4:2.0.2'
-	testCompile 'org.powermock:powermock-module-junit4-rule:2.0.2'
+	testCompile 'org.powermock:powermock-api-mockito2:2.0.4'
+	testCompile 'org.powermock:powermock-module-junit4:2.0.4'
+	testCompile 'org.powermock:powermock-module-junit4-rule:2.0.4'
 }
 
 jacoco {
@@ -421,6 +421,27 @@ task integrationTest(type: Test) {
 	classpath = sourceSets.integrationTest.runtimeClasspath
 	outputs.upToDateWhen { false }
 	environment(run.environment)
+}
+
+// Create the task that runs the maintenance command. Run e.g. with:
+//   ./gradlew dbMaintenance -Pargs="--clearEmptyBiographies"
+// To see all options, run just:
+//   ./gradlew dbMaintenance
+// which will print the help.
+task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database maintenance command."
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	def cmdline = ["maintenance"]
+	if (project.hasProperty("args")) {
+		cmdline.addAll(project.args.split("\\s+"))
+	} else {
+		cmdline << "--help"
+	}
+	cmdline << anetConfig
+	args cmdline
 }
 
 classes.dependsOn buildClient
