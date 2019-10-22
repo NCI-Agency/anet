@@ -191,7 +191,7 @@ function populate(instance, scheme, context) {
   }
   // use an empty context if none is provided.
   context = context || {}
-  // for each property in the scheme create an object with probility functions to execute the
+  // for each property in the scheme create an object with probability functions to execute the
   // scheme property function
   Object.keys(scheme).forEach(key => {
     const applyWithProbability = function(probability) {

@@ -1,4 +1,5 @@
 import faker from "faker"
+import _isEmpty from "lodash/isEmpty"
 import { Organization, Person, Position } from "models"
 import { fuzzy, identity, populate, runGQL, specialUser } from "../simutils"
 
@@ -65,30 +66,47 @@ async function getPosition(user, uuid) {
 /* eslint-enable no-unused-vars */
 
 async function listOrganizations(user) {
-  const result = await runGQL(user, {
+  const totalCount = (await runGQL(user, {
     query: `
       query ($organizationsQuery: OrganizationSearchQueryInput) {
-        organizations: organizationList(query: $organizationsQuery) {
-          list {
-            uuid
-            type
-            shortName
-          }
+        organizationList(query: $organizationsQuery) {
+          totalCount
         }
       }
     `,
     variables: {
       organizationsQuery: {
         pageNum: 0,
-        pageSize: 0,
+        pageSize: 1,
         status: Organization.STATUS.ACTIVE
       }
     }
-  })
-  if (result.errors) {
-    result.errors.forEach(error => console.error(error.message))
+  })).data.organizationList.totalCount
+  let organizations = null
+  if (totalCount > 0) {
+    const random = faker.random.number({ max: totalCount - 1 })
+    organizations = (await runGQL(user, {
+      query: `
+        query ($organizationsQuery: OrganizationSearchQueryInput) {
+          organizationList(query: $organizationsQuery) {
+            list {
+              uuid
+              type
+              shortName
+            }
+          }
+        }
+      `,
+      variables: {
+        organizationsQuery: {
+          pageNum: random,
+          pageSize: 1,
+          status: Organization.STATUS.ACTIVE
+        }
+      }
+    })).data.organizationList.list
   }
-  return result.data.organizations.list
+  return organizations
 }
 
 /**
@@ -180,28 +198,11 @@ const _deletePosition = async function(user) {
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
-  const positions = (await runGQL(user, {
-    query: `
-      query ($positionsQuery: PositionSearchQueryInput) {
-        positionList(query: $positionsQuery) {
-          list {
-            uuid,
-            name
-          }
-        }
-      }
-    `,
-    variables: {
-      positionsQuery: {
-        pageNum: 0,
-        pageSize: 0,
-        isFilled: false,
-        status: Position.STATUS.INACTIVE,
-        type: [type]
-      }
-    }
-  })).data.positionList.list
-  const position = faker.random.arrayElement(positions)
+  const position = await getRandomPosition(user, {
+    isFilled: false,
+    status: Position.STATUS.INACTIVE,
+    type: [type]
+  })
 
   if (position) {
     console.debug(`Removing position of ${position.name.green}`)
@@ -232,28 +233,11 @@ const _deactivatePosition = async function(user) {
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
-  const positions = (await runGQL(user, {
-    query: `
-      query ($positionsQuery: PositionSearchQueryInput) {
-        positionList(query: $positionsQuery) {
-          list {
-            uuid
-            name
-          }
-        }
-      }
-    `,
-    variables: {
-      positionsQuery: {
-        pageNum: 0,
-        pageSize: 0,
-        isFilled: false,
-        status: Position.STATUS.ACTIVE,
-        type: [type]
-      }
-    }
-  })).data.positionList.list
-  var position = faker.random.arrayElement(positions)
+  let position = await getRandomPosition(user, {
+    isFilled: false,
+    status: Position.STATUS.ACTIVE,
+    type: [type]
+  })
 
   if (position) {
     position = (await runGQL(user, {
@@ -312,36 +296,19 @@ const updatePosition = async function(user) {
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
-  const positions = (await runGQL(user, {
-    query: `
-      query ($positionsQuery: PositionSearchQueryInput) {
-        positionList(query: $positionsQuery) {
-          list {
-            uuid
-            name
-          }
-        }
-      }
-    `,
-    variables: {
-      positionsQuery: {
-        pageNum: 0,
-        pageSize: 0,
-        isFilled: false,
-        type: [type]
-      }
-    }
-  })).data.positionList.list
-  const position0 = faker.random.arrayElement(positions)
+  let position = await getRandomPosition(user, {
+    isFilled: false,
+    type: [type]
+  })
 
-  if (position0) {
-    console.debug(`Updating position of ${position0.name.green}`)
+  if (position) {
+    console.debug(`Updating position of ${position.name.green}`)
 
     const organizations = await listOrganizations(user)
-    const position = (await runGQL(user, {
+    position = (await runGQL(user, {
       query: `
         query {
-          position (uuid:"${position0.uuid}") {
+          position (uuid:"${position.uuid}") {
             uuid
             name
             code
@@ -427,28 +394,10 @@ const putPersonInPosition = async function(user) {
       }
     }
   })).data.personList.list.filter(p => !p.position)
-  var positions = (await runGQL(user, {
-    query: `
-      query ($positionsQuery: PositionSearchQueryInput) {
-        positionList(query: $positionsQuery) {
-          list {
-            uuid
-            name
-          }
-        }
-      }
-    `,
-    variables: {
-      positionsQuery: {
-        pageNum: 0,
-        pageSize: 0,
-        isFilled: false,
-        type: [type]
-      }
-    }
-  })).data.positionList.list
-
-  var position = faker.random.arrayElement(positions)
+  const position = await getRandomPosition(user, {
+    isFilled: false,
+    type: [type]
+  })
   var person = faker.random.arrayElement(persons)
 
   if (!position) {
@@ -730,6 +679,45 @@ const deletePosition = async function(user, grow) {
     console.debug("Skipping delete position")
     return "(skipped)"
   }
+}
+
+async function getRandomPosition(user, variables) {
+  const positionsQuery = Object.assign({}, variables, {
+    pageNum: 0,
+    pageSize: 1
+  })
+  const totalCount = (await runGQL(user, {
+    query: `
+      query ($positionsQuery: PositionSearchQueryInput) {
+        positionList(query: $positionsQuery) {
+          totalCount
+        }
+      }
+    `,
+    variables: {
+      positionsQuery
+    }
+  })).data.positionList.totalCount
+  let positions = null
+  if (totalCount > 0) {
+    positionsQuery.pageNum = faker.random.number({ max: totalCount - 1 })
+    positions = (await runGQL(user, {
+      query: `
+        query ($positionsQuery: PositionSearchQueryInput) {
+          positionList(query: $positionsQuery) {
+            list {
+              uuid,
+              name
+            }
+          }
+        }
+      `,
+      variables: {
+        positionsQuery
+      }
+    })).data.positionList.list
+  }
+  return _isEmpty(positions) ? null : positions[0]
 }
 
 export {
