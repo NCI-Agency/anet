@@ -140,14 +140,16 @@ class LinkSourceAnet extends Component {
       editorState,
       entityType.type,
       {
-        url: "\\" + this.state.objectType.toLowerCase() + "/" + value.uuid
+        url: "\\" + this.state.objectType.toLowerCase() + "/" + value.uuid,
+        value: "\\" + this.state.objectType.toLowerCase() + "/" + value.uuid,
+        objectType: this.state.objectType
       },
       value.name ||
         value.shortName ||
         value.longName ||
         value.intent ||
         value.uuid,
-      "MUTABLE"
+      "IMMUTABLE"
     )
 
     onComplete(nextState)

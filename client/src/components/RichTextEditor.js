@@ -5,7 +5,7 @@ import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertToRaw, convertFromRaw } from "draft-js"
 import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
 
-import Link from "components/editor/Link"
+import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import linkifyPlugin from "components/editor/plugins/linkifyPlugin"
 
@@ -74,8 +74,8 @@ const ENTITY_CONTROL = {
       "M256 1012c-65.176 0-126.45-25.38-172.534-71.464-95.134-95.136-95.134-249.934 0-345.070l87.764-87.764c20.308-20.306 53.234-20.306 73.54 0 20.308 20.306 20.308 53.232 0 73.54l-87.764 87.764c-54.586 54.586-54.586 143.406 0 197.992 26.44 26.44 61.598 41.002 98.994 41.002s72.552-14.562 98.998-41.006l192-191.998c54.584-54.586 54.584-143.406 0-197.992-20.308-20.308-20.306-53.232 0-73.54 20.306-20.306 53.232-20.306 73.54 0.002 95.132 95.134 95.132 249.932 0.002 345.068l-192.002 192c-46.090 46.088-107.364 71.466-172.538 71.466z"
     ],
     source: LinkSourceAnet,
-    decorator: Link,
-    attributes: ["url"],
+    decorator: LinkAnet,
+    attributes: ["url", "value", "objectType"],
     whitelist: {
       href: "^(?![#/])"
     }
@@ -86,7 +86,11 @@ const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
     // a tags will become LINK entities, marked as mutable, with only the URL as data.
     if (nodeName === "a") {
-      return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", { url: node.href })
+      // return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", { url: node.href }
+      return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", {
+        url: node.href,
+        value: node.href
+      })
     }
 
     if (nodeName === "hr") {
