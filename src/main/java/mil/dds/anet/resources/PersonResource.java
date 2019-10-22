@@ -66,7 +66,8 @@ public class PersonResource {
       validateEmail(p.getEmailAddress());
     }
 
-    p.setBiography(Utils.sanitizeHtml(p.getBiography()));
+    p.setBiography(
+        Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     Person created = dao.insert(p);
 
     if (created.getPosition() != null) {
@@ -174,7 +175,8 @@ public class PersonResource {
       }
     }
 
-    p.setBiography(Utils.sanitizeHtml(p.getBiography()));
+    p.setBiography(
+        Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     final int numRows = dao.update(p);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
