@@ -46,8 +46,6 @@ public class FutureEngagementWorkerTest {
   private static boolean executeEmailServerTests;
   private static String whitelistedEmail;
 
-
-
   @BeforeClass
   @SuppressWarnings("unchecked")
   public static void setUpClass() throws Exception {
@@ -60,6 +58,8 @@ public class FutureEngagementWorkerTest {
         app.getApplication());
     futureEngagementWorker = new FutureEngagementWorker(engine.getReportDao());
     emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
+
+    // Clear the email server before start testing
     emailServer.clearEmailServer();
   }
 
@@ -76,11 +76,11 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void reportsOK() {
-    Report report = createTestReport("reportsOK_1");
+    final Report report = createTestReport("reportsOK_1");
     engine.getReportDao().update(report);
-    Report report2 = createTestReport("reportsOK_2");
+    final Report report2 = createTestReport("reportsOK_2");
     engine.getReportDao().update(report2);
-    Report report3 = createTestReport("reportsOK_3");
+    final Report report3 = createTestReport("reportsOK_3");
     engine.getReportDao().update(report3);
 
     expectedIds.add("reportsOK_1");
@@ -92,7 +92,7 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void testReportDueInFuture() {
-    Report report = createTestReport("testReportDueInFuture_1");
+    final Report report = createTestReport("testReportDueInFuture_1");
     report.setEngagementDate(Instant.now().plus(Duration.ofDays(2L)));
     engine.getReportDao().update(report);
 
@@ -103,7 +103,7 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void testReportDueEndToday() {
-    Report report = createTestReport("testReportDueEndToday_1");
+    final Report report = createTestReport("testReportDueEndToday_1");
     report.setEngagementDate(Utils.endOfToday());
     engine.getReportDao().update(report);
 
@@ -127,8 +127,8 @@ public class FutureEngagementWorkerTest {
       unexpectedIds.add(fullId);
     }
 
-    Report report = createTestReport(fullId);
-    ApprovalStep as = report.getApprovalStep();
+    final Report report = createTestReport(fullId);
+    final ApprovalStep as = report.getApprovalStep();
     as.setType(type);
     engine.getApprovalStepDao().insert(as);
     report.setApprovalStep(as);
@@ -147,7 +147,8 @@ public class FutureEngagementWorkerTest {
     checkReportState(ReportState.REJECTED, true, "REJECTED");
   }
 
-  private void checkReportState(ReportState state, boolean isExpected, final String id) {
+  private void checkReportState(final ReportState state, final boolean isExpected,
+      final String id) {
     final String fullId = "checkApprovalStepType_" + id;
     if (isExpected) {
       expectedIds.add(fullId);
@@ -155,7 +156,7 @@ public class FutureEngagementWorkerTest {
       unexpectedIds.add(fullId);
     }
 
-    Report report = createTestReport(fullId);
+    final Report report = createTestReport(fullId);
     report.setState(state);
     engine.getReportDao().update(report);
 
@@ -164,15 +165,15 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void testApprovalStepReport() {
-    Report report = createTestReport("testApprovalStepReport_1");
-    ApprovalStep step = report.getApprovalStep();
+    final Report report = createTestReport("testApprovalStepReport_1");
+    final ApprovalStep step = report.getApprovalStep();
     step.setType(ApprovalStepType.REPORT_APPROVAL);
     engine.getApprovalStepDao().insert(step);
     report.setApprovalStep(step);
     engine.getReportDao().update(report);
 
     // Report in approve step
-    ReportAction ra = new ReportAction();
+    final ReportAction ra = new ReportAction();
     ra.setReport(report);
     ra.setReportUuid(report.getUuid());
     ra.setStep(step);
@@ -186,39 +187,41 @@ public class FutureEngagementWorkerTest {
     testFututeEngagementWorker(0);
   }
 
+  // DB integration
   private void testFututeEngagementWorker(final int expectedCount) {
-    // DB integration
-    int emailSize = engine.getEmailDao().getAll().size();
+    final int emailSize = engine.getEmailDao().getAll().size();
     futureEngagementWorker.run();
     assertEquals(emailSize + expectedCount, engine.getEmailDao().getAll().size());
   }
 
+  // Email integration
   private static void testFututeEngagementWorkerEmail() throws IOException, InterruptedException {
-    // Email integration
-    if (executeEmailServerTests) {
-      // We wait until all messages have been (asynchronously) sent
-      Thread.sleep(5000);
-
-      final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
-      assertEquals(expectedIds.size(), emails.size());
-      emails.forEach(e -> assertTrue(expectedIds.contains(e.to.text.split("@")[0])));
-      emails.forEach(e -> assertFalse(unexpectedIds.contains(e.to.text.split("@")[0])));
+    if (!executeEmailServerTests) {
+      return;
     }
+
+    // We wait until all messages have been (asynchronously) sent
+    Thread.sleep(10000);
+
+    final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
+    assertEquals(expectedIds.size(), emails.size());
+    emails.forEach(e -> assertTrue(expectedIds.contains(e.to.text.split("@")[0])));
+    emails.forEach(e -> assertFalse(unexpectedIds.contains(e.to.text.split("@")[0])));
   }
 
   private static Report createTestReport(final String toAdressId) {
-    Person author = TestBeans.getTestPerson();
+    final Person author = TestBeans.getTestPerson();
     author.setEmailAddress(toAdressId + whitelistedEmail);
     engine.getPersonDao().insert(author);
 
-    Organization organization = TestBeans.getTestOrganization();
+    final Organization organization = TestBeans.getTestOrganization();
     engine.getOrganizationDao().insert(organization);
 
-    ApprovalStep approvalStep = TestBeans.getTestApprovalStep(organization);
+    final ApprovalStep approvalStep = TestBeans.getTestApprovalStep(organization);
     approvalStep.setType(ApprovalStepType.PLANNING_APPROVAL);
     engine.getApprovalStepDao().insertAtEnd(approvalStep);
 
-    Report report = TestBeans.getTestReport(author, approvalStep, ImmutableList.of());
+    final Report report = TestBeans.getTestReport(author, approvalStep, ImmutableList.of());
     engine.getReportDao().insert(report);
     return report;
   }
