@@ -126,6 +126,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // Add the database script command
     bootstrap.addCommand(new DatabaseScriptCommand());
 
+    // Add the database maintenance command
+    bootstrap.addCommand(new MaintenanceCommand(this));
+
     // Serve assets on /assets
     bootstrap.addBundle(new ConfiguredAssetsBundle(ImmutableMap.<String, String>builder()
         .put("/assets/", "/assets/").put("/imagery/", "/imagery/").put("/data/", "/data/").build(),
@@ -221,19 +224,14 @@ public class AnetApplication extends Application<AnetConfiguration> {
     scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
 
     // Check for any emails that need to be sent every 5 minutes.
-    // And run once in 5 seconds from boot-up. (give the server time to boot up).
-    scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
-    scheduler.schedule(emailWorker, 5, TimeUnit.SECONDS);
-
-    // Check for any future engagements every 1 minutes in development mode or every 3 hours
-    // otherwise.
     // And run once in 10 seconds from boot-up. (give the server time to boot up).
-    if (configuration.isDevelopmentMode()) {
-      scheduler.scheduleAtFixedRate(futureWorker, 0, 1, TimeUnit.MINUTES);
-    } else {
-      scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
-    }
-    scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
+    scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
+    scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
+
+    // Check for any future engagements every 3 hours.
+    // And run once in 15 seconds from boot-up. (give the server time to boot up).
+    scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
+    scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
     // Check whether the application is configured to auto-check for account
     // deactivation

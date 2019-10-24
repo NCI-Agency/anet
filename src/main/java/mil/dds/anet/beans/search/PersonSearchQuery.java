@@ -25,6 +25,9 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   // Find people who are pending verification
   Boolean pendingVerification;
 
+  // Find people who (don't) have the biography filled in
+  Boolean hasBiography;
+
   public PersonSearchQuery() {
     super(PersonSearchSortBy.NAME);
     this.setPageSize(100);
@@ -118,6 +121,14 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
 
   public void setEndOfTourDateEnd(Instant endOfTourDateEnd) {
     this.endOfTourDateEnd = endOfTourDateEnd;
+  }
+
+  public Boolean getHasBiography() {
+    return hasBiography;
+  }
+
+  public void setHasBiography(Boolean hasBiography) {
+    this.hasBiography = hasBiography;
   }
 
 }

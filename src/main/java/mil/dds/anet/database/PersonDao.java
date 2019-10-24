@@ -16,8 +16,10 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
+import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,6 +232,25 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return new ForeignKeyFetcher<PersonPositionHistory>()
         .load(context, FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY, personUuid)
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
+  }
+
+  public void clearEmptyBiographies() {
+    // Search all people with a not null biography field
+    final PersonSearchQuery query = new PersonSearchQuery();
+    query.setPageSize(0);
+    query.setHasBiography(true);
+    final List<Person> persons = search(query).getList();
+
+    // For each person with an empty html biography, set this one to null
+    for (final Person p : persons) {
+      if (Utils.isEmptyHtml(p.getBiography())) {
+        getDbHandle()
+            .createUpdate(
+                "/* updatePersonBiography */ UPDATE people SET biography = NULL WHERE uuid = :uuid")
+            .bind("uuid", p.getUuid()).execute();
+        AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
+      }
+    }
   }
 
   private static Blob convertImageToBlob(String image) {

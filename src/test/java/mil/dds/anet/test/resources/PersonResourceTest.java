@@ -318,6 +318,21 @@ public class PersonResourceTest extends AbstractResourceTest {
     // TODO: should we enforce that this query returns ONLY arthur? I think not since we're using
     // the plus addressing for testing..
 
+    // Search for persons with biography filled
+    query = new PersonSearchQuery();
+    query.setHasBiography(true);
+    searchResults =
+        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    assertThat(searchResults.getList()).isNotEmpty();
+
+    // Search for persons with empty biography
+    query = new PersonSearchQuery();
+    query.setHasBiography(false);
+    searchResults =
+        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    assertThat(searchResults.getList()).isNotEmpty();
   }
 
   @Test

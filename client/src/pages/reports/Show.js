@@ -223,9 +223,7 @@ const GQL_DELETE_REPORT = gql`
 `
 const GQL_EMAIL_REPORT = gql`
   mutation($uuid: String!, $email: AnetEmailInput!) {
-    emailReport(uuid: $uuid, email: $email) {
-      uuid
-    }
+    emailReport(uuid: $uuid, email: $email)
   }
 `
 const GQL_SUBMIT_REPORT = gql`
