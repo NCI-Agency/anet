@@ -371,6 +371,14 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
           values: countries,
           labels: countries
         }
+      },
+      "Has Biography?": {
+        component: SelectSearchFilter,
+        props: {
+          queryKey: "hasBiography",
+          values: ["true", "false"],
+          labels: ["Yes", "No"]
+        }
       }
     }
   }

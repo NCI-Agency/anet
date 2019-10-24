@@ -571,10 +571,10 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-    sqlArgs.put("positionAdvisor", Position.PositionType.ADVISOR.ordinal());
-    sqlArgs.put("reportDraft", ReportState.DRAFT.ordinal());
-    sqlArgs.put("reportPending", ReportState.PENDING_APPROVAL.ordinal());
-    sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
+    sqlArgs.put("positionAdvisor", DaoUtils.getEnumId(Position.PositionType.ADVISOR));
+    sqlArgs.put("reportDraft", DaoUtils.getEnumId(ReportState.DRAFT));
+    sqlArgs.put("reportPending", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
+    sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
 
     return getDbHandle().createQuery(String.format(sql.toString(), fmtArgs)).bindMap(sqlArgs)
         .map(new MapMapper(false)).list();
@@ -861,13 +861,13 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append("       WHERE \"approvalSteps\".type = :planningApprovalStepType )");
     sql.append(" ))");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-    sqlArgs.put("reportApproved", ReportState.APPROVED.ordinal());
-    sqlArgs.put("reportRejected", ReportState.REJECTED.ordinal());
-    sqlArgs.put("reportPendingApproval", ReportState.PENDING_APPROVAL.ordinal());
-    sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
-    sqlArgs.put("planningApprovalStepType", ApprovalStepType.PLANNING_APPROVAL.ordinal());
-    return getDbHandle().createQuery(String.format(sql.toString())).bindMap(sqlArgs)
-        .map(new ReportMapper()).list();
+    sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));
+    sqlArgs.put("reportRejected", DaoUtils.getEnumId(ReportState.REJECTED));
+    sqlArgs.put("reportPendingApproval", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
+    sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
+    sqlArgs.put("planningApprovalStepType", DaoUtils.getEnumId(ApprovalStepType.PLANNING_APPROVAL));
+    return getDbHandle().createQuery(sql.toString()).bindMap(sqlArgs).map(new ReportMapper())
+        .list();
   }
 
 }

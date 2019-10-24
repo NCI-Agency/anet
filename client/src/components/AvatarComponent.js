@@ -38,7 +38,7 @@ export default class AvatarComponent extends React.Component {
 
     let image =
       this.props.editCurrent &&
-      (this.props.src == null || this.props.src === ""
+      (this.props.src === null || this.props.src === ""
         ? DEFAULT_AVATAR
         : "data:image/jpeg;base64," + this.props.src)
 
