@@ -602,10 +602,11 @@
         },
         "wasabi": {
             "hashes": [
-                "sha256:b4fbee9dd0c8f5cff6554c0463c565e2d52b7c844d7eccb477d29a6ff8567750",
-                "sha256:f92c83e728bf1db6dc859ffc861afa328d2da8ef0c7a19300e5fb1bd5762b277"
+                "sha256:051fd33b47cf5f21626a3b750001b267c464c84a33f8e8fbcb49e48c8fe82838",
+                "sha256:7127b5f75d0f17f51048ca81d62440655ae87afcbed36adad717a5e35e671fa8"
             ],
-            "version": "==0.2.2"
+            "index": "pypi",
+            "version": "==0.3.0"
         }
     },
     "develop": {}
