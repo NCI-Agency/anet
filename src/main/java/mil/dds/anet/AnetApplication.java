@@ -228,7 +228,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
     scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
 
     // Check for any future engagements every 3 hours.
-
     // And run once in 15 seconds from boot-up. (give the server time to boot up).
     scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
     scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
