@@ -15957,10 +15957,31 @@ webdriver@5.15.1:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@5.15.1, webdriverio@^5.15.1:
+webdriverio@5.15.1:
   version "5.15.1"
   resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.15.1.tgz#1f408f09c23fd985dbf7b765212208c71bc541e3"
   integrity sha512-5JHmOgxhrdwvk8q51mw7qGKX88975QRnolr14c3FeiTnukZ7nk4CKoSopW8hjBzK6xDYVQtSdDwhHLocOdsP9w==
+  dependencies:
+    "@wdio/config" "5.15.1"
+    "@wdio/logger" "5.13.2"
+    "@wdio/repl" "5.15.1"
+    "@wdio/utils" "5.15.1"
+    archiver "^3.0.0"
+    css-value "^0.0.1"
+    grapheme-splitter "^1.0.2"
+    lodash.clonedeep "^4.5.0"
+    lodash.isobject "^3.0.2"
+    lodash.isplainobject "^4.0.6"
+    lodash.zip "^4.2.0"
+    resq "^1.6.0"
+    rgb2hex "^0.1.0"
+    serialize-error "^5.0.0"
+    webdriver "5.15.1"
+
+webdriverio@^5.15.2:
+  version "5.15.2"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.15.2.tgz#e922269bfa2e750f3b2d97a4f98c9591cbcde897"
+  integrity sha512-b+5GYQFt9dzMCsT5i8TztyxDXPQm/CQuUunPzVXqyLx4PK46aZ5MnmkzZmjewE6Wn1fXLVpkYuY0htxSOR65Ww==
   dependencies:
     "@wdio/config" "5.15.1"
     "@wdio/logger" "5.13.2"
