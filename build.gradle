@@ -106,7 +106,7 @@ dependencies {
 	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.12.0'
 
 	// used for writing Excel documents
-	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+	compile group: 'org.apache.poi', name: 'poi', version: '4.1.1'
 	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
 
 	// For parsing HTML to check for 'empty' input
