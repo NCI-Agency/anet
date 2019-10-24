@@ -11,6 +11,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
+import CustomFields from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -782,6 +783,17 @@ const BaseReportForm = props => {
                     </div>
                   )}
                 </Collapse>
+              </Fieldset>
+
+              <Fieldset title="Custom fields" id="custom-fields">
+                <CustomFields
+                  fieldsConfig={Settings.fields.report.customFields}
+                  formikProps={{
+                    values: values,
+                    setFieldTouched,
+                    setFieldValue
+                  }}
+                />
               </Fieldset>
 
               <div className="submit-buttons">

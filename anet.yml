@@ -242,6 +242,36 @@ dictionary:
       nextSteps: Next steps
       keyOutcomes: Key outcomes
       reportText: Engagement details
+      customFields:
+        justification:
+          type: text
+          label: Effort number
+          placeholder: Placeholder text for justification
+          helpText: Help text for text field
+          style:
+            height: 200px
+        nlt:
+          type: date
+          label: Not later than
+          helpText: Help text for date field
+        nlt_dt:
+          type: datetime
+          label: Not later than datetime
+          helpText: Help text for datetime field
+        colour_options:
+          type: enum
+          label: Choose one of the colours
+          helpText: Help text for chosing colours
+          choices:
+            GREEN:
+              label: Green
+              color: '#c2ffb3'
+            AMBER:
+              label: Amber
+              color: '#ffe396'
+            RED:
+              label: Red
+              color: '#ff8279'
 
     person:
       firstName: First name

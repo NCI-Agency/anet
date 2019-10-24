@@ -267,7 +267,8 @@ properties:
             type: string
             title: The label for report's engagement details
             description: Used in the UI where report's engagement details are shown.
-
+          customFields:
+            type: object
       person:
         type: object
         additionalProperties: false

@@ -273,7 +273,7 @@ const BaseTaskForm = props => {
                       )}
                       name="customFieldEnum1"
                       component={FieldHelper.renderButtonToggleGroup}
-                      buttons={customEnumButtons(
+                      buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
@@ -309,7 +309,7 @@ const BaseTaskForm = props => {
                     )}
                     name="customFieldEnum2"
                     component={FieldHelper.renderButtonToggleGroup}
-                    buttons={customEnumButtons(
+                    buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}
                     onChange={value => setFieldValue("customFieldEnum2", value)}
@@ -339,21 +339,6 @@ const BaseTaskForm = props => {
       }}
     </Formik>
   )
-
-  function customEnumButtons(list) {
-    const buttons = []
-    for (const key in list) {
-      if (list.hasOwnProperty(key)) {
-        buttons.push({
-          id: key,
-          value: key,
-          label: list[key].label,
-          color: list[key].color
-        })
-      }
-    }
-    return buttons
-  }
 
   function onCancel() {
     history.goBack()

@@ -234,6 +234,21 @@ export const renderSpecialField = ({
   )
 }
 
+export const customEnumButtons = list => {
+  const buttons = []
+  for (const key in list) {
+    if (list.hasOwnProperty(key)) {
+      buttons.push({
+        id: key,
+        value: key,
+        label: list[key].label,
+        color: list[key].color
+      })
+    }
+  }
+  return buttons
+}
+
 export const renderButtonToggleGroup = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
