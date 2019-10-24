@@ -223,19 +223,15 @@ public class AnetApplication extends Application<AnetConfiguration> {
     scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
 
     // Check for any emails that need to be sent every 5 minutes.
-    // And run once in 5 seconds from boot-up. (give the server time to boot up).
-    scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
-    scheduler.schedule(emailWorker, 5, TimeUnit.SECONDS);
-
-    // Check for any future engagements every 1 minutes in development mode or every 3 hours
-    // otherwise.
     // And run once in 10 seconds from boot-up. (give the server time to boot up).
-    if (configuration.isDevelopmentMode()) {
-      scheduler.scheduleAtFixedRate(futureWorker, 0, 1, TimeUnit.MINUTES);
-    } else {
-      scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
-    }
-    scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
+    scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
+    scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
+
+    // Check for any future engagements every 3 hours.
+
+    // And run once in 15 seconds from boot-up. (give the server time to boot up).
+    scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
+    scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
     runAccountDeactivationWorker(configuration, scheduler, engine);
 
@@ -275,27 +271,14 @@ public class AnetApplication extends Application<AnetConfiguration> {
     if (configuration.getDictionaryEntry("automaticallyInactivateUsers") != null) {
       // Check for any accounts which are scheduled to be deactivated as they reach the end-of-tour
       // date.
-      final String intervalDictKey = "automaticallyInactivateUsers.checkIntervalInSecs";
-      final Integer accountDeactivationWarningInterval =
-          (Integer) configuration.getDictionaryEntry(intervalDictKey);
-
-      if (accountDeactivationWarningInterval == null) {
-        final String errorMsg =
-            "Missing or invalid value '" + intervalDictKey + "' in the configuration";
-        logger.error(errorMsg);
-        throw new IllegalArgumentException(errorMsg);
-      }
-
+      final Integer accountDeactivationWarningInterval = (Integer) configuration
+          .getDictionaryEntry("automaticallyInactivateUsers.checkIntervalInSecs");
       final AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
           configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
 
       // Run the email deactivation worker at the set interval. In development run it every minute.
-      if (configuration.isDevelopmentMode()) {
-        scheduler.scheduleAtFixedRate(deactivationWarningWorker, 0, 1, TimeUnit.MINUTES);
-      } else {
-        scheduler.scheduleAtFixedRate(deactivationWarningWorker, accountDeactivationWarningInterval,
-            accountDeactivationWarningInterval, TimeUnit.SECONDS);
-      }
+      scheduler.scheduleAtFixedRate(deactivationWarningWorker, accountDeactivationWarningInterval,
+          accountDeactivationWarningInterval, TimeUnit.SECONDS);
     }
   }
 

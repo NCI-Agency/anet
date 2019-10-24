@@ -1,8 +1,6 @@
 package mil.dds.anet.integrationtest.db;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
@@ -191,7 +189,7 @@ public class FutureEngagementWorkerTest {
   private void testFututeEngagementWorker(final int expectedCount) {
     final int emailSize = engine.getEmailDao().getAll().size();
     futureEngagementWorker.run();
-    assertEquals(emailSize + expectedCount, engine.getEmailDao().getAll().size());
+    assertThat(engine.getEmailDao().getAll().size()).isEqualTo(emailSize + expectedCount);
   }
 
   // Email integration
@@ -204,9 +202,9 @@ public class FutureEngagementWorkerTest {
     Thread.sleep(10000);
 
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
-    assertEquals(expectedIds.size(), emails.size());
-    emails.forEach(e -> assertTrue(expectedIds.contains(e.to.text.split("@")[0])));
-    emails.forEach(e -> assertFalse(unexpectedIds.contains(e.to.text.split("@")[0])));
+    assertThat(emails.size()).isEqualTo(expectedIds.size());
+    emails.forEach(e -> assertThat(expectedIds.contains(e.to.text.split("@")[0])));
+    emails.forEach(e -> assertThat(unexpectedIds.contains(e.to.text.split("@")[0])));
   }
 
   private static Report createTestReport(final String toAdressId) {
