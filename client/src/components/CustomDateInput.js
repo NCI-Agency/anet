@@ -28,7 +28,11 @@ export default class CustomDateInput extends Component {
     id: PropTypes.string,
     showIcon: PropTypes.bool,
     withTime: PropTypes.bool,
-    value: PropTypes.object,
+    value: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.instanceOf(Date)
+    ]),
     onChange: PropTypes.func,
     onBlur: PropTypes.func
   }
@@ -67,7 +71,7 @@ export default class CustomDateInput extends Component {
           inputRef: ref => (this.inputRef.current = ref)
         }}
         rightElement={rightElement}
-        value={value}
+        value={value && moment(value).toDate()}
         onChange={onChange}
         formatDate={date => moment(date).format(inputFormat)}
         parseDate={str => moment(str, dateFormats, true).toDate()}
