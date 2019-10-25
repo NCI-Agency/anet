@@ -7236,7 +7236,8 @@ extsprintf@^1.2.0:
 
 "faker@https://github.com/Marak/faker.js.git":
   version "4.1.0"
-  resolved "https://github.com/Marak/faker.js.git#10bfb9f467b0ac2b8912ffc15690b50ef3244f09"
+  uid "9fd8d7d37b398842d0784a116a340f7aa6afb89b"
+  resolved "https://github.com/Marak/faker.js.git#9fd8d7d37b398842d0784a116a340f7aa6afb89b"
 
 fast-deep-equal@^1.0.0:
   version "1.1.0"
