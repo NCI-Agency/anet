@@ -1,6 +1,6 @@
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
-import { Field } from "formik"
+import { Field, FieldArray } from "formik"
 import PropTypes from "prop-types"
 import React from "react"
 import { HelpBlock } from "react-bootstrap"
@@ -47,29 +47,34 @@ const FIELD_COMPONENTS = {
   enum: ButtonToggleGroupField
 }
 
-const CustomFields = ({ fieldsConfig, formikProps }) => {
-  return Object.keys(fieldsConfig).map(key => {
-    const fieldConfig = fieldsConfig[key]
-    const { type, helpText, ...fieldProps } = fieldConfig
-    const FieldComponent = FIELD_COMPONENTS[type]
-    return (
-      <FieldComponent
-        key={key}
-        name={key}
-        value={formikProps.values[key]}
-        onChange={value => formikProps.setFieldValue(key, value)}
-        onBlur={() => formikProps.setFieldTouched(key, true)}
-        {...fieldProps}
-      >
-        {helpText && (
-          <HelpBlock>
-            <span className="text-success">{helpText}</span>
-          </HelpBlock>
-        )}
-      </FieldComponent>
-    )
-  })
-}
+const CustomFields = ({ fieldsConfig, formikProps }) => (
+  // We use a FieldArray in order to group the customFields fields
+  <FieldArray
+    name="customFields"
+    render={arrayHelpers =>
+      Object.keys(fieldsConfig).map(key => {
+        const fieldConfig = fieldsConfig[key]
+        const { type, helpText, ...fieldProps } = fieldConfig
+        const FieldComponent = FIELD_COMPONENTS[type]
+        const fieldName = `customFields.0.${key}`
+        return (
+          <FieldComponent
+            key={key}
+            name={fieldName}
+            onChange={value => formikProps.setFieldValue(fieldName, value)}
+            onBlur={() => formikProps.setFieldTouched(fieldName, true)}
+            {...fieldProps}
+          >
+            {helpText && (
+              <HelpBlock>
+                <span className="text-success">{helpText}</span>
+              </HelpBlock>
+            )}
+          </FieldComponent>
+        )
+      })}
+  />
+)
 CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object

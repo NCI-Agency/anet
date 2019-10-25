@@ -22,7 +22,6 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
-import _pick from "lodash/pick"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
@@ -242,7 +241,14 @@ const BaseReportForm = props => {
       text: tag.name
     }))
   }
-
+  const initialCustomFields = initialValues.customFields
+  // customFields is array when returned by autosave, JSON string when coming
+  // from the db. It should be an array as the related field is a FieldArray.
+  if (!Array.isArray(initialCustomFields)) {
+    initialValues.customFields = initialCustomFields
+      ? [JSON.parse(initialCustomFields)]
+      : [{}]
+  }
   return (
     <Formik
       enableReinitialize
@@ -982,15 +988,13 @@ const BaseReportForm = props => {
   }
 
   function save(values, sendEmail) {
-    const customFieldsKeys = Object.keys(Settings.fields.report.customFields)
     const report = Object.without(
       new Report(values),
       "notes",
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
-      "attendees",
-      ...customFieldsKeys
+      "attendees"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1017,9 +1021,9 @@ const BaseReportForm = props => {
       Object.without(a, "firstName", "lastName", "position")
     )
     report.location = utils.getReference(report.location)
-    // custom fields will be saved in one json field
-    const customFieldsValues = _pick(values, customFieldsKeys)
-    report.customFields = JSON.stringify(customFieldsValues)
+    // transform the customFields first elem to JSON (customFields should contain
+    // the JSON of all the fields defined as customFields)
+    report.customFields = JSON.stringify(report.customFields[0])
     const edit = isEditMode(values)
     const variables = { report }
     if (edit) {

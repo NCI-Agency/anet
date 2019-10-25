@@ -88,6 +88,7 @@ const GQL_GET_REPORT = gql`
         name
         description
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
