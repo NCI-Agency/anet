@@ -22,6 +22,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _pick from "lodash/pick"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
@@ -981,13 +982,15 @@ const BaseReportForm = props => {
   }
 
   function save(values, sendEmail) {
+    const customFieldsKeys = Object.keys(Settings.fields.report.customFields)
     const report = Object.without(
       new Report(values),
       "notes",
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
-      "attendees"
+      "attendees",
+      ...customFieldsKeys
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1014,6 +1017,9 @@ const BaseReportForm = props => {
       Object.without(a, "firstName", "lastName", "position")
     )
     report.location = utils.getReference(report.location)
+    // custom fields will be saved in one json field
+    const customFieldsValues = _pick(values, customFieldsKeys)
+    report.customFields = JSON.stringify(customFieldsValues)
     const edit = isEditMode(values)
     const variables = { report }
     if (edit) {

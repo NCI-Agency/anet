@@ -38,6 +38,7 @@ public class ReportMapper implements RowMapper<Report> {
     r.setAuthorUuid(rs.getString("reports_authorUuid"));
     r.setAdvisorOrgUuid(rs.getString("reports_advisorOrganizationUuid"));
     r.setPrincipalOrgUuid(rs.getString("reports_principalOrganizationUuid"));
+    r.setCustomFields(rs.getString("reports_customFields"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

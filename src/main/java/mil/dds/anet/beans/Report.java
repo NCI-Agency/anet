@@ -76,6 +76,7 @@ public class Report extends AbstractAnetBean {
   private Person user;
   private List<AuthorizationGroup> authorizationGroups;
   private List<ReportAction> workflow;
+  private String customFields;
 
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
@@ -534,6 +535,15 @@ public class Report extends AbstractAnetBean {
     this.workflow = workflow;
   }
 
+  @GraphQLQuery(name = "customFields")
+  public String getCustomFields() {
+    return customFields;
+  }
+
+  public void setCustomFields(String customFields) {
+    this.customFields = Utils.trimStringReturnNull(customFields);
+  }
+
   private List<ReportAction> createApprovalStepsActions(List<ReportAction> actions,
       List<ApprovalStep> steps) {
     final List<ReportAction> newActions = new LinkedList<ReportAction>();
@@ -693,7 +703,8 @@ public class Report extends AbstractAnetBean {
         && Objects.equals(r.getAuthorUuid(), getAuthorUuid())
         && Objects.equals(r.getComments(), comments) && Objects.equals(r.getTags(), tags)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
-        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
+        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups)
+        && Objects.equals(r.getCustomFields(), customFields);
   }
 
   @Override
