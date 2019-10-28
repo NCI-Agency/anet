@@ -11,7 +11,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
-import CustomFields from "components/CustomFields"
+import { CustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -242,8 +242,9 @@ const BaseReportForm = props => {
     }))
   }
   const initialCustomFields = initialValues.customFields
-  // customFields is array when returned by autosave, JSON string when coming
-  // from the db. It should be an array as the related field is a FieldArray.
+  // customFields can be an array (when returned by autosave) or a JSON string
+  // (when coming from the db). Its form field, a FieldArray, expects an array
+  // as value.
   if (!Array.isArray(initialCustomFields)) {
     initialValues.customFields = initialCustomFields
       ? [JSON.parse(initialCustomFields)]
@@ -796,7 +797,6 @@ const BaseReportForm = props => {
                 <CustomFields
                   fieldsConfig={Settings.fields.report.customFields}
                   formikProps={{
-                    values: values,
                     setFieldTouched,
                     setFieldValue
                   }}

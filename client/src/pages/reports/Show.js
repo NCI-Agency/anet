@@ -8,6 +8,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -208,6 +209,7 @@ const GQL_GET_REPORT = gql`
         name
         description
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -290,6 +292,7 @@ const BaseReportShow = props => {
       text: tag.name
     }))
     data.report.to = ""
+    data.report.customFields = JSON.parse(data.report.customFields)
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })
@@ -617,6 +620,14 @@ const BaseReportShow = props => {
                         />
                     </div>
                   )) || <h5>No groups are authorized!</h5>}
+                </Fieldset>
+              )}
+
+              {Settings.fields.report.customFields && (
+                <Fieldset title="Custom fields" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.report.customFields}
+                  />
                 </Fieldset>
               )}
 

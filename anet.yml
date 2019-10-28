@@ -243,16 +243,22 @@ dictionary:
       keyOutcomes: Key outcomes
       reportText: Engagement details
       customFields:
-        justification:
+        inputFieldName:
           type: text
           label: Effort number
-          placeholder: Placeholder text for justification
+          placeholder: Placeholder text for input field
           helpText: Help text for text field
+        textareaFieldName:
+          type: text
+          label: Effort number
+          placeholder: Placeholder text for textarea field
+          helpText: Help text for textarea field
+          componentClass: textarea
           style:
             height: 200px
         nlt:
           type: date
-          label: Not later than
+          label: Not later than date
           helpText: Help text for date field
         nlt_dt:
           type: datetime
