@@ -22,7 +22,7 @@ import PositionTable from "components/PositionTable"
 import ReportCollection from "components/ReportCollection"
 import { SearchDescription } from "components/SearchFilters"
 import SubNav from "components/SubNav"
-import UltimatePagination from "components/UltimatePagination"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _get from "lodash/get"
@@ -219,38 +219,37 @@ const Organizations = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={organizationQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="organizations-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Code</th>
-            <th>Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Organization.map(organizations, org => (
-            <tr key={org.uuid}>
-              <td>
-                <LinkTo organization={org} />
-              </td>
-              <td>{org.longName}</td>
-              <td>{org.identificationCode}</td>
-              <td>{org.humanNameOfType()}</td>
+      >
+        <Table responsive hover striped id="organizations-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Code</th>
+              <th>Type</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {Organization.map(organizations, org => (
+              <tr key={org.uuid}>
+                <td>
+                  <LinkTo organization={org} />
+                </td>
+                <td>{org.longName}</td>
+                <td>{org.identificationCode}</td>
+                <td>{org.humanNameOfType()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -316,52 +315,51 @@ const People = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={personQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="people-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Location</th>
-            <th>Organization</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Person.map(people, person => (
-            <tr key={person.uuid}>
-              <td>
-                <LinkTo person={person} />
-              </td>
-              <td>
-                <LinkTo position={person.position} />
-                {person.position && person.position.code
-                  ? `, ${person.position.code}`
-                  : ""}
-              </td>
-              <td>
-                <LinkTo
-                  whenUnspecified=""
-                  anetLocation={person.position && person.position.location}
-                />
-              </td>
-              <td>
-                {person.position && person.position.organization && (
-                  <LinkTo organization={person.position.organization} />
-                )}
-              </td>
+      >
+        <Table responsive hover striped id="people-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Location</th>
+              <th>Organization</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {Person.map(people, person => (
+              <tr key={person.uuid}>
+                <td>
+                  <LinkTo person={person} />
+                </td>
+                <td>
+                  <LinkTo position={person.position} />
+                  {person.position && person.position.code
+                    ? `, ${person.position.code}`
+                    : ""}
+                </td>
+                <td>
+                  <LinkTo
+                    whenUnspecified=""
+                    anetLocation={person.position && person.position.location}
+                  />
+                </td>
+                <td>
+                  {person.position && person.position.organization && (
+                    <LinkTo organization={person.position.organization} />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -418,27 +416,16 @@ const Positions = props => {
     return result
   }
 
-  const positions = data ? data.positionList.list : []
-  const totalCount = data && data.positionList && data.positionList.totalCount
+  const paginatedPositions = data ? data.positionList : []
+  const totalCount = paginatedPositions && data.positionList.totalCount
   setTotalCount(totalCount)
-  if (_get(positions, "length", 0) === 0) {
-    return <em>No positions found</em>
-  }
 
   return (
-    <div>
-      <UltimatePagination
-        Component="header"
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={positionQuery.pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
-      />
-      <br />
-      <PositionTable positions={positions} id="positions-search-results" />
-    </div>
+    <PositionTable
+      paginatedPositions={paginatedPositions}
+      goToPage={setPage}
+      id="positions-search-results"
+    />
   )
 
   function setPage(pageNum) {
@@ -503,34 +490,33 @@ const Tasks = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={taskQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="tasks-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Task.map(tasks, task => (
-            <tr key={task.uuid}>
-              <td>
-                <LinkTo task={task}>
-                  {task.shortName} {task.longName}
-                </LinkTo>
-              </td>
+      >
+        <Table responsive hover striped id="tasks-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {Task.map(tasks, task => (
+              <tr key={task.uuid}>
+                <td>
+                  <LinkTo task={task}>
+                    {task.shortName} {task.longName}
+                  </LinkTo>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -596,32 +582,31 @@ const Locations = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={locationQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="locations-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {locations.map(loc => (
-            <tr key={loc.uuid}>
-              <td>
-                <LinkTo anetLocation={loc} />
-              </td>
+      >
+        <Table responsive hover striped id="locations-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {locations.map(loc => (
+              <tr key={loc.uuid}>
+                <td>
+                  <LinkTo anetLocation={loc} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
