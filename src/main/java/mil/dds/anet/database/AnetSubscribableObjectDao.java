@@ -19,6 +19,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 
   public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
 
+  @InTransaction
   @Override
   public int update(T obj) {
     DaoUtils.setUpdateFields(obj);
@@ -31,6 +32,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
     return numRows;
   }
 
+  @InTransaction
   @Override
   public int delete(String uuid) {
     final T obj = getObjectForSubscriptionDelete(uuid);

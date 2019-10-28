@@ -19,12 +19,10 @@ import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQuery<?>> {
 
   private static final Logger logger =
@@ -32,26 +30,11 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
 
   public static final String TABLE_NAME = "subscriptions";
 
-  public AnetBeanList<Subscription> getAll(int pageNum, int pageSize) {
-    final String sql;
-    if (DaoUtils.isMsSql()) {
-      sql = "/* getAllSubscriptions */ SELECT subscriptions.*, COUNT(*) OVER() AS totalCount "
-          + "FROM subscriptions ORDER BY \"updatedAt\" DESC "
-          + "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-    } else {
-      sql = "/* getAllSubscriptions */ SELECT * from subscriptions "
-          + "ORDER BY \"updatedAt\" DESC LIMIT :limit OFFSET :offset";
-    }
-
-    final Query query =
-        getDbHandle().createQuery(sql).bind("limit", pageSize).bind("offset", pageSize * pageNum);
-    return new AnetBeanList<Subscription>(query, pageNum, pageSize, new SubscriptionMapper());
-  }
-
   public Subscription getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
 
+  @InTransaction
   @Override
   public Subscription insert(Subscription obj) {
     final Instant updatedAt = obj.getUpdatedAt();
@@ -100,6 +83,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
         .bind("uuid", uuid).execute();
   }
 
+  @InTransaction
   public int deleteObjectSubscription(Person user, String uuid) {
     final Position position = user.loadPosition();
     return getDbHandle()
@@ -110,6 +94,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
         .execute();
   }
 
+  @InTransaction
   public int updateSubscriptions(SubscriptionUpdateGroup subscriptionUpdate) {
     if (subscriptionUpdate == null || !subscriptionUpdate.isValid()) {
       return 0;
@@ -174,6 +159,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
         .bind("isNote", subscriptionUpdate.isNote).bindMap(params).execute();
   }
 
+  @InTransaction
   public boolean isSubscribedObject(Map<String, Object> context, String subscribedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position position = user.loadPosition();

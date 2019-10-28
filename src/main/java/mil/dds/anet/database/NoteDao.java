@@ -16,6 +16,7 @@ import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
@@ -41,6 +42,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return idBatcher.getByIds(uuids);
   }
 
+  @InTransaction
   @Override
   public Note insert(Note obj) {
     DaoUtils.setInsertFields(obj);
@@ -62,6 +64,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return n;
   }
 
+  @InTransaction
   @Override
   public int update(Note obj) {
     DaoUtils.setUpdateFields(obj);
@@ -80,6 +83,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         .bindBean(n).bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt())).execute();
   }
 
+  @InTransaction
   @Override
   public int delete(String uuid) {
     final Note note = getByUuid(uuid);
