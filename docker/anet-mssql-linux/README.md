@@ -16,7 +16,7 @@ Docker image for running an mssql database for [anet](https://github.com/nci-age
       ncia/anet-mssql-linux
   ```
 
-This will start an mssql server 14.0.3006.16-3 on ubuntu:16.04 with full text search enabled, and it will create an empty db (DB_NAME) with a sysadmin (DB_USER/DB_USER_PASSWORD)
+This will start an mssql server 14.0.3238.1-19 on ubuntu:16.04 with full text search enabled, and it will create an empty db (DB_NAME) with a sysadmin (DB_USER/DB_USER_PASSWORD)
 
 After the image is launched, you may want to execute sql statements:
 
