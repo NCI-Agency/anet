@@ -18,7 +18,6 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
-import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
@@ -46,10 +45,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   }
 
   protected void buildQuery(ReportSearchQuery query) {
-    qb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
-    qb.addFromClause("reports");
-    qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
-    qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
+    // Base select and from clauses are added by child classes
 
     if (query.isTextPresent()) {
       addTextQuery(query);

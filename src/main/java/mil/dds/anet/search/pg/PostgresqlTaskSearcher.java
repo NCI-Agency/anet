@@ -1,7 +1,9 @@
 package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.search.AbstractTaskSearcher;
 
 public class PostgresqlTaskSearcher extends AbstractTaskSearcher {
@@ -12,8 +14,16 @@ public class PostgresqlTaskSearcher extends AbstractTaskSearcher {
 
   @Override
   protected void addTextQuery(TaskSearchQuery query) {
-    final String text = qb.getContainsQuery(query.getText());
-    qb.addLikeClauses("text", new String[] {"tasks.\"longName\"", "tasks.\"shortName\""}, text);
+    addFullTextSearch("tasks", query.getText(), query.isSortByPresent());
+  }
+
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
+      // We're doing a full-text search without an explicit sort order,
+      // so sort first on the search pseudo-rank.
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
+    }
+    super.addOrderByClauses(qb, query);
   }
 
 }

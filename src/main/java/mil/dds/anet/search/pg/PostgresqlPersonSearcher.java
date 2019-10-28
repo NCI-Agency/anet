@@ -1,8 +1,10 @@
 package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.search.AbstractPersonSearcher;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
 
 public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
 
@@ -12,14 +14,16 @@ public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
 
   @Override
   protected void addTextQuery(PersonSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
-    if (query.getMatchPositionName()) {
-      qb.addLikeClauses("text", new String[] {"people.name", "people.code",
-          "people.\"emailAddress\"", "positions.name", "positions.code"}, text);
-    } else {
-      qb.addLikeClauses("text",
-          new String[] {"people.name", "people.code", "people.\"emailAddress\""}, text);
+    addFullTextSearch("people", query.getText(), query.isSortByPresent());
+  }
+
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
+      // We're doing a full-text search without an explicit sort order,
+      // so sort first on the search pseudo-rank.
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
     }
+    super.addOrderByClauses(qb, query);
   }
 
 }

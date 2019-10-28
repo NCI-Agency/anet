@@ -4,6 +4,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 
@@ -19,6 +20,15 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   @Override
   public AnetBeanList<Report> runSearch(ReportSearchQuery query) {
     return runSearch(outerQb, query);
+  }
+
+  @Override
+  protected void buildQuery(ReportSearchQuery query) {
+    qb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
+    qb.addFromClause("reports");
+    qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
+    qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
+    super.buildQuery(query);
   }
 
   @Override

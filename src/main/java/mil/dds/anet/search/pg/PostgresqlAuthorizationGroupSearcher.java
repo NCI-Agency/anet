@@ -2,7 +2,9 @@ package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.search.AbstractAuthorizationGroupSearcher;
+import mil.dds.anet.search.AbstractSearchQueryBuilder;
 
 public class PostgresqlAuthorizationGroupSearcher extends AbstractAuthorizationGroupSearcher {
 
@@ -13,9 +15,17 @@ public class PostgresqlAuthorizationGroupSearcher extends AbstractAuthorizationG
 
   @Override
   protected void addTextQuery(AuthorizationGroupSearchQuery query) {
-    final String text = qb.getContainsQuery(query.getText());
-    qb.addLikeClauses("text",
-        new String[] {"\"authorizationGroup\".name", "\"authorizationGroup\".description"}, text);
+    addFullTextSearch("\"authorizationGroups\"", query.getText(), query.isSortByPresent());
+  }
+
+  protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
+      AuthorizationGroupSearchQuery query) {
+    if (query.isTextPresent() && !query.isSortByPresent()) {
+      // We're doing a full-text search without an explicit sort order,
+      // so sort first on the search pseudo-rank.
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
+    }
+    super.addOrderByClauses(qb, query);
   }
 
 }

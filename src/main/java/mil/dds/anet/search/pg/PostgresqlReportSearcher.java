@@ -2,7 +2,9 @@ package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 
@@ -23,10 +25,15 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
+  protected void buildQuery(ReportSearchQuery query) {
+    qb.addSelectClause(ReportDao.REPORT_FIELDS);
+    qb.addFromClause("reports");
+    super.buildQuery(query);
+  }
+
+  @Override
   protected void addTextQuery(ReportSearchQuery query) {
-    final String text = qb.getContainsQuery(query.getText());
-    qb.addLikeClauses("text", new String[] {"reports.text", "reports.intent",
-        "reports.\"keyOutcomes\"", "reports.\"nextSteps\"", "tags.name", "tags.description"}, text);
+    addFullTextSearch("reports", query.getText(), query.isSortByPresent());
   }
 
   @Override
@@ -66,6 +73,12 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
     if (qb == outerQb) {
       // ordering must be on the outer query
+      if (query.isTextPresent() && !query.isSortByPresent()) {
+        // We're doing a full-text search without an explicit sort order,
+        // so sort first on the search pseudo-rank.
+        qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
+      }
+
       super.addOrderByClauses(qb, query);
     }
   }
