@@ -4,7 +4,7 @@ import LinkTo from "components/LinkTo"
 import { mapDispatchToProps, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import Tag from "components/Tag"
-import UltimatePagination from "components/UltimatePagination"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
@@ -159,17 +159,17 @@ const ReportSummary = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         className="pull-right"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      {reports.map(report => (
-        <ReportSummaryRow report={report} key={report.uuid} />
-      ))}
+      >
+        {reports.map(report => (
+          <ReportSummaryRow report={report} key={report.uuid} />
+        ))}
+      </UltimatePaginationTopDown>
     </div>
   )
 

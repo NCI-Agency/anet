@@ -56,7 +56,6 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQuery> {
 
   private static final String[] fields = {"uuid", "state", "createdAt", "updatedAt",
@@ -86,6 +85,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     }
   }
 
+  @InTransaction
   public Report insert(Report r, Person user) {
     DaoUtils.setInsertFields(r);
     return insertInternal(r, user);
@@ -173,6 +173,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return getByUuid(uuid, null);
   }
 
+  @InTransaction
   public Report getByUuid(String uuid, Person user) {
     /* Check whether uuid is purely numerical, and if so, query on legacyId */
     final String queryDescriptor;
@@ -199,6 +200,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return result;
   }
 
+  @InTransaction
   public int update(Report r, Person user) {
     DaoUtils.setUpdateFields(r);
     return updateWithSubscriptions(r, user);
@@ -256,6 +258,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason())).execute();
   }
 
+  @InTransaction
   public void updateToDraftState(Report r) {
     getDbHandle().createUpdate(
         "/* UpdateFutureEngagementToDraft */ UPDATE reports SET state = :state , \"approvalStepUuid\" = NULL "
@@ -264,6 +267,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .execute();
   }
 
+  @InTransaction
   public int addAttendeeToReport(ReportPerson rp, Report r) {
     return getDbHandle().createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
         + "(\"personUuid\", \"reportUuid\", \"isPrimary\") VALUES (:personUuid, :reportUuid, :isPrimary)")
@@ -271,6 +275,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("isPrimary", rp.isPrimary()).execute();
   }
 
+  @InTransaction
   public int removeAttendeeFromReport(Person p, Report r) {
     return getDbHandle()
         .createUpdate("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
@@ -278,6 +283,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("reportUuid", r.getUuid()).bind("personUuid", p.getUuid()).execute();
   }
 
+  @InTransaction
   public int updateAttendeeOnReport(ReportPerson rp, Report r) {
     return getDbHandle().createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
         + "SET \"isPrimary\" = :isPrimary WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
@@ -285,7 +291,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("isPrimary", rp.isPrimary()).execute();
   }
 
-
+  @InTransaction
   public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
     return getDbHandle().createUpdate(
         "/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupUuid\", \"reportUuid\") "
@@ -293,6 +299,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", a.getUuid()).execute();
   }
 
+  @InTransaction
   public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
     return getDbHandle().createUpdate(
         "/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
@@ -300,6 +307,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", a.getUuid()).execute();
   }
 
+  @InTransaction
   public int addTaskToReport(Task p, Report r) {
     return getDbHandle()
         .createUpdate(
@@ -308,6 +316,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("reportUuid", r.getUuid()).bind("taskUuid", p.getUuid()).execute();
   }
 
+  @InTransaction
   public int removeTaskFromReport(String taskUuid, Report r) {
     return getDbHandle()
         .createUpdate("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
@@ -315,6 +324,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("reportUuid", r.getUuid()).bind("taskUuid", taskUuid).execute();
   }
 
+  @InTransaction
   public int addTagToReport(Tag t, Report r) {
     return getDbHandle()
         .createUpdate(
@@ -323,6 +333,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .bind("reportUuid", r.getUuid()).bind("tagUuid", t.getUuid()).execute();
   }
 
+  @InTransaction
   public int removeTagFromReport(Tag t, Report r) {
     return getDbHandle()
         .createUpdate("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
@@ -336,6 +347,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         reportUuid);
   }
 
+  @InTransaction
   public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
     return getDbHandle().createQuery(
         "/* getAuthorizationGroupsForReport */ SELECT * FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
@@ -371,6 +383,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    * Deletes a given report from the database. Ensures consistency by removing all references to a
    * report before deleting a report.
    */
+  @InTransaction
   @Override
   public int deleteInternal(String reportUuid) {
     // Delete tags
@@ -466,6 +479,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   /* Generates Advisor Report Insights for Organizations */
+  @InTransaction
   public List<Map<String, Object>> getAdvisorReportInsights(Instant start, Instant end,
       String orgUuid) {
     final Map<String, Object> sqlArgs = new HashMap<String, Object>();
@@ -593,8 +607,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    * @param orgs the list of orgs for whose reports to find, null means all
    * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
    */
-  private List<Map<String, Object>> rollupQuery(Instant start, Instant end,
-      OrganizationType orgType, List<Organization> orgs, boolean missingOrgReports) {
+  @InTransaction
+  public List<Map<String, Object>> rollupQuery(Instant start, Instant end, OrganizationType orgType,
+      List<Organization> orgs, boolean missingOrgReports) {
     String orgColumn =
         String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationUuid"
             : "principalOrganizationUuid");
@@ -812,6 +827,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    * have just become past engagements. These reports need to get the draft state as they need to go
    * through the report approval chain before being published.
    */
+  @InTransaction
   public List<Report> getFutureToPastReports(Instant end) {
     final Map<String, Object> sqlArgs = new HashMap<String, Object>();
     StringBuilder sql = new StringBuilder();

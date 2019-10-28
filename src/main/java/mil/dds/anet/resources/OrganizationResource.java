@@ -180,7 +180,7 @@ public class OrganizationResource {
 
       Utils.addRemoveElementsByUuid(existingSteps, org.getPlanningApprovalSteps(),
           newStep -> engine.getApprovalStepDao().insert(newStep),
-          oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
+          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
 
       for (int i = 0; i < org.getPlanningApprovalSteps().size(); i++) {
         ApprovalStep curr = org.getPlanningApprovalSteps().get(i);
@@ -208,7 +208,7 @@ public class OrganizationResource {
 
       Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
           newStep -> engine.getApprovalStepDao().insert(newStep),
-          oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
+          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
 
       for (int i = 0; i < org.getApprovalSteps().size(); i++) {
         ApprovalStep curr = org.getApprovalSteps().get(i);

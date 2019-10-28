@@ -23,7 +23,6 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class AuthorizationGroupDao
     extends AnetBaseDao<AuthorizationGroup, AuthorizationGroupSearchQuery> {
 
@@ -104,6 +103,7 @@ public class AuthorizationGroupDao
     throw new UnsupportedOperationException();
   }
 
+  @InTransaction
   public int addPositionToAuthorizationGroup(Position p, AuthorizationGroup a) {
     return getDbHandle().createUpdate(
         "/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupUuid\", \"positionUuid\") "
@@ -111,6 +111,7 @@ public class AuthorizationGroupDao
         .bind("authorizationGroupUuid", a.getUuid()).bind("positionUuid", p.getUuid()).execute();
   }
 
+  @InTransaction
   public int removePositionFromAuthorizationGroup(Position p, AuthorizationGroup a) {
     return getDbHandle().createUpdate(
         "/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupPositions\" "
@@ -130,6 +131,7 @@ public class AuthorizationGroupDao
         .runSearch(query);
   }
 
+  @InTransaction
   public List<AuthorizationGroup> getRecentAuthorizationGroups(Person author, int maxResults) {
     final String sql;
     if (DaoUtils.isMsSql()) {
@@ -160,6 +162,7 @@ public class AuthorizationGroupDao
         .map(new AuthorizationGroupMapper()).list();
   }
 
+  @InTransaction
   public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
     return getDbHandle().createQuery("/* getReportsForAuthorizationGroup */ SELECT "
         + ReportDao.REPORT_FIELDS + "FROM reports, \"reportAuthorizationGroups\" "

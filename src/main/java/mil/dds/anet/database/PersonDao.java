@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
@@ -130,6 +129,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
   }
 
+  @InTransaction
   public List<Person> findByDomainUsername(String domainUsername) {
     return getDbHandle()
         .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
@@ -142,6 +142,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .list();
   }
 
+  @InTransaction
   public List<Person> getRecentPeople(Person author, int maxResults) {
     String sql;
     if (DaoUtils.isMsSql()) {
@@ -163,6 +164,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .bind("maxResults", maxResults).map(new PersonMapper()).list();
   }
 
+  @InTransaction
   public int mergePeople(Person winner, Person loser) {
     // delete duplicates where other is primary, or where neither is primary
     getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
@@ -234,6 +236,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
+  @InTransaction
   public void clearEmptyBiographies() {
     // Search all people with a not null biography field
     final PersonSearchQuery query = new PersonSearchQuery();

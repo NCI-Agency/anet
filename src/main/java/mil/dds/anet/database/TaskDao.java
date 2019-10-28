@@ -25,7 +25,6 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   public static final String TABLE_NAME = "tasks";
@@ -132,6 +131,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
     throw new UnsupportedOperationException();
   }
 
+  @InTransaction
   public int addPositionToTask(Position p, Task t) {
     return getDbHandle().createUpdate(
         "/* addPositionToTask */ INSERT INTO \"taskResponsiblePositions\" (\"taskUuid\", \"positionUuid\") "
@@ -139,6 +139,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
         .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
   }
 
+  @InTransaction
   public int removePositionFromTask(Position p, Task t) {
     return getDbHandle()
         .createUpdate("/* removePositionFromTask*/ DELETE FROM \"taskResponsiblePositions\" "
@@ -152,6 +153,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
         FkDataLoaderKey.TASK_RESPONSIBLE_POSITIONS, taskUuid);
   }
 
+  @InTransaction
   public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {
     return getDbHandle()
         .createUpdate("/* setReponsibleOrgForTask */ UPDATE tasks "
@@ -160,6 +162,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
         .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
   }
 
+  @InTransaction
   public List<Task> getTopLevelTasks() {
     return getDbHandle()
         .createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
@@ -171,6 +174,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
     return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);
   }
 
+  @InTransaction
   public List<Task> getRecentTasks(Person author, int maxResults) {
     String sql;
     if (DaoUtils.isMsSql()) {
