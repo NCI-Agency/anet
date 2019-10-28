@@ -236,6 +236,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
+  @InTransaction
   public void clearEmptyBiographies() {
     // Search all people with a not null biography field
     final PersonSearchQuery query = new PersonSearchQuery();
