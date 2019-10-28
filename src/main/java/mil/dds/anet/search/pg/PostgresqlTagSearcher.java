@@ -12,7 +12,7 @@ public class PostgresqlTagSearcher extends AbstractTagSearcher {
 
   @Override
   protected void addTextQuery(TagSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
+    final String text = qb.getContainsQuery(query.getText());
     qb.addLikeClauses("text", new String[] {"tags.name", "tags.description"}, text);
   }
 

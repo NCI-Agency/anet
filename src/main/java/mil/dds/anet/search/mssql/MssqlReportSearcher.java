@@ -34,17 +34,17 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
     qb.addFromClause(
         "LEFT JOIN CONTAINSTABLE (reports, (text, intent, keyOutcomes, nextSteps), :containsQuery) c_reports"
             + " ON reports.uuid = c_reports.[Key]"
-            + " LEFT JOIN FREETEXTTABLE(reports, (text, intent, keyOutcomes, nextSteps), :freetextQuery) f_reports"
+            + " LEFT JOIN FREETEXTTABLE(reports, (text, intent, keyOutcomes, nextSteps), :fullTextQuery) f_reports"
             + " ON reports.uuid = f_reports.[Key]");
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
         + " ON tags.uuid = c_tags.[Key]"
-        + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
+        + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :fullTextQuery) f_tags"
         + " ON tags.uuid = f_tags.[Key]");
     qb.addWhereClause("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL"
         + " OR c_tags.rank IS NOT NULL OR f_tags.rank IS NOT NULL)");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
-    qb.addSqlArg("freetextQuery", text);
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
+    qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));
   }
 
   @Override

@@ -13,7 +13,7 @@ public class PostgresqlAuthorizationGroupSearcher extends AbstractAuthorizationG
 
   @Override
   protected void addTextQuery(AuthorizationGroupSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
+    final String text = qb.getContainsQuery(query.getText());
     qb.addLikeClauses("text",
         new String[] {"\"authorizationGroup\".name", "\"authorizationGroup\".description"}, text);
   }

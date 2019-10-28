@@ -24,7 +24,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   @Override
   protected void addTextQuery(ReportSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
+    final String text = qb.getContainsQuery(query.getText());
     qb.addLikeClauses("text", new String[] {"reports.text", "reports.intent",
         "reports.\"keyOutcomes\"", "reports.\"nextSteps\"", "tags.name", "tags.description"}, text);
   }

@@ -12,7 +12,7 @@ public class PostgresqlTaskSearcher extends AbstractTaskSearcher {
 
   @Override
   protected void addTextQuery(TaskSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
+    final String text = qb.getContainsQuery(query.getText());
     qb.addLikeClauses("text", new String[] {"tasks.\"longName\"", "tasks.\"shortName\""}, text);
   }
 

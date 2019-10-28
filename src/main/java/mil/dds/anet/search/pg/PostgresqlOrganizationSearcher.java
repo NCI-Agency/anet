@@ -13,7 +13,7 @@ public class PostgresqlOrganizationSearcher extends AbstractOrganizationSearcher
 
   @Override
   protected void addTextQuery(OrganizationSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
+    final String text = qb.getContainsQuery(query.getText());
     qb.addLikeClauses("text",
         new String[] {"organizations.\"shortName\"", "organizations.\"longName\""}, text);
   }

@@ -13,7 +13,7 @@ public class PostgresqlLocationSearcher extends AbstractLocationSearcher {
 
   @Override
   protected void addTextQuery(LocationSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
+    final String text = qb.getContainsQuery(query.getText());
     qb.addLikeClause("text", "locations.name", text);
   }
 
