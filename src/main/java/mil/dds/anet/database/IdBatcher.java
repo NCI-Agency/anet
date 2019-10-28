@@ -11,7 +11,6 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class IdBatcher<T extends AbstractAnetBean> {
 
   private static final List<String> defaultIfEmpty = Arrays.asList("-1");
@@ -32,6 +31,7 @@ public class IdBatcher<T extends AbstractAnetBean> {
     return handle.get();
   }
 
+  @InTransaction
   public List<T> getByIds(List<String> uuids) {
     final List<String> args = uuids.isEmpty() ? defaultIfEmpty : uuids;
     return getDbHandle().createQuery(sql).bindList(paramName, args).map(mapper)

@@ -11,23 +11,25 @@ import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends AbstractSearchQuery<?>>
     implements IAnetDao<T> {
 
   @Inject
   private Provider<Handle> handle;
 
+  @InTransaction
   public T insert(T obj) {
     DaoUtils.setInsertFields(obj);
     return insertInternal(obj);
   }
 
+  @InTransaction
   public int update(T obj) {
     DaoUtils.setUpdateFields(obj);
     return updateInternal(obj);
   }
 
+  @InTransaction
   public int delete(String uuid) {
     return deleteInternal(uuid);
   }
