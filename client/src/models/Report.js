@@ -1,5 +1,5 @@
 import { Settings } from "api"
-import Model, { yupDate } from "components/Model"
+import Model, { createYupSchema, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
@@ -44,6 +44,11 @@ export default class Report extends Model {
     NEGATIVE: "NEGATIVE",
     NEUTRAL: "NEUTRAL"
   }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createYupSchema(
+    Settings.fields.report.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -250,7 +255,11 @@ export default class Report extends Model {
       authorizationGroups: yup
         .array()
         .nullable()
-        .default([])
+        .default([]),
+      customFields: yup
+        .object()
+        .shape(Report.customFieldsSchema)
+        .nullable()
     })
     .concat(Model.yupSchema)
 

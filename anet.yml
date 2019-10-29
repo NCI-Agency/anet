@@ -245,25 +245,44 @@ dictionary:
       customFields:
         inputFieldName:
           type: text
-          label: Effort number
+          label: Text field
           placeholder: Placeholder text for input field
           helpText: Help text for text field
+          validationType: string
+          validations:
+            - type: required
+              params: [You must provide the text field]
         textareaFieldName:
           type: text
-          label: Effort number
+          label: Textarea field
           placeholder: Placeholder text for textarea field
           helpText: Help text for textarea field
           componentClass: textarea
           style:
             height: 200px
+          validationType: string
+        numberFieldName:
+          type: text
+          label: Number field
+          placeholder: Placeholder text for input field
+          helpText: Help text for text field
+          validationType: number
+          validations:
+            - type: integer
+            - type: min
+              params: [5]
+            - type: max
+              params: [100]
         nlt:
           type: date
           label: Not later than date
           helpText: Help text for date field
+          validationType: date
         nlt_dt:
           type: datetime
           label: Not later than datetime
           helpText: Help text for datetime field
+          validationType: date
         colour_options:
           type: enum
           label: Choose one of the colours
@@ -278,6 +297,7 @@ dictionary:
             RED:
               label: Red
               color: '#ff8279'
+          validationType: string
 
     person:
       firstName: First name

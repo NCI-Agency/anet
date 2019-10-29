@@ -99,7 +99,13 @@ export const CustomFields = ({ fieldsConfig, formikProps }) => (
   <>
     {Object.keys(fieldsConfig).map(key => {
       const fieldConfig = fieldsConfig[key]
-      const { type, helpText, ...fieldProps } = fieldConfig
+      const {
+        type,
+        helpText,
+        validations,
+        validationType,
+        ...fieldProps
+      } = fieldConfig
       const FieldComponent = FIELD_COMPONENTS[type]
       const fieldName = `customFields.${key}`
       return (
@@ -127,6 +133,7 @@ CustomFields.propTypes = {
 
 const READONLY_FIELD_COMPONENTS = {
   text: ReadonlyTextField,
+  number: ReadonlyTextField,
   date: ReadonlyDateField,
   datetime: ReadonlyDateTimeField,
   enum: ReadonlyEnumField
@@ -137,7 +144,13 @@ export const ReadonlyCustomFields = ({ fieldsConfig }) => {
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
-        const { type, helpText, ...fieldProps } = fieldConfig
+        const {
+          type,
+          helpText,
+          validations,
+          validationType,
+          ...fieldProps
+        } = fieldConfig
         const FieldComponent = READONLY_FIELD_COMPONENTS[type]
         const fieldName = `customFields.${key}`
         return <FieldComponent key={key} name={fieldName} {...fieldProps} />

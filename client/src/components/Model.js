@@ -1,5 +1,6 @@
 import encodeQuery from "querystring/encode"
 import _forEach from "lodash/forEach"
+import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
 import utils from "utils"
@@ -40,6 +41,46 @@ export const yupDate = yup.date().transform(function(value, originalValue) {
   const newValue = moment(originalValue)
   return newValue.isValid() ? newValue.toDate() : value
 })
+
+const CUSTOM_FIELD_TYPE_SCHEMA = {
+  string: yup
+    .string()
+    .nullable()
+    .default(""),
+  number: yup
+    .number()
+    .nullable()
+    .default(null),
+  date: yupDate.nullable().default(null)
+}
+
+const createFieldYupSchema = (fieldKey, fieldConfig) => {
+  const { label, validationType, validations } = fieldConfig
+  let fieldYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[validationType]
+  if (!_isEmpty(label)) {
+    fieldYupSchema = fieldYupSchema.label(label)
+  }
+  if (!_isEmpty(validations)) {
+    validations.forEach(validation => {
+      const { params, type } = validation
+      if (!fieldYupSchema[type]) {
+        return
+      }
+      fieldYupSchema = !_isEmpty(params)
+        ? fieldYupSchema[type](...params)
+        : fieldYupSchema[type]()
+    })
+  }
+  return fieldYupSchema
+}
+
+export const createYupSchema = config => {
+  return Object.fromEntries(
+    Object.entries(config)
+      .map(([k, v]) => [k, createFieldYupSchema(k, config[k])])
+      .filter(([k, v]) => v !== null)
+  )
+}
 
 export default class Model {
   static schema = {
