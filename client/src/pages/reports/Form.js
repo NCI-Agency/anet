@@ -241,15 +241,6 @@ const BaseReportForm = props => {
       text: tag.name
     }))
   }
-  const initialCustomFields = initialValues.customFields
-  // customFields can be an array (when returned by autosave) or a JSON string
-  // (when coming from the db). Its form field, a FieldArray, expects an array
-  // as value.
-  if (!Array.isArray(initialCustomFields)) {
-    initialValues.customFields = initialCustomFields
-      ? [JSON.parse(initialCustomFields)]
-      : [{}]
-  }
   return (
     <Formik
       enableReinitialize
@@ -994,7 +985,8 @@ const BaseReportForm = props => {
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
-      "attendees"
+      "attendees",
+      "customFields"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1023,7 +1015,7 @@ const BaseReportForm = props => {
     report.location = utils.getReference(report.location)
     // transform the customFields first elem to JSON (customFields should contain
     // the JSON of all the fields defined as customFields)
-    report.customFields = JSON.stringify(report.customFields[0])
+    report.customFields = JSON.stringify(values.customFields)
     const edit = isEditMode(values)
     const variables = { report }
     if (edit) {

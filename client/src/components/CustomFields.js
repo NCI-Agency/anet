@@ -1,13 +1,13 @@
 import { Settings } from "api"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
-import { Field, FieldArray } from "formik"
+import { Field } from "formik"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { HelpBlock } from "react-bootstrap"
 
-export const TextField = fieldProps => {
+const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
   return (
     <Field
@@ -18,7 +18,7 @@ export const TextField = fieldProps => {
   )
 }
 
-export const ReadonlyTextField = fieldProps => {
+const ReadonlyTextField = fieldProps => {
   const { name, label } = fieldProps
   return (
     <Field
@@ -29,7 +29,7 @@ export const ReadonlyTextField = fieldProps => {
   )
 }
 
-export const DateField = fieldProps => {
+const DateField = fieldProps => {
   const { withTime, ...otherFieldProps } = fieldProps
   return (
     <Field
@@ -40,7 +40,7 @@ export const DateField = fieldProps => {
   )
 }
 
-export const ReadonlyDateField = fieldProps => {
+const ReadonlyDateField = fieldProps => {
   const { name, label, withTime } = fieldProps
   return (
     <Field
@@ -58,13 +58,11 @@ export const ReadonlyDateField = fieldProps => {
   )
 }
 
-export const DateTimeField = props => <DateField {...props} withTime />
+const DateTimeField = props => <DateField {...props} withTime />
 
-export const ReadonlyDateTimeField = props => (
-  <ReadonlyDateField {...props} withTime />
-)
+const ReadonlyDateTimeField = props => <ReadonlyDateField {...props} withTime />
 
-export const EnumField = fieldProps => {
+const EnumField = fieldProps => {
   const { choices, ...otherFieldProps } = fieldProps
   return (
     <Field
@@ -78,7 +76,7 @@ export const EnumField = fieldProps => {
 const humanNameOfChoice = (choices, fieldVal) =>
   fieldVal && choices[fieldVal].label
 
-export const ReadonlyEnumField = fieldProps => {
+const ReadonlyEnumField = fieldProps => {
   const { name, label, choices } = fieldProps
   return (
     <Field
@@ -98,32 +96,29 @@ const FIELD_COMPONENTS = {
 }
 
 export const CustomFields = ({ fieldsConfig, formikProps }) => (
-  // We use a FieldArray in order to group the customFields fields
-  <FieldArray
-    name="customFields"
-    render={arrayHelpers =>
-      Object.keys(fieldsConfig).map(key => {
-        const fieldConfig = fieldsConfig[key]
-        const { type, helpText, ...fieldProps } = fieldConfig
-        const FieldComponent = FIELD_COMPONENTS[type]
-        const fieldName = `customFields.0.${key}`
-        return (
-          <FieldComponent
-            key={key}
-            name={fieldName}
-            onChange={value => formikProps.setFieldValue(fieldName, value)}
-            onBlur={() => formikProps.setFieldTouched(fieldName, true)}
-            {...fieldProps}
-          >
-            {helpText && (
-              <HelpBlock>
-                <span className="text-success">{helpText}</span>
-              </HelpBlock>
-            )}
-          </FieldComponent>
-        )
-      })}
-  />
+  <>
+    {Object.keys(fieldsConfig).map(key => {
+      const fieldConfig = fieldsConfig[key]
+      const { type, helpText, ...fieldProps } = fieldConfig
+      const FieldComponent = FIELD_COMPONENTS[type]
+      const fieldName = `customFields.${key}`
+      return (
+        <FieldComponent
+          key={key}
+          name={fieldName}
+          onChange={value => formikProps.setFieldValue(fieldName, value)}
+          onBlur={() => formikProps.setFieldTouched(fieldName, true)}
+          {...fieldProps}
+        >
+          {helpText && (
+            <HelpBlock>
+              <span className="text-success">{helpText}</span>
+            </HelpBlock>
+          )}
+        </FieldComponent>
+      )
+    })}
+  </>
 )
 CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,

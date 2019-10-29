@@ -118,6 +118,7 @@ const ReportEdit = props => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
+    data.report.customFields = JSON.parse(data.report.customFields)
   }
   const report = new Report(data ? data.report : {})
 
