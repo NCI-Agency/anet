@@ -10,9 +10,7 @@ import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class ReportActionDao extends AnetBaseDao<ReportAction, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "reportActions";

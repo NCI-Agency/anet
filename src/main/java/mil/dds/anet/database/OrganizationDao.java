@@ -24,7 +24,6 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearchQuery> {
 
   private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode",
@@ -95,6 +94,7 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
         personUuid);
   }
 
+  @InTransaction
   public List<Organization> getTopLevelOrgs(OrganizationType type) {
     return getDbHandle()
         .createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS + " FROM organizations "
@@ -116,6 +116,7 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
     public List<Organization> getOrgsByShortNames(@BindList("shortNames") List<String> shortNames);
   }
 
+  @InTransaction
   public List<Organization> getOrgsByShortNames(List<String> shortNames) {
     if (Utils.isEmptyOrNull(shortNames)) {
       return Collections.emptyList();

@@ -10,7 +10,6 @@ import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends AbstractSearchQueryBuilder<B, T> {
@@ -32,7 +31,6 @@ public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends 
     }
   }
 
-  @InTransaction
   @Override
   protected AnetBeanList<B> getResult(Handle handle, T query, RowMapper<B> mapper) {
     final Query sqlQuery = addPagination(query, handle, sql, sqlArgs, listArgs);

@@ -15,7 +15,6 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class ForeignKeyBatcher<T extends AbstractAnetBean> {
 
   private static final List<String> defaultIfEmpty = Arrays.asList("-1");
@@ -44,6 +43,7 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
     return handle.get();
   }
 
+  @InTransaction
   public List<List<T>> getByForeignKeys(List<String> foreignKeys) {
     final List<String> args = foreignKeys.isEmpty() ? defaultIfEmpty : foreignKeys;
     final Query query = getDbHandle().createQuery(sql).bindList(paramName, args);

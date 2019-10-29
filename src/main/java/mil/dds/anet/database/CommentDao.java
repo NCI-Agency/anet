@@ -9,7 +9,6 @@ import mil.dds.anet.database.mappers.CommentMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class CommentDao extends AnetBaseDao<Comment, AbstractSearchQuery<?>> {
 
   private static String[] fields =
@@ -54,6 +53,7 @@ public class CommentDao extends AnetBaseDao<Comment, AbstractSearchQuery<?>> {
         .bindBean(c).bind("updatedAt", DaoUtils.asLocalDateTime(c.getUpdatedAt())).execute();
   }
 
+  @InTransaction
   public List<Comment> getCommentsForReport(String reportUuid) {
     return getDbHandle()
         .createQuery("/* getCommentForReport */ SELECT " + COMMENT_FIELDS + "FROM comments "
