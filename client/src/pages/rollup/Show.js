@@ -423,12 +423,14 @@ const BaseRollupShow = props => {
 
   function getQueryParams() {
     const sqParams = getSearchQuery(searchQuery)
+    const maxReportAge =
+      1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     const reportsQueryParams = {
       state: [Report.STATE.PUBLISHED], // Specifically excluding cancelled engagements.
       releasedAtStart: getRollupStart().valueOf(),
       releasedAtEnd: getRollupEnd().valueOf(),
       engagementDateStart: moment(getRollupStart())
-        .subtract(appSettings.maxReportAge, "days")
+        .subtract(maxReportAge, "days")
         .valueOf(),
       sortBy: "ENGAGEMENT_DATE",
       sortOrder: "DESC",
