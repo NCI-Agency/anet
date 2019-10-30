@@ -96,9 +96,7 @@ export default class AssignPersonModal extends Component {
                   onChange={this.handleChangePerson}
                   objectType={Person}
                   valueKey="name"
-                  fields={
-                    "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
-                  }
+                  fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
                   addon={PEOPLE_ICON}
                   vertical
                 />
