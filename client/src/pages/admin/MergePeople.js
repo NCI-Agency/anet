@@ -200,9 +200,9 @@ const MergePeople = props => {
                       winner &&
                       !_isEmpty(winner.position) && (
                         <Alert bsStyle="danger">
-                        <b>Danger:</b> Position on Loser (
-                        {loser.position.name}) will be left unfilled
-                      </Alert>
+                          <b>Danger:</b> Position on Loser (
+                          {loser.position.name}) will be left unfilled
+                        </Alert>
                     )}
                   </Col>
                 </Row>

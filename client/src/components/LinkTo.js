@@ -112,11 +112,11 @@ export default class LinkTo extends Component {
       !button &&
       modelFields.hasOwnProperty("avatar") && (
         <AvatarDisplayComponent
-        avatar={modelInstance.avatar}
-        height={32}
-        width={32}
-        style={{ marginLeft: 5, marginRight: 5 }}
-      />
+          avatar={modelInstance.avatar}
+          height={32}
+          width={32}
+          style={{ marginLeft: 5, marginRight: 5 }}
+        />
     )
 
     if (!isLink) {
