@@ -607,20 +607,20 @@ const BaseReportShow = props => {
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
-                  <div
+                    <div
                       dangerouslySetInnerHTML={{
-                      __html: report.reportSensitiveInformation.text
-                    }}
+                        __html: report.reportSensitiveInformation.text
+                      }}
                     />
-                  {(hasAuthorizationGroups && (
+                    {(hasAuthorizationGroups && (
                       <div>
-                      <h5>Authorized groups:</h5>
-                      <AuthorizationGroupTable
+                        <h5>Authorized groups:</h5>
+                        <AuthorizationGroupTable
                           authorizationGroups={values.authorizationGroups}
                         />
-                    </div>
-                  )) || <h5>No groups are authorized!</h5>}
-                </Fieldset>
+                      </div>
+                    )) || <h5>No groups are authorized!</h5>}
+                  </Fieldset>
               )}
 
               {Settings.fields.report.customFields && (

@@ -271,7 +271,28 @@
           ]
         }
       ],
-      "indent": "warn",
+      "indent": [
+        "warn",
+        2,
+        {
+          "SwitchCase": 1,
+          "ignoredNodes": [
+            "JSXElement",
+            "JSXElement > *",
+            "JSXAttribute",
+            "JSXIdentifier",
+            "JSXNamespacedName",
+            "JSXMemberExpression",
+            "JSXSpreadAttribute",
+            "JSXExpressionContainer",
+            "JSXOpeningElement",
+            "JSXClosingElement",
+            "JSXText",
+            "JSXEmptyExpression",
+            "JSXSpreadChild"
+          ]
+        }
+      ],
       "jsx-quotes": [
         "warn",
         "prefer-double"
@@ -291,9 +312,15 @@
       "react-hooks/rules-of-hooks": "error",
       "react/jsx-closing-bracket-location": "warn",
       "react/jsx-closing-tag-location": "warn",
-      "react/jsx-handler-names": "warn",
-      "react/jsx-indent": "warn",
-      "react/jsx-indent-props": "warn",
+      "react/jsx-handler-names": "off",
+      "react/jsx-indent": [
+        "warn",
+        2
+      ],
+      "react/jsx-indent-props": [
+        "warn",
+        2
+      ],
       "react/no-did-update-set-state": "warn",
       "semi": [
         "warn",
