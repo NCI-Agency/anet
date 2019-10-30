@@ -551,14 +551,14 @@ const BaseReportForm = props => {
                   !values.cancelled &&
                   values.atmosphere && (
                     <Field
-                    name="atmosphereDetails"
-                    label={Settings.fields.report.atmosphereDetails}
-                    component={FieldHelper.renderInputField}
-                    placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                      values.atmosphere === "POSITIVE" ? "(optional)" : ""
+                      name="atmosphereDetails"
+                      label={Settings.fields.report.atmosphereDetails}
+                      component={FieldHelper.renderInputField}
+                      placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
+                        values.atmosphere === "POSITIVE" ? "(optional)" : ""
                       }`}
-                    className="atmosphere-details"
-                  />
+                      className="atmosphere-details"
+                    />
                 )}
 
                 {Settings.fields.report.reportTags && (

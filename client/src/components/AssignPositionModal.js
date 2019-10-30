@@ -119,9 +119,7 @@ class BaseAssignPositionModal extends Component {
                   onChange={this.handlePositionChange}
                   objectType={Position}
                   valueKey="name"
-                  fields={
-                    "uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
-                  }
+                  fields="uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
                   addon={POSITIONS_ICON}
                   vertical
                 />
