@@ -8,9 +8,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.utils.DaoUtils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class TagDao extends AnetBaseDao<Tag, TagSearchQuery> {
 
   public static final String TABLE_NAME = "tags";

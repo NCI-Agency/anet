@@ -95,4 +95,10 @@ UltimatePagination.propTypes = {
   goToPage: PropTypes.func
 }
 
+UltimatePagination.defaultProps = {
+  pageNum: 0,
+  pageSize: 0,
+  totalCount: 0
+}
+
 export default UltimatePagination

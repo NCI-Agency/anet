@@ -20,7 +20,6 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.core.mapper.MapMapper;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "approvalSteps";
@@ -141,6 +140,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
   /**
    * Inserts this approval step at the end of the organizations Approval Chain.
    */
+  @InTransaction
   public ApprovalStep insertAtEnd(ApprovalStep as) {
     as = insert(as);
 
@@ -167,16 +167,12 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
         .bindBean(as).execute();
   }
 
-  @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
-  }
-
   /**
    * Delete the Approval Step with the given UUID. Will patch up the Approval Process list after the
    * removal.
    */
-  public boolean deleteStep(String uuid) {
+  @Override
+  public int deleteInternal(String uuid) {
     // ensure there is nothing currently on this step
     if (isStepInUse(uuid)) {
       throw new WebApplicationException("Reports are currently pending at this step",
@@ -197,14 +193,14 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
         "/* deleteApproval.updateActions */ UPDATE \"reportActions\" SET \"approvalStepUuid\" = ? WHERE \"approvalStepUuid\" = ?",
         null, uuid);
 
-    getDbHandle()
+    return getDbHandle()
         .execute("/* deleteApproval.delete2 */ DELETE FROM \"approvalSteps\" where uuid = ?", uuid);
-    return true;
   }
 
   /**
    * Check whether the Approval Step is being used by a report.
    */
+  @InTransaction
   public boolean isStepInUse(String uuid) {
     List<Map<String, Object>> rs = getDbHandle().select(
         "/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepUuid\" = ?",
@@ -217,6 +213,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
   /**
    * Returns the previous step for a given stepUuid.
    */
+  @InTransaction
   public ApprovalStep getStepByNextStepUuid(String uuid) {
     List<ApprovalStep> list = getDbHandle()
         .createQuery(
@@ -237,12 +234,14 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
         approvalStepUuid);
   }
 
+  @InTransaction
   public int addApprover(ApprovalStep step, String positionUuid) {
     return getDbHandle().createUpdate(
         "/* addApprover */ INSERT INTO approvers (\"approvalStepUuid\", \"positionUuid\") VALUES (:stepUuid, :positionUuid)")
         .bind("stepUuid", step.getUuid()).bind("positionUuid", positionUuid).execute();
   }
 
+  @InTransaction
   public int removeApprover(ApprovalStep step, String positionUuid) {
     return getDbHandle().createUpdate(
         "/* removeApprover */ DELETE FROM approvers WHERE \"approvalStepUuid\" = :stepUuid AND \"positionUuid\" = :positionUuid")
