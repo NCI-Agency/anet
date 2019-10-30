@@ -19,7 +19,7 @@ import { jumpToTop, useBoilerplate } from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
@@ -421,7 +421,7 @@ const BaseReportForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field
+                <FastField
                   name="intent"
                   label={Settings.fields.report.intent}
                   component={FieldHelper.renderInputField}
@@ -446,7 +446,7 @@ const BaseReportForm = props => {
                   className="meeting-goal"
                 />
 
-                <Field
+                <FastField
                   name="engagementDate"
                   component={FieldHelper.renderSpecialField}
                   onChange={value => setFieldValue("engagementDate", value)}
@@ -465,10 +465,10 @@ const BaseReportForm = props => {
                       </span>
                     </HelpBlock>
                   )}
-                </Field>
+                </FastField>
 
                 {Settings.engagementsIncludeTimeAndDuration && (
-                  <Field
+                  <FastField
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.renderInputField}
@@ -494,7 +494,7 @@ const BaseReportForm = props => {
                 />
 
                 {!isFutureEngagement && (
-                  <Field
+                  <FastField
                     name="cancelled"
                     component={FieldHelper.renderSpecialField}
                     label={Settings.fields.report.cancelled}
@@ -518,12 +518,12 @@ const BaseReportForm = props => {
                   />
                 )}
                 {!isFutureEngagement && values.cancelled && (
-                  <Field
+                  <FastField
                     name="cancelledReason"
                     label="due to"
                     component={FieldHelper.renderSpecialField}
                     widget={
-                      <Field
+                      <FastField
                         component="select"
                         className="cancelled-reason-form-group form-control"
                       >
@@ -532,13 +532,13 @@ const BaseReportForm = props => {
                             {reason.label}
                           </option>
                         ))}
-                      </Field>
+                      </FastField>
                     }
                   />
                 )}
 
                 {!isFutureEngagement && !values.cancelled && (
-                  <Field
+                  <FastField
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
                     component={FieldHelper.renderButtonToggleGroup}
@@ -562,7 +562,7 @@ const BaseReportForm = props => {
                 )}
 
                 {Settings.fields.report.reportTags && (
-                  <Field
+                  <FastField
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
                     component={FieldHelper.renderSpecialField}
@@ -660,7 +660,7 @@ const BaseReportForm = props => {
                 id="meeting-details"
               >
                 {!isFutureEngagement && !values.cancelled && (
-                  <Field
+                  <FastField
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}
                     component={FieldHelper.renderInputField}
@@ -685,7 +685,7 @@ const BaseReportForm = props => {
                 )}
 
                 {!isFutureEngagement && (
-                  <Field
+                  <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps}
                     component={FieldHelper.renderInputField}
@@ -709,7 +709,7 @@ const BaseReportForm = props => {
                   />
                 )}
 
-                <Field
+                <FastField
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.renderSpecialField}
@@ -734,7 +734,7 @@ const BaseReportForm = props => {
                 <Collapse in={showSensitiveInfo}>
                   {(values.reportSensitiveInformation || !props.edit) && (
                     <div>
-                      <Field
+                      <FastField
                         name="reportSensitiveInformation.text"
                         component={FieldHelper.renderSpecialField}
                         label="Report sensitive information text"
