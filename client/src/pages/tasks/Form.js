@@ -17,7 +17,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
-import { Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -62,14 +62,14 @@ const BaseTaskForm = props => {
     }
   ]
 
-  const ShortNameField = DictionaryField(Field)
-  const LongNameField = DictionaryField(Field)
+  const ShortNameField = DictionaryField(FastField)
+  const LongNameField = DictionaryField(FastField)
   const TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
-  const TaskCustomField = DictionaryField(Field)
-  const PlannedCompletionField = DictionaryField(Field)
-  const ProjectedCompletionField = DictionaryField(Field)
-  const TaskCustomFieldEnum1 = DictionaryField(Field)
-  const TaskCustomFieldEnum2 = DictionaryField(Field)
+  const TaskCustomField = DictionaryField(FastField)
+  const PlannedCompletionField = DictionaryField(FastField)
+  const ProjectedCompletionField = DictionaryField(FastField)
+  const TaskCustomFieldEnum1 = DictionaryField(FastField)
+  const TaskCustomFieldEnum2 = DictionaryField(FastField)
   const ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
 
   initialValues.assessment_customFieldEnum1 = ""
@@ -165,7 +165,7 @@ const BaseTaskForm = props => {
                   component={FieldHelper.renderInputField}
                 />
 
-                <Field
+                <FastField
                   name="status"
                   component={FieldHelper.renderButtonToggleGroup}
                   buttons={statusButtons}
@@ -280,7 +280,7 @@ const BaseTaskForm = props => {
                         setFieldValue("customFieldEnum1", value)}
                     />
                     {edit && (
-                      <Field
+                      <FastField
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                         component={FieldHelper.renderSpecialField}
