@@ -93,9 +93,10 @@
         },
         "future": {
             "hashes": [
-                "sha256:858e38522e8fd0d3ce8f0c1feaf0603358e366d5403209674c7b617fa0c24093"
+                "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"
             ],
-            "version": "==0.18.1"
+            "index": "pypi",
+            "version": "==0.18.2"
         },
         "gql": {
             "hashes": [
@@ -538,7 +539,6 @@
                 "sha256:f2f6a950b801352f596667459839235cf059b39307e4034d7ed68e7dfb497bd6",
                 "sha256:f48623820170eff0e2fc79419688a16f5977916548dd0d3a8d0d3fc93a7978ad"
             ],
-            "index": "pypi",
             "version": "==0.2.0"
         },
         "tensorboardx": {
