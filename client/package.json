@@ -45,7 +45,7 @@
     "colors": "^1.4.0",
     "config": "^3.2.3",
     "copy-webpack-plugin": "^5.0.4",
-    "countries-list": "^2.4.3",
+    "countries-list": "^2.5.0",
     "cross-fetch": "^3.0.4",
     "cross-spawn": "^7.0.1",
     "css-loader": "^3.2.0",
