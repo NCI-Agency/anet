@@ -91,6 +91,16 @@ const GQL_GET_TASK_LIST = gql`
         uuid
         shortName
         longName
+        status
+        responsibleOrg {
+          uuid
+          shortName
+        }
+        customFieldEnum1
+        customFieldRef1 {
+          uuid
+          shortName
+        }
       }
     }
   }
