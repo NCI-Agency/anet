@@ -44,7 +44,7 @@
     "chromedriver": "^78.0.1",
     "colors": "^1.4.0",
     "config": "^3.2.4",
-    "copy-webpack-plugin": "^5.0.4",
+    "copy-webpack-plugin": "^5.0.5",
     "countries-list": "^2.5.0",
     "cross-fetch": "^3.0.4",
     "cross-spawn": "^7.0.1",
