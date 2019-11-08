@@ -140,6 +140,10 @@ const ReportTable = props => {
     ...props
   })
   if (done) {
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     return result
   }
 

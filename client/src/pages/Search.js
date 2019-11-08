@@ -206,6 +206,8 @@ const Organizations = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -303,6 +305,8 @@ const People = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -413,6 +417,8 @@ const Positions = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -478,6 +484,8 @@ const Tasks = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -570,6 +578,8 @@ const Locations = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 

@@ -67,6 +67,10 @@ const ReportMap = props => {
     return markerArray
   }, [data])
   if (done) {
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     return result
   }
 
