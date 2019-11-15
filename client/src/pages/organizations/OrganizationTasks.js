@@ -123,7 +123,4 @@ const OrganizationTasks = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(OrganizationTasks)
+export default connect(null, mapDispatchToProps)(OrganizationTasks)

@@ -85,7 +85,4 @@ OrganizationNewConditional.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(OrganizationNew)
+export default connect(null, mapDispatchToProps)(OrganizationNew)

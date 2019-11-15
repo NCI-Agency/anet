@@ -2,6 +2,7 @@ package mil.dds.anet.test.beans;
 
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mil.dds.anet.database.mappers.MapperUtils;
 

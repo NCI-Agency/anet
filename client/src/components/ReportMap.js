@@ -99,7 +99,4 @@ ReportMap.propTypes = {
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportMap)
+export default connect(null, mapDispatchToProps)(ReportMap)

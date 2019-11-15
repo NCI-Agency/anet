@@ -1013,7 +1013,4 @@ const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Search)
+export default connect(mapStateToProps, mapDispatchToProps)(Search)

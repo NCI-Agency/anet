@@ -384,7 +384,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(DecisivesDashboard)
+export default connect(mapStateToProps, mapDispatchToProps)(DecisivesDashboard)

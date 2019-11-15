@@ -170,7 +170,4 @@ const mapStateToProps = (state, ownProps) => ({
   pageProps: state.pageProps
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(App)
+export default connect(mapStateToProps, mapDispatchToProps)(App)

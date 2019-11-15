@@ -36,7 +36,4 @@ const GraphiQL = props => {
 
 GraphiQL.propTypes = { ...pagePropTypes }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(GraphiQL)
+export default connect(null, mapDispatchToProps)(GraphiQL)

@@ -504,7 +504,4 @@ ReportMinimal.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportMinimal)
+export default connect(null, mapDispatchToProps)(ReportMinimal)
