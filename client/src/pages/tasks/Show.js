@@ -282,7 +282,4 @@ const TaskShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(TaskShow)
+export default connect(null, mapDispatchToProps)(TaskShow)

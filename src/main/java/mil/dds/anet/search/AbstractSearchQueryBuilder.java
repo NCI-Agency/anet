@@ -21,6 +21,7 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
 
   public enum Comparison {
     AFTER(">="), BEFORE("<=");
+
     private String op;
 
     private Comparison(String op) {

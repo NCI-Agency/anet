@@ -105,7 +105,4 @@ TaskEdit.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(TaskEdit)
+export default connect(null, mapDispatchToProps)(TaskEdit)

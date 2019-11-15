@@ -131,7 +131,4 @@ const AdminIndex = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(AdminIndex)
+export default connect(null, mapDispatchToProps)(AdminIndex)

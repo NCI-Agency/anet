@@ -57,7 +57,4 @@ const ReportNew = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportNew)
+export default connect(null, mapDispatchToProps)(ReportNew)

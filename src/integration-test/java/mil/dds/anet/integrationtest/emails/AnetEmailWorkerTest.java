@@ -3,6 +3,7 @@ package mil.dds.anet.integrationtest.emails;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.when;
+
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;

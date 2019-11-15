@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.FileInputStream;

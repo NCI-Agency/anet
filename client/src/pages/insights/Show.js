@@ -234,7 +234,4 @@ const InsightsShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(InsightsShow)
+export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)

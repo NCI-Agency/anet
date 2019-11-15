@@ -115,7 +115,4 @@ ReportCalendar.propTypes = {
   setTotalCount: PropTypes.func
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportCalendar)
+export default connect(null, mapDispatchToProps)(ReportCalendar)

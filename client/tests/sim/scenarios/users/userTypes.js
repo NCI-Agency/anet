@@ -8,26 +8,29 @@ async function getRandomUser(user, variables) {
     pageNum: 0,
     pageSize: 1
   })
-  const totalCount = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
         query ($positionsQuery: PositionSearchQueryInput) {
           positionList(query: $positionsQuery) {
             totalCount
           }
         }
       `,
-    variables: {
-      positionsQuery
-    }
-  })).data.positionList.totalCount
+      variables: {
+        positionsQuery
+      }
+    })
+  ).data.positionList.totalCount
   if (totalCount === 0) {
     return null
   }
   let person
   for (let i = 0; i < Math.max(totalCount, 10); i++) {
     positionsQuery.pageNum = faker.random.number({ max: totalCount - 1 })
-    const positions = (await runGQL(specialUser, {
-      query: `
+    const positions = (
+      await runGQL(specialUser, {
+        query: `
           query ($positionsQuery: PositionSearchQueryInput) {
             positionList(query: $positionsQuery) {
               list {
@@ -42,10 +45,11 @@ async function getRandomUser(user, variables) {
             }
           }
         `,
-      variables: {
-        positionsQuery
-      }
-    })).data.positionList.list.filter(p => p.person.domainUsername)
+        variables: {
+          positionsQuery
+        }
+      })
+    ).data.positionList.list.filter(p => p.person.domainUsername)
     person = !_isEmpty(positions) && positions[0].person
     if (person) {
       break

@@ -226,7 +226,4 @@ const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ReportTable)
+export default connect(mapStateToProps, mapDispatchToProps)(ReportTable)
