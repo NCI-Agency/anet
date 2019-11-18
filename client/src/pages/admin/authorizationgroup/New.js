@@ -32,7 +32,4 @@ AuthorizationGroupNew.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(AuthorizationGroupNew)
+export default connect(null, mapDispatchToProps)(AuthorizationGroupNew)

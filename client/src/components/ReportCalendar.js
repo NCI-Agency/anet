@@ -71,6 +71,10 @@ const ReportCalendar = props => {
       return apiPromise.current
     }
     prevReportQuery.current = reportQuery
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     // Store API promise to use in optimised case
     apiPromise.current = API.query(GQL_GET_REPORT_LIST, {
       reportQuery
@@ -111,7 +115,4 @@ ReportCalendar.propTypes = {
   setTotalCount: PropTypes.func
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportCalendar)
+export default connect(null, mapDispatchToProps)(ReportCalendar)

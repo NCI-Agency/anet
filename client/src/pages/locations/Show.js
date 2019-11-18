@@ -189,7 +189,4 @@ const LocationShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(LocationShow)
+export default connect(null, mapDispatchToProps)(LocationShow)

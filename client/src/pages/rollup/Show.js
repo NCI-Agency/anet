@@ -656,7 +656,4 @@ const RollupShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(RollupShow)
+export default connect(mapStateToProps, mapDispatchToProps)(RollupShow)

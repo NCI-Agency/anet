@@ -140,6 +140,10 @@ const ReportTable = props => {
     ...props
   })
   if (done) {
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     return result
   }
 
@@ -222,7 +226,4 @@ const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ReportTable)
+export default connect(mapStateToProps, mapDispatchToProps)(ReportTable)

@@ -528,7 +528,4 @@ const PersonShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PersonShow)
+export default connect(null, mapDispatchToProps)(PersonShow)

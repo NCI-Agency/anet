@@ -150,7 +150,8 @@ const BasePositionShow = props => {
   const canDelete =
     currentUser.isAdmin() &&
     position.status === Position.STATUS.INACTIVE &&
-    (position.uuid && (!position.person || !position.person.uuid))
+    position.uuid &&
+    (!position.person || !position.person.uuid)
 
   return (
     <Formik enableReinitialize initialValues={position} {...myFormProps}>
@@ -461,7 +462,4 @@ BasePositionShow.propTypes = {
   currentUser: PropTypes.instanceOf(Person)
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PositionShow)
+export default connect(null, mapDispatchToProps)(PositionShow)

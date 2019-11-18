@@ -487,7 +487,4 @@ const Home = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Home)
+export default connect(null, mapDispatchToProps)(Home)

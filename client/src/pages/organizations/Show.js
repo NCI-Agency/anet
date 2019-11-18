@@ -439,7 +439,4 @@ const OrganizationShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(OrganizationShow)
+export default connect(mapStateToProps, mapDispatchToProps)(OrganizationShow)
