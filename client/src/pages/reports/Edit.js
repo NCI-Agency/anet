@@ -150,7 +150,4 @@ ReportEdit.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportEdit)
+export default connect(null, mapDispatchToProps)(ReportEdit)

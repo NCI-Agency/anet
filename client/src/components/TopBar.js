@@ -147,7 +147,4 @@ const mapDispatchToProps = dispatch => ({
   resetPages: () => dispatch(resetPages())
 })
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(TopBar)
+export default connect(null, mapDispatchToProps)(TopBar)

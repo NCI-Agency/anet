@@ -1,7 +1,7 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
-import { mapDispatchToProps, usePrevious } from "components/Page"
+import { mapDispatchToProps } from "components/Page"
 import _isEqual from "lodash/isEqual"
 import { Person, Report } from "models"
 import moment from "moment"
@@ -43,11 +43,10 @@ const GQL_GET_REPORT_LIST = gql`
 
 const ReportCalendar = props => {
   const { queryParams, setTotalCount } = props
-  const prevQueryParams = usePrevious(queryParams)
   const history = useHistory()
-  const engagementDateRange = useRef(null)
+  const prevReportQuery = useRef(null)
+  const apiPromise = useRef(null)
   const calendarComponentRef = useRef(null)
-  const events = useRef([])
 
   return (
     <Calendar
@@ -62,23 +61,22 @@ const ReportCalendar = props => {
   )
 
   function getEvents(fetchInfo, successCallback, failureCallback) {
-    const newEngagementDateRange = [
-      moment(fetchInfo.start).startOf("day"),
-      moment(fetchInfo.end).endOf("day")
-    ]
-    if (_isEqual(engagementDateRange.current, newEngagementDateRange)) {
-      if (_isEqual(queryParams, prevQueryParams)) {
-        return events.current
-      }
-    } else {
-      engagementDateRange.current = newEngagementDateRange
-    }
     const reportQuery = Object.assign({}, queryParams, {
       pageSize: 0,
-      engagementDateStart: newEngagementDateRange[0],
-      engagementDateEnd: newEngagementDateRange[1]
+      engagementDateStart: moment(fetchInfo.start).startOf("day"),
+      engagementDateEnd: moment(fetchInfo.end).endOf("day")
     })
-    API.query(GQL_GET_REPORT_LIST, {
+    if (_isEqual(prevReportQuery.current, reportQuery)) {
+      // Optimise, return previous API promise instead of calling API.query again
+      return apiPromise.current
+    }
+    prevReportQuery.current = reportQuery
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
+    // Store API promise to use in optimised case
+    apiPromise.current = API.query(GQL_GET_REPORT_LIST, {
       reportQuery
     }).then(data => {
       const reports = data ? data.reportList.list : []
@@ -86,7 +84,7 @@ const ReportCalendar = props => {
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      events.current = reports.map(r => {
+      return reports.map(r => {
         const who =
           (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
         const where =
@@ -107,8 +105,8 @@ const ReportCalendar = props => {
             !Settings.engagementsIncludeTimeAndDuration || r.duration === null
         }
       })
-      successCallback(events.current)
     })
+    return apiPromise.current
   }
 }
 
@@ -117,7 +115,4 @@ ReportCalendar.propTypes = {
   setTotalCount: PropTypes.func
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportCalendar)
+export default connect(null, mapDispatchToProps)(ReportCalendar)

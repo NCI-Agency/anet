@@ -357,7 +357,4 @@ const MergePeople = props => {
 
 MergePeople.propTypes = { ...pagePropTypes }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(MergePeople)
+export default connect(null, mapDispatchToProps)(MergePeople)

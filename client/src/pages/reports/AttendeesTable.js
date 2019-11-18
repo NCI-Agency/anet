@@ -58,8 +58,9 @@ const TableBody = props => {
   return (
     <tbody>
       {enableDivider && <AttendeeDividerRow />}
-      {Person.map(attendees.filter(p => p.role === role), person =>
-        handleAttendeeRow(person)
+      {Person.map(
+        attendees.filter(p => p.role === role),
+        person => handleAttendeeRow(person)
       )}
     </tbody>
   )

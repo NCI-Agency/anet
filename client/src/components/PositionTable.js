@@ -184,7 +184,4 @@ BasePositionTable.propTypes = {
   goToPage: PropTypes.func
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PositionTable)
+export default connect(null, mapDispatchToProps)(PositionTable)
