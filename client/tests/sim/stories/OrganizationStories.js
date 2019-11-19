@@ -165,11 +165,13 @@ async function gqlCreateOrganization(user, org) {
       uuid: faker.random.uuid()
     }
   } else {
-    return (await runGQL(user, {
-      query:
-        "mutation($organization: OrganizationInput!) { createOrganization(organization: $organization) { uuid } }",
-      variables: { organization: org }
-    })).data.createOrganization
+    return (
+      await runGQL(user, {
+        query:
+          "mutation($organization: OrganizationInput!) { createOrganization(organization: $organization) { uuid } }",
+        variables: { organization: org }
+      })
+    ).data.createOrganization
   }
 }
 
@@ -225,8 +227,9 @@ const createOrganization = async function(user, parentOrg, path) {
 
 const organizationsBuildup = async function(user, number) {
   async function count() {
-    return (await runGQL(user, {
-      query: `
+    return (
+      await runGQL(user, {
+        query: `
         query {
           organizationList(query: {
             pageNum: 0,
@@ -237,8 +240,9 @@ const organizationsBuildup = async function(user, number) {
           }
         }
       `,
-      variables: {}
-    })).data.organizationList.totalCount
+        variables: {}
+      })
+    ).data.organizationList.totalCount
   }
 
   if ((await count()) < number) {
@@ -247,8 +251,9 @@ const organizationsBuildup = async function(user, number) {
 }
 
 async function countOrganizations(user) {
-  return (await runGQL(user, {
-    query: `
+  return (
+    await runGQL(user, {
+      query: `
       query {
         organizationList(query: {
           pageNum: 0,
@@ -258,8 +263,9 @@ async function countOrganizations(user) {
         }
       }
     `,
-    variables: {}
-  })).data.organizationList.totalCount
+      variables: {}
+    })
+  ).data.organizationList.totalCount
 }
 
 export { organizationsBuildup, createOrganization, createHierarchy }

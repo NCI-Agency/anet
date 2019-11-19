@@ -161,7 +161,4 @@ const FilterableAdvisorReportsTable = props => {
   }
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(FilterableAdvisorReportsTable)
+export default connect(null, mapDispatchToProps)(FilterableAdvisorReportsTable)

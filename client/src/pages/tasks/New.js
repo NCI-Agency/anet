@@ -84,7 +84,4 @@ TaskNewConditional.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(TaskNew)
+export default connect(null, mapDispatchToProps)(TaskNew)

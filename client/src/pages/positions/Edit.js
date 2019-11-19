@@ -102,7 +102,4 @@ PositionEdit.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PositionEdit)
+export default connect(null, mapDispatchToProps)(PositionEdit)

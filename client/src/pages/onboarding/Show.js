@@ -43,7 +43,4 @@ const OnboardingShow = props => {
 
 OnboardingShow.propTypes = { ...pagePropTypes }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(OnboardingShow)
+export default connect(null, mapDispatchToProps)(OnboardingShow)

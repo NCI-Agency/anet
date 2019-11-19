@@ -101,7 +101,4 @@ const MyReports = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(MyReports)
+export default connect(mapStateToProps, mapDispatchToProps)(MyReports)

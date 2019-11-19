@@ -189,7 +189,4 @@ const Help = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Help)
+export default connect(null, mapDispatchToProps)(Help)

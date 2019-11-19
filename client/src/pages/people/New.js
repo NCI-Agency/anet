@@ -25,7 +25,4 @@ PersonNew.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PersonNew)
+export default connect(null, mapDispatchToProps)(PersonNew)

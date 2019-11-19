@@ -133,7 +133,4 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   resetPagination: () => dispatch(resetPagination())
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SearchBar)
+export default connect(mapStateToProps, mapDispatchToProps)(SearchBar)

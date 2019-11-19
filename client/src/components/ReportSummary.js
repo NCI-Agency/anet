@@ -143,6 +143,10 @@ const ReportSummary = props => {
     ...props
   })
   if (done) {
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     return result
   }
 
@@ -198,15 +202,15 @@ const ReportSummaryRow = props => {
           {/* If the parent does not fetch report.updatedAt, we will not display this
             so we do not get a broken view.
           */
-            report.updatedAt && (
-              <span>
+          report.updatedAt && (
+            <span>
               : last saved at{" "}
-                {moment(report.updatedAt).format(
-                  Settings.dateFormats.forms.displayShort.withTime
-                )}
-              </span>
-            )
-          }
+              {moment(report.updatedAt).format(
+                Settings.dateFormats.forms.displayShort.withTime
+              )}
+            </span>
+          )
+}
         </p>
       )}
 
@@ -365,7 +369,4 @@ const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ReportSummary)
+export default connect(mapStateToProps, mapDispatchToProps)(ReportSummary)
