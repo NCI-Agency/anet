@@ -97,25 +97,36 @@ const FIELD_COMPONENTS = {
   enum: EnumField
 }
 
-export const CustomFields = ({ fieldsConfig, formikProps }) => (
-  <>
-    {Object.keys(fieldsConfig).map(key => {
-      const fieldConfig = fieldsConfig[key]
-      const {
-        type,
-        helpText,
-        validations,
-        validationType,
-        ...fieldProps
-      } = fieldConfig
-      const FieldComponent = FIELD_COMPONENTS[type]
-      const fieldName = `customFields.${key}`
-      return (
-        (!fieldConfig.visibleWhen ||
+export const CustomFields = ({
+  fieldsConfig,
+  formikProps,
+  prevInvisibleFields,
+  setInvisibleFields
+}) => {
+  const invisibleFields = []
+  const customFields = (
+    <>
+      {Object.keys(fieldsConfig).map(key => {
+        const fieldConfig = fieldsConfig[key]
+        const {
+          type,
+          helpText,
+          validations,
+          validationType,
+          visibleWhen,
+          ...fieldProps
+        } = fieldConfig
+        const FieldComponent = FIELD_COMPONENTS[type]
+        const fieldName = `customFields.${key}`
+        const isVisible =
+          !fieldConfig.visibleWhen ||
           (fieldConfig.visibleWhen &&
-            !_isEmpty(
-              JSONPath(fieldConfig.visibleWhen, formikProps.values)
-            ))) && (
+            !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikProps.values)))
+        if (!isVisible) {
+          invisibleFields.push(key)
+        }
+        return (
+          isVisible && (
             <FieldComponent
               key={key}
               name={fieldName}
@@ -124,19 +135,26 @@ export const CustomFields = ({ fieldsConfig, formikProps }) => (
               {...fieldProps}
             >
               {helpText && (
-              <HelpBlock>
-                <span className="text-success">{helpText}</span>
-              </HelpBlock>
+                <HelpBlock>
+                  <span className="text-success">{helpText}</span>
+                </HelpBlock>
               )}
             </FieldComponent>
+          )
         )
-      )
-    })}
-  </>
-)
+      })}
+    </>
+  )
+  if (prevInvisibleFields.join() !== invisibleFields.join()) {
+    setInvisibleFields(invisibleFields)
+  }
+  return customFields
+}
 CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
-  formikProps: PropTypes.object
+  formikProps: PropTypes.object,
+  prevInvisibleFields: PropTypes.array,
+  setInvisibleFields: PropTypes.func
 }
 
 const READONLY_FIELD_COMPONENTS = {

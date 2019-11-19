@@ -146,6 +146,7 @@ const BaseReportForm = props => {
   )
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  const [invisibleCustomFields, setInvisibleCustomFields] = useState([])
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
   const autoSaveSettings = {
@@ -792,6 +793,8 @@ const BaseReportForm = props => {
                     setFieldValue,
                     values
                   }}
+                  prevInvisibleFields={invisibleCustomFields}
+                  setInvisibleFields={setInvisibleCustomFields}
                 />
               </Fieldset>
 
@@ -1016,7 +1019,11 @@ const BaseReportForm = props => {
     report.location = utils.getReference(report.location)
     // transform the customFields first elem to JSON (customFields should contain
     // the JSON of all the fields defined as customFields)
-    report.customFields = JSON.stringify(values.customFields)
+    let visibleCustomFields = values.customFields
+    invisibleCustomFields.forEach(f => {
+      visibleCustomFields = Object.without(visibleCustomFields, f)
+    })
+    report.customFields = JSON.stringify(visibleCustomFields)
     const edit = isEditMode(values)
     const variables = { report }
     if (edit) {

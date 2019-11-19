@@ -289,6 +289,7 @@ dictionary:
               params: [5]
             - type: max
               params: [100]
+          visibleWhen: $[?((@.colour_options === 'GREEN')||(@.colour_options === 'RED'))]
         nlt:
           type: date
           label: Not later than date
