@@ -2,6 +2,8 @@ import { Settings } from "api"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import { Field } from "formik"
+import { JSONPath } from "jsonpath-plus"
+import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -109,19 +111,25 @@ export const CustomFields = ({ fieldsConfig, formikProps }) => (
       const FieldComponent = FIELD_COMPONENTS[type]
       const fieldName = `customFields.${key}`
       return (
-        <FieldComponent
-          key={key}
-          name={fieldName}
-          onChange={value => formikProps.setFieldValue(fieldName, value)}
-          onBlur={() => formikProps.setFieldTouched(fieldName, true)}
-          {...fieldProps}
-        >
-          {helpText && (
-            <HelpBlock>
-              <span className="text-success">{helpText}</span>
-            </HelpBlock>
-          )}
-        </FieldComponent>
+        (!fieldConfig.visibleWhen ||
+          (fieldConfig.visibleWhen &&
+            !_isEmpty(
+              JSONPath(fieldConfig.visibleWhen, formikProps.values)
+            ))) && (
+            <FieldComponent
+              key={key}
+              name={fieldName}
+              onChange={value => formikProps.setFieldValue(fieldName, value)}
+              onBlur={() => formikProps.setFieldTouched(fieldName, true)}
+              {...fieldProps}
+            >
+              {helpText && (
+              <HelpBlock>
+                <span className="text-success">{helpText}</span>
+              </HelpBlock>
+              )}
+            </FieldComponent>
+        )
       )
     })}
   </>

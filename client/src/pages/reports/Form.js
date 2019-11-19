@@ -789,7 +789,8 @@ const BaseReportForm = props => {
                   fieldsConfig={Settings.fields.report.customFields}
                   formikProps={{
                     setFieldTouched,
-                    setFieldValue
+                    setFieldValue,
+                    values
                   }}
                 />
               </Fieldset>

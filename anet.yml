@@ -252,6 +252,21 @@ dictionary:
           validations:
             - type: required
               params: [You must provide the text field]
+        colour_options:
+          type: enum
+          label: Choose one of the colours
+          helpText: Help text for chosing colours
+          choices:
+            GREEN:
+              label: Green
+              color: '#c2ffb3'
+            AMBER:
+              label: Amber
+              color: '#ffe396'
+            RED:
+              label: Red
+              color: '#ff8279'
+          validationType: string
         textareaFieldName:
           type: text
           label: Textarea field
@@ -261,6 +276,7 @@ dictionary:
           style:
             height: 200px
           validationType: string
+          visibleWhen: $[?(@.colour_options === 'GREEN')]
         numberFieldName:
           type: text
           label: Number field
@@ -283,21 +299,6 @@ dictionary:
           label: Not later than datetime
           helpText: Help text for datetime field
           validationType: date
-        colour_options:
-          type: enum
-          label: Choose one of the colours
-          helpText: Help text for chosing colours
-          choices:
-            GREEN:
-              label: Green
-              color: '#c2ffb3'
-            AMBER:
-              label: Amber
-              color: '#ffe396'
-            RED:
-              label: Red
-              color: '#ff8279'
-          validationType: string
 
     person:
       firstName: First name
