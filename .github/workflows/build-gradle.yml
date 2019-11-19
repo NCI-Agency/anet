@@ -20,4 +20,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
+      env:
+        NODE_OPTIONS: '--max-old-space-size=8192'
       run: ./gradlew distZip
