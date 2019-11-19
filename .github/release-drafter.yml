@@ -1,0 +1,20 @@
+branches: 
+  - candidate
+name-template: "ANET $NEXT_PATCH_VERSION"
+version-template: "$MAJOR.$MINOR.$PATCH"
+categories:
+  - title: '🚀 Features'
+    label: feature
+  - title: '🎨 Enhancements'
+    label: enhancement
+  - title: '🐛 Bug Fixes'
+    label: bug
+  - title: '🔧 Under the hood'
+    labels:
+      - debt
+      - dependencies
+change-template: "* $TITLE (#$NUMBER)"
+template: |
+  ## What’s changed in ANET
+
+  $CHANGES
