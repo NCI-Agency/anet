@@ -2722,7 +2722,7 @@
 	<changeSet id="create-emailDeactivationWarnings-table" author="jose-west">
 		<comment>Add a table to support a robust email deactivation warning mechanism.</comment>
 		<createTable tableName="emailDeactivationWarnings">
-			<column name="personUuid" type="int" >
+			<column name="personUuid" type="${uuid_type}" >
 				<constraints nullable="false" />
 			</column>
 			<column name="sentAt" type="datetime" />
