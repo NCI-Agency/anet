@@ -1,6 +1,8 @@
 branches: 
   - candidate
   - release-drafter
+name-template: "ANET $NEXT_PATCH_VERSION"
+version-template: "$MAJOR.$MINOR.$PATCH"
 categories:
   - title: '🚀 Features'
     label: feature
