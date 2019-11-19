@@ -1,6 +1,5 @@
 branches: 
   - candidate
-  - release-drafter
 name-template: "ANET $NEXT_PATCH_VERSION"
 version-template: "$MAJOR.$MINOR.$PATCH"
 categories:
@@ -13,7 +12,7 @@ categories:
   - title: '🔧 Under the hood'
     labels:
       - debt
-			- dependencies
+      - dependencies
 change-template: "* $TITLE (#$NUMBER)"
 template: |
   ## What’s changed in ANET
