@@ -2719,4 +2719,21 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
+	<changeSet id="create-emailDeactivationWarnings-table" author="jose-west">
+		<comment>Add a table to support a robust email deactivation warning mechanism.</comment>
+		<createTable tableName="emailDeactivationWarnings">
+			<column name="personUuid" type="int" >
+				<constraints nullable="false" />
+			</column>
+			<column name="sentAt" type="datetime" />
+		</createTable>
+
+		<addUniqueConstraint tableName="emailDeactivationWarnings" columnNames="personUuid" constraintName="uniqueEmailDeactivationWarningsPerson" />
+		<addForeignKeyConstraint
+			baseTableName="emailDeactivationWarnings" constraintName="FK_emailDeactivationWarnings_person" 
+			baseColumnNames="personUuid" referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+	</changeSet>
+
 </databaseChangeLog>
