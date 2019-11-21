@@ -42,21 +42,39 @@ export const yupDate = yup.date().transform(function(value, originalValue) {
   return newValue.isValid() ? newValue.toDate() : value
 })
 
+export const CUSTOM_FIELD_TYPE = {
+  TEXT: "text",
+  NUMBER: "number",
+  DATE: "date",
+  DATETIME: "datetime",
+  ENUM: "enum",
+  ENUMSET: "enumset"
+}
+
 const CUSTOM_FIELD_TYPE_SCHEMA = {
-  string: yup
+  [CUSTOM_FIELD_TYPE.TEXT]: yup
     .string()
     .nullable()
     .default(""),
-  number: yup
+  [CUSTOM_FIELD_TYPE.NUMBER]: yup
     .number()
     .nullable()
     .default(null),
-  date: yupDate.nullable().default(null)
+  [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.ENUM]: yup
+    .string()
+    .nullable()
+    .default(""),
+  [CUSTOM_FIELD_TYPE.ENUMSET]: yup
+    .array()
+    .nullable()
+    .default([])
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig) => {
-  const { label, validationType, validations } = fieldConfig
-  let fieldYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[validationType]
+  const { label, type, validations } = fieldConfig
+  let fieldYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[type]
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }

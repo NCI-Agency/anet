@@ -248,11 +248,10 @@ dictionary:
           label: Text field
           placeholder: Placeholder text for input field
           helpText: Help text for text field
-          validationType: string
           validations:
             - type: required
               params: [You must provide the text field]
-        colour_options:
+        colourOptions:
           type: enum
           label: Choose one of the colours
           helpText: Help text for chosing colours
@@ -266,7 +265,6 @@ dictionary:
             RED:
               label: Red
               color: '#ff8279'
-          validationType: string
         textareaFieldName:
           type: text
           label: Textarea field
@@ -275,31 +273,27 @@ dictionary:
           componentClass: textarea
           style:
             height: 200px
-          validationType: string
-          visibleWhen: $[?(@.colour_options === 'GREEN')]
+          visibleWhen: $[?(@.colourOptions === 'GREEN')]
         numberFieldName:
           type: text
           label: Number field
           placeholder: Placeholder text for input field
           helpText: Help text for text field
-          validationType: number
           validations:
             - type: integer
             - type: min
               params: [5]
             - type: max
               params: [100]
-          visibleWhen: $[?((@.colour_options === 'GREEN')||(@.colour_options === 'RED'))]
+          visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
         nlt:
           type: date
           label: Not later than date
           helpText: Help text for date field
-          validationType: date
         nlt_dt:
           type: datetime
           label: Not later than datetime
           helpText: Help text for datetime field
-          validationType: date
 
     person:
       firstName: First name

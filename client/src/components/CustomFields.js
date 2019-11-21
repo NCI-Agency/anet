@@ -1,6 +1,7 @@
 import { Settings } from "api"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
+import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { Field } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _isEmpty from "lodash/isEmpty"
@@ -91,10 +92,11 @@ const ReadonlyEnumField = fieldProps => {
 }
 
 const FIELD_COMPONENTS = {
-  text: TextField,
-  date: DateField,
-  datetime: DateTimeField,
-  enum: EnumField
+  [CUSTOM_FIELD_TYPE.TEXT]: TextField,
+  [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
+  [CUSTOM_FIELD_TYPE.DATE]: DateField,
+  [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
+  [CUSTOM_FIELD_TYPE.ENUM]: EnumField
 }
 
 export const CustomFields = ({
@@ -158,11 +160,11 @@ CustomFields.propTypes = {
 }
 
 const READONLY_FIELD_COMPONENTS = {
-  text: ReadonlyTextField,
-  number: ReadonlyTextField,
-  date: ReadonlyDateField,
-  datetime: ReadonlyDateTimeField,
-  enum: ReadonlyEnumField
+  [CUSTOM_FIELD_TYPE.TEXT]: ReadonlyTextField,
+  [CUSTOM_FIELD_TYPE.NUMBER]: ReadonlyTextField,
+  [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
+  [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
+  [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField
 }
 
 export const ReadonlyCustomFields = ({ fieldsConfig }) => {
