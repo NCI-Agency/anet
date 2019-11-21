@@ -64,7 +64,7 @@
     "eslint-plugin-react-hooks": "^2.3.0",
     "eslint-plugin-standard": "^4.0.1",
     "faker": "https://github.com/Marak/faker.js.git",
-    "file-loader": "^4.2.0",
+    "file-loader": "^4.3.0",
     "git-describe": "^4.0.4",
     "graphql-cli": "^3.0.14",
     "handlebars": "^4.5.3",
