@@ -151,7 +151,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
   }
 
   @Override
-  public void run(AnetConfiguration configuration, Environment environment) {
+  public void run(AnetConfiguration configuration, Environment environment)
+      throws IllegalArgumentException {
     // Get the Database connection up and running
     final String dbUrl = configuration.getDataSourceFactory().getUrl();
     logger.info("datasource url: {}", dbUrl);
@@ -231,17 +232,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
     scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
-    // Check whether the application is configured to auto-check for account
-    // deactivation
-    if (configuration.getDictionaryEntry("automaticallyInactivateUsers") != null) {
-      // Check for any accounts which are scheduled to be deactivated as they reach
-      // the end-of-tour date. Check every 24 hours.
-      int accountDeactivationWarningInterval = 24 * 60 * 60 * 1000;
-      AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
-          configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
-      scheduler.scheduleAtFixedRate(deactivationWarningWorker, 0,
-          accountDeactivationWarningInterval, TimeUnit.MILLISECONDS);
-    }
+    runAccountDeactivationWorker(configuration, scheduler, engine);
 
     // Create all of the HTTP Resources.
     LoggingResource loggingResource = new LoggingResource();
@@ -270,6 +261,29 @@ public class AnetApplication extends Application<AnetConfiguration> {
                 orgResource, taskResource, adminResource, savedSearchResource, tagResource,
                 authorizationGroupResource, noteResource),
             metricRegistry));
+  }
+
+  private void runAccountDeactivationWorker(final AnetConfiguration configuration,
+      final ScheduledExecutorService scheduler, final AnetObjectEngine engine)
+      throws IllegalArgumentException {
+    // Check whether the application is configured to auto-check for account deactivation
+    if (configuration.getDictionaryEntry("automaticallyInactivateUsers") != null) {
+      // Check for any accounts which are scheduled to be deactivated as they reach the end-of-tour
+      // date.
+      final Integer accountDeactivationWarningInterval = (Integer) configuration
+          .getDictionaryEntry("automaticallyInactivateUsers.checkIntervalInSecs");
+      final AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
+          configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
+
+      // Run the email deactivation worker at the set interval. In development run it every minute.
+      scheduler.scheduleAtFixedRate(deactivationWarningWorker, accountDeactivationWarningInterval,
+          accountDeactivationWarningInterval, TimeUnit.SECONDS);
+
+      // While in development, run the worker once at the start to see whether it works correctly
+      if (configuration.isDevelopmentMode()) {
+        scheduler.schedule(deactivationWarningWorker, 20, TimeUnit.SECONDS);
+      }
+    }
   }
 
   protected static JSONObject getDictionary(AnetConfiguration configuration)
