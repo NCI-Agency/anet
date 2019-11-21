@@ -275,14 +275,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
           configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
 
-      // Run the email deactivation worker at the set interval. In development run it every minute.
-      scheduler.scheduleAtFixedRate(deactivationWarningWorker, accountDeactivationWarningInterval,
-          accountDeactivationWarningInterval, TimeUnit.SECONDS);
-
-      // While in development, run the worker once at the start to see whether it works correctly
-      if (configuration.isDevelopmentMode()) {
-        scheduler.schedule(deactivationWarningWorker, 20, TimeUnit.SECONDS);
-      }
+      // Run the email deactivation worker at the set interval.
+      scheduler.scheduleAtFixedRate(deactivationWarningWorker, 0, accountDeactivationWarningInterval, TimeUnit.SECONDS);
+      scheduler.schedule(deactivationWarningWorker, 20, TimeUnit.SECONDS);
     }
   }
 

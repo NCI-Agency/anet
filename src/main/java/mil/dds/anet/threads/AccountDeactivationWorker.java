@@ -1,6 +1,7 @@
 package mil.dds.anet.threads;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -9,11 +10,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.EmailDeactivationWarning;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.EmailDeactivationWarningDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
@@ -93,33 +96,70 @@ public class AccountDeactivationWorker implements Runnable {
     // that reach the end-of-tour date
     persons.forEach(p -> {
       for (int i = 0; i < warningDays.size(); i++) {
-        final Integer warning = warningDays.get(i);
-        final Integer nextWarning = i == warningDays.size() - 1 ? null : warningDays.get(i + 1);
-        checkDeactivationStatus(p, warning, nextWarning, now);
+        // Skip inactive ANET users or users from ignored domains
+        if (p.getStatus() == PersonStatus.INACTIVE
+            || Utils.isDomainUserNameIgnored(p.getDomainUsername(), this.ignoredDomainNames)) {
+          break;
+        }
+
+        // Deactivate account as end-of-tour date has been reached
+        if (p.getEndOfTourDate().isBefore(now)) {
+          deactivateAccount(p);
+          break;
+        }
+
+        checkDeactivationWarnings(p, warningDays, i, now);
       }
     });
   }
 
-  private void checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
-      final Integer nextWarning, final Instant now) {
-    // Skip inactive ANET users or users from ignored domains
-    if (person.getStatus() == PersonStatus.INACTIVE
-        || Utils.isDomainUserNameIgnored(person.getDomainUsername(), this.ignoredDomainNames)) {
-      return;
-    }
+  private void checkDeactivationWarnings(final Person person, final List<Integer> warningDays,
+      final int currentWarning, final Instant now) {
 
-    // Deactivate account as end-of-tour date has been reached
-    if (person.getEndOfTourDate().isBefore(now)) {
-      deactivateAccount(person);
-      return;
-    }
-
-    // Send deactivation warning email
-    final Instant warningDate = now.plus(daysBeforeWarning, ChronoUnit.DAYS);
+    final Integer currentDaysBeforeWarning = warningDays.get(currentWarning);
+    final Integer previousDaysBeforeWarning =
+        currentWarning == 0 ? null : warningDays.get(currentWarning - 1);
+    final Integer nextDaysBeforeWarning =
+        currentWarning == warningDays.size() - 1 ? null : warningDays.get(currentWarning + 1);
     final Instant nextReminder =
-        nextWarning == null ? null : now.plus(nextWarning, ChronoUnit.DAYS);
+        nextDaysBeforeWarning == null ? null : now.plus(nextDaysBeforeWarning, ChronoUnit.DAYS);
+
+    // Find the last time an email warning has been sent
+    final EmailDeactivationWarning latestEDW =
+        new EmailDeactivationWarningDao().getByUuid(person.getUuid());
+
+    // Prevent duplicate warnings
+    if (Duration.between(now, latestEDW.getSentAt()).toMinutes() < this.warningIntervalInSecs
+        / 60) {
+      return;
+    }
+
+    // Send deactivation warning email. Note that if a warning has been missed it will be ignored to
+    // prevent multiple warnings at once
+    final Instant warningDate = now.plus(currentDaysBeforeWarning, ChronoUnit.DAYS);
+
     if (person.getEndOfTourDate().isBefore(warningDate) && person.getEndOfTourDate()
         .isAfter(warningDate.minus(this.warningIntervalInSecs, ChronoUnit.SECONDS))) {
+      sendDeactivationWarningEmail(person, nextReminder);
+      return;
+    }
+
+    // Prevent missing warnings (to prevent muliple warnings, only checked if no warning already
+    // sent)
+
+    // No warning sent yet, but there is a previous warning configured
+    final boolean warningCond1 = latestEDW == null && previousDaysBeforeWarning != null;
+
+    // Previous warning was sent before the previous configured warning (so it was missed)
+    final long daysFromLastWarningTillEOT =
+        Duration
+            .between(person.getEndOfTourDate(),
+                latestEDW.getSentAt().minus(this.warningIntervalInSecs, ChronoUnit.SECONDS))
+            .toDays();
+    final boolean warningCond2 = latestEDW != null && previousDaysBeforeWarning != null
+        && daysFromLastWarningTillEOT > previousDaysBeforeWarning;
+
+    if (warningCond1 || warningCond2) {
       sendDeactivationWarningEmail(person, nextReminder);
     }
   }
