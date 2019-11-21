@@ -624,7 +624,7 @@ const BaseReportShow = props => {
               )}
 
               {Settings.fields.report.customFields && (
-                <Fieldset title="Custom fields" id="custom-fields">
+                <Fieldset title="Engagement information" id="custom-fields">
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
                   />

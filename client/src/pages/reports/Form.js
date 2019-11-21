@@ -785,7 +785,7 @@ const BaseReportForm = props => {
                 </Collapse>
               </Fieldset>
 
-              <Fieldset title="Custom fields" id="custom-fields">
+              <Fieldset title="Engagement information" id="custom-fields">
                 <CustomFields
                   fieldsConfig={Settings.fields.report.customFields}
                   formikProps={{
