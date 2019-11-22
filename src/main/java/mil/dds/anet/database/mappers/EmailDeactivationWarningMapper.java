@@ -13,7 +13,6 @@ public class EmailDeactivationWarningMapper implements RowMapper<EmailDeactivati
   public EmailDeactivationWarning map(final ResultSet r, final StatementContext ctx)
       throws SQLException {
     final EmailDeactivationWarning edw = new EmailDeactivationWarning();
-    DaoUtils.setCommonBeanFields(edw, r, null);
 
     edw.setPersonUuid(r.getString("personUuid"));
     edw.setSentAt(DaoUtils.getInstantAsLocalDateTime(r, "sentAt"));

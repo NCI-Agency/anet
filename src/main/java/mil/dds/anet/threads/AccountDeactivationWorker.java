@@ -135,8 +135,8 @@ public class AccountDeactivationWorker implements Runnable {
         nextConfiguredWarning == null ? null : now.plus(nextConfiguredWarning, ChronoUnit.DAYS);
 
     // Find the last time an email warning has been sent
-    final EmailDeactivationWarning latestEDW =
-        AnetObjectEngine.getInstance().getEmailDeactivationWarningDao().getByUuid(person.getUuid());
+    final EmailDeactivationWarning latestEDW = AnetObjectEngine.getInstance()
+        .getEmailDeactivationWarningDao().getEmailDeactivationWarningForPerson(person.getUuid());
 
     // Prevent duplicate warnings
     if (latestEDW != null && Duration.between(now, latestEDW.getSentAt())
@@ -216,15 +216,19 @@ public class AccountDeactivationWorker implements Runnable {
     }
   }
 
-  private void sendDeactivationWarningEmail(Person p, Instant nextReminder) {
+  private void sendDeactivationWarningEmail(final Person p, final Instant nextReminder) {
     try {
-      AnetEmail email = new AnetEmail();
-      AccountDeactivationWarningEmail action = new AccountDeactivationWarningEmail();
+      final AnetEmail email = new AnetEmail();
+      final AccountDeactivationWarningEmail action = new AccountDeactivationWarningEmail();
       action.setPerson(p);
       action.setNextReminder(nextReminder);
       email.setAction(action);
       email.addToAddress(p.getEmailAddress());
       AnetEmailWorker.sendEmailAsync(email);
+      final EmailDeactivationWarning edw = new EmailDeactivationWarning();
+      edw.setPerson(p.getUuid());
+      edw.setSentAt(Instant.now());
+      AnetObjectEngine.getInstance().getEmailDeactivationWarningDao().insert(edw);
     } catch (Exception e) {
       logger.error("Exception when sending deactivation warning email", e);
     }
