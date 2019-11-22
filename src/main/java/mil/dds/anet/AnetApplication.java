@@ -276,7 +276,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
           configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
 
       // Run the email deactivation worker at the set interval.
-      scheduler.scheduleAtFixedRate(deactivationWarningWorker, 0, accountDeactivationWarningInterval, TimeUnit.SECONDS);
+      scheduler.scheduleAtFixedRate(deactivationWarningWorker, 0,
+          accountDeactivationWarningInterval, TimeUnit.SECONDS);
       scheduler.schedule(deactivationWarningWorker, 20, TimeUnit.SECONDS);
     }
   }
