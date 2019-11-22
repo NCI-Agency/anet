@@ -156,9 +156,12 @@ public class AccountDeactivationWorkerTest {
         createEmailDeactivationWarningMock(testPerson16, Instant.now().plus(30, ChronoUnit.DAYS));
     final EmailDeactivationWarning edw45 =
         createEmailDeactivationWarningMock(testPerson31, Instant.now().plus(45, ChronoUnit.DAYS));
-    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson14.getUuid())).thenReturn(edw15);
-    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson16.getUuid())).thenReturn(edw30);
-    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson31.getUuid())).thenReturn(edw45);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson14.getUuid()))
+        .thenReturn(edw15);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson16.getUuid()))
+        .thenReturn(edw30);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson31.getUuid()))
+        .thenReturn(edw45);
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
