@@ -73,8 +73,8 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig) => {
-  const { label, type, validations } = fieldConfig
-  let fieldYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[type]
+  const { label, validations } = fieldConfig
+  let fieldYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }

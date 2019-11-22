@@ -288,10 +288,10 @@ dictionary:
             height: 200px
           visibleWhen: $[?(@.colourOptions === 'GREEN')]
         numberFieldName:
-          type: text
+          type: number
           label: Number field
-          placeholder: Placeholder text for input field
-          helpText: Help text for text field
+          placeholder: Placeholder text for number field
+          helpText: Help text for number field
           validations:
             - type: integer
             - type: min
