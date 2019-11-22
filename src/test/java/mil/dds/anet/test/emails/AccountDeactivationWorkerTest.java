@@ -70,7 +70,7 @@ public class AccountDeactivationWorkerTest {
     when(positionDao.removePersonFromPosition(Mockito.any())).thenReturn(1);
     when(instance.getPositionDao()).thenReturn(positionDao);
 
-    when(emailDeactivationWarningDao.getByUuid(any())).thenReturn(null);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(any())).thenReturn(null);
     when(instance.getEmailDeactivationWarningDao()).thenReturn(emailDeactivationWarningDao);
 
     when(AnetObjectEngine.getInstance()).thenReturn(instance);
@@ -81,7 +81,7 @@ public class AccountDeactivationWorkerTest {
 
   @Before
   public void setupBeforeEachTest() {
-    when(emailDeactivationWarningDao.getByUuid(any())).thenReturn(null);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(any())).thenReturn(null);
   }
 
   @Test
@@ -156,9 +156,9 @@ public class AccountDeactivationWorkerTest {
         createEmailDeactivationWarningMock(testPerson16, Instant.now().plus(30, ChronoUnit.DAYS));
     final EmailDeactivationWarning edw45 =
         createEmailDeactivationWarningMock(testPerson31, Instant.now().plus(45, ChronoUnit.DAYS));
-    when(emailDeactivationWarningDao.getByUuid(testPerson14.getUuid())).thenReturn(edw15);
-    when(emailDeactivationWarningDao.getByUuid(testPerson16.getUuid())).thenReturn(edw30);
-    when(emailDeactivationWarningDao.getByUuid(testPerson31.getUuid())).thenReturn(edw45);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson14.getUuid())).thenReturn(edw15);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson16.getUuid())).thenReturn(edw30);
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson31.getUuid())).thenReturn(edw45);
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
