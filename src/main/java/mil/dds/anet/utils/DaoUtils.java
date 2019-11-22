@@ -74,6 +74,10 @@ public class DaoUtils {
     return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.MSSQL;
   }
 
+  public static boolean isPostgresql() {
+    return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.POSTGRESQL;
+  }
+
   public static String getNewUuid() {
     return UUID.randomUUID().toString();
   }
