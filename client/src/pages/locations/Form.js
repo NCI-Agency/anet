@@ -106,7 +106,7 @@ const BaseLocationForm = props => {
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.renderRadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />

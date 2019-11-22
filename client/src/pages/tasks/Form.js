@@ -167,7 +167,7 @@ const BaseTaskForm = props => {
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.renderRadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
@@ -272,7 +272,7 @@ const BaseTaskForm = props => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.renderRadioButtonToggleGroup}
                       buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
@@ -308,7 +308,7 @@ const BaseTaskForm = props => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.renderRadioButtonToggleGroup}
                     buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}

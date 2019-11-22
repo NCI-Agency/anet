@@ -270,7 +270,7 @@ const BaseOrganizationForm = props => {
                   <>
                     <Field
                       name="type"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.renderRadioButtonToggleGroup}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
@@ -304,7 +304,7 @@ const BaseOrganizationForm = props => {
                     />
                     <Field
                       name="status"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.renderRadioButtonToggleGroup}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                       disabled={!isAdmin}

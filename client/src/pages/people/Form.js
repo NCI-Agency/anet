@@ -323,7 +323,7 @@ const BasePersonForm = props => {
                 ) : (
                   <Field
                     name="role"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.renderRadioButtonToggleGroup}
                     buttons={roleButtons}
                     onChange={value => {
                       const roleCountries = getCountries(value)
@@ -363,7 +363,7 @@ const BasePersonForm = props => {
                 ) : (
                   <Field
                     name="status"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.renderRadioButtonToggleGroup}
                     buttons={statusButtons}
                     onChange={value => setFieldValue("status", value)}
                   >

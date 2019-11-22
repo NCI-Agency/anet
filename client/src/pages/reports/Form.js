@@ -542,7 +542,7 @@ const BaseReportForm = props => {
                   <Field
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.renderRadioButtonToggleGroup}
                     buttons={atmosphereButtons}
                     onChange={value => setFieldValue("atmosphere", value)}
                     className="atmosphere-form-group"

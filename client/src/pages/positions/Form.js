@@ -195,7 +195,7 @@ const BasePositionForm = props => {
                 ) : (
                   <Field
                     name="type"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.renderRadioButtonToggleGroup}
                     buttons={typeButtons}
                     onChange={value => setFieldValue("type", value)}
                   />
@@ -203,7 +203,7 @@ const BasePositionForm = props => {
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.renderRadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 >
@@ -250,7 +250,7 @@ const BasePositionForm = props => {
                 {!isPrincipal && (
                   <Field
                     name="permissions"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.renderRadioButtonToggleGroup}
                     buttons={permissionsButtons}
                     onChange={value => setFieldValue("permissions", value)}
                   />

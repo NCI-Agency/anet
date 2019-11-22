@@ -91,7 +91,9 @@ export default class RelatedObjectNoteModal extends Component {
                             <Field
                               name={question.id}
                               label=""
-                              component={FieldHelper.renderButtonToggleGroup}
+                              component={
+                                FieldHelper.renderRadioButtonToggleGroup
+                              }
                               buttons={question.choice}
                               onChange={value => {
                                 setFieldValue(question.id, value)

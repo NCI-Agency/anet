@@ -249,11 +249,12 @@ export const customEnumButtons = list => {
   return buttons
 }
 
-export const renderButtonToggleGroup = ({
+const renderButtonToggleGroup = (
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
-}) => {
+  type,
+  props
+) => {
   const {
     label,
     children,
@@ -265,7 +266,7 @@ export const renderButtonToggleGroup = ({
   } = props
   const widgetElem = (
     <ToggleButtonGroup
-      type="radio"
+      type={type}
       defaultValue={field.value}
       {...field}
       {...otherProps}
@@ -274,20 +275,15 @@ export const renderButtonToggleGroup = ({
         if (!button) {
           return null
         }
-        let { label, color, style, ...props } = button
+        let { label, value, color, style, ...props } = button
         if (color) {
-          if (field.value === button.value) {
+          if (field.value === value) {
             style = { ...style, backgroundColor: color }
           }
           style = { ...style, borderColor: color, borderWidth: "2px" }
         }
         return (
-          <ToggleButton
-            {...props}
-            key={button.value}
-            value={button.value}
-            style={style}
-          >
+          <ToggleButton {...props} key={value} value={value} style={style}>
             {label}
           </ToggleButton>
         )
@@ -305,5 +301,17 @@ export const renderButtonToggleGroup = ({
     vertical
   )
 }
+
+export const renderRadioButtonToggleGroup = ({
+  field, // { name, value, onChange, onBlur }
+  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  ...props
+}) => renderButtonToggleGroup(field, form, "radio", props)
+
+export const renderCheckboxButtonToggleGroup = ({
+  field, // { name, value, onChange, onBlur }
+  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  ...props
+}) => renderButtonToggleGroup(field, form, "checkbox", props)
 
 export default renderField
