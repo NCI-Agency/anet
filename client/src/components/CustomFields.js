@@ -70,14 +70,19 @@ const EnumField = fieldProps => {
   return (
     <Field
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={FieldHelper.renderButtonToggleGroup}
+      component={FieldHelper.renderRadioButtonToggleGroup}
       {...otherFieldProps}
     />
   )
 }
 
-const humanNameOfChoice = (choices, fieldVal) =>
-  fieldVal && choices[fieldVal].label
+const enumHumanValue = (choices, fieldVal) => {
+  if (Array.isArray(fieldVal)) {
+    return fieldVal && fieldVal.map(k => choices[k].label).join(", ")
+  } else {
+    return fieldVal && choices[fieldVal].label
+  }
+}
 
 const ReadonlyEnumField = fieldProps => {
   const { name, label, choices } = fieldProps
@@ -86,7 +91,30 @@ const ReadonlyEnumField = fieldProps => {
       name={name}
       label={label}
       component={FieldHelper.renderReadonlyField}
-      humanValue={fieldVal => humanNameOfChoice(choices, fieldVal)}
+      humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
+    />
+  )
+}
+
+const EnumSetField = fieldProps => {
+  const { choices, ...otherFieldProps } = fieldProps
+  return (
+    <Field
+      buttons={FieldHelper.customEnumButtons(choices)}
+      component={FieldHelper.renderCheckboxButtonToggleGroup}
+      {...otherFieldProps}
+    />
+  )
+}
+
+const ReadonlyEnumSetField = fieldProps => {
+  const { name, label, choices } = fieldProps
+  return (
+    <Field
+      name={name}
+      label={label}
+      component={FieldHelper.renderReadonlyField}
+      humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
     />
   )
 }
@@ -96,7 +124,8 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
   [CUSTOM_FIELD_TYPE.DATE]: DateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
-  [CUSTOM_FIELD_TYPE.ENUM]: EnumField
+  [CUSTOM_FIELD_TYPE.ENUM]: EnumField,
+  [CUSTOM_FIELD_TYPE.ENUMSET]: EnumSetField
 }
 
 export const CustomFields = ({
@@ -164,7 +193,8 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.NUMBER]: ReadonlyTextField,
   [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
-  [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField
+  [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
+  [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumSetField
 }
 
 export const ReadonlyCustomFields = ({ fieldsConfig }) => {

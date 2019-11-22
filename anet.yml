@@ -243,6 +243,19 @@ dictionary:
       keyOutcomes: Key outcomes
       reportText: Engagement details
       customFields:
+        multipleSelect:
+          type: enumset
+          label: Choose one or more of the options
+          helpText: Help text for chosing multiple values
+          choices:
+            opt1:
+              label: Opt 1
+            opt2:
+              label: Opt 2
+            opt3:
+              label: Opt 3
+            opt4:
+              label: Opt 4
         inputFieldName:
           type: text
           label: Text field
