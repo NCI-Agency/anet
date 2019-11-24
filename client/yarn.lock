@@ -1007,10 +1007,10 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-transform-proto-to-assign@^7.5.5":
-  version "7.5.5"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-proto-to-assign/-/plugin-transform-proto-to-assign-7.5.5.tgz#9ba443be793d4dff1c2898807704b81a51562c20"
-  integrity sha512-1vlFiFiIfKXBVm2SJtPr65x7NUAv4Sa3qhBbH4TnSXaUTDQnOSf+W8vNq3BNliaI28kwT8aD3rMTTsEryJpDZw==
+"@babel/plugin-transform-proto-to-assign@^7.7.4":
+  version "7.7.4"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-proto-to-assign/-/plugin-transform-proto-to-assign-7.7.4.tgz#0c8cbeae745f2cb6a2a0ba60ebc8a21720be04f2"
+  integrity sha512-Nz8pspc1cCO3apXw9XvH/hNtHRH4CRMXcD0Drh1yyzlFgqJsea1VK4hQbDpAvd15WYH0ggJQMRXnqi78sgJOlQ==
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
     lodash "^4.17.13"
