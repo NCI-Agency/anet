@@ -286,9 +286,9 @@ async function editAndSavePositionFromCurrentUserPage(t, validateTrue) {
 }
 
 async function validationEditPositionOnCurrentPage(t, validateTrue) {
-  let { $, assertElementText, until, shortWaitMs } = t.context
+  let { $, assertElementText, until, shortWaitMs, mediumWaitMs } = t.context
   let $editButton = await $(".edit-position")
-  await t.context.driver.wait(until.elementIsVisible($editButton))
+  await t.context.driver.wait(until.elementIsVisible($editButton), mediumWaitMs)
   await $editButton.click()
   await t.context.pageHelpers.clickFormBottomSubmit()
   await t.context.driver.sleep(shortWaitMs) // wait for transition

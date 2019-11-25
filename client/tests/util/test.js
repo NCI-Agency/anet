@@ -319,15 +319,27 @@ test.beforeEach(t => {
       )
       for (let $row of $supportedPositionsRows) {
         let [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
-        await t.context.driver.wait(until.elementIsVisible($billetCell))
+        await t.context.driver.wait(
+          until.elementIsVisible($billetCell),
+          mediumWaitMs
+        )
         await $billetCell.getText()
-        await t.context.driver.wait(until.elementIsVisible($advisorCell))
+        await t.context.driver.wait(
+          until.elementIsVisible($advisorCell),
+          mediumWaitMs
+        )
         let advisorText = await $advisorCell.getText()
         if (advisorText === personName) {
           let $advisorLink = await $advisorCell.findElement(By.css("a"))
-          await t.context.driver.wait(until.elementIsVisible($advisorLink))
+          await t.context.driver.wait(
+            until.elementIsVisible($advisorLink),
+            mediumWaitMs
+          )
           await $advisorLink.click()
-          await t.context.driver.wait(until.stalenessOf($advisorLink))
+          await t.context.driver.wait(
+            until.stalenessOf($advisorLink),
+            mediumWaitMs
+          )
           return
         }
       }
