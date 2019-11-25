@@ -106,6 +106,10 @@ test("Draft and submit a report", async t => {
     ".reportTextField .public-DraftEditor-content",
     "engagement details"
   )
+  await pageHelpers.writeInForm(
+    "[id='customFields.inputFieldName']",
+    "custom field text"
+  )
 
   let editorCssPath =
     ".reportSensitiveInformationField .public-DraftEditor-content"
