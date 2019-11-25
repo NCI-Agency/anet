@@ -148,7 +148,7 @@ export const CustomFields = ({
           ...fieldProps
         } = fieldConfig
         const FieldComponent = FIELD_COMPONENTS[type]
-        const fieldName = `customFields.${key}`
+        const fieldName = `formCustomFields.${key}`
         const isVisible =
           !fieldConfig.visibleWhen ||
           (fieldConfig.visibleWhen &&
@@ -210,7 +210,7 @@ export const ReadonlyCustomFields = ({ fieldsConfig }) => {
           ...fieldProps
         } = fieldConfig
         const FieldComponent = READONLY_FIELD_COMPONENTS[type]
-        const fieldName = `customFields.${key}`
+        const fieldName = `formCustomFields.${key}`
         return <FieldComponent key={key} name={fieldName} {...fieldProps} />
       })}
     </>

@@ -292,7 +292,7 @@ const BaseReportShow = props => {
       text: tag.name
     }))
     data.report.to = ""
-    data.report.customFields = JSON.parse(data.report.customFields)
+    data.report.formCustomFields = JSON.parse(data.report.customFields)
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })

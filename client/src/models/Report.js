@@ -256,7 +256,8 @@ export default class Report extends Model {
         .array()
         .nullable()
         .default([]),
-      customFields: yup
+      // not actually in the database, the database contains the JSON customFields
+      formCustomFields: yup
         .object()
         .shape(Report.customFieldsSchema)
         .nullable()

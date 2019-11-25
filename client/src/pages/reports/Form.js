@@ -990,7 +990,8 @@ const BaseReportForm = props => {
       "reportTags",
       "showSensitiveInfo",
       "attendees",
-      "customFields"
+      "customFields", // initial JSON from the db
+      "formCustomFields"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1017,9 +1018,9 @@ const BaseReportForm = props => {
       Object.without(a, "firstName", "lastName", "position")
     )
     report.location = utils.getReference(report.location)
-    // transform the customFields first elem to JSON (customFields should contain
+    // transform the formCustomFields first elem to JSON (customFields should contain
     // the JSON of all the fields defined as customFields)
-    let visibleCustomFields = values.customFields
+    let visibleCustomFields = values.formCustomFields
     invisibleCustomFields.forEach(f => {
       visibleCustomFields = Object.without(visibleCustomFields, f)
     })

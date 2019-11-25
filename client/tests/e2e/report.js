@@ -107,7 +107,7 @@ test("Draft and submit a report", async t => {
     "engagement details"
   )
   await pageHelpers.writeInForm(
-    "[id='customFields.inputFieldName']",
+    "[id='formCustomFields.inputFieldName']",
     "custom field text"
   )
 
