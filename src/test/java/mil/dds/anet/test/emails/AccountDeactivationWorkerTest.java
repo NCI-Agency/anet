@@ -3,12 +3,16 @@ package mil.dds.anet.test.emails;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.EmailDeactivationWarning;
@@ -81,6 +85,7 @@ public class AccountDeactivationWorkerTest {
 
   @Before
   public void setupBeforeEachTest() {
+    // Make sure we get the default situation after each test (no warnings sent yet)
     when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(any())).thenReturn(null);
   }
 
@@ -137,30 +142,30 @@ public class AccountDeactivationWorkerTest {
   @Test
   public void testDuplicateWarningPrevention() throws Exception {
     // Configure
-    final Person testPerson14 = createPersonMock(Instant.now().plus(14, ChronoUnit.DAYS),
-        "test14@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test14");
+    final Person testPerson12 = createPersonMock(Instant.now().plus(12, ChronoUnit.DAYS),
+        "test12@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test12");
 
-    final Person testPerson16 = createPersonMock(Instant.now().plus(16, ChronoUnit.DAYS),
-        "test16@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test16");
+    final Person testPerson18 = createPersonMock(Instant.now().plus(18, ChronoUnit.DAYS),
+        "test18@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test18");
 
-    final Person testPerson31 = createPersonMock(Instant.now().plus(31, ChronoUnit.DAYS),
-        "test31@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test31");
+    final Person testPerson35 = createPersonMock(Instant.now().plus(35, ChronoUnit.DAYS),
+        "test35@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test35");
 
     when(personDao.search(Mockito.any()))
-        .thenReturn(new AnetBeanList<>(Arrays.asList(testPerson14, testPerson16, testPerson31)));
+        .thenReturn(new AnetBeanList<>(Arrays.asList(testPerson12, testPerson18, testPerson35)));
 
     // Setup DAO
     final EmailDeactivationWarning edw15 =
-        createEmailDeactivationWarningMock(testPerson14, Instant.now().plus(15, ChronoUnit.DAYS));
+        createEmailDeactivationWarningMock(testPerson12, Instant.now().plus(15, ChronoUnit.DAYS));
     final EmailDeactivationWarning edw30 =
-        createEmailDeactivationWarningMock(testPerson16, Instant.now().plus(30, ChronoUnit.DAYS));
+        createEmailDeactivationWarningMock(testPerson18, Instant.now().plus(30, ChronoUnit.DAYS));
     final EmailDeactivationWarning edw45 =
-        createEmailDeactivationWarningMock(testPerson31, Instant.now().plus(45, ChronoUnit.DAYS));
-    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson14.getUuid()))
+        createEmailDeactivationWarningMock(testPerson35, Instant.now().plus(45, ChronoUnit.DAYS));
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson12.getUuid()))
         .thenReturn(edw15);
-    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson16.getUuid()))
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson18.getUuid()))
         .thenReturn(edw30);
-    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson31.getUuid()))
+    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(testPerson35.getUuid()))
         .thenReturn(edw45);
 
     // Send email(s)
@@ -253,6 +258,9 @@ public class AccountDeactivationWorkerTest {
     PowerMockito.verifyPrivate(AnetEmailWorker.class, Mockito.times(1)).invoke("sendEmailAsync",
         captor.capture());
 
+    verify(emailDeactivationWarningDao, times(1)).delete(testPersonEotActive.getUuid());
+    verify(emailDeactivationWarningDao, never()).delete(testPersonEotInactive.getUuid());
+
     final List<AnetEmail> emails = captor.getAllValues();
     assertEquals(1, emails.size());
 
@@ -269,6 +277,7 @@ public class AccountDeactivationWorkerTest {
       final PersonStatus status, final String domainName) {
 
     final Person testPerson = PowerMockito.mock(Person.class, Mockito.RETURNS_MOCKS);
+    when(testPerson.getUuid()).thenReturn(UUID.randomUUID().toString());
     when(testPerson.getName()).thenReturn(domainName);
     when(testPerson.getEndOfTourDate()).thenReturn(endOfTour);
     when(testPerson.getEmailAddress()).thenReturn(email);

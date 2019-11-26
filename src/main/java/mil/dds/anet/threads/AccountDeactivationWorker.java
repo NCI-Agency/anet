@@ -76,7 +76,7 @@ public class AccountDeactivationWorker implements Runnable {
             : daysTillNextWarning;
 
     // Pick the earliest warning
-    final int daysBeforeLatestWarning = warningDays.get(0);
+    final int daysBeforeLatestWarning = Collections.max(warningDays);
 
     // Get a list of all people with a end of tour coming up using the earliest warning date
     final PersonSearchQuery query = new PersonSearchQuery();
@@ -201,6 +201,9 @@ public class AccountDeactivationWorker implements Runnable {
 
     // Send email to inform user
     sendAccountDeactivationEmail(p);
+
+    // Remove account deativation warning data from DB
+    AnetObjectEngine.getInstance().getEmailDeactivationWarningDao().delete(p.getUuid());
   }
 
   private void sendAccountDeactivationEmail(Person p) {
