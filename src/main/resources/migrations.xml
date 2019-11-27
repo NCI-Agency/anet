@@ -2728,7 +2728,7 @@
 			<column name="sentAt" type="datetime" />
 		</createTable>
 
-		<addUniqueConstraint tableName="emailDeactivationWarnings" columnNames="personUuid" constraintName="uniqueEmailDeactivationWarningsPerson" />
+		<addUniqueConstraint tableName="emailDeactivationWarnings" columnNames="personUuid" constraintName="UQ_EmailDeactivationWarningsPerson" />
 		<addForeignKeyConstraint
 			baseTableName="emailDeactivationWarnings" constraintName="FK_emailDeactivationWarnings_person" 
 			baseColumnNames="personUuid" referencedTableName="people" referencedColumnNames="uuid"

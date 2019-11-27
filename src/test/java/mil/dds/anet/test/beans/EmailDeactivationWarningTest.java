@@ -21,7 +21,6 @@ public class EmailDeactivationWarningTest extends BeanTester<EmailDeactivationWa
   public void testDataObject() {
     final EmailDeactivationWarning edw = getTestEDW();
     assertThat(edw.getPersonUuid()).isEqualTo("test_uuid");
-    assertThat(edw.getPerson()).isNull();
     assertThat(edw.getSentAt().toEpochMilli()).isEqualTo(new Long("1498780800000"));
 
     assertThat(edw.getUuid()).isNull();
@@ -30,7 +29,7 @@ public class EmailDeactivationWarningTest extends BeanTester<EmailDeactivationWa
 
     assertThat(edw.hashCode()).isNotNull();
     assertThat(edw).isEqualTo(edw);
-    assertThat(edw.toString()).isEqualTo("[Person:test_uuid;SentAt:2017-06-30T00:00:00Z]");
+    assertThat(edw.toString()).isEqualTo("[PersonUuid:test_uuid;SentAt:2017-06-30T00:00:00Z]");
   }
 
   @Test

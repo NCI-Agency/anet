@@ -1,38 +1,25 @@
 package mil.dds.anet.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import java.time.Instant;
 import java.util.Objects;
 import mil.dds.anet.views.AbstractAnetBean;
 
+@GraphQLIgnore
 public class EmailDeactivationWarning extends AbstractAnetBean {
 
-  private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
+  private String personUuid;
   private Instant sentAt;
 
-  @JsonIgnore
-  @GraphQLIgnore
-  public Person getPerson() {
-    return person.getForeignObject();
-  }
 
-  @JsonIgnore
-  @GraphQLIgnore
-  public void setPerson(final String personUuid) {
-    this.person = new ForeignObjectHolder<>(personUuid);
-  }
-
-  @GraphQLIgnore
   public String getPersonUuid() {
-    return person.getForeignUuid();
+    return personUuid;
   }
 
   public void setPersonUuid(final String personUuid) {
-    this.person = new ForeignObjectHolder<>(personUuid);
+    this.personUuid = personUuid;
   }
 
-  @GraphQLIgnore
   public Instant getSentAt() {
     return sentAt;
   }
@@ -54,11 +41,11 @@ public class EmailDeactivationWarning extends AbstractAnetBean {
 
   @Override
   public int hashCode() {
-    return Objects.hash(person, sentAt);
+    return Objects.hash(personUuid, sentAt);
   }
 
   @Override
   public String toString() {
-    return String.format("[Person:%s;SentAt:%s]", getPersonUuid(), getSentAt());
+    return String.format("[PersonUuid:%s;SentAt:%s]", getPersonUuid(), getSentAt());
   }
 }

@@ -231,7 +231,7 @@ public class AccountDeactivationWorker implements Runnable {
       email.addToAddress(p.getEmailAddress());
       AnetEmailWorker.sendEmailAsync(email);
       final EmailDeactivationWarning edw = new EmailDeactivationWarning();
-      edw.setPerson(p.getUuid());
+      edw.setPersonUuid(p.getUuid());
       edw.setSentAt(Instant.now());
       AnetObjectEngine.getInstance().getEmailDeactivationWarningDao().insert(edw);
     } catch (Exception e) {

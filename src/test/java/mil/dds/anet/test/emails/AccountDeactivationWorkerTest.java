@@ -307,7 +307,6 @@ public class AccountDeactivationWorkerTest {
       final Instant sentAt) {
     final EmailDeactivationWarning edw =
         PowerMockito.mock(EmailDeactivationWarning.class, Mockito.RETURNS_MOCKS);
-    when(edw.getPerson()).thenReturn(person);
     when(edw.getSentAt()).thenReturn(sentAt);
 
     return edw;
