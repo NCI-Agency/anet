@@ -43,7 +43,7 @@ public class EmailDeactivationWarningDao
 
   @InTransaction
   public EmailDeactivationWarning getEmailDeactivationWarningForPerson(final String personUuid) {
-    List<EmailDeactivationWarning> userEDW = getDbHandle()
+    final List<EmailDeactivationWarning> userEDW = getDbHandle()
         .createQuery("/* getEmailDeactivationWarning */ SELECT " + "\"personUuid\", \"sentAt\""
             + "FROM \"emailDeactivationWarnings\" "
             + "WHERE \"emailDeactivationWarnings\".\"personUuid\" = :personUuid ORDER BY \"emailDeactivationWarnings\".\"sentAt\" ASC")

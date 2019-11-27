@@ -90,9 +90,8 @@ public class AccountDeactivationWorker implements Runnable {
     // Send emails to let users know their account will soon be deactivated or deactivate accounts
     // that reach the end-of-tour date
     persons.forEach(p -> {
-      // Skip inactive ANET users or users from ignored domains
-      if (p.getStatus() == PersonStatus.INACTIVE
-          || Utils.isDomainUserNameIgnored(p.getDomainUsername(), this.ignoredDomainNames)) {
+      // Skip inactive ANET users
+      if (p.getStatus() == PersonStatus.INACTIVE) {
         return;
       }
 
@@ -102,7 +101,10 @@ public class AccountDeactivationWorker implements Runnable {
         return;
       }
 
-      checkDeactivationWarnings(p, warningDays, now);
+      // Send warnings to users from domains not present in the ignored list
+      if (!Utils.isDomainUserNameIgnored(p.getDomainUsername(), this.ignoredDomainNames)) {
+        checkDeactivationWarnings(p, warningDays, now);
+      }
     });
   }
 

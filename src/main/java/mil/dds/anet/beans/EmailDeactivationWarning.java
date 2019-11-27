@@ -48,18 +48,17 @@ public class EmailDeactivationWarning extends AbstractAnetBean {
     }
 
     final EmailDeactivationWarning c = (EmailDeactivationWarning) o;
-    return Objects.equals(c.getUuid(), uuid) && Objects.equals(c.getPersonUuid(), getPersonUuid())
-        && Objects.equals(c.getSentAt(), sentAt) && Objects.equals(c.getUpdatedAt(), updatedAt)
-        && Objects.equals(c.getCreatedAt(), createdAt);
+    return Objects.equals(c.getPersonUuid(), getPersonUuid())
+        && Objects.equals(c.getSentAt(), sentAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, person, sentAt);
+    return Objects.hash(person, sentAt);
   }
 
   @Override
   public String toString() {
-    return String.format("[%s] - [Person:%s,SentAt:%d]", uuid, getPersonUuid(), sentAt);
+    return String.format("[Person:%s;SentAt:%s]", getPersonUuid(), getSentAt());
   }
 }

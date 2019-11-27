@@ -1,7 +1,6 @@
 package mil.dds.anet.test.emails;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -10,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -44,21 +44,19 @@ import org.powermock.modules.junit4.PowerMockRunner;
     AccountDeactivationWarningEmail.class, EmailDeactivationWarningDao.class})
 @PowerMockIgnore("javax.security.*")
 public class AccountDeactivationWorkerTest {
-
-  private AnetConfiguration config;
-  private PersonDao personDao;
-  private PositionDao positionDao;
-  private EmailDeactivationWarningDao emailDeactivationWarningDao;
+  private final AnetConfiguration config =
+      PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
+  private final PersonDao personDao = PowerMockito.mock(PersonDao.class, Mockito.RETURNS_MOCKS);
+  private final PositionDao positionDao =
+      PowerMockito.mock(PositionDao.class, Mockito.RETURNS_MOCKS);
+  private final EmailDeactivationWarningDao emailDeactivationWarningDao =
+      PowerMockito.mock(EmailDeactivationWarningDao.class, Mockito.RETURNS_MOCKS);
 
   private static final int SCHEDULER_TIME_MS = 1 * 1000;
 
   @Before
-  public void setup() throws Exception {
-    config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
-    personDao = PowerMockito.mock(PersonDao.class, Mockito.RETURNS_MOCKS);
-    positionDao = PowerMockito.mock(PositionDao.class, Mockito.RETURNS_MOCKS);
-    emailDeactivationWarningDao =
-        PowerMockito.mock(EmailDeactivationWarningDao.class, Mockito.RETURNS_MOCKS);
+  public void setupBeforeEachTest() throws Exception {
+    // Make sure we get the default situation after each test (no warnings sent yet)
     PowerMockito.mockStatic(AnetObjectEngine.class);
 
     when(config.getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior"))
@@ -83,12 +81,6 @@ public class AccountDeactivationWorkerTest {
     PowerMockito.doNothing().when(AnetEmailWorker.class, "sendEmailAsync", Mockito.any());
   }
 
-  @Before
-  public void setupBeforeEachTest() {
-    // Make sure we get the default situation after each test (no warnings sent yet)
-    when(emailDeactivationWarningDao.getEmailDeactivationWarningForPerson(any())).thenReturn(null);
-  }
-
   @Test
   public void testWarnings() throws Exception {
     // Note that for all these tests it applies that no emails have been sent before
@@ -96,15 +88,15 @@ public class AccountDeactivationWorkerTest {
     // Configure
     final Person testPerson15 = createPersonMock(Instant.now().plus(15, ChronoUnit.DAYS),
         "test15@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test15");
-
     final Person testPerson30 = createPersonMock(Instant.now().plus(30, ChronoUnit.DAYS),
         "test30@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30");
-
     final Person testPerson45 = createPersonMock(Instant.now().plus(45, ChronoUnit.DAYS),
         "test45@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test45");
+    final Person testPersonIgnored = createPersonMock(Instant.now().plus(15, ChronoUnit.DAYS),
+        "testIgnored@test.com", PersonStatus.ACTIVE, "ignored_domain\\test15");
 
-    when(personDao.search(Mockito.any()))
-        .thenReturn(new AnetBeanList<>(Arrays.asList(testPerson15, testPerson30, testPerson45)));
+    when(personDao.search(Mockito.any())).thenReturn(new AnetBeanList<>(
+        Arrays.asList(testPerson15, testPerson30, testPerson45, testPersonIgnored)));
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
@@ -117,26 +109,27 @@ public class AccountDeactivationWorkerTest {
         captor.capture());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(3, emails.size());
+    assertThat(emails.size()).isEqualTo(3);
 
-    assertEquals(1,
-        emails.stream()
-            .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-                && e.getToAddresses().contains("test15@test.com")
-                && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() == null)
-            .count());
-    assertEquals(1,
-        emails.stream()
-            .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-                && e.getToAddresses().contains("test30@test.com")
-                && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
-            .count());
-    assertEquals(1,
-        emails.stream()
-            .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-                && e.getToAddresses().contains("test45@test.com")
-                && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
-            .count());
+    assertThat(emails.stream()
+        .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
+            && e.getToAddresses().contains(testPerson15.getEmailAddress())
+            && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() == null)
+        .count()).isEqualTo(1);
+    assertThat(emails.stream()
+        .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
+            && e.getToAddresses().contains(testPerson30.getEmailAddress())
+            && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
+        .count()).isEqualTo(1);
+    assertThat(emails.stream()
+        .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
+            && e.getToAddresses().contains(testPerson45.getEmailAddress())
+            && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
+        .count()).isEqualTo(1);
+    assertThat(emails.stream()
+        .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
+            && e.getToAddresses().contains(testPersonIgnored.getEmailAddress()))
+        .count()).isEqualTo(0);
   }
 
   @Test
@@ -144,10 +137,8 @@ public class AccountDeactivationWorkerTest {
     // Configure
     final Person testPerson12 = createPersonMock(Instant.now().plus(12, ChronoUnit.DAYS),
         "test12@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test12");
-
     final Person testPerson18 = createPersonMock(Instant.now().plus(18, ChronoUnit.DAYS),
         "test18@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test18");
-
     final Person testPerson35 = createPersonMock(Instant.now().plus(35, ChronoUnit.DAYS),
         "test35@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test35");
 
@@ -179,7 +170,7 @@ public class AccountDeactivationWorkerTest {
         captor.capture());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(0, emails.size());
+    assertThat(emails.size()).isEqualTo(0);
   }
 
   @Test
@@ -189,13 +180,10 @@ public class AccountDeactivationWorkerTest {
     // Configure
     final Person testPerson14 = createPersonMock(Instant.now().plus(14, ChronoUnit.DAYS),
         "test14@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test14");
-
     final Person testPerson16 = createPersonMock(Instant.now().plus(16, ChronoUnit.DAYS),
         "test16@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test16");
-
     final Person testPerson31 = createPersonMock(Instant.now().plus(31, ChronoUnit.DAYS),
         "test31@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test31");
-
     final Person testPerson46 = createPersonMock(Instant.now().plus(46, ChronoUnit.DAYS),
         "test46@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test46");
 
@@ -213,26 +201,23 @@ public class AccountDeactivationWorkerTest {
         captor.capture());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(3, emails.size());
+    assertThat(emails.size()).isEqualTo(3);
 
-    assertEquals(1,
-        emails.stream()
-            .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-                && e.getToAddresses().contains("test14@test.com")
-                && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() == null)
-            .count());
-    assertEquals(1,
-        emails.stream()
-            .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-                && e.getToAddresses().contains("test16@test.com")
-                && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
-            .count());
-    assertEquals(1,
-        emails.stream()
-            .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-                && e.getToAddresses().contains("test31@test.com")
-                && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
-            .count());
+    assertThat(emails.stream()
+        .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
+            && e.getToAddresses().contains("test14@test.com")
+            && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() == null)
+        .count()).isEqualTo(1);
+    assertThat(emails.stream()
+        .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
+            && e.getToAddresses().contains("test16@test.com")
+            && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
+        .count()).isEqualTo(1);
+    assertThat(emails.stream()
+        .filter(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
+            && e.getToAddresses().contains("test31@test.com")
+            && ((AccountDeactivationWarningEmail) e.getAction()).getNextReminder() != null)
+        .count()).isEqualTo(1);
     // Note that 46 should not generate a warning!
   }
 
@@ -241,7 +226,6 @@ public class AccountDeactivationWorkerTest {
     // Configure
     final Person testPersonEotActive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
         "test1_eot_acive@test.com", PersonStatus.ACTIVE);
-
     final Person testPersonEotInactive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
         "test2_eot_inacive@test.com", PersonStatus.INACTIVE);
 
@@ -262,10 +246,41 @@ public class AccountDeactivationWorkerTest {
     verify(emailDeactivationWarningDao, never()).delete(testPersonEotInactive.getUuid());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(1, emails.size());
+    assertThat(emails.size()).isEqualTo(1);
 
-    assertTrue(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
+    assertThat(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
         && e.getToAddresses().contains("test1_eot_acive@test.com")));
+  }
+
+  @Test
+  public void testNoWarningsConfigured() throws Exception {
+    // Setup
+    when(config.getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior"))
+        .thenReturn(new ArrayList<Integer>());
+
+    // Configure
+    final Person testPerson15 = createPersonMock(Instant.now().plus(15, ChronoUnit.DAYS),
+        "test15@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test15");
+    final Person testPerson30 = createPersonMock(Instant.now().plus(30, ChronoUnit.DAYS),
+        "test30@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30");
+    final Person testPerson45 = createPersonMock(Instant.now().plus(45, ChronoUnit.DAYS),
+        "test45@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test45");
+
+    when(personDao.search(Mockito.any()))
+        .thenReturn(new AnetBeanList<>(Arrays.asList(testPerson15, testPerson30, testPerson45)));
+
+    // Send email(s)
+    final AccountDeactivationWorker accountDeactivationWorker =
+        new AccountDeactivationWorker(config, personDao, SCHEDULER_TIME_MS);
+    accountDeactivationWorker.run();
+
+    // Verify
+    final ArgumentCaptor<AnetEmail> captor = ArgumentCaptor.forClass(AnetEmail.class);
+    PowerMockito.verifyPrivate(AnetEmailWorker.class, Mockito.times(0)).invoke("sendEmailAsync",
+        captor.capture());
+
+    final List<AnetEmail> emails = captor.getAllValues();
+    assertThat(emails.size()).isEqualTo(0);
   }
 
   private Person createDummyPerson(final Instant endOfTour, final String email,
