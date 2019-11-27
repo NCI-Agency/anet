@@ -809,7 +809,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     StringBuilder sql = new StringBuilder();
 
     sql.append("/* getFutureToPastReports */");
-    sql.append(" SELECT " + ReportDao.REPORT_FIELDS);
+    sql.append(
+        " SELECT reports.uuid AS reports_uuid, reports.\"authorUuid\" AS \"reports_authorUuid\"");
     sql.append(" FROM reports");
     // We are not interested in draft reports, as they will remain draft.
     // We are not interested in cancelled reports, as they will remain cancelled.
