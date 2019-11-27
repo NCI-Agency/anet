@@ -1,9 +1,13 @@
 package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Location;
@@ -18,6 +22,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
@@ -27,14 +32,22 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
 
+  private static final Set<String> ALL_FIELDS = Sets.newHashSet(ReportDao.allFields);
+  private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(ReportDao.minimalFields);
+  private static final Map<String, String> FIELD_MAPPING = ImmutableMap.<String, String>builder()
+      .put("reportText", "text").put("location", "locationUuid")
+      .put("approvalStep", "approvalStepUuid").put("advisorOrg", "advisorOrganizationUuid")
+      .put("principalOrg", "principalOrganizationUuid").put("author", "authorUuid").build();
+
   public AbstractReportSearcher(AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
     super(qb);
   }
 
   @InTransaction
   public AnetBeanList<Report> runSearch(
-      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
-    buildQuery(query);
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, Set<String> subFields,
+      ReportSearchQuery query) {
+    buildQuery(subFields, query);
     outerQb.addSelectClause("*");
     outerQb.addTotalCount();
     outerQb.addFromClause("( " + qb.build() + " ) l");
@@ -44,7 +57,17 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     return outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
   }
 
+  @Override
   protected void buildQuery(ReportSearchQuery query) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected String getTableFields(Set<String> subFields) {
+    return getTableFields(ReportDao.TABLE_NAME, ALL_FIELDS, MINIMAL_FIELDS, FIELD_MAPPING,
+        subFields);
+  }
+
+  protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
     // Base select and from clauses are added by child classes
 
     if (query.isTextPresent()) {

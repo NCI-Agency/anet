@@ -1,10 +1,10 @@
 package mil.dds.anet.search.pg;
 
+import java.util.Set;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
@@ -21,17 +21,16 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   @InTransaction
   @Override
-  public AnetBeanList<Report> runSearch(ReportSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Report> runSearch(Set<String> subFields, ReportSearchQuery query) {
+    buildQuery(subFields, query);
     return qb.buildAndRun(getDbHandle(), query, new ReportMapper());
   }
 
-  @Override
-  protected void buildQuery(ReportSearchQuery query) {
-    qb.addSelectClause(ReportDao.REPORT_FIELDS);
+  protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
+    qb.addSelectClause(getTableFields(subFields));
     qb.addTotalCount();
     qb.addFromClause("reports");
-    super.buildQuery(query);
+    super.buildQuery(subFields, query);
   }
 
   @Override

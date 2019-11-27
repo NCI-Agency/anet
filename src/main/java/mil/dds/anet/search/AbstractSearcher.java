@@ -1,12 +1,17 @@
 package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 
@@ -28,6 +33,22 @@ public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends Abs
   }
 
   protected abstract void buildQuery(T query);
+
+  protected String getTableFields(String tableName, Set<String> allFields,
+      Set<String> minimalFields, Map<String, String> fieldMapping, Set<String> subFields) {
+    final String[] fieldsArray;
+    if (subFields == null) {
+      fieldsArray = Iterables.toArray(allFields, String.class);
+    } else {
+      final Set<String> fields = subFields.stream().map(f -> f.replaceFirst("^list/", ""))
+          .map(f -> fieldMapping.getOrDefault(f, f)).filter(f -> !f.contains("/"))
+          .collect(Collectors.toSet());
+      fields.retainAll(allFields);
+      fields.addAll(minimalFields);
+      fieldsArray = Iterables.toArray(fields, String.class);
+    }
+    return DaoUtils.buildFieldAliases(tableName, fieldsArray, true);
+  }
 
   protected void addFullTextSearch(String tableName, String text, boolean isSortByPresent) {
     final List<String> whereClauses = new ArrayList<>();
