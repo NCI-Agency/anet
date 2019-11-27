@@ -15,7 +15,7 @@ public class PostgresqlAuthorizationGroupSearcher extends AbstractAuthorizationG
 
   @Override
   protected void addTextQuery(AuthorizationGroupSearchQuery query) {
-    addFullTextSearch("\"authorizationGroups\"", query.getText(), query.isSortByPresent());
+    addFullTextSearch("authorizationGroups", query.getText(), query.isSortByPresent());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
