@@ -627,6 +627,9 @@ const BaseReportShow = props => {
                 <Fieldset title="Engagement information" id="custom-fields">
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
+                    formikProps={{
+                      values
+                    }}
                   />
                 </Fieldset>
               )}

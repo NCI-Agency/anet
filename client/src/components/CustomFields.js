@@ -1,14 +1,17 @@
 import { Settings } from "api"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
+import Fieldset from "components/Fieldset"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
-import { Field } from "formik"
+import { Field, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
+import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
-import { HelpBlock } from "react-bootstrap"
+import { Button, HelpBlock } from "react-bootstrap"
+import REMOVE_ICON from "resources/delete.png"
 
 const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
@@ -119,22 +122,160 @@ const ReadonlyEnumSetField = fieldProps => {
   )
 }
 
+const ArrayOfObjectsField = fieldProps => {
+  const {
+    name,
+    fieldConfig,
+    formikProps,
+    prevInvisibleFields,
+    setInvisibleFields
+  } = fieldProps
+  const nameKeys = name.split(".")
+  const value = nameKeys.reduce(
+    (v, key) => (v && v[key] ? v[key] : null),
+    formikProps.values
+  )
+  return (
+    <FieldArray
+      name={name}
+      render={arrayHelpers => (
+        <div>
+          <Button
+            className="pull-right"
+            onClick={() => addObject(arrayHelpers, value)}
+            bsStyle="primary"
+            id="addObjectButton"
+          >
+            Add an object
+          </Button>
+          {value.map((obj, index) =>
+            renderArrayObject(
+              name,
+              fieldConfig,
+              formikProps,
+              prevInvisibleFields,
+              setInvisibleFields,
+              arrayHelpers,
+              obj,
+              index
+            )
+          )}
+        </div>
+      )}
+    />
+  )
+}
+
+const renderArrayObject = (
+  fieldName,
+  fieldsConfig,
+  formikProps,
+  prevInvisibleFields,
+  setInvisibleFields,
+  arrayHelpers,
+  obj,
+  index
+) => {
+  return (
+    <Fieldset title={`Object ${index + 1}`} key={index}>
+      <Button
+        className="pull-right"
+        title="Remove this object"
+        onClick={() => arrayHelpers.push({})}
+      >
+        <img src={REMOVE_ICON} height={14} alt="Remove this object" />
+      </Button>
+      <CustomFields
+        fieldsConfig={fieldsConfig.objectFields}
+        formikProps={formikProps}
+        prevInvisibleFields={prevInvisibleFields}
+        setInvisibleFields={setInvisibleFields}
+        fieldNamePrefix={`${fieldName}.${index}`}
+      />
+    </Fieldset>
+  )
+}
+
+const addObject = arrayHelpers => {
+  arrayHelpers.push({})
+}
+
+const ReadonlyArrayOfObjectsField = fieldProps => {
+  const {
+    name,
+    fieldConfig,
+    formikProps,
+    prevInvisibleFields,
+    setInvisibleFields
+  } = fieldProps
+  const nameKeys = name.split(".")
+  const value = nameKeys.reduce(
+    (v, key) => (v && v[key] ? v[key] : null),
+    formikProps.values
+  )
+  return (
+    <FieldArray
+      name={name}
+      render={arrayHelpers => (
+        <div>
+          {value.map((obj, index) =>
+            renderReadonlyArrayObject(
+              name,
+              fieldConfig,
+              formikProps,
+              prevInvisibleFields,
+              setInvisibleFields,
+              arrayHelpers,
+              obj,
+              index
+            )
+          )}
+        </div>
+      )}
+    />
+  )
+}
+
+const renderReadonlyArrayObject = (
+  fieldName,
+  fieldsConfig,
+  formikProps,
+  prevInvisibleFields,
+  setInvisibleFields,
+  arrayHelpers,
+  obj,
+  index
+) => {
+  return (
+    <Fieldset title={`Object ${index + 1}`} key={index}>
+      <ReadonlyCustomFields
+        fieldsConfig={fieldsConfig.objectFields}
+        formikProps={formikProps}
+        fieldNamePrefix={`${fieldName}.${index}`}
+      />
+    </Fieldset>
+  )
+}
 const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: TextField,
   [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
   [CUSTOM_FIELD_TYPE.DATE]: DateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
   [CUSTOM_FIELD_TYPE.ENUM]: EnumField,
-  [CUSTOM_FIELD_TYPE.ENUMSET]: EnumSetField
+  [CUSTOM_FIELD_TYPE.ENUMSET]: EnumSetField,
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ArrayOfObjectsField
 }
 
 export const CustomFields = ({
   fieldsConfig,
   formikProps,
+  fieldNamePrefix,
   prevInvisibleFields,
   setInvisibleFields
 }) => {
-  const invisibleFields = []
+  let invisibleFields = _cloneDeep(prevInvisibleFields)
+  let turnedInvisible = []
+  let turnedVisible = []
   const customFields = (
     <>
       {Object.keys(fieldsConfig).map(key => {
@@ -143,18 +284,28 @@ export const CustomFields = ({
           type,
           helpText,
           validations,
-          validationType,
           visibleWhen,
           ...fieldProps
         } = fieldConfig
         const FieldComponent = FIELD_COMPONENTS[type]
-        const fieldName = `formCustomFields.${key}`
+        const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
         const isVisible =
           !fieldConfig.visibleWhen ||
           (fieldConfig.visibleWhen &&
             !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikProps.values)))
-        if (!isVisible) {
-          invisibleFields.push(key)
+        if (!isVisible && !invisibleFields.includes(key)) {
+          turnedInvisible.push(key)
+        } else if (isVisible && invisibleFields.includes(key)) {
+          turnedVisible.push(key)
+        }
+        let extraProps = {}
+        if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+          extraProps = {
+            fieldConfig: fieldConfig,
+            formikProps: formikProps,
+            prevInvisibleFields: prevInvisibleFields,
+            setInvisibleFields: setInvisibleFields
+          }
         }
         return (
           isVisible && (
@@ -164,6 +315,7 @@ export const CustomFields = ({
               onChange={value => formikProps.setFieldValue(fieldName, value)}
               onBlur={() => formikProps.setFieldTouched(fieldName, true)}
               {...fieldProps}
+              {...extraProps}
             >
               {helpText && (
                 <HelpBlock>
@@ -176,7 +328,9 @@ export const CustomFields = ({
       })}
     </>
   )
-  if (prevInvisibleFields.join() !== invisibleFields.join()) {
+  if (turnedVisible.length || turnedInvisible.length) {
+    invisibleFields = invisibleFields.filter(x => !turnedVisible.includes(x))
+    turnedInvisible.forEach(x => invisibleFields.push(x))
     setInvisibleFields(invisibleFields)
   }
   return customFields
@@ -184,6 +338,7 @@ export const CustomFields = ({
 CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
+  fieldNamePrefix: PropTypes.string,
   prevInvisibleFields: PropTypes.array,
   setInvisibleFields: PropTypes.func
 }
@@ -194,28 +349,51 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
   [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
-  [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumSetField
+  [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumSetField,
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField
 }
 
-export const ReadonlyCustomFields = ({ fieldsConfig }) => {
+export const ReadonlyCustomFields = ({
+  fieldsConfig,
+  formikProps,
+  fieldNamePrefix
+}) => {
   return (
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
         const {
           type,
+          placeholder,
           helpText,
           validations,
-          validationType,
+          visibleWhen,
+          objectFields,
           ...fieldProps
         } = fieldConfig
+        let extraProps = {}
+        if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+          extraProps = {
+            fieldConfig: fieldConfig,
+            formikProps: formikProps
+          }
+        }
         const FieldComponent = READONLY_FIELD_COMPONENTS[type]
-        const fieldName = `formCustomFields.${key}`
-        return <FieldComponent key={key} name={fieldName} {...fieldProps} />
+        const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
+        return (
+          <FieldComponent
+            key={key}
+            name={fieldName}
+            {...fieldProps}
+            {...extraProps}
+          />
+        )
       })}
     </>
   )
 }
 ReadonlyCustomFields.propTypes = {
-  fieldsConfig: PropTypes.object
+  fieldsConfig: PropTypes.object,
+  formikProps: PropTypes.object,
+  fieldNamePrefix: PropTypes.string
 }

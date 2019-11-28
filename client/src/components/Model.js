@@ -48,7 +48,8 @@ export const CUSTOM_FIELD_TYPE = {
   DATE: "date",
   DATETIME: "datetime",
   ENUM: "enum",
-  ENUMSET: "enumset"
+  ENUMSET: "enumset",
+  ARRAY_OF_OBJECTS: "array_of_objects"
 }
 
 const CUSTOM_FIELD_TYPE_SCHEMA = {
@@ -69,14 +70,22 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
   [CUSTOM_FIELD_TYPE.ENUMSET]: yup
     .array()
     .nullable()
+    .default([]),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup
+    .array()
+    .nullable()
     .default([])
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig) => {
-  const { label, validations } = fieldConfig
+  const { label, validations, objectFields } = fieldConfig
   let fieldYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
+  }
+  if (!_isEmpty(objectFields)) {
+    const objSchema = createYupSchema(objectFields)
+    fieldYupSchema = fieldYupSchema.of(yup.object().shape(objSchema))
   }
   if (!_isEmpty(validations)) {
     validations.forEach(validation => {

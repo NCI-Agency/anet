@@ -307,6 +307,21 @@ dictionary:
           type: datetime
           label: Not later than datetime
           helpText: Help text for datetime field
+        arrayField:
+          type: array_of_objects
+          label: Array of objects
+          helpText: Help text for chosing multiple values
+          objectFields:
+            textF:
+              type: text
+              label: Object text
+              placeholder: Placeholder text for object text field
+              helpText: Help text for object text field
+            dateF:
+              type: date
+              label: Object date
+              helpText: Help text for object date field
+              visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
     person:
       firstName: First name
