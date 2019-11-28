@@ -181,7 +181,7 @@ const renderArrayObject = (
       <Button
         className="pull-right"
         title="Remove this object"
-        onClick={() => arrayHelpers.push({})}
+        onClick={() => arrayHelpers.remove(index)}
       >
         <img src={REMOVE_ICON} height={14} alt="Remove this object" />
       </Button>
