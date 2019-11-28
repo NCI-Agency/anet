@@ -2569,12 +2569,12 @@
   resolved "https://registry.yarnpkg.com/@types/zen-observable/-/zen-observable-0.8.0.tgz#8b63ab7f1aa5321248aad5ac890a485656dcea4d"
   integrity sha512-te5lMAWii1uEJ4FwLjzdlbw3+n0FZNOvFXHxQDKeT0dilh7HOzdMzV2TrJVUzq8ep7J4Na8OUYPRLSQkJHAlrg==
 
-"@wdio/browserstack-service@^5.16.5":
-  version "5.16.5"
-  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.16.5.tgz#cd013f4140899221c63288f28b77f29b3d2a834e"
-  integrity sha512-EjiUxIHQLxB6ZlwMaQhaH61e9xTFYBErrYVo/nHUWDndyZFRQeH2EUj1nOtvjqw8YgXHrASt8YRuSb0Cuonoew==
+"@wdio/browserstack-service@^5.16.10":
+  version "5.16.10"
+  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.16.10.tgz#5a63aff4abaadde24e05f4519a9682fc30226485"
+  integrity sha512-xiQ0MWJ4yXOw9Y2mbjxMtZ9QwwfDZs09vZyLx4btfzZo1//EPNifUq4d/jc8Ga9dyuLjska+tZ6cIVaTiGv+YA==
   dependencies:
-    "@wdio/logger" "5.16.5"
+    "@wdio/logger" "5.16.10"
     browserstack-local "1.4.2"
     request "^2.85.0"
 
@@ -2620,6 +2620,16 @@
     "@wdio/runner" "5.16.8"
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
+
+"@wdio/logger@5.16.10":
+  version "5.16.10"
+  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.16.10.tgz#45d0ea485d52c8a7c526954ccc980d54c3e29e56"
+  integrity sha512-hRKhxgd9uB48Dtj2xe2ckxU4KwI/RO8IwguySuaI2SLFj6EDbdonwzpVkq111/fjBuq7R1NauAaNcm3AMEbIFA==
+  dependencies:
+    chalk "^3.0.0"
+    loglevel "^1.6.0"
+    loglevel-plugin-prefix "^0.8.4"
+    strip-ansi "^6.0.0"
 
 "@wdio/logger@5.16.5":
   version "5.16.5"
