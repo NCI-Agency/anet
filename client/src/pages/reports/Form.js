@@ -22,6 +22,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
@@ -1019,11 +1020,10 @@ const BaseReportForm = props => {
     )
     report.location = utils.getReference(report.location)
     // customFields should contain the JSON of all the visible custom fields
-    let visibleCustomFields = values.formCustomFields
     invisibleCustomFields.forEach(f => {
-      visibleCustomFields = Object.without(visibleCustomFields, f)
+      _set(values, f.split("."), undefined)
     })
-    report.customFields = JSON.stringify(visibleCustomFields)
+    report.customFields = JSON.stringify(values.formCustomFields)
     const edit = isEditMode(values)
     const variables = { report }
     if (edit) {

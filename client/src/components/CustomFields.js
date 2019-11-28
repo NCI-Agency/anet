@@ -286,10 +286,10 @@ export const CustomFields = ({
           !fieldConfig.visibleWhen ||
           (fieldConfig.visibleWhen &&
             !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikProps.values)))
-        if (!isVisible && !prevInvisibleFields.includes(key)) {
-          turnedInvisible.push(key)
-        } else if (isVisible && prevInvisibleFields.includes(key)) {
-          turnedVisible.push(key)
+        if (!isVisible && !prevInvisibleFields.includes(fieldName)) {
+          turnedInvisible.push(fieldName)
+        } else if (isVisible && prevInvisibleFields.includes(fieldName)) {
+          turnedVisible.push(fieldName)
         }
         let extraProps = {}
         if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
