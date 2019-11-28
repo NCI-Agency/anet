@@ -237,12 +237,11 @@ public class AnetApplication extends Application<AnetConfiguration> {
     runAccountDeactivationWorker(configuration, scheduler, engine);
 
     if (DaoUtils.isPostgresql()) {
-      // Update PostgreSQL materialized views every 60 minutes.
-      // And run once 25 seconds after boot-up.
+      // Wait 60 seconds between updates of PostgreSQL materialized views,
+      // starting 30 seconds after boot-up.
       final MaterializedViewRefreshWorker materializedViewRefreshWorker =
           new MaterializedViewRefreshWorker(engine.getAdminDao());
-      scheduler.scheduleAtFixedRate(materializedViewRefreshWorker, 60, 60, TimeUnit.MINUTES);
-      scheduler.schedule(materializedViewRefreshWorker, 25, TimeUnit.SECONDS);
+      scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
     }
 
     // Create all of the HTTP Resources.

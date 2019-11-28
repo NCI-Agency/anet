@@ -2734,13 +2734,71 @@
 
 	<changeSet id="add-postgresql-fulltext" author="gjvoosten" dbms="postgresql">
 		<sql>
+			<!-- Add generated full-text columns -->
+			ALTER TABLE "authorizationGroups"
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."identificationCode", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(organizations."shortName", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE notes
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(notes.text, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(people.name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people."domainUsername", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people."emailAddress", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people."phoneNumber", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people.biography, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE positions
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(positions.name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(positions.code, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE reports
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(reports.intent, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(reports."keyOutcomes", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(reports."nextSteps", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(reports.text, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tags
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(tags.name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(tags.description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tasks
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(tasks."shortName", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", '')), ${fts_high})
+				) STORED;
+
 			<!-- Create full-text materialized views and indexes -->
 			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_fts_authorizationGroups"(uuid, full_text) AS
 				SELECT
 					"authorizationGroups".uuid,
-					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".name, '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".description, '')), ${fts_low})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(notes.text, ' '), '')), ${fts_low})
+					"authorizationGroups".full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
 				FROM "authorizationGroups"
 				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'authorizationGroups'
 					AND "noteRelatedObjects"."relatedObjectUuid" = "authorizationGroups".uuid
@@ -2754,8 +2812,8 @@
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
 				SELECT
 					locations.uuid,
-					setweight(to_tsvector(${fts_config}, coalesce(locations.name, '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(notes.text, ' '), '')), ${fts_low})
+					locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
 				FROM locations
 				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
 					AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
@@ -2769,10 +2827,8 @@
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
 				SELECT
 					organizations.uuid,
-					setweight(to_tsvector(${fts_config}, coalesce(organizations."shortName", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(organizations."identificationCode", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(notes.text, ' '), '')), ${fts_low})
+					organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
 				FROM organizations
 				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
 					AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
@@ -2786,16 +2842,10 @@
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
 				SELECT
 					people.uuid,
-					setweight(to_tsvector(${fts_config}, coalesce(people.name, '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(people."domainUsername", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(people."emailAddress", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(people."phoneNumber", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(people.biography, '')), ${fts_low})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(positions.name, ' '), '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(positions.code, ' '), '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(organizations."shortName", ' '), '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(organizations."identificationCode", ' '), '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(notes.text, ' '), '')), ${fts_low})
+					people.full_text
+					|| coalesce(tsvector_agg(positions.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
 				FROM people
 				LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
 				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
@@ -2811,12 +2861,10 @@
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
 				SELECT
 					positions.uuid,
-					setweight(to_tsvector(${fts_config}, coalesce(positions.name, '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(positions.code, '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(people.name, ' '), '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(organizations."shortName", ' '), '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(organizations."identificationCode", ' '), '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(notes.text, ' '), '')), ${fts_low})
+					positions.full_text
+					|| coalesce(tsvector_agg(people.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
 				FROM positions
 				LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
 				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
@@ -2832,11 +2880,8 @@
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
 				SELECT
 					reports.uuid,
-					setweight(to_tsvector(${fts_config}, coalesce(reports.intent, '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(reports."keyOutcomes", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(reports."nextSteps", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(reports.text, '')), ${fts_low})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(notes.text, ' '), '')), ${fts_low})
+					reports.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
 				FROM reports
 				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'reports'
 					AND "noteRelatedObjects"."relatedObjectUuid" = reports.uuid
@@ -2850,8 +2895,7 @@
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tags(uuid, full_text) AS
 				SELECT
 					tags.uuid,
-					setweight(to_tsvector(${fts_config}, coalesce(tags.name, '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(tags.description, '')), ${fts_low})
+					tags.full_text
 				FROM tags
 				GROUP BY tags.uuid
 				WITH DATA;
@@ -2862,9 +2906,8 @@
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
 				SELECT
 					tasks.uuid,
-					setweight(to_tsvector(${fts_config}, coalesce(tasks."shortName", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", '')), ${fts_high})
-					|| setweight(to_tsvector(${fts_config}, coalesce(string_agg(notes.text, ' '), '')), ${fts_low})
+					tasks.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
 				FROM tasks
 				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
 					AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
@@ -2886,6 +2929,17 @@
 				DROP MATERIALIZED VIEW mv_fts_reports;
 				DROP MATERIALIZED VIEW mv_fts_tags;
 				DROP MATERIALIZED VIEW mv_fts_tasks;
+
+				<!-- Drop generated full-text columns -->
+				ALTER TABLE "authorizationGroups" DROP COLUMN full_text;
+				ALTER TABLE locations DROP COLUMN full_text;
+				ALTER TABLE organizations DROP COLUMN full_text;
+				ALTER TABLE notes DROP COLUMN full_text;
+				ALTER TABLE people DROP COLUMN full_text;
+				ALTER TABLE positions DROP COLUMN full_text;
+				ALTER TABLE reports DROP COLUMN full_text;
+				ALTER TABLE tags DROP COLUMN full_text;
+				ALTER TABLE tasks DROP COLUMN full_text;
 			</sql>
 		</rollback>
 	</changeSet>
