@@ -2,7 +2,7 @@ import Aigle from "aigle"
 import colors from "colors"
 import faker from "faker"
 import scenarioMapping from "./scenarios/scenarios"
-import { fuzzy, normalCDF, normalPPF } from "./simutils"
+import { fuzzy, normalCDF, normalPPF, sleep } from "./simutils"
 
 const DEFAULT_SCENARIO_NAME = "default"
 const DEFAULT_CYCLES = 3
@@ -95,6 +95,7 @@ async function runBuildup(scenario) {
       const user = await userType.userFunction()
       const grow = () => 100 // Probability = 100 (always execute)
 
+      await sleep(buildup.preDelay)
       for (var i = 0; i < buildup.number; i++) {
         await buildup.runnable(user, grow, buildup.arguments)
       }

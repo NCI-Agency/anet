@@ -1,5 +1,9 @@
 import fetch from "cross-fetch"
 
+export const sleep = seconds => {
+  return new Promise(resolve => setTimeout(resolve, (seconds || 0) * 1000))
+}
+
 async function runGQL(user, query) {
   const result = await fetch(
     `${process.env.SERVER_URL}/graphql?user=${user.name}&pass=${user.password}`,
