@@ -127,7 +127,7 @@ const ArrayOfObjectsField = fieldProps => {
     name,
     fieldConfig,
     formikProps,
-    prevInvisibleFields,
+    invisibleFields,
     setInvisibleFields
   } = fieldProps
   const nameKeys = name.split(".")
@@ -153,7 +153,7 @@ const ArrayOfObjectsField = fieldProps => {
               name,
               fieldConfig,
               formikProps,
-              prevInvisibleFields,
+              invisibleFields,
               setInvisibleFields,
               arrayHelpers,
               obj,
@@ -170,7 +170,7 @@ const renderArrayObject = (
   fieldName,
   fieldsConfig,
   formikProps,
-  prevInvisibleFields,
+  invisibleFields,
   setInvisibleFields,
   arrayHelpers,
   obj,
@@ -188,7 +188,7 @@ const renderArrayObject = (
       <CustomFields
         fieldsConfig={fieldsConfig.objectFields}
         formikProps={formikProps}
-        prevInvisibleFields={prevInvisibleFields}
+        invisibleFields={invisibleFields}
         setInvisibleFields={setInvisibleFields}
         fieldNamePrefix={`${fieldName}.${index}`}
       />
@@ -201,13 +201,7 @@ const addObject = arrayHelpers => {
 }
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
-  const {
-    name,
-    fieldConfig,
-    formikProps,
-    prevInvisibleFields,
-    setInvisibleFields
-  } = fieldProps
+  const { name, fieldConfig, formikProps } = fieldProps
   const nameKeys = name.split(".")
   const value = nameKeys.reduce(
     (v, key) => (v && v[key] ? v[key] : null),
@@ -219,16 +213,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
       render={arrayHelpers => (
         <div>
           {value.map((obj, index) =>
-            renderReadonlyArrayObject(
-              name,
-              fieldConfig,
-              formikProps,
-              prevInvisibleFields,
-              setInvisibleFields,
-              arrayHelpers,
-              obj,
-              index
-            )
+            renderReadonlyArrayObject(name, fieldConfig, formikProps, index)
           )}
         </div>
       )}
@@ -238,24 +223,21 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
 
 const renderReadonlyArrayObject = (
   fieldName,
-  fieldsConfig,
+  fieldConfig,
   formikProps,
-  prevInvisibleFields,
-  setInvisibleFields,
-  arrayHelpers,
-  obj,
   index
 ) => {
   return (
     <Fieldset title={`Object ${index + 1}`} key={index}>
       <ReadonlyCustomFields
-        fieldsConfig={fieldsConfig.objectFields}
+        fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
         fieldNamePrefix={`${fieldName}.${index}`}
       />
     </Fieldset>
   )
 }
+
 const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: TextField,
   [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
@@ -270,12 +252,13 @@ export const CustomFields = ({
   fieldsConfig,
   formikProps,
   fieldNamePrefix,
-  prevInvisibleFields,
+  invisibleFields,
   setInvisibleFields
 }) => {
-  let invisibleFields = _cloneDeep(prevInvisibleFields)
+  let prevInvisibleFields = _cloneDeep(invisibleFields)
   let turnedInvisible = []
   let turnedVisible = []
+  let curInvisibleFields = []
   const customFields = (
     <>
       {Object.keys(fieldsConfig).map(key => {
@@ -293,9 +276,9 @@ export const CustomFields = ({
           !fieldConfig.visibleWhen ||
           (fieldConfig.visibleWhen &&
             !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikProps.values)))
-        if (!isVisible && !invisibleFields.includes(key)) {
+        if (!isVisible && !prevInvisibleFields.includes(key)) {
           turnedInvisible.push(key)
-        } else if (isVisible && invisibleFields.includes(key)) {
+        } else if (isVisible && prevInvisibleFields.includes(key)) {
           turnedVisible.push(key)
         }
         let extraProps = {}
@@ -303,7 +286,7 @@ export const CustomFields = ({
           extraProps = {
             fieldConfig: fieldConfig,
             formikProps: formikProps,
-            prevInvisibleFields: prevInvisibleFields,
+            invisibleFields: invisibleFields,
             setInvisibleFields: setInvisibleFields
           }
         }
@@ -329,9 +312,11 @@ export const CustomFields = ({
     </>
   )
   if (turnedVisible.length || turnedInvisible.length) {
-    invisibleFields = invisibleFields.filter(x => !turnedVisible.includes(x))
-    turnedInvisible.forEach(x => invisibleFields.push(x))
-    setInvisibleFields(invisibleFields)
+    curInvisibleFields = prevInvisibleFields.filter(
+      x => !turnedVisible.includes(x)
+    )
+    turnedInvisible.forEach(x => curInvisibleFields.push(x))
+    setInvisibleFields(curInvisibleFields)
   }
   return customFields
 }
@@ -339,7 +324,7 @@ CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
   fieldNamePrefix: PropTypes.string,
-  prevInvisibleFields: PropTypes.array,
+  invisibleFields: PropTypes.array,
   setInvisibleFields: PropTypes.func
 }
 

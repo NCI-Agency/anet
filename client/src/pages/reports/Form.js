@@ -793,7 +793,7 @@ const BaseReportForm = props => {
                     setFieldValue,
                     values
                   }}
-                  prevInvisibleFields={invisibleCustomFields}
+                  invisibleFields={invisibleCustomFields}
                   setInvisibleFields={setInvisibleCustomFields}
                 />
               </Fieldset>
@@ -1018,8 +1018,7 @@ const BaseReportForm = props => {
       Object.without(a, "firstName", "lastName", "position")
     )
     report.location = utils.getReference(report.location)
-    // transform the formCustomFields first elem to JSON (customFields should contain
-    // the JSON of all the fields defined as customFields)
+    // customFields should contain the JSON of all the visible custom fields
     let visibleCustomFields = values.formCustomFields
     invisibleCustomFields.forEach(f => {
       visibleCustomFields = Object.without(visibleCustomFields, f)
