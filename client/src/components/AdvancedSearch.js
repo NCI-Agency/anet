@@ -245,10 +245,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   resetPagination: () => dispatch(resetPagination())
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AdvancedSearch)
+export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch)
 
 const SearchFilter = props => {
   const { onRemove, filter, element } = props

@@ -9,7 +9,7 @@ function loadFileAjaxSync(filePath, mimeType) {
   if (authHeader) {
     xmlhttp.setRequestHeader(authHeader[0], authHeader[1])
   }
-  if (mimeType != null) {
+  if (mimeType !== null) {
     if (xmlhttp.overrideMimeType) {
       xmlhttp.overrideMimeType(mimeType)
     }

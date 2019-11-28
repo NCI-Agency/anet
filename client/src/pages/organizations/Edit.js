@@ -114,7 +114,4 @@ OrganizationEdit.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(OrganizationEdit)
+export default connect(null, mapDispatchToProps)(OrganizationEdit)

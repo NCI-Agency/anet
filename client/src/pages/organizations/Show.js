@@ -328,22 +328,22 @@ const BaseOrganizationShow = props => {
                 {organization.childrenOrgs &&
                   organization.childrenOrgs.length > 0 && (
                     <Field
-                    name="childrenOrgs"
-                    component={FieldHelper.renderReadonlyField}
-                    label="Sub organizations"
-                    humanValue={
+                      name="childrenOrgs"
+                      component={FieldHelper.renderReadonlyField}
+                      label="Sub organizations"
+                      humanValue={
                         <ListGroup>
-                        {organization.childrenOrgs.map(organization => (
+                          {organization.childrenOrgs.map(organization => (
                             <ListGroupItem key={organization.uuid}>
-                            <LinkTo organization={organization}>
+                              <LinkTo organization={organization}>
                                 {organization.shortName} {organization.longName}{" "}
                                 {organization.identificationCode}
                               </LinkTo>
-                          </ListGroupItem>
-                        ))}
-                      </ListGroup>
-                    }
-                  />
+                            </ListGroupItem>
+                          ))}
+                        </ListGroup>
+                      }
+                    />
                 )}
               </Fieldset>
 
@@ -419,7 +419,4 @@ const OrganizationShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(OrganizationShow)
+export default connect(mapStateToProps, mapDispatchToProps)(OrganizationShow)

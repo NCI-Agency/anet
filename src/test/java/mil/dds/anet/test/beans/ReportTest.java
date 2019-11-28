@@ -1,6 +1,7 @@
 package mil.dds.anet.test.beans;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;

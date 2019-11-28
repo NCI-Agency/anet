@@ -151,10 +151,10 @@ export default class DateRangeSearch extends Component {
           value.relative === AFTER ||
           value.relative === ON) && (
           <CustomDateInput
-              showIcon={false}
-              value={dateStart}
-              onChange={this.onChangeStart}
-            />
+            showIcon={false}
+            value={dateStart}
+            onChange={this.onChangeStart}
+          />
         )}
         {value.relative === BETWEEN && (
           <span style={{ marginLeft: 5, marginRight: 5 }}>and</span>

@@ -1,8 +1,9 @@
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import AdvancedSearch from "components/AdvancedSearch"
 import { SearchDescription } from "components/SearchFilters"
+import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -18,7 +19,17 @@ const SearchBar = props => {
   } = props
   const history = useHistory()
   const advancedSearchLink = useRef()
+  // (Re)set searchTerms if the query.text prop changes
+  const latestQueryText = useRef(query.text)
+  const queryTextUnchanged = _isEqual(latestQueryText.current, query.text)
   const [searchTerms, setSearchTerms] = useState(query.text)
+  useEffect(() => {
+    if (!queryTextUnchanged) {
+      latestQueryText.current = query.text
+      setSearchTerms(query.text)
+    }
+  }, [query, setSearchTerms, queryTextUnchanged])
+
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   const placeholder = query.objectType
     ? "Filter " + SEARCH_OBJECT_LABELS[query.objectType]
@@ -107,7 +118,4 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   resetPagination: () => dispatch(resetPagination())
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SearchBar)
+export default connect(mapStateToProps, mapDispatchToProps)(SearchBar)

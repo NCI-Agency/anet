@@ -86,7 +86,7 @@ const FilterableAdvisorReportsTable = props => {
     let result, csvGroupCols, csvCols, columnDelimiter, lineDelimiter, data
 
     data = args.data || null
-    if (data == null || !data.length) {
+    if (data === null || !data.length) {
       return null
     }
 
@@ -137,7 +137,7 @@ const FilterableAdvisorReportsTable = props => {
     let csv = convertArrayOfObjectsToCSV({
       data: args.data
     })
-    if (csv == null) return
+    if (csv === null) return
 
     filename = args.filename || "export-advisor-report.csv"
     var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
@@ -161,7 +161,4 @@ const FilterableAdvisorReportsTable = props => {
   }
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(FilterableAdvisorReportsTable)
+export default connect(null, mapDispatchToProps)(FilterableAdvisorReportsTable)

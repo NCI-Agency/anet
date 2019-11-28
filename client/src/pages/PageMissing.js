@@ -22,7 +22,4 @@ const PageMissing = props => {
 
 PageMissing.propTypes = { ...pagePropTypes }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PageMissing)
+export default connect(null, mapDispatchToProps)(PageMissing)

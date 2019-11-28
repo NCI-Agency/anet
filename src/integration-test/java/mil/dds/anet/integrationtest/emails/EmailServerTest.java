@@ -3,6 +3,7 @@ package mil.dds.anet.integrationtest.emails;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
+
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.List;
 import mil.dds.anet.AnetApplication;

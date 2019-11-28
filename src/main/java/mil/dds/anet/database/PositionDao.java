@@ -28,7 +28,6 @@ import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
@@ -168,6 +167,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     }
   }
 
+  @InTransaction
   public int setPersonInPosition(String personUuid, String positionUuid) {
     // If the position is already assigned to another person, remove the person from the position
     AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(positionUuid);
@@ -234,6 +234,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
   }
 
+  @InTransaction
   public int removePersonFromPosition(String positionUuid) {
     Instant now = Instant.now();
     getDbHandle()
@@ -331,6 +332,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     return associatedPositionsBatcher.getByForeignKeys(foreignKeys);
   }
 
+  @InTransaction
   public int associatePosition(String positionUuidA, String positionUuidB) {
     Instant now = Instant.now();
     final List<String> uuids = Arrays.asList(positionUuidA, positionUuidB);
@@ -344,6 +346,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("deleted", false).execute();
   }
 
+  @InTransaction
   public int deletePositionAssociation(String positionUuidA, String positionUuidB) {
     final List<String> uuids = Arrays.asList(positionUuidA, positionUuidB);
     Collections.sort(uuids);
@@ -360,6 +363,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   }
 
+  @InTransaction
   public List<Position> getEmptyPositions(PositionType type) {
     return getDbHandle()
         .createQuery("SELECT " + POSITIONS_FIELDS + " FROM positions "
@@ -386,6 +390,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
+  @InTransaction
   public Position getCurrentPositionForPerson(String personUuid) {
     List<Position> positions = getDbHandle()
         .createQuery("/* getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS
@@ -397,6 +402,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     return positions.get(0);
   }
 
+  @InTransaction
   public Boolean getIsApprover(String positionUuid) {
     Number count = (Number) getDbHandle().createQuery(
         "/* getIsApprover */ SELECT count(*) as ct from approvers where \"positionUuid\" = :positionUuid")

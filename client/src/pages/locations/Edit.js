@@ -72,7 +72,4 @@ LocationEdit.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(LocationEdit)
+export default connect(null, mapDispatchToProps)(LocationEdit)

@@ -102,7 +102,4 @@ KanbanDashboardImpl.propTypes = {
   dashboardData: PropTypes.object
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(KanbanDashboard)
+export default connect(null, mapDispatchToProps)(KanbanDashboard)

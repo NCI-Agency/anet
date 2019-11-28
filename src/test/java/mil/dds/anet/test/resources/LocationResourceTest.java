@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;

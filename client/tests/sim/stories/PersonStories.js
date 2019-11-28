@@ -1,8 +1,15 @@
+import { Settings } from "api"
 import faker from "faker"
+import Faker from "faker/lib"
+import { getAlpha2Code } from "i18n-iso-countries"
+import { countries } from "countries-list"
 import { Person } from "models"
 import { fuzzy, identity, populate, runGQL } from "../simutils"
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
+
+const availableLocales = Object.keys(faker.locales)
+const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 
 function principalName(_gender) {
   const gender = _gender === "MALE" ? "m" : "f"
@@ -15,15 +22,16 @@ function principalName(_gender) {
   return result
 }
 
-function advisorName(gender) {
+function advisorName(gender, locale) {
+  const localizedFaker = new Faker({ locale: locale, locales: faker.locales })
   const genderInt = gender === "MALE" ? 0 : 1
   return {
-    firstName: faker.name.firstName(genderInt),
-    lastName: faker.name.lastName(genderInt)
+    firstName: localizedFaker.name.firstName(genderInt),
+    lastName: localizedFaker.name.lastName(genderInt)
   }
 }
 
-function randomPerson(role) {
+function randomPerson(role, status) {
   const gender = fuzzy.withProbability(0.9) ? "MALE" : "FEMALE"
   if (!role) {
     role = faker.random.arrayElement([
@@ -31,22 +39,61 @@ function randomPerson(role) {
       Person.ROLE.ADVISOR
     ])
   }
-  const name = (role === Person.ROLE.PRINCIPAL ? principalName : advisorName)(
-    gender
+  const defaultLangCode = "en"
+  const country = faker.random.arrayElement(
+    role === Person.ROLE.PRINCIPAL
+      ? Settings.fields.principal.person.countries
+      : Settings.fields.advisor.person.countries
   )
+  // Countries in the Settings from anet.yml are in English
+  const countryCode = getAlpha2Code(country, "en")
+  const countryByCode = countries[countryCode]
+  // Some hacks for picking country-specific languages supported by faker
+  const fakerHacks = {
+    AT: "de_AT",
+    AU: "en_AU",
+    BE: "nl_BE",
+    GB: "en_GB",
+    NO: "nb_NO",
+    PT: "pt_PT",
+    US: "en_US"
+  }
+  const langCode =
+    fakerHacks[countryCode] ||
+    (countryByCode
+      ? faker.random.arrayElement(countryByCode.languages)
+      : defaultLangCode)
+  const locale = availableLocales.includes(langCode)
+    ? langCode
+    : defaultLangCode
+  const name = (role === Person.ROLE.PRINCIPAL ? principalName : advisorName)(
+    gender,
+    locale
+  )
+  const rank = faker.random.arrayElement(availableRanks)
+  let email = ""
+  if (role === Person.ROLE.ADVISOR) {
+    let domainName = faker.random.arrayElement(Settings.domainNames)
+    if (domainName.startsWith("*")) {
+      domainName = faker.internet.domainWord() + domainName.slice(1)
+    }
+    email = faker.internet.email(name.firstName, name.lastName, domainName)
+  } else if (fuzzy.withProbability(0.25)) {
+    email = faker.internet.email(name.firstName, name.lastName)
+  }
 
   return {
     name: () => Person.fullName(name, true),
-    status: () => Person.STATUS.ACTIVE,
-    country: identity,
-    rank: identity,
+    status: () => status || Person.STATUS.ACTIVE,
+    country: () => country,
+    rank: () => rank,
     gender: () => gender,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
     biography: () => faker.lorem.paragraphs(),
     role: () => role,
     position: identity,
-    emailAddress: () => faker.internet.email(name.firstName, name.lastName)
+    emailAddress: () => email
   }
 }
 
@@ -70,9 +117,9 @@ function modifiedPerson() {
   }
 }
 
-const _createPerson = async function(user) {
+const _createPerson = async function(user, role, status) {
   const person = new Person()
-  populate(person, randomPerson())
+  populate(person, randomPerson(role, status))
     .name.always()
     .role.always()
     .status.always()
@@ -81,6 +128,7 @@ const _createPerson = async function(user) {
     .gender.always()
     .endOfTourDate.always()
     .biography.always()
+    .emailAddress.always()
 
   console.debug(
     `Creating ${person.gender.toLowerCase().green} ${
@@ -89,20 +137,43 @@ const _createPerson = async function(user) {
   )
 
   const { firstName, lastName, ...personStripped } = person // TODO: we need to do this more generically
-  return (await runGQL(user, {
-    query:
-      "mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }",
-    variables: { person: personStripped }
-  })).data.createPerson
+  return (
+    await runGQL(user, {
+      query:
+        "mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }",
+      variables: { person: personStripped }
+    })
+  ).data.createPerson
 }
 
 const updatePerson = async function(user) {
-  const people = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
       query {
         personList(query: {
           pageNum: 0,
-          pageSize: 0,
+          pageSize: 1,
+          status: ${Person.STATUS.ACTIVE}
+        }) {
+          totalCount
+        }
+      }
+    `,
+      variables: {}
+    })
+  ).data.personList.totalCount
+  if (totalCount === 0) {
+    return null
+  }
+  const random = faker.random.number({ max: totalCount - 1 })
+  const people = (
+    await runGQL(user, {
+      query: `
+      query {
+        personList(query: {
+          pageNum: ${random},
+          pageSize: 1,
           status: ${Person.STATUS.ACTIVE}
         }) {
           list {
@@ -111,12 +182,14 @@ const updatePerson = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.personList.list
+      variables: {}
+    })
+  ).data.personList.list
 
-  let person = faker.random.arrayElement(people)
-  person = (await runGQL(user, {
-    query: `
+  let person = people && people[0]
+  person = (
+    await runGQL(user, {
+      query: `
       query {
         person (uuid:"${person.uuid}") {
           uuid
@@ -134,8 +207,9 @@ const updatePerson = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.person
+      variables: {}
+    })
+  ).data.person
 
   populate(person, modifiedPerson())
     .name.rarely()
@@ -148,37 +222,69 @@ const updatePerson = async function(user) {
     .biography.often()
     .emailAddress.rarely()
 
-  return (await runGQL(user, {
-    query: "mutation($person: PersonInput!) { updatePerson(person: $person) }",
-    variables: { person: person }
-  })).data.updatePerson
+  return (
+    await runGQL(user, {
+      query:
+        "mutation($person: PersonInput!) { updatePerson(person: $person) }",
+      variables: { person: person }
+    })
+  ).data.updatePerson
 }
 
 const _deletePerson = async function(user) {
-  const people = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
       query {
         personList(query: {
           pageNum: 0,
-          pageSize: 0,
+          pageSize: 1,
           status: ${Person.STATUS.ACTIVE}
       }) {
-        list {
-          uuid
-          name
-          position {
-            uuid
-          }
-        }
+        totalCount
       }
     }
   `,
-    variables: {}
-  })).data.personList.list.filter(p => !p.position)
-  const person0 = faker.random.arrayElement(people)
+      variables: {}
+    })
+  ).data.personList.totalCount
+  if (totalCount === 0) {
+    return null
+  }
+  let person0
+  for (let i = 0; i < Math.max(totalCount, 10); i++) {
+    const random = faker.random.number({ max: totalCount - 1 })
+    const people = (
+      await runGQL(user, {
+        query: `
+        query {
+          personList(query: {
+            pageNum: ${random},
+            pageSize: 1,
+            status: ${Person.STATUS.ACTIVE}
+        }) {
+          list {
+            uuid
+            name
+            position {
+              uuid
+            }
+          }
+        }
+      }
+    `,
+        variables: {}
+      })
+    ).data.personList.list.filter(p => !p.position)
+    person0 = people && people[0]
+    if (person0) {
+      break
+    }
+  }
   if (person0) {
-    const person = (await runGQL(user, {
-      query: `
+    const person = (
+      await runGQL(user, {
+        query: `
         query {
           person(uuid: "${person0.uuid}") {
               biography
@@ -195,17 +301,20 @@ const _deletePerson = async function(user) {
           }
         }
       `,
-      variables: {}
-    })).data.person
-    person.status = Person.STATUS.ACTIVE
+        variables: {}
+      })
+    ).data.person
+    person.status = Person.STATUS.INACTIVE
 
     console.debug(`Deleting/Deactivating ${person.name.green}`)
     // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.
-    return (await runGQL(user, {
-      query:
-        "mutation($person: PersonInput!) { updatePerson(person: $person) }",
-      variables: { person: person }
-    })).data.updatePerson
+    return (
+      await runGQL(user, {
+        query:
+          "mutation($person: PersonInput!) { updatePerson(person: $person) }",
+        variables: { person: person }
+      })
+    ).data.updatePerson
   } else {
     console.debug("No person to delete")
     return null
@@ -213,8 +322,9 @@ const _deletePerson = async function(user) {
 }
 
 async function countPersons(user) {
-  return (await runGQL(user, {
-    query: `
+  return (
+    await runGQL(user, {
+      query: `
       query {
         personList(query: {
           pageNum: 0,
@@ -224,11 +334,12 @@ async function countPersons(user) {
         }
       }
     `,
-    variables: {}
-  })).data.personList.totalCount
+      variables: {}
+    })
+  ).data.personList.totalCount
 }
 
-const createPerson = async function(user, grow) {
+const createPerson = async function(user, grow, args) {
   if (grow) {
     const count = await countPersons(user)
     if (!grow(count)) {
@@ -236,7 +347,7 @@ const createPerson = async function(user, grow) {
       return "(skipped)"
     }
   }
-  return _createPerson(user)
+  return _createPerson(user, args && args.role, args && args.status)
 }
 
 const deletePerson = async function(user, grow) {

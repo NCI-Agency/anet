@@ -1,6 +1,7 @@
 package mil.dds.anet.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.utils.DaoUtils;
 import org.junit.Test;

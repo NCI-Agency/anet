@@ -58,6 +58,14 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
 
+    if (query.getHasBiography() != null) {
+      if (query.getHasBiography()) {
+        qb.addWhereClause("people.biography IS NOT NULL");
+      } else {
+        qb.addWhereClause("people.biography IS NULL");
+      }
+    }
+
     addOrderByClauses(qb, query);
   }
 
