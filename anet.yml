@@ -307,10 +307,11 @@ dictionary:
           type: datetime
           label: Not later than datetime
           helpText: Help text for datetime field
-        arrayField:
+        arrayFieldName:
           type: array_of_objects
           label: Array of objects
-          helpText: Help text for chosing multiple values
+          addButtonLabel: Add an object
+          objectLabel: Object
           objectFields:
             textF:
               type: text

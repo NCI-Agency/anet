@@ -7,6 +7,7 @@ import { Field, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
+import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -135,40 +136,44 @@ const ArrayOfObjectsField = fieldProps => {
     (v, key) => (v && v[key] ? v[key] : null),
     formikProps.values
   )
+  const fieldsetTitle = fieldConfig.label || ""
+  const addButtonLabel = fieldConfig.addButtonLabel || "Add a new item"
   return (
-    <FieldArray
-      name={name}
-      render={arrayHelpers => (
-        <div>
-          <Button
-            className="pull-right"
-            onClick={() => addObject(arrayHelpers, value)}
-            bsStyle="primary"
-            id="addObjectButton"
-          >
-            Add an object
-          </Button>
-          {value.map((obj, index) =>
-            renderArrayObject(
-              name,
-              fieldConfig,
-              formikProps,
-              invisibleFields,
-              setInvisibleFields,
-              arrayHelpers,
-              obj,
-              index
-            )
-          )}
-        </div>
-      )}
-    />
+    <Fieldset title={fieldsetTitle}>
+      <FieldArray
+        name={name}
+        render={arrayHelpers => (
+          <div>
+            <Button
+              className="pull-right"
+              onClick={() => addObject(arrayHelpers, value)}
+              bsStyle="primary"
+              id="addObjectButton"
+            >
+              {addButtonLabel}
+            </Button>
+            {value.map((obj, index) =>
+              renderArrayObject(
+                name,
+                fieldConfig,
+                formikProps,
+                invisibleFields,
+                setInvisibleFields,
+                arrayHelpers,
+                obj,
+                index
+              )
+            )}
+          </div>
+        )}
+      />
+    </Fieldset>
   )
 }
 
 const renderArrayObject = (
   fieldName,
-  fieldsConfig,
+  fieldConfig,
   formikProps,
   invisibleFields,
   setInvisibleFields,
@@ -176,17 +181,18 @@ const renderArrayObject = (
   obj,
   index
 ) => {
+  const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
   return (
-    <Fieldset title={`Object ${index + 1}`} key={index}>
+    <Fieldset title={`${objLabel} ${index + 1}`} key={index}>
       <Button
         className="pull-right"
-        title="Remove this object"
+        title={`Remove this ${objLabel}`}
         onClick={() => arrayHelpers.remove(index)}
       >
-        <img src={REMOVE_ICON} height={14} alt="Remove this object" />
+        <img src={REMOVE_ICON} height={14} alt={`Remove this ${objLabel}`} />
       </Button>
       <CustomFields
-        fieldsConfig={fieldsConfig.objectFields}
+        fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
         invisibleFields={invisibleFields}
         setInvisibleFields={setInvisibleFields}
@@ -207,17 +213,20 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
     (v, key) => (v && v[key] ? v[key] : null),
     formikProps.values
   )
+  const fieldsetTitle = fieldConfig.label || ""
   return (
-    <FieldArray
-      name={name}
-      render={arrayHelpers => (
-        <div>
-          {value.map((obj, index) =>
-            renderReadonlyArrayObject(name, fieldConfig, formikProps, index)
-          )}
-        </div>
-      )}
-    />
+    <Fieldset title={fieldsetTitle}>
+      <FieldArray
+        name={name}
+        render={arrayHelpers => (
+          <div>
+            {value.map((obj, index) =>
+              renderReadonlyArrayObject(name, fieldConfig, formikProps, index)
+            )}
+          </div>
+        )}
+      />
+    </Fieldset>
   )
 }
 
@@ -227,8 +236,9 @@ const renderReadonlyArrayObject = (
   formikProps,
   index
 ) => {
+  const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
   return (
-    <Fieldset title={`Object ${index + 1}`} key={index}>
+    <Fieldset title={`${objLabel} ${index + 1}`} key={index}>
       <ReadonlyCustomFields
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
