@@ -91,7 +91,4 @@ const OnboardingEdit = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(OnboardingEdit)
+export default connect(null, mapDispatchToProps)(OnboardingEdit)

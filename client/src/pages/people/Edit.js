@@ -105,7 +105,4 @@ PersonEdit.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PersonEdit)
+export default connect(null, mapDispatchToProps)(PersonEdit)

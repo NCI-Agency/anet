@@ -25,7 +25,4 @@ LocationNew.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(LocationNew)
+export default connect(null, mapDispatchToProps)(LocationNew)

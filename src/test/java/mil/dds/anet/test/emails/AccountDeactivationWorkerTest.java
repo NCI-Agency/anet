@@ -3,6 +3,7 @@ package mil.dds.anet.test.emails;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -33,7 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AnetEmailWorker.class, AnetObjectEngine.class, AnetConfiguration.class,
     PersonDao.class, PositionDao.class, AccountDeactivationEmail.class,
-    AccountDeactivationWarningEmail.class, Person.class})
+    AccountDeactivationWarningEmail.class})
 @PowerMockIgnore("javax.security.*")
 public class AccountDeactivationWorkerTest {
 
@@ -54,6 +55,8 @@ public class AccountDeactivationWorkerTest {
         .thenReturn(Arrays.asList(15, 30, 45));
     when(config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames"))
         .thenReturn(Arrays.asList("ignored_domain", "*.ignored", "ignored.domain"));
+    when(config.getDictionaryEntry("automaticallyInactivateUsers.checkIntervalInSecs"))
+        .thenReturn("60");
 
     final AnetObjectEngine instance = PowerMockito.mock(AnetObjectEngine.class);
     when(instance.getPersonDao()).thenReturn(personDao);
@@ -71,19 +74,19 @@ public class AccountDeactivationWorkerTest {
 
     // Configure
     final Person testPerson14 = createDummyPerson(Instant.now().plus(14, ChronoUnit.DAYS),
-        "test14@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test14", new Position());
+        "test14@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test14");
 
     final Person testPerson15 = createDummyPerson(Instant.now().plus(15, ChronoUnit.DAYS),
-        "test15@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test15", new Position());
+        "test15@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test15");
 
     final Person testPerson30 = createDummyPerson(Instant.now().plus(30, ChronoUnit.DAYS),
-        "test30@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30", new Position());
+        "test30@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30");
 
     final Person testPerson45 = createDummyPerson(Instant.now().plus(45, ChronoUnit.DAYS),
-        "test45@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30", new Position());
+        "test45@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30");
 
     final Person testPerson46 = createDummyPerson(Instant.now().plus(46, ChronoUnit.DAYS),
-        "test46@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test46", new Position());
+        "test46@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test46");
 
     when(personDao.search(Mockito.any())).thenReturn(new AnetBeanList<>(
         Arrays.asList(testPerson14, testPerson15, testPerson30, testPerson45, testPerson46)));
@@ -142,20 +145,20 @@ public class AccountDeactivationWorkerTest {
         && e.getToAddresses().contains("test1_eot_acive@test.com")));
   }
 
-  private Person createDummyPerson(Instant endOfTour, String email, PersonStatus status) {
-    return createDummyPerson(endOfTour, email, status, "domain\\dummy", new Position());
+  private Person createDummyPerson(final Instant endOfTour, final String email,
+      final PersonStatus status) {
+    return createDummyPerson(endOfTour, email, status, "domain\\dummy");
   }
 
-  private Person createDummyPerson(Instant endOfTour, String email, PersonStatus status,
-      String domainName, Position position) {
+  private Person createDummyPerson(final Instant endOfTour, final String email,
+      final PersonStatus status, final String domainName) {
 
-    final Person testPerson = PowerMockito.mock(Person.class);
-    when(testPerson.getEndOfTourDate()).thenReturn(endOfTour);
-    when(testPerson.getEmailAddress()).thenReturn(email);
-    when(testPerson.getStatus()).thenReturn(status);
-    when(testPerson.getDomainUsername()).thenReturn(domainName);
-    when(testPerson.getPosition()).thenReturn(position);
-    when(testPerson.loadPosition()).thenReturn(position);
+    final Person testPerson = new Person();
+    testPerson.setEndOfTourDate(endOfTour);
+    testPerson.setEmailAddress(email);
+    testPerson.setStatus(status);
+    testPerson.setDomainUsername(domainName);
+    testPerson.setPosition(new Position());
 
     return testPerson;
   }

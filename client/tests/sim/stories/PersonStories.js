@@ -137,16 +137,19 @@ const _createPerson = async function(user, role, status) {
   )
 
   const { firstName, lastName, ...personStripped } = person // TODO: we need to do this more generically
-  return (await runGQL(user, {
-    query:
-      "mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }",
-    variables: { person: personStripped }
-  })).data.createPerson
+  return (
+    await runGQL(user, {
+      query:
+        "mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }",
+      variables: { person: personStripped }
+    })
+  ).data.createPerson
 }
 
 const updatePerson = async function(user) {
-  const totalCount = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
       query {
         personList(query: {
           pageNum: 0,
@@ -157,14 +160,16 @@ const updatePerson = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.personList.totalCount
+      variables: {}
+    })
+  ).data.personList.totalCount
   if (totalCount === 0) {
     return null
   }
   const random = faker.random.number({ max: totalCount - 1 })
-  const people = (await runGQL(user, {
-    query: `
+  const people = (
+    await runGQL(user, {
+      query: `
       query {
         personList(query: {
           pageNum: ${random},
@@ -177,12 +182,14 @@ const updatePerson = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.personList.list
+      variables: {}
+    })
+  ).data.personList.list
 
   let person = people && people[0]
-  person = (await runGQL(user, {
-    query: `
+  person = (
+    await runGQL(user, {
+      query: `
       query {
         person (uuid:"${person.uuid}") {
           uuid
@@ -200,8 +207,9 @@ const updatePerson = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.person
+      variables: {}
+    })
+  ).data.person
 
   populate(person, modifiedPerson())
     .name.rarely()
@@ -214,15 +222,19 @@ const updatePerson = async function(user) {
     .biography.often()
     .emailAddress.rarely()
 
-  return (await runGQL(user, {
-    query: "mutation($person: PersonInput!) { updatePerson(person: $person) }",
-    variables: { person: person }
-  })).data.updatePerson
+  return (
+    await runGQL(user, {
+      query:
+        "mutation($person: PersonInput!) { updatePerson(person: $person) }",
+      variables: { person: person }
+    })
+  ).data.updatePerson
 }
 
 const _deletePerson = async function(user) {
-  const totalCount = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
       query {
         personList(query: {
           pageNum: 0,
@@ -233,16 +245,18 @@ const _deletePerson = async function(user) {
       }
     }
   `,
-    variables: {}
-  })).data.personList.totalCount
+      variables: {}
+    })
+  ).data.personList.totalCount
   if (totalCount === 0) {
     return null
   }
   let person0
   for (let i = 0; i < Math.max(totalCount, 10); i++) {
     const random = faker.random.number({ max: totalCount - 1 })
-    const people = (await runGQL(user, {
-      query: `
+    const people = (
+      await runGQL(user, {
+        query: `
         query {
           personList(query: {
             pageNum: ${random},
@@ -259,16 +273,18 @@ const _deletePerson = async function(user) {
         }
       }
     `,
-      variables: {}
-    })).data.personList.list.filter(p => !p.position)
+        variables: {}
+      })
+    ).data.personList.list.filter(p => !p.position)
     person0 = people && people[0]
     if (person0) {
       break
     }
   }
   if (person0) {
-    const person = (await runGQL(user, {
-      query: `
+    const person = (
+      await runGQL(user, {
+        query: `
         query {
           person(uuid: "${person0.uuid}") {
               biography
@@ -285,17 +301,20 @@ const _deletePerson = async function(user) {
           }
         }
       `,
-      variables: {}
-    })).data.person
+        variables: {}
+      })
+    ).data.person
     person.status = Person.STATUS.INACTIVE
 
     console.debug(`Deleting/Deactivating ${person.name.green}`)
     // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.
-    return (await runGQL(user, {
-      query:
-        "mutation($person: PersonInput!) { updatePerson(person: $person) }",
-      variables: { person: person }
-    })).data.updatePerson
+    return (
+      await runGQL(user, {
+        query:
+          "mutation($person: PersonInput!) { updatePerson(person: $person) }",
+        variables: { person: person }
+      })
+    ).data.updatePerson
   } else {
     console.debug("No person to delete")
     return null
@@ -303,8 +322,9 @@ const _deletePerson = async function(user) {
 }
 
 async function countPersons(user) {
-  return (await runGQL(user, {
-    query: `
+  return (
+    await runGQL(user, {
+      query: `
       query {
         personList(query: {
           pageNum: 0,
@@ -314,8 +334,9 @@ async function countPersons(user) {
         }
       }
     `,
-    variables: {}
-  })).data.personList.totalCount
+      variables: {}
+    })
+  ).data.personList.totalCount
 }
 
 const createPerson = async function(user, grow, args) {
