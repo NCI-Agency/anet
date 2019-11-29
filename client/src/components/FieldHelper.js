@@ -7,6 +7,8 @@ import {
   FormGroup,
   HelpBlock,
   InputGroup,
+  Radio,
+  Table,
   ToggleButton,
   ToggleButtonGroup
 } from "react-bootstrap"
@@ -313,5 +315,44 @@ export const renderCheckboxButtonToggleGroup = ({
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => renderButtonToggleGroup(field, form, "checkbox", props)
+
+export const renderLikertScale = ({
+  field, // { name, value, onChange, onBlur }
+  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  ...props
+}) => {
+  const { label, children, extraColElem, addon, vertical, buttons } = props
+  const { value, ...fieldProps } = field
+  const widgetElem = (
+    <Table striped condensed hover responsive style={{ marginBottom: 0 }}>
+      <tbody>
+        <tr>
+          {buttons.map((button, index) => {
+            return <td key={button.value}>{button.label}</td>
+          })}
+        </tr>
+        <tr>
+          {buttons.map((button, index) => {
+            return (
+              <td key={button.value}>
+                <Radio value={button.value} {...fieldProps} />
+              </td>
+            )
+          })}
+        </tr>
+      </tbody>
+    </Table>
+  )
+  return renderField(
+    field,
+    label,
+    form,
+    widgetElem,
+    children,
+    extraColElem,
+    addon,
+    vertical
+  )
+}
 
 export default renderField

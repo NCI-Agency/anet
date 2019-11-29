@@ -14,12 +14,16 @@ import React from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
+const RENDERERS = {
+  likertScale: FieldHelper.renderLikertScale
+}
+
 const TextField = fieldProps => {
-  const { onChange, onBlur, ...otherFieldProps } = fieldProps
+  const { onChange, onBlur, renderer, ...otherFieldProps } = fieldProps
   return (
     <Field
       type="text"
-      component={FieldHelper.renderInputField}
+      component={RENDERERS[renderer] || FieldHelper.renderInputField}
       {...otherFieldProps}
     />
   )
@@ -70,11 +74,13 @@ const DateTimeField = props => <DateField {...props} withTime />
 const ReadonlyDateTimeField = props => <ReadonlyDateField {...props} withTime />
 
 const EnumField = fieldProps => {
-  const { choices, ...otherFieldProps } = fieldProps
+  const { choices, renderer, ...otherFieldProps } = fieldProps
   return (
     <Field
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={FieldHelper.renderRadioButtonToggleGroup}
+      component={
+        RENDERERS[renderer] || FieldHelper.renderRadioButtonToggleGroup
+      }
       {...otherFieldProps}
     />
   )
@@ -101,11 +107,13 @@ const ReadonlyEnumField = fieldProps => {
 }
 
 const EnumSetField = fieldProps => {
-  const { choices, ...otherFieldProps } = fieldProps
+  const { choices, renderer, ...otherFieldProps } = fieldProps
   return (
     <Field
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={FieldHelper.renderCheckboxButtonToggleGroup}
+      component={
+        RENDERERS[renderer] || FieldHelper.renderCheckboxButtonToggleGroup
+      }
       {...otherFieldProps}
     />
   )

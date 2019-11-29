@@ -243,10 +243,22 @@ dictionary:
       keyOutcomes: Key outcomes
       reportText: Engagement details
       customFields:
-        multipleSelect:
+        multipleButtons:
           type: enumset
           label: Choose one or more of the options
           helpText: Help text for chosing multiple values
+          choices:
+            opt1:
+              label: Option 1
+            opt2:
+              label: Option 2
+            opt3:
+              label: Option 3
+        likertScale:
+          type: enum
+          renderer: likertScale
+          label: Likert scale
+          helpText: Help text for likert scale
           choices:
             opt1:
               label: Opt 1
