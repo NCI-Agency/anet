@@ -13,15 +13,22 @@ import {
   Button,
   Col,
   ControlLabel,
-  DropdownButton,
   FormControl,
   FormGroup,
-  MenuItem,
   Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
+
+import {
+  Classes,
+  Menu,
+  MenuItem,
+  Popover,
+  Position as PopoverPosition,
+  PopoverInteractionKind
+} from "@blueprintjs/core"
 
 function updateOrganizationFilterState(organizationFilter, positionType) {
   if (organizationFilter) {
@@ -53,11 +60,29 @@ const AdvancedSearch = props => {
     changePositionTypeFilter,
     changeOrganizationFilter
   )
-  // console.log("RENDER AdvancedSearch", objectType, text, filters)
+
   const filterDefs = objectType ? ALL_FILTERS[objectType].filters : {}
   const existingKeys = filters.map(f => f.key)
   const moreFiltersAvailable =
     existingKeys.length < Object.keys(filterDefs).length
+
+  const MenuContent = (
+    <Menu
+      className={Classes.POPOVER_DISMISS}
+      style={{ maxHeight: "400px", overflowY: "auto" }}
+    >
+      {Object.keys(filterDefs).map(filterKey => (
+        <MenuItem
+          disabled={existingKeys.indexOf(filterKey) > -1}
+          key={filterKey}
+          onClick={() => addFilter(filterKey)}
+          text={filterKey}
+          shouldDismissPopover={false}
+        />
+      ))}
+    </Menu>
+  )
+
   return (
     <Formik>
       {() => (
@@ -88,60 +113,69 @@ const AdvancedSearch = props => {
 
             <FormControl defaultValue={text} className="hidden" />
 
-            {filters.map(
-              filter =>
-                filterDefs[filter.key] && (
-                  <SearchFilter
-                    key={filter.key}
-                    filter={filter}
-                    onRemove={removeFilter}
-                    element={filterDefs[filter.key]}
-                    organizationFilter={organizationFilter}
-                  />
-                )
-            )}
+            <div className="advanced-search-content">
+              {filters.map(
+                filter =>
+                  filterDefs[filter.key] && (
+                    <SearchFilter
+                      key={filter.key}
+                      filter={filter}
+                      onRemove={removeFilter}
+                      element={filterDefs[filter.key]}
+                      organizationFilter={organizationFilter}
+                    />
+                  )
+              )}
+            </div>
 
-            <Row>
-              <Col xs={6} xsOffset={3}>
+            <Row style={{ borderTop: "1px solid #ddd", paddingTop: "15px" }}>
+              <Col md={6} mdOffset={2}>
                 {!objectType ? (
                   "To add filters, first pick a type above"
                 ) : !moreFiltersAvailable ? (
                   "No additional filters available"
                 ) : (
-                  <DropdownButton
-                    bsStyle="link"
-                    title="+ Add another filter"
-                    onSelect={addFilter}
-                    id="addFilterDropdown"
+                  <Popover
+                    content={MenuContent}
+                    captureDismiss
+                    interactionKind={PopoverInteractionKind.CLICK}
+                    usePortal={false}
+                    position={PopoverPosition.RIGHT}
+                    modifiers={{
+                      preventOverflow: {
+                        boundariesElement: "viewport"
+                      },
+                      flip: {
+                        enabled: false
+                      }
+                    }}
                   >
-                    {Object.keys(filterDefs).map(filterKey => (
-                      <MenuItem
-                        disabled={existingKeys.indexOf(filterKey) > -1}
-                        eventKey={filterKey}
-                        key={filterKey}
-                      >
-                        {filterKey}
-                      </MenuItem>
-                    ))}
-                  </DropdownButton>
+                    <Button bsStyle="link" id="addFilterDropdown">
+                      + Add another filter
+                    </Button>
+                  </Popover>
                 )}
               </Col>
-            </Row>
-
-            <Row>
-              <div className="pull-right">
-                <Button onClick={props.onCancel} style={{ marginRight: 20 }}>
+              <Col md={4}>
+                <Button
+                  className={Classes.POPOVER_DISMISS}
+                  intent="danger"
+                  onClick={props.onCancel}
+                  style={{ marginRight: 20 }}
+                >
                   Cancel
                 </Button>
                 <Button
                   bsStyle="primary"
+                  className={Classes.POPOVER_DISMISS}
                   type="submit"
+                  intent="success"
                   onClick={onSubmit}
                   style={{ marginRight: 20 }}
                 >
                   Search
                 </Button>
-              </div>
+              </Col>
             </Row>
           </Form>
         </div>
@@ -211,8 +245,6 @@ const AdvancedSearch = props => {
         pathname: "/search"
       })
     }
-    event.preventDefault()
-    event.stopPropagation()
   }
 }
 

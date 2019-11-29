@@ -691,8 +691,21 @@ header.searchPagination {
 	font-size: 0.8em;
 }
 
-.advanced-search  {
-  padding-top: 15px;
+.advanced-search {
+	padding: 15px;
+}
+
+.advanced-search-content {
+	max-height: 400px; /** FIX to make dyamic based on window size */
+	overflow-y: auto;
+}
+
+.advanced-search-content .form-group {
+	margin: 0 0 15px !important;
+}
+
+.advanced-search-form {
+	padding-bottom: 5px;
 }
 
 .advanced-search .col-xs-3 select {

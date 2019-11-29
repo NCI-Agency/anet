@@ -3,11 +3,54 @@ import AdvancedSearch from "components/AdvancedSearch"
 import { SearchDescription } from "components/SearchFilters"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, PureComponent } from "react"
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
+
+import { Popover, Position, PopoverInteractionKind } from "@blueprintjs/core"
+
+export class SearchPopover extends PureComponent {
+  constructor(props) {
+    super(props)
+    this.state = {
+      isOpen: false
+    }
+  }
+
+  render() {
+    const { isOpen } = this.state
+    const { popoverContent, children } = this.props
+    return (
+      <Popover
+        isOpen={isOpen}
+        onInteraction={this._handleInteraction}
+        captureDismiss
+        content={popoverContent}
+        interactionKind={PopoverInteractionKind.CLICK}
+        position={Position.BOTTOM_LEFT}
+        usePortal={false}
+        modifiers={{
+          preventOverflow: {
+            boundariesElement: "viewport"
+          },
+          flip: {
+            enabled: false
+          }
+        }}
+      >
+        {children}
+      </Popover>
+    )
+  }
+  _handleInteraction = isOpen => this.setState({ isOpen })
+}
+
+SearchPopover.propTypes = {
+  popoverContent: PropTypes.element.isRequired,
+  children: PropTypes.any.isRequired
+}
 
 const SearchBar = props => {
   const {
@@ -18,11 +61,12 @@ const SearchBar = props => {
     onSearchGoToSearchPage
   } = props
   const history = useHistory()
-  const advancedSearchLink = useRef()
   // (Re)set searchTerms if the query.text prop changes
   const latestQueryText = useRef(query.text)
   const queryTextUnchanged = _isEqual(latestQueryText.current, query.text)
   const [searchTerms, setSearchTerms] = useState(query.text)
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
+
   useEffect(() => {
     if (!queryTextUnchanged) {
       latestQueryText.current = query.text
@@ -30,15 +74,21 @@ const SearchBar = props => {
     }
   }, [query, setSearchTerms, queryTextUnchanged])
 
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   const placeholder = query.objectType
     ? "Filter " + SEARCH_OBJECT_LABELS[query.objectType]
     : "Search for " +
       searchObjectTypes.map(type => SEARCH_OBJECT_LABELS[type]).join(", ")
 
+  const PopoverContent = (
+    <AdvancedSearch
+      onSearch={runAdvancedSearch}
+      onCancel={setShowAdvancedSearch}
+      text={searchTerms}
+    />
+  )
   return (
     <div>
-      <Form onSubmit={onSubmit}>
+      <Form onSubmit={onSubmit} className="advanced-search-form">
         <InputGroup>
           <FormControl
             value={searchTerms}
@@ -55,21 +105,9 @@ const SearchBar = props => {
           )}
         </InputGroup>
       </Form>
-
-      <div
-        className="add-search-filter"
-        ref={advancedSearchLink}
-        onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-      >
+      <SearchPopover popoverContent={PopoverContent}>
         <SearchDescription query={query} showPlaceholders />
-      </div>
-      {showAdvancedSearch && (
-        <AdvancedSearch
-          onSearch={runAdvancedSearch}
-          onCancel={() => setShowAdvancedSearch(false)}
-          text={searchTerms}
-        />
-      )}
+      </SearchPopover>
     </div>
   )
 
