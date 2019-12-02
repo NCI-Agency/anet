@@ -691,13 +691,17 @@ header.searchPagination {
 	font-size: 0.8em;
 }
 
-.advanced-search {
-	padding: 15px;
+.advanced-select-popover .bp3-popover-content-sizing {
+	width: 100% !important;
 }
 
-.advanced-search-content {
-	max-height: 400px; /** FIX to make dyamic based on window size */
-	overflow-y: auto;
+.advanced-select-popover .bp3-popover-content {
+	min-width: 400px;
+	max-width: 90vw !important;
+}
+
+.advanced-search {
+	padding: 15px;
 }
 
 .advanced-search-content .form-group {

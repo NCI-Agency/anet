@@ -7,19 +7,12 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import {
-  Button,
-  Col,
-  FormControl,
-  InputGroup,
-  Overlay,
-  Popover,
-  Row
-} from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
+import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
+import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
+
 import "./AdvancedSelect.css"
 
-const MOBILE_WIDTH = 733
+const hasMultipleItems = object => Object.keys(object).length > 1
 
 const AdvancedSelectTarget = ({ overlayRef }) => (
   <Row>
@@ -36,33 +29,32 @@ AdvancedSelectTarget.propTypes = {
   })
 }
 
-const FilterAsNav = props => {
-  const { items, currentFilter, handleOnClick } = props
-  return (
-    <ul className="advanced-select-filters">
-      {Object.keys(items).map(filterType => (
-        <li
-          key={filterType}
-          className={currentFilter === filterType ? "active" : null}
-        >
-          <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
-            {items[filterType].label}
-          </Button>
-        </li>
-      ))}
-    </ul>
+const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
+  hasMultipleItems(items) && (
+    <Col md={4} xsHidden smHidden>
+      <ul className="advanced-select-filters">
+        {Object.keys(items).map(filterType => (
+          <li
+            key={filterType}
+            className={currentFilter === filterType ? "active" : null}
+          >
+            <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
+              {items[filterType].label}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </Col>
   )
-}
 FilterAsNav.propTypes = {
   items: PropTypes.object,
   currentFilter: PropTypes.string,
   handleOnClick: PropTypes.func
 }
 
-const FilterAsDropdown = props => {
-  const { items, handleOnChange } = props
-  return (
-    <>
+const FilterAsDropdown = ({ items, handleOnChange }) =>
+  hasMultipleItems(items) && (
+    <Col style={{ minHeight: "80px" }} mdHidden lgHidden>
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -73,9 +65,8 @@ const FilterAsDropdown = props => {
           ))}
         </select>
       </p>
-    </>
+    </Col>
   )
-}
 FilterAsDropdown.propTypes = {
   items: PropTypes.object,
   handleOnChange: PropTypes.func
@@ -177,109 +168,95 @@ export default class AdvancedSelect extends Component {
       overlayRenderRow,
       filterDefs
     } = overlayProps
-    const { results, filterType, isLoading } = this.state
+
+    const {
+      results,
+      filterType,
+      isLoading,
+      searchTerms,
+      showOverlay
+    } = this.state
+
     const renderSelectedWithDelete = renderSelected
       ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
       : null
     const items = results && results[filterType] ? results[filterType].list : []
+
+    const PopoverContent = (
+      <Row className="border-between">
+        <FilterAsNav
+          items={filterDefs}
+          currentFilter={this.state.filterType}
+          handleOnClick={this.changeFilterType}
+        />
+
+        <FilterAsDropdown
+          items={filterDefs}
+          handleOnChange={this.handleOnChangeSelect}
+        />
+
+        <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
+          <this.props.overlayTable
+            fieldName={fieldName}
+            items={items}
+            selectedItems={value}
+            handleAddItem={item => {
+              handleAddItem(item)
+              if (this.props.closeOverlayOnAdd) {
+                this.handleHideOverlay()
+              }
+            }}
+            handleRemoveItem={handleRemoveItem}
+            objectType={objectType}
+            columns={[""].concat(overlayColumns)}
+            renderRow={overlayRenderRow}
+            isLoading={isLoading}
+            loaderMessage={
+              <div style={{ width: "300px" }}>No results found</div>
+            }
+            tableClassName={overlayTableClassName}
+          />
+          {this.paginationFor(filterType)}
+        </Col>
+      </Row>
+    )
+
     return (
       <>
-        <InputGroup>
-          <FormControl
-            name={fieldName}
-            value={
-              this.state.searchTerms === null ? "" : this.state.searchTerms
+        <Popover
+          className="advanced-select-popover"
+          popoverClassName="bp3-popover-content-sizing"
+          content={PopoverContent}
+          isOpen={showOverlay}
+          captureDismiss
+          interactionKind={PopoverInteractionKind.CLICK}
+          onInteraction={this.handleInteraction}
+          usePortal={false}
+          position={Position.BOTTOM_LEFT}
+          modifiers={{
+            preventOverflow: {
+              enabled: false
+            },
+            flip: {
+              enabled: false
             }
-            placeholder={placeholder}
-            onChange={this.changeSearchTerms}
-            onFocus={this.handleInputFocus}
-            onBlur={this.handleInputBlur}
-          />
-          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-          {addon && (
-            <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-          )}
-        </InputGroup>
-        <Overlay
-          show={this.state.showOverlay}
-          container={this.overlayContainer.current}
-          target={this.overlayTarget.current}
-          rootClose
-          onHide={this.handleHideOverlay}
-          placement="bottom"
-          animation={false}
-          delayHide={200}
+          }}
         >
-          <Popover
-            id={`${fieldName}-popover`}
-            className="advanced-select-popover"
-            title={null}
-            placement="bottom"
-            style={{
-              width: "100%",
-              maxWidth: "100%",
-              boxShadow: "0 6px 20px hsla(0, 0%, 0%, 0.4)"
-            }}
-          >
-            {" "}
-            <ContainerDimensions>
-              {({ width }) => {
-                const hasLeftNav =
-                  width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
-                const hasTopNav =
-                  width < MOBILE_WIDTH && Object.keys(filterDefs).length > 1
-                return (
-                  <Row className="border-between">
-                    {hasLeftNav && (
-                      <Col sm={4} md={3}>
-                        <div>
-                          <FilterAsNav
-                            items={filterDefs}
-                            currentFilter={this.state.filterType}
-                            handleOnClick={this.changeFilterType}
-                          />
-                        </div>
-                      </Col>
-                    )}
-                    <Col
-                      sm={hasLeftNav ? 8 : 12}
-                      md={hasLeftNav ? 9 : 12}
-                      style={{ minHeight: "80px" }}
-                    >
-                      {hasTopNav && (
-                        <div>
-                          <FilterAsDropdown
-                            items={filterDefs}
-                            handleOnChange={this.handleOnChangeSelect}
-                          />
-                        </div>
-                      )}
-                      <this.props.overlayTable
-                        fieldName={fieldName}
-                        items={items}
-                        selectedItems={value}
-                        handleAddItem={item => {
-                          handleAddItem(item)
-                          if (this.props.closeOverlayOnAdd) {
-                            this.handleHideOverlay()
-                          }
-                        }}
-                        handleRemoveItem={handleRemoveItem}
-                        objectType={objectType}
-                        columns={[""].concat(overlayColumns)}
-                        renderRow={overlayRenderRow}
-                        isLoading={isLoading}
-                        loaderMessage="No results found"
-                        tableClassName={overlayTableClassName}
-                      />
-                      {this.paginationFor(filterType)}
-                    </Col>
-                  </Row>
-                )
-              }}
-            </ContainerDimensions>
-          </Popover>
-        </Overlay>
+          <InputGroup>
+            <FormControl
+              name={fieldName}
+              value={searchTerms === null ? "" : searchTerms}
+              placeholder={placeholder}
+              onChange={this.changeSearchTerms}
+              onFocus={this.handleInputFocus}
+              onBlur={this.handleInputBlur}
+            />
+            {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+            {addon && (
+              <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+            )}
+          </InputGroup>
+        </Popover>
         <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
           <Col sm={12}>{renderSelectedWithDelete}</Col>
@@ -289,7 +266,7 @@ export default class AdvancedSelect extends Component {
   }
 
   handleInputFocus = () => {
-    if (this.state.showOverlay === true) {
+    if (this.state.showOverlay) {
       // Overlay is already open and we do input focus, no need to fetch data
       this.setState({
         inputFocused: true
@@ -299,7 +276,6 @@ export default class AdvancedSelect extends Component {
         {
           searchTerms: "",
           inputFocused: true,
-          showOverlay: true,
           isLoading: true
         },
         this.fetchResults()
@@ -313,11 +289,9 @@ export default class AdvancedSelect extends Component {
     })
   }
 
+  handleInteraction = showOverlay => this.setState({ showOverlay })
+
   handleHideOverlay = () => {
-    if (this.state.inputFocused) {
-      // Do not hide the overlay when the trigger input has the focus
-      return
-    }
     this.setState({
       filterType: Object.keys(this.props.filterDefs)[0],
       searchTerms: "",
