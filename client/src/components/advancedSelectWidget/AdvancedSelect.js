@@ -223,40 +223,42 @@ export default class AdvancedSelect extends Component {
 
     return (
       <>
-        <Popover
-          className="advanced-select-popover"
-          popoverClassName="bp3-popover-content-sizing"
-          content={PopoverContent}
-          isOpen={showOverlay}
-          captureDismiss
-          interactionKind={PopoverInteractionKind.CLICK}
-          onInteraction={this.handleInteraction}
-          usePortal={false}
-          position={Position.BOTTOM_LEFT}
-          modifiers={{
-            preventOverflow: {
-              enabled: false
-            },
-            flip: {
-              enabled: false
-            }
-          }}
-        >
-          <InputGroup>
-            <FormControl
-              name={fieldName}
-              value={searchTerms === null ? "" : searchTerms}
-              placeholder={placeholder}
-              onChange={this.changeSearchTerms}
-              onFocus={this.handleInputFocus}
-              onBlur={this.handleInputBlur}
-            />
-            {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-            {addon && (
-              <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-            )}
-          </InputGroup>
-        </Popover>
+        <div id={`${fieldName}-popover`}>
+          <Popover
+            className="advanced-select-popover"
+            popoverClassName="bp3-popover-content-sizing"
+            content={PopoverContent}
+            isOpen={showOverlay}
+            captureDismiss
+            interactionKind={PopoverInteractionKind.CLICK}
+            onInteraction={this.handleInteraction}
+            usePortal={false}
+            position={Position.BOTTOM_LEFT}
+            modifiers={{
+              preventOverflow: {
+                enabled: false
+              },
+              flip: {
+                enabled: false
+              }
+            }}
+          >
+            <InputGroup>
+              <FormControl
+                name={fieldName}
+                value={searchTerms === null ? "" : searchTerms}
+                placeholder={placeholder}
+                onChange={this.changeSearchTerms}
+                onFocus={this.handleInputFocus}
+                onBlur={this.handleInputBlur}
+              />
+              {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+              {addon && (
+                <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+              )}
+            </InputGroup>
+          </Popover>
+        </div>
         <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
           <Col sm={12}>{renderSelectedWithDelete}</Col>
