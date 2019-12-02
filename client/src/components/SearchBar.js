@@ -26,6 +26,7 @@ export class SearchPopover extends PureComponent {
       <Popover
         isOpen={isOpen}
         onInteraction={this._handleInteraction}
+        boundary="window"
         captureDismiss
         content={popoverContent}
         interactionKind={PopoverInteractionKind.CLICK}
@@ -33,7 +34,7 @@ export class SearchPopover extends PureComponent {
         usePortal={false}
         modifiers={{
           preventOverflow: {
-            boundariesElement: "viewport"
+            enabled: false
           },
           flip: {
             enabled: false
