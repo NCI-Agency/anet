@@ -864,6 +864,11 @@ header.searchPagination {
 }
 /* End of loading indicator */
 
+.modal.in .modal-dialog {
+	-webkit-transform: translate(0, 0);
+	transform: translate(0, 150px);
+}
+
 @media print {
 	.only-show-for-print {
 		display: inherit;
