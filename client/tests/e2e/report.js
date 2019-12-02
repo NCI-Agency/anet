@@ -97,10 +97,13 @@ test("Draft and submit a report", async t => {
     "Closing the tasks advanced multi select overlay empties the input field."
   )
 
-  let $newTaskRow = await $(".tasks-selector table tbody tr td")
+  const taskRowSelector = ".tasks-selector table tbody tr td"
+  let $newTaskRow = await $(taskRowSelector)
+  await t.context.driver.wait(until.stalenessOf($newTaskRow))
+
   await assertElementText(
     t,
-    $newTaskRow,
+    await $(taskRowSelector),
     "1.1.B - Milestone the Second in EF 1.1"
   )
 
