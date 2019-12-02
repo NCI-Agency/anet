@@ -1,4 +1,4 @@
-import { Report, Position, Task, Location } from "models"
+import { Report, Person, Position, Task, Location } from "models"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
@@ -6,6 +6,50 @@ import _uniqWith from "lodash/uniqWith"
 import { fuzzy, runGQL, populate } from "../simutils"
 
 async function getRandomPerson(user, variables) {
+  const peopleQuery = Object.assign({}, variables, {
+    pageNum: 0,
+    pageSize: 1
+  })
+  const totalCount = (
+    await runGQL(user, {
+      query: `
+        query ($peopleQuery: PersonSearchQueryInput) {
+          personList(query: $peopleQuery) {
+            totalCount
+          }
+        }
+      `,
+      variables: {
+        peopleQuery
+      }
+    })
+  ).data.personList.totalCount
+  let people = null
+  if (totalCount > 0) {
+    peopleQuery.pageNum = faker.random.number({ max: totalCount - 1 })
+    people = (
+      await runGQL(user, {
+        query: `
+          query ($peopleQuery: PersonSearchQueryInput) {
+            personList(query: $peopleQuery) {
+              list {
+                uuid
+                name
+                role
+              }
+            }
+          }
+        `,
+        variables: {
+          peopleQuery
+        }
+      })
+    ).data.personList.list
+  }
+  return _isEmpty(people) ? null : people[0]
+}
+
+async function getRandomPositionPerson(user, variables) {
   const positionsQuery = Object.assign({}, variables, {
     pageNum: 0,
     pageSize: 1
@@ -53,20 +97,28 @@ async function getRandomPerson(user, variables) {
   return _isEmpty(positions) ? null : positions[0].person
 }
 
-export const randomAdvisor = async function(user) {
-  return getRandomPerson(user, {
-    status: Position.STATUS.ACTIVE,
-    isFilled: true,
-    type: [Position.TYPE.ADVISOR]
-  })
+export const randomAdvisor = async function(user, hasPosition) {
+  return hasPosition
+    ? getRandomPositionPerson(user, {
+      status: Position.STATUS.ACTIVE,
+      isFilled: true,
+      type: [Position.TYPE.ADVISOR]
+    })
+    : getRandomPerson(user, {
+      role: Person.ROLE.ADVISOR
+    })
 }
 
-export const randomPrincipal = async function(user) {
-  return getRandomPerson(user, {
-    status: Position.STATUS.ACTIVE,
-    isFilled: true,
-    type: [Position.TYPE.PRINCIPAL]
-  })
+export const randomPrincipal = async function(user, hasPosition) {
+  return hasPosition
+    ? getRandomPositionPerson(user, {
+      status: Position.STATUS.ACTIVE,
+      isFilled: true,
+      type: [Position.TYPE.PRINCIPAL]
+    })
+    : getRandomPerson(user, {
+      role: Person.ROLE.PRINCIPAL
+    })
 }
 
 async function populateReport(report, user, args) {
@@ -178,7 +230,7 @@ async function populateReport(report, user, args) {
     const nbOfAdvisors = faker.random.number({ min: 1, max: 5 })
     let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
-      const advisor = await randomAdvisor(user)
+      const advisor = await randomAdvisor(user, primary)
       if (advisor) {
         advisor.primary = primary
         primary = false
@@ -189,7 +241,7 @@ async function populateReport(report, user, args) {
     const nbOfPrincipals = faker.random.number({ min: 1, max: 5 })
     primary = true
     for (let i = 0; i < nbOfPrincipals; i++) {
-      const principal = await randomPrincipal(user)
+      const principal = await randomPrincipal(user, primary)
       if (principal) {
         principal.primary = primary
         primary = false
@@ -197,7 +249,15 @@ async function populateReport(report, user, args) {
       }
     }
 
-    return [..._uniqWith(attendees, _isEqual)]
+    const seenUuids = []
+    return attendees.filter(a => {
+      if (seenUuids.includes(a.uuid)) {
+        return false
+      } else {
+        seenUuids.push(a.uuid)
+        return true
+      }
+    })
   }
   const attendees = await getAttendees()
   async function getTasks() {
