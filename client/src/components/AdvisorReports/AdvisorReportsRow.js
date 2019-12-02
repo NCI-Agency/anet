@@ -40,7 +40,7 @@ const AdvisorReportsRow = props => {
 AdvisorReportsRow.propTypes = {
   checked: PropTypes.bool,
   columnGroups: PropTypes.array,
-  handleOrganizationClick: PropTypes.func,
+  handleOrganizationClick: PropTypes.bool,
   link: PropTypes.object,
   onSelectRow: PropTypes.func,
   row: PropTypes.object

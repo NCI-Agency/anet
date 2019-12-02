@@ -1,54 +1,41 @@
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React from "react"
 import { Button } from "react-bootstrap"
 
-class Toolbar extends Component {
-  static propTypes = {
-    onFilterTextInput: PropTypes.func.isRequired,
-    onExportButtonClick: PropTypes.func.isRequired
-  }
-
-  constructor(props) {
-    super(props)
-    this.handleFilterTextInputChange = this.handleFilterTextInputChange.bind(
-      this
-    )
-    this.handleExportButtonClick = this.handleExportButtonClick.bind(this)
-  }
-
-  handleFilterTextInputChange(e) {
-    this.props.onFilterTextInput(e.target.value)
-  }
-
-  handleExportButtonClick() {
-    this.props.onExportButtonClick()
-  }
-
-  render() {
-    return (
-      <form className="advisor-reports-form">
-        <div className="row">
-          <div className="col-sm-8">
-            <label className="sr-only" htmlFor="advisorSearch">
-              Search organizations
-            </label>
-            <input
-              className="form-control"
-              id="advisorSearch"
-              type="text"
-              placeholder="Search organizations..."
-              onChange={this.handleFilterTextInputChange}
-            />
-          </div>
-          <div className="col-sm-2">
-            <Button onClick={this.handleExportButtonClick}>
-              Export to CSV
-            </Button>
-          </div>
+const Toolbar = props => {
+  return (
+    <form className="advisor-reports-form">
+      <div className="row">
+        <div className="col-sm-8">
+          <label className="sr-only" htmlFor="advisorSearch">
+            Search organizations
+          </label>
+          <input
+            className="form-control"
+            id="advisorSearch"
+            type="text"
+            placeholder="Search organizations..."
+            onChange={handleFilterTextInputChange}
+          />
         </div>
-      </form>
-    )
+        <div className="col-sm-2">
+          <Button onClick={handleExportButtonClick}>Export to CSV</Button>
+        </div>
+      </div>
+    </form>
+  )
+
+  function handleFilterTextInputChange(e) {
+    props.onFilterTextInput(e.target.value)
   }
+
+  function handleExportButtonClick() {
+    props.onExportButtonClick()
+  }
+}
+Toolbar.propTypes = {
+  onFilterTextInput: PropTypes.func.isRequired,
+  onExportButtonClick: PropTypes.func.isRequired
 }
 
 export default Toolbar
