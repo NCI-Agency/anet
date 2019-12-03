@@ -11,7 +11,9 @@ import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
 import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
 import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
 import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
-import TextInputFilter from "components/advancedSearch/TextInputFilter"
+import TextInputFilter, {
+  deserializeTextInputFilter
+} from "components/advancedSearch/TextInputFilter"
 import {
   LocationOverlayRow,
   PersonDetailedOverlayRow,
@@ -91,6 +93,7 @@ const taskFilters = props => {
   if (customField) {
     taskFiltersObj[customField.label] = {
       component: TextInputFilter,
+      deserializer: deserializeTextInputFilter,
       props: {
         queryKey: "customField"
       }
