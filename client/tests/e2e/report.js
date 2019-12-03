@@ -88,8 +88,8 @@ test("Draft and submit a report", async t => {
   )
 
   // click outside the overlay to make sure the $tasksAdvancedSelect closes
-  let $keyOutcomes = await $("#keyOutcomes")
-  await $keyOutcomes.click()
+  let $tasksShortcutList = await $("#tasks-shortcut-list")
+  await $tasksShortcutList.click()
 
   t.is(
     await $tasksAdvancedSelect.getAttribute("value"),
