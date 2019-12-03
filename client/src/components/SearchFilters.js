@@ -4,7 +4,9 @@ import AdvancedSelectFilter, {
   deserializeAdvancedSelectFilter
 } from "components/advancedSearch/AdvancedSelectFilter"
 import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
-import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
+import DateRangeSearch, {
+  deserializeDateRangeSearch
+} from "components/advancedSearch/DateRangeSearch"
 import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
 import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
 import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
@@ -58,6 +60,7 @@ const taskFilters = props => {
   if (projectedCompletion) {
     taskFiltersObj[projectedCompletion.label] = {
       component: DateRangeSearch,
+      deserializer: deserializeDateRangeSearch,
       props: {
         queryKey: "projectedCompletion"
       }
@@ -67,6 +70,7 @@ const taskFilters = props => {
   if (plannedCompletion) {
     taskFiltersObj[plannedCompletion.label] = {
       component: DateRangeSearch,
+      deserializer: deserializeDateRangeSearch,
       props: {
         queryKey: "plannedCompletion"
       }
@@ -239,24 +243,28 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Engagement Date": {
         component: DateRangeSearch,
+        deserializer: deserializeDateRangeSearch,
         props: {
           queryKey: "engagementDate"
         }
       },
       "Release Date": {
         component: DateRangeSearch,
+        deserializer: deserializeDateRangeSearch,
         props: {
           queryKey: "releasedAt"
         }
       },
       "Creation Date": {
         component: DateRangeSearch,
+        deserializer: deserializeDateRangeSearch,
         props: {
           queryKey: "createdAt"
         }
       },
       "Update Date": {
         component: DateRangeSearch,
+        deserializer: deserializeDateRangeSearch,
         props: {
           queryKey: "updatedAt"
         }
