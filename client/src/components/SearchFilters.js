@@ -1,6 +1,8 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import { Settings } from "api"
-import AdvancedSelectFilter from "components/advancedSearch/AdvancedSelectFilter"
+import AdvancedSelectFilter, {
+  deserializeAdvancedSelectFilter
+} from "components/advancedSearch/AdvancedSelectFilter"
 import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
 import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
 import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
@@ -185,6 +187,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
     filters: {
       Author: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: authorWidgetFilters,
           placeholder: "Filter reports by author...",
@@ -193,6 +196,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Attendee: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: attendeeWidgetFilters,
           placeholder: "Filter reports by attendee...",
@@ -201,6 +205,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Pending Approval Of": {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: pendingApprovalOfWidgetFilters,
           placeholder: "Filter reports pending approval of...",
@@ -209,6 +214,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Author Position": {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPositionProps, {
           filterDefs: authorPositionWidgetFilters,
           placeholder: "Filter reports by author position...",
@@ -217,6 +223,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Attendee Position": {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPositionProps, {
           filterDefs: attendeePositionWidgetFilters,
           placeholder: "Filter reports by attendee position...",
@@ -256,6 +263,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Location: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
           placeholder: "Filter reports by location...",
@@ -285,6 +293,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Tag: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: {
           overlayColumns: ["Name"],
           overlayRenderRow: TagOverlayRow,
@@ -308,6 +317,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
   const taskShortLabel = Settings.fields.task.shortLabel
   filters[SEARCH_OBJECT_TYPES.REPORTS].filters[taskShortLabel] = {
     component: AdvancedSelectFilter,
+    deserializer: deserializeAdvancedSelectFilter,
     props: Object.assign({}, advancedSelectFilterTaskProps, {
       filterDefs: taskWidgetFilters,
       placeholder: `Filter reports by ${taskShortLabel}...`,
@@ -350,6 +360,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Location: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
           placeholder: "Filter by location...",
@@ -440,6 +451,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Location: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
           placeholder: "Filter by location...",

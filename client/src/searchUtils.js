@@ -18,8 +18,13 @@ export function deserializeQueryParams(objType, queryParams, callbackFunction) {
     Object.keys(filterDefs).map(filterKey => {
       const fd = filterDefs[filterKey]
       const FilterComponent = fd.component
-      const inst = new FilterComponent(fd.props || {})
-      const deser = inst.deserialize(queryParams, filterKey)
+      let deser = null
+      if (fd.deserializer) {
+        deser = fd.deserializer(fd.props, queryParams, filterKey)
+      } else {
+        const inst = new FilterComponent(fd.props || {})
+        deser = inst.deserialize(queryParams, filterKey)
+      }
       if (deser && deser.then instanceof Function) {
         // deserialize returns a Promise
         promises.push(deser)
