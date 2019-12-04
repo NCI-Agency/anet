@@ -3,7 +3,9 @@ import { Settings } from "api"
 import AdvancedSelectFilter, {
   deserializeAdvancedSelectFilter
 } from "components/advancedSearch/AdvancedSelectFilter"
-import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
+import CheckboxSearchFilter, {
+  deserializeCheckboxSearchFilter
+} from "components/advancedSearch/CheckboxSearchFilter"
 import DateRangeSearch, {
   deserializeDateRangeSearch
 } from "components/advancedSearch/DateRangeSearch"
@@ -318,6 +320,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Sensitive Info": {
         component: CheckboxSearchFilter,
+        deserializer: deserializeCheckboxSearchFilter,
         props: {
           queryKey: "sensitiveInfo"
         }
