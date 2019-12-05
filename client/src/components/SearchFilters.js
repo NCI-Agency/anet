@@ -14,7 +14,9 @@ import OrganizationFilter, {
 } from "components/advancedSearch/OrganizationFilter"
 import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
 import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
-import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
+import SelectSearchFilter, {
+  deserializeSelectSearchFilter
+} from "components/advancedSearch/SelectSearchFilter"
 import TextInputFilter, {
   deserializeTextInputFilter
 } from "components/advancedSearch/TextInputFilter"
@@ -55,6 +57,7 @@ const taskFilters = props => {
     },
     Status: {
       component: SelectSearchFilter,
+      deserializer: deserializeSelectSearchFilter,
       props: {
         queryKey: "status",
         values: [Task.STATUS.ACTIVE, Task.STATUS.INACTIVE],
@@ -86,6 +89,7 @@ const taskFilters = props => {
   if (customEnum1) {
     taskFiltersObj[customEnum1.label] = {
       component: SelectSearchFilter,
+      deserializer: deserializeSelectSearchFilter,
       props: {
         queryKey: "projectStatus",
         values: Object.keys(customEnum1.enum),
@@ -291,6 +295,7 @@ const searchFilters = function() {
       },
       "Engagement Status": {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "engagementStatus",
           values: [
@@ -302,6 +307,7 @@ const searchFilters = function() {
       },
       [Settings.fields.report.atmosphere]: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "atmosphere",
           values: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
@@ -356,6 +362,7 @@ const searchFilters = function() {
       },
       Role: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "role",
           values: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
@@ -367,6 +374,7 @@ const searchFilters = function() {
       },
       Status: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "status",
           values: [
@@ -387,6 +395,7 @@ const searchFilters = function() {
       },
       Rank: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "rank",
           values: ranks,
@@ -395,6 +404,7 @@ const searchFilters = function() {
       },
       Nationality: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "country",
           values: countries,
@@ -403,6 +413,7 @@ const searchFilters = function() {
       },
       "Has Biography?": {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "hasBiography",
           values: ["true", "false"],
@@ -416,6 +427,7 @@ const searchFilters = function() {
     filters: {
       Status: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "status",
           values: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
@@ -423,6 +435,7 @@ const searchFilters = function() {
       },
       "Organization Type": {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "type",
           values: [
@@ -461,6 +474,7 @@ const searchFilters = function() {
       },
       Status: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "status",
           values: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
@@ -477,6 +491,7 @@ const searchFilters = function() {
       },
       "Is Filled?": {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "isFilled",
           values: ["true", "false"],
@@ -490,6 +505,7 @@ const searchFilters = function() {
     filters: {
       Status: {
         component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "status",
           values: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
