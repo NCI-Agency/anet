@@ -1626,6 +1626,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Position position = user.getPosition();
     final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
     try {
+      createTestReport();
       final List<AdvisorReportsEntry> advisorReports = graphQLHelper.getObjectList(user,
           "query { payload: advisorReportInsights { uuid name stats { week nrReportsSubmitted nrEngagementsAttended } } }",
           null, new TypeReference<GraphQlResponse<List<AdvisorReportsEntry>>>() {});
@@ -1639,7 +1640,34 @@ public class ReportsResourceTest extends AbstractResourceTest {
       if (isSuperUser) {
         fail("Unexpected ForbiddenException");
       }
+    } catch (ExecutionException e) {
+      fail("Unexpected ExecutionException");
+    } catch (InterruptedException e) {
+      fail("Unexpected InterruptedException");
     }
+  }
+
+  private void createTestReport() throws InterruptedException, ExecutionException {
+    final Person author = getJackJackson();
+    final ReportPerson attendee = PersonTest.personToReportPerson(author);
+    attendee.setPrimary(true);
+    final Position advisorPosition = attendee.loadPosition();
+    final Organization advisorOrganization = advisorPosition.loadOrganization(context).get();
+
+    final Report r = new Report();
+    r.setAuthor(author);
+    r.setState(ReportState.PUBLISHED);
+    r.setAtmosphere(Atmosphere.POSITIVE);
+    r.setIntent("Testing the advisor reports insight");
+    r.setNextSteps("Retrieve the advisor reports insight");
+    final Instant engagementDate =
+        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+    r.setEngagementDate(engagementDate);
+    r.setAttendees(Lists.newArrayList(attendee));
+    r.setAdvisorOrg(advisorOrganization);
+    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+        "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(createdUuid).isNotNull();
   }
 
 }
