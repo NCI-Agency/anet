@@ -24,7 +24,7 @@
     "@babel/preset-react": "^7.7.4",
     "@babel/register": "^7.7.4",
     "@babel/runtime": "^7.7.4",
-    "@storybook/addon-actions": "^5.2.6",
+    "@storybook/addon-actions": "^5.2.8",
     "@storybook/react": "^5.2.6",
     "@wdio/browserstack-service": "^5.16.10",
     "@wdio/cli": "^5.16.10",
