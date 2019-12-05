@@ -9,7 +9,9 @@ import CheckboxSearchFilter, {
 import DateRangeSearch, {
   deserializeDateRangeSearch
 } from "components/advancedSearch/DateRangeSearch"
-import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
+import OrganizationFilter, {
+  deserializeOrganizationFilter
+} from "components/advancedSearch/OrganizationFilter"
 import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
 import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
 import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
@@ -241,6 +243,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Organization: {
         component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
           queryIncludeChildOrgsKey: "includeOrgChildren"
@@ -345,6 +348,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
     filters: {
       Organization: {
         component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
           queryIncludeChildOrgsKey: "includeChildOrgs"
@@ -450,6 +454,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       [POSTITION_ORGANIZATION_FILTER_KEY]: {
         component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "organizationUuid",
           queryIncludeChildOrgsKey: "includeChildrenOrgs",
