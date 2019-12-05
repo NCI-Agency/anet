@@ -48,7 +48,7 @@
     "countries-list": "^2.5.0",
     "cross-fetch": "^3.0.4",
     "cross-spawn": "^7.0.1",
-    "css-loader": "^3.2.0",
+    "css-loader": "^3.2.1",
     "dotenv": "^8.2.0",
     "eslint": "^5.16.0",
     "eslint-config-react-app": "^3.0.8",
