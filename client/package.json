@@ -106,7 +106,7 @@
     "@fullcalendar/timegrid": "^4.3.0",
     "apollo-boost": "^0.4.4",
     "bootstrap": "^3.4.1",
-    "change-case": "^3.1.0",
+    "change-case": "^4.0.1",
     "classnames": "^2.2.6",
     "core-js": "^3.4.5",
     "create-react-class": "^15.6.3",
