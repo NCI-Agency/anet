@@ -20,8 +20,13 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const OrganizationFilter = props => {
-  const { asFormField, onChange, queryKey, queryIncludeChildOrgsKey } = props
-  const queryParams = props.queryParams || {}
+  const {
+    asFormField,
+    onChange,
+    queryKey,
+    queryIncludeChildOrgsKey,
+    orgFilterQueryParams
+  } = props
   const latestValueProp = useRef(props.value)
   const valuePropUnchanged = _isEqualWith(
     latestValueProp.current,
@@ -69,13 +74,13 @@ const OrganizationFilter = props => {
     "value",
     "queryKey",
     "queryIncludeChildOrgsKey",
-    "queryParams",
+    "orgFilterQueryParams",
     "asFormField"
   )
   const advancedSelectFilters = {
     all: {
       label: "All",
-      queryVars: queryParams
+      queryVars: orgFilterQueryParams
     }
   }
 
@@ -117,13 +122,15 @@ const OrganizationFilter = props => {
 OrganizationFilter.propTypes = {
   // An OrganizationFilter filter allows users to search the ANET database
   // for existing organizations and use that records ID as the search term.
+  // If a position type has been selected, it will only search for organizations
+  // of the related type.
   // The queryKey property tells this filter what property to set on the
   // search query (ie authorUuid, organizationUuid, etc).
   queryKey: PropTypes.string.isRequired,
   queryIncludeChildOrgsKey: PropTypes.string.isRequired,
   value: PropTypes.any,
   onChange: PropTypes.func,
-  queryParams: PropTypes.object,
+  orgFilterQueryParams: PropTypes.object,
   asFormField: PropTypes.bool
 }
 OrganizationFilter.defaultProps = {

@@ -1,7 +1,6 @@
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import searchFilters, {
-  POSTITION_ORGANIZATION_FILTER_KEY,
   POSTITION_POSITION_TYPE_FILTER_KEY
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
@@ -23,22 +22,6 @@ import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
 
-function updateOrganizationFilterState(organizationFilter, positionType) {
-  if (organizationFilter) {
-    if (positionType === Position.TYPE.PRINCIPAL) {
-      organizationFilter.setState({
-        queryParams: { type: Organization.TYPE.PRINCIPAL_ORG }
-      })
-    } else if (positionType === Position.TYPE.ADVISOR) {
-      organizationFilter.setState({
-        queryParams: { type: Organization.TYPE.ADVISOR_ORG }
-      })
-    } else {
-      organizationFilter.setState({ queryParams: {} })
-    }
-  }
-}
-
 const AdvancedSearch = props => {
   const { query, text } = props
   const history = useHistory()
@@ -46,13 +29,9 @@ const AdvancedSearch = props => {
   const [filters, setFilters] = useState(
     query.filters ? query.filters.slice() : []
   )
-  const [positionTypeFilter, setPositionTypeFilter] = useState(null)
-  const [organizationFilter, setOrganizationFilter] = useState(null)
-
-  const ALL_FILTERS = searchFilters.searchFilters(
-    changePositionTypeFilter,
-    changeOrganizationFilter
-  )
+  // Keep orgFilterQueryParams as it depends on the value selected for the positonTypeFilter
+  const [orgFilterQueryParams, setOrgFilterQueryParams] = useState({})
+  const ALL_FILTERS = searchFilters.searchFilters()
   // console.log("RENDER AdvancedSearch", objectType, text, filters)
   const filterDefs = objectType ? ALL_FILTERS[objectType].filters : {}
   const existingKeys = filters.map(f => f.key)
@@ -96,7 +75,8 @@ const AdvancedSearch = props => {
                     filter={filter}
                     onRemove={removeFilter}
                     element={filterDefs[filter.key]}
-                    organizationFilter={organizationFilter}
+                    updateOrgFilterQueryParams={setOrgFilterQueryParams}
+                    orgFilterQueryParams={orgFilterQueryParams}
                   />
                 )
             )}
@@ -149,26 +129,10 @@ const AdvancedSearch = props => {
     </Formik>
   )
 
-  function changePositionTypeFilter(positionTypeFilter) {
-    updateOrganizationFilter(positionTypeFilter, organizationFilter)
-    setPositionTypeFilter(positionTypeFilter)
-  }
-
-  function changeOrganizationFilter(organizationFilter) {
-    updateOrganizationFilter(positionTypeFilter, organizationFilter)
-    setOrganizationFilter(organizationFilter)
-  }
-
-  function updateOrganizationFilter(positionTypeFilter, organizationFilter) {
-    const positionType = positionTypeFilter
-      ? positionTypeFilter.state.value.value
-      : ""
-    updateOrganizationFilterState(organizationFilter, positionType)
-  }
-
   function changeObjectType(objectType) {
     setObjectType(objectType)
     setFilters([])
+    setOrgFilterQueryParams({})
   }
 
   function clearObjectType() {
@@ -188,10 +152,8 @@ const AdvancedSearch = props => {
     newFilters.splice(newFilters.indexOf(filter), 1)
     setFilters(newFilters)
 
-    if (filter.key === POSTITION_ORGANIZATION_FILTER_KEY) {
-      changeOrganizationFilter(null)
-    } else if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
-      changePositionTypeFilter(null)
+    if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
+      setOrgFilterQueryParams({})
     }
   }
 
@@ -248,7 +210,13 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch)
 
 const SearchFilter = props => {
-  const { onRemove, filter, element } = props
+  const {
+    onRemove,
+    filter,
+    element,
+    orgFilterQueryParams,
+    updateOrgFilterQueryParams
+  } = props
   const label = filter.key
   const ChildComponent = element.component
 
@@ -261,6 +229,7 @@ const SearchFilter = props => {
         <ChildComponent
           value={filter.value || ""}
           onChange={onChange}
+          orgFilterQueryParams={orgFilterQueryParams}
           {...element.props}
         />
       </Col>
@@ -274,12 +243,15 @@ const SearchFilter = props => {
 
   function onChange(value) {
     filter.value = value
-
     if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
-      updateOrganizationFilterState(
-        props.organizationFilter,
-        filter.value.value || ""
-      )
+      const positionType = filter.value.value || ""
+      let orgQueryParams = {}
+      if (positionType === Position.TYPE.PRINCIPAL) {
+        orgQueryParams = { type: Organization.TYPE.PRINCIPAL_ORG }
+      } else if (positionType === Position.TYPE.ADVISOR) {
+        orgQueryParams = { type: Organization.TYPE.ADVISOR_ORG }
+      }
+      updateOrgFilterQueryParams(orgQueryParams)
     }
   }
 }
@@ -287,7 +259,8 @@ const SearchFilter = props => {
 SearchFilter.propTypes = {
   onRemove: PropTypes.func,
   filter: PropTypes.object,
-  organizationFilter: PropTypes.object,
+  orgFilterQueryParams: PropTypes.object,
+  updateOrgFilterQueryParams: PropTypes.func,
   element: PropTypes.shape({
     component: PropTypes.func.isRequired,
     props: PropTypes.object

@@ -42,12 +42,12 @@ import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
-export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
 
 const taskFilters = props => {
   const taskFiltersObj = {
     Organization: {
       component: OrganizationFilter,
+      deserializer: deserializeOrganizationFilter,
       props: {
         queryKey: "responsibleOrgUuid",
         queryIncludeChildOrgsKey: "includeChildrenOrgs"
@@ -140,7 +140,7 @@ const advancedSelectFilterTaskProps = {
   addon: TASKS_ICON
 }
 
-const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
+const searchFilters = function() {
   const filters = {}
   const authorWidgetFilters = {
     all: {
@@ -448,17 +448,15 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
           labels: [
             Settings.fields.advisor.position.name,
             Settings.fields.principal.position.name
-          ],
-          ref: positionTypeFilterRef
+          ]
         }
       },
-      [POSTITION_ORGANIZATION_FILTER_KEY]: {
+      Organization: {
         component: OrganizationFilter,
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "organizationUuid",
-          queryIncludeChildOrgsKey: "includeChildrenOrgs",
-          ref: organizationFilterRef
+          queryIncludeChildOrgsKey: "includeChildrenOrgs"
         }
       },
       Status: {
@@ -509,7 +507,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
 }
 
 // filters not being displayed in the advanced search but being used in the search
-const extraFilters = function(positionTypeFilterRef, organizationFilterRef) {
+const extraFilters = function() {
   const filters = {}
   filters[SEARCH_OBJECT_TYPES.REPORTS] = [
     "includeEngagementDayOfWeek",
@@ -549,10 +547,10 @@ SearchFilterDisplay.propTypes = {
 
 export const SearchDescription = props => {
   const { query, showPlaceholders } = props
-  const allFilters = searchFilters()
+  const ALL_FILTERS = searchFilters()
   const filterDefs =
     query.objectType && SEARCH_OBJECT_TYPES[query.objectType]
-      ? allFilters[SEARCH_OBJECT_TYPES[query.objectType]].filters
+      ? ALL_FILTERS[SEARCH_OBJECT_TYPES[query.objectType]].filters
       : {}
   const filters = query.filters.filter(f => filterDefs[f.key])
   return (
