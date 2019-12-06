@@ -1,19 +1,15 @@
+import useSearchFilter from "components/advancedSearch/hooks"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
+import React from "react"
 import { Checkbox, FormGroup } from "react-bootstrap"
 
 const CheckboxSearchFilter = props => {
-  const { asFormField, onChange, queryKey } = props
-  const value = { value: true }
-
-  useEffect(() => {
-    if (asFormField) {
-      onChange({
-        ...value,
-        toQuery: () => ({ [queryKey]: value.value })
-      })
-    }
-  }, [asFormField, onChange, queryKey, value])
+  const { asFormField, queryKey } = props
+  const defaultValue = { value: true }
+  const toQuery = val => {
+    return { [queryKey]: val.value }
+  }
+  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery) // eslint-disable-line no-unused-vars
 
   const msg = "Authorized for me"
   return !asFormField ? (
@@ -28,7 +24,7 @@ const CheckboxSearchFilter = props => {
 }
 CheckboxSearchFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   asFormField: PropTypes.bool
 }
 CheckboxSearchFilter.defaultProps = {

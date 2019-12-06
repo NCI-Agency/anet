@@ -12,7 +12,6 @@ import DateRangeSearch, {
 import OrganizationFilter, {
   deserializeOrganizationFilter
 } from "components/advancedSearch/OrganizationFilter"
-import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
 import ReportStateSearch, {
   deserializeReportStateSearch
 } from "components/advancedSearch/ReportStateSearch"
@@ -457,14 +456,16 @@ const searchFilters = function() {
   filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
     filters: {
       [POSTITION_POSITION_TYPE_FILTER_KEY]: {
-        component: PositionTypeSearchFilter,
+        component: SelectSearchFilter,
+        deserializer: deserializeSelectSearchFilter,
         props: {
           queryKey: "type",
           values: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
           labels: [
             Settings.fields.advisor.position.name,
             Settings.fields.principal.position.name
-          ]
+          ],
+          isPositionTypeFilter: true
         }
       },
       Organization: {

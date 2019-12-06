@@ -1,4 +1,5 @@
 import { Settings } from "api"
+import useSearchFilter from "components/advancedSearch/hooks"
 import CustomDateInput from "components/CustomDateInput"
 import {
   AFTER,
@@ -13,12 +14,10 @@ import {
   ON,
   RANGE_TYPE_LABELS
 } from "dateUtils"
-import _isEqualWith from "lodash/isEqualWith"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React from "react"
 import { FormGroup } from "react-bootstrap"
-import utils from "utils"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
@@ -37,30 +36,16 @@ const dateRangeValue = PropTypes.shape({
 })
 
 const DateRangeSearch = props => {
-  const { asFormField, onChange, onlyBetween, queryKey } = props
-  const latestValueProp = useRef(props.value)
-  const valuePropUnchanged = _isEqualWith(
-    latestValueProp.current,
-    props.value,
-    utils.treatFunctionsAsEqual
-  )
-  const [value, setValue] = useState(
-    props.value || {
-      relative: BETWEEN,
-      start: null,
-      end: null
-    }
-  )
-
-  useEffect(() => {
-    if (!valuePropUnchanged) {
-      latestValueProp.current = props.value
-      setValue(props.value)
-    }
-    if (asFormField) {
-      onChange({ ...value, toQuery: () => dateToQuery(queryKey, value) })
-    }
-  }, [asFormField, onChange, props.value, queryKey, value, valuePropUnchanged])
+  const { asFormField, queryKey, onlyBetween } = props
+  const defaultValue = props.value || {
+    relative: BETWEEN,
+    start: null,
+    end: null
+  }
+  const toQuery = val => {
+    return dateToQuery(queryKey, val)
+  }
+  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
   const selectMenu = onlyBetween => {
     const betweenOption = (
@@ -95,7 +80,7 @@ const DateRangeSearch = props => {
       <select
         disabled={onlyBetween}
         value={value.relative}
-        onChange={onChangeRelative}
+        onChange={handleChangeRelative}
         style={{ marginRight: 5, height: "38px" }}
       >
         {options}
@@ -140,7 +125,7 @@ const DateRangeSearch = props => {
           <CustomDateInput
             showIcon={false}
             value={dateStart}
-            onChange={onChangeStart}
+            onChange={handleChangeStart}
           />
         )}
         {value.relative === BETWEEN && (
@@ -150,34 +135,35 @@ const DateRangeSearch = props => {
           <CustomDateInput
             showIcon={false}
             value={dateEnd}
-            onChange={onChangeEnd}
+            onChange={handleChangeEnd}
           />
         )}
       </div>
     </FormGroup>
   )
 
-  function onChangeStart(newDate) {
+  function handleChangeStart(newDate) {
     setValue(prevValue => {
       return { ...prevValue, start: newDate }
     })
   }
 
-  function onChangeEnd(newDate) {
+  function handleChangeEnd(newDate) {
     setValue(prevValue => {
       return { ...prevValue, end: newDate }
     })
   }
 
-  function onChangeRelative(newValue) {
+  function handleChangeRelative(newValue) {
+    const relativeVal = newValue.target.value // synthetic event outside async context
     setValue(prevValue => {
-      return { ...prevValue, relative: newValue.target.value }
+      return { ...prevValue, relative: relativeVal }
     })
   }
 }
 DateRangeSearch.propTypes = {
   queryKey: PropTypes.string.isRequired,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   onlyBetween: PropTypes.bool,
   value: PropTypes.oneOfType([dateRangeValue, PropTypes.string]),
   asFormField: PropTypes.bool

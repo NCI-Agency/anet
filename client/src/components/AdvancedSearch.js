@@ -29,7 +29,7 @@ const AdvancedSearch = props => {
   const [filters, setFilters] = useState(
     query.filters ? query.filters.slice() : []
   )
-  // Keep orgFilterQueryParams as it depends on the value selected for the positonTypeFilter
+  // Keep orgFilterQueryParams as it depends on the value selected for the positionTypeFilter
   const [orgFilterQueryParams, setOrgFilterQueryParams] = useState({})
   const ALL_FILTERS = searchFilters.searchFilters()
   // console.log("RENDER AdvancedSearch", objectType, text, filters)

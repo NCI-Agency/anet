@@ -1,10 +1,9 @@
-import _isEqualWith from "lodash/isEqualWith"
+import useSearchFilter from "components/advancedSearch/hooks"
 import _map from "lodash/map"
 import { Report } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React from "react"
 import { FormGroup } from "react-bootstrap"
-import utils from "utils"
 
 const STATE_LABELS = {
   [Report.STATE.DRAFT]: "Draft",
@@ -28,47 +27,27 @@ const CANCELLATION_REASON_LABELS = {
 }
 
 const ReportStateSearch = props => {
-  const { asFormField, onChange } = props
-  const latestValueProp = useRef(props.value)
-  const valuePropUnchanged = _isEqualWith(
-    latestValueProp.current,
-    props.value,
-    utils.treatFunctionsAsEqual
-  )
-  const [value, setValue] = useState({
+  const { asFormField } = props
+  const isOnlyCancelled = val => {
+    return val.state.length === 1 && val.state[0] === Report.STATE.CANCELLED
+  }
+
+  const defaultValue = {
     state: props.value.state || [Report.STATE.DRAFT],
     cancelledReason: props.value.cancelledReason || ""
-  })
-  const onlyCancelled =
-    value.state.length === 1 && value.state[0] === Report.STATE.CANCELLED
-
-  useEffect(() => {
-    function toQuery() {
-      let query = { state: value.state }
-      if (onlyCancelled && value.cancelledReason) {
-        query.cancelledReason = value.cancelledReason
-      }
-      return query
+  }
+  const toQuery = val => {
+    const onlyCancelled = isOnlyCancelled(val)
+    let query = { state: val.state }
+    if (onlyCancelled && val.cancelledReason) {
+      query.cancelledReason = val.cancelledReason
     }
-
-    if (!valuePropUnchanged) {
-      latestValueProp.current = props.value
-      setValue(props.value)
-    }
-    if (asFormField) {
-      onChange({ ...value, toQuery: toQuery })
-    }
-  }, [
-    asFormField,
-    onChange,
-    onlyCancelled,
-    props.value,
-    value,
-    valuePropUnchanged
-  ])
+    return query
+  }
+  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
   const labels = value.state.map(s => STATE_LABELS[s])
-
+  const onlyCancelled = isOnlyCancelled(value)
   let stateDisplay = labels.join(" or ")
   if (onlyCancelled && value.cancelledReason) {
     const reason = Report.CANCELLATION_REASON[value.cancelledReason]
@@ -79,7 +58,7 @@ const ReportStateSearch = props => {
     stateDisplay
   ) : (
     <FormGroup>
-      <select value={value.state} onChange={changeState} multiple>
+      <select value={value.state} onChange={handleChangeState} multiple>
         {Object.keys(STATE_LABELS).map(key => (
           <option key={key} value={key}>
             {STATE_LABELS[key]}
@@ -91,7 +70,7 @@ const ReportStateSearch = props => {
           due to{" "}
           <select
             value={value.cancelledReason}
-            onChange={changeCancelledReason}
+            onChange={handleChangeCancelledReason}
           >
             <option value="">Everything</option>
             {Object.keys(CANCELLATION_REASON_LABELS).map(key => (
@@ -105,7 +84,7 @@ const ReportStateSearch = props => {
     </FormGroup>
   )
 
-  function changeState(event) {
+  function handleChangeState(event) {
     const selectedOptions =
       event.target.selectedOptions ||
       Array.from(event.target.options).filter(o => o.selected)
@@ -115,7 +94,7 @@ const ReportStateSearch = props => {
     }))
   }
 
-  function changeCancelledReason(event) {
+  function handleChangeCancelledReason(event) {
     const reason = event.target.value // synthetic event outside async context
     setValue(prevValue => ({ ...prevValue, cancelledReason: reason }))
   }
@@ -133,7 +112,7 @@ ReportStateSearch.propTypes = {
       toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
     })
   ]),
-  onChange: PropTypes.func,
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   // Passed by the SearchFilterDisplay row
   asFormField: PropTypes.bool
 }

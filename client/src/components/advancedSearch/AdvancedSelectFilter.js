@@ -1,33 +1,17 @@
 import API from "api"
 import { gql } from "apollo-boost"
+import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
-import React, { useState, useEffect, useRef } from "react"
-import utils from "utils"
+import React from "react"
 
 const AdvancedSelectFilter = props => {
-  const { asFormField, onChange, queryKey, valueKey } = props
-  const latestValueProp = useRef(props.value)
-  const valuePropUnchanged = _isEqualWith(
-    latestValueProp.current,
-    props.value,
-    utils.treatFunctionsAsEqual
-  )
-  const [value, setValue] = useState(props.value || {})
-
-  useEffect(() => {
-    if (!valuePropUnchanged) {
-      latestValueProp.current = props.value
-      setValue(props.value)
-    }
-    if (asFormField) {
-      onChange({
-        ...value,
-        toQuery: () => ({ [queryKey]: value && value.uuid })
-      })
-    }
-  }, [asFormField, onChange, props.value, queryKey, value, valuePropUnchanged])
+  const { asFormField, queryKey, valueKey } = props
+  const defaultValue = props.value || {}
+  const toQuery = val => {
+    return { [queryKey]: val && val.uuid }
+  }
+  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
   const advancedSelectProps = Object.without(
     props,
@@ -65,7 +49,7 @@ AdvancedSelectFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
   objectType: PropTypes.func.isRequired,
   value: PropTypes.any,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   valueKey: PropTypes.string.isRequired,
   fields: PropTypes.string,
   asFormField: PropTypes.bool

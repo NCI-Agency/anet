@@ -1,34 +1,33 @@
-import _isEqualWith from "lodash/isEqualWith"
+import useSearchFilter from "components/advancedSearch/hooks"
+import { Position } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React from "react"
 import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
+const advisorSearchPositionTypes = [
+  Position.TYPE.ADVISOR,
+  Position.TYPE.SUPER_USER,
+  Position.TYPE.ADMINISTRATOR
+]
+
 const SelectSearchFilter = props => {
-  const { asFormField, onChange, queryKey } = props
-  const latestValueProp = useRef(props.value)
-  const valuePropUnchanged = _isEqualWith(
-    latestValueProp.current,
-    props.value,
-    utils.treatFunctionsAsEqual
-  )
-  const [value, setValue] = useState({
+  const { asFormField, isPositionTypeFilter, queryKey, values } = props
+  const defaultValue = {
     value: props.value.value || props.values[0] || ""
-  })
+  }
+  const toQuery = val => {
+    // Searching for advisors implies searching for super users and admins as well
+    const valueForQuery =
+      isPositionTypeFilter && val.value === Position.TYPE.ADVISOR
+        ? advisorSearchPositionTypes
+        : val.value
+    return { [queryKey]: valueForQuery }
+  }
+  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
-  useEffect(() => {
-    if (!valuePropUnchanged) {
-      latestValueProp.current = props.value
-      setValue(props.value)
-    }
-    if (asFormField) {
-      onChange({ ...value, toQuery: () => ({ [queryKey]: value.value }) })
-    }
-  }, [asFormField, onChange, props.value, queryKey, value, valuePropUnchanged])
-
-  let values = props.values
-  let labels = props.labels || values.map(v => utils.sentenceCase(v))
-  return !props.asFormField ? (
+  const labels = props.labels || values.map(v => utils.sentenceCase(v))
+  return !asFormField ? (
     <>{labels[values.indexOf(value.value)]}</>
   ) : (
     <FormGroup>
@@ -57,8 +56,9 @@ SelectSearchFilter.propTypes = {
       toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
     })
   ]),
-  onChange: PropTypes.func,
-  asFormField: PropTypes.bool
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
+  asFormField: PropTypes.bool,
+  isPositionTypeFilter: PropTypes.bool
 }
 SelectSearchFilter.defaultProps = {
   asFormField: true

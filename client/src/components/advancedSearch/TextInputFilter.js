@@ -1,30 +1,17 @@
-import _isEqualWith from "lodash/isEqualWith"
+import useSearchFilter from "components/advancedSearch/hooks"
 import PropTypes from "prop-types"
-import React, { useState, useRef, useEffect } from "react"
+import React from "react"
 import { FormControl, FormGroup } from "react-bootstrap"
-import utils from "utils"
 
 const TextInputFilter = props => {
-  const { asFormField, onChange, queryKey } = props
-  const latestValueProp = useRef(props.value)
-  const valuePropUnchanged = _isEqualWith(
-    latestValueProp.current,
-    props.value,
-    utils.treatFunctionsAsEqual
-  )
-  const [value, setValue] = useState(props.value || { value: "" })
+  const { asFormField, queryKey } = props
+  const defaultValue = props.value || { value: "" }
+  const toQuery = val => {
+    return { [queryKey]: val.value }
+  }
+  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery) // eslint-disable-line no-unused-vars
 
-  useEffect(() => {
-    if (!valuePropUnchanged) {
-      latestValueProp.current = props.value
-      setValue(props.value)
-    }
-    if (asFormField) {
-      onChange({ ...value, toQuery: () => ({ [queryKey]: value.value }) })
-    }
-  }, [asFormField, onChange, props.value, queryKey, value, valuePropUnchanged])
-
-  return !props.asFormField ? (
+  return !asFormField ? (
     <>{value.value}</>
   ) : (
     <FormGroup>
@@ -46,7 +33,7 @@ TextInputFilter.propTypes = {
       toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
     })
   ]),
-  onChange: PropTypes.func,
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   // Passed by the SearchFilterDisplay row
   asFormField: PropTypes.bool
 }
