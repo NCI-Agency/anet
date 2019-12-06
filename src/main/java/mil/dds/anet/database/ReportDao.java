@@ -20,6 +20,7 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
@@ -490,22 +491,24 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append("COUNT(reports.\"authorUuid\") AS \"nrReportsSubmitted\"");
 
     sql.append(" FROM ");
-    sql.append("people,");
+    sql.append("positions,");
     sql.append("reports,");
+    sql.append("%5$s");
     sql.append("organizations");
 
-    sql.append(" WHERE people.uuid = reports.\"authorUuid\"");
+    sql.append(" WHERE positions.\"currentPersonUuid\" = reports.\"authorUuid\"");
+    sql.append(" %6$s");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-    sql.append(" AND people.role = :personAdvisor");
+    sql.append(" AND positions.type = :positionAdvisor");
     sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
     sql.append(" AND reports.\"createdAt\" BETWEEN :startDate and :endDate");
-    sql.append(" %9$s");
+    sql.append(" %11$s");
 
     sql.append(" GROUP BY ");
     sql.append("organizations.uuid,");
     sql.append("organizations.\"shortName\",");
-    sql.append("%5$s");
-    sql.append("%6$s");
+    sql.append("%7$s");
+    sql.append("%8$s");
     sql.append(" " + String.format(getWeekFormat(), "reports.\"createdAt\""));
     sql.append(") a");
 
@@ -519,53 +522,56 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrEngagementsAttended\"");
 
     sql.append(" FROM ");
-    sql.append("people,");
+    sql.append("positions,");
+    sql.append("%5$s");
     sql.append("reports,");
     sql.append("\"reportPeople\",");
     sql.append("organizations");
 
-    sql.append(" WHERE people.uuid = \"reportPeople\".\"personUuid\"");
+    sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
+    sql.append(" %6$s");
     sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-    sql.append(" AND people.role = :personAdvisor");
+    sql.append(" AND positions.type = :positionAdvisor");
     sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
     sql.append(" AND reports.\"engagementDate\" BETWEEN :startDate and :endDate");
-    sql.append(" %9$s");
+    sql.append(" %11$s");
 
     sql.append(" GROUP BY ");
     sql.append("organizations.uuid,");
     sql.append("organizations.\"shortName\",");
-    sql.append("%5$s");
-    sql.append("%6$s");
+    sql.append("%7$s");
+    sql.append("%8$s");
     sql.append(" " + String.format(getWeekFormat(), "reports.\"engagementDate\""));
     sql.append(") b");
 
     sql.append(" ON ");
     sql.append(" a.\"organizationUuid\" = b.\"organizationUuid\"");
-    sql.append(" %7$s");
+    sql.append(" %9$s");
     sql.append(" AND a.week = b.week");
 
-    sql.append(" ORDER BY");
-    sql.append(" \"organizationShortName\",");
-    sql.append(" %8$s");
-    sql.append(" week");
+    sql.append(" ORDER BY ");
+    sql.append("\"organizationShortName\",");
+    sql.append("%10$s");
+    sql.append("week;");
 
     final Object[] fmtArgs;
     if (!Organization.DUMMY_ORG_UUID.equals(orgUuid)) {
       fmtArgs = new String[] {
           "CASE WHEN a.\"personUuid\" IS NULL THEN b.\"personUuid\" ELSE a.\"personUuid\" END AS \"personUuid\",",
           "CASE WHEN a.name IS NULL THEN b.name ELSE a.name END AS name,",
-          "people.uuid AS \"personUuid\",", "people.name AS name,", "people.uuid,", "people.name,",
+          "people.uuid AS \"personUuid\",", "people.name AS name,", "people,",
+          "AND positions.\"currentPersonUuid\" = people.uuid", "people.uuid,", "people.name,",
           "AND a.\"personUuid\" = b.\"personUuid\"", "name,",
           "AND organizations.uuid = :organizationUuid"};
       sqlArgs.put("organizationUuid", orgUuid);
     } else {
-      fmtArgs = new String[] {"", "", "", "", "", "", "", "", ""};
+      fmtArgs = new String[] {"", "", "", "", "", "", "", "", "", "", ""};
     }
 
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-    sqlArgs.put("personAdvisor", DaoUtils.getEnumId(Person.Role.ADVISOR));
+    sqlArgs.put("positionAdvisor", DaoUtils.getEnumId(Position.PositionType.ADVISOR));
     sqlArgs.put("reportDraft", DaoUtils.getEnumId(ReportState.DRAFT));
     sqlArgs.put("reportPending", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
     sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
