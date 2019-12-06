@@ -13,7 +13,9 @@ import OrganizationFilter, {
   deserializeOrganizationFilter
 } from "components/advancedSearch/OrganizationFilter"
 import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
-import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
+import ReportStateSearch, {
+  deserializeReportStateSearch
+} from "components/advancedSearch/ReportStateSearch"
 import SelectSearchFilter, {
   deserializeSelectSearchFilter
 } from "components/advancedSearch/SelectSearchFilter"
@@ -291,7 +293,8 @@ const searchFilters = function() {
         })
       },
       State: {
-        component: ReportStateSearch
+        component: ReportStateSearch,
+        deserializer: deserializeReportStateSearch
       },
       "Engagement Status": {
         component: SelectSearchFilter,
