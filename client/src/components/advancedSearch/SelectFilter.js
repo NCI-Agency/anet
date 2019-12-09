@@ -11,7 +11,7 @@ const advisorSearchPositionTypes = [
   Position.TYPE.ADMINISTRATOR
 ]
 
-const SelectSearchFilter = props => {
+const SelectFilter = props => {
   const { asFormField, isPositionTypeFilter, queryKey, values } = props
   const defaultValue = {
     value: props.value.value || props.values[0] || ""
@@ -45,7 +45,7 @@ const SelectSearchFilter = props => {
     setValue({ value: event.target.value })
   }
 }
-SelectSearchFilter.propTypes = {
+SelectFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
   values: PropTypes.array.isRequired,
   labels: PropTypes.array,
@@ -60,11 +60,11 @@ SelectSearchFilter.propTypes = {
   asFormField: PropTypes.bool,
   isPositionTypeFilter: PropTypes.bool
 }
-SelectSearchFilter.defaultProps = {
+SelectFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeSelectSearchFilter = (props, query, key) => {
+export const deserializeSelectFilter = (props, query, key) => {
   if (query[props.queryKey]) {
     const toQueryValue = { [props.queryKey]: query[props.queryKey] }
     return {
@@ -78,4 +78,4 @@ export const deserializeSelectSearchFilter = (props, query, key) => {
   return null
 }
 
-export default SelectSearchFilter
+export default SelectFilter
