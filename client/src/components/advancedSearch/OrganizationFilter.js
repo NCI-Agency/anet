@@ -1,14 +1,13 @@
 import API from "api"
 import { gql } from "apollo-boost"
+import useSearchFilter from "components/advancedSearch/hooks"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import _isEqualWith from "lodash/isEqualWith"
 import { Organization } from "models"
 import PropTypes from "prop-types"
-import React, { useState, useEffect, useRef } from "react"
+import React from "react"
 import { Checkbox } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import utils from "utils"
 
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {
@@ -22,51 +21,24 @@ const GQL_GET_ORGANIZATION = gql`
 const OrganizationFilter = props => {
   const {
     asFormField,
-    onChange,
     queryKey,
     queryIncludeChildOrgsKey,
     orgFilterQueryParams
   } = props
-  const latestValueProp = useRef(props.value)
-  const valuePropUnchanged = _isEqualWith(
-    latestValueProp.current,
-    props.value,
-    utils.treatFunctionsAsEqual
-  )
-  const [value, setValue] = useState(props.value || {})
-  const [includeChildOrgs, setIncludeChildOrgs] = useState(
-    props.value.includeChildOrgs || false
-  )
-
-  useEffect(() => {
-    if (!valuePropUnchanged) {
-      latestValueProp.current = props.value
-      setValue(props.value)
-      setIncludeChildOrgs(props.value.includeChildOrgs || false)
+  const defaultValue = {
+    value: props.value.value || {},
+    includeChildOrgs: props.value.includeChildOrgs || false
+  }
+  const toQuery = val => {
+    return {
+      [queryKey]: val.value.uuid,
+      [queryIncludeChildOrgsKey]: val.includeChildOrgs
     }
-    if (asFormField) {
-      onChange({
-        ...value,
-        includeChildOrgs: includeChildOrgs,
-        toQuery: () => ({
-          [queryKey]: value.uuid,
-          [queryIncludeChildOrgsKey]: includeChildOrgs
-        })
-      })
-    }
-  }, [
-    asFormField,
-    includeChildOrgs,
-    onChange,
-    props.value,
-    queryIncludeChildOrgsKey,
-    queryKey,
-    value,
-    valuePropUnchanged
-  ])
+  }
+  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
-  let msg = props.value.shortName
-  if (msg && includeChildOrgs) {
+  let msg = value.value.shortName
+  if (msg && value.includeChildOrgs) {
     msg += ", including sub-organizations"
   }
   const advancedSelectProps = Object.without(
@@ -102,22 +74,32 @@ const OrganizationFilter = props => {
         fields={Organization.autocompleteQuery}
         placeholder="Filter by organization..."
         addon={ORGANIZATIONS_ICON}
-        onChange={event => {
-          if (typeof event === "object") {
-            setValue(event)
-          }
-        }}
-        value={value}
+        onChange={handleChangeOrg}
+        value={value.value}
       />
       <Checkbox
         inline
-        checked={includeChildOrgs}
-        onChange={event => setIncludeChildOrgs(event.target.checked)}
+        checked={value.includeChildOrgs}
+        onChange={handleChangeIncludeChildOrgs}
       >
         Include sub-organizations
       </Checkbox>
     </div>
   )
+
+  function handleChangeOrg(event) {
+    if (typeof event === "object") {
+      setValue(prevValue => ({
+        ...prevValue,
+        value: event
+      }))
+    }
+  }
+
+  function handleChangeIncludeChildOrgs(event) {
+    const isChecked = event.target.checked // synthetic event outside async context
+    setValue(prevValue => ({ ...prevValue, includeChildOrgs: isChecked }))
+  }
 }
 OrganizationFilter.propTypes = {
   // An OrganizationFilter filter allows users to search the ANET database
@@ -146,16 +128,16 @@ export const deserializeOrganizationFilter = (props, query, key) => {
         const toQueryValue = {
           [props.queryKey]: query[props.queryKey]
         }
+        const value = { value: data.organization }
         if (query[props.queryIncludeChildOrgsKey]) {
-          data.organization.includeChildOrgs =
-            query[props.queryIncludeChildOrgsKey]
+          value.includeChildOrgs = query[props.queryIncludeChildOrgsKey]
           toQueryValue[props.queryIncludeChildOrgsKey] =
             query[props.queryIncludeChildOrgsKey]
         }
         return {
           key: key,
           value: {
-            ...data.organization,
+            ...value,
             toQuery: () => toQueryValue
           }
         }
