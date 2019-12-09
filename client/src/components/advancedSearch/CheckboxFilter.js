@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Checkbox, FormGroup } from "react-bootstrap"
 
-const CheckboxSearchFilter = props => {
+const CheckboxFilter = props => {
   const { asFormField, queryKey } = props
   const defaultValue = { value: true }
   const toQuery = val => {
@@ -22,16 +22,16 @@ const CheckboxSearchFilter = props => {
     </FormGroup>
   )
 }
-CheckboxSearchFilter.propTypes = {
+CheckboxFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
   onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   asFormField: PropTypes.bool
 }
-CheckboxSearchFilter.defaultProps = {
+CheckboxFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeCheckboxSearchFilter = (props, query, key) => {
+export const deserializeCheckboxFilter = (props, query, key) => {
   if (query[props.queryKey]) {
     const toQueryValue = { [props.queryKey]: query[props.queryKey] }
     return {
@@ -45,4 +45,4 @@ export const deserializeCheckboxSearchFilter = (props, query, key) => {
   return null
 }
 
-export default CheckboxSearchFilter
+export default CheckboxFilter

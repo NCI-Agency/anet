@@ -26,7 +26,7 @@ const CANCELLATION_REASON_LABELS = {
     "Availability of Interpreter(s)"
 }
 
-const ReportStateSearch = props => {
+const ReportStateFilter = props => {
   const { asFormField } = props
   const isOnlyCancelled = val => {
     return val.state.length === 1 && val.state[0] === Report.STATE.CANCELLED
@@ -99,7 +99,7 @@ const ReportStateSearch = props => {
     setValue(prevValue => ({ ...prevValue, cancelledReason: reason }))
   }
 }
-ReportStateSearch.propTypes = {
+ReportStateFilter.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.shape({
@@ -116,11 +116,11 @@ ReportStateSearch.propTypes = {
   // Passed by the SearchFilterDisplay row
   asFormField: PropTypes.bool
 }
-ReportStateSearch.defaultProps = {
+ReportStateFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeReportStateSearch = (props, query, key) => {
+export const deserializeReportStateFilter = (props, query, key) => {
   if (query.state) {
     const value = { state: query.state }
     if (query.cancelledReason) {
@@ -137,4 +137,4 @@ export const deserializeReportStateSearch = (props, query, key) => {
   return null
 }
 
-export default ReportStateSearch
+export default ReportStateFilter

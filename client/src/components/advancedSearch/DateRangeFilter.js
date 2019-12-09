@@ -35,7 +35,7 @@ const dateRangeValue = PropTypes.shape({
   ])
 })
 
-const DateRangeSearch = props => {
+const DateRangeFilter = props => {
   const { asFormField, queryKey, onlyBetween } = props
   const defaultValue = props.value || {
     relative: BETWEEN,
@@ -161,19 +161,19 @@ const DateRangeSearch = props => {
     })
   }
 }
-DateRangeSearch.propTypes = {
+DateRangeFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
   onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   onlyBetween: PropTypes.bool,
   value: PropTypes.oneOfType([dateRangeValue, PropTypes.string]),
   asFormField: PropTypes.bool
 }
-DateRangeSearch.defaultProps = {
+DateRangeFilter.defaultProps = {
   onlyBetween: false,
   asFormField: true
 }
 
-export const deserializeDateRangeSearch = (props, query, key) => {
+export const deserializeDateRangeFilter = (props, query, key) => {
   const startKey = dateRangeStartKey(props.queryKey)
   const endKey = dateRangeEndKey(props.queryKey)
   const toQueryValue = {}
@@ -214,4 +214,4 @@ export const deserializeDateRangeSearch = (props, query, key) => {
   return null
 }
 
-export default DateRangeSearch
+export default DateRangeFilter

@@ -3,18 +3,18 @@ import { Settings } from "api"
 import AdvancedSelectFilter, {
   deserializeAdvancedSelectFilter
 } from "components/advancedSearch/AdvancedSelectFilter"
-import CheckboxSearchFilter, {
-  deserializeCheckboxSearchFilter
-} from "components/advancedSearch/CheckboxSearchFilter"
-import DateRangeSearch, {
-  deserializeDateRangeSearch
-} from "components/advancedSearch/DateRangeSearch"
+import CheckboxFilter, {
+  deserializeCheckboxFilter
+} from "components/advancedSearch/CheckboxFilter"
+import DateRangeFilter, {
+  deserializeDateRangeFilter
+} from "components/advancedSearch/DateRangeFilter"
 import OrganizationFilter, {
   deserializeOrganizationFilter
 } from "components/advancedSearch/OrganizationFilter"
-import ReportStateSearch, {
-  deserializeReportStateSearch
-} from "components/advancedSearch/ReportStateSearch"
+import ReportStateFilter, {
+  deserializeReportStateFilter
+} from "components/advancedSearch/ReportStateFilter"
 import SelectSearchFilter, {
   deserializeSelectSearchFilter
 } from "components/advancedSearch/SelectSearchFilter"
@@ -69,8 +69,8 @@ const taskFilters = props => {
   const projectedCompletion = Settings.fields.task.projectedCompletion
   if (projectedCompletion) {
     taskFiltersObj[projectedCompletion.label] = {
-      component: DateRangeSearch,
-      deserializer: deserializeDateRangeSearch,
+      component: DateRangeFilter,
+      deserializer: deserializeDateRangeFilter,
       props: {
         queryKey: "projectedCompletion"
       }
@@ -79,8 +79,8 @@ const taskFilters = props => {
   const plannedCompletion = Settings.fields.task.plannedCompletion
   if (plannedCompletion) {
     taskFiltersObj[plannedCompletion.label] = {
-      component: DateRangeSearch,
-      deserializer: deserializeDateRangeSearch,
+      component: DateRangeFilter,
+      deserializer: deserializeDateRangeFilter,
       props: {
         queryKey: "plannedCompletion"
       }
@@ -255,29 +255,29 @@ const searchFilters = function() {
         }
       },
       "Engagement Date": {
-        component: DateRangeSearch,
-        deserializer: deserializeDateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "engagementDate"
         }
       },
       "Release Date": {
-        component: DateRangeSearch,
-        deserializer: deserializeDateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "releasedAt"
         }
       },
       "Creation Date": {
-        component: DateRangeSearch,
-        deserializer: deserializeDateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "createdAt"
         }
       },
       "Update Date": {
-        component: DateRangeSearch,
-        deserializer: deserializeDateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "updatedAt"
         }
@@ -292,8 +292,8 @@ const searchFilters = function() {
         })
       },
       State: {
-        component: ReportStateSearch,
-        deserializer: deserializeReportStateSearch
+        component: ReportStateFilter,
+        deserializer: deserializeReportStateFilter
       },
       "Engagement Status": {
         component: SelectSearchFilter,
@@ -330,8 +330,8 @@ const searchFilters = function() {
         }
       },
       "Sensitive Info": {
-        component: CheckboxSearchFilter,
-        deserializer: deserializeCheckboxSearchFilter,
+        component: CheckboxFilter,
+        deserializer: deserializeCheckboxFilter,
         props: {
           queryKey: "sensitiveInfo"
         }
