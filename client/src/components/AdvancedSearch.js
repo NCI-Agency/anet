@@ -22,6 +22,22 @@ import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
 
+const ORG_QUERY_PARAM_TYPES = {
+  NONE: {},
+  PRINCIPAL: { type: Organization.TYPE.PRINCIPAL_ORG },
+  ADVISOR: { type: Organization.TYPE.ADVISOR_ORG }
+}
+
+function getOrgQueryParams(positionType) {
+  if (positionType === Position.TYPE.PRINCIPAL) {
+    return ORG_QUERY_PARAM_TYPES.PRINCIPAL
+  } else if (positionType === Position.TYPE.ADVISOR) {
+    return ORG_QUERY_PARAM_TYPES.ADVISOR
+  } else {
+    return ORG_QUERY_PARAM_TYPES.NONE
+  }
+}
+
 const AdvancedSearch = props => {
   const { query, text } = props
   const history = useHistory()
@@ -30,7 +46,9 @@ const AdvancedSearch = props => {
     query.filters ? query.filters.slice() : []
   )
   // Keep orgFilterQueryParams as it depends on the value selected for the positionTypeFilter
-  const [orgFilterQueryParams, setOrgFilterQueryParams] = useState({})
+  const [orgFilterQueryParams, setOrgFilterQueryParams] = useState(
+    getOrgQueryParams(null)
+  )
   const ALL_FILTERS = searchFilters.searchFilters()
   // console.log("RENDER AdvancedSearch", objectType, text, filters)
   const filterDefs = objectType ? ALL_FILTERS[objectType].filters : {}
@@ -132,7 +150,7 @@ const AdvancedSearch = props => {
   function changeObjectType(objectType) {
     setObjectType(objectType)
     setFilters([])
-    setOrgFilterQueryParams({})
+    setOrgFilterQueryParams(getOrgQueryParams(null))
   }
 
   function clearObjectType() {
@@ -153,7 +171,7 @@ const AdvancedSearch = props => {
     setFilters(newFilters)
 
     if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
-      setOrgFilterQueryParams({})
+      setOrgFilterQueryParams(getOrgQueryParams(null))
     }
   }
 
@@ -208,22 +226,6 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch)
-
-const ORG_QUERY_PARAM_TYPES = {
-  NONE: {},
-  PRINCIPAL: { type: Organization.TYPE.PRINCIPAL_ORG },
-  ADVISOR: { type: Organization.TYPE.ADVISOR_ORG }
-}
-
-function getOrgQueryParams(positionType) {
-  if (positionType === Position.TYPE.PRINCIPAL) {
-    return ORG_QUERY_PARAM_TYPES.PRINCIPAL
-  } else if (positionType === Position.TYPE.ADVISOR) {
-    return ORG_QUERY_PARAM_TYPES.ADVISOR
-  } else {
-    return ORG_QUERY_PARAM_TYPES.NONE
-  }
-}
 
 const SearchFilter = props => {
   const {
