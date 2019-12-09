@@ -209,6 +209,22 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch)
 
+const ORG_QUERY_PARAM_TYPES = {
+  NONE: {},
+  PRINCIPAL: { type: Organization.TYPE.PRINCIPAL_ORG },
+  ADVISOR: { type: Organization.TYPE.ADVISOR_ORG }
+}
+
+function getOrgQueryParams(positionType) {
+  if (positionType === Position.TYPE.PRINCIPAL) {
+    return ORG_QUERY_PARAM_TYPES.PRINCIPAL
+  } else if (positionType === Position.TYPE.ADVISOR) {
+    return ORG_QUERY_PARAM_TYPES.ADVISOR
+  } else {
+    return ORG_QUERY_PARAM_TYPES.NONE
+  }
+}
+
 const SearchFilter = props => {
   const {
     onRemove,
@@ -245,13 +261,7 @@ const SearchFilter = props => {
     filter.value = value
     if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
       const positionType = filter.value.value || ""
-      let orgQueryParams = {}
-      if (positionType === Position.TYPE.PRINCIPAL) {
-        orgQueryParams = { type: Organization.TYPE.PRINCIPAL_ORG }
-      } else if (positionType === Position.TYPE.ADVISOR) {
-        orgQueryParams = { type: Organization.TYPE.ADVISOR_ORG }
-      }
-      updateOrgFilterQueryParams(orgQueryParams)
+      updateOrgFilterQueryParams(getOrgQueryParams(positionType))
     }
   }
 }
