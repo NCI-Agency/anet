@@ -25,7 +25,7 @@ function getListEndpoint(type) {
   }
 }
 
-async function getRandomObject(user, type, variables) {
+export async function getRandomObject(user, type, variables, fields = "uuid") {
   const [listEndpoint, queryType] = getListEndpoint(type)
   const objectQuery = Object.assign({}, variables, {
     pageNum: 0,
@@ -55,7 +55,7 @@ async function getRandomObject(user, type, variables) {
       query ($objectQuery: ${queryType}) {
         ${listEndpoint}(query: $objectQuery) {
           list {
-            uuid
+            ${fields}
           }
         }
       }

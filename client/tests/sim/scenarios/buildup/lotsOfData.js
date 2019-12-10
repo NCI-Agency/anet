@@ -3,6 +3,7 @@ import { createLocation } from "../../stories/LocationStories"
 import { createNote } from "../../stories/NoteStories"
 import { createHierarchy } from "../../stories/OrganizationStories"
 import { createPerson } from "../../stories/PersonStories"
+import { createPosition } from "../../stories/PositionStories"
 import { createReport } from "../../stories/ReportStories"
 
 const buildupLotsOfData = [
@@ -48,33 +49,41 @@ const buildupLotsOfData = [
   },
   {
     name: "Create advisor organization",
-    number: 200,
+    number: 20,
     runnable: createHierarchy,
     preDelay: 0,
     userTypes: ["existingAdmin"],
     arguments: {
       type: Organization.TYPE.ADVISOR_ORG,
       status: Organization.STATUS.ACTIVE,
-      subOrgs: false
+      subOrgs: true
     }
   },
   {
     name: "Create principal organization",
-    number: 1000,
+    number: 100,
     runnable: createHierarchy,
     preDelay: 0,
     userTypes: ["existingAdmin"],
     arguments: {
       type: Organization.TYPE.PRINCIPAL_ORG,
       status: Organization.STATUS.ACTIVE,
-      subOrgs: false
+      subOrgs: true
     }
+  },
+  {
+    name: "Create position",
+    number: 20000,
+    runnable: createPosition,
+    preDelay: 300,
+    userTypes: ["existingAdmin"],
+    arguments: {}
   },
   {
     name: "Create published report #1",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -82,7 +91,7 @@ const buildupLotsOfData = [
     name: "Create published report #2",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -90,7 +99,7 @@ const buildupLotsOfData = [
     name: "Create published report #3",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -98,7 +107,7 @@ const buildupLotsOfData = [
     name: "Create published report #4",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -106,7 +115,7 @@ const buildupLotsOfData = [
     name: "Create published report #5",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -114,7 +123,7 @@ const buildupLotsOfData = [
     name: "Create published report #6",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -122,7 +131,7 @@ const buildupLotsOfData = [
     name: "Create published report #7",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -130,7 +139,7 @@ const buildupLotsOfData = [
     name: "Create published report #8",
     number: 25000,
     runnable: createReport,
-    preDelay: 120,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -168,9 +177,9 @@ const buildupLotsOfData = [
   },
   {
     name: "Create position note",
-    number: 100,
+    number: 1000,
     runnable: createNote,
-    preDelay: 60,
+    preDelay: 600,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "positions" }
   },
@@ -186,7 +195,7 @@ const buildupLotsOfData = [
     name: "Create report note #1",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   },
@@ -194,7 +203,7 @@ const buildupLotsOfData = [
     name: "Create report note #2",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   },
@@ -202,7 +211,7 @@ const buildupLotsOfData = [
     name: "Create report note #3",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   },
@@ -210,7 +219,7 @@ const buildupLotsOfData = [
     name: "Create report note #4",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   },
@@ -218,7 +227,7 @@ const buildupLotsOfData = [
     name: "Create report note #5",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   },
@@ -226,7 +235,7 @@ const buildupLotsOfData = [
     name: "Create report note #6",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   },
@@ -234,7 +243,7 @@ const buildupLotsOfData = [
     name: "Create report note #7",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   },
@@ -242,7 +251,7 @@ const buildupLotsOfData = [
     name: "Create report note #8",
     number: 1000,
     runnable: createNote,
-    preDelay: 600,
+    preDelay: 900,
     userTypes: ["existingAdmin"],
     arguments: { relatedObjectType: "reports" }
   }

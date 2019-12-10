@@ -5,8 +5,9 @@ import React from "react"
 
 const _advisorStats = (columnGroups, statistics) => {
   let stats = []
-  columnGroups.forEach((group, index) => {
-    let rowCell = statistics[index]
+  columnGroups.forEach(group => {
+    let rowCell = statistics.filter(s => s.week === group)
+    rowCell = rowCell ? rowCell[0] : null
     let keySubmitted = _uniqueId("submitted_")
     let keyAttended = _uniqueId("attended_")
     if (rowCell) {

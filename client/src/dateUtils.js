@@ -27,30 +27,33 @@ export function dateRangeEndKey(queryKey) {
 }
 
 export function dateToQuery(queryKey, value) {
-  let startKey = dateRangeStartKey(queryKey)
-  let endKey = dateRangeEndKey(queryKey)
+  const startKey = dateRangeStartKey(queryKey)
+  const endKey = dateRangeEndKey(queryKey)
+  const startDateStart = value.start && moment(null).startOf("day")
+  const startDateEnd = value.start && moment(value.start).endOf("day")
+  const endDateEnd = value.end && moment(value.end).endOf("day")
 
   if (value.relative === BETWEEN) {
     // Between start and end date
     return {
-      [startKey]: moment(value.start).startOf("day"),
-      [endKey]: moment(value.end).endOf("day")
+      [startKey]: startDateStart,
+      [endKey]: endDateEnd
     }
   } else if (value.relative === BEFORE) {
     // Before end date
     return {
-      [endKey]: moment(value.end).endOf("day")
+      [endKey]: endDateEnd
     }
   } else if (value.relative === AFTER) {
     // After start date
     return {
-      [startKey]: moment(value.start).startOf("day")
+      [startKey]: startDateStart
     }
   } else if (value.relative === ON) {
     // On given date
     return {
-      [startKey]: moment(value.start).startOf("day"),
-      [endKey]: moment(value.start).endOf("day")
+      [startKey]: startDateStart,
+      [endKey]: startDateEnd
     }
   } else {
     // LAST_DAY, LAST_WEEK, LAST_MONTH => Time relative to now, up till now
