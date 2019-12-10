@@ -16,7 +16,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   public PostgresqlReportSearcher() {
     super(new PostgresqlSearchQueryBuilder<Report, ReportSearchQuery>("PostgresqlReportSearch"));
-    this.isoDowFormat = "EXTRACT(ISODOW FROM %s)";
+    this.isoDowFormat = "EXTRACT(DOW FROM %s)+1"; // We need Sunday=1, Monday=2, etc.
   }
 
   @InTransaction
