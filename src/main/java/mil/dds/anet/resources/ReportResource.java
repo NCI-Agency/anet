@@ -976,7 +976,8 @@ public class ReportResource {
         .withMinute(0).withSecond(0).withNano(0).toInstant();
     Instant startDate =
         weekStart.atZone(DaoUtils.getDefaultZoneId()).minusWeeks(weeksAgo).toInstant();
-    final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgUuid);
+    final List<Map<String, Object>> list =
+        dao.getAdvisorReportInsights(startDate, weekStart, orgUuid);
 
     final String groupName = "stats";
     final String topLevelField;

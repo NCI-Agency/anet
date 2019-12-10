@@ -68,12 +68,6 @@ async function createHierarchy(user, grow, args) {
   const status = args.status || Organization.STATUS.ACTIVE // faker.random.objectElement(Organization.STATUS)
   const usedServices = []
 
-  console.debug(
-    `Creating ${type.toLowerCase().green} organization ${longName.green} (${
-      shortName.green
-    })`
-  )
-
   return createSubOrg(undefined, [])
 
   /**
@@ -123,6 +117,12 @@ async function createHierarchy(user, grow, args) {
     org.identificationCode = faker.helpers.replaceSymbols("??????")
     org.type = type
     org.status = status
+
+    console.debug(
+      `Creating ${org.type.toLowerCase().green} ${
+        level > 0 ? "sub-" : ""
+      }organization ${org.longName.green} (${org.shortName.green})`
+    )
 
     // store the organization in the database
     const result = await gqlCreateOrganization(user, org)
