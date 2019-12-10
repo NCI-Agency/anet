@@ -62,17 +62,19 @@ public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends Abs
       qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
     }
 
+    final String materializedView = String.format("\"mv_fts_%1$s\"", tableName);
+    final String fullTextColumn = String.format("%1$s.full_text", materializedView);
     final String tsQuery = "websearch_to_tsquery('anet', :fullTextQuery)";
-    whereClauses.add(String.format("SELECT uuid FROM \"mv_fts_%1$s\" WHERE full_text @@ %2$s",
-        tableName, tsQuery));
+    whereClauses.add(String.format("SELECT uuid FROM %1$s WHERE %2$s @@ %3$s", materializedView,
+        fullTextColumn, tsQuery));
     qb.addWhereClause(String.format("\"%1$s\".uuid IN (%2$s)", tableName,
         Joiner.on(" UNION ").join(whereClauses)));
     qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));
 
     if (!isSortByPresent) {
-      selectClauses.add(String.format("ts_rank(full_text, %1$s)", tsQuery));
-      qb.addFromClause(String
-          .format("LEFT JOIN \"mv_fts_%1$s\" ON \"mv_fts_%1$s\".uuid = \"%1$s\".uuid", tableName));
+      selectClauses.add(String.format("ts_rank(%1$s, %2$s)", fullTextColumn, tsQuery));
+      qb.addFromClause(String.format("LEFT JOIN %1$s ON %1$s.uuid = \"%2$s\".uuid",
+          materializedView, tableName));
       qb.addSelectClause(
           String.format("(%1$s) AS search_rank", Joiner.on(" + ").join(selectClauses)));
     }
