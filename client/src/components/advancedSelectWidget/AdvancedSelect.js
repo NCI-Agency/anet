@@ -116,7 +116,6 @@ export default class AdvancedSelect extends Component {
     filterType: Object.keys(this.props.filterDefs)[0], // per default use the first filter
     results: {},
     showOverlay: false,
-    inputFocused: false,
     isLoading: false
   }
 
