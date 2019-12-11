@@ -65,7 +65,7 @@ const AdvancedSearch = props => {
   const moreFiltersAvailable =
     existingKeys.length < Object.keys(filterDefs).length
 
-  const MenuContent = (
+  const advancedSearchMenuContent = (
     <Menu
       className={Classes.POPOVER_DISMISS}
       style={{ maxHeight: "400px", overflowY: "auto" }}
@@ -135,7 +135,7 @@ const AdvancedSearch = props => {
                   "No additional filters available"
                 ) : (
                   <Popover
-                    content={MenuContent}
+                    content={advancedSearchMenuContent}
                     captureDismiss
                     interactionKind={PopoverInteractionKind.CLICK}
                     usePortal={false}
