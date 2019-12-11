@@ -10,43 +10,31 @@ import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
 
-import { Popover, Position, PopoverInteractionKind } from "@blueprintjs/core"
-
-export class SearchPopover extends PureComponent {
-  constructor(props) {
-    super(props)
-    this.state = {
-      isOpen: false
-    }
-  }
-
-  render() {
-    const { isOpen } = this.state
-    const { popoverContent, children } = this.props
-    return (
-      <Popover
-        isOpen={isOpen}
-        onInteraction={this._handleInteraction}
-        boundary="window"
-        captureDismiss
-        content={popoverContent}
-        interactionKind={PopoverInteractionKind.CLICK}
-        position={Position.BOTTOM_LEFT}
-        usePortal={false}
-        modifiers={{
-          preventOverflow: {
-            enabled: false
-          },
-          flip: {
-            enabled: false
-          }
-        }}
-      >
-        {children}
-      </Popover>
-    )
-  }
-  _handleInteraction = isOpen => this.setState({ isOpen })
+export const SearchPopover = ({ popoverContent, children }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const _handleInteraction = isOpen => setIsOpen(isOpen)
+  return (
+    <Popover
+      isOpen={isOpen}
+      onInteraction={_handleInteraction}
+      boundary="window"
+      captureDismiss
+      content={popoverContent}
+      interactionKind={PopoverInteractionKind.CLICK}
+      position={Position.BOTTOM_LEFT}
+      usePortal={false}
+      modifiers={{
+        preventOverflow: {
+          enabled: false
+        },
+        flip: {
+          enabled: false
+        }
+      }}
+    >
+      {children}
+    </Popover>
+  )
 }
 
 SearchPopover.propTypes = {
@@ -89,7 +77,7 @@ const SearchBar = props => {
     />
   )
   return (
-    <div>
+    <>
       <Form onSubmit={onSubmit} className="advanced-search-form">
         <InputGroup>
           <FormControl
@@ -110,7 +98,7 @@ const SearchBar = props => {
       <SearchPopover popoverContent={PopoverContent}>
         <SearchDescription query={query} showPlaceholders />
       </SearchPopover>
-    </div>
+    </>
   )
 
   function onChange(event) {
