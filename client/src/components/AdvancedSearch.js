@@ -1,3 +1,11 @@
+import {
+  Classes,
+  Menu,
+  MenuItem,
+  Popover,
+  PopoverInteractionKind,
+  Position as PopoverPosition
+} from "@blueprintjs/core"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import searchFilters, {
@@ -20,15 +28,6 @@ import {
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
-
-import {
-  Classes,
-  Menu,
-  MenuItem,
-  Popover,
-  Position as PopoverPosition,
-  PopoverInteractionKind
-} from "@blueprintjs/core"
 
 function updateOrganizationFilterState(organizationFilter, positionType) {
   if (organizationFilter) {

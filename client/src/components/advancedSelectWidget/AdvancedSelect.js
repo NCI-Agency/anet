@@ -1,3 +1,4 @@
+import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
 import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
@@ -8,8 +9,6 @@ import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
-import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
-
 import "./AdvancedSelect.css"
 
 const hasMultipleItems = object => Object.keys(object).length > 1
