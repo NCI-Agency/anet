@@ -695,6 +695,15 @@ header.searchPagination {
 	width: 100% !important;
 }
 
+.advanced-select-popover span.bp3-popover-target {
+	display: block;
+	width: 100%;
+}
+
+.advanced-select-popover .bp3-transition-container {
+	top: 35px !important;
+}
+
 .advanced-select-popover .bp3-popover-content {
 	min-width: 400px;
 	max-width: 90vw !important;

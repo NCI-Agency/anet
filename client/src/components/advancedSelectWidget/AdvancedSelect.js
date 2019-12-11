@@ -120,9 +120,9 @@ export default class AdvancedSelect extends Component {
     isLoading: false
   }
 
-  latestRequest = null
   overlayContainer = React.createRef()
   overlayTarget = React.createRef()
+  searchInput = React.createRef()
 
   componentDidMount() {
     this.setState({
@@ -146,6 +146,7 @@ export default class AdvancedSelect extends Component {
 
   render() {
     const {
+      closeOverlayOnAdd,
       fieldName,
       placeholder,
       value,
@@ -181,11 +182,11 @@ export default class AdvancedSelect extends Component {
       : null
     const items = results && results[filterType] ? results[filterType].list : []
 
-    const PopoverContent = (
+    const advancedSearchPopoverContent = (
       <Row className="border-between">
         <FilterAsNav
           items={filterDefs}
-          currentFilter={this.state.filterType}
+          currentFilter={filterType}
           handleOnClick={this.changeFilterType}
         />
 
@@ -201,7 +202,7 @@ export default class AdvancedSelect extends Component {
             selectedItems={value}
             handleAddItem={item => {
               handleAddItem(item)
-              if (this.props.closeOverlayOnAdd) {
+              if (closeOverlayOnAdd) {
                 this.handleHideOverlay()
               }
             }}
@@ -223,40 +224,40 @@ export default class AdvancedSelect extends Component {
     return (
       <>
         <div id={`${fieldName}-popover`}>
-          <Popover
-            className="advanced-select-popover"
-            popoverClassName="bp3-popover-content-sizing"
-            content={PopoverContent}
-            isOpen={showOverlay}
-            captureDismiss
-            interactionKind={PopoverInteractionKind.CLICK}
-            onInteraction={this.handleInteraction}
-            usePortal={false}
-            position={Position.BOTTOM_LEFT}
-            modifiers={{
-              preventOverflow: {
-                enabled: false
-              },
-              flip: {
-                enabled: false
-              }
-            }}
-          >
-            <InputGroup>
+          <InputGroup>
+            <Popover
+              className="advanced-select-popover"
+              popoverClassName="bp3-popover-content-sizing"
+              content={advancedSearchPopoverContent}
+              isOpen={showOverlay}
+              captureDismiss
+              interactionKind={PopoverInteractionKind.CLICK}
+              onInteraction={this.handleInteraction}
+              usePortal={false}
+              position={Position.BOTTOM}
+              modifiers={{
+                preventOverflow: {
+                  enabled: false
+                },
+                flip: {
+                  enabled: false
+                }
+              }}
+            >
               <FormControl
                 name={fieldName}
-                value={searchTerms === null ? "" : searchTerms}
+                value={searchTerms || ""}
                 placeholder={placeholder}
                 onChange={this.changeSearchTerms}
                 onFocus={this.handleInputFocus}
-                onBlur={this.handleInputBlur}
+                inputRef={this.searchInput}
               />
-              {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-              {addon && (
-                <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-              )}
-            </InputGroup>
-          </Popover>
+            </Popover>
+            {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+            {addon && (
+              <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+            )}
+          </InputGroup>
         </div>
         <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
@@ -268,29 +269,21 @@ export default class AdvancedSelect extends Component {
 
   handleInputFocus = () => {
     if (this.state.showOverlay) {
-      // Overlay is already open and we do input focus, no need to fetch data
-      this.setState({
-        inputFocused: true
-      })
-    } else {
-      this.setState(
-        {
-          searchTerms: "",
-          inputFocused: true,
-          isLoading: true
-        },
-        this.fetchResults()
-      )
+      return // Overlay is already open and we do not need to fetch data
     }
+    this.setState(
+      {
+        searchTerms: "",
+        isLoading: true
+      },
+      this.fetchResults()
+    )
   }
 
-  handleInputBlur = () => {
-    this.setState({
-      inputFocused: false
-    })
+  handleInteraction = (showOverlay, event) => {
+    const inputFocus = this.searchInput.current.contains(event && event.target)
+    return this.setState({ showOverlay: showOverlay || inputFocus })
   }
-
-  handleInteraction = showOverlay => this.setState({ showOverlay })
 
   handleHideOverlay = () => {
     this.setState({
@@ -367,7 +360,7 @@ export default class AdvancedSelect extends Component {
       if (this.state.searchTerms) {
         Object.assign(queryVars, { text: this.state.searchTerms + "*" })
       }
-      let thisRequest = (this.latestRequest = API.query(
+      const thisRequest = (this.latestRequest = API.query(
         gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
