@@ -80,6 +80,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
     private static final String sql =
         "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
     private static final Map<String, Object> additionalParams = new HashMap<>();
+
     static {
       additionalParams.put("type", DaoUtils.getEnumId(ApprovalStepType.PLANNING_APPROVAL));
     }
@@ -94,6 +95,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
     private static final String sql =
         "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
     private static final Map<String, Object> additionalParams = new HashMap<>();
+
     static {
       additionalParams.put("type", DaoUtils.getEnumId(ApprovalStepType.REPORT_APPROVAL));
     }

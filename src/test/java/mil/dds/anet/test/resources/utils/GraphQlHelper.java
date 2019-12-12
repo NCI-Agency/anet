@@ -9,6 +9,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.views.AbstractAnetBean;
 
+@SuppressWarnings("checkstyle:SummaryJavadoc")
 public final class GraphQlHelper {
 
   private static final String getWithParamFmt =
