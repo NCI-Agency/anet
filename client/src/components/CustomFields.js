@@ -10,7 +10,7 @@ import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
@@ -137,7 +137,7 @@ const ArrayOfObjectsField = fieldProps => {
     fieldConfig,
     formikProps,
     invisibleFields,
-    setInvisibleFields
+    updateInvisibleFields
   } = fieldProps
   const nameKeys = name.split(".")
   const value = nameKeys.reduce(
@@ -166,7 +166,7 @@ const ArrayOfObjectsField = fieldProps => {
                 fieldConfig,
                 formikProps,
                 invisibleFields,
-                setInvisibleFields,
+                updateInvisibleFields,
                 arrayHelpers,
                 obj,
                 index
@@ -184,7 +184,7 @@ const renderArrayObject = (
   fieldConfig,
   formikProps,
   invisibleFields,
-  setInvisibleFields,
+  updateInvisibleFields,
   arrayHelpers,
   obj,
   index
@@ -203,7 +203,7 @@ const renderArrayObject = (
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
         invisibleFields={invisibleFields}
-        setInvisibleFields={setInvisibleFields}
+        updateInvisibleFields={updateInvisibleFields}
         fieldNamePrefix={`${fieldName}.${index}`}
       />
     </Fieldset>
@@ -266,18 +266,85 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ArrayOfObjectsField
 }
 
-export const CustomFields = ({
-  fieldsConfig,
-  formikProps,
-  fieldNamePrefix,
+function getInvisibleFields(
   invisibleFields,
-  setInvisibleFields
-}) => {
+  fieldsConfig,
+  fieldNamePrefix,
+  formikValues
+) {
   let prevInvisibleFields = _cloneDeep(invisibleFields)
   let turnedInvisible = []
   let turnedVisible = []
   let curInvisibleFields = []
-  const customFields = (
+  Object.keys(fieldsConfig).forEach(key => {
+    const fieldConfig = fieldsConfig[key]
+    const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
+    const isVisible =
+      !fieldConfig.visibleWhen ||
+      (fieldConfig.visibleWhen &&
+        !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikValues)))
+    if (!isVisible && !prevInvisibleFields.includes(fieldName)) {
+      turnedInvisible.push(fieldName)
+    } else if (isVisible && prevInvisibleFields.includes(fieldName)) {
+      turnedVisible.push(fieldName)
+    }
+  })
+  if (turnedVisible.length || turnedInvisible.length) {
+    curInvisibleFields = prevInvisibleFields.filter(
+      x => !turnedVisible.includes(x)
+    )
+    turnedInvisible.forEach(x => curInvisibleFields.push(x))
+    return curInvisibleFields
+  }
+  return invisibleFields
+}
+
+export const CustomFieldsContainer = props => {
+  const [invisibleFields, setInvisibleFields] = useState([])
+  useEffect(() => {
+    props.formikProps.setFieldValue(
+      "formCustomFields.invisibleCustomFields",
+      invisibleFields
+    )
+  }, [invisibleFields, props.formikProps.setFieldValue])
+  return (
+    <>
+      <Field
+        type="text"
+        name="formCustomFields.invisibleCustomFields"
+        component="textarea"
+      />
+      <CustomFields
+        invisibleFields={invisibleFields}
+        updateInvisibleFields={setInvisibleFields}
+        {...props}
+      />
+    </>
+  )
+}
+CustomFieldsContainer.propTypes = {
+  fieldsConfig: PropTypes.object,
+  formikProps: PropTypes.object,
+  fieldNamePrefix: PropTypes.string
+}
+
+const CustomFields = ({
+  fieldsConfig,
+  formikProps,
+  fieldNamePrefix,
+  invisibleFields,
+  updateInvisibleFields
+}) => {
+  const curInvisibleFields = getInvisibleFields(
+    invisibleFields,
+    fieldsConfig,
+    fieldNamePrefix,
+    formikProps.values
+  )
+  useEffect(() => {
+    updateInvisibleFields(curInvisibleFields)
+  }, [curInvisibleFields, updateInvisibleFields])
+  return (
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
@@ -290,22 +357,14 @@ export const CustomFields = ({
         } = fieldConfig
         const FieldComponent = FIELD_COMPONENTS[type]
         const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
-        const isVisible =
-          !fieldConfig.visibleWhen ||
-          (fieldConfig.visibleWhen &&
-            !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikProps.values)))
-        if (!isVisible && !prevInvisibleFields.includes(fieldName)) {
-          turnedInvisible.push(fieldName)
-        } else if (isVisible && prevInvisibleFields.includes(fieldName)) {
-          turnedVisible.push(fieldName)
-        }
+        const isVisible = !invisibleFields.includes(fieldName)
         let extraProps = {}
         if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
           extraProps = {
             fieldConfig: fieldConfig,
             formikProps: formikProps,
             invisibleFields: invisibleFields,
-            setInvisibleFields: setInvisibleFields
+            updateInvisibleFields: updateInvisibleFields
           }
         }
         return (
@@ -329,21 +388,13 @@ export const CustomFields = ({
       })}
     </>
   )
-  if (turnedVisible.length || turnedInvisible.length) {
-    curInvisibleFields = prevInvisibleFields.filter(
-      x => !turnedVisible.includes(x)
-    )
-    turnedInvisible.forEach(x => curInvisibleFields.push(x))
-    setInvisibleFields(curInvisibleFields)
-  }
-  return customFields
 }
 CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
   fieldNamePrefix: PropTypes.string,
   invisibleFields: PropTypes.array,
-  setInvisibleFields: PropTypes.func
+  updateInvisibleFields: PropTypes.func
 }
 
 const READONLY_FIELD_COMPONENTS = {

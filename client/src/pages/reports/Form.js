@@ -11,7 +11,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
-import { CustomFields } from "components/CustomFields"
+import { CustomFieldsContainer } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -147,7 +147,6 @@ const BaseReportForm = props => {
   )
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  const [invisibleCustomFields, setInvisibleCustomFields] = useState([])
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
   const autoSaveSettings = {
@@ -787,15 +786,13 @@ const BaseReportForm = props => {
               </Fieldset>
 
               <Fieldset title="Engagement information" id="custom-fields">
-                <CustomFields
+                <CustomFieldsContainer
                   fieldsConfig={Settings.fields.report.customFields}
                   formikProps={{
                     setFieldTouched,
                     setFieldValue,
                     values
                   }}
-                  invisibleFields={invisibleCustomFields}
-                  setInvisibleFields={setInvisibleCustomFields}
                 />
               </Fieldset>
 
@@ -1020,7 +1017,7 @@ const BaseReportForm = props => {
     )
     report.location = utils.getReference(report.location)
     // customFields should contain the JSON of all the visible custom fields
-    invisibleCustomFields.forEach(f => {
+    values.formCustomFields.invisibleCustomFields.forEach(f => {
       _set(values, f.split("."), undefined)
     })
     report.customFields = JSON.stringify(values.formCustomFields)

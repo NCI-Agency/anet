@@ -58,7 +58,7 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
     .nullable()
     .default(""),
   [CUSTOM_FIELD_TYPE.NUMBER]: yup
-    .number()
+    .mixed()
     .nullable()
     .default(null),
   [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
@@ -84,7 +84,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
     fieldYupSchema = fieldYupSchema.label(label)
   }
   if (!_isEmpty(objectFields)) {
-    const objSchema = createYupSchema(objectFields)
+    const objSchema = createYupObjectShape(objectFields)
     fieldYupSchema = fieldYupSchema.of(yup.object().shape(objSchema))
   }
   if (!_isEmpty(validations)) {
@@ -98,15 +98,31 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
         : fieldYupSchema[type]()
     })
   }
+  if (fieldConfig.type === CUSTOM_FIELD_TYPE.NUMBER) {
+    // For number type of fields, only validate on number type when they are visible
+    fieldYupSchema = fieldYupSchema.when(
+      "invisibleCustomFields",
+      (invisibleCustomFields, schema) => {
+        return invisibleCustomFields.includes("formCustomFields." + fieldKey)
+          ? schema
+          : schema.concat(yup.number())
+      }
+    )
+  }
   return fieldYupSchema
 }
 
-export const createYupSchema = config => {
-  return Object.fromEntries(
+export const createYupObjectShape = config => {
+  const objShape = Object.fromEntries(
     Object.entries(config)
       .map(([k, v]) => [k, createFieldYupSchema(k, config[k])])
       .filter(([k, v]) => v !== null)
   )
+  objShape.invisibleCustomFields = yup
+    .array()
+    .nullable()
+    .default([])
+  return objShape
 }
 
 export default class Model {

@@ -1,5 +1,5 @@
 import { Settings } from "api"
-import Model, { createYupSchema, yupDate } from "components/Model"
+import Model, { createYupObjectShape, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
@@ -46,7 +46,7 @@ export default class Report extends Model {
   }
 
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupSchema(
+  static customFieldsSchema = createYupObjectShape(
     Settings.fields.report.customFields
   )
 
@@ -65,9 +65,7 @@ export default class Report extends Model {
         .default(null),
       duration: yup
         .number()
-        .integer()
         .nullable()
-        .positive()
         .default(null),
       // not actually in the database, but used for validation:
       cancelled: yup
