@@ -87,7 +87,7 @@ dependencies {
 	compile 'com.google.guava:guava:28.1-jre' // Pick the non-Android version of Guice
 
 	// Supported databases:
-	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
+	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.1.1.jre13-preview'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.2' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
