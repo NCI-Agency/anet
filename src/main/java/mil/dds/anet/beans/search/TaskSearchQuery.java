@@ -17,6 +17,9 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
   private String projectStatus;
   private String customField;
 
+  // Find tasks who (don't) have the customFieldRef1 filled in
+  Boolean hasCustomFieldRef1;
+
   // Search for tasks with a specific parent Task.
   private String customFieldRef1Uuid;
   // Include descendants recursively from the specified parent.
@@ -106,6 +109,14 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
   public void setCustomField(String customField) {
     this.customField = customField;
+  }
+
+  public Boolean getHasCustomFieldRef1() {
+    return hasCustomFieldRef1;
+  }
+
+  public void setHasCustomFieldRef1(Boolean hasCustomFieldRef1) {
+    this.hasCustomFieldRef1 = hasCustomFieldRef1;
   }
 
   public String getCustomFieldRef1Uuid() {

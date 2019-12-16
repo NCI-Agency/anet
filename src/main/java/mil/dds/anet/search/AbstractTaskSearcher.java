@@ -51,6 +51,14 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         "tasks.\"projectedCompletion\"", Comparison.BEFORE, query.getProjectedCompletionEnd());
     qb.addLikeClause("customField", "tasks.\"customField\"", query.getCustomField());
 
+    if (query.getHasCustomFieldRef1() != null) {
+      if (query.getHasCustomFieldRef1()) {
+        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NOT NULL");
+      } else {
+        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NULL");
+      }
+    }
+
     if (query.getCustomFieldRef1Uuid() != null) {
       addCustomFieldRef1UuidQuery(query);
     }
