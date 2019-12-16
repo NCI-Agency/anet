@@ -6,12 +6,12 @@ import {
   propTypes as pagePropTypes,
   useBoilerplate
 } from "components/Page"
-import * as GraphiQLreq from "graphiql"
+import GraphiQL from "graphiql"
 import "graphiql/graphiql.css"
 import React from "react"
 import { connect } from "react-redux"
 
-const GraphiQL = props => {
+const GraphiQLContainer = props => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -21,7 +21,7 @@ const GraphiQL = props => {
   // TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
   return (
     <div style={{ height: "600px" }}>
-      <GraphiQLreq fetcher={fetch} />
+      <GraphiQL fetcher={fetch} />
     </div>
   )
 
@@ -34,6 +34,6 @@ const GraphiQL = props => {
   }
 }
 
-GraphiQL.propTypes = { ...pagePropTypes }
+GraphiQLContainer.propTypes = { ...pagePropTypes }
 
-export default connect(null, mapDispatchToProps)(GraphiQL)
+export default connect(null, mapDispatchToProps)(GraphiQLContainer)
