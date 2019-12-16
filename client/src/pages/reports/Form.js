@@ -316,17 +316,39 @@ const BaseReportForm = props => {
           }
         }
 
-        const tasksFilters = {
+        const tasksFiltersLevel1 = {
           allTasks: {
-            label: "All tasks",
-            queryVars: {}
+            label: "All objectives",
+            queryVars: { hasCustomFieldRef1: false }
+          }
+        }
+        const tasksFiltersLevel2 = {
+          allTasks: {
+            label: "All efforts",
+            queryVars: { hasCustomFieldRef1: true }
           }
         }
         if (currentOrgUuid) {
-          tasksFilters.assignedToMyOrg = {
+          tasksFiltersLevel1.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: currentOrgUuid
+              responsibleOrgUuid: currentOrgUuid,
+              hasCustomFieldRef1: false
+            }
+          }
+          tasksFiltersLevel2.assignedToMyOrg = {
+            label: "Assigned to my organization",
+            queryVars: {
+              responsibleOrgUuid: currentOrgUuid,
+              hasCustomFieldRef1: true
+            }
+          }
+        }
+        if (values.tasksLevel1.length) {
+          tasksFiltersLevel2.forSelectedObjectives = {
+            label: "For selected objectives",
+            queryVars: {
+              customFieldRef1Uuid: values.tasksLevel1[0].uuid
             }
           }
         }
@@ -341,14 +363,21 @@ const BaseReportForm = props => {
           primaryAdvisor.position &&
           primaryAdvisor.position.organization
         ) {
-          tasksFilters.assignedToReportOrg = {
+          tasksFiltersLevel1.assignedToReportOrg = {
             label: "Assigned to organization of report",
             queryVars: {
-              responsibleOrgUuid: primaryAdvisor.position.organization.uuid
+              responsibleOrgUuid: primaryAdvisor.position.organization.uuid,
+              hasCustomFieldRef1: false
+            }
+          }
+          tasksFiltersLevel2.assignedToReportOrg = {
+            label: "Assigned to organization of report",
+            queryVars: {
+              responsibleOrgUuid: primaryAdvisor.position.organization.uuid,
+              hasCustomFieldRef1: true
             }
           }
         }
-
         const authorizationGroupsFilters = {
           allAuthorizationGroups: {
             label: "All authorization groups",
@@ -619,6 +648,36 @@ const BaseReportForm = props => {
                 className="tasks-selector"
               >
                 <AdvancedMultiSelect
+                  fieldName="tasksLevel1"
+                  fieldLabel="Objectives"
+                  placeholder="Search for objectives"
+                  value={values.tasksLevel1}
+                  renderSelected={
+                    <TaskTable
+                      tasks={values.tasksLevel1}
+                      showDelete
+                      showOrganization
+                    />
+                  }
+                  overlayColumns={["Name", "Organization"]}
+                  overlayRenderRow={TaskDetailedOverlayRow}
+                  filterDefs={tasksFiltersLevel1}
+                  onChange={value => {
+                    setFieldValue("tasksLevel1", value)
+                    setFieldTouched("tasksLevel1", true)
+                  }}
+                  objectType={Task}
+                  queryParams={{ status: Task.STATUS.ACTIVE }}
+                  fields={Task.autocompleteQuery}
+                  addon={TASKS_ICON}
+                  shortcutsTitle={`Recent ${pluralize(
+                    Settings.fields.task.shortLabel
+                  )}`}
+                  shortcuts={recents.tasks}
+                  renderExtraCol
+                />
+
+                <AdvancedMultiSelect
                   fieldName="tasks"
                   fieldLabel={Settings.fields.task.shortLabel}
                   placeholder={`Search for ${pluralize(
@@ -634,7 +693,7 @@ const BaseReportForm = props => {
                   }
                   overlayColumns={["Name", "Organization"]}
                   overlayRenderRow={TaskDetailedOverlayRow}
-                  filterDefs={tasksFilters}
+                  filterDefs={tasksFiltersLevel2}
                   onChange={value => {
                     setFieldValue("tasks", value)
                     setFieldTouched("tasks", true)
@@ -975,7 +1034,8 @@ const BaseReportForm = props => {
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
-      "attendees"
+      "attendees",
+      "tasksLevel1"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
