@@ -29,7 +29,7 @@ export function dateRangeEndKey(queryKey) {
 export function dateToQuery(queryKey, value) {
   const startKey = dateRangeStartKey(queryKey)
   const endKey = dateRangeEndKey(queryKey)
-  const startDateStart = value.start && moment(null).startOf("day")
+  const startDateStart = value.start && moment(value.start).startOf("day")
   const startDateEnd = value.start && moment(value.start).endOf("day")
   const endDateEnd = value.end && moment(value.end).endOf("day")
 

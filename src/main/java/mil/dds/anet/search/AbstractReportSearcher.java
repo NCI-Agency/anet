@@ -156,6 +156,10 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
           case CANCELLED:
             engagementStatusClauses.add(" reports.state = :cancelledState");
             qb.addSqlArg("cancelledState", DaoUtils.getEnumId(ReportState.CANCELLED));
+            break;
+          default:
+            // ignore this one
+            break;
         }
       });
       qb.addWhereClause("(" + Joiner.on(" OR ").join(engagementStatusClauses) + ")");
