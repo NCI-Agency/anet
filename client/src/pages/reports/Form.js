@@ -323,6 +323,14 @@ const BaseReportForm = props => {
           }
         }
         const tasksFiltersLevel2 = {
+          forSelectedObjectives: {
+            label: "For selected objectives",
+            queryVars: {
+              customFieldRef1Uuid: values.tasksLevel1.length
+                ? values.tasksLevel1.map(t => t.uuid)
+                : [""]
+            }
+          },
           allTasks: {
             label: "All efforts",
             queryVars: { hasCustomFieldRef1: true }
@@ -341,14 +349,6 @@ const BaseReportForm = props => {
             queryVars: {
               responsibleOrgUuid: currentOrgUuid,
               hasCustomFieldRef1: true
-            }
-          }
-        }
-        if (values.tasksLevel1.length) {
-          tasksFiltersLevel2.forSelectedObjectives = {
-            label: "For selected objectives",
-            queryVars: {
-              customFieldRef1Uuid: values.tasksLevel1[0].uuid
             }
           }
         }
