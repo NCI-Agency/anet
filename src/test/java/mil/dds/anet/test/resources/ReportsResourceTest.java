@@ -950,6 +950,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Search for report text with stopwords
     query = new ReportSearchQuery();
     query.setText("Hospital usage of Drugs");
+    query.setPageSize(0); // get them all
     searchResults =
         graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
@@ -1660,6 +1661,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setAtmosphere(Atmosphere.POSITIVE);
     r.setIntent("Testing the advisor reports insight");
     r.setNextSteps("Retrieve the advisor reports insight");
+    r.setLocation(getLocation(author, "General Hospital"));
     final Instant engagementDate =
         Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
     r.setEngagementDate(engagementDate);
@@ -1668,6 +1670,17 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
         "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(createdUuid).isNotNull();
+  }
+
+  private Location getLocation(Person user, String name) {
+    final LocationSearchQuery query = new LocationSearchQuery();
+    query.setText(name);
+    final AnetBeanList<Location> results =
+        graphQLHelper.searchObjects(user, "locationList", "query", "LocationSearchQueryInput",
+            "uuid", query, new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
+    assertThat(results).isNotNull();
+    assertThat(results.getList()).isNotEmpty();
+    return results.getList().get(0);
   }
 
 }
