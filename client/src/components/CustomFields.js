@@ -301,18 +301,16 @@ function getInvisibleFields(
 
 export const CustomFieldsContainer = props => {
   const [invisibleFields, setInvisibleFields] = useState([])
+  const { setFieldValue } = props.formikProps
   useEffect(() => {
-    props.formikProps.setFieldValue(
-      "formCustomFields.invisibleCustomFields",
-      invisibleFields
-    )
-  }, [invisibleFields, props.formikProps.setFieldValue])
+    setFieldValue("formCustomFields.invisibleCustomFields", invisibleFields)
+  }, [invisibleFields, setFieldValue])
   return (
     <>
       <Field
         type="text"
         name="formCustomFields.invisibleCustomFields"
-        component="textarea"
+        className="hidden"
       />
       <CustomFields
         invisibleFields={invisibleFields}
