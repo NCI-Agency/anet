@@ -88,7 +88,7 @@ dependencies {
 
 	// Supported databases:
 	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.8' // If using postgresql
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.9' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.2' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
@@ -315,37 +315,33 @@ task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.t
 		resultTags << 'ncia/anet-app-server:'+projectBranch
 	if (projectBranch=="master")
 		resultTags << 'ncia/anet-app-server:latest'
-	tags = resultTags
+	images = resultTags
 }
 
 task dockerPushCandidateImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
-	imageName = 'ncia/anet-app-server'
-	tag = 'candidate'
+	images = ['ncia/anet-app-server:candidate']
 }
 
 task dockerPushLatestImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
-	imageName = 'ncia/anet-app-server'
-	tag = 'latest'
+	images = ['ncia/anet-app-server:latest']
 }
 
 task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
-	imageName = 'ncia/anet-app-server'
-	tag = project.version
+	images = ["ncia/anet-app-server:${project.version}"]
 }
 
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "database container"
-	repository = isMssql ? "ncia/anet-mssql-linux" : "postgres"
-	description = "Pulls a docker image for the ANET DB from " + repository + "."
-	tag = "latest"
+	image = isMssql ? "ncia/anet-mssql-linux:latest" : "postgres:latest"
+	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
 task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
 	group = "database container"
-	imageId = dockerPullDB.getImageId()
+	imageId = dockerPullDB.getImage()
 	containerName = dbContainerName
 	description = "Creates an ANET ${dbType} SQL DB container named " + dbContainerName + "."
-	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
+	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isMssql) {
 	  withEnvVar('ACCEPT_EULA', 'Y')
 	  withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
@@ -357,7 +353,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	  withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
 	  withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	}
-	portBindings = [run.environment["ANET_DB_EXPOSED_PORT"]+":"+run.environment["ANET_DB_PORT"]]
+	hostConfig.portBindings = [run.environment["ANET_DB_EXPOSED_PORT"]+":"+run.environment["ANET_DB_PORT"]]
 }
 
 // need to make this invoke dockerCreateDB if there is no anet-${dbType}-server and possibly get newer image if available
@@ -382,18 +378,17 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 // fake-smtp-server tasks
 task dockerPullFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "fake-smtp-server container"
-	repository = "devoto13/fake-smtp-server"
-	description = "Pulls a docker image for the fake-smtp-server from " + repository + "."
-	tag = "0.1.0" // No 'latest' available yet
+	image = "devoto13/fake-smtp-server:0.1.0" // No 'latest' available yet
+	description = "Pulls a docker image for the fake-smtp-server from ${image}."
 }
 
 task dockerCreateFakeSmtpServer(dependsOn: dockerPullFakeSmtpServer, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
 	group = "fake-smtp-server container"
-	imageId = dockerPullFakeSmtpServer.getImageId()
+	imageId = dockerPullFakeSmtpServer.getImage()
 	containerName = fakeSmtpContainerName
 	description = "Creates a fake-smtp-server container named " + fakeSmtpContainerName + "."
 	exposePorts("tcp", [1025, 1080])
-	portBindings = [run.environment["ANET_SMTP_PORT"] + ":" + 1025, run.environment["ANET_SMTP_HTTP_PORT"] + ":" + 1080]
+	hostConfig.portBindings = [run.environment["ANET_SMTP_PORT"] + ":" + 1025, run.environment["ANET_SMTP_HTTP_PORT"] + ":" + 1080]
 }
 
 task dockerStartFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
@@ -481,7 +476,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:5.3.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:6.0.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
 		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.26.1"
 	}
