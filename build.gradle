@@ -83,7 +83,7 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '2.0.0'
 	compile group: 'io.dropwizard-bundles', name: 'dropwizard-configurable-assets-bundle', version: '1.3.5'
 
-	compile 'ru.vyarus.guicey:guicey-jdbi3:0.7.0'
+	compile 'ru.vyarus.guicey:guicey-jdbi3:5.0.0-0'
 	compile 'com.google.guava:guava:28.1-jre' // Pick the non-Android version of Guice
 
 	// Supported databases:
