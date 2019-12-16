@@ -87,7 +87,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks", "tasks",
           "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
     } else {
-      qb.addEqualsClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
+      qb.addInListClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
           query.getCustomFieldRef1Uuid());
     }
   }
