@@ -120,19 +120,20 @@ OrganizationFilter.defaultProps = {
 }
 
 export const deserializeOrganizationFilter = (props, query, key) => {
-  if (query[props.queryKey]) {
+  const { queryKey, queryIncludeChildOrgsKey } = props
+  if (query[queryKey]) {
     return API.query(GQL_GET_ORGANIZATION, {
-      uuid: query[props.queryKey]
+      uuid: query[queryKey]
     }).then(data => {
       if (data.organization) {
         const toQueryValue = {
-          [props.queryKey]: query[props.queryKey]
+          [queryKey]: query[queryKey]
         }
         const value = { value: data.organization }
-        if (query[props.queryIncludeChildOrgsKey]) {
-          value.includeChildOrgs = query[props.queryIncludeChildOrgsKey]
-          toQueryValue[props.queryIncludeChildOrgsKey] =
-            query[props.queryIncludeChildOrgsKey]
+        const includeChildOrgs = query[queryIncludeChildOrgsKey]
+        if (includeChildOrgs) {
+          value.includeChildOrgs = includeChildOrgs
+          toQueryValue[queryIncludeChildOrgsKey] = includeChildOrgs
         }
         return {
           key: key,

@@ -174,8 +174,9 @@ DateRangeFilter.defaultProps = {
 }
 
 export const deserializeDateRangeFilter = (props, query, key) => {
-  const startKey = dateRangeStartKey(props.queryKey)
-  const endKey = dateRangeEndKey(props.queryKey)
+  const { queryKey } = props
+  const startKey = dateRangeStartKey(queryKey)
+  const endKey = dateRangeEndKey(queryKey)
   const toQueryValue = {}
   const filterValue = {}
 

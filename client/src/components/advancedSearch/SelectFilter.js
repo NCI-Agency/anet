@@ -12,7 +12,7 @@ const advisorSearchPositionTypes = [
 ]
 
 const SelectFilter = props => {
-  const { asFormField, isPositionTypeFilter, queryKey, values } = props
+  const { asFormField, isPositionTypeFilter, queryKey, values, labels } = props
   const defaultValue = {
     value: props.value.value || props.values[0] || ""
   }
@@ -26,15 +26,15 @@ const SelectFilter = props => {
   }
   const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
-  const labels = props.labels || values.map(v => utils.sentenceCase(v))
+  const optionsLabels = labels || values.map(v => utils.sentenceCase(v))
   return !asFormField ? (
-    <>{labels[values.indexOf(value.value)]}</>
+    <>{optionsLabels[values.indexOf(value.value)]}</>
   ) : (
     <FormGroup>
       <select value={value.value} onChange={handleChange}>
         {values.map((v, idx) => (
           <option key={idx} value={v}>
-            {labels[idx]}
+            {optionsLabels[idx]}
           </option>
         ))}
       </select>
@@ -65,12 +65,13 @@ SelectFilter.defaultProps = {
 }
 
 export const deserializeSelectFilter = (props, query, key) => {
-  if (query[props.queryKey]) {
-    const toQueryValue = { [props.queryKey]: query[props.queryKey] }
+  const { queryKey } = props
+  if (query[queryKey]) {
+    const toQueryValue = { [queryKey]: query[queryKey] }
     return {
       key: key,
       value: {
-        value: query[props.queryKey],
+        value: query[queryKey],
         toQuery: () => toQueryValue
       }
     }

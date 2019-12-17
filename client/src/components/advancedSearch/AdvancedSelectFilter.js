@@ -21,7 +21,7 @@ const AdvancedSelectFilter = props => {
     "onChange"
   )
   return !asFormField ? (
-    <>{props.value[valueKey]}</>
+    <>{value[valueKey]}</>
   ) : (
     <AdvancedSingleSelect
       {...advancedSelectProps}
@@ -60,21 +60,22 @@ AdvancedSelectFilter.defaultProps = {
 }
 
 export const deserializeAdvancedSelectFilter = (props, query, key) => {
-  if (query[props.queryKey]) {
-    const getInstanceName = props.objectType.getInstanceName
+  const { queryKey, objectType, fields } = props
+  if (query[queryKey]) {
+    const getInstanceName = objectType.getInstanceName
     return API.query(
       gql`
         query($uuid: String!) {
           ${getInstanceName}(uuid: $uuid) {
-            ${props.fields}
+            ${fields}
           }
         }
       `,
-      { uuid: query[props.queryKey] }
+      { uuid: query[queryKey] }
     ).then(data => {
       if (data[getInstanceName]) {
         const toQueryValue = {
-          [props.queryKey]: query[props.queryKey]
+          [queryKey]: query[queryKey]
         }
         return {
           key: key,

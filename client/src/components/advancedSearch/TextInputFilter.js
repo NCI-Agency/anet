@@ -43,12 +43,13 @@ TextInputFilter.defaultProps = {
 }
 
 export const deserializeTextInputFilter = (props, query, key) => {
-  if (query[props.queryKey]) {
-    const toQueryValue = { [props.queryKey]: query[props.queryKey] }
+  const { queryKey } = props
+  if (query[queryKey]) {
+    const toQueryValue = { [queryKey]: query[queryKey] }
     return {
       key: key,
       value: {
-        value: query[props.queryKey],
+        value: query[queryKey],
         toQuery: () => toQueryValue
       }
     }
