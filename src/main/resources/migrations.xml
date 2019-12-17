@@ -2719,7 +2719,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-    <changeSet id="add-custom-fields-to-reports" author="maradragan" dbms="mssql">
+    <changeSet id="add-custom-fields-to-reports" author="maradragan">
         <addColumn tableName="reports" >
             <column name="customFields" type="${long_text_type}" />
         </addColumn>
