@@ -670,11 +670,6 @@ const BaseReportForm = props => {
                   queryParams={{ status: Task.STATUS.ACTIVE }}
                   fields={Task.autocompleteQuery}
                   addon={TASKS_ICON}
-                  shortcutsTitle={`Recent ${pluralize(
-                    Settings.fields.task.shortLabel
-                  )}`}
-                  shortcuts={recents.tasks}
-                  renderExtraCol
                 />
 
                 <AdvancedMultiSelect
