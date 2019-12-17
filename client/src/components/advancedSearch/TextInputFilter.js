@@ -2,6 +2,7 @@ import useSearchFilter from "components/advancedSearch/hooks"
 import PropTypes from "prop-types"
 import React from "react"
 import { FormControl, FormGroup } from "react-bootstrap"
+import { deserializeSearchFilter } from "searchUtils"
 
 const TextInputFilter = props => {
   const { asFormField, queryKey } = props
@@ -43,18 +44,7 @@ TextInputFilter.defaultProps = {
 }
 
 export const deserializeTextInputFilter = (props, query, key) => {
-  const { queryKey } = props
-  if (query[queryKey]) {
-    const toQueryValue = { [queryKey]: query[queryKey] }
-    return {
-      key: key,
-      value: {
-        value: query[queryKey],
-        toQuery: toQueryValue
-      }
-    }
-  }
-  return null
+  return deserializeSearchFilter(props, query, key)
 }
 
 export default TextInputFilter

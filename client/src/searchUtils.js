@@ -1,6 +1,10 @@
 import searchFilters from "components/SearchFilters"
 
-export function deserializeQueryParams(objType, queryParams, callbackFunction) {
+export const deserializeQueryParams = (
+  objType,
+  queryParams,
+  callbackFunction
+) => {
   // From query params to search filters
   var text = queryParams.text || ""
   var usedFilters = []
@@ -40,4 +44,20 @@ export function deserializeQueryParams(objType, queryParams, callbackFunction) {
     })
     callbackFunction(objType, usedFilters, text)
   })
+}
+
+export const deserializeSearchFilter = (props, query, key) => {
+  // general deserialization from query to a search filter
+  const { queryKey } = props
+  if (query[queryKey]) {
+    const toQueryValue = { [queryKey]: query[queryKey] }
+    return {
+      key: key,
+      value: {
+        value: query[queryKey],
+        toQuery: toQueryValue
+      }
+    }
+  }
+  return null
 }

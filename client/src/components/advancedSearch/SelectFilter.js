@@ -3,6 +3,7 @@ import { Position } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { FormGroup } from "react-bootstrap"
+import { deserializeSearchFilter } from "searchUtils"
 import utils from "utils"
 
 const advisorSearchPositionTypes = [
@@ -65,18 +66,7 @@ SelectFilter.defaultProps = {
 }
 
 export const deserializeSelectFilter = (props, query, key) => {
-  const { queryKey } = props
-  if (query[queryKey]) {
-    const toQueryValue = { [queryKey]: query[queryKey] }
-    return {
-      key: key,
-      value: {
-        value: query[queryKey],
-        toQuery: toQueryValue
-      }
-    }
-  }
-  return null
+  return deserializeSearchFilter(props, query, key)
 }
 
 export default SelectFilter
