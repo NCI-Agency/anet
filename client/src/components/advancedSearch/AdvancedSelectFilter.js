@@ -81,7 +81,7 @@ export const deserializeAdvancedSelectFilter = (props, query, key) => {
           key: key,
           value: {
             ...data[getInstanceName],
-            toQuery: () => toQueryValue
+            toQuery: toQueryValue
           }
         }
       } else {

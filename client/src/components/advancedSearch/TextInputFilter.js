@@ -50,7 +50,7 @@ export const deserializeTextInputFilter = (props, query, key) => {
       key: key,
       value: {
         value: query[queryKey],
-        toQuery: () => toQueryValue
+        toQuery: toQueryValue
       }
     }
   }

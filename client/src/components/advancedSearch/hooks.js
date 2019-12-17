@@ -11,7 +11,7 @@ const useSearchFilter = (props, defaultValue, toQuery) => {
     utils.treatFunctionsAsEqual
   )
   const [value, setValue] = useState(defaultValue)
-  const toQueryVal = toQuery(value) // eslint-disable-line no-unused-vars
+  const toQueryValue = toQuery(value)
 
   useEffect(() => {
     if (!valuePropUnchanged) {
@@ -24,10 +24,10 @@ const useSearchFilter = (props, defaultValue, toQuery) => {
     if (asFormField) {
       onChange({
         ...value,
-        toQuery: () => toQueryVal
+        toQuery: toQueryValue
       })
     }
-  }, [asFormField, onChange, toQueryVal, value])
+  }, [asFormField, onChange, toQueryValue, value])
 
   return [value, setValue]
 }

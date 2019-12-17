@@ -139,7 +139,7 @@ export const deserializeOrganizationFilter = (props, query, key) => {
           key: key,
           value: {
             ...value,
-            toQuery: () => toQueryValue
+            toQuery: toQueryValue
           }
         }
       } else {

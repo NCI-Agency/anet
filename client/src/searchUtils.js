@@ -1,6 +1,7 @@
 import searchFilters from "components/SearchFilters"
 
 export function deserializeQueryParams(objType, queryParams, callbackFunction) {
+  // From query params to search filters
   var text = queryParams.text || ""
   var usedFilters = []
   var promises = []

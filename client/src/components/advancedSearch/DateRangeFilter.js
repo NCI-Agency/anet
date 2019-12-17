@@ -208,7 +208,7 @@ export const deserializeDateRangeFilter = (props, query, key) => {
       key: key,
       value: {
         ...filterValue,
-        toQuery: () => toQueryValue
+        toQuery: toQueryValue
       }
     }
   }

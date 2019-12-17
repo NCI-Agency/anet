@@ -130,7 +130,7 @@ export const deserializeReportStateFilter = (props, query, key) => {
       key: key,
       value: {
         ...value,
-        toQuery: () => value
+        toQuery: value
       }
     }
   }
