@@ -31,7 +31,7 @@ import _isEqual from "lodash/isEqual"
 import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Badge,
@@ -658,7 +658,26 @@ const Search = props => {
     numReports
   )
   const taskShortLabel = Settings.fields.task.shortLabel
-  const searchQueryParams = getSearchQuery(searchQuery)
+  // Memo'ize the search query parameters we use to prevent unnecessary re-renders
+  const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
+    searchQuery
+  ])
+  const genericSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      }),
+    [searchQueryParams]
+  )
+  const reportsSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "ENGAGEMENT_DATE",
+        sortOrder: "DESC"
+      }),
+    [searchQueryParams]
+  )
   const queryTypes = _isEmpty(searchQueryParams)
     ? []
     : searchQuery.objectType
@@ -794,131 +813,71 @@ const Search = props => {
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) && (
         <Fieldset id="organizations" title="Organizations">
-          {renderOrganizations(searchQueryParams)}
+          <Organizations
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumOrganizations}
+            paginationKey="SEARCH_organizations"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && (
         <Fieldset id="people" title="People">
-          {renderPeople(searchQueryParams)}
+          <People
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumPeople}
+            paginationKey="SEARCH_people"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && (
         <Fieldset id="positions" title="Positions">
-          {renderPositions(searchQueryParams)}
+          <Positions
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumPositions}
+            paginationKey="SEARCH_positions"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && (
         <Fieldset id="tasks" title={pluralize(taskShortLabel)}>
-          {renderTasks(searchQueryParams)}
+          <Tasks
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumTasks}
+            paginationKey="SEARCH_tasks"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && (
         <Fieldset id="locations" title="Locations">
-          {renderLocations(searchQueryParams)}
+          <Locations
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumLocations}
+            paginationKey="SEARCH_locations"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && (
         <Fieldset id="reports" title="Reports">
-          {renderReports(searchQueryParams)}
+          <ReportCollection
+            queryParams={reportsSearchQueryParams}
+            setTotalCount={setNumReports}
+            paginationKey="SEARCH_reports"
+          />
         </Fieldset>
       )}
       {renderSaveModal()}
     </div>
   )
-
-  function renderOrganizations(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Organizations
-        queryParams={queryParams}
-        setTotalCount={setNumOrganizations}
-        paginationKey="SEARCH_organizations"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderPeople(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <People
-        queryParams={queryParams}
-        setTotalCount={setNumPeople}
-        paginationKey="SEARCH_people"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderPositions(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Positions
-        queryParams={queryParams}
-        setTotalCount={setNumPositions}
-        paginationKey="SEARCH_positions"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderTasks(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Tasks
-        queryParams={queryParams}
-        setTotalCount={setNumTasks}
-        paginationKey="SEARCH_tasks"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderLocations(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Locations
-        queryParams={queryParams}
-        setTotalCount={setNumLocations}
-        paginationKey="SEARCH_locations"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderReports(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "ENGAGEMENT_DATE",
-      sortOrder: "DESC"
-    })
-    return (
-      <ReportCollection
-        queryParams={queryParams}
-        setTotalCount={setNumReports}
-        paginationKey="SEARCH_reports"
-      />
-    )
-  }
 
   function renderSaveModal() {
     return (
