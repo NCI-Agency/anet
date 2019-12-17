@@ -3,6 +3,8 @@ package mil.dds.anet.database;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -19,7 +21,6 @@ import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class ReportSensitiveInformationDao
     extends AnetBaseDao<ReportSensitiveInformation, AbstractSearchQuery<?>> {
 
@@ -62,6 +63,7 @@ public class ReportSensitiveInformationDao
     throw new UnsupportedOperationException();
   }
 
+  @InTransaction
   public ReportSensitiveInformation insert(ReportSensitiveInformation rsi, Person user,
       Report report) {
     if (rsi == null || !isAuthorized(user, report) || Utils.isEmptyHtml(rsi.getText())) {
@@ -84,6 +86,7 @@ public class ReportSensitiveInformationDao
     throw new UnsupportedOperationException();
   }
 
+  @InTransaction
   public int update(ReportSensitiveInformation rsi, Person user, Report report) {
     if (rsi == null || !isAuthorized(user, report)) {
       return 0;
@@ -109,6 +112,7 @@ public class ReportSensitiveInformationDao
     return (DaoUtils.getUuid(rsi) == null) ? insert(rsi, user, report) : update(rsi, user, report);
   }
 
+  @InTransaction
   public CompletableFuture<ReportSensitiveInformation> getForReport(Map<String, Object> context,
       Report report, Person user) {
     if (!isAuthorized(user, report)) {
@@ -143,16 +147,21 @@ public class ReportSensitiveInformationDao
       // No user or no report
       return false;
     }
+    if (Objects.equals(userUuid, report.getAuthorUuid())) {
+      // Author is always authorized
+      return true;
+    }
 
-    // Check authorization in a single query
-    final Query query = getDbHandle().createQuery("/* checkReportAuthorization */ SELECT r.uuid"
-        + " FROM reports r"
-        + " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportUuid\" = r.uuid"
-        + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\" "
-        + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" WHERE r.uuid = :reportUuid"
-        + " AND ( (r.\"authorUuid\" = :userUuid) OR (p.\"currentPersonUuid\" = :userUuid) )")
+    // Check authorization groups
+    final Query query = getDbHandle()
+        .createQuery("/* checkReportAuthorization */ SELECT COUNT(*) AS count"
+            + " FROM \"reportAuthorizationGroups\" rag"
+            + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\" "
+            + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" WHERE rag.\"reportUuid\" = :reportUuid"
+            + " AND p.\"currentPersonUuid\" = :userUuid")
         .bind("reportUuid", reportUuid).bind("userUuid", userUuid);
-    return (query.map(new MapMapper(false)).list().size() > 0);
+    final Optional<Map<String, Object>> result = query.map(new MapMapper(false)).findFirst();
+    return result.isPresent() && ((Number) result.get().get("count")).intValue() > 0;
   }
 
 }

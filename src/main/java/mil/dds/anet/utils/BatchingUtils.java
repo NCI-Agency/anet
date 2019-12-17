@@ -37,18 +37,42 @@ import org.dataloader.stats.Statistics;
 
 public final class BatchingUtils {
 
-  private BatchingUtils() {}
+  private final ExecutorService dispatcherService;
+  private final DataLoaderRegistry dataLoaderRegistry;
+  private final DataLoaderOptions dataLoaderOptions;
 
-  public static DataLoaderRegistry registerDataLoaders(AnetObjectEngine engine,
-      boolean batchingEnabled, boolean cachingEnabled) {
-    final DataLoaderOptions dataLoaderOptions =
+  public BatchingUtils(AnetObjectEngine engine, boolean batchingEnabled, boolean cachingEnabled) {
+    // Give each registry its own thread pool
+    dispatcherService = Executors.newFixedThreadPool(3);
+    dataLoaderRegistry = new DataLoaderRegistry();
+    dataLoaderOptions =
         DataLoaderOptions.newOptions().setStatisticsCollector(() -> new SimpleStatisticsCollector())
             .setBatchingEnabled(batchingEnabled).setCachingEnabled(cachingEnabled)
             .setMaxBatchSize(1000);
-    final DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
-    // Give each registry its own thread pool
-    final ExecutorService dispatcherService = Executors.newFixedThreadPool(3);
+    registerDataLoaders(engine);
+  }
 
+  public DataLoaderRegistry getDataLoaderRegistry() {
+    return dataLoaderRegistry;
+  }
+
+  /**
+   * Call this when you're done with this batcher; it shuts down the thread pool being used (which
+   * may free up some resources). If you don't call this yourself, eventually it will be done
+   * through {@link #finalize()}, but that might be delayed.
+   */
+  public void shutdown() {
+    dispatcherService.shutdown();
+  }
+
+  @Override
+  @SuppressWarnings("checkstyle:NoFinalizer")
+  protected void finalize() throws Throwable {
+    shutdown();
+    super.finalize();
+  }
+
+  private void registerDataLoaders(AnetObjectEngine engine) {
     dataLoaderRegistry.register(IdDataLoaderKey.APPROVAL_STEPS.toString(),
         new DataLoader<>(new BatchLoader<String, ApprovalStep>() {
           @Override
@@ -309,11 +333,9 @@ public final class BatchingUtils {
                 () -> engine.getTaskDao().getResponsiblePositions(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
-    return dataLoaderRegistry;
   }
 
-  public static void updateStats(MetricRegistry metricRegistry,
-      DataLoaderRegistry dataLoaderRegistry) {
+  public void updateStats(MetricRegistry metricRegistry, DataLoaderRegistry dataLoaderRegistry) {
     // Combined stats for all data loaders
     updateStats(metricRegistry, "DataLoaderRegistry", dataLoaderRegistry.getStatistics());
     for (final String key : dataLoaderRegistry.getKeys()) {
@@ -322,8 +344,7 @@ public final class BatchingUtils {
     }
   }
 
-  private static void updateStats(MetricRegistry metricRegistry, String name,
-      Statistics statistics) {
+  private void updateStats(MetricRegistry metricRegistry, String name, Statistics statistics) {
     metricRegistry.counter(MetricRegistry.name(name, "BatchInvokeCount"))
         .inc(statistics.getBatchInvokeCount());
     metricRegistry.counter(MetricRegistry.name(name, "BatchLoadCount"))

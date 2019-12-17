@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -48,6 +49,7 @@ public abstract class AbstractResourceTest {
   protected static GraphQlHelper graphQLHelper;
   protected static Person admin;
   protected static Map<String, Object> context;
+  private static BatchingUtils batchingUtils;
 
   private static final String PERSON_FIELDS =
       "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
@@ -60,13 +62,14 @@ public abstract class AbstractResourceTest {
     graphQLHelper = new GraphQlHelper(client, RULE.getLocalPort());
     admin = findOrPutPersonInDb(PersonTest.getArthurDmin());
     context = new HashMap<>();
-    context.put("dataLoaderRegistry",
-        BatchingUtils.registerDataLoaders(AnetObjectEngine.getInstance(), false, false));
+    batchingUtils = new BatchingUtils(AnetObjectEngine.getInstance(), false, false);
+    context.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
   }
 
   @AfterClass
   public static void tearDown() {
     client.close();
+    batchingUtils.shutdown();
   }
 
   /*

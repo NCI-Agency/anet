@@ -22,7 +22,7 @@ import PositionTable from "components/PositionTable"
 import ReportCollection from "components/ReportCollection"
 import { SearchDescription } from "components/SearchFilters"
 import SubNav from "components/SubNav"
-import UltimatePagination from "components/UltimatePagination"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _get from "lodash/get"
@@ -31,7 +31,7 @@ import _isEqual from "lodash/isEqual"
 import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Badge,
@@ -206,6 +206,8 @@ const Organizations = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -219,38 +221,37 @@ const Organizations = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={organizationQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="organizations-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Code</th>
-            <th>Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Organization.map(organizations, org => (
-            <tr key={org.uuid}>
-              <td>
-                <LinkTo organization={org} />
-              </td>
-              <td>{org.longName}</td>
-              <td>{org.identificationCode}</td>
-              <td>{org.humanNameOfType()}</td>
+      >
+        <Table responsive hover striped id="organizations-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Code</th>
+              <th>Type</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {Organization.map(organizations, org => (
+              <tr key={org.uuid}>
+                <td>
+                  <LinkTo organization={org} />
+                </td>
+                <td>{org.longName}</td>
+                <td>{org.identificationCode}</td>
+                <td>{org.humanNameOfType()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -304,6 +305,8 @@ const People = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -316,52 +319,51 @@ const People = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={personQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="people-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Location</th>
-            <th>Organization</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Person.map(people, person => (
-            <tr key={person.uuid}>
-              <td>
-                <LinkTo person={person} />
-              </td>
-              <td>
-                <LinkTo position={person.position} />
-                {person.position && person.position.code
-                  ? `, ${person.position.code}`
-                  : ""}
-              </td>
-              <td>
-                <LinkTo
-                  whenUnspecified=""
-                  anetLocation={person.position && person.position.location}
-                />
-              </td>
-              <td>
-                {person.position && person.position.organization && (
-                  <LinkTo organization={person.position.organization} />
-                )}
-              </td>
+      >
+        <Table responsive hover striped id="people-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Location</th>
+              <th>Organization</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {Person.map(people, person => (
+              <tr key={person.uuid}>
+                <td>
+                  <LinkTo person={person} />
+                </td>
+                <td>
+                  <LinkTo position={person.position} />
+                  {person.position && person.position.code
+                    ? `, ${person.position.code}`
+                    : ""}
+                </td>
+                <td>
+                  <LinkTo
+                    whenUnspecified=""
+                    anetLocation={person.position && person.position.location}
+                  />
+                </td>
+                <td>
+                  {person.position && person.position.organization && (
+                    <LinkTo organization={person.position.organization} />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -415,30 +417,21 @@ const Positions = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
-  const positions = data ? data.positionList.list : []
-  const totalCount = data && data.positionList && data.positionList.totalCount
+  const paginatedPositions = data ? data.positionList : []
+  const totalCount = paginatedPositions && data.positionList.totalCount
   setTotalCount(totalCount)
-  if (_get(positions, "length", 0) === 0) {
-    return <em>No positions found</em>
-  }
 
   return (
-    <div>
-      <UltimatePagination
-        Component="header"
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={positionQuery.pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
-      />
-      <br />
-      <PositionTable positions={positions} />
-    </div>
+    <PositionTable
+      paginatedPositions={paginatedPositions}
+      goToPage={setPage}
+      id="positions-search-results"
+    />
   )
 
   function setPage(pageNum) {
@@ -491,6 +484,8 @@ const Tasks = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -503,34 +498,33 @@ const Tasks = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={taskQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="tasks-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Task.map(tasks, task => (
-            <tr key={task.uuid}>
-              <td>
-                <LinkTo task={task}>
-                  {task.shortName} {task.longName}
-                </LinkTo>
-              </td>
+      >
+        <Table responsive hover striped id="tasks-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {Task.map(tasks, task => (
+              <tr key={task.uuid}>
+                <td>
+                  <LinkTo task={task}>
+                    {task.shortName} {task.longName}
+                  </LinkTo>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -584,6 +578,8 @@ const Locations = props => {
     ...props
   })
   if (done) {
+    // Reset the total count
+    setTotalCount(null)
     return result
   }
 
@@ -596,32 +592,31 @@ const Locations = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={locationQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      <br />
-      <Table responsive hover striped id="locations-search-results">
-        <thead>
-          <tr>
-            <th>Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {locations.map(loc => (
-            <tr key={loc.uuid}>
-              <td>
-                <LinkTo anetLocation={loc} />
-              </td>
+      >
+        <Table responsive hover striped id="locations-search-results">
+          <thead>
+            <tr>
+              <th>Name</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {locations.map(loc => (
+              <tr key={loc.uuid}>
+                <td>
+                  <LinkTo anetLocation={loc} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -663,7 +658,26 @@ const Search = props => {
     numReports
   )
   const taskShortLabel = Settings.fields.task.shortLabel
-  const searchQueryParams = getSearchQuery(searchQuery)
+  // Memo'ize the search query parameters we use to prevent unnecessary re-renders
+  const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
+    searchQuery
+  ])
+  const genericSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      }),
+    [searchQueryParams]
+  )
+  const reportsSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "ENGAGEMENT_DATE",
+        sortOrder: "DESC"
+      }),
+    [searchQueryParams]
+  )
   const queryTypes = _isEmpty(searchQueryParams)
     ? []
     : searchQuery.objectType
@@ -750,22 +764,19 @@ const Search = props => {
             <Dropdown.Menu className="super-colors">
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)
-                }
+                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
               >
                 Excel (xlsx)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "kml", setError)
-                }
+                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
               >
                 Google Earth (kml)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "nvg", setError)
-                }
+                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
               >
                 NATO Vector Graphics (nvg)
               </MenuItem>
@@ -802,131 +813,71 @@ const Search = props => {
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) && (
         <Fieldset id="organizations" title="Organizations">
-          {renderOrganizations(searchQueryParams)}
+          <Organizations
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumOrganizations}
+            paginationKey="SEARCH_organizations"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && (
         <Fieldset id="people" title="People">
-          {renderPeople(searchQueryParams)}
+          <People
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumPeople}
+            paginationKey="SEARCH_people"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && (
         <Fieldset id="positions" title="Positions">
-          {renderPositions(searchQueryParams)}
+          <Positions
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumPositions}
+            paginationKey="SEARCH_positions"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && (
         <Fieldset id="tasks" title={pluralize(taskShortLabel)}>
-          {renderTasks(searchQueryParams)}
+          <Tasks
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumTasks}
+            paginationKey="SEARCH_tasks"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && (
         <Fieldset id="locations" title="Locations">
-          {renderLocations(searchQueryParams)}
+          <Locations
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumLocations}
+            paginationKey="SEARCH_locations"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && (
         <Fieldset id="reports" title="Reports">
-          {renderReports(searchQueryParams)}
+          <ReportCollection
+            queryParams={reportsSearchQueryParams}
+            setTotalCount={setNumReports}
+            paginationKey="SEARCH_reports"
+          />
         </Fieldset>
       )}
       {renderSaveModal()}
     </div>
   )
-
-  function renderOrganizations(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Organizations
-        queryParams={queryParams}
-        setTotalCount={setNumOrganizations}
-        paginationKey="SEARCH_organizations"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderPeople(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <People
-        queryParams={queryParams}
-        setTotalCount={setNumPeople}
-        paginationKey="SEARCH_people"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderPositions(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Positions
-        queryParams={queryParams}
-        setTotalCount={setNumPositions}
-        paginationKey="SEARCH_positions"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderTasks(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Tasks
-        queryParams={queryParams}
-        setTotalCount={setNumTasks}
-        paginationKey="SEARCH_tasks"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderLocations(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Locations
-        queryParams={queryParams}
-        setTotalCount={setNumLocations}
-        paginationKey="SEARCH_locations"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderReports(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "ENGAGEMENT_DATE",
-      sortOrder: "DESC"
-    })
-    return (
-      <ReportCollection
-        queryParams={queryParams}
-        setTotalCount={setNumReports}
-        paginationKey="SEARCH_reports"
-      />
-    )
-  }
 
   function renderSaveModal() {
     return (
@@ -1021,7 +972,4 @@ const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Search)
+export default connect(mapStateToProps, mapDispatchToProps)(Search)

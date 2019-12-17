@@ -85,7 +85,4 @@ PositionNewConditional.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PositionNew)
+export default connect(null, mapDispatchToProps)(PositionNew)

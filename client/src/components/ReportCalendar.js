@@ -2,6 +2,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
 import { mapDispatchToProps } from "components/Page"
+import _isEqual from "lodash/isEqual"
 import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -43,6 +44,8 @@ const GQL_GET_REPORT_LIST = gql`
 const ReportCalendar = props => {
   const { queryParams, setTotalCount } = props
   const history = useHistory()
+  const prevReportQuery = useRef(null)
+  const apiPromise = useRef(null)
   const calendarComponentRef = useRef(null)
 
   return (
@@ -63,7 +66,17 @@ const ReportCalendar = props => {
       engagementDateStart: moment(fetchInfo.start).startOf("day"),
       engagementDateEnd: moment(fetchInfo.end).endOf("day")
     })
-    API.query(GQL_GET_REPORT_LIST, {
+    if (_isEqual(prevReportQuery.current, reportQuery)) {
+      // Optimise, return previous API promise instead of calling API.query again
+      return apiPromise.current
+    }
+    prevReportQuery.current = reportQuery
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
+    // Store API promise to use in optimised case
+    apiPromise.current = API.query(GQL_GET_REPORT_LIST, {
       reportQuery
     }).then(data => {
       const reports = data ? data.reportList.list : []
@@ -71,7 +84,7 @@ const ReportCalendar = props => {
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      const events = reports.map(r => {
+      return reports.map(r => {
         const who =
           (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
         const where =
@@ -92,8 +105,8 @@ const ReportCalendar = props => {
             !Settings.engagementsIncludeTimeAndDuration || r.duration === null
         }
       })
-      successCallback(events)
     })
+    return apiPromise.current
   }
 }
 
@@ -102,7 +115,4 @@ ReportCalendar.propTypes = {
   setTotalCount: PropTypes.func
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportCalendar)
+export default connect(null, mapDispatchToProps)(ReportCalendar)

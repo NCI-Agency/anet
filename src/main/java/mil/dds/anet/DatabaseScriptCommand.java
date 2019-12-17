@@ -30,10 +30,9 @@ public class DatabaseScriptCommand extends ConfiguredCommand<AnetConfiguration> 
   protected void run(Bootstrap<AnetConfiguration> bootstrap, Namespace namespace,
       AnetConfiguration configuration) throws Exception {
     final JdbiFactory factory = new JdbiFactory();
-    final Environment environment =
-        new Environment(bootstrap.getApplication().getName(), bootstrap.getObjectMapper(),
-            bootstrap.getValidatorFactory().getValidator(), bootstrap.getMetricRegistry(),
-            bootstrap.getClassLoader(), bootstrap.getHealthCheckRegistry());
+    final Environment environment = new Environment(bootstrap.getApplication().getName(),
+        bootstrap.getObjectMapper(), bootstrap.getValidatorFactory(), bootstrap.getMetricRegistry(),
+        bootstrap.getClassLoader(), bootstrap.getHealthCheckRegistry(), configuration);
 
     final String sqlFilePath = namespace.getString("sqlFile");
 

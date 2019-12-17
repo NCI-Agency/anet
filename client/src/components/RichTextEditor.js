@@ -171,6 +171,7 @@ class RichTextEditor extends Component {
               onChange(toHTML(rawContent))
             }
           }}
+          stateSaveInterval={100}
           plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
           rawContentState={value ? fromHTML(value) : null}
           showUndoControl
@@ -178,10 +179,10 @@ class RichTextEditor extends Component {
           spellCheck
           stripPastedStyles={false}
           bottomToolbar={props => (
-            <React.Fragment>
+            <>
               <SideToolbar>
                 {externalProps => (
-                  <React.Fragment>
+                  <>
                     <HeadlineOneButton {...externalProps} />
                     <HeadlineTwoButton {...externalProps} />
                     <BlockquoteButton {...externalProps} />
@@ -190,10 +191,10 @@ class RichTextEditor extends Component {
                     <UnderlineButton {...externalProps} />
                     <UnorderedListButton {...externalProps} />
                     <OrderedListButton {...externalProps} />
-                  </React.Fragment>
+                  </>
                 )}
               </SideToolbar>
-            </React.Fragment>
+            </>
           )}
         />
       </div>

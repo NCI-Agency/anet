@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import com.google.common.base.Joiner;
 import java.time.Instant;
 import java.util.List;
 import javax.inject.Inject;
@@ -11,7 +10,6 @@ import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class EmailDao {
 
   @Inject
@@ -26,6 +24,7 @@ public class EmailDao {
     return handle.get();
   }
 
+  @InTransaction
   public List<AnetEmail> getAll() {
     return getDbHandle()
         .createQuery(
@@ -33,15 +32,17 @@ public class EmailDao {
         .map(emailMapper).list();
   }
 
+  @InTransaction
   public void deletePendingEmails(List<Integer> processedEmails) {
     if (!processedEmails.isEmpty()) {
-      final String emailIds = Joiner.on(", ").join(processedEmails);
-      getDbHandle().createUpdate(
-          "/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN (" + emailIds + ")")
-          .execute();
+      getDbHandle()
+          .createUpdate(
+              "/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN ( <emailIds> )")
+          .bindList("emailIds", processedEmails).execute();
     }
   }
 
+  @InTransaction
   public void createPendingEmail(String jobSpec) {
     getDbHandle().createUpdate(
         "/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")

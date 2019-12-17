@@ -17,17 +17,6 @@ const GQL_GET_REPORT_LIST = gql`
       list {
         uuid
         intent
-        primaryAdvisor {
-          uuid
-          name
-        }
-        principalOrg {
-          uuid
-          shortName
-        }
-        engagementDate
-        duration
-        state
         location {
           uuid
           name
@@ -78,6 +67,10 @@ const ReportMap = props => {
     return markerArray
   }, [data])
   if (done) {
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     return result
   }
 
@@ -106,7 +99,4 @@ ReportMap.propTypes = {
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportMap)
+export default connect(null, mapDispatchToProps)(ReportMap)

@@ -506,6 +506,10 @@ table hr.attendee-divider {
 	margin: 0px;
 }
 
+.table-responsive {
+	clear: both;
+}
+
 .report-cancelled {
 	/*border-left: 1.5rem solid #DA9795;*/
 	border-left: 1.5rem solid #C23030;

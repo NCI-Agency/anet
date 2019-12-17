@@ -199,10 +199,10 @@ const MergePeople = props => {
                       !_isEmpty(loser.position) &&
                       winner &&
                       !_isEmpty(winner.position) && (
-                      <Alert bsStyle="danger">
-                        <b>Danger:</b> Position on Loser (
-                        {loser.position.name}) will be left unfilled
-                      </Alert>
+                        <Alert bsStyle="danger">
+                          <b>Danger:</b> Position on Loser (
+                          {loser.position.name}) will be left unfilled
+                        </Alert>
                     )}
                   </Col>
                 </Row>
@@ -229,7 +229,7 @@ const MergePeople = props => {
 
   function showPersonDetails(person) {
     return (
-      <React.Fragment>
+      <>
         <Field
           name="uuid"
           component={FieldHelper.renderReadonlyField}
@@ -317,7 +317,7 @@ const MergePeople = props => {
           }
           vertical
         />
-      </React.Fragment>
+      </>
     )
   }
 
@@ -357,7 +357,4 @@ const MergePeople = props => {
 
 MergePeople.propTypes = { ...pagePropTypes }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(MergePeople)
+export default connect(null, mapDispatchToProps)(MergePeople)

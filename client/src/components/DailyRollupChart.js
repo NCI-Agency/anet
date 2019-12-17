@@ -20,11 +20,12 @@ const DailyRollupChart = props => {
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
     let chartBox = node.current.getBoundingClientRect()
-    let chartWidth = isNumeric(width)
-      ? width - 30
-      : chartBox.right - chartBox.left - 30
+    let chartWidth = (isNumeric(width) ? width : chartBox.width) - 30
     let chart = d3.select(node.current)
-    let xLabels = [].concat.apply([], data.map(d => d.published + d.cancelled))
+    let xLabels = [].concat.apply(
+      [],
+      data.map(d => d.published + d.cancelled)
+    )
     let yLabels = {}
     let yDomain = data.map(d => {
       yLabels[d.org.uuid] = d.org.shortName

@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -949,6 +950,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Search for report text with stopwords
     query = new ReportSearchQuery();
     query.setText("Hospital usage of Drugs");
+    query.setPageSize(0); // get them all
     searchResults =
         graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
@@ -1625,6 +1627,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Position position = user.getPosition();
     final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
     try {
+      createTestReport();
       final List<AdvisorReportsEntry> advisorReports = graphQLHelper.getObjectList(user,
           "query { payload: advisorReportInsights { uuid name stats { week nrReportsSubmitted nrEngagementsAttended } } }",
           null, new TypeReference<GraphQlResponse<List<AdvisorReportsEntry>>>() {});
@@ -1638,7 +1641,46 @@ public class ReportsResourceTest extends AbstractResourceTest {
       if (isSuperUser) {
         fail("Unexpected ForbiddenException");
       }
+    } catch (ExecutionException e) {
+      fail("Unexpected ExecutionException");
+    } catch (InterruptedException e) {
+      fail("Unexpected InterruptedException");
     }
+  }
+
+  private void createTestReport() throws InterruptedException, ExecutionException {
+    final Person author = getJackJackson();
+    final ReportPerson attendee = PersonTest.personToReportPerson(author);
+    attendee.setPrimary(true);
+    final Position advisorPosition = attendee.loadPosition();
+    final Organization advisorOrganization = advisorPosition.loadOrganization(context).get();
+
+    final Report r = new Report();
+    r.setAuthor(author);
+    r.setState(ReportState.PUBLISHED);
+    r.setAtmosphere(Atmosphere.POSITIVE);
+    r.setIntent("Testing the advisor reports insight");
+    r.setNextSteps("Retrieve the advisor reports insight");
+    r.setLocation(getLocation(author, "General Hospital"));
+    final Instant engagementDate =
+        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+    r.setEngagementDate(engagementDate);
+    r.setAttendees(Lists.newArrayList(attendee));
+    r.setAdvisorOrg(advisorOrganization);
+    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+        "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(createdUuid).isNotNull();
+  }
+
+  private Location getLocation(Person user, String name) {
+    final LocationSearchQuery query = new LocationSearchQuery();
+    query.setText(name);
+    final AnetBeanList<Location> results =
+        graphQLHelper.searchObjects(user, "locationList", "query", "LocationSearchQueryInput",
+            "uuid", query, new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
+    assertThat(results).isNotNull();
+    assertThat(results.getList()).isNotEmpty();
+    return results.getList().get(0);
   }
 
 }

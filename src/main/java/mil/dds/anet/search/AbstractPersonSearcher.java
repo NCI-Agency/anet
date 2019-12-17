@@ -7,6 +7,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, PersonSearchQuery>
     implements IPersonSearcher {
@@ -15,6 +16,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     super(qb);
   }
 
+  @InTransaction
   @Override
   public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
     buildQuery(query);
@@ -35,9 +37,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       addTextQuery(query);
     }
 
-    qb.addDateClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,
-        query.getEndOfTourDateStart());
-    qb.addDateClause("endDate", "people.\"endOfTourDate\"", Comparison.BEFORE,
+    qb.addDateRangeClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,
+        query.getEndOfTourDateStart(), "endDate", "people.\"endOfTourDate\"", Comparison.BEFORE,
         query.getEndOfTourDateEnd());
     qb.addEqualsClause("role", "people.role", query.getRole());
     qb.addInClause("statuses", "people.status", query.getStatus());
@@ -56,6 +57,14 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     }
 
     qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+
+    if (query.getHasBiography() != null) {
+      if (query.getHasBiography()) {
+        qb.addWhereClause("people.biography IS NOT NULL");
+      } else {
+        qb.addWhereClause("people.biography IS NULL");
+      }
+    }
 
     addOrderByClauses(qb, query);
   }

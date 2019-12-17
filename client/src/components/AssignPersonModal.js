@@ -96,9 +96,7 @@ export default class AssignPersonModal extends Component {
                   onChange={this.handleChangePerson}
                   objectType={Person}
                   valueKey="name"
-                  fields={
-                    "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
-                  }
+                  fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
                   addon={PEOPLE_ICON}
                   vertical
                 />
@@ -137,11 +135,7 @@ export default class AssignPersonModal extends Component {
           <Button className="pull-left" onClick={this.close}>
             Cancel
           </Button>
-          <Button
-            onClick={this.save}
-            bsStyle={"primary"}
-            className="save-button"
-          >
+          <Button onClick={this.save} bsStyle="primary" className="save-button">
             Save
           </Button>
         </Modal.Footer>
@@ -199,11 +193,11 @@ export default class AssignPersonModal extends Component {
       this.state.person.position.uuid !== this.props.position.uuid
     ) {
       const errorMessage = (
-        <React.Fragment>
+        <>
           This person is currently in another position. By selecting this
           person, <b>{this.state.person.position.name}</b> will be left
           unfilled.
-        </React.Fragment>
+        </>
       )
       error = { message: errorMessage }
     }

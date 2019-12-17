@@ -119,9 +119,7 @@ class BaseAssignPositionModal extends Component {
                   onChange={this.handlePositionChange}
                   objectType={Position}
                   valueKey="name"
-                  fields={
-                    "uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
-                  }
+                  fields="uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
                   addon={POSITIONS_ICON}
                   vertical
                 />
@@ -160,7 +158,7 @@ class BaseAssignPositionModal extends Component {
           <Button className="pull-left" onClick={this.close}>
             Cancel
           </Button>
-          <Button onClick={this.save} bsStyle={"primary"}>
+          <Button onClick={this.save} bsStyle="primary">
             Save
           </Button>
         </Modal.Footer>
@@ -218,11 +216,11 @@ class BaseAssignPositionModal extends Component {
       this.state.position.person.uuid !== this.props.person.uuid
     ) {
       const errorMessage = (
-        <React.Fragment>
+        <>
           This position is currently held by{" "}
           <LinkTo person={this.state.position.person} />. By selecting this
           position, they will be removed.
-        </React.Fragment>
+        </>
       )
       error = { message: errorMessage }
     }

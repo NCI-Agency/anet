@@ -58,7 +58,7 @@ FilterList.propTypes = {
 const SelectFilterInputField = props => {
   const { items, handleOnChange } = props
   return (
-    <React.Fragment>
+    <>
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -69,7 +69,7 @@ const SelectFilterInputField = props => {
           ))}
         </select>
       </p>
-    </React.Fragment>
+    </>
   )
 }
 SelectFilterInputField.propTypes = {
@@ -195,7 +195,7 @@ export default class AdvancedSelect extends Component {
       : null
     const items = results && results[filterType] ? results[filterType].list : []
     return (
-      <React.Fragment>
+      <>
         <Field
           name={fieldName}
           label={fieldLabel}
@@ -280,7 +280,7 @@ export default class AdvancedSelect extends Component {
                         columns={[""].concat(overlayColumns)}
                         renderRow={overlayRenderRow}
                         isLoading={isLoading}
-                        loaderMessage={"No results found"}
+                        loaderMessage="No results found"
                         tableClassName={overlayTableClassName}
                       />
                       {this.paginationFor(filterType)}
@@ -296,14 +296,14 @@ export default class AdvancedSelect extends Component {
           {vertical ? (
             <Col sm={12}>{renderSelectedWithDelete}</Col>
           ) : (
-            <React.Fragment>
+            <>
               <Col sm={2} />
               <Col sm={7}>{renderSelectedWithDelete}</Col>
               <Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
-            </React.Fragment>
+            </>
           )}
         </Row>
-      </React.Fragment>
+      </>
     )
   }
 

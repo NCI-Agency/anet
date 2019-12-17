@@ -4,13 +4,14 @@ import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { mapDispatchToProps, useBoilerplate } from "components/Page"
-import UltimatePagination from "components/UltimatePagination"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import _get from "lodash/get"
 
 const GQL_GET_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
@@ -55,6 +56,12 @@ const BaseOrganizationTasks = props => {
 
   const { pageSize, totalCount } = paginatedTasks
 
+  if (_get(tasks, "length", 0) === 0) {
+    return (
+      <em>This organization doesn't have any {pluralize(taskShortLabel)}</em>
+    )
+  }
+
   return (
     <Fieldset
       id="tasks"
@@ -70,38 +77,34 @@ const BaseOrganizationTasks = props => {
         )
       }
     >
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPageNum}
-      />
-      <Table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {Task.map(tasks, (task, idx) => (
-            <tr key={task.uuid} id={`task_${idx}`}>
-              <td>
-                <LinkTo task={task}>{task.shortName}</LinkTo>
-              </td>
-              <td>{task.longName}</td>
+      >
+        <Table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
 
-      {tasks.length === 0 && (
-        <em>This organization doesn't have any {pluralize(taskShortLabel)}</em>
-      )}
+          <tbody>
+            {Task.map(tasks, (task, idx) => (
+              <tr key={task.uuid} id={`task_${idx}`}>
+                <td>
+                  <LinkTo task={task}>{task.shortName}</LinkTo>
+                </td>
+                <td>{task.longName}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </Fieldset>
   )
 }
@@ -120,7 +123,4 @@ const OrganizationTasks = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(OrganizationTasks)
+export default connect(null, mapDispatchToProps)(OrganizationTasks)

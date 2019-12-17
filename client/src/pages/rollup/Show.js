@@ -94,9 +94,7 @@ const GQL_EMAIL_ROLLUP = gql`
       principalOrganizationUuid: $principalOrganizationUuid
       advisorOrganizationUuid: $advisorOrganizationUuid
       orgType: $orgType
-    ) {
-      uuid
-    }
+    )
   }
 `
 
@@ -218,7 +216,7 @@ const Collection = props => {
   return (
     <div className="scrollable">
       <ReportCollection
-        paginationKey={"r_rollup"}
+        paginationKey="r_rollup"
         queryParams={queryParams}
         viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
       />
@@ -345,8 +343,7 @@ const BaseRollupShow = props => {
                     str,
                     Settings.dateFormats.forms.input.date,
                     true
-                  ).toDate()
-                }
+                  ).toDate()}
                 placeholder={inputFormat}
                 maxDate={moment().toDate()}
                 allowSingleDayRange
@@ -426,12 +423,14 @@ const BaseRollupShow = props => {
 
   function getQueryParams() {
     const sqParams = getSearchQuery(searchQuery)
+    const maxReportAge =
+      1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     const reportsQueryParams = {
       state: [Report.STATE.PUBLISHED], // Specifically excluding cancelled engagements.
       releasedAtStart: getRollupStart().valueOf(),
       releasedAtEnd: getRollupEnd().valueOf(),
       engagementDateStart: moment(getRollupStart())
-        .subtract(appSettings.maxReportAge, "days")
+        .subtract(maxReportAge, "days")
         .valueOf(),
       sortBy: "ENGAGEMENT_DATE",
       sortOrder: "DESC",
@@ -657,7 +656,4 @@ const RollupShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(RollupShow)
+export default connect(mapStateToProps, mapDispatchToProps)(RollupShow)

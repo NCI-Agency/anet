@@ -6,7 +6,7 @@
 ##############################################################
 
 # The wait period before sending a command to the email server (in ms)
-emailWaitBeforeAction: 1000
+emailWaitBeforeAction: 500
 
 # How many times to check that the server has been cleared after a command has been sent
 emailMaxWaitRetriesOnClear: 5

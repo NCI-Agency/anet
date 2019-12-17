@@ -219,9 +219,7 @@ const GQL_DELETE_REPORT = gql`
 `
 const GQL_EMAIL_REPORT = gql`
   mutation($uuid: String!, $email: AnetEmailInput!) {
-    emailReport(uuid: $uuid, email: $email) {
-      uuid
-    }
+    emailReport(uuid: $uuid, email: $email)
   }
 `
 const GQL_SUBMIT_REPORT = gql`
@@ -543,11 +541,11 @@ const BaseReportShow = props => {
                     label={Settings.fields.report.atmosphere}
                     component={FieldHelper.renderReadonlyField}
                     humanValue={
-                      <React.Fragment>
+                      <>
                         {utils.sentenceCase(report.atmosphere)}
                         {report.atmosphereDetails &&
                           ` – ${report.atmosphereDetails}`}
-                      </React.Fragment>
+                      </>
                     }
                   />
                 )}
@@ -605,21 +603,21 @@ const BaseReportShow = props => {
 
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
-                <Fieldset title="Sensitive information">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: report.reportSensitiveInformation.text
-                    }}
-                  />
-                  {(hasAuthorizationGroups && (
-                    <div>
-                      <h5>Authorized groups:</h5>
-                      <AuthorizationGroupTable
-                        authorizationGroups={values.authorizationGroups}
-                      />
-                    </div>
-                  )) || <h5>No groups are authorized!</h5>}
-                </Fieldset>
+                  <Fieldset title="Sensitive information">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: report.reportSensitiveInformation.text
+                      }}
+                    />
+                    {(hasAuthorizationGroups && (
+                      <div>
+                        <h5>Authorized groups:</h5>
+                        <AuthorizationGroupTable
+                          authorizationGroups={values.authorizationGroups}
+                        />
+                      </div>
+                    )) || <h5>No groups are authorized!</h5>}
+                  </Fieldset>
               )}
 
               {report.showWorkflow() && (
@@ -690,8 +688,7 @@ const BaseReportShow = props => {
                     bsStyle="primary"
                     type="button"
                     onClick={() =>
-                      submitComment(values.newComment, setFieldValue)
-                    }
+                      submitComment(values.newComment, setFieldValue)}
                   >
                     Save comment
                   </Button>
@@ -1203,10 +1200,10 @@ const BaseReportShow = props => {
   function renderValidationMessages(submitType) {
     submitType = submitType || "submitting"
     return (
-      <React.Fragment>
+      <>
         {renderValidationErrors(submitType)}
         {renderValidationWarnings(validationWarnings, submitType)}
-      </React.Fragment>
+      </>
     )
   }
 
@@ -1268,7 +1265,4 @@ const ReportShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportShow)
+export default connect(null, mapDispatchToProps)(ReportShow)

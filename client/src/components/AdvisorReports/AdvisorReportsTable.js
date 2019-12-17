@@ -73,7 +73,4 @@ AdvisorReportsTable.propTypes = {
   orgUuid: PropTypes.string
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(AdvisorReportsTable)
+export default connect(null, mapDispatchToProps)(AdvisorReportsTable)

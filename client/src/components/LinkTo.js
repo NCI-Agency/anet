@@ -111,12 +111,12 @@ export default class LinkTo extends Component {
     const avatarComponent = showAvatar &&
       !button &&
       modelFields.hasOwnProperty("avatar") && (
-      <AvatarDisplayComponent
-        avatar={modelInstance.avatar}
-        height={32}
-        width={32}
-        style={{ marginLeft: 5, marginRight: 5 }}
-      />
+        <AvatarDisplayComponent
+          avatar={modelInstance.avatar}
+          height={32}
+          width={32}
+          style={{ marginLeft: 5, marginRight: 5 }}
+        />
     )
 
     if (!isLink) {
@@ -145,11 +145,11 @@ export default class LinkTo extends Component {
     const LinkToComponent = componentClass
     return (
       <LinkToComponent to={to} {...componentProps}>
-        <React.Fragment>
+        <>
           {iconComponent}
           {avatarComponent}
           {children || modelInstance.toString()}
-        </React.Fragment>
+        </>
       </LinkToComponent>
     )
   }

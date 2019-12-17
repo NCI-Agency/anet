@@ -165,7 +165,4 @@ const AuthorizationGroupShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(AuthorizationGroupShow)
+export default connect(null, mapDispatchToProps)(AuthorizationGroupShow)

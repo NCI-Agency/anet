@@ -72,7 +72,7 @@ const BaseLocationForm = props => {
           autoPan: true,
           onMove: (event, map) => onMarkerMove(event, map, setFieldValue)
         }
-        if (Location.hasCoordinates(values.coord)) {
+        if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
             lat: values.lat,
             lng: values.lng
@@ -115,10 +115,10 @@ const BaseLocationForm = props => {
                   name="location"
                   component={FieldHelper.renderReadonlyField}
                   humanValue={
-                    <React.Fragment>
+                    <>
                       <Coordinate coord={values.lat} />,{" "}
                       <Coordinate coord={values.lng} />
-                    </React.Fragment>
+                    </>
                   }
                 />
               </Fieldset>
