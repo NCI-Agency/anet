@@ -12,9 +12,9 @@ const advisorSearchPositionTypes = [
 ]
 
 const SelectFilter = props => {
-  const { asFormField, isPositionTypeFilter, queryKey, values, labels } = props
+  const { asFormField, isPositionTypeFilter, queryKey, options, labels } = props
   const defaultValue = {
-    value: props.value.value || props.values[0] || ""
+    value: props.value.value || options[0] || ""
   }
   const toQuery = val => {
     // Searching for advisors implies searching for super users and admins as well
@@ -26,13 +26,13 @@ const SelectFilter = props => {
   }
   const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
-  const optionsLabels = labels || values.map(v => utils.sentenceCase(v))
+  const optionsLabels = labels || options.map(v => utils.sentenceCase(v))
   return !asFormField ? (
-    <>{optionsLabels[values.indexOf(value.value)]}</>
+    <>{optionsLabels[options.indexOf(value.value)]}</>
   ) : (
     <FormGroup>
       <select value={value.value} onChange={handleChange}>
-        {values.map((v, idx) => (
+        {options.map((v, idx) => (
           <option key={idx} value={v}>
             {optionsLabels[idx]}
           </option>
@@ -47,7 +47,7 @@ const SelectFilter = props => {
 }
 SelectFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
-  values: PropTypes.array.isRequired,
+  options: PropTypes.array.isRequired,
   labels: PropTypes.array,
   value: PropTypes.oneOfType([
     PropTypes.string,

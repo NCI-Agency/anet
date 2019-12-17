@@ -61,7 +61,7 @@ const taskFilters = props => {
       deserializer: deserializeSelectFilter,
       props: {
         queryKey: "status",
-        values: [Task.STATUS.ACTIVE, Task.STATUS.INACTIVE],
+        options: [Task.STATUS.ACTIVE, Task.STATUS.INACTIVE],
         labels: ["Active", "Inactive"]
       }
     }
@@ -93,7 +93,7 @@ const taskFilters = props => {
       deserializer: deserializeSelectFilter,
       props: {
         queryKey: "projectStatus",
-        values: Object.keys(customEnum1.enum),
+        options: Object.keys(customEnum1.enum),
         labels: Object.values(customEnum1.enum).map(o => o.label)
       }
     }
@@ -300,7 +300,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "engagementStatus",
-          values: [
+          options: [
             Report.ENGAGEMENT_STATUS.HAPPENED,
             Report.ENGAGEMENT_STATUS.FUTURE,
             Report.ENGAGEMENT_STATUS.CANCELLED
@@ -312,7 +312,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "atmosphere",
-          values: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
+          options: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
         }
       },
       Tag: {
@@ -367,7 +367,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "role",
-          values: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
+          options: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
           labels: [
             Settings.fields.advisor.person.name,
             Settings.fields.principal.person.name
@@ -379,7 +379,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [
+          options: [
             Person.STATUS.ACTIVE,
             Person.STATUS.INACTIVE,
             Person.STATUS.NEW_USER
@@ -400,7 +400,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "rank",
-          values: ranks,
+          options: ranks,
           labels: ranks
         }
       },
@@ -409,7 +409,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "country",
-          values: countries,
+          options: countries,
           labels: countries
         }
       },
@@ -418,7 +418,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "hasBiography",
-          values: ["true", "false"],
+          options: ["true", "false"],
           labels: ["Yes", "No"]
         }
       }
@@ -432,7 +432,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
+          options: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
         }
       },
       "Organization Type": {
@@ -440,7 +440,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
-          values: [
+          options: [
             Organization.TYPE.ADVISOR_ORG,
             Organization.TYPE.PRINCIPAL_ORG
           ],
@@ -460,7 +460,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
-          values: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
+          options: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
           labels: [
             Settings.fields.advisor.position.name,
             Settings.fields.principal.position.name
@@ -481,7 +481,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
+          options: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
         }
       },
       Location: {
@@ -498,7 +498,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "isFilled",
-          values: ["true", "false"],
+          options: ["true", "false"],
           labels: ["Yes", "No"]
         }
       }
@@ -512,7 +512,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
+          options: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
         }
       }
     }
