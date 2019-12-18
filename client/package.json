@@ -152,6 +152,7 @@
     "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.4",
     "redux-persist": "^6.0.0",
+    "weakset": "^1.0.0",
     "yup": "^0.27.0"
   },
   "resolutions": {

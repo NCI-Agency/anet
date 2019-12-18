@@ -203,7 +203,7 @@ dictionary:
         label: Effort number
         placeholder: Enter an effort name, example....
 
-      longLabel: Tasks and Milestones
+      longLabel: Objectives and Efforts
       longName:
         label: Task description
         placeholder: Enter an effort description, example ....

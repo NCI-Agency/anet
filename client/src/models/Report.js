@@ -169,6 +169,11 @@ export default class Report extends Model {
         .object()
         .nullable()
         .default({}),
+      // not actually in the database, but used for validation:
+      tasksLevel1: yup
+        .array()
+        .nullable()
+        .default([]),
       tasks: yup
         .array()
         .nullable()

@@ -28,19 +28,16 @@ const SliderKnob = posed.circle({
 })
 
 export default function LikertScale(props) {
-  console.log(`vvvvvvvvvvvv ${(props.value || 0) / 100}`)
   const [x, setX] = useState(
     ((props.value || 50) * (MAX_X - MIN_X)) / 100 + MIN_X
   )
   const [y, setY] = useState(0)
 
-  console.log(`xxxxx ${x}`)
-
   const onXChange = v => {
     setX(v + CENTER_X)
-    props.onChange(
-      Math.floor(((v - MIN_X) * 100) / (MAX_X - MIN_X) - MARGIN + 1)
-    )
+    // props.onChange(
+    //   Math.floor(((v - MIN_X) * 100) / (MAX_X - MIN_X) - MARGIN + 1)
+    // )
   }
 
   const onYChange = v => setY(v + CENTER_Y)
@@ -53,34 +50,34 @@ export default function LikertScale(props) {
         width={WIDTH}
         xmlns="http://www.w3.org/2000/svg"
       >
-        {props.background &&
-        <>
-        <rect
-          style={{ fill: "#ff8888", strokeWidth: 0 }}
-          y="0"
-          x="0"
-          height={HEIGHT}
-          width={END_X / 3}
-          id="rect3713"
-        />
-        <rect
-          style={{ fill: "#ffffab", strokeWidth: 0 }}
-          y="0"
-          x={END_X / 3}
-          height={HEIGHT}
-          width={(END_X * 2) / 3}
-          id="rect3713"
-        />
-        <rect
-          style={{ fill: "#9ef39e", strokeWidth: 0 }}
-          y="0"
-          x={(END_X * 2) / 3}
-          height={HEIGHT}
-          width={END_X}
-          id="rect3713"
-        />
-        </>
-        }
+        {props.background && (
+          <>
+            <rect
+              style={{ fill: "#ff8888", strokeWidth: 0 }}
+              y="0"
+              x="0"
+              height={HEIGHT}
+              width={END_X / 3}
+              id="rect3713"
+            />
+            <rect
+              style={{ fill: "#ffffab", strokeWidth: 0 }}
+              y="0"
+              x={END_X / 3}
+              height={HEIGHT}
+              width={(END_X * 2) / 3}
+              id="rect3713"
+            />
+            <rect
+              style={{ fill: "#9ef39e", strokeWidth: 0 }}
+              y="0"
+              x={(END_X * 2) / 3}
+              height={HEIGHT}
+              width={END_X}
+              id="rect3713"
+            />
+          </>
+        )}
 
         <g fill="none" fillRule="evenodd">
           <path
@@ -113,12 +110,17 @@ export default function LikertScale(props) {
           {Math.floor((x * 100) / (MAX_X - MIN_X) - MARGIN + 1)}
         </text>
       </svg>
+      Supporting text defining assessment criteria
     </div>
   )
 }
 
 LikertScale.propTypes = {
   value: PropTypes.number,
-  onChange: PropTypes.func,
   background: PropTypes.bool
+}
+
+LikertScale.defaultProps = {
+  value: 0,
+  background: true
 }

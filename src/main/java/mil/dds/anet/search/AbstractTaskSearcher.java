@@ -51,6 +51,14 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         "tasks.\"projectedCompletion\"", Comparison.BEFORE, query.getProjectedCompletionEnd());
     qb.addLikeClause("customField", "tasks.\"customField\"", query.getCustomField());
 
+    if (query.getHasCustomFieldRef1() != null) {
+      if (query.getHasCustomFieldRef1()) {
+        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NOT NULL");
+      } else {
+        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NULL");
+      }
+    }
+
     if (query.getCustomFieldRef1Uuid() != null) {
       addCustomFieldRef1UuidQuery(query);
     }
@@ -76,11 +84,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
     if (query.getCustomFieldRef1Recursively()) {
-      qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks",
-          "organizations", "\"parentOrgUuid\"", "customFieldRef1Uuid",
-          query.getCustomFieldRef1Uuid());
+      qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks", "tasks",
+          "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
     } else {
-      qb.addEqualsClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
+      qb.addInListClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
           query.getCustomFieldRef1Uuid());
     }
   }
