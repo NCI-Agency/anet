@@ -15,7 +15,7 @@ import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
 const RENDERERS = {
-  likertScale: FieldHelper.renderLikertScale
+  likertScale: FieldHelper.RenderLikertScale2
 }
 
 const TextField = fieldProps => {
