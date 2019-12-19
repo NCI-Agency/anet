@@ -3053,12 +3053,12 @@
     browserstack-local "1.4.2"
     request "^2.85.0"
 
-"@wdio/cli@^5.16.16":
-  version "5.16.16"
-  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.16.16.tgz#c5c1552608fbb69899b350c149d03273c0128a01"
-  integrity sha512-l/aPZAJ0svdbC96HiZLPef4wbA1ETl+w7ome3r09nBfx1eqgzB0HTUtNlzeUErhqd8eICCWkZOiuasTVPK8iLw==
+"@wdio/cli@^5.17.0":
+  version "5.17.0"
+  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.17.0.tgz#1f11e149d0d0ca3ec825b4fba4d045bf7466ed7e"
+  integrity sha512-xuOR1DtT2+R2b+9nG9BOPEghqSS6hJVM+qxPzt8nv7QjHfHiSqAsn86V4rGTI4wuHs6DUf07I6GsJeU6Jkf92w==
   dependencies:
-    "@wdio/config" "5.16.11"
+    "@wdio/config" "5.17.0"
     "@wdio/logger" "5.16.10"
     "@wdio/utils" "5.16.15"
     async-exit-hook "^2.0.1"
@@ -3072,7 +3072,7 @@
     lodash.pickby "^4.6.0"
     lodash.union "^4.6.0"
     log-update "^3.2.0"
-    webdriverio "5.16.15"
+    webdriverio "5.17.0"
     yargs "^15.0.1"
     yarn-install "^1.0.0"
 
@@ -3080,6 +3080,15 @@
   version "5.16.11"
   resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.16.11.tgz#2f2c58e4a50ab3fc9251f2ea8ec64c86d4266e5c"
   integrity sha512-fGa7gDTyzzs28QIkJGPqG2ocgOvHBUanSDan4pw1pX7y1yJtPI0Nc3hkfxB6u/MqsW67GXCNMRyOS9Ri1I912A==
+  dependencies:
+    "@wdio/logger" "5.16.10"
+    deepmerge "^4.0.0"
+    glob "^7.1.2"
+
+"@wdio/config@5.17.0":
+  version "5.17.0"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.17.0.tgz#43c4a051a3b626310851778dd9ef6dd0518dc414"
+  integrity sha512-rdFcAR/5YlRfBXWh9463b+kU0JmwyfgFnAFy2GMhbJ9CSJSooflppPgGiC7+3hFOsqWqUMDWcLpQgYN9Fyv/gg==
   dependencies:
     "@wdio/logger" "5.16.10"
     deepmerge "^4.0.0"
@@ -8515,16 +8524,7 @@ fs-extra@^7.0.0:
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
-fs-extra@^8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.0.1.tgz#90294081f978b1f182f347a440a209154344285b"
-  integrity sha512-W+XLrggcDzlle47X/XnS7FXrXu9sDo+Ze9zpndeBxdgv88FHLm1HtmkhEwavruS6koanBjp098rUpHs65EmG7A==
-  dependencies:
-    graceful-fs "^4.1.2"
-    jsonfile "^4.0.0"
-    universalify "^0.1.0"
-
-fs-extra@^8.1.0:
+fs-extra@^8.0.1, fs-extra@^8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.1.0.tgz#49d43c45a88cd9677668cb7be1b46efdb8d2e1c0"
   integrity sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==
@@ -16939,7 +16939,19 @@ webdriver@5.16.15:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@5.16.15, webdriverio@^5.16.15:
+webdriver@5.17.0:
+  version "5.17.0"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-5.17.0.tgz#451ac2df970210b1fe99fe197a9be378e2acde11"
+  integrity sha512-Jg3Z/O+EuKQA91wZNHHRFiSa4TqT8UyvH+Lgvdl6CeZEUstbtP0CpxmyMP8ZRJjMqvuM7/NMIpKjpWCRaCXYGA==
+  dependencies:
+    "@wdio/config" "5.17.0"
+    "@wdio/logger" "5.16.10"
+    "@wdio/protocols" "5.16.7"
+    "@wdio/utils" "5.16.15"
+    lodash.merge "^4.6.1"
+    request "^2.83.0"
+
+webdriverio@5.16.15:
   version "5.16.15"
   resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.16.15.tgz#1bb577dfc96f3fa8cbbc34c13fc8cf3623d689e0"
   integrity sha512-Sm2vpahcFPlVJIT9XoUPsXJGV2jEeebIIGaBAjTUXmOf3aS/12oClPCCcn1AgJ+muhPNbdK7ULkTGEmBFC1XUA==
@@ -16959,6 +16971,27 @@ webdriverio@5.16.15, webdriverio@^5.16.15:
     rgb2hex "^0.1.0"
     serialize-error "^5.0.0"
     webdriver "5.16.15"
+
+webdriverio@5.17.0, webdriverio@^5.16.15:
+  version "5.17.0"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.17.0.tgz#ad4a43279f07168f6c43590b034469583a4ef792"
+  integrity sha512-hAYwnJGLBsgeGG7TT7kbiSaJPvoFfa4akGt+Hn+9c/KoUvwQafQ5vJ/tz98TFjOkwcs0FGxCXcu6Ra8iEzLvqQ==
+  dependencies:
+    "@wdio/config" "5.17.0"
+    "@wdio/logger" "5.16.10"
+    "@wdio/repl" "5.16.15"
+    "@wdio/utils" "5.16.15"
+    archiver "^3.0.0"
+    css-value "^0.0.1"
+    grapheme-splitter "^1.0.2"
+    lodash.clonedeep "^4.5.0"
+    lodash.isobject "^3.0.2"
+    lodash.isplainobject "^4.0.6"
+    lodash.zip "^4.2.0"
+    resq "^1.6.0"
+    rgb2hex "^0.1.0"
+    serialize-error "^5.0.0"
+    webdriver "5.17.0"
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
