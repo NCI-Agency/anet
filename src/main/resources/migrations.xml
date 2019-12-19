@@ -2735,6 +2735,7 @@
 	<changeSet id="add-postgresql-fulltext" author="gjvoosten" dbms="postgresql">
 		<sql>
 			<!-- Create text search configuration -->
+			DROP TEXT SEARCH CONFIGURATION IF EXISTS anet;
 			CREATE TEXT SEARCH CONFIGURATION anet ( COPY = pg_catalog.english );
 			ALTER TEXT SEARCH CONFIGURATION anet ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;
 
