@@ -104,7 +104,7 @@
     "@fullcalendar/list": "^4.3.0",
     "@fullcalendar/react": "^4.3.0",
     "@fullcalendar/timegrid": "^4.3.0",
-    "apollo-boost": "^0.4.4",
+    "apollo-boost": "^0.4.7",
     "bootstrap": "^3.4.1",
     "change-case": "^4.1.0",
     "classnames": "^2.2.6",
