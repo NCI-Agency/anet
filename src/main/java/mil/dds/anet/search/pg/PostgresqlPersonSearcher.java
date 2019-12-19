@@ -15,10 +15,10 @@ public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
     final String text = qb.getFullTextQuery(query.getText());
     if (query.getMatchPositionName()) {
       qb.addLikeClauses("text", new String[] {"people.name", "people.code",
-          "people.\"emailAddress\"", "people.biography", "positions.name", "positions.code"}, text);
+          "people.\"emailAddress\"", "positions.name", "positions.code"}, text);
     } else {
-      qb.addLikeClauses("text", new String[] {"people.name", "people.code",
-          "people.\"emailAddress\"", "people.biography"}, text);
+      qb.addLikeClauses("text",
+          new String[] {"people.name", "people.code", "people.\"emailAddress\""}, text);
     }
   }
 

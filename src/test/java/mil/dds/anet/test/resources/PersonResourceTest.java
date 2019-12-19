@@ -260,12 +260,6 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
-    query.setText("advisor"); // Search against biographies
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
-    assertThat(searchResults.getList().size()).isGreaterThan(1);
-
     query.setText(null);
     query.setRole(Role.ADVISOR);
     searchResults =
