@@ -72,8 +72,6 @@ public class Report extends AbstractAnetBean {
   List<Comment> comments;
   private List<Tag> tags;
   private ReportSensitiveInformation reportSensitiveInformation;
-  // The user who instantiated this; needed to determine access to sensitive information
-  private Person user;
   private List<AuthorizationGroup> authorizationGroups;
   private List<ReportAction> workflow;
 
@@ -619,7 +617,7 @@ public class Report extends AbstractAnetBean {
       return CompletableFuture.completedFuture(reportSensitiveInformation);
     }
     return AnetObjectEngine.getInstance().getReportSensitiveInformationDao()
-        .getForReport(context, this, user).thenApply(o -> {
+        .getForReport(context, this, DaoUtils.getUserFromContext(context)).thenApply(o -> {
           reportSensitiveInformation = o;
           return o;
         });
@@ -632,18 +630,6 @@ public class Report extends AbstractAnetBean {
 
   public void setReportSensitiveInformation(ReportSensitiveInformation reportSensitiveInformation) {
     this.reportSensitiveInformation = reportSensitiveInformation;
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
-  public Person getUser() {
-    return user;
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
-  public void setUser(Person user) {
-    this.user = user;
   }
 
   // TODO: batch load? (used in reports/{Edit,Show}.js)
