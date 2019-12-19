@@ -28,14 +28,15 @@ const SliderKnob = posed.circle({
 })
 
 const LikertScale = props => {
-  const valueProp = Number(props.value)
+  const { onChange, value } = props
+  const valueProp = Number(value)
   const [x, setX] = useState(
     ((valueProp || 50) * (MAX_X - MIN_X)) / 100 + MIN_X
   )
   const [y, setY] = useState(0)
   useEffect(() => {
-    props.onChange(x)
-  }, [props, x])
+    onChange(x)
+  }, [onChange, x])
 
   const onXChange = v => {
     setX(v + CENTER_X)

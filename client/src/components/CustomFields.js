@@ -376,13 +376,17 @@ const CustomFields = ({
             updateInvisibleFields: updateInvisibleFields
           }
         }
+        const handleFieldChange = value =>
+          formikProps.setFieldValue(fieldName, value)
+        const handleFieldTouched = () =>
+          formikProps.setFieldTouched(fieldName, true)
         return (
           isVisible && (
             <FieldComponent
               key={key}
               name={fieldName}
-              onChange={value => formikProps.setFieldValue(fieldName, value)}
-              onBlur={() => formikProps.setFieldTouched(fieldName, true)}
+              onChange={handleFieldChange}
+              onBlur={handleFieldTouched}
               {...fieldProps}
               {...extraProps}
             >
