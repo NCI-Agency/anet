@@ -4,9 +4,9 @@ import PropTypes from "prop-types"
 
 const MARGIN = 4
 const HEIGHT = 45
-const WIDTH = 225
+const WIDTH = 325
 const CENTER_X = WIDTH * 0.5
-const CENTER_Y = HEIGHT * 0.5
+const CENTER_Y = HEIGHT * 0.3
 const START_X = MARGIN
 const END_X = WIDTH - MARGIN
 
@@ -42,6 +42,8 @@ export default function LikertScale(props) {
 
   const onYChange = v => setY(v + CENTER_Y)
 
+  const ticks = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
   return (
     <div>
       <svg
@@ -60,6 +62,9 @@ export default function LikertScale(props) {
               width={END_X / 3}
               id="rect3713"
             />
+            <text fill="gray" x={5} y={CENTER_Y + 25}>
+              Criteria 1
+            </text>
             <rect
               style={{ fill: "#ffffab", strokeWidth: 0 }}
               y="0"
@@ -68,6 +73,9 @@ export default function LikertScale(props) {
               width={(END_X * 2) / 3}
               id="rect3713"
             />
+            <text fill="gray" x={END_X / 3 + 5} y={CENTER_Y + 25}>
+              Criteria 2
+            </text>
             <rect
               style={{ fill: "#9ef39e", strokeWidth: 0 }}
               y="0"
@@ -78,7 +86,19 @@ export default function LikertScale(props) {
             />
           </>
         )}
-
+        <text fill="gray" x={(END_X * 2) / 3 + 5} y={CENTER_Y + 25}>
+          Criteria 3
+        </text>
+        {ticks.map(tick => (
+          <rect
+            style={{ fill: "gray", strokeWidth: 0 }}
+            y={CENTER_Y}
+            x={tick * (MAX_X - MIN_X) / 100 + MARGIN}
+            height={5}
+            width={2}
+            key={`tick-${tick}`}
+          />
+        ))}
         <g fill="none" fillRule="evenodd">
           <path
             d={`
@@ -106,8 +126,8 @@ export default function LikertScale(props) {
             onValueChange={{ x: onXChange, y: onYChange }}
           />
         </g>
-        <text fill="gray" x={x - 5} y={CENTER_Y + 20}>
-          {Math.floor((x * 100) / (MAX_X - MIN_X) - MARGIN + 1)}
+        <text fill="gray" x={x - 5} y={CENTER_Y + 16}>
+          {Math.floor((x * 100) / (MAX_X - MIN_X) - MARGIN + 1) / 10}
         </text>
       </svg>
       Supporting text defining assessment criteria
