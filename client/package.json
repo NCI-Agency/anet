@@ -90,7 +90,7 @@
     "webpack": "^4.41.2",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.9.0",
+    "webpack-dev-server": "^3.10.1",
     "webpack-merge": "^4.2.2",
     "xhr2": "^0.2.0"
   },
