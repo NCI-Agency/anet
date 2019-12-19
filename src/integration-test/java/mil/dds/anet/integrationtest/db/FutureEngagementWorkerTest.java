@@ -58,19 +58,22 @@ public class FutureEngagementWorkerTest {
     futureEngagementWorker = new FutureEngagementWorker(engine.getReportDao());
     emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
 
-    // Clear the email server before start testing
+    // Clear the email server before starting testing
     emailServer.clearEmailServer();
   }
 
   @AfterClass
-  public static void finalCheckAndCleanup() throws IOException, InterruptedException {
+  public static void finalCheckAndCleanup() throws Exception {
     // Test that all emails have been correctly sent
-    testFututeEngagementWorkerEmail();
+    testFutureEngagementWorkerEmail();
+
+    // Clear the email server after testing
+    emailServer.clearEmailServer();
   }
 
   @Test
   public void testNoReports() {
-    testFututeEngagementWorker(0);
+    testFutureEngagementWorker(0);
   }
 
   @Test
@@ -86,7 +89,7 @@ public class FutureEngagementWorkerTest {
     expectedIds.add("reportsOK_2");
     expectedIds.add("reportsOK_3");
 
-    testFututeEngagementWorker(3);
+    testFutureEngagementWorker(3);
   }
 
   @Test
@@ -97,7 +100,7 @@ public class FutureEngagementWorkerTest {
 
     unexpectedIds.add("testReportDueInFuture_1");
 
-    testFututeEngagementWorker(0);
+    testFutureEngagementWorker(0);
   }
 
   @Test
@@ -108,7 +111,7 @@ public class FutureEngagementWorkerTest {
 
     expectedIds.add("testReportDueEndToday_1");
 
-    testFututeEngagementWorker(1);
+    testFutureEngagementWorker(1);
   }
 
   @Test
@@ -133,7 +136,7 @@ public class FutureEngagementWorkerTest {
     report.setApprovalStep(as);
     engine.getReportDao().update(report);
 
-    testFututeEngagementWorker(isExpected ? 1 : 0);
+    testFutureEngagementWorker(isExpected ? 1 : 0);
   }
 
   @Test
@@ -159,7 +162,7 @@ public class FutureEngagementWorkerTest {
     report.setState(state);
     engine.getReportDao().update(report);
 
-    testFututeEngagementWorker(isExpected ? 1 : 0);
+    testFutureEngagementWorker(isExpected ? 1 : 0);
   }
 
   @Test
@@ -183,18 +186,18 @@ public class FutureEngagementWorkerTest {
 
     unexpectedIds.add("testApprovalStepReport_1");
 
-    testFututeEngagementWorker(0);
+    testFutureEngagementWorker(0);
   }
 
   // DB integration
-  private void testFututeEngagementWorker(final int expectedCount) {
+  private void testFutureEngagementWorker(final int expectedCount) {
     final int emailSize = engine.getEmailDao().getAll().size();
     futureEngagementWorker.run();
     assertThat(engine.getEmailDao().getAll().size()).isEqualTo(emailSize + expectedCount);
   }
 
   // Email integration
-  private static void testFututeEngagementWorkerEmail() throws IOException, InterruptedException {
+  private static void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
     if (!executeEmailServerTests) {
       return;
     }
