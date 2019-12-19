@@ -151,7 +151,7 @@
     "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.4",
     "redux-persist": "^6.0.0",
-    "yup": "^0.27.0"
+    "yup": "^0.28.0"
   },
   "resolutions": {
     "autobind-decorator": "2.4.0"
