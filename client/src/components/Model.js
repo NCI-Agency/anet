@@ -49,7 +49,8 @@ export const CUSTOM_FIELD_TYPE = {
   DATETIME: "datetime",
   ENUM: "enum",
   ENUMSET: "enumset",
-  ARRAY_OF_OBJECTS: "array_of_objects"
+  ARRAY_OF_OBJECTS: "array_of_objects",
+  SPECIAL_FIELD: "special_field"
 }
 
 const CUSTOM_FIELD_TYPE_SCHEMA = {
@@ -74,7 +75,11 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup
     .array()
     .nullable()
-    .default([])
+    .default([]),
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup
+    .mixed()
+    .nullable()
+    .default(null)
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig) => {

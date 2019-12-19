@@ -275,8 +275,8 @@ dictionary:
               params: [1]
           visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         levelTrained:
-          type: number
-          renderer: likertScale
+          type: special_field
+          widget: likertScale
           label: Level trained
           helpText: Basic / Intermediate / Advanced
           visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]

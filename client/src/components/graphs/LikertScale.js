@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import posed from "react-pose"
 import PropTypes from "prop-types"
 
@@ -27,11 +27,15 @@ const SliderKnob = posed.circle({
   }
 })
 
-export default function LikertScale(props) {
+const LikertScale = props => {
+  const valueProp = Number(props.value)
   const [x, setX] = useState(
-    ((props.value || 50) * (MAX_X - MIN_X)) / 100 + MIN_X
+    ((valueProp || 50) * (MAX_X - MIN_X)) / 100 + MIN_X
   )
   const [y, setY] = useState(0)
+  useEffect(() => {
+    props.onChange(x)
+  }, [props, x])
 
   const onXChange = v => {
     setX(v + CENTER_X)
@@ -93,7 +97,7 @@ export default function LikertScale(props) {
           <rect
             style={{ fill: "gray", strokeWidth: 0 }}
             y={CENTER_Y}
-            x={tick * (MAX_X - MIN_X) / 100 + MARGIN}
+            x={(tick * (MAX_X - MIN_X)) / 100 + MARGIN}
             height={5}
             width={2}
             key={`tick-${tick}`}
@@ -137,10 +141,13 @@ export default function LikertScale(props) {
 
 LikertScale.propTypes = {
   value: PropTypes.number,
-  background: PropTypes.bool
+  background: PropTypes.bool,
+  onChange: PropTypes.func
 }
 
 LikertScale.defaultProps = {
   value: 0,
   background: true
 }
+
+export default LikertScale

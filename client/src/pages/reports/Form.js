@@ -857,6 +857,7 @@ const BaseReportForm = props => {
                 {values.tasks.map(task => (
                   <Field
                     key={`assessment-${task.shortName}-${task.longName}`}
+                    name={`assessment-${task.shortName}-${task.longName}`}
                     label={`${task.shortName} ${task.longName}`}
                     component={FieldHelper.RenderLikertScale2}
                     background

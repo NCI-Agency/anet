@@ -357,19 +357,8 @@ export const renderLikertScale = ({
 }
 
 export const RenderLikertScale2 = ({ field, form, ...props }) => {
-  const {
-    label,
-    children,
-    extraColElem,
-    addon,
-    vertical,
-    trainingEvent
-  } = props
-  console.log(props)
-  console.log(field)
-  console.log(form)
-  const { value, ...fieldProps } = field
-  const widgetElem = <LikertScale value={trainingEvent} {...fieldProps} />
+  const { label, children, extraColElem, addon, vertical } = props
+  const widgetElem = <LikertScale {...field} />
   return renderField(
     field,
     label,

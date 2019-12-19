@@ -13,20 +13,30 @@ import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
+import LikertScale from "./graphs/LikertScale"
 
+const WIDGETS = {
+  likertScale: LikertScale
+}
 const RENDERERS = {
   likertScale: FieldHelper.RenderLikertScale2
 }
 
-const TextField = fieldProps => {
-  const { onChange, onBlur, renderer, ...otherFieldProps } = fieldProps
+const SpecialField = fieldProps => {
+  const { widget, ...otherFieldProps } = fieldProps
+  const SpecialFieldWidget = WIDGETS[widget]
   return (
     <Field
-      type="text"
-      component={RENDERERS[renderer] || FieldHelper.renderInputField}
+      component={FieldHelper.renderSpecialField}
+      widget={<SpecialFieldWidget />}
       {...otherFieldProps}
     />
   )
+}
+
+const TextField = fieldProps => {
+  const { onChange, onBlur, ...otherFieldProps } = fieldProps
+  return <Field component={FieldHelper.renderInputField} {...otherFieldProps} />
 }
 
 const ReadonlyTextField = fieldProps => {
@@ -141,7 +151,7 @@ const ArrayOfObjectsField = fieldProps => {
   } = fieldProps
   const nameKeys = name.split(".")
   const value = nameKeys.reduce(
-    (v, key) => (v && v[key] ? v[key] : null),
+    (v, key) => (v && v[key] ? v[key] : []),
     formikProps.values
   )
   const fieldsetTitle = fieldConfig.label || ""
@@ -218,7 +228,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
   const { name, fieldConfig, formikProps } = fieldProps
   const nameKeys = name.split(".")
   const value = nameKeys.reduce(
-    (v, key) => (v && v[key] ? v[key] : null),
+    (v, key) => (v && v[key] ? v[key] : []),
     formikProps.values
   )
   const fieldsetTitle = fieldConfig.label || ""
@@ -263,7 +273,8 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
   [CUSTOM_FIELD_TYPE.ENUM]: EnumField,
   [CUSTOM_FIELD_TYPE.ENUMSET]: EnumSetField,
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ArrayOfObjectsField
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ArrayOfObjectsField,
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: SpecialField
 }
 
 function getInvisibleFields(
@@ -402,7 +413,8 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
   [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumSetField,
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField,
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: ReadonlyTextField
 }
 
 export const ReadonlyCustomFields = ({
