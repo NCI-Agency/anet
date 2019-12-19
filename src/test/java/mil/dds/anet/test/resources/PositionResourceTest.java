@@ -34,6 +34,7 @@ import mil.dds.anet.beans.search.PositionSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.utils.DaoUtils;
 import org.junit.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
@@ -396,7 +397,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Search by organization
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("ef 1");
+    // FIXME: decide what the search should do in both cases
+    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"ef 1\" or \"ef 1.1\"" : "ef 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
