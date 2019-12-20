@@ -885,7 +885,7 @@ const BaseReportForm = props => {
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
           const touched = _cloneDeep(autoSaveSettings.touched) // save previous touched
-          form.resetForm(newValues)
+          form.resetForm({ values: newValues })
           Object.entries(touched).forEach(([field, value]) =>
             // re-set touched so we keep messages
             form.setFieldTouched(field, value)
