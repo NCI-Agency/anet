@@ -450,7 +450,7 @@ const BaseReportForm = props => {
                   name="engagementDate"
                   component={FieldHelper.renderSpecialField}
                   onChange={value => setFieldValue("engagementDate", value)}
-                  onBlur={() => setFieldTouched("engagementDate", true)}
+                  onBlur={() => setFieldTouched("engagementDate")}
                   widget={
                     <CustomDateInput
                       id="engagementDate"
@@ -721,7 +721,7 @@ const BaseReportForm = props => {
                   widget={
                     <RichTextEditor
                       className="reportTextField"
-                      onHandleBlur={() => setFieldTouched("reportText", true)}
+                      onHandleBlur={() => setFieldTouched("reportText")}
                     />
                   }
                 />
@@ -751,10 +751,7 @@ const BaseReportForm = props => {
                           <RichTextEditor
                             className="reportSensitiveInformationField"
                             onHandleBlur={() =>
-                              setFieldTouched(
-                                "reportSensitiveInformation.text",
-                                true
-                              )}
+                              setFieldTouched("reportSensitiveInformation.text")}
                           />
                         }
                       />

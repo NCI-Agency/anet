@@ -452,7 +452,7 @@ const BasePersonForm = props => {
                   component={FieldHelper.renderSpecialField}
                   value={values.endOfTourDate}
                   onChange={value => setFieldValue("endOfTourDate", value)}
-                  onBlur={() => setFieldTouched("endOfTourDate", true)}
+                  onBlur={() => setFieldTouched("endOfTourDate")}
                   widget={<CustomDateInput id="endOfTourDate" />}
                 >
                   {isAdvisor && endOfTourDateInPast && (
@@ -468,7 +468,7 @@ const BasePersonForm = props => {
                   widget={
                     <RichTextEditor
                       className="biography"
-                      onHandleBlur={() => setFieldTouched("biography", true)}
+                      onHandleBlur={() => setFieldTouched("biography")}
                     />
                   }
                 />

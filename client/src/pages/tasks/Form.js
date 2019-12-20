@@ -247,7 +247,7 @@ const BaseTaskForm = props => {
                     component={FieldHelper.renderSpecialField}
                     onChange={value =>
                       setFieldValue("plannedCompletion", value)}
-                    onBlur={() => setFieldTouched("plannedCompletion", true)}
+                    onBlur={() => setFieldTouched("plannedCompletion")}
                     widget={<CustomDateInput id="plannedCompletion" />}
                   />
                 )}
@@ -259,7 +259,7 @@ const BaseTaskForm = props => {
                     component={FieldHelper.renderSpecialField}
                     onChange={value =>
                       setFieldValue("projectedCompletion", value)}
-                    onBlur={() => setFieldTouched("projectedCompletion", true)}
+                    onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
                   />
                 )}
@@ -290,10 +290,7 @@ const BaseTaskForm = props => {
                           <RichTextEditor
                             className="textField"
                             onHandleBlur={() =>
-                              setFieldTouched(
-                                "assessment_customFieldEnum1",
-                                true
-                              )}
+                              setFieldTouched("assessment_customFieldEnum1")}
                           />
                         }
                       />
