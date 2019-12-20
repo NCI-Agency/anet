@@ -9,10 +9,11 @@ import React, { Component } from "react"
 export default class AdvancedMultiSelect extends Component {
   static propTypes = {
     ...advancedSelectPropTypes,
-    value: PropTypes.array
+    value: PropTypes.array.isRequired
   }
 
   static defaultProps = {
+    value: [],
     overlayTable: AdvancedMultiSelectOverlayTable
   }
 

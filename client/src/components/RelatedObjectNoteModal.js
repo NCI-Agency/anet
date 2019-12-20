@@ -112,7 +112,7 @@ export default class RelatedObjectNoteModal extends Component {
                       widget={
                         <RichTextEditor
                           className="textField"
-                          onHandleBlur={() => setFieldTouched("text", true)}
+                          onHandleBlur={() => setFieldTouched("text")}
                         />
                       }
                       vertical
