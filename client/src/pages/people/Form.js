@@ -446,7 +446,7 @@ const BasePersonForm = props => {
                     </FastField>
                   }
                 />
-                <Field
+                <FastField
                   name="code"
                   label={Settings.fields.person.code}
                   component={FieldHelper.renderInputField}
