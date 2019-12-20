@@ -7,12 +7,14 @@ import { Field, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
+import _isEqualWith from "lodash/isEqualWith"
 import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
+import utils from "utils"
 import LikertScale from "./graphs/LikertScale"
 
 const WIDGETS = {
@@ -316,6 +318,7 @@ export const CustomFieldsContainer = props => {
   useEffect(() => {
     setFieldValue("formCustomFields.invisibleCustomFields", invisibleFields)
   }, [invisibleFields, setFieldValue])
+
   return (
     <>
       <Field
@@ -337,6 +340,54 @@ CustomFieldsContainer.propTypes = {
   fieldNamePrefix: PropTypes.string
 }
 
+const CustomField = ({
+  fieldConfig,
+  fieldName,
+  formikProps,
+  invisibleFields,
+  updateInvisibleFields
+}) => {
+  const {
+    type,
+    helpText,
+    validations,
+    visibleWhen,
+    ...fieldProps
+  } = fieldConfig
+  const { setFieldValue } = formikProps
+  const handleChange = useMemo(() => value => setFieldValue(fieldName, value), [
+    setFieldValue,
+    fieldName
+  ])
+  const FieldComponent = FIELD_COMPONENTS[type]
+  const isVisible = !invisibleFields.includes(fieldName)
+  let extraProps = {}
+  if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+    extraProps = {
+      fieldConfig,
+      formikProps,
+      invisibleFields,
+      updateInvisibleFields
+    }
+  }
+  return (
+    isVisible && (
+      <FieldComponent
+        name={fieldName}
+        onChange={handleChange}
+        {...fieldProps}
+        {...extraProps}
+      >
+        {helpText && (
+          <HelpBlock>
+            <span className="text-success">{helpText}</span>
+          </HelpBlock>
+        )}
+      </FieldComponent>
+    )
+  )
+}
+
 const CustomFields = ({
   fieldsConfig,
   formikProps,
@@ -344,59 +395,57 @@ const CustomFields = ({
   invisibleFields,
   updateInvisibleFields
 }) => {
-  const curInvisibleFields = getInvisibleFields(
+  const formikValues = formikProps.values
+
+  const latestInvisibleFieldsProp = useRef(invisibleFields)
+  const invisibleFieldsPropUnchanged = _isEqualWith(
+    latestInvisibleFieldsProp.current,
     invisibleFields,
-    fieldsConfig,
-    fieldNamePrefix,
-    formikProps.values
+    utils.treatFunctionsAsEqual
   )
+
+  const curInvisibleFields = useMemo(
+    () =>
+      getInvisibleFields(
+        invisibleFields,
+        fieldsConfig,
+        fieldNamePrefix,
+        formikValues
+      ),
+    [invisibleFields, fieldsConfig, fieldNamePrefix, formikValues]
+  )
+  const invisibleFieldsUnchanged = _isEqualWith(
+    latestInvisibleFieldsProp.current,
+    curInvisibleFields,
+    utils.treatFunctionsAsEqual
+  )
+
   useEffect(() => {
-    updateInvisibleFields(curInvisibleFields)
-  }, [curInvisibleFields, updateInvisibleFields])
+    if (!invisibleFieldsPropUnchanged) {
+      latestInvisibleFieldsProp.current = invisibleFields
+    }
+  }, [invisibleFieldsPropUnchanged, invisibleFields])
+
+  useEffect(() => {
+    if (!invisibleFieldsUnchanged) {
+      updateInvisibleFields(curInvisibleFields)
+    }
+  }, [invisibleFieldsUnchanged, curInvisibleFields, updateInvisibleFields])
+
   return (
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
-        const {
-          type,
-          helpText,
-          validations,
-          visibleWhen,
-          ...fieldProps
-        } = fieldConfig
-        const FieldComponent = FIELD_COMPONENTS[type]
         const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
-        const isVisible = !invisibleFields.includes(fieldName)
-        let extraProps = {}
-        if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
-          extraProps = {
-            fieldConfig: fieldConfig,
-            formikProps: formikProps,
-            invisibleFields: invisibleFields,
-            updateInvisibleFields: updateInvisibleFields
-          }
-        }
-        const handleFieldChange = value =>
-          formikProps.setFieldValue(fieldName, value)
-        const handleFieldTouched = () =>
-          formikProps.setFieldTouched(fieldName, true)
         return (
-          isVisible && (
-            <FieldComponent
-              key={key}
-              name={fieldName}
-              onChange={handleFieldChange}
-              onBlur={handleFieldTouched}
-              {...fieldProps}
-              {...extraProps}
-            >
-              {helpText && (
-                <HelpBlock>
-                  <span className="text-success">{helpText}</span>
-                </HelpBlock>
-              )}
-            </FieldComponent>
-          )
+          <CustomField
+            key={key}
+            fieldConfig={fieldConfig}
+            fieldName={fieldName}
+            formikProps={formikProps}
+            invisibleFields={invisibleFields}
+            updateInvisibleFields={updateInvisibleFields}
+          />
         )
       })}
     </>
