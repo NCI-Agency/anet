@@ -4,6 +4,7 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -85,6 +86,7 @@ const GQL_GET_PERSON = gql`
           name
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -113,7 +115,9 @@ const BasePersonShow = props => {
   if (done) {
     return result
   }
-
+  if (data) {
+    data.person.formCustomFields = JSON.parse(data.person.customFields)
+  }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
@@ -391,6 +395,17 @@ const BasePersonShow = props => {
                   </Table>
                 )}
               </Fieldset>
+
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.person.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
             </Form>
           </div>
         )

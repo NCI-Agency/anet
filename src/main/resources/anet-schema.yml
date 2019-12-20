@@ -316,6 +316,8 @@ properties:
             type: string
             title: The label for a person's end of tour date
             description: Used in the UI where a person's end of tour date is shown.
+          customFields:
+            type: object
 
       position:
         type: object

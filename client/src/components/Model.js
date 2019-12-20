@@ -118,16 +118,19 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
 }
 
 export const createYupObjectShape = config => {
-  const objShape = Object.fromEntries(
-    Object.entries(config)
-      .map(([k, v]) => [k, createFieldYupSchema(k, config[k])])
-      .filter(([k, v]) => v !== null)
-  )
-  objShape.invisibleCustomFields = yup
-    .array()
-    .nullable()
-    .default([])
-  return objShape
+  if (config) {
+    const objShape = Object.fromEntries(
+      Object.entries(config)
+        .map(([k, v]) => [k, createFieldYupSchema(k, config[k])])
+        .filter(([k, v]) => v !== null)
+    )
+    objShape.invisibleCustomFields = yup
+      .array()
+      .nullable()
+      .default([])
+    return objShape
+  }
+  return {}
 }
 
 export default class Model {

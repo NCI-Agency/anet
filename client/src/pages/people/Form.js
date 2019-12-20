@@ -2,6 +2,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
+import { CustomFieldsContainer } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -14,6 +15,7 @@ import TriggerableConfirm from "components/TriggerableConfirm"
 import AvatarEditModal from "components/AvatarEditModal"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
+import _set from "lodash/set"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -473,6 +475,20 @@ const BasePersonForm = props => {
                   }
                 />
               </Fieldset>
+
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.person.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
+
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -571,7 +587,9 @@ const BasePersonForm = props => {
       new Person(values),
       "notes",
       "firstName",
-      "lastName"
+      "lastName",
+      "customFields", // initial JSON from the db
+      "formCustomFields"
     )
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
@@ -580,6 +598,11 @@ const BasePersonForm = props => {
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
+    // customFields should contain the JSON of all the visible custom fields
+    values.formCustomFields.invisibleCustomFields.forEach(f => {
+      _set(values, f.split("."), undefined)
+    })
+    person.customFields = JSON.stringify(values.formCustomFields)
     return API.mutation(props.edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person
     })
