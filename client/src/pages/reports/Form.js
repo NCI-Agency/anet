@@ -330,7 +330,7 @@ const BaseReportForm = props => {
             }
           }
         }
-        const primaryAdvisors = values.attendees.filter(
+        const primaryAdvisors = (values.attendees || []).filter(
           a => a.role === Person.ROLE.ADVISOR && a.primary === true
         )
         const primaryAdvisor = primaryAdvisors.length
@@ -998,7 +998,7 @@ const BaseReportForm = props => {
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = values.attendees.map(a =>
+    report.attendees = (values.attendees || []).map(a =>
       Object.without(a, "firstName", "lastName", "position")
     )
     report.location = utils.getReference(report.location)
