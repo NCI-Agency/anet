@@ -534,18 +534,15 @@ const BasePersonForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
+    // After successful submit, reset the form in order to make sure the dirty
+    // prop is also reset (otherwise we would get a blocking navigation warning)
+    form.resetForm()
     if (onSaveRedirectToHome) {
-      // After successful submit, reset the form in order to make sure the dirty
-      // prop is also reset (otherwise we would get a blocking navigation warning)
-      form.resetForm()
       localStorage.clear()
       localStorage.newUser = "true"
       props.loadAppData()
       history.push("/")
     } else {
-      // After successful submit, reset the form in order to make sure the dirty
-      // prop is also reset (otherwise we would get a blocking navigation warning)
-      form.resetForm()
       const { edit } = props
       const operation = edit ? "updatePerson" : "createPerson"
       const person = new Person({

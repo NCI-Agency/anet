@@ -813,7 +813,7 @@ const BaseReportForm = props => {
                     id="formBottomSubmit"
                     bsStyle="primary"
                     type="button"
-                    onClick={() => onSubmit(values, { resetForm: resetForm })}
+                    onClick={() => onSubmit(values, { resetForm })}
                     disabled={isSubmitting}
                   >
                     {submitText}
