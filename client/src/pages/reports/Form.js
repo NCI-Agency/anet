@@ -600,8 +600,11 @@ const BaseReportForm = props => {
                   ]}
                   overlayRenderRow={PersonDetailedOverlayRow}
                   filterDefs={attendeesFilters}
-                  onChange={value =>
-                    updateAttendees(setFieldValue, "attendees", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("attendees", true, false)
+                    updateAttendees(setFieldValue, "attendees", value)
+                  }}
                   objectType={Person}
                   queryParams={{
                     status: [Person.STATUS.ACTIVE]
@@ -636,8 +639,9 @@ const BaseReportForm = props => {
                   overlayRenderRow={TaskDetailedOverlayRow}
                   filterDefs={tasksFilters}
                   onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("tasks", true, false)
                     setFieldValue("tasks", value)
-                    setFieldTouched("tasks", true)
                   }}
                   objectType={Task}
                   queryParams={{ status: Task.STATUS.ACTIVE }}

@@ -133,8 +133,9 @@ const MergePeople = props => {
                         overlayRenderRow={PersonSimpleOverlayRow}
                         filterDefs={peopleFilters}
                         onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("loser", true, false) // onBlur doesn't work when selecting an option
                           setFieldValue("loser", value)
-                          setFieldTouched("loser") // onBlur doesn't work when selecting an option
                         }}
                         objectType={Person}
                         valueKey="name"
@@ -162,8 +163,9 @@ const MergePeople = props => {
                         overlayRenderRow={PersonSimpleOverlayRow}
                         filterDefs={peopleFilters}
                         onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("winner", true, false) // onBlur doesn't work when selecting an option
                           setFieldValue("winner", value)
-                          setFieldTouched("winner") // onBlur doesn't work when selecting an option
                         }}
                         objectType={Person}
                         valueKey="name"
