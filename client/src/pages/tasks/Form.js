@@ -70,7 +70,7 @@ const BaseTaskForm = props => {
   const ProjectedCompletionField = DictionaryField(FastField)
   const TaskCustomFieldEnum1 = DictionaryField(FastField)
   const TaskCustomFieldEnum2 = DictionaryField(FastField)
-  const ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
+  const ResponsiblePositionsMultiSelect = DictionaryField(AdvancedMultiSelect)
 
   initialValues.assessment_customFieldEnum1 = ""
 
@@ -188,7 +188,7 @@ const BaseTaskForm = props => {
                   addon={ORGANIZATIONS_ICON}
                 />
 
-                <ResponsiblePositonsMultiSelect
+                <ResponsiblePositionsMultiSelect
                   fieldName="responsiblePositions"
                   dictProps={Settings.fields.task.responsiblePositions}
                   fieldLabel={Settings.fields.task.responsiblePositions.label}
