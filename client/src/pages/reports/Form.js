@@ -654,6 +654,7 @@ const BaseReportForm = props => {
                   value={values.tasksLevel1}
                   renderSelected={
                     <TaskTable
+                      id="tasks-objectives"
                       tasks={values.tasksLevel1}
                       showDelete
                       showOrganization
@@ -681,6 +682,7 @@ const BaseReportForm = props => {
                   value={values.tasks}
                   renderSelected={
                     <TaskTable
+                      id="tasks-tasks"
                       tasks={values.tasks}
                       showDelete
                       showOrganization
