@@ -52,9 +52,9 @@ test("Draft and submit a report", async t => {
     "topferness, christopf"
   )
 
-  // click outside the overlay to make sure the $attendeesShortcutList closes
-  let $attendeesShortcutList = await $("#tasks-shortcut-list")
-  await $attendeesShortcutList.click()
+  // click outside the overlay to make sure the $taskShortcutList closes
+  let $taskShortcutList = await $("#tasks-shortcut-list")
+  await $taskShortcutList.click()
 
   t.is(
     await $attendeesAdvancedSelect.getAttribute("value"),
