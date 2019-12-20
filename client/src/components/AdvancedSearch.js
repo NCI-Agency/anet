@@ -282,9 +282,10 @@ const SearchFilter = props => {
   const { onRemove, filter, element } = props
   const label = filter.key
   const ChildComponent = element.component
+  const { queryKey } = element.props || undefined
 
   return (
-    <FormGroup>
+    <FormGroup controlId={queryKey}>
       <Col xs={1} sm={2}>
         <ControlLabel>{label}</ControlLabel>
       </Col>

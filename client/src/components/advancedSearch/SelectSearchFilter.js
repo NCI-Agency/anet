@@ -58,7 +58,11 @@ export default class SelectSearchFilter extends Component {
       <>{labels[values.indexOf(this.state.value.value)]}</>
     ) : (
       <div>
-        <select value={this.state.value.value} onChange={this.onChange}>
+        <select
+          id={this.props.queryKey}
+          value={this.state.value.value}
+          onChange={this.onChange}
+        >
           {values.map((v, idx) => (
             <option key={idx} value={v}>
               {labels[idx]}

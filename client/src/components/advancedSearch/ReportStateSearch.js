@@ -29,6 +29,7 @@ const CANCELLATION_REASON_LABELS = {
 
 export default class ReportStateSearch extends Component {
   static propTypes = {
+    queryKey: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.shape({
@@ -93,7 +94,12 @@ export default class ReportStateSearch extends Component {
       stateDisplay
     ) : (
       <div>
-        <select value={value.state} onChange={this.changeState} multiple>
+        <select
+          id={this.props.queryKey}
+          value={value.state}
+          onChange={this.changeState}
+          multiple
+        >
           {Object.keys(STATE_LABELS).map(key => (
             <option key={key} value={key}>
               {STATE_LABELS[key]}
@@ -104,6 +110,7 @@ export default class ReportStateSearch extends Component {
           <span style={{ verticalAlign: "top", paddingLeft: "8px" }}>
             due to{" "}
             <select
+              id={this.props.queryKey}
               value={value.cancelledReason}
               onChange={this.changeCancelledReason}
             >

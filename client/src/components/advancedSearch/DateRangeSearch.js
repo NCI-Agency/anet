@@ -104,6 +104,7 @@ export default class DateRangeSearch extends Component {
 
     return (
       <select
+        id={this.props.queryKey}
         disabled={onlyBetween}
         value={this.state.value.relative}
         onChange={this.onChangeRelative}

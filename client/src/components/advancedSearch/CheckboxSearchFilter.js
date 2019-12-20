@@ -34,7 +34,11 @@ export default class CheckboxSearchFilter extends Component {
       <>{msg}</>
     ) : (
       <div>
-        <Checkbox readOnly checked={this.state.value.value}>
+        <Checkbox
+          id={this.props.queryKey}
+          readOnly
+          checked={this.state.value.value}
+        >
           {msg}
         </Checkbox>
       </div>

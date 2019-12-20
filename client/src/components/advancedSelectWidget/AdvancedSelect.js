@@ -272,6 +272,7 @@ export default class AdvancedSelect extends Component {
     }
     this.setState(
       {
+        showOverlay: true,
         searchTerms: "",
         isLoading: true
       },
