@@ -447,6 +447,12 @@ const BasePersonForm = props => {
                   }
                 />
                 <Field
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.renderInputField}
+                  disabled={!isAdmin}
+                />
+                <Field
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
                   component={FieldHelper.renderSpecialField}

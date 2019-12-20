@@ -253,6 +253,7 @@ dictionary:
       emailAddress: Email
       phoneNumber: Phone
       country: Nationality
+      code: ID card number
       rank: Rank
       ranks:
         - value: CIV
