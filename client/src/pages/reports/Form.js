@@ -1085,7 +1085,14 @@ const BaseReportForm = props => {
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
     report.attendees = values.attendees.map(a =>
-      Object.without(a, "firstName", "lastName", "position")
+      Object.without(
+        a,
+        "firstName",
+        "lastName",
+        "position",
+        "customFields",
+        "formCustomFields"
+      )
     )
     report.location = utils.getReference(report.location)
     // customFields should contain the JSON of all the visible custom fields
