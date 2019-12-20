@@ -73,7 +73,7 @@ const PersonEdit = props => {
     const parsedFullName = Person.parseFullName(data.person.name)
     data.person.firstName = parsedFullName.firstName
     data.person.lastName = parsedFullName.lastName
-    data.report.formCustomFields = JSON.parse(data.person.customFields)
+    data.person.formCustomFields = JSON.parse(data.person.customFields)
   }
   const person = new Person(data ? data.person : {})
   const legendText = person.isNewUser()

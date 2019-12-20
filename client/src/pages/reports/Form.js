@@ -706,16 +706,18 @@ const BaseReportForm = props => {
                 />
               </Fieldset>
 
-              <Fieldset title="Engagement information" id="custom-fields">
-                <CustomFieldsContainer
-                  fieldsConfig={Settings.fields.report.customFields}
-                  formikProps={{
-                    setFieldTouched,
-                    setFieldValue,
-                    values
-                  }}
-                />
-              </Fieldset>
+              {Settings.fields.report.customFields && (
+                <Fieldset title="Engagement information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.report.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
 
               <Fieldset
                 title={

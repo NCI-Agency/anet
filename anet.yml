@@ -408,21 +408,6 @@ dictionary:
               label: Option 2
             opt3:
               label: Option 3
-        likertScale:
-          type: enum
-          renderer: likertScale
-          label: Likert scale
-          helpText: Help text for likert scale
-          choices:
-            opt1:
-              label: Opt 1
-            opt2:
-              label: Opt 2
-            opt3:
-              label: Opt 3
-            opt4:
-              label: Opt 4
-          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('opt1') != -1)]
         inputFieldName:
           type: text
           label: Text field
