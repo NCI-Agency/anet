@@ -29,7 +29,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
       "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
-      "pendingVerification", "createdAt", "updatedAt", "avatar"};
+      "pendingVerification", "createdAt", "updatedAt", "avatar", "customFields"};
   public static String TABLE_NAME = "people";
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
@@ -78,9 +78,9 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     StringBuilder sql = new StringBuilder();
     sql.append("/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-        + "gender, country, avatar, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
+        + "gender, country, avatar, \"customFields\", \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
-        + ":gender, :country, :avatar, ");
+        + ":gender, :country, :avatar, :customFields, ");
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("CAST(:endOfTourDate AS datetime2), ");
@@ -106,7 +106,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         + "\"avatar\" = :avatar,"
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
-        + "\"updatedAt\" = :updatedAt, ");
+        + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, ");
 
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.

@@ -20,10 +20,10 @@ import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Report extends AbstractAnetBean {
+public class Report extends AbstractCustomizableAnetBean {
 
   public enum ReportState {
     DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, // -
@@ -76,7 +76,6 @@ public class Report extends AbstractAnetBean {
   private Person user;
   private List<AuthorizationGroup> authorizationGroups;
   private List<ReportAction> workflow;
-  private String customFields;
 
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
@@ -533,15 +532,6 @@ public class Report extends AbstractAnetBean {
 
   public void setWorkflow(List<ReportAction> workflow) {
     this.workflow = workflow;
-  }
-
-  @GraphQLQuery(name = "customFields")
-  public String getCustomFields() {
-    return customFields;
-  }
-
-  public void setCustomFields(String customFields) {
-    this.customFields = Utils.trimStringReturnNull(customFields);
   }
 
   private List<ReportAction> createApprovalStepsActions(List<ReportAction> actions,

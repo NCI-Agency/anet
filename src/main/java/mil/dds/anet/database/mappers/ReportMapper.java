@@ -15,7 +15,7 @@ public class ReportMapper implements RowMapper<Report> {
   @Override
   public Report map(ResultSet rs, StatementContext ctx) throws SQLException {
     Report r = new Report();
-    DaoUtils.setCommonBeanFields(r, rs, "reports");
+    DaoUtils.setCustomizableBeanFields(r, rs, "reports");
 
     r.setState(MapperUtils.getEnumIdx(rs, "reports_state", ReportState.class));
     r.setEngagementDate(DaoUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));
@@ -38,7 +38,6 @@ public class ReportMapper implements RowMapper<Report> {
     r.setAuthorUuid(rs.getString("reports_authorUuid"));
     r.setAdvisorOrgUuid(rs.getString("reports_advisorOrganizationUuid"));
     r.setPrincipalOrgUuid(rs.getString("reports_principalOrganizationUuid"));
-    r.setCustomFields(rs.getString("reports_customFields"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

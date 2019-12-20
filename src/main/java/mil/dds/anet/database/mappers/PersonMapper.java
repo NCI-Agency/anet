@@ -32,7 +32,7 @@ public class PersonMapper implements RowMapper<Person> {
     if (r.getObject("people_uuid") == null) {
       return null;
     }
-    DaoUtils.setCommonBeanFields(a, r, "people");
+    DaoUtils.setCustomizableBeanFields(a, r, "people");
     a.setName(r.getString("people_name"));
     a.setStatus(MapperUtils.getEnumIdx(r, "people_status", PersonStatus.class));
     a.setRole(MapperUtils.getEnumIdx(r, "people_role", Role.class));

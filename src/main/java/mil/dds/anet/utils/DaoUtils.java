@@ -16,6 +16,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,6 +109,16 @@ public class DaoUtils {
     // Only present when batch searching
     if (MapperUtils.containsColumnNamed(rs, "batchUuid")) {
       bean.setBatchUuid(rs.getString("batchUuid"));
+    }
+  }
+
+  public static void setCustomizableBeanFields(AbstractCustomizableAnetBean bean, ResultSet rs,
+      String tableName) throws SQLException {
+    setCommonBeanFields(bean, rs, tableName);
+
+    final String customFieldsCol = getQualifiedFieldName(tableName, "customFields");
+    if (MapperUtils.containsColumnNamed(rs, customFieldsCol)) {
+      bean.setCustomFields(rs.getString(customFieldsCol));
     }
   }
 

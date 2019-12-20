@@ -2725,4 +2725,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="add-custom-fields-to-people" author="maradragan">
+        <addColumn tableName="people" >
+            <column name="customFields" type="${long_text_type}" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
