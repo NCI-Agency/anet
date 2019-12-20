@@ -70,7 +70,7 @@ const BaseTaskForm = props => {
   const ProjectedCompletionField = DictionaryField(Field)
   const TaskCustomFieldEnum1 = DictionaryField(Field)
   const TaskCustomFieldEnum2 = DictionaryField(Field)
-  const ResponsiblePositonsMultiSelect = DictionaryField(Field)
+  const ResponsiblePositionsMultiSelect = DictionaryField(Field)
 
   initialValues.assessment_customFieldEnum1 = ""
 
@@ -194,7 +194,7 @@ const BaseTaskForm = props => {
                   }
                 />
 
-                <ResponsiblePositonsMultiSelect
+                <ResponsiblePositionsMultiSelect
                   name="responsiblePositions"
                   component={FieldHelper.renderSpecialField}
                   dictProps={Settings.fields.task.responsiblePositions}
