@@ -1,6 +1,7 @@
 package mil.dds.anet.beans.search;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Task.TaskStatus;
 
@@ -17,11 +18,14 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
   private String projectStatus;
   private String customField;
 
-  // Search for tasks with a specific parent Task.
-  private String customFieldRef1Uuid;
-  // Include descendants recursively from the specified parent.
-  // If true will include all tasks in the tree of the parent Task
-  // Including the parent Task.
+  // Find tasks who (don't) have the customFieldRef1 filled in
+  Boolean hasCustomFieldRef1;
+
+  // Search for tasks with one of the given parent Task(s)
+  private List<String> customFieldRef1Uuid;
+  // Include descendants recursively from the specified parent(s).
+  // If true will include all tasks in the tree of the parent Task(s)
+  // Including the parent Task(s).
   private Boolean customFieldRef1Recursively;
 
   public TaskSearchQuery() {
@@ -108,11 +112,19 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
     this.customField = customField;
   }
 
-  public String getCustomFieldRef1Uuid() {
+  public Boolean getHasCustomFieldRef1() {
+    return hasCustomFieldRef1;
+  }
+
+  public void setHasCustomFieldRef1(Boolean hasCustomFieldRef1) {
+    this.hasCustomFieldRef1 = hasCustomFieldRef1;
+  }
+
+  public List<String> getCustomFieldRef1Uuid() {
     return customFieldRef1Uuid;
   }
 
-  public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
+  public void setCustomFieldRef1Uuid(List<String> customFieldRef1Uuid) {
     this.customFieldRef1Uuid = customFieldRef1Uuid;
   }
 
