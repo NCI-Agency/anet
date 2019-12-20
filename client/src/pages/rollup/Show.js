@@ -371,13 +371,18 @@ const BaseRollupShow = props => {
         action={
           <span>
             <Button
+              id="print-rollup"
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={printPreview}
             >
               Print
             </Button>
-            <Button onClick={toggleEmailModal} bsStyle="primary">
+            <Button
+              id="email-rollup"
+              onClick={toggleEmailModal}
+              bsStyle="primary"
+            >
               Email rollup
             </Button>
           </span>
@@ -534,6 +539,7 @@ const BaseRollupShow = props => {
           </Modal.Body>
           <Modal.Footer>
             <Button
+              id="preview-rollup-email"
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={showPreview}
@@ -541,6 +547,7 @@ const BaseRollupShow = props => {
               Preview
             </Button>
             <Button
+              id="send-rollup-email"
               bsStyle="primary"
               type="button"
               onClick={submitForm}
