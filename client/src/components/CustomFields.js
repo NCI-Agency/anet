@@ -2,6 +2,7 @@ import { Settings } from "api"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LikertScale from "components/graphs/LikertScale"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { Field, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
@@ -15,7 +16,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import utils from "utils"
-import LikertScale from "./graphs/LikertScale"
 
 const WIDGETS = {
   likertScale: LikertScale

@@ -14,6 +14,7 @@ import CustomDateInput from "components/CustomDateInput"
 import { CustomFieldsContainer } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LikertScale from "components/graphs/LikertScale"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, useBoilerplate } from "components/Page"
@@ -861,8 +862,9 @@ const BaseReportForm = props => {
                     key={`assessment-${task.shortName}-${task.longName}`}
                     name={`assessment-${task.shortName}-${task.longName}`}
                     label={`${task.shortName} ${task.longName}`}
-                    component={FieldHelper.RenderLikertScale2}
-                    background
+                    component={FieldHelper.renderSpecialField}
+                    widget={<LikertScale />}
+                    background={false}
                   />
                 ))}
               </Fieldset>

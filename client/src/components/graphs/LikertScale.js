@@ -28,7 +28,7 @@ const SliderKnob = posed.circle({
 })
 
 const LikertScale = props => {
-  const { onChange, value } = props
+  const { onChange, value, background } = props
   const valueProp = Number(value)
   const [x, setX] = useState(
     ((valueProp || 50) * (MAX_X - MIN_X)) / 100 + MIN_X
@@ -57,7 +57,7 @@ const LikertScale = props => {
         width={WIDTH}
         xmlns="http://www.w3.org/2000/svg"
       >
-        {props.background && (
+        {background && (
           <>
             <rect
               style={{ fill: "#ff8888", strokeWidth: 0 }}
