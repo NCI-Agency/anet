@@ -69,7 +69,7 @@ const SearchBar = props => {
     : "Search for " +
       searchObjectTypes.map(type => SEARCH_OBJECT_LABELS[type]).join(", ")
 
-  const PopoverContent = (
+  const popoverContent = (
     <AdvancedSearch
       onSearch={runAdvancedSearch}
       onCancel={setShowAdvancedSearch}
@@ -95,7 +95,7 @@ const SearchBar = props => {
           )}
         </InputGroup>
       </Form>
-      <SearchPopover popoverContent={PopoverContent}>
+      <SearchPopover popoverContent={popoverContent}>
         <SearchDescription query={query} showPlaceholders />
       </SearchPopover>
     </>
