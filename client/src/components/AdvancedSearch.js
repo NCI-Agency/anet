@@ -72,7 +72,7 @@ const AdvancedSearch = props => {
     >
       {Object.keys(filterDefs).map(filterKey => (
         <MenuItem
-          disabled={existingKeys.indexOf(filterKey) > -1}
+          disabled={existingKeys.includes(filterKey)}
           key={filterKey}
           onClick={() => addFilter(filterKey)}
           text={filterKey}
