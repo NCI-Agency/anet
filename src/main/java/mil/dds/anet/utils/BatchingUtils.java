@@ -66,6 +66,7 @@ public final class BatchingUtils {
   }
 
   @Override
+  @SuppressWarnings("checkstyle:NoFinalizer")
   protected void finalize() throws Throwable {
     shutdown();
     super.finalize();

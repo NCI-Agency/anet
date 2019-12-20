@@ -42,12 +42,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     outerQb.addSqlArgs(qb.getSqlArgs());
     outerQb.addListArgs(qb.getListArgs());
     addOrderByClauses(outerQb, query);
-    final AnetBeanList<Report> result =
-        outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
-    for (final Report report : result.getList()) {
-      report.setUser(query.getUser());
-    }
-    return result;
+    return outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
   }
 
   protected void buildQuery(ReportSearchQuery query) {
@@ -156,6 +151,10 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
           case CANCELLED:
             engagementStatusClauses.add(" reports.state = :cancelledState");
             qb.addSqlArg("cancelledState", DaoUtils.getEnumId(ReportState.CANCELLED));
+            break;
+          default:
+            // ignore this one
+            break;
         }
       });
       qb.addWhereClause("(" + Joiner.on(" OR ").join(engagementStatusClauses) + ")");

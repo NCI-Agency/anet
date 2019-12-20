@@ -406,7 +406,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   public Boolean getIsApprover(String positionUuid) {
     Number count = (Number) getDbHandle().createQuery(
         "/* getIsApprover */ SELECT count(*) as ct from approvers where \"positionUuid\" = :positionUuid")
-        .bind("positionUuid", positionUuid).map(new MapMapper(false)).findOnly().get("ct");
+        .bind("positionUuid", positionUuid).map(new MapMapper(false)).one().get("ct");
 
     return count.longValue() > 0;
   }

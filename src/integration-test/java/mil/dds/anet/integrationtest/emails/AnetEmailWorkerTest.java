@@ -18,6 +18,7 @@ import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,6 +80,15 @@ public class AnetEmailWorkerTest {
     instance = PowerMockito.mock(AnetObjectEngine.class);
     when(instance.getContext()).thenReturn(new HashMap<String, Object>());
     when(AnetObjectEngine.getInstance()).thenReturn(instance);
+
+    // Clear the email server before starting test
+    emailServer.clearEmailServer();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    // Clear the email server after test
+    emailServer.clearEmailServer();
   }
 
   /**
@@ -88,9 +98,6 @@ public class AnetEmailWorkerTest {
    */
   @Test
   public void testWorker() throws Exception {
-    // Setup
-    emailServer.clearEmailServer();
-
     final List<String> toAddresses = Arrays.asList("test_to_address@anet.com");
     final AnetEmail testEmail = createTestEmail(1, toAddresses, "test_comment");
 
