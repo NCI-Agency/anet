@@ -446,6 +446,12 @@ const BasePersonForm = props => {
                     </FastField>
                   }
                 />
+                <Field
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.renderInputField}
+                  disabled={!isAdmin}
+                />
                 <FastField
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
