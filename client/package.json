@@ -149,7 +149,7 @@
     "react-toastify": "^5.4.1",
     "react-tooltip": "^3.11.1",
     "react-ultimate-pagination": "^1.2.0",
-    "redux": "^4.0.4",
+    "redux": "^4.0.5",
     "redux-persist": "^6.0.0",
     "yup": "^0.28.0"
   },
