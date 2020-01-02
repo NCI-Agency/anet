@@ -109,7 +109,7 @@
     "change-case": "^4.1.1",
     "classnames": "^2.2.6",
     "core-js": "^3.6.0",
-    "d3": "^5.14.2",
+    "d3": "^5.15.0",
     "draft-convert": "^2.1.8",
     "draft-js": "^0.10.5",
     "draft-js-buttons": "^2.0.2",
