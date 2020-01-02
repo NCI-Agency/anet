@@ -87,7 +87,7 @@
     "uuid": "^3.3.3",
     "wdio-chromedriver-service": "^5.0.2",
     "webdriverio": "^5.18.0",
-    "webpack": "^4.41.4",
+    "webpack": "^4.41.5",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.10.1",
