@@ -864,7 +864,7 @@ const BaseReportForm = props => {
                     label={`${task.shortName} ${task.longName}`}
                     component={FieldHelper.renderSpecialField}
                     widget={<LikertScale />}
-                    background={false}
+                    background
                   />
                 ))}
               </Fieldset>

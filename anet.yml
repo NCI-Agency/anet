@@ -280,7 +280,16 @@ dictionary:
           label: Level trained
           helpText: Basic / Intermediate / Advanced
           visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-
+          levels:
+            - color: "#ff6557"
+              endValue: 30
+              label: beginner
+            - color: "#ffde85"
+              endValue: 70
+              label: intermediate
+            - color: "#afffa6"
+              endValue: 100
+              label: advanced
         systemProcess:
           type: enum
           label: System / process
