@@ -2,103 +2,92 @@ import React, { useEffect, useRef } from "react"
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 
-const MARGIN = 20
-const HEIGHT = 65
-const WIDTH = 325
-const CENTER_Y = HEIGHT * 0.3
-const MIN_X = MARGIN
-const MAX_X = WIDTH - MARGIN
-const screenToValue = x => ((x - MIN_X) * 100) / (MAX_X - MIN_X)
-const valueToScreen = value => (value * (MAX_X - MIN_X)) / 100 + MIN_X
+const LikertScale = ({ onChange, value, levels, size }) => {
+  const ticks = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  const cursorRef = useRef(null)
 
-const Cursor = props => {
-  const d3Ref = useRef(null)
-  const { onValueChange, value } = props
+  const MARGIN = 20
+  const scaleYPosition = size.height - 30
+  const screenToValue = x => ((x - MARGIN) * 100) / (size.width - 2 * MARGIN)
+  const valueToScreen = value =>
+    (value * (size.width - 2 * MARGIN)) / 100 + MARGIN
+  const x = valueToScreen(Number(value !== undefined ? value : 50))
+
   useEffect(() => {
     const handleDrag = d3.drag().on("drag", function() {
-      const me = d3.select(d3Ref.current)
-      const newX = Math.min(Math.max(d3.event.x, MIN_X), MAX_X)
-      me.attr("transform", `translate(${newX} ${CENTER_Y})`)
-      onValueChange(newX)
+      const me = d3.select(cursorRef.current)
+      const newX = Math.min(
+        Math.max(d3.event.x, valueToScreen(0)),
+        valueToScreen(100)
+      )
+      me.attr("transform", `translate(${newX} ${scaleYPosition})`)
+      onChange(screenToValue(newX))
     })
-    handleDrag(d3.select(d3Ref.current))
-  }, [onValueChange])
+    handleDrag(d3.select(cursorRef.current))
+  }, [onChange])
 
   useEffect(() => {
-    d3.select(d3Ref.current).attr(
+    d3.select(cursorRef.current).attr(
       "transform",
-      `translate(${value} ${CENTER_Y})`
+      `translate(${x} ${scaleYPosition})`
     )
-  }, [value])
+  }, [x, scaleYPosition])
 
   return (
-    <g ref={d3Ref}>
-      <polygon
-        points="0,0 10,13 -10,13"
-        style={{ fill: "blue", strokeWidth: 0 }}
-      />
-      <text fill="blue" x={-10}>
-        {(Math.floor(screenToValue(value)) / 10).toFixed(1)}
-      </text>
-    </g>
-  )
-}
-
-Cursor.propTypes = {
-  onValueChange: PropTypes.func,
-  value: PropTypes.number
-}
-
-const LikertScale = props => {
-  const { onChange, value, levels } = props
-  const x = valueToScreen(Number(value !== undefined ? value : 50))
-  const ticks = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-
-  return (
-    <div>
-      <svg
-        height={HEIGHT}
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        width={WIDTH}
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {levels.map((level, index) => {
-          const startX = valueToScreen(
-            index === 0 ? 0 : levels[index - 1].endValue
-          )
-          return (
-            <>
-              <rect
-                style={{ fill: level.color, strokeWidth: 0 }}
-                y={0}
-                x={startX}
-                height={HEIGHT}
-                width={valueToScreen(level.endValue) - startX}
-                key={`level-${index}`}
-              />
-              <text fill="gray" x={startX} y={CENTER_Y + 25}>
-                {level.label}
-              </text>
-            </>
-          )
-        })}
-        )}
-        <text fill="gray" x={(MAX_X * 2) / 3 + 5} y={CENTER_Y + 25}>
-          Criteria 3
+    <svg
+      height={size.height}
+      width={size.width}
+      viewBox={`0 0 ${size.width} ${size.height}`}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {levels.map((level, index) => {
+        const startX = valueToScreen(
+          index === 0 ? 0 : levels[index - 1].endValue
+        )
+        const endX = valueToScreen(level.endValue)
+        const active = x <= endX && x > startX
+        return (
+          <>
+            <rect
+              style={{ fill: level.color, strokeWidth: 0 }}
+              y={0}
+              x={startX}
+              height={size.height}
+              width={endX - startX}
+              key={`level-${index}`}
+            />
+            <text
+              fill={active ? "black" : "gray"}
+              x={startX}
+              y={MARGIN}
+              style={{ pointerEvents: "none" }}
+            >
+              {level.label}
+            </text>
+          </>
+        )
+      })}
+      )}
+      {ticks.map(tick => (
+        <rect
+          style={{ fill: "gray", strokeWidth: 0 }}
+          y={scaleYPosition}
+          x={valueToScreen(tick) - 1}
+          height={5}
+          width={3}
+          key={`tick-${tick}`}
+        />
+      ))}
+      <g ref={cursorRef}>
+        <polygon
+          points="0,0 13,13 13,30 -13,30 -13,13"
+          style={{ stroke: "blue", fill: "white", strokeWidth: 1 }}
+        />
+        <text fill="blue" x={-10} y={25} style={{ pointerEvents: "none" }}>
+          {(Math.floor(value) / 10).toFixed(value < 100 ? 1 : 0)}
         </text>
-        {ticks.map(tick => (
-          <rect
-            style={{ fill: "gray", strokeWidth: 0 }}
-            y={CENTER_Y}
-            x={valueToScreen(tick) - 1}
-            height={5}
-            width={3}
-            key={`tick-${tick}`}
-          />
-        ))}
-        <Cursor value={x} onValueChange={x => onChange(screenToValue(x))} />
-      </svg>
-    </div>
+      </g>
+    </svg>
   )
 }
 
@@ -112,7 +101,11 @@ LikertScale.propTypes = {
       tooltip: PropTypes.string,
       label: PropTypes.string
     })
-  ).isRequired
+  ).isRequired,
+  size: PropTypes.shape({
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired
+  }).isRequired
 }
 
 LikertScale.defaultProps = {
@@ -130,7 +123,11 @@ LikertScale.defaultProps = {
       color: "#afffa6",
       endValue: 100
     }
-  ]
+  ],
+  size: {
+    height: 65,
+    width: 325
+  }
 }
 
 export default LikertScale
