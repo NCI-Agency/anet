@@ -82,7 +82,7 @@ const LikertScale = ({ onChange, value, levels, size }) => {
       <g ref={cursorRef}>
         <polygon
           points="0,0 13,13 13,30 -13,30 -13,13"
-          style={{ stroke: "gray", fill: "" + activeColor, strokeWidth: 1 }}
+          style={{ stroke: "gray", fill: "" + activeColor, strokeWidth: 1, cursor: "pointer" }}
         />
         <text
           fill={activeColor.l < 0.5 ? "white" : "black"}
