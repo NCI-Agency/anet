@@ -3,35 +3,43 @@ import * as d3 from "d3"
 import PropTypes from "prop-types"
 
 const LikertScale = ({ onChange, value, levels, size }) => {
-  const ticks = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
   const cursorRef = useRef(null)
+  const axisRef = useRef(null)
 
   const MARGIN = 20
   const scaleYPosition = size.height - 30
-  const screenToValue = x => ((x - MARGIN) * 100) / (size.width - 2 * MARGIN)
-  const valueToScreen = value =>
-    (value * (size.width - 2 * MARGIN)) / 100 + MARGIN
-  const x = valueToScreen(Number(value !== undefined ? value : 50))
+  const scale = d3
+    .scaleLinear()
+    .domain([0, 10])
+    .range([MARGIN, size.width - 2 * MARGIN])
+  const x = scale(Number(value !== undefined ? value : 50))
 
   useEffect(() => {
     const handleDrag = d3.drag().on("drag", function() {
       const me = d3.select(cursorRef.current)
       const newX = Math.min(
-        Math.max(d3.event.x, valueToScreen(0)),
-        valueToScreen(100)
+        Math.max(d3.event.x, scale.range()[0]),
+        scale.range()[1]
       )
       me.attr("transform", `translate(${newX} ${scaleYPosition})`)
-      onChange(screenToValue(newX))
+      onChange(scale.invert(newX))
     })
     handleDrag(d3.select(cursorRef.current))
-  }, [onChange])
+  }, [onChange, size])
 
   useEffect(() => {
     d3.select(cursorRef.current).attr(
       "transform",
       `translate(${x} ${scaleYPosition})`
     )
-  }, [x, scaleYPosition])
+  }, [x, size])
+
+  useEffect(() => {
+    const axis = d3.axisBottom(scale)
+    d3.select(axisRef.current).call(axis)
+  }, [scale, size])
+
+  let activeColor = null
 
   return (
     <svg
@@ -41,24 +49,26 @@ const LikertScale = ({ onChange, value, levels, size }) => {
       xmlns="http://www.w3.org/2000/svg"
     >
       {levels.map((level, index) => {
-        const startX = valueToScreen(
-          index === 0 ? 0 : levels[index - 1].endValue
-        )
-        const endX = valueToScreen(level.endValue)
-        const active = x <= endX && x > startX
+        const startX = scale(index === 0 ? 0 : levels[index - 1].endValue)
+        const endX = scale(level.endValue)
+        const active = x <= endX && (x > startX || index === 0)
+        const fillColor = d3.color(level.color)
+        active && (activeColor = d3.hsl(level.color))
+        fillColor.opacity = active ? 0.4 : 0.15
         return (
           <>
             <rect
-              style={{ fill: level.color, strokeWidth: 0 }}
+              style={{ fill: fillColor, stroke: "gray", strokeWidth: 1 }}
               y={0}
               x={startX}
-              height={size.height}
+              height={size.height - 11}
               width={endX - startX}
               key={`level-${index}`}
             />
             <text
               fill={active ? "black" : "gray"}
-              x={startX}
+              fontWeight={active ? "bold" : "normal"}
+              x={startX + 5}
               y={MARGIN}
               style={{ pointerEvents: "none" }}
             >
@@ -68,23 +78,20 @@ const LikertScale = ({ onChange, value, levels, size }) => {
         )
       })}
       )}
-      {ticks.map(tick => (
-        <rect
-          style={{ fill: "gray", strokeWidth: 0 }}
-          y={scaleYPosition}
-          x={valueToScreen(tick) - 1}
-          height={5}
-          width={3}
-          key={`tick-${tick}`}
-        />
-      ))}
+      <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
       <g ref={cursorRef}>
         <polygon
           points="0,0 13,13 13,30 -13,30 -13,13"
-          style={{ stroke: "blue", fill: "white", strokeWidth: 1 }}
+          style={{ stroke: "gray", fill: "" + activeColor, strokeWidth: 1 }}
         />
-        <text fill="blue" x={-10} y={25} style={{ pointerEvents: "none" }}>
-          {(Math.floor(value) / 10).toFixed(value < 100 ? 1 : 0)}
+        <text
+          fill={activeColor.l < 0.5 ? "white" : "black"}
+          fontWeight="bold"
+          x={-11}
+          y={25}
+          style={{ pointerEvents: "none" }}
+        >
+          {Number(value).toFixed(value < scale.domain()[1] ? 1 : 0)}
         </text>
       </g>
     </svg>
@@ -112,21 +119,21 @@ LikertScale.defaultProps = {
   value: 0,
   levels: [
     {
-      color: "#ff6557",
-      endValue: 30
+      color: "red",
+      endValue: 3
     },
     {
-      color: "#ffde85",
-      endValue: 70
+      color: "#FFBF00",
+      endValue: 7
     },
     {
-      color: "#afffa6",
-      endValue: 100
+      color: "green",
+      endValue: 10
     }
   ],
   size: {
     height: 65,
-    width: 325
+    width: 500
   }
 }
 

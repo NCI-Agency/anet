@@ -281,14 +281,14 @@ dictionary:
           helpText: Basic / Intermediate / Advanced
           visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
           levels:
-            - color: "#ff6557"
-              endValue: 30
+            - color: lightGray
+              endValue: 3
               label: beginner
-            - color: "#ffde85"
-              endValue: 70
+            - color: lightGray
+              endValue: 7
               label: intermediate
-            - color: "#afffa6"
-              endValue: 100
+            - color: lightGray
+              endValue: 10
               label: advanced
         systemProcess:
           type: enum
