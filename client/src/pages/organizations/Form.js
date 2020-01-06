@@ -80,8 +80,11 @@ const ApproverTable = props => {
 }
 
 ApproverTable.propTypes = {
-  approvers: PropTypes.array,
+  approvers: PropTypes.array.isRequired,
   onDelete: PropTypes.func
+}
+ApproverTable.defaultProps = {
+  approvers: []
 }
 
 const BaseOrganizationForm = props => {
@@ -381,7 +384,9 @@ const BaseOrganizationForm = props => {
                             </Modal.Footer>
                           </Modal>
 
-                          {values.planningApprovalSteps.map((step, index) =>
+                          {(
+                            values.planningApprovalSteps || []
+                          ).map((step, index) =>
                             renderApprovalStep(
                               "planningApprovalSteps",
                               arrayHelpers,
@@ -460,7 +465,7 @@ const BaseOrganizationForm = props => {
                             </Modal.Footer>
                           </Modal>
 
-                          {values.approvalSteps.map((step, index) =>
+                          {(values.approvalSteps || []).map((step, index) =>
                             renderApprovalStep(
                               "approvalSteps",
                               arrayHelpers,
