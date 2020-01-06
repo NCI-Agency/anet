@@ -9,6 +9,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
+import { CustomFieldsContainer } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -18,6 +19,7 @@ import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
+import _set from "lodash/set"
 import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -317,6 +319,22 @@ const BaseTaskForm = props => {
                 )}
               </Fieldset>
 
+              {Settings.fields.person.customFields && (
+                <Fieldset
+                  title={`${Settings.fields.task.shortLabel} information`}
+                  id="custom-fields"
+                >
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.task.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
+
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -378,10 +396,17 @@ const BaseTaskForm = props => {
     const task = Object.without(
       new Task(values),
       "notes",
-      "assessment_customFieldEnum1"
+      "assessment_customFieldEnum1",
+      "customFields", // initial JSON from the db
+      "formCustomFields"
     )
     task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
+    // customFields should contain the JSON of all the visible custom fields
+    values.formCustomFields.invisibleCustomFields.forEach(f => {
+      _set(values, f.split("."), undefined)
+    })
+    task.customFields = JSON.stringify(values.formCustomFields)
     const { edit } = props
     const variables = { task: task }
     if (

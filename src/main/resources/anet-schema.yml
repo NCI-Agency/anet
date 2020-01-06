@@ -229,6 +229,8 @@ properties:
             examples: [Responsible organization]
           responsiblePositions:
             "$ref": "#/definitions/inputField"
+          customFields:
+            type: object
 
       report:
         type: object
@@ -269,6 +271,7 @@ properties:
             description: Used in the UI where report's engagement details are shown.
           customFields:
             type: object
+
       person:
         type: object
         additionalProperties: false

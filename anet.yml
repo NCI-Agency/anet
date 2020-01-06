@@ -232,6 +232,85 @@ dictionary:
       responsiblePositions:
         label: Responsible positions
         placeholder: Search for a position...
+      customFields:
+        multipleButtons:
+          type: enumset
+          label: Choose one or more of the options
+          helpText: Help text for chosing multiple values
+          choices:
+            opt1:
+              label: Option 1
+            opt2:
+              label: Option 2
+            opt3:
+              label: Option 3
+        inputFieldName:
+          type: text
+          label: Text field
+          placeholder: Placeholder text for input field
+          helpText: Help text for text field
+          validations:
+            - type: required
+              params: [You must provide the text field]
+        colourOptions:
+          type: enum
+          label: Choose one of the colours
+          helpText: Help text for chosing colours
+          choices:
+            GREEN:
+              label: Green
+              color: '#c2ffb3'
+            AMBER:
+              label: Amber
+              color: '#ffe396'
+            RED:
+              label: Red
+              color: '#ff8279'
+        textareaFieldName:
+          type: text
+          label: Textarea field
+          placeholder: Placeholder text for textarea field
+          helpText: Help text for textarea field
+          componentClass: textarea
+          style:
+            height: 200px
+          visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        numberFieldName:
+          type: number
+          label: Number field
+          placeholder: Placeholder text for number field
+          helpText: Help text for number field
+          validations:
+            - type: integer
+            - type: min
+              params: [5]
+            - type: max
+              params: [100]
+          visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        nlt:
+          type: date
+          label: Not later than date
+          helpText: Help text for date field
+        nlt_dt:
+          type: datetime
+          label: Not later than datetime
+          helpText: Help text for datetime field
+        arrayFieldName:
+          type: array_of_objects
+          label: Array of objects
+          addButtonLabel: Add an object
+          objectLabel: Object
+          objectFields:
+            textF:
+              type: text
+              label: Object text
+              placeholder: Placeholder text for object text field
+              helpText: Help text for object text field
+            dateF:
+              type: date
+              label: Object date
+              helpText: Help text for object date field
+              visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
     report:
       intent: Engagement purpose
@@ -335,6 +414,7 @@ dictionary:
               type: number
               label: Qty
           visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+
     person:
       firstName: First name
       lastName: Last name

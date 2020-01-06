@@ -2,6 +2,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -67,6 +68,7 @@ const GQL_GET_TASK = gql`
           avatar(size: 32)
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -91,6 +93,9 @@ const BaseTaskShow = props => {
     return result
   }
 
+  if (data) {
+    data.task.formCustomFields = JSON.parse(data.task.customFields)
+  }
   const task = new Task(data ? data.task : {})
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
@@ -247,6 +252,20 @@ const BaseTaskShow = props => {
                   />
                 )}
               </Fieldset>
+
+              {Settings.fields.task.customFields && (
+                <Fieldset
+                  title={`${Settings.fields.task.shortLabel} information`}
+                  id="custom-fields"
+                >
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.task.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             <Fieldset title="Responsible positions">

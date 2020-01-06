@@ -1,5 +1,5 @@
 import { Settings } from "api"
-import Model, { yupDate } from "components/Model"
+import Model, { createYupObjectShape, yupDate } from "components/Model"
 import React from "react"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
@@ -30,6 +30,11 @@ export default class Task extends Model {
     ACTIVE: "ACTIVE",
     INACTIVE: "INACTIVE"
   }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createYupObjectShape(
+    Settings.fields.person.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -89,7 +94,12 @@ export default class Task extends Model {
         .array()
         .nullable()
         .default([])
-        .label(Settings.fields.task.responsiblePositions.label)
+        .label(Settings.fields.task.responsiblePositions.label),
+      // not actually in the database, the database contains the JSON customFields
+      formCustomFields: yup
+        .object()
+        .shape(Task.customFieldsSchema)
+        .nullable()
     })
     .concat(Model.yupSchema)
 
