@@ -328,9 +328,10 @@ const BaseReportForm = props => {
           forSelectedObjectives: {
             label: "For selected objectives",
             queryVars: {
-              customFieldRef1Uuid: values.tasksLevel1.length
-                ? values.tasksLevel1.map(t => t.uuid)
-                : [""]
+              customFieldRef1Uuid:
+                values.tasksLevel1 && values.tasksLevel1.length
+                  ? values.tasksLevel1.map(t => t.uuid)
+                  : [""]
             }
           },
           allTasks: {
@@ -869,7 +870,7 @@ const BaseReportForm = props => {
                 title="Engagement assessments"
                 id="engagement-assessments"
               >
-                {values.tasks.map(task => (
+                {(values.tasks || []).map(task => (
                   <Field
                     key={`assessment-${task.shortName}-${task.longName}`}
                     name={`assessment-${task.shortName}-${task.longName}`}
@@ -1096,7 +1097,7 @@ const BaseReportForm = props => {
       report.keyOutcomes = ""
     }
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
-    report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
+    report.tags = (values.reportTags || []).map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
     report.attendees = (values.attendees || []).map(a =>
       Object.without(

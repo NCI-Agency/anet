@@ -381,7 +381,9 @@ const BaseOrganizationForm = props => {
                             </Modal.Footer>
                           </Modal>
 
-                          {values.planningApprovalSteps.map((step, index) =>
+                          {(
+                            values.planningApprovalSteps || []
+                          ).map((step, index) =>
                             renderApprovalStep(
                               "planningApprovalSteps",
                               arrayHelpers,
@@ -460,7 +462,7 @@ const BaseOrganizationForm = props => {
                             </Modal.Footer>
                           </Modal>
 
-                          {values.approvalSteps.map((step, index) =>
+                          {(values.approvalSteps || []).map((step, index) =>
                             renderApprovalStep(
                               "approvalSteps",
                               arrayHelpers,
