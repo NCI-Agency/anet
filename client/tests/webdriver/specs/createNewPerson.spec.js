@@ -17,6 +17,9 @@ describe("Create new Person form page", () => {
       CreatePerson.openAsSuperUser()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
+      // Fill required custom field of type text
+      CreatePerson.customFieldsTextField.waitForDisplayed()
+      CreatePerson.customFieldsTextField.setValue("test")
       CreatePerson.lastName.waitForDisplayed()
       CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
       CreatePerson.gender.click()
@@ -43,6 +46,9 @@ describe("Create new Person form page", () => {
       CreatePerson.openAsSuperUser()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
+      // Fill required custom field of type text
+      CreatePerson.customFieldsTextField.waitForDisplayed()
+      CreatePerson.customFieldsTextField.setValue("test")
       CreatePerson.lastName.waitForDisplayed()
       CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
       CreatePerson.rank.selectByAttribute(
@@ -62,6 +68,9 @@ describe("Create new Person form page", () => {
       CreatePerson.openAsSuperUser()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
+      // Fill required custom field of type text
+      CreatePerson.customFieldsTextField.waitForDisplayed()
+      CreatePerson.customFieldsTextField.setValue("test")
       CreatePerson.lastName.waitForDisplayed()
       CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
       CreatePerson.rank.selectByAttribute(
@@ -98,6 +107,9 @@ describe("Create new Person form page", () => {
       CreatePerson.openAsAdmin()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
+      // Fill required custom field of type text
+      CreatePerson.customFieldsTextField.waitForDisplayed()
+      CreatePerson.customFieldsTextField.setValue("test")
       CreatePerson.roleAdvisorButton.waitForExist()
       CreatePerson.roleAdvisorButton.click()
       const warningMessage = browser.$(".alert.alert-warning")
@@ -109,6 +121,8 @@ describe("Create new Person form page", () => {
     })
     it("Should not save if endOfTourDate is not filled in", () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
+      CreatePerson.customFieldsTextField.waitForDisplayed()
+      CreatePerson.customFieldsTextField.setValue("test")
       CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
       CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
       CreatePerson.roleAdvisorButton.waitForExist()
@@ -147,6 +161,8 @@ describe("Create new Person form page", () => {
 
     it("Should save with a valid email address in uppercase", () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
+      CreatePerson.customFieldsTextField.waitForDisplayed()
+      CreatePerson.customFieldsTextField.setValue("test")
       CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
       CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
       CreatePerson.roleAdvisorButton.waitForExist()
