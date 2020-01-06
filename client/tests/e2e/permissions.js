@@ -250,7 +250,10 @@ async function validateUserCanEditUserForCurrentPage(t) {
   )
   await $editPersonButton.click()
 
-  let $bioTextArea = await $(".biography .public-DraftEditor-content")
+  let $bioTextArea = await $(
+    ".biography .public-DraftEditor-content",
+    shortWaitMs // wait for Draftail to save the editor contents
+  )
   await t.context.driver.wait(
     async() => {
       let originalBioText = await $bioTextArea.getText()

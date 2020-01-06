@@ -474,7 +474,10 @@ const BasePersonForm = props => {
                   widget={
                     <RichTextEditor
                       className="biography"
-                      onHandleBlur={() => setFieldTouched("biography")}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("biography", true, false)
+                      }}
                     />
                   }
                 />

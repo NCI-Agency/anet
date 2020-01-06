@@ -118,7 +118,8 @@ test("Draft and submit a report", async t => {
   await pageHelpers.writeInForm("#nextSteps", "next steps")
   await pageHelpers.writeInForm(
     ".reportTextField .public-DraftEditor-content",
-    "engagement details"
+    "engagement details",
+    shortWaitMs // wait for Draftail to save the editor contents
   )
 
   let editorCssPath =
@@ -135,7 +136,11 @@ test("Draft and submit a report", async t => {
   await t.context.driver.wait(
     until.elementIsVisible($reportSensitiveInformationField)
   )
-  await pageHelpers.writeInForm(editorCssPath, "sensitive info")
+  await pageHelpers.writeInForm(
+    editorCssPath,
+    "sensitive info",
+    shortWaitMs // wait for Draftail to save the editor contents
+  )
   let $addAuthGroupShortcutButtons = await $$(
     "#meeting-details .shortcut-list button"
   )
