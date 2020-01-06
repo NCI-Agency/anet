@@ -25,14 +25,14 @@ const LikertScale = ({ onChange, value, levels, size }) => {
       onChange(scale.invert(newX))
     })
     handleDrag(d3.select(cursorRef.current))
-  }, [onChange, size])
+  }, [onChange, scale, scaleYPosition, size])
 
   useEffect(() => {
     d3.select(cursorRef.current).attr(
       "transform",
       `translate(${x} ${scaleYPosition})`
     )
-  }, [x, size])
+  }, [x, size, scaleYPosition])
 
   useEffect(() => {
     const axis = d3.axisBottom(scale)
@@ -56,14 +56,13 @@ const LikertScale = ({ onChange, value, levels, size }) => {
         active && (activeColor = d3.hsl(level.color))
         fillColor.opacity = active ? 0.4 : 0.15
         return (
-          <>
+          <React.Fragment key={`level-${index}`}>
             <rect
               style={{ fill: fillColor, stroke: "gray", strokeWidth: 1 }}
               y={0}
               x={startX}
               height={size.height - 11}
               width={endX - startX}
-              key={`level-${index}`}
             />
             <text
               fill={active ? "black" : "gray"}
@@ -74,7 +73,7 @@ const LikertScale = ({ onChange, value, levels, size }) => {
             >
               {level.label}
             </text>
-          </>
+          </React.Fragment>
         )
       })}
       )}
@@ -82,7 +81,12 @@ const LikertScale = ({ onChange, value, levels, size }) => {
       <g ref={cursorRef}>
         <polygon
           points="0,0 13,13 13,30 -13,30 -13,13"
-          style={{ stroke: "gray", fill: "" + activeColor, strokeWidth: 1, cursor: "pointer" }}
+          style={{
+            stroke: "gray",
+            fill: "" + activeColor,
+            strokeWidth: 1,
+            cursor: "pointer"
+          }}
         />
         <text
           fill={activeColor.l < 0.5 ? "white" : "black"}
