@@ -289,8 +289,14 @@ const BaseTaskForm = props => {
                         widget={
                           <RichTextEditor
                             className="textField"
-                            onHandleBlur={() =>
-                              setFieldTouched("assessment_customFieldEnum1")}
+                            onHandleBlur={() => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched(
+                                "assessment_customFieldEnum1",
+                                true,
+                                false
+                              )
+                            }}
                           />
                         }
                       />

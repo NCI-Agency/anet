@@ -777,7 +777,10 @@ const BaseReportForm = props => {
                   widget={
                     <RichTextEditor
                       className="reportTextField"
-                      onHandleBlur={() => setFieldTouched("reportText")}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("reportText", true, false)
+                      }}
                     />
                   }
                 />
@@ -806,8 +809,14 @@ const BaseReportForm = props => {
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
-                            onHandleBlur={() =>
-                              setFieldTouched("reportSensitiveInformation.text")}
+                            onHandleBlur={() => {
+                              // validation will be done by setFieldValue
+                              setFieldTouched(
+                                "reportSensitiveInformation.text",
+                                true,
+                                false
+                              )
+                            }}
                           />
                         }
                       />
