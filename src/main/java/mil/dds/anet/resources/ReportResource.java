@@ -144,8 +144,6 @@ public class ReportResource {
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
-    // Needed for sensitive information, e.g. when autoSaving a new report
-    r.setUser(author);
     r = dao.insert(r, author);
     AnetAuditLogger.log("Report {} created by author {} ", r, author);
     return r;
@@ -352,7 +350,6 @@ public class ReportResource {
 
     // Clear and re-load sensitive information; needed in case of autoSave by the client form, or
     // when sensitive info is 'empty' HTML
-    r.setUser(editor);
     try {
       r.setReportSensitiveInformation(null);
       r.loadReportSensitiveInformation(engine.getContext()).get();

@@ -30,6 +30,7 @@ const GQL_GET_APP_DATA = gql`
       emailAddress
       status
       avatar(size: 32)
+      code
       position {
         uuid
         name

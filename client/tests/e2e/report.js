@@ -6,7 +6,7 @@ let test = require("../util/test")
 var testReportURL = null
 
 test("Draft and submit a report", async t => {
-  t.plan(14)
+  t.plan(16)
 
   let {
     pageHelpers,
@@ -79,9 +79,28 @@ test("Draft and submit a report", async t => {
   )
   await assertElementText(t, $principalOrg, "MoD")
 
+  let $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+    "#tasksLevel1",
+    "budget and planning"
+  )
+
+  let $tasksTitle = await t.context.driver.findElement(
+    By.xpath('//h2/span[text()="Tasks and Milestones"]')
+  )
+  await $tasksTitle.click()
+
+  t.is(
+    await $objectivesAdvancedSelect.getAttribute("value"),
+    "",
+    "Closing the objectives advanced multi select overlay empties the input field."
+  )
+
+  let $newObjectivesRow = await $("#tasks-objectives table tbody tr td")
+  await assertElementText(t, $newObjectivesRow, "EF 1 - Budget and Planning")
+
   let $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
-    "1.1.B"
+    "1.1"
   )
 
   let $tasksShortcutTitle = await $("#tasks-shortcut-title")
@@ -93,18 +112,15 @@ test("Draft and submit a report", async t => {
     "Closing the tasks advanced multi select overlay empties the input field."
   )
 
-  let $newTaskRow = await $(".tasks-selector table tbody tr td")
-  await assertElementText(
-    t,
-    $newTaskRow,
-    "1.1.B - Milestone the Second in EF 1.1"
-  )
+  let $newTaskRow = await $("#tasks-tasks table tbody tr td")
+  await assertElementText(t, $newTaskRow, "1.1 - Budgeting in the MoD")
 
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")
   await pageHelpers.writeInForm(
     ".reportTextField .public-DraftEditor-content",
-    "engagement details"
+    "engagement details",
+    shortWaitMs // wait for Draftail to save the editor contents
   )
   await pageHelpers.writeInForm(
     "[id='formCustomFields.inputFieldName']",
@@ -125,7 +141,11 @@ test("Draft and submit a report", async t => {
   await t.context.driver.wait(
     until.elementIsVisible($reportSensitiveInformationField)
   )
-  await pageHelpers.writeInForm(editorCssPath, "sensitive info")
+  await pageHelpers.writeInForm(
+    editorCssPath,
+    "sensitive info",
+    shortWaitMs // wait for Draftail to save the editor contents
+  )
   let $addAuthGroupShortcutButtons = await $$(
     "#meeting-details .shortcut-list button"
   )

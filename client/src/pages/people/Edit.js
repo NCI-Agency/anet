@@ -32,6 +32,7 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       avatar(size: 256)
+      code
       position {
         uuid
         name

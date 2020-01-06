@@ -66,10 +66,13 @@ const TableBody = props => {
   )
 }
 TableBody.propTypes = {
-  attendees: PropTypes.array,
+  attendees: PropTypes.array.isRequired,
   handleAttendeeRow: PropTypes.func,
   role: PropTypes.string,
   enableDivider: PropTypes.bool
+}
+TableBody.defaultProps = {
+  attendees: []
 }
 
 const TableContainer = props => {

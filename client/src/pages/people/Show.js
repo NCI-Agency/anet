@@ -52,6 +52,7 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       avatar(size: 256)
+      code
       position {
         uuid
         name
@@ -238,6 +239,11 @@ const BasePersonShow = props => {
                 <Field
                   name="country"
                   label={Settings.fields.person.country}
+                  component={FieldHelper.renderReadonlyField}
+                />
+                <Field
+                  name="code"
+                  label={Settings.fields.person.code}
                   component={FieldHelper.renderReadonlyField}
                 />
                 <Field

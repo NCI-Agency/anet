@@ -189,15 +189,10 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       keyField = "uuid";
       key = uuid;
     }
-    final Report result = getDbHandle()
+    return getDbHandle()
         .createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + "FROM reports "
             + "WHERE reports.\"" + keyField + "\" = :key")
         .bind("key", key).map(new ReportMapper()).findFirst().orElse(null);
-    if (result == null) {
-      return null;
-    }
-    result.setUser(user);
-    return result;
   }
 
   @InTransaction

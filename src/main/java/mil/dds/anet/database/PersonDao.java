@@ -29,7 +29,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
       "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
-      "pendingVerification", "createdAt", "updatedAt", "avatar", "customFields"};
+      "pendingVerification", "avatar", "code", "createdAt", "updatedAt", "customFields"};
   public static String TABLE_NAME = "people";
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
@@ -78,16 +78,16 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     StringBuilder sql = new StringBuilder();
     sql.append("/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-        + "gender, country, avatar, \"customFields\", \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
+        + "gender, country, avatar, code, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
-        + ":gender, :country, :avatar, :customFields, ");
+        + ":gender, :country, :avatar, :code, ");
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("CAST(:endOfTourDate AS datetime2), ");
     } else {
       sql.append(":endOfTourDate, ");
     }
-    sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
+    sql.append(":biography, :domainUsername, :createdAt, :updatedAt, :customFields);");
     getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -103,7 +103,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, "
         + "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
-        + "\"avatar\" = :avatar,"
+        + "\"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, ");

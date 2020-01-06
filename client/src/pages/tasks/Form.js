@@ -18,7 +18,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
-import { Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import _set from "lodash/set"
 import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
@@ -64,15 +64,15 @@ const BaseTaskForm = props => {
     }
   ]
 
-  const ShortNameField = DictionaryField(Field)
-  const LongNameField = DictionaryField(Field)
+  const ShortNameField = DictionaryField(FastField)
+  const LongNameField = DictionaryField(FastField)
   const TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
-  const TaskCustomField = DictionaryField(Field)
-  const PlannedCompletionField = DictionaryField(Field)
-  const ProjectedCompletionField = DictionaryField(Field)
-  const TaskCustomFieldEnum1 = DictionaryField(Field)
-  const TaskCustomFieldEnum2 = DictionaryField(Field)
-  const ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
+  const TaskCustomField = DictionaryField(FastField)
+  const PlannedCompletionField = DictionaryField(FastField)
+  const ProjectedCompletionField = DictionaryField(FastField)
+  const TaskCustomFieldEnum1 = DictionaryField(FastField)
+  const TaskCustomFieldEnum2 = DictionaryField(FastField)
+  const ResponsiblePositionsMultiSelect = DictionaryField(AdvancedMultiSelect)
 
   initialValues.assessment_customFieldEnum1 = ""
 
@@ -167,7 +167,7 @@ const BaseTaskForm = props => {
                   component={FieldHelper.renderInputField}
                 />
 
-                <Field
+                <FastField
                   name="status"
                   component={FieldHelper.renderRadioButtonToggleGroup}
                   buttons={statusButtons}
@@ -190,7 +190,7 @@ const BaseTaskForm = props => {
                   addon={ORGANIZATIONS_ICON}
                 />
 
-                <ResponsiblePositonsMultiSelect
+                <ResponsiblePositionsMultiSelect
                   fieldName="responsiblePositions"
                   dictProps={Settings.fields.task.responsiblePositions}
                   fieldLabel={Settings.fields.task.responsiblePositions.label}
@@ -249,7 +249,7 @@ const BaseTaskForm = props => {
                     component={FieldHelper.renderSpecialField}
                     onChange={value =>
                       setFieldValue("plannedCompletion", value)}
-                    onBlur={() => setFieldTouched("plannedCompletion", true)}
+                    onBlur={() => setFieldTouched("plannedCompletion")}
                     widget={<CustomDateInput id="plannedCompletion" />}
                   />
                 )}
@@ -261,7 +261,7 @@ const BaseTaskForm = props => {
                     component={FieldHelper.renderSpecialField}
                     onChange={value =>
                       setFieldValue("projectedCompletion", value)}
-                    onBlur={() => setFieldTouched("projectedCompletion", true)}
+                    onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
                   />
                 )}
@@ -282,7 +282,7 @@ const BaseTaskForm = props => {
                         setFieldValue("customFieldEnum1", value)}
                     />
                     {edit && (
-                      <Field
+                      <FastField
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                         component={FieldHelper.renderSpecialField}
@@ -291,11 +291,14 @@ const BaseTaskForm = props => {
                         widget={
                           <RichTextEditor
                             className="textField"
-                            onHandleBlur={() =>
+                            onHandleBlur={() => {
+                              // validation will be done by setFieldValue
                               setFieldTouched(
                                 "assessment_customFieldEnum1",
-                                true
-                              )}
+                                true,
+                                false
+                              )
+                            }}
                           />
                         }
                       />

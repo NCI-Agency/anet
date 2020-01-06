@@ -301,6 +301,10 @@ properties:
             type: string
             title: The label for a person's country
             description: Used in the UI where a person's country is shown.
+          code:
+            type: string
+            title: The label for a person's code
+            description: Used in the UI where a person's code is shown.
           rank:
             type: string
             title: The label for a person's rank

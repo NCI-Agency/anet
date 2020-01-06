@@ -27,7 +27,7 @@ let capabilities = {
   // but that is so prone to unexpected failures as to be unusable.
   // So test with latest stable Chrome instead.
   browserName: "Chrome",
-  browser_version: "76.0",
+  browser_version: "79.0",
   "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: ["--start-maximized"]

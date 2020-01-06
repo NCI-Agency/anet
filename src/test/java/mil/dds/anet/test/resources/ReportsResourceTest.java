@@ -1441,7 +1441,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Report returned2 = graphQLHelper.getObjectById(elizabeth, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // elizabeth should be allowed to see it
-    returned2.setUser(elizabeth);
     assertThat(returned2.getReportSensitiveInformation()).isNotNull();
     assertThat(returned2.getReportSensitiveInformation().getText())
         .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
@@ -1460,7 +1459,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Report returned3 = graphQLHelper.getObjectById(jack, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // jack should not be allowed to see it
-    returned3.setUser(jack);
     assertThat(returned3.getReportSensitiveInformation()).isNull();
   }
 
@@ -1490,7 +1488,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult).isNotEmpty();
     final Report report = reportResult.get();
-    report.setUser(erin);
     // erin is the author, so should be able to see the sensitive information
     assertThat(report.getReportSensitiveInformation()).isNotNull();
     assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
@@ -1515,7 +1512,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult2).isNotEmpty();
     final Report report2 = reportResult2.get();
-    report2.setUser(reina);
     // reina is in the authorization group, so should be able to see the sensitive information
     assertThat(report2.getReportSensitiveInformation()).isNotNull();
     assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
@@ -1540,7 +1536,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult3).isNotEmpty();
     final Report report3 = reportResult3.get();
-    report3.setUser(elizabeth);
     // elizabeth is not in the authorization group, so should not be able to see the sensitive
     // information
     assertThat(report3.getReportSensitiveInformation()).isNull();

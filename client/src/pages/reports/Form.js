@@ -21,7 +21,7 @@ import { jumpToTop, useBoilerplate } from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
@@ -354,7 +354,7 @@ const BaseReportForm = props => {
             }
           }
         }
-        const primaryAdvisors = values.attendees.filter(
+        const primaryAdvisors = (values.attendees || []).filter(
           a => a.role === Person.ROLE.ADVISOR && a.primary === true
         )
         const primaryAdvisor = primaryAdvisors.length
@@ -452,7 +452,7 @@ const BaseReportForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field
+                <FastField
                   name="intent"
                   label={Settings.fields.report.intent}
                   component={FieldHelper.renderInputField}
@@ -477,11 +477,11 @@ const BaseReportForm = props => {
                   className="meeting-goal"
                 />
 
-                <Field
+                <FastField
                   name="engagementDate"
                   component={FieldHelper.renderSpecialField}
                   onChange={value => setFieldValue("engagementDate", value)}
-                  onBlur={() => setFieldTouched("engagementDate", true)}
+                  onBlur={() => setFieldTouched("engagementDate")}
                   widget={
                     <CustomDateInput
                       id="engagementDate"
@@ -496,10 +496,10 @@ const BaseReportForm = props => {
                       </span>
                     </HelpBlock>
                   )}
-                </Field>
+                </FastField>
 
                 {Settings.engagementsIncludeTimeAndDuration && (
-                  <Field
+                  <FastField
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.renderInputField}
@@ -525,7 +525,7 @@ const BaseReportForm = props => {
                 />
 
                 {!isFutureEngagement && (
-                  <Field
+                  <FastField
                     name="cancelled"
                     component={FieldHelper.renderSpecialField}
                     label={Settings.fields.report.cancelled}
@@ -549,12 +549,12 @@ const BaseReportForm = props => {
                   />
                 )}
                 {!isFutureEngagement && values.cancelled && (
-                  <Field
+                  <FastField
                     name="cancelledReason"
                     label="due to"
                     component={FieldHelper.renderSpecialField}
                     widget={
-                      <Field
+                      <FastField
                         component="select"
                         className="cancelled-reason-form-group form-control"
                       >
@@ -563,13 +563,13 @@ const BaseReportForm = props => {
                             {reason.label}
                           </option>
                         ))}
-                      </Field>
+                      </FastField>
                     }
                   />
                 )}
 
                 {!isFutureEngagement && !values.cancelled && (
-                  <Field
+                  <FastField
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
                     component={FieldHelper.renderRadioButtonToggleGroup}
@@ -593,7 +593,7 @@ const BaseReportForm = props => {
                 )}
 
                 {Settings.fields.report.reportTags && (
-                  <Field
+                  <FastField
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
                     component={FieldHelper.renderSpecialField}
@@ -631,8 +631,11 @@ const BaseReportForm = props => {
                   ]}
                   overlayRenderRow={PersonDetailedOverlayRow}
                   filterDefs={attendeesFilters}
-                  onChange={value =>
-                    updateAttendees(setFieldValue, "attendees", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("attendees", true, false)
+                    updateAttendees(setFieldValue, "attendees", value)
+                  }}
                   objectType={Person}
                   queryParams={{
                     status: [Person.STATUS.ACTIVE]
@@ -656,6 +659,7 @@ const BaseReportForm = props => {
                   value={values.tasksLevel1}
                   renderSelected={
                     <TaskTable
+                      id="tasks-objectives"
                       tasks={values.tasksLevel1}
                       showDelete
                       showOrganization
@@ -683,6 +687,7 @@ const BaseReportForm = props => {
                   value={values.tasks}
                   renderSelected={
                     <TaskTable
+                      id="tasks-tasks"
                       tasks={values.tasks}
                       showDelete
                       showOrganization
@@ -692,8 +697,9 @@ const BaseReportForm = props => {
                   overlayRenderRow={TaskDetailedOverlayRow}
                   filterDefs={tasksFiltersLevel2}
                   onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("tasks", true, false)
                     setFieldValue("tasks", value)
-                    setFieldTouched("tasks", true)
                   }}
                   objectType={Task}
                   queryParams={{ status: Task.STATUS.ACTIVE }}
@@ -729,7 +735,7 @@ const BaseReportForm = props => {
                 id="meeting-details"
               >
                 {!isFutureEngagement && !values.cancelled && (
-                  <Field
+                  <FastField
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}
                     component={FieldHelper.renderInputField}
@@ -754,7 +760,7 @@ const BaseReportForm = props => {
                 )}
 
                 {!isFutureEngagement && (
-                  <Field
+                  <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps}
                     component={FieldHelper.renderInputField}
@@ -778,7 +784,7 @@ const BaseReportForm = props => {
                   />
                 )}
 
-                <Field
+                <FastField
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.renderSpecialField}
@@ -786,7 +792,10 @@ const BaseReportForm = props => {
                   widget={
                     <RichTextEditor
                       className="reportTextField"
-                      onHandleBlur={() => setFieldTouched("reportText", true)}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("reportText", true, false)
+                      }}
                     />
                   }
                 />
@@ -803,7 +812,7 @@ const BaseReportForm = props => {
                 <Collapse in={showSensitiveInfo}>
                   {(values.reportSensitiveInformation || !props.edit) && (
                     <div>
-                      <Field
+                      <FastField
                         name="reportSensitiveInformation.text"
                         component={FieldHelper.renderSpecialField}
                         label="Report sensitive information text"
@@ -815,11 +824,14 @@ const BaseReportForm = props => {
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
-                            onHandleBlur={() =>
+                            onHandleBlur={() => {
+                              // validation will be done by setFieldValue
                               setFieldTouched(
                                 "reportSensitiveInformation.text",
-                                true
-                              )}
+                                true,
+                                false
+                              )
+                            }}
                           />
                         }
                       />
@@ -897,7 +909,7 @@ const BaseReportForm = props => {
                     id="formBottomSubmit"
                     bsStyle="primary"
                     type="button"
-                    onClick={() => onSubmit(values, { resetForm: resetForm })}
+                    onClick={() => onSubmit(values, { resetForm })}
                     disabled={isSubmitting}
                   >
                     {submitText}
@@ -970,7 +982,7 @@ const BaseReportForm = props => {
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
           const touched = _cloneDeep(autoSaveSettings.touched) // save previous touched
-          form.resetForm(newValues)
+          form.resetForm({ values: newValues })
           Object.entries(touched).forEach(([field, value]) =>
             // re-set touched so we keep messages
             form.setFieldTouched(field, value)
@@ -1086,7 +1098,7 @@ const BaseReportForm = props => {
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = values.attendees.map(a =>
+    report.attendees = (values.attendees || []).map(a =>
       Object.without(
         a,
         "firstName",

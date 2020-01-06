@@ -2720,21 +2720,27 @@
 	</changeSet>
 
     <changeSet id="add-custom-fields-to-reports" author="maradragan">
-        <addColumn tableName="reports" >
+        <addColumn tableName="reports">
             <column name="customFields" type="${long_text_type}" />
         </addColumn>
     </changeSet>
 
     <changeSet id="add-custom-fields-to-people" author="maradragan">
-        <addColumn tableName="people" >
+        <addColumn tableName="people">
             <column name="customFields" type="${long_text_type}" />
         </addColumn>
     </changeSet>
 
     <changeSet id="add-custom-fields-to-tasks" author="maradragan">
-        <addColumn tableName="tasks" >
+        <addColumn tableName="tasks">
             <column name="customFields" type="${long_text_type}" />
         </addColumn>
     </changeSet>
+
+	<changeSet id="add-people-code" author="gjvoosten">
+		<addColumn tableName="people">
+			<column name="code" type="nvarchar(100)" />
+		</addColumn>
+	</changeSet>
 
 </databaseChangeLog>

@@ -13,7 +13,7 @@ import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import AvatarEditModal from "components/AvatarEditModal"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import { Person } from "models"
@@ -201,7 +201,7 @@ const BasePersonForm = props => {
                   </Col>
                   <Col sm={7}>
                     <Col sm={5}>
-                      <Field
+                      <FastField
                         name="lastName"
                         component={FieldHelper.renderInputFieldNoLabel}
                         display="inline"
@@ -214,7 +214,7 @@ const BasePersonForm = props => {
                       ,
                     </Col>
                     <Col sm={6}>
-                      <Field
+                      <FastField
                         name="firstName"
                         component={FieldHelper.renderInputFieldNoLabel}
                         display="inline"
@@ -304,7 +304,7 @@ const BasePersonForm = props => {
                 </FormGroup>
 
                 {isAdmin && (
-                  <Field
+                  <FastField
                     name="domainUsername"
                     component={FieldHelper.renderInputField}
                     extraColElem={
@@ -317,13 +317,13 @@ const BasePersonForm = props => {
                 )}
 
                 {edit ? (
-                  <Field
+                  <FastField
                     name="role"
                     component={FieldHelper.renderReadonlyField}
                     humanValue={Person.humanNameOfRole(values.role)}
                   />
                 ) : (
-                  <Field
+                  <FastField
                     name="role"
                     component={FieldHelper.renderRadioButtonToggleGroup}
                     buttons={roleButtons}
@@ -347,17 +347,17 @@ const BasePersonForm = props => {
                         contact an ANET administrator.
                       </Alert>
                     )}
-                  </Field>
+                  </FastField>
                 )}
 
                 {disableStatusChange ? (
-                  <Field
+                  <FastField
                     name="status"
                     component={FieldHelper.renderReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
                 ) : isNewUser ? (
-                  <Field
+                  <FastField
                     name="status"
                     component={FieldHelper.renderReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
@@ -394,23 +394,23 @@ const BasePersonForm = props => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <Field
+                <FastField
                   name="emailAddress"
                   label={Settings.fields.person.emailAddress}
                   type="email"
                   component={FieldHelper.renderInputField}
                 />
-                <Field
+                <FastField
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
                   component={FieldHelper.renderInputField}
                 />
-                <Field
+                <FastField
                   name="rank"
                   label={Settings.fields.person.rank}
                   component={FieldHelper.renderSpecialField}
                   widget={
-                    <Field component="select" className="form-control">
+                    <FastField component="select" className="form-control">
                       <option />
                       {ranks.map(rank => (
                         <option key={rank.value} value={rank.value}>
@@ -418,43 +418,49 @@ const BasePersonForm = props => {
                           {rank.description && ` - ( ${rank.description} )`}
                         </option>
                       ))}
-                    </Field>
+                    </FastField>
                   }
                 />
-                <Field
+                <FastField
                   name="gender"
                   label={Settings.fields.person.gender}
                   component={FieldHelper.renderSpecialField}
                   widget={
-                    <Field component="select" className="form-control">
+                    <FastField component="select" className="form-control">
                       <option />
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
-                    </Field>
+                    </FastField>
                   }
                 />
-                <Field
+                <FastField
                   name="country"
                   label={Settings.fields.person.country}
                   component={FieldHelper.renderSpecialField}
                   widget={
-                    <Field component="select" className="form-control">
+                    <FastField component="select" className="form-control">
                       <option />
                       {countries.map(country => (
                         <option key={country} value={country}>
                           {country}
                         </option>
                       ))}
-                    </Field>
+                    </FastField>
                   }
                 />
-                <Field
+                <FastField
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.renderInputField}
+                  disabled={!isAdmin}
+                />
+                <FastField
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
                   component={FieldHelper.renderSpecialField}
                   value={values.endOfTourDate}
                   onChange={value => setFieldValue("endOfTourDate", value)}
-                  onBlur={() => setFieldTouched("endOfTourDate", true)}
+                  onBlur={() => setFieldTouched("endOfTourDate")}
                   widget={<CustomDateInput id="endOfTourDate" />}
                 >
                   {isAdvisor && endOfTourDateInPast && (
@@ -462,15 +468,18 @@ const BasePersonForm = props => {
                       Be aware that the end of tour date is in the past.
                     </Alert>
                   )}
-                </Field>
-                <Field
+                </FastField>
+                <FastField
                   name="biography"
                   component={FieldHelper.renderSpecialField}
                   onChange={value => setFieldValue("biography", value)}
                   widget={
                     <RichTextEditor
                       className="biography"
-                      onHandleBlur={() => setFieldTouched("biography", true)}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("biography", true, false)
+                      }}
                     />
                   }
                 />
@@ -550,18 +559,15 @@ const BasePersonForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
+    // After successful submit, reset the form in order to make sure the dirty
+    // prop is also reset (otherwise we would get a blocking navigation warning)
+    form.resetForm()
     if (onSaveRedirectToHome) {
-      // After successful submit, reset the form in order to make sure the dirty
-      // prop is also reset (otherwise we would get a blocking navigation warning)
-      form.resetForm()
       localStorage.clear()
       localStorage.newUser = "true"
       props.loadAppData()
       history.push("/")
     } else {
-      // After successful submit, reset the form in order to make sure the dirty
-      // prop is also reset (otherwise we would get a blocking navigation warning)
-      form.resetForm()
       const { edit } = props
       const operation = edit ? "updatePerson" : "createPerson"
       const person = new Person({

@@ -60,6 +60,7 @@ AdvancedSelectOverlayTable.propTypes = {
   tableClassName: PropTypes.string
 }
 AdvancedSelectOverlayTable.defaultProps = {
+  selectedItems: [],
   tableClassName: ""
 }
 

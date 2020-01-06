@@ -47,6 +47,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   private List<PersonPositionHistory> previousPositions;
 
   private String avatar;
+  private String code;
 
   public Person() {
     this.pendingVerification = false; // Defaults
@@ -248,6 +249,15 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     this.avatar = avatar;
   }
 
+  @GraphQLQuery(name = "code")
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Person)) {
@@ -260,7 +270,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatar(), avatar) && (createdAt != null)
+        && Objects.equals(other.getAvatar(), avatar) && Objects.equals(other.getCode(), code)
+        && (createdAt != null)
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)
                 ? (updatedAt.equals(other.getUpdatedAt()))
@@ -272,7 +283,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   @Override
   public int hashCode() {
     return Objects.hash(uuid, name, status, role, emailAddress, phoneNumber, rank, biography,
-        createdAt, updatedAt, pendingVerification);
+        pendingVerification, avatar, code, createdAt, updatedAt);
   }
 
   @Override
