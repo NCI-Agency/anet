@@ -33,7 +33,7 @@ export default class Task extends Model {
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createYupObjectShape(
-    Settings.fields.person.customFields
+    Settings.fields.task.customFields
   )
 
   static yupSchema = yup
