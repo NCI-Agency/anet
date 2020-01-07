@@ -665,13 +665,18 @@ const BaseOrganizationForm = props => {
       new Organization(values),
       "notes",
       "childrenOrgs",
-      "positions"
+      "positions",
+      "tasks"
+    )
+    // strip tasks fields not in data model
+    organization.tasks = (values.tasks || []).map(t =>
+      Object.without(t, "formCustomFields")
     )
     organization.parentOrg = utils.getReference(organization.parentOrg)
     return API.mutation(
       props.edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
-    )
+    ).then()
   }
 }
 
