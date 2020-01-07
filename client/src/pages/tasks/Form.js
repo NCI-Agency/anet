@@ -406,7 +406,7 @@ const BaseTaskForm = props => {
     task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     // customFields should contain the JSON of all the visible custom fields
-    values.formCustomFields.invisibleCustomFields.forEach(f => {
+    values.formCustomFields.invisibleCustomFields && values.formCustomFields.invisibleCustomFields.forEach(f => { // TODO: workaround - invisibleCustomFields should be defined
       _set(values, f.split("."), undefined)
     })
     task.customFields = JSON.stringify(values.formCustomFields)

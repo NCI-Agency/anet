@@ -73,6 +73,7 @@ const GQL_GET_REPORT = gql`
           uuid
           shortName
         }
+        customFields
       }
       tags {
         uuid

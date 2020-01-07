@@ -14,7 +14,6 @@ import CustomDateInput from "components/CustomDateInput"
 import { CustomFieldsContainer } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LikertScale from "components/graphs/LikertScale"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, useBoilerplate } from "components/Page"
@@ -82,6 +81,7 @@ const GQL_GET_RECENTS = gql`
           uuid
           shortName
         }
+        customFields
       }
     }
     authorizationGroupRecents(maxResults: 6) {
@@ -870,16 +870,36 @@ const BaseReportForm = props => {
                 title="Engagement assessments"
                 id="engagement-assessments"
               >
-                {(values.tasks || []).map(task => (
-                  <Field
-                    key={`assessment-${task.shortName}-${task.longName}`}
-                    name={`assessment-${task.shortName}-${task.longName}`}
-                    label={`${task.shortName} ${task.longName}`}
-                    component={FieldHelper.renderSpecialField}
-                    widget={<LikertScale />}
-                    background
-                  />
-                ))}
+                {(values.tasks || []).map(task => {
+                  if (!task.customFields) {
+                    return null
+                  }
+                  const taskCustomFields = JSON.parse(task.customFields)
+                  if (!taskCustomFields.assessmentDefinition) {
+                    return null
+                  }
+                  const taskAssessmentDefinition = JSON.parse(
+                    taskCustomFields.assessmentDefinition
+                  )
+                  let newValues = {}
+
+                  return (
+                    <Fieldset
+                      title={`Assessment for ${task.shortName} ${task.longName}`}
+                      id="custom-fields"
+                      key={`assessment-${values.uuid}-${task.uuid}`}
+                    >
+                      <CustomFieldsContainer
+                        fieldsConfig={taskAssessmentDefinition}
+                        formikProps={{
+                          setFieldTouched,
+                          setFieldValue,
+                          newValues
+                        }}
+                      />
+                    </Fieldset>
+                  )
+                })}
               </Fieldset>
 
               <div className="submit-buttons">

@@ -313,8 +313,8 @@ INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, cu
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
 	VALUES (N'7fdef880-1bf3-4e56-8476-79166324023f', '1.1.C', 'Milestone the Third in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.1'), (SELECT uuid from organizations where shortName='EF 1.1'));
 
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', 'EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1'), (SELECT uuid from organizations WHERE shortName='EF 1.2'));
+INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid, customFields)
+	VALUES (N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', 'EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1'), (SELECT uuid from organizations WHERE shortName='EF 1.2'), '{ "assessmentDefinition": "{ \"assessment\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"Test Assessment 1\", \"helpText\": \"Please provide assessment for something important\", \"levels\": [ { \"color\": \"red\", \"endValue\": 2, \"label\": \"test\" }, { \"color\": \"#FFBF00\", \"endValue\": 8, \"label\": \"mid\" }, { \"color\": \"green\", \"endValue\": 10, \"label\": \"high\" } ] } }" }');
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
 	VALUES (N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations where shortName='EF 1.2'));
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
@@ -322,8 +322,8 @@ INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, cu
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
 	VALUES (N'6bbb1be9-4655-48d7-83f2-bc474781544a', '1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations where shortName='EF 1.2'));
 
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1'), (SELECT uuid FROM organizations WHERE shortName='EF 1.3'));
+INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid, customFields)
+	VALUES (N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1'), (SELECT uuid FROM organizations WHERE shortName='EF 1.3'),'{ "assessmentDefinition": "{ \"frenchFlag\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"French Flag assessment\", \"helpText\": \"Please tell us which is the best color in the French flaf\", \"levels\": [ { \"color\": \"blue\", \"endValue\": 3.3, \"label\": \"blue\" }, { \"color\": \"white\", \"endValue\": 6.6, \"label\": \"white\" }, { \"color\": \"red\", \"endValue\": 10, \"label\": \"red\" } ] } }" }');
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
 	VALUES (N'076793eb-9950-4ea6-bbd5-2d8b8827828c', '1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.3'), (SELECT uuid from organizations where shortName='EF 1.3'));
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
