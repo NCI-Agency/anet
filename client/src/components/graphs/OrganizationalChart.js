@@ -7,7 +7,7 @@ import _xor from "lodash/xor"
 import { Symbol } from "milsymbol"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -76,47 +76,13 @@ const OrganizationalChart = props => {
   const [personnelDepth, setPersonnelDepth] = useState(5)
   const history = useHistory()
   const svgContainer = useRef(null)
-  const canvas = useRef(null)
-  const link = useRef(null)
-  const node = useRef(null)
+  const canvasRef = useRef(null)
+  const linkRef = useRef(null)
+  const nodeRef = useRef(null)
   const tree = useRef(d3.tree())
   const [root, setRoot] = useState(null)
-  const getNodeSize = () => [200, 100 + 11 * personnelDepth]
-  const calculateBounds = rootArg => {
-    const boundingBox = rootArg.descendants().reduce(
-      (box, nodeArg) => {
-        console.log("----------")
-        console.dir(nodeArg)
-        console.log(nodeArg.x)
-        console.log(Object.keys(nodeArg))
-        console.log(Math.min(box.xmin, nodeArg.x))
-        return {
-          xmin: Math.min(box.xmin, nodeArg.x),
-          xmax: Math.max(box.xmax, nodeArg.x),
-          ymin: Math.min(box.ymin, nodeArg.y),
-          ymax: Math.max(box.ymax, nodeArg.y)
-        }
-      },
-      {
-        xmin: Number.MAX_SAFE_INTEGER,
-        xmax: Number.MIN_SAFE_INTEGER,
-        ymin: Number.MAX_SAFE_INTEGER,
-        ymax: Number.MIN_SAFE_INTEGER
-      }
-    )
-    return {
-      box: boundingBox,
-      size: [
-        boundingBox.xmax - boundingBox.xmin + getNodeSize()[0],
-        boundingBox.ymax - boundingBox.ymin + getNodeSize()[1]
-      ],
-      center: [
-        (boundingBox.xmax + boundingBox.xmin + getNodeSize()[0] - 50) / 2,
-        (boundingBox.ymax + boundingBox.ymin + getNodeSize()[1] - 50) / 2
-      ]
-    }
-  }
-
+  const [height, setHeight] = useState(props.size.height)
+  const nodeSize = [200, 100 + 11 * personnelDepth]
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
     uuid: props.org.uuid
   })
@@ -127,31 +93,21 @@ const OrganizationalChart = props => {
     ...props
   })
 
+  const canvas = d3.select(canvasRef.current)
+  const link = d3.select(linkRef.current)
+  const node = d3.select(nodeRef.current)
+
   useEffect(() => {
-    if (!data) {
-      // TODO: make effect only happen on svgContainer.current change
-      return
-    }
-    if (link.current == null) {
-      canvas.current = d3.select(svgContainer.current).append("g")
-      link.current = canvas.current
-        .append("g")
-        .attr("fill", "none")
-        .attr("stroke", "#555")
-      node.current = canvas.current
-        .append("g")
-        .attr("cursor", "pointer")
-        .attr("pointer-events", "all")
-    }
-    setRoot(
-      d3.hierarchy(data.organization, d =>
-        expanded.includes(d.uuid)
-          ? data.organization.descendantOrgs.filter(org =>
-            org.parentOrg?.uuid === d.uuid
-          )
-          : null
+    data &&
+      setRoot(
+        d3.hierarchy(data.organization, d =>
+          expanded.includes(d.uuid)
+            ? data.organization.descendantOrgs.filter(
+              org => org.parentOrg?.uuid === d.uuid
+            )
+            : null
+        )
       )
-    )
   }, [data, expanded])
 
   useEffect(() => {
@@ -159,47 +115,57 @@ const OrganizationalChart = props => {
       return
     }
 
-    const chartBox = svgContainer.current.getBoundingClientRect()
+    const calculateBounds = rootArg => {
+      const boundingBox = rootArg.descendants().reduce(
+        (box, nodeArg) => {
+          return {
+            xmin: Math.min(box.xmin, nodeArg.x || 0),
+            xmax: Math.max(box.xmax, nodeArg.x || 0),
+            ymin: Math.min(box.ymin, nodeArg.y || 0),
+            ymax: Math.max(box.ymax, nodeArg.y || 0)
+          }
+        },
+        {
+          xmin: Number.MAX_SAFE_INTEGER,
+          xmax: Number.MIN_SAFE_INTEGER,
+          ymin: Number.MAX_SAFE_INTEGER,
+          ymax: Number.MIN_SAFE_INTEGER
+        }
+      )
+      return {
+        box: boundingBox,
+        size: [
+          boundingBox.xmax - boundingBox.xmin + nodeSize[0],
+          boundingBox.ymax - boundingBox.ymin + nodeSize[1]
+        ],
+        center: [
+          (boundingBox.xmax + boundingBox.xmin + nodeSize[0] - 50) / 2,
+          (boundingBox.ymax + boundingBox.ymin + nodeSize[1] - 50) / 2
+        ]
+      }
+    }
 
-    const fullWidth = chartBox.width
-    const fullHeight = chartBox.height
-
-    canvas.current.attr(
+    tree.current.nodeSize(nodeSize)
+    const bounds = calculateBounds(root)
+    const scale = Math.min(
+      1.2,
+      1 / Math.max(bounds.size[0] / props.size.width, bounds.size[1] / height)
+    )
+    canvas.attr(
       "transform",
-      "translate(" + fullHeight / 2 + "," + 50 + ")"
+      `translate(${props.size.width / 2 - scale * bounds.center[0]},${height /
+        2 -
+        scale * bounds.center[1]}) scale(${scale})`
     )
 
-    tree.current.size(fullWidth, fullHeight)
-    tree.current.nodeSize(getNodeSize())
-
-    const bounds = calculateBounds(root)
-
-    if (bounds) {
-      const scale = Math.min(
-        1.2,
-        1 / Math.max(bounds.size[0] / fullWidth, bounds.size[1] / fullHeight)
-      )
-      canvas.current.attr(
-        "transform",
-        `translate(${fullWidth / 2 - scale * bounds.center[0]},${fullHeight /
-          2 -
-          scale * bounds.center[1]}) scale(${scale})`
-      )
-      d3.select(svgContainer.current).attr(
-        "height",
-        scale * bounds.size[1] + 50
-      )
-    }
-  }, [data, root, expanded])
+    setHeight(scale * bounds.size[1] + 50)
+  }, [nodeSize, canvas, data, height, props.size.width, root])
 
   useEffect(() => {
-    if (!data) {
-      return
-    }
-    setExpanded([data.organization.uuid])
+    data && setExpanded([data.organization.uuid])
   }, [data])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (
       !svgContainer.current ||
       !data?.organization ||
@@ -209,20 +175,15 @@ const OrganizationalChart = props => {
       return
     }
 
-    const linkSelect = link.current
-      .selectAll("path")
-      .data(tree.current(root).links())
+    const linkSelect = link.selectAll("path").data(tree.current(root).links())
 
-    linkSelect
-      .transition()
-      .duration(transitionDuration)
-      .attr(
-        "d",
-        d3
-          .linkVertical()
-          .x(d => d.x)
-          .y(d => d.y)
-      )
+    linkSelect.attr(
+      "d",
+      d3
+        .linkVertical()
+        .x(d => d.x)
+        .y(d => d.y)
+    )
 
     linkSelect
       .enter()
@@ -239,7 +200,7 @@ const OrganizationalChart = props => {
 
     linkSelect.exit().remove()
 
-    const nodeSelect = node.current
+    const nodeSelect = node
       .selectAll("g.org")
       .data(root.descendants(), d => d.data.uuid)
 
@@ -271,7 +232,7 @@ const OrganizationalChart = props => {
       .attr("y", 5)
       .on("click", d => setExpanded(expanded => _xor(expanded, [d.data.uuid])))
 
-    node.current
+    node
       .selectAll("image.orgChildIcon")
       .attr("href", d =>
         expanded.indexOf(d.data.uuid) > -1 ? ORGANIZATIONS_ICON : EXPAND_ICON
@@ -422,14 +383,7 @@ const OrganizationalChart = props => {
         } ${d.name}`
         return result.length > 31 ? result.substring(0, 28) + "..." : result
       })
-  }, [
-    data,
-    expanded,
-    history,
-    personnelDepth,
-    svgContainer,
-    root
-  ])
+  }, [data, expanded, history, personnelDepth, svgContainer, root, link, node])
 
   if (done) {
     return result
@@ -437,12 +391,17 @@ const OrganizationalChart = props => {
 
   return (
     <SVGCanvas
-      size={props.size}
+      size={{ width: props.size.width, height: height }}
       exportTitle={`${data.shortName} organization chart`}
       ref={svgContainer}
       zoomFn={increment =>
         setPersonnelDepth(Math.max(0, personnelDepth + increment))}
-    />
+    >
+      <g ref={canvasRef}>
+        <g ref={linkRef} style={{ fill: "none", stroke: "#555" }} />
+        <g ref={nodeRef} style={{ cursor: "pointer", pointerEvents: "all" }} />
+      </g>
+    </SVGCanvas>
   )
 }
 

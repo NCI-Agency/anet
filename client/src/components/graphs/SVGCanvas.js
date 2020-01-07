@@ -60,7 +60,9 @@ const SVGCanvas = props => {
         width={props.size.width}
         height={props.size.height}
         ref={props.svgRef}
-      />
+      >
+        {props.children}
+      </svg>
     </div>
   )
 }
@@ -69,7 +71,8 @@ SVGCanvas.propTypes = {
   size: PropTypes.object.isRequired,
   exportTitle: PropTypes.string,
   zoomFn: PropTypes.func,
-  svgRef: PropTypes.object
+  svgRef: PropTypes.object,
+  children: PropTypes.node
 }
 
 export default React.forwardRef((props, ref) => {

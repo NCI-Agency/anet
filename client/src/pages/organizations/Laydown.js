@@ -43,12 +43,10 @@ const BaseOrganizationLaydown = props => {
             <ContainerDimensions>
               {({ width, height }) => (
                 <OrganizationalChart
-                  width={width}
-                  height={height}
                   label="test"
                   org={organization}
                   exportTitle={`Organization diagram for ${organization}`}
-                  size={{ width: "100%", height: 800 }}
+                  size={{ width: width, height: height }}
                 />
               )}
             </ContainerDimensions>
