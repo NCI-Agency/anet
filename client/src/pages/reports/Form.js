@@ -15,6 +15,7 @@ import { CustomFieldsContainer } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import { NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, useBoilerplate } from "components/Page"
 import ReportTags from "components/ReportTags"
@@ -22,6 +23,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
@@ -120,7 +122,12 @@ const GQL_CREATE_REPORT = gql`
   }
 `
 const GQL_UPDATE_REPORT = gql`
-  mutation($report: ReportInput!, $sendEditEmail: Boolean!) {
+  mutation(
+    $report: ReportInput!
+    $sendEditEmail: Boolean!
+    $withNotes: Boolean!
+    $notes: [NoteInput]
+  ) {
     updateReport(report: $report, sendEditEmail: $sendEditEmail) {
       uuid
       state
@@ -132,6 +139,7 @@ const GQL_UPDATE_REPORT = gql`
         text
       }
     }
+    createNotes(notes: $notes) @include(if: $withNotes)
   }
 `
 const GQL_DELETE_REPORT = gql`
@@ -139,6 +147,11 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
+// const GQL_CREATE_NOTES = gql`
+//   mutation($notes: [NoteInput]) {
+//     createNotes(notes: $notes)
+//   }
+// `
 
 const BaseReportForm = props => {
   const { currentUser, edit, title, initialValues, ...myFormProps } = props
@@ -881,8 +894,6 @@ const BaseReportForm = props => {
                   const taskAssessmentDefinition = JSON.parse(
                     taskCustomFields.assessmentDefinition
                   )
-                  let newValues = {}
-
                   return (
                     <Fieldset
                       title={`Assessment for ${task.shortName} ${task.longName}`}
@@ -890,11 +901,12 @@ const BaseReportForm = props => {
                       key={`assessment-${values.uuid}-${task.uuid}`}
                     >
                       <CustomFieldsContainer
+                        fieldNamePrefix={`taskAssessments.${task.uuid}`}
                         fieldsConfig={taskAssessmentDefinition}
                         formikProps={{
                           setFieldTouched,
                           setFieldValue,
-                          newValues
+                          values
                         }}
                       />
                     </Fieldset>
@@ -1094,9 +1106,11 @@ const BaseReportForm = props => {
       "reportTags",
       "showSensitiveInfo",
       "attendees",
+      "tasks",
       "customFields", // initial JSON from the db
       "formCustomFields",
-      "tasksLevel1"
+      "tasksLevel1",
+      "taskAssessments"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1129,16 +1143,41 @@ const BaseReportForm = props => {
         "formCustomFields"
       )
     )
+    // strip tasks fields not in data model
+    report.tasks = (values.tasks || []).map(t =>
+      Object.without(t, "formCustomFields")
+    )
     report.location = utils.getReference(report.location)
     // customFields should contain the JSON of all the visible custom fields
-    values.formCustomFields.invisibleCustomFields.forEach(f => {
-      _set(values, f.split("."), undefined)
-    })
+    if (values.formCustomFields.invisibleCustomFields) {
+      values.formCustomFields.invisibleCustomFields.forEach(f => {
+        _set(values, f.split("."), undefined)
+      })
+    }
     report.customFields = JSON.stringify(values.formCustomFields)
     const edit = isEditMode(values)
     const variables = { report }
     if (edit) {
       variables.sendEditEmail = sendEmail
+      // Add an additional mutation to create notes for the taskAssessments
+      variables.notes = Object.keys(values.taskAssessments)
+        .filter(key => !_isEmpty(values.taskAssessments[key]))
+        .map(key => ({
+          type: NOTE_TYPE.PARTNER_ASSESSMENT,
+          noteRelatedObjects: [
+            {
+              relatedObjectType: "tasks",
+              relatedObjectUuid: key
+            },
+            {
+              relatedObjectType: "reports",
+              relatedObjectUuid: props.initialValues.uuid
+            }
+          ],
+          text: JSON.stringify(values.taskAssessments[key])
+        }))
+      console.log(variables.notes)
+      variables.withNotes = !!variables.notes
     }
     return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
   }

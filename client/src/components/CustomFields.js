@@ -24,6 +24,8 @@ const RENDERERS = {
   likertScale: FieldHelper.RenderLikertScale2
 }
 
+const DEFAULT_CUSTOM_FIELDS_PREFIX = "formCustomFields"
+
 const SpecialField = fieldProps => {
   const { widget, ...otherFieldProps } = fieldProps
   const SpecialFieldWidget = WIDGETS[widget]
@@ -291,7 +293,7 @@ function getInvisibleFields(
   let curInvisibleFields = []
   Object.keys(fieldsConfig).forEach(key => {
     const fieldConfig = fieldsConfig[key]
-    const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
+    const fieldName = `${fieldNamePrefix}.${key}`
     const isVisible =
       !fieldConfig.visibleWhen ||
       (fieldConfig.visibleWhen &&
@@ -313,19 +315,17 @@ function getInvisibleFields(
 }
 
 export const CustomFieldsContainer = props => {
+  const { fieldNamePrefix, formikProps } = props
   const [invisibleFields, setInvisibleFields] = useState([])
-  const { setFieldValue } = props.formikProps
+  const { setFieldValue } = formikProps
+  const invisibleFieldsFieldName = `${fieldNamePrefix}.invisibleCustomFields`
   useEffect(() => {
-    setFieldValue("formCustomFields.invisibleCustomFields", invisibleFields)
-  }, [invisibleFields, setFieldValue])
+    setFieldValue(invisibleFieldsFieldName, invisibleFields)
+  }, [invisibleFieldsFieldName, invisibleFields, setFieldValue])
 
   return (
     <>
-      <Field
-        type="text"
-        name="formCustomFields.invisibleCustomFields"
-        className="hidden"
-      />
+      <Field type="text" name={invisibleFieldsFieldName} className="hidden" />
       <CustomFields
         invisibleFields={invisibleFields}
         updateInvisibleFields={setInvisibleFields}
@@ -337,7 +337,10 @@ export const CustomFieldsContainer = props => {
 CustomFieldsContainer.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
-  fieldNamePrefix: PropTypes.string
+  fieldNamePrefix: PropTypes.string.isRequired
+}
+CustomFieldsContainer.defaultProps = {
+  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
 }
 
 const CustomField = ({
@@ -436,12 +439,11 @@ const CustomFields = ({
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
-        const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
         return (
           <CustomField
             key={key}
             fieldConfig={fieldConfig}
-            fieldName={fieldName}
+            fieldName={`${fieldNamePrefix}.${key}`}
             formikProps={formikProps}
             invisibleFields={invisibleFields}
             updateInvisibleFields={updateInvisibleFields}
@@ -454,9 +456,12 @@ const CustomFields = ({
 CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
-  fieldNamePrefix: PropTypes.string,
+  fieldNamePrefix: PropTypes.string.isRequired,
   invisibleFields: PropTypes.array,
   updateInvisibleFields: PropTypes.func
+}
+CustomFields.defaultProps = {
+  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
 }
 
 const READONLY_FIELD_COMPONENTS = {
@@ -496,11 +501,10 @@ export const ReadonlyCustomFields = ({
           }
         }
         const FieldComponent = READONLY_FIELD_COMPONENTS[type]
-        const fieldName = (fieldNamePrefix || "formCustomFields") + `.${key}`
         return (
           <FieldComponent
             key={key}
-            name={fieldName}
+            name={`${fieldNamePrefix}.${key}`}
             {...fieldProps}
             {...extraProps}
           />
@@ -512,5 +516,8 @@ export const ReadonlyCustomFields = ({
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
-  fieldNamePrefix: PropTypes.string
+  fieldNamePrefix: PropTypes.string.isRequired
+}
+ReadonlyCustomFields.defaultProps = {
+  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
 }

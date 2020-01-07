@@ -3,6 +3,7 @@ package mil.dds.anet.resources;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -32,6 +33,17 @@ public class NoteResource {
     n.setAuthorUuid(DaoUtils.getUuid(user));
     n = dao.insert(n);
     AnetAuditLogger.log("Note {} created by {}", n, user);
+    return n;
+  }
+
+  @GraphQLMutation(name = "createNotes")
+  public int createNotes(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "notes") List<Note> notes) {
+    int n = 0;
+    for (final Note note : notes) {
+      createNote(context, note);
+      n++;
+    }
     return n;
   }
 

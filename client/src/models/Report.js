@@ -263,7 +263,12 @@ export default class Report extends Model {
       formCustomFields: yup
         .object()
         .shape(Report.customFieldsSchema)
+        .nullable(),
+      // not actually in the database, used to be able to fill assessments
+      taskAssessments: yup
+        .object()
         .nullable()
+        .default({})
     })
     .concat(Model.yupSchema)
 
