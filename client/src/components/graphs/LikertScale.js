@@ -25,19 +25,19 @@ const LikertScale = ({ onChange, value, levels, size }) => {
       onChange(scale.invert(newX))
     })
     handleDrag(d3.select(cursorRef.current))
-  }, [onChange, scale, scaleYPosition, size])
+  }, [onChange, scale, scaleYPosition])
 
   useEffect(() => {
     d3.select(cursorRef.current).attr(
       "transform",
       `translate(${x} ${scaleYPosition})`
     )
-  }, [x, size, scaleYPosition])
+  }, [x, scaleYPosition])
 
   useEffect(() => {
     const axis = d3.axisBottom(scale)
     d3.select(axisRef.current).call(axis)
-  }, [scale, size])
+  }, [scale])
 
   let activeColor = null
 
