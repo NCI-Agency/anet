@@ -57,8 +57,8 @@ const SVGCanvas = props => {
       )}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width={props.size.width}
-        height={props.size.height}
+        width={props.width}
+        height={props.height}
         ref={props.svgRef}
       >
         {props.children}
@@ -68,7 +68,8 @@ const SVGCanvas = props => {
 }
 
 SVGCanvas.propTypes = {
-  size: PropTypes.object.isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
   exportTitle: PropTypes.string,
   zoomFn: PropTypes.func,
   svgRef: PropTypes.object,

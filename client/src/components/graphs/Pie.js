@@ -12,10 +12,7 @@ const Pie = props => {
     canvas.current = d3
       .select(svgContainer.current)
       .append("g")
-      .attr(
-        "transform",
-        `translate(${props.size.width / 2}, ${props.size.height / 2})`
-      )
+      .attr("transform", `translate(${props.width / 2}, ${props.height / 2})`)
     pie.current.value(function(d) {
       return d.value
     })
@@ -26,10 +23,10 @@ const Pie = props => {
       .style("text-anchor", "middle")
       .style("font-weight", "bold")
       .style("font-size", "17px")
-  }, [props.size.height, props.size.width, svgContainer])
+  }, [props.height, props.width, svgContainer])
 
   useEffect(() => {
-    const radius = Math.min(props.size.width, props.size.height) / 2 - 2
+    const radius = Math.min(props.width, props.height) / 2 - 2
     const arcs = pie.current(d3.entries(props.data))
     const arcForLabels = d3
       .arc()
@@ -70,7 +67,9 @@ const Pie = props => {
     canvas.current.select("text").text(props.label)
   }, [props])
 
-  return <SVGCanvas size={props.size} ref={svgContainer} />
+  return (
+    <SVGCanvas width={props.width} height={props.height} ref={svgContainer} />
+  )
 }
 
 Pie.propTypes = {
@@ -78,7 +77,8 @@ Pie.propTypes = {
   segmentFill: PropTypes.func.isRequired,
   segmentLabel: PropTypes.func.isRequired,
   data: PropTypes.object.isRequired,
-  size: PropTypes.object.isRequired
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired
 }
 
 export default Pie

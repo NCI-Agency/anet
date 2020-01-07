@@ -81,7 +81,7 @@ const OrganizationalChart = props => {
   const nodeRef = useRef(null)
   const tree = useRef(d3.tree())
   const [root, setRoot] = useState(null)
-  const [height, setHeight] = useState(props.size.height)
+  const [height, setHeight] = useState(props.height)
   const nodeSize = [200, 100 + 11 * personnelDepth]
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
     uuid: props.org.uuid
@@ -149,17 +149,16 @@ const OrganizationalChart = props => {
     const bounds = calculateBounds(root)
     const scale = Math.min(
       1.2,
-      1 / Math.max(bounds.size[0] / props.size.width, bounds.size[1] / height)
+      1 / Math.max(bounds.size[0] / props.width, bounds.size[1] / height)
     )
     canvas.attr(
       "transform",
-      `translate(${props.size.width / 2 - scale * bounds.center[0]},${height /
-        2 -
+      `translate(${props.width / 2 - scale * bounds.center[0]},${height / 2 -
         scale * bounds.center[1]}) scale(${scale})`
     )
 
     setHeight(scale * bounds.size[1] + 50)
-  }, [nodeSize, canvas, data, height, props.size.width, root])
+  }, [nodeSize, canvas, data, height, props.width, root])
 
   useEffect(() => {
     data && setExpanded([data.organization.uuid])
@@ -282,12 +281,10 @@ const OrganizationalChart = props => {
           : d.data.longName
       )
 
-    const headG = nodeSelect
-      .selectAll("g.head")
-      .data(
-        d => sortPositions(d.data.positions, Math.min(1, personnelDepth)) || [],
-        d => d.uuid
-      )
+    const headG = nodeSelect.selectAll("g.head").data(
+      d => sortPositions(d.data.positions, Math.min(1, personnelDepth)) || [],
+      d => d.uuid
+    )
 
     const headGenter = headG
       .enter()
@@ -341,12 +338,10 @@ const OrganizationalChart = props => {
           : position.name
       )
 
-    const positionsG = nodeSelect
-      .selectAll("g.position")
-      .data(
-        d => sortPositions(d.data.positions, personnelDepth).slice(1),
-        d => d.uuid
-      )
+    const positionsG = nodeSelect.selectAll("g.position").data(
+      d => sortPositions(d.data.positions, personnelDepth).slice(1),
+      d => d.uuid
+    )
 
     positionsG.exit().remove()
 
@@ -391,7 +386,8 @@ const OrganizationalChart = props => {
 
   return (
     <SVGCanvas
-      size={{ width: props.size.width, height: height }}
+      width={props.width}
+      height={height}
       exportTitle={`${data.shortName} organization chart`}
       ref={svgContainer}
       zoomFn={increment =>
@@ -407,7 +403,8 @@ const OrganizationalChart = props => {
 
 OrganizationalChart.propTypes = {
   org: PropTypes.object.isRequired,
-  size: PropTypes.object.isRequired
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired
 }
 
 export default OrganizationalChart

@@ -51,7 +51,8 @@ const Column = props => {
       </Panel.Heading>
       <Panel.Body>
         <Pie
-          size={{ width: 70, height: 70 }}
+          width={70}
+          height={70}
           data={counters}
           label={`${tasks.length}`}
           segmentFill={entity => {

@@ -272,7 +272,8 @@ class BaseRelatedObjectNotes extends Component {
                     {question.label}
                     <br />
                     <Pie
-                      size={{ width: 70, height: 70 }}
+                      width={70}
+                      height={70}
                       data={assessmentsSummary[question.id]}
                       label={Object.values(
                         assessmentsSummary[question.id]
