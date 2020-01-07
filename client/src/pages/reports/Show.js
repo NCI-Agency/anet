@@ -219,9 +219,7 @@ const GQL_DELETE_REPORT = gql`
 `
 const GQL_EMAIL_REPORT = gql`
   mutation($uuid: String!, $email: AnetEmailInput!) {
-    emailReport(uuid: $uuid, email: $email) {
-      uuid
-    }
+    emailReport(uuid: $uuid, email: $email)
   }
 `
 const GQL_SUBMIT_REPORT = gql`
@@ -606,20 +604,20 @@ const BaseReportShow = props => {
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
-                  <div
+                    <div
                       dangerouslySetInnerHTML={{
-                      __html: report.reportSensitiveInformation.text
-                    }}
+                        __html: report.reportSensitiveInformation.text
+                      }}
                     />
-                  {(hasAuthorizationGroups && (
+                    {(hasAuthorizationGroups && (
                       <div>
-                      <h5>Authorized groups:</h5>
-                      <AuthorizationGroupTable
+                        <h5>Authorized groups:</h5>
+                        <AuthorizationGroupTable
                           authorizationGroups={values.authorizationGroups}
                         />
-                    </div>
-                  )) || <h5>No groups are authorized!</h5>}
-                </Fieldset>
+                      </div>
+                    )) || <h5>No groups are authorized!</h5>}
+                  </Fieldset>
               )}
 
               {report.showWorkflow() && (
@@ -1267,7 +1265,4 @@ const ReportShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportShow)
+export default connect(null, mapDispatchToProps)(ReportShow)

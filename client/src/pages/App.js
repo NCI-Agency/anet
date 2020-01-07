@@ -30,6 +30,7 @@ const GQL_GET_APP_DATA = gql`
       emailAddress
       status
       avatar(size: 32)
+      code
       position {
         uuid
         name
@@ -170,7 +171,4 @@ const mapStateToProps = (state, ownProps) => ({
   pageProps: state.pageProps
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(App)
+export default connect(mapStateToProps, mapDispatchToProps)(App)

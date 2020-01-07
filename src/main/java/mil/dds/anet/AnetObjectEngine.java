@@ -2,6 +2,7 @@ package mil.dds.anet;
 
 import com.google.inject.Injector;
 import io.dropwizard.Application;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -275,7 +276,7 @@ public class AnetObjectEngine {
    */
   public Map<String, Task> buildTopLevelTaskHash(String parentTaskUuid) {
     final TaskSearchQuery query = new TaskSearchQuery();
-    query.setCustomFieldRef1Uuid(parentTaskUuid);
+    query.setCustomFieldRef1Uuid(Collections.singletonList(parentTaskUuid));
     query.setCustomFieldRef1Recursively(true);
     query.setPageSize(0);
     final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();

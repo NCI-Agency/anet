@@ -35,7 +35,7 @@ test("checking super user permissions", async t => {
   // User is super user, he/she may edit positions only for his/her own organization
   let $otherOrgPositionLink = await getFromSearchResults(
     t,
-    "EF 1",
+    "EF 1 Manager",
     "EF 1 Manager",
     "positions"
   )
@@ -250,7 +250,10 @@ async function validateUserCanEditUserForCurrentPage(t) {
   )
   await $editPersonButton.click()
 
-  let $bioTextArea = await $(".biography .public-DraftEditor-content")
+  let $bioTextArea = await $(
+    ".biography .public-DraftEditor-content",
+    shortWaitMs // wait for Draftail to save the editor contents
+  )
   await t.context.driver.wait(
     async() => {
       let originalBioText = await $bioTextArea.getText()

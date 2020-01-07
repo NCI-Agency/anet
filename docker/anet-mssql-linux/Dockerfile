@@ -11,10 +11,9 @@ RUN export DEBIAN_FRONTEND=noninteractive ACCEPT_EULA=Y && \
     curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list | tee /etc/apt/sources.list.d/mssql-server.list && \
     curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/msprod.list && \
     apt-get update && \
-    apt-get install -y mssql-server=14.0.3223.3-15 mssql-server-fts=14.0.3223.3-15 mssql-tools unixodbc-dev locales sudo && \
+    apt-get install -y mssql-server=14.0.3238.1-19 mssql-server-fts=14.0.3238.1-19 mssql-tools unixodbc-dev locales sudo && \
     rm -rf /var/lib/apt/lists/* && \
     locale-gen en_US.UTF-8
-    
 
 ADD entrypoint.sh /opt/
 ADD waitTillServiceStarted.sh /opt/

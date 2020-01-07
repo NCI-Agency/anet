@@ -11,11 +11,20 @@ const WILDCARD = "*"
 const domainNames = Settings.domainNames.map(d => d.toLowerCase())
 const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
 
+// Support null input like change-case v3 did…
+const wrappedChangeCase = {}
+Object.keys(changeCase)
+  .filter(c => c.endsWith("Case"))
+  .forEach(c => {
+    wrappedChangeCase[c] = (input, options) =>
+      !input ? "" : changeCase[c](input, options)
+  })
+
 export default {
-  ...changeCase,
+  ...wrappedChangeCase,
   pluralize,
   resourceize: function(string) {
-    return pluralize(changeCase.camel(string))
+    return pluralize(wrappedChangeCase.camelCase(string))
   },
 
   handleEmailValidation: function(value, shouldValidate) {

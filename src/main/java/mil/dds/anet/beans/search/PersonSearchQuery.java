@@ -25,11 +25,12 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
   // Find people who are pending verification
   Boolean pendingVerification;
 
+  // Find people who (don't) have the biography filled in
+  Boolean hasBiography;
+
   public PersonSearchQuery() {
     super(PersonSearchSortBy.NAME);
     this.setPageSize(100);
-    // FIXME: Explicitly set sorting by name (ascending) to reinstate pre-SOUNDEX search behaviour.
-    this.setSortBy(PersonSearchSortBy.NAME);
   }
 
   public String getOrgUuid() {
@@ -118,6 +119,14 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
 
   public void setEndOfTourDateEnd(Instant endOfTourDateEnd) {
     this.endOfTourDateEnd = endOfTourDateEnd;
+  }
+
+  public Boolean getHasBiography() {
+    return hasBiography;
+  }
+
+  public void setHasBiography(Boolean hasBiography) {
+    this.hasBiography = hasBiography;
   }
 
 }

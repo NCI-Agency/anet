@@ -141,10 +141,9 @@ public class ReportResource {
       }
     }
 
-    r.setReportText(Utils.sanitizeHtml(r.getReportText()));
+    r.setReportText(
+        Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
-    // Needed for sensitive information, e.g. when autoSaving a new report
-    r.setUser(author);
     r = dao.insert(r, author);
     AnetAuditLogger.log("Report {} created by author {} ", r, author);
     return r;
@@ -251,7 +250,8 @@ public class ReportResource {
       throw new WebApplicationException("failed to load PrimaryPrincipal", e);
     }
 
-    r.setReportText(Utils.sanitizeHtml(r.getReportText()));
+    r.setReportText(
+        Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
     // begin DB modifications
     final int numRows = dao.update(r, editor);
@@ -350,7 +350,6 @@ public class ReportResource {
 
     // Clear and re-load sensitive information; needed in case of autoSave by the client form, or
     // when sensitive info is 'empty' HTML
-    r.setUser(editor);
     try {
       r.setReportSensitiveInformation(null);
       r.loadReportSensitiveInformation(engine.getContext()).get();
@@ -974,7 +973,8 @@ public class ReportResource {
         .withMinute(0).withSecond(0).withNano(0).toInstant();
     Instant startDate =
         weekStart.atZone(DaoUtils.getDefaultZoneId()).minusWeeks(weeksAgo).toInstant();
-    final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgUuid);
+    final List<Map<String, Object>> list =
+        dao.getAdvisorReportInsights(startDate, weekStart, orgUuid);
 
     final String groupName = "stats";
     final String topLevelField;

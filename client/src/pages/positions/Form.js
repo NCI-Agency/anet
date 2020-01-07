@@ -12,7 +12,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -84,7 +84,7 @@ const BasePositionForm = props => {
     }
   ])
 
-  const CodeFieldWithLabel = DictionaryField(Field)
+  const CodeFieldWithLabel = DictionaryField(FastField)
 
   // For advisor types of positions, add permissions property.
   // The permissions property allows selecting a
@@ -187,13 +187,13 @@ const BasePositionForm = props => {
               <Fieldset title={title} action={action} />
               <Fieldset>
                 {props.edit ? (
-                  <Field
+                  <FastField
                     name="type"
                     component={FieldHelper.renderReadonlyField}
                     humanValue={Position.humanNameOfType}
                   />
                 ) : (
-                  <Field
+                  <FastField
                     name="type"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={typeButtons}
@@ -201,7 +201,7 @@ const BasePositionForm = props => {
                   />
                 )}
 
-                <Field
+                <FastField
                   name="status"
                   component={FieldHelper.renderButtonToggleGroup}
                   buttons={statusButtons}
@@ -216,7 +216,7 @@ const BasePositionForm = props => {
                       </span>
                     </HelpBlock>
                   )}
-                </Field>
+                </FastField>
 
                 <AdvancedSingleSelect
                   fieldName="organization"
@@ -240,7 +240,7 @@ const BasePositionForm = props => {
                   component={FieldHelper.renderInputField}
                 />
 
-                <Field
+                <FastField
                   name="name"
                   component={FieldHelper.renderInputField}
                   label={Settings.fields.position.name}
@@ -248,7 +248,7 @@ const BasePositionForm = props => {
                 />
 
                 {!isPrincipal && (
-                  <Field
+                  <FastField
                     name="permissions"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={permissionsButtons}

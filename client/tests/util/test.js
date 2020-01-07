@@ -289,9 +289,12 @@ test.beforeEach(t => {
       await $advancedSelectSuggestion.click()
       return $advancedSelectInput
     },
-    async writeInForm(inputSelector, text) {
+    async writeInForm(inputSelector, text, delay) {
       let $meetingGoalInput = await t.context.$(inputSelector)
       await $meetingGoalInput.sendKeys(text)
+      if (delay) {
+        await t.context.driver.sleep(delay) // wait e.g. for Draftail to save the editor contents
+      }
     },
     async assertReportShowStatusText(t, text) {
       await t.context.assertElementText(

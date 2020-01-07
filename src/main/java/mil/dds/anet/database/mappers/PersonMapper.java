@@ -40,6 +40,7 @@ public class PersonMapper implements RowMapper<Person> {
     a.setPhoneNumber(r.getString("people_phoneNumber"));
     a.setCountry(r.getString("people_country"));
     a.setGender(r.getString("people_gender"));
+    a.setCode(r.getString("people_code"));
     a.setEndOfTourDate(DaoUtils.getInstantAsLocalDateTime(r, "people_endOfTourDate"));
     a.setRank(r.getString("people_rank"));
     a.setBiography(r.getString("people_biography"));

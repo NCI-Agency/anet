@@ -48,15 +48,15 @@ function randomOrganization() {
 }
 
 /**
- * Creates an organization with a hiearchical structure for sub-organizations
+ * Creates an organization with a hierarchical structure for sub-organizations
  * @param {*} user The user that will insert the organization into the database
  */
-async function createHiearchy(user, grow) {
+async function createHierarchy(user, grow, args) {
   if (grow) {
     const count = await countOrganizations(user)
     if (!grow(count)) {
       console.debug(
-        `Skipping create organization hiearchy (${count} organizations exist)`
+        `Skipping create organization hierarchy (${count} organizations exist)`
       )
       return "(skipped)"
     }
@@ -64,15 +64,10 @@ async function createHiearchy(user, grow) {
 
   const longName = faker.company.companyName()
   const shortName = abbreviateCompanyName(longName)
-  const type = Organization.TYPE.PRINCIPAL_ORG // faker.random.objectElement(Organization.TYPE)
-  const status = Organization.STATUS.ACTIVE // faker.random.objectElement(Organization.STATUS)
+  const type = args.type || Organization.TYPE.PRINCIPAL_ORG // faker.random.objectElement(Organization.TYPE)
+  const status = args.status || Organization.STATUS.ACTIVE // faker.random.objectElement(Organization.STATUS)
   const usedServices = []
 
-  console.debug(
-    `Creating ${type.toLowerCase().green} organization ${longName.green} (${
-      shortName.green
-    })`
-  )
   return createSubOrg(undefined, [])
 
   /**
@@ -101,7 +96,7 @@ async function createHiearchy(user, grow) {
 
   /**
    * Creates sub-organization for some parent
-   * @param {*} parentOrg The parent organization or undefined if top of hiearchy
+   * @param {*} parentOrg The parent organization or undefined if top of hierarchy
    * @param {*} path Path with child-indicator to this sub-organization. Used for generating short-names
    */
   async function createSubOrg(parentOrg, path) {
@@ -123,14 +118,22 @@ async function createHiearchy(user, grow) {
     org.type = type
     org.status = status
 
+    console.debug(
+      `Creating ${org.type.toLowerCase().green} ${
+        level > 0 ? "sub-" : ""
+      }organization ${org.longName.green} (${org.shortName.green})`
+    )
+
     // store the organization in the database
     const result = await gqlCreateOrganization(user, org)
 
     // create sub organizations
-    const subOrgCount = randomSubOrgCount(level)
-    var i
-    for (i = 1; i <= subOrgCount; i++) {
-      await createSubOrg(result, path.concat(i))
+    if (args.subOrgs) {
+      const subOrgCount = randomSubOrgCount(level)
+      var i
+      for (i = 1; i <= subOrgCount; i++) {
+        await createSubOrg(result, path.concat(i))
+      }
     }
 
     return result
@@ -162,11 +165,13 @@ async function gqlCreateOrganization(user, org) {
       uuid: faker.random.uuid()
     }
   } else {
-    return (await runGQL(user, {
-      query:
-        "mutation($organization: OrganizationInput!) { createOrganization(organization: $organization) { uuid } }",
-      variables: { organization: org }
-    })).data.createOrganization
+    return (
+      await runGQL(user, {
+        query:
+          "mutation($organization: OrganizationInput!) { createOrganization(organization: $organization) { uuid } }",
+        variables: { organization: org }
+      })
+    ).data.createOrganization
   }
 }
 
@@ -222,30 +227,33 @@ const createOrganization = async function(user, parentOrg, path) {
 
 const organizationsBuildup = async function(user, number) {
   async function count() {
-    return (await runGQL(user, {
-      query: `
+    return (
+      await runGQL(user, {
+        query: `
         query {
           organizationList(query: {
             pageNum: 0,
-            pageSize: 0,
+            pageSize: 1,
             status: ${Organization.STATUS.ACTIVE}
           }) {
             totalCount
           }
         }
       `,
-      variables: {}
-    })).data.organizationList.totalCount
+        variables: {}
+      })
+    ).data.organizationList.totalCount
   }
 
   if ((await count()) < number) {
-    await createHiearchy(user)
+    await createHierarchy(user)
   }
 }
 
 async function countOrganizations(user) {
-  return (await runGQL(user, {
-    query: `
+  return (
+    await runGQL(user, {
+      query: `
       query {
         organizationList(query: {
           pageNum: 0,
@@ -255,8 +263,9 @@ async function countOrganizations(user) {
         }
       }
     `,
-    variables: {}
-  })).data.organizationList.totalCount
+      variables: {}
+    })
+  ).data.organizationList.totalCount
 }
 
-export { organizationsBuildup, createOrganization, createHiearchy }
+export { organizationsBuildup, createOrganization, createHierarchy }

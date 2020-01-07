@@ -1,8 +1,12 @@
 import Aigle from "aigle"
 import colors from "colors"
 import faker from "faker"
-import { simpleScenario } from "./Scenario"
-import { fuzzy, normalCDF, normalPPF } from "./simutils"
+import scenarioMapping from "./scenarios/scenarios"
+import { fuzzy, normalCDF, normalPPF, sleep } from "./simutils"
+
+const DEFAULT_SCENARIO_NAME = "default"
+const DEFAULT_CYCLES = 3
+const DEFAULT_RUNNINGTIME = 3
 
 const parseNumericArg = (args, argIndex, defaultValue) => {
   if (args && args[argIndex]) {
@@ -14,12 +18,105 @@ const parseNumericArg = (args, argIndex, defaultValue) => {
   return defaultValue
 }
 
+/**
+ * Starts the simulator. The following optional arguments can be used:
+ *
+ * 0: Scenario name
+ * 1: Number of cycles
+ * 2: Running time in minutes
+ *
+ * Use format: yarn run sim - <scenario_name> <cycles> <running_time>
+ */
 const simulate = async args => {
-  const cycle = parseNumericArg(args, 0, 3)
-  const runningTime = parseNumericArg(args, 1, 3)
+  // Parse input arguments and use default values where necessary
+  let scenario = null
+
+  const givenScenarioName = args ? args[0] : null
+
+  if (!givenScenarioName) {
+    // No scenario given, use default
+    const defaultScenario = scenarioMapping[DEFAULT_SCENARIO_NAME]
+    if (!defaultScenario) {
+      console.log(
+        colors.red(
+          "No scenario name given, and no default scenario found. Aborting..."
+        )
+      )
+      return
+    }
+    console.log(
+      colors.yellow("No scenario name given, using default scenario...")
+    )
+    scenario = defaultScenario
+  } else {
+    // Try reading given scenario
+    const givenScenario = scenarioMapping[givenScenarioName]
+    if (!givenScenario) {
+      console.log(
+        colors.red(
+          `Scenario with name ${givenScenarioName} not found; possible scenarios are: ${Object.keys(
+            scenarioMapping
+          )}. Aborting...`
+        )
+      )
+      return
+    }
+    console.log(
+      colors.green(`Reading from scenario with name "${givenScenarioName}"...`)
+    )
+    scenario = givenScenario
+  }
+
+  console.log(colors.green(`Scenario description: "${scenario.description}"`))
+
+  const cycle = parseNumericArg(args, 1, DEFAULT_CYCLES)
+  const runningTime = parseNumericArg(args, 2, DEFAULT_RUNNINGTIME)
+
+  // Run the buildup mechanism
+  await runBuildup(scenario)
+
+  // Run the stories mechanism
+  await runStories(scenario, cycle, runningTime)
+}
+
+// Buildup mechanism: generates a set amount of data
+async function runBuildup(scenario) {
+  if (scenario.buildup === undefined || scenario.buildup.length === 0) {
+    console.log(colors.yellow("No scenario buildup found."))
+    return
+  }
+
+  console.log(colors.green("Sim buildup starting"))
+
+  await Aigle.resolve(scenario.buildup).each(async buildup => {
+    const userTypeName = faker.random.arrayElement(buildup.userTypes)
+    const userType = scenario.userTypes.find(d => d.name === userTypeName)
+    if (userType) {
+      const user = await userType.userFunction()
+      const grow = () => 100 // Probability = 100 (always execute)
+
+      await sleep(buildup.preDelay)
+      for (var i = 0; i < buildup.number; i++) {
+        await buildup.runnable(user, grow, buildup.arguments)
+      }
+    }
+  })
+
+  Aigle.resolve(scenario.buildup).each(buildup =>
+    console.log(`Executed '${buildup.name}' ${buildup.number} times`)
+  )
+}
+
+// Stories mechanism: generates data during a set amount of time with a certain frequency
+async function runStories(scenario, cycle, runningTime) {
+  if (scenario.stories === undefined || scenario.stories.length === 0) {
+    console.log(colors.yellow("No scenario stories found."))
+    return
+  }
+
   console.log(
     colors.green(
-      "Sim starting, cycle:",
+      "Sim stories starting, cycle:",
       cycle,
       ", running time:",
       runningTime,
@@ -27,16 +124,7 @@ const simulate = async args => {
     )
   )
 
-  // simpleScenario.buildup.forEach(async buildup => {
-  //     const userTypeName = faker.random.arrayElement(buildup.userTypes)
-  //     const userType = simpleScenario.userTypes.find(d => d.name === userTypeName)
-  //     if (userType) {
-  //         const user = await userType.userFunction()
-  //         await buildup.runnable(user, buildup.number)
-  //     }
-  // })
-
-  const storyRuns = simpleScenario.stories.map(story => {
+  const storyRuns = scenario.stories.map(story => {
     const period = cycle * (1 / story.frequency) * 1000
     return {
       period: period,
@@ -66,7 +154,7 @@ const simulate = async args => {
   }
 
   while (time() < runningTime * 60 * 1000) {
-    await Aigle.resolve(simpleScenario.userTypes).each(async userType => {
+    await Aigle.resolve(scenario.userTypes).each(async userType => {
       // delay some arbitrary time
       await Aigle.delay(10)
       const run = faker.random.arrayElement(storyRuns)

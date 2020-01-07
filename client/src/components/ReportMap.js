@@ -67,6 +67,10 @@ const ReportMap = props => {
     return markerArray
   }, [data])
   if (done) {
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     return result
   }
 
@@ -95,7 +99,4 @@ ReportMap.propTypes = {
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportMap)
+export default connect(null, mapDispatchToProps)(ReportMap)

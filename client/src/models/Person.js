@@ -113,6 +113,10 @@ export default class Person extends Model {
         .nullable()
         .default("")
         .label(Settings.fields.person.phoneNumber),
+      code: yup
+        .string()
+        .nullable()
+        .default(""),
       endOfTourDate: yupDate
         .nullable()
         .when(["role", "status"], (role, status, schema) => {
