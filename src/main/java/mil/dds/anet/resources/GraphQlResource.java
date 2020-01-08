@@ -10,8 +10,13 @@ import graphql.GraphQLError;
 import graphql.schema.GraphQLSchema;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.GraphQLSchemaGenerator;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.generator.mapping.common.ScalarMapper;
+import io.leangen.graphql.metadata.strategy.DefaultInclusionStrategy;
+import io.leangen.graphql.metadata.strategy.InputFieldInclusionParams;
+import io.leangen.graphql.metadata.strategy.query.AnnotatedResolverBuilder;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.AnnotatedElement;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -136,8 +141,26 @@ public class GraphQlResource {
    * that the Resource can return, scans those to find methods annotated with GraphQLFetcher
    */
   private void buildGraph() {
-    final GraphQLSchemaGenerator schemaBuilder =
-        new GraphQLSchemaGenerator().withBasePackages("mil.dds.anet").withTypeMappers(
+    final String topPackage = "mil.dds.anet";
+    final GraphQLSchemaGenerator schemaBuilder = new GraphQLSchemaGenerator()
+        // Load only our own packages:
+        .withBasePackages(topPackage)
+        // Resolve queries by @GraphQLQuery annotations only:
+        .withNestedResolverBuilders(new AnnotatedResolverBuilder())
+        // Resolve inputs by @GraphQLInputField annotations only:
+        .withInclusionStrategy(new DefaultInclusionStrategy(topPackage) {
+          @Override
+          public boolean includeInputField(InputFieldInclusionParams params) {
+            return super.includeInputField(params)
+                && params.getElements().stream().anyMatch(this::isAnnotated);
+          }
+
+          protected boolean isAnnotated(AnnotatedElement element) {
+            return element.isAnnotationPresent(GraphQLInputField.class);
+          }
+        })
+        // Load our DateTimeMapper:
+        .withTypeMappers(
             (config, defaults) -> defaults.insertBefore(ScalarMapper.class, new DateTimeMapper()));
     for (final Object resource : resources) {
       schemaBuilder.withOperationsFromSingleton(resource);
