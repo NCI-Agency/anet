@@ -54,7 +54,8 @@ const LikertScale = ({ onChange, value, levels, width, height }) => {
       width={width}
       xmlns="http://www.w3.org/2000/svg"
       ref={containerRef}
-      onClick={e => onChange(scale.invert(e.clientX - containerBox.x))}
+      onClick={e =>
+        e.clientX && onChange(scale.invert(e.clientX - containerBox.x))}
     >
       {levels.map((level, index) => {
         const startX = scale(index === 0 ? 0 : levels[index - 1].endValue)

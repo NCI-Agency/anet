@@ -895,21 +895,16 @@ const BaseReportForm = props => {
                     taskCustomFields.assessmentDefinition
                   )
                   return (
-                    <Fieldset
-                      title={`Assessment for ${task.shortName} ${task.longName}`}
-                      id="custom-fields"
+                    <CustomFieldsContainer
                       key={`assessment-${values.uuid}-${task.uuid}`}
-                    >
-                      <CustomFieldsContainer
-                        fieldNamePrefix={`taskAssessments.${task.uuid}`}
-                        fieldsConfig={taskAssessmentDefinition}
-                        formikProps={{
-                          setFieldTouched,
-                          setFieldValue,
-                          values
-                        }}
-                      />
-                    </Fieldset>
+                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      fieldsConfig={taskAssessmentDefinition}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values
+                      }}
+                    />
                   )
                 })}
               </Fieldset>
