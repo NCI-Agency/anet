@@ -4,12 +4,12 @@ import PropTypes from "prop-types"
 import React from "react"
 
 const _advisorStats = (columnGroups, statistics) => {
-  let stats = []
+  const stats = []
   columnGroups.forEach(group => {
     let rowCell = statistics.filter(s => s.week === group)
     rowCell = rowCell ? rowCell[0] : null
-    let keySubmitted = _uniqueId("submitted_")
-    let keyAttended = _uniqueId("attended_")
+    const keySubmitted = _uniqueId("submitted_")
+    const keyAttended = _uniqueId("attended_")
     if (rowCell) {
       stats.push(<td key={keySubmitted}>{rowCell.nrReportsSubmitted}</td>)
       stats.push(<td key={keyAttended}>{rowCell.nrEngagementsAttended}</td>)
@@ -22,13 +22,15 @@ const _advisorStats = (columnGroups, statistics) => {
 }
 
 const AdvisorReportsRow = props => {
-  let statistics = _advisorStats(props.columnGroups, props.row.stats)
-  let checkbox = props.onSelectRow ? (
+  const statistics = _advisorStats(props.columnGroups, props.row.stats)
+  const checkbox = props.onSelectRow ? (
     <td>
       <Checkbox checked={props.checked} onChange={props.onSelectRow} />
     </td>
   ) : null
-  let description = props.handleOrganizationClick ? props.link : props.row.name
+  const description = props.handleOrganizationClick
+    ? props.link
+    : props.row.name
   return (
     <tr>
       {checkbox}

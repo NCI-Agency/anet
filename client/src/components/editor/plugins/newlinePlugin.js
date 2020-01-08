@@ -27,7 +27,7 @@ const createNewLines = (newLines, nextState) => {
 
 const newlinePlugin = () => ({
   handlePastedText(text, html, editorState, { setEditorState }) {
-    let nextState = editorState
+    const nextState = editorState
     if (!HTML_REGEX.test(html)) {
       const newLines = text.match(NEW_LINE_REGEX)
       setEditorState(newLines ? createNewLines(newLines, nextState) : nextState)

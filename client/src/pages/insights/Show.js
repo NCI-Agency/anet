@@ -178,7 +178,7 @@ const BaseInsightsShow = props => {
   )
 
   function getCutoffDate() {
-    let maxReportAge =
+    const maxReportAge =
       1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment()
       .subtract(maxReportAge, "days")

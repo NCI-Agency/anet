@@ -67,7 +67,7 @@ class BaseTopBar extends Component {
   }
 
   updateBannerVisibility() {
-    let visibilitySetting = parseInt(
+    const visibilitySetting = parseInt(
       this.props.appSettings[GENERAL_BANNER_VISIBILITY],
       10
     )

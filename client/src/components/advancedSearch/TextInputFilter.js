@@ -59,7 +59,7 @@ export default class TextInputFilter extends Component {
 
   @autobind
   onChange(event) {
-    let { value } = this.state
+    const { value } = this.state
     value.value = event.target.value
     this.setState({ value }, this.updateFilter)
   }
@@ -72,7 +72,7 @@ export default class TextInputFilter extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

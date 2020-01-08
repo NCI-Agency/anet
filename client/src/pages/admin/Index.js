@@ -48,7 +48,7 @@ const BaseAdminIndex = props => {
     return result
   }
 
-  let settings = {}
+  const settings = {}
   data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
 
   return (
