@@ -53,7 +53,6 @@ const BaseLocationForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      isInitialValid
       {...myFormProps}
     >
       {({

@@ -127,7 +127,6 @@ const BaseOrganizationForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Organization.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >

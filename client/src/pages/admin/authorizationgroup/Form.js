@@ -51,7 +51,6 @@ const AuthorizationGroupForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={AuthorizationGroup.yupSchema}
-      isInitialValid
       {...myFormProps}
     >
       {({

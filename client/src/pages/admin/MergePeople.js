@@ -101,7 +101,6 @@ const MergePeople = props => {
         enableReinitialize
         onSubmit={onSubmit}
         validationSchema={yupSchema}
-        isInitialValid={() => yupSchema.isValidSync({})}
         initialValues={{ loser: {}, winner: {}, copyPosition: false }}
       >
         {({

@@ -49,7 +49,6 @@ export default class RelatedObjectNoteModal extends Component {
           enableReinitialize
           onSubmit={this.onSubmit}
           validationSchema={this.yupSchema}
-          isInitialValid
           initialValues={note}
         >
           {({
