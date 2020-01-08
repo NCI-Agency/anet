@@ -294,13 +294,13 @@ dictionary:
           levels:
             - color: lightGray
               endValue: 3
-              label: beginner
+              label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
             - color: lightGray
               endValue: 7
               label: intermediate
             - color: lightGray
               endValue: 10
-              label: advanced
+              label: advanced advanced advanced advanced
         systemProcess:
           type: enum
           label: System / process

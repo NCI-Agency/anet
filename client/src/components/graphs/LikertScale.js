@@ -1,17 +1,21 @@
 import React, { useEffect, useRef } from "react"
 import * as d3 from "d3"
 import PropTypes from "prop-types"
+import Text from 'react-svg-text'
 
-const LikertScale = ({ onChange, value, levels, size }) => {
+const LikertScale = ({ onChange, value, levels, width, height }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
+  const containerRef = useRef(null)
+  const containerBox = containerRef.current?.getBoundingClientRect() || { width: 0, height: 0 }
 
   const MARGIN = 20
-  const scaleYPosition = size.height - 30
+  const scaleYPosition = containerBox.height - 30
+
   const scale = d3
     .scaleLinear()
     .domain([0, 10])
-    .range([MARGIN, size.width - 2 * MARGIN])
+    .range([MARGIN, containerBox.width - 2 * MARGIN])
   const x = scale(Number(value !== undefined ? value : 50))
 
   useEffect(() => {
@@ -43,10 +47,11 @@ const LikertScale = ({ onChange, value, levels, size }) => {
 
   return (
     <svg
-      height={size.height}
-      width={size.width}
-      viewBox={`0 0 ${size.width} ${size.height}`}
+      height={height}
+      width={width}
       xmlns="http://www.w3.org/2000/svg"
+      ref={containerRef}
+      onClick={(e) => onChange(scale.invert(e.clientX - containerBox.x))}
     >
       {levels.map((level, index) => {
         const startX = scale(index === 0 ? 0 : levels[index - 1].endValue)
@@ -61,18 +66,20 @@ const LikertScale = ({ onChange, value, levels, size }) => {
               style={{ fill: fillColor, stroke: "gray", strokeWidth: 1 }}
               y={0}
               x={startX}
-              height={size.height - 11}
+              height={containerBox.height - 11}
               width={endX - startX}
             />
-            <text
+            <Text
               fill={active ? "black" : "gray"}
               fontWeight={active ? "bold" : "normal"}
-              x={startX + 5}
-              y={MARGIN}
+              x={startX + 2}
+              y={2}
               style={{ pointerEvents: "none" }}
+              width={endX - startX - 4}
+              verticalAnchor="start"
             >
               {level.label}
-            </text>
+            </Text>
           </React.Fragment>
         )
       })}
@@ -89,7 +96,7 @@ const LikertScale = ({ onChange, value, levels, size }) => {
           }}
         />
         <text
-          fill={activeColor.l < 0.5 ? "white" : "black"}
+          fill={activeColor?.l < 0.5 ? "white" : "black"}
           fontWeight="bold"
           x={-11}
           y={25}
@@ -113,10 +120,8 @@ LikertScale.propTypes = {
       label: PropTypes.string
     })
   ).isRequired,
-  size: PropTypes.shape({
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired
-  }).isRequired
+  width: PropTypes.string.isRequired,
+  height: PropTypes.string.isRequired
 }
 
 LikertScale.defaultProps = {
@@ -135,10 +140,8 @@ LikertScale.defaultProps = {
       endValue: 10
     }
   ],
-  size: {
-    height: 65,
-    width: 500
-  }
+  height: "65",
+  width: "100%"
 }
 
 export default LikertScale
