@@ -322,7 +322,7 @@ const BaseTaskForm = props => {
                 )}
               </Fieldset>
 
-              {Settings.fields.person.customFields && (
+              {Settings.fields.task.customFields && (
                 <Fieldset
                   title={`${Settings.fields.task.shortLabel} information`}
                   id="custom-fields"
