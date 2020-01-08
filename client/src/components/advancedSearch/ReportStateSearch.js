@@ -123,7 +123,7 @@ export default class ReportStateSearch extends Component {
 
   @autobind
   changeState(event) {
-    let value = this.state.value
+    const value = this.state.value
     const selectedOptions =
       event.target.selectedOptions ||
       Array.from(event.target.options).filter(o => o.selected)
@@ -133,15 +133,15 @@ export default class ReportStateSearch extends Component {
 
   @autobind
   changeCancelledReason(event) {
-    let value = this.state.value
+    const value = this.state.value
     value.cancelledReason = event.target.value
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   toQuery() {
-    let value = this.state.value
-    let query = { state: value.state }
+    const value = this.state.value
+    const query = { state: value.state }
     const onlyCancelled =
       value.state.length === 1 && value.state[0] === Report.STATE.CANCELLED
     if (onlyCancelled && value.cancelledReason) {
@@ -153,7 +153,7 @@ export default class ReportStateSearch extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

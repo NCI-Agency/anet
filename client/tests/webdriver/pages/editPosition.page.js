@@ -4,26 +4,33 @@ class EditPosition extends Page {
   get form() {
     return browser.$("form")
   }
+
   get typeAdvisorButton() {
     return browser.$("#typeAdvisorButton")
   }
+
   get typePrincipalButton() {
     return browser.$("#typePrincipalButton")
   }
+
   get organizationInput() {
     return browser.$("#organization")
   }
+
   get orgAdvancedSelectFirstItem() {
     return browser.$(
       "#organization-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
+
   get alertSuccess() {
     return browser.$(".alert-success")
   }
+
   get cancelButton() {
     return browser.$("div.submit-buttons").$("button=Cancel")
   }
+
   get submitButton() {
     return browser.$("#formBottomSubmit")
   }

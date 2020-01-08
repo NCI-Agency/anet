@@ -1,14 +1,14 @@
-let assert = require("assert")
-let _includes = require("lodash/includes")
-let moment = require("moment")
-let test = require("../util/test")
+const assert = require("assert")
+const _includes = require("lodash/includes")
+const moment = require("moment")
+const test = require("../util/test")
 
 var testReportURL = null
 
 test("Draft and submit a report", async t => {
   t.plan(16)
 
-  let {
+  const {
     pageHelpers,
     $,
     $$,
@@ -24,13 +24,13 @@ test("Draft and submit a report", async t => {
   await pageHelpers.goHomeAndThenToReportsPage()
   await pageHelpers.writeInForm("#intent", "meeting goal")
 
-  let $engagementDate = await $("#engagementDate")
+  const $engagementDate = await $("#engagementDate")
   await $engagementDate.click()
   await t.context.driver.sleep(shortWaitMs) // wait for the datepicker to pop up
 
   await pageHelpers.clickTodayButton()
 
-  let $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+  const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
     "general hospita"
   )
@@ -41,15 +41,15 @@ test("Draft and submit a report", async t => {
     "Clicking a location advanced single select widget suggestion populates the input field."
   )
 
-  let $positiveAtmosphereButton = await $("#positiveAtmos")
+  const $positiveAtmosphereButton = await $("#positiveAtmos")
   await $positiveAtmosphereButton.click()
 
-  let $attendeesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+  const $attendeesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#attendees",
     "topferness, christopf"
   )
 
-  let $attendeesShortcutTitle = await $("#attendees-shortcut-title")
+  const $attendeesShortcutTitle = await $("#attendees-shortcut-title")
   await $attendeesShortcutTitle.click()
 
   t.is(
@@ -58,7 +58,7 @@ test("Draft and submit a report", async t => {
     "Closing the attendees advanced multi select overlay empties the input field."
   )
 
-  let [
+  const [
     $principalPrimaryInput,
     $principalName,
     $principalPosition,
@@ -78,12 +78,12 @@ test("Draft and submit a report", async t => {
   )
   await assertElementText(t, $principalOrg, "MoD")
 
-  let $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+  const $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasksLevel1",
     "budget and planning"
   )
 
-  let $tasksTitle = await t.context.driver.findElement(
+  const $tasksTitle = await t.context.driver.findElement(
     By.xpath('//h2/span[text()="Tasks and Milestones"]')
   )
   await $tasksTitle.click()
@@ -94,15 +94,15 @@ test("Draft and submit a report", async t => {
     "Closing the objectives advanced multi select overlay empties the input field."
   )
 
-  let $newObjectivesRow = await $("#tasks-objectives table tbody tr td")
+  const $newObjectivesRow = await $("#tasks-objectives table tbody tr td")
   await assertElementText(t, $newObjectivesRow, "EF 1 - Budget and Planning")
 
-  let $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+  const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
     "1.1"
   )
 
-  let $tasksShortcutTitle = await $("#tasks-shortcut-title")
+  const $tasksShortcutTitle = await $("#tasks-shortcut-title")
   await $tasksShortcutTitle.click()
 
   t.is(
@@ -111,7 +111,7 @@ test("Draft and submit a report", async t => {
     "Closing the tasks advanced multi select overlay empties the input field."
   )
 
-  let $newTaskRow = await $("#tasks-tasks table tbody tr td")
+  const $newTaskRow = await $("#tasks-tasks table tbody tr td")
   await assertElementText(t, $newTaskRow, "1.1 - Budgeting in the MoD")
 
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
@@ -122,15 +122,15 @@ test("Draft and submit a report", async t => {
     shortWaitMs // wait for Draftail to save the editor contents
   )
 
-  let editorCssPath =
+  const editorCssPath =
     ".reportSensitiveInformationField .public-DraftEditor-content"
-  let $reportSensitiveInformationField = await $(editorCssPath)
+  const $reportSensitiveInformationField = await $(editorCssPath)
   t.false(
     await $reportSensitiveInformationField.isDisplayed(),
     'Report sensitive info should not be present before "add sensitive information" button is clicked"'
   )
 
-  let $addSensitiveInfoButton = await $("#toggleSensitiveInfo")
+  const $addSensitiveInfoButton = await $("#toggleSensitiveInfo")
   await $addSensitiveInfoButton.click()
 
   await t.context.driver.wait(
@@ -141,7 +141,7 @@ test("Draft and submit a report", async t => {
     "sensitive info",
     shortWaitMs // wait for Draftail to save the editor contents
   )
-  let $addAuthGroupShortcutButtons = await $$(
+  const $addAuthGroupShortcutButtons = await $$(
     "#meeting-details .shortcut-list button"
   )
   // Add all recent authorization groups
@@ -149,7 +149,7 @@ test("Draft and submit a report", async t => {
     $addAuthGroupShortcutButtons.map($button => $button.click())
   )
 
-  let $formButtonSubmit = await $("#formBottomSubmit")
+  const $formButtonSubmit = await $("#formBottomSubmit")
   await t.context.driver.wait(until.elementIsEnabled($formButtonSubmit))
   await $formButtonSubmit.click()
   await pageHelpers.assertReportShowStatusText(
@@ -157,7 +157,7 @@ test("Draft and submit a report", async t => {
     "This is a DRAFT report and hasn't been submitted."
   )
 
-  let currentPathname = await t.context.getCurrentPathname()
+  const currentPathname = await t.context.getCurrentPathname()
   t.regex(
     currentPathname,
     /reports\/[0-9a-f-]+/,
@@ -165,7 +165,7 @@ test("Draft and submit a report", async t => {
   )
   testReportURL = currentPathname
 
-  let $submitReportButton = await $("#submitReportButton")
+  const $submitReportButton = await $("#submitReportButton")
   await $submitReportButton.click()
   await t.context.driver.wait(until.stalenessOf($submitReportButton))
   await assertElementNotPresent(
@@ -179,7 +179,7 @@ test("Draft and submit a report", async t => {
     "This report is PENDING approvals."
   )
 
-  let $allertSuccess = await t.context.driver.findElement(
+  const $allertSuccess = await t.context.driver.findElement(
     By.css(".alert-success")
   )
   await t.context.driver.wait(until.elementIsVisible($allertSuccess))
@@ -198,7 +198,7 @@ test("Draft and submit a report", async t => {
 test("Publish report chain", async t => {
   t.plan(6)
 
-  let {
+  const {
     pageHelpers,
     $,
     $$,
@@ -214,8 +214,8 @@ test("Publish report chain", async t => {
 
   // Try to have Erin approve her own report
   await t.context.get("/", "erin")
-  let $homeTileErin = await $$(".home-tile")
-  let [
+  const $homeTileErin = await $$(".home-tile")
+  const [
     /* eslint-disable no-unused-vars */ $draftReportsErin /* eslint-enable no-unused-vars */,
     $reportsPendingErin,
     /* eslint-disable no-unused-vars */
@@ -226,7 +226,7 @@ test("Publish report chain", async t => {
   await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
   await $reportsPendingErin.click()
   await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
-  let $reportCollection = await $(".report-collection em")
+  const $reportCollection = await $(".report-collection em")
   await assertElementText(
     t,
     $reportCollection,
@@ -236,8 +236,8 @@ test("Publish report chain", async t => {
 
   // First Jacob needs to approve the report, then rebecca can approve the report
   await t.context.get("/", "jacob")
-  let $homeTileJacob = await $$(".home-tile")
-  let [
+  const $homeTileJacob = await $$(".home-tile")
+  const [
     /* eslint-disable no-unused-vars */ $draftReportsJacob /* eslint-enable no-unused-vars */,
     $reportsPendingJacob,
     /* eslint-disable no-unused-vars */
@@ -249,7 +249,7 @@ test("Publish report chain", async t => {
   await $reportsPendingJacob.click()
   await t.context.driver.wait(until.stalenessOf($reportsPendingJacob))
 
-  let $reportsPendingJacobSummaryTab = await $(
+  const $reportsPendingJacobSummaryTab = await $(
     ".report-collection button[value='summary']"
   )
   await t.context.driver.wait(
@@ -257,7 +257,7 @@ test("Publish report chain", async t => {
   )
   await $reportsPendingJacobSummaryTab.click()
 
-  let $readReportButtonJacob = await $(
+  const $readReportButtonJacob = await $(
     ".read-report-button[href='" + testReportURL + "']"
   )
   await t.context.driver.wait(until.elementIsEnabled($readReportButtonJacob))
@@ -266,14 +266,14 @@ test("Publish report chain", async t => {
     t,
     "This report is PENDING approvals."
   )
-  let $jacobApproveButton = await $(".approve-button")
+  const $jacobApproveButton = await $(".approve-button")
   await t.context.driver.wait(until.elementIsEnabled($jacobApproveButton))
   await $jacobApproveButton.click()
   await t.context.driver.wait(until.stalenessOf($jacobApproveButton))
 
   await t.context.get("/", "rebecca")
-  let $homeTile = await $$(".home-tile")
-  let [
+  const $homeTile = await $$(".home-tile")
+  const [
     /* eslint-disable no-unused-vars */ $draftReports /* eslint-enable no-unused-vars */,
     $reportsPending,
     /* eslint-disable no-unused-vars */
@@ -285,7 +285,7 @@ test("Publish report chain", async t => {
   await $reportsPending.click()
   await t.context.driver.wait(until.stalenessOf($reportsPending))
 
-  let $reportsPendingRebeccaSummaryTab = await $(
+  const $reportsPendingRebeccaSummaryTab = await $(
     ".report-collection button[value='summary']"
   )
   await t.context.driver.wait(
@@ -293,7 +293,7 @@ test("Publish report chain", async t => {
   )
   await $reportsPendingRebeccaSummaryTab.click()
 
-  let $readReportButtonRebecca = await $(
+  const $readReportButtonRebecca = await $(
     ".read-report-button[href='" + testReportURL + "']"
   )
   await t.context.driver.wait(until.elementIsEnabled($readReportButtonRebecca))
@@ -303,14 +303,14 @@ test("Publish report chain", async t => {
     t,
     "This report is PENDING approvals."
   )
-  let $rebeccaApproveButton = await $(".approve-button")
+  const $rebeccaApproveButton = await $(".approve-button")
   await $rebeccaApproveButton.click()
   await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
 
   // Admin user needs to publish the report
   await t.context.get("/", "arthur")
-  let $homeTileArthur = await $$(".home-tile")
-  let [
+  const $homeTileArthur = await $$(".home-tile")
+  const [
     /* eslint-disable no-unused-vars */
     $draftReportsArthur,
     $reportsPendingAll,
@@ -324,19 +324,19 @@ test("Publish report chain", async t => {
   await $approvedReports.click()
   await t.context.driver.wait(until.stalenessOf($approvedReports))
 
-  let $reportsApprovedSummaryTab = await $(
+  const $reportsApprovedSummaryTab = await $(
     ".report-collection button[value='summary']"
   )
   await $reportsApprovedSummaryTab.click()
 
-  let $readApprovedReportButton = await $(
+  const $readApprovedReportButton = await $(
     ".read-report-button[href='" + testReportURL + "']"
   )
   await t.context.driver.wait(until.elementIsEnabled($readApprovedReportButton))
   await $readApprovedReportButton.click()
 
   await pageHelpers.assertReportShowStatusText(t, "This report is APPROVED.")
-  let $arthurPublishButton = await $(".publish-button")
+  const $arthurPublishButton = await $(".publish-button")
   await $arthurPublishButton.click()
   await t.context.driver.wait(until.stalenessOf($arthurPublishButton))
 
@@ -350,12 +350,12 @@ test("Publish report chain", async t => {
   //     'When a report is approved, the user sees a message indicating that it has been added to the daily rollup'
   // )
 
-  let $rollupLink = await t.context.driver.findElement(
+  const $rollupLink = await t.context.driver.findElement(
     By.linkText("Daily rollup")
   )
   await t.context.driver.wait(until.elementIsEnabled($rollupLink))
   await $rollupLink.click()
-  let currentPathname = await t.context.getCurrentPathname()
+  const currentPathname = await t.context.getCurrentPathname()
   t.is(
     currentPathname,
     "/rollup",
@@ -363,10 +363,10 @@ test("Publish report chain", async t => {
   )
   await $("#daily-rollup")
 
-  let $$rollupDateRange = await $$(".rollupDateRange .bp3-input")
+  const $$rollupDateRange = await $$(".rollupDateRange .bp3-input")
   await $$rollupDateRange[0].click()
   await t.context.driver.sleep(shortWaitMs) // wait for datepicker to show
-  let $todayButton = await t.context.driver.findElement(
+  const $todayButton = await t.context.driver.findElement(
     By.xpath('//a/div[text()="Today"]')
   )
   await $todayButton.click()
@@ -375,12 +375,12 @@ test("Publish report chain", async t => {
   await $$rollupDateRange[1].sendKeys(Key.TAB)
   await t.context.driver.sleep(longWaitMs) // wait for report collection to load
 
-  let $rollupTableTab = await $(".report-collection button[value='table']")
+  const $rollupTableTab = await $(".report-collection button[value='table']")
   await $rollupTableTab.click()
 
-  let $reportCollectionTable = await $(".report-collection table")
+  const $reportCollectionTable = await $(".report-collection table")
   await t.context.driver.wait(until.elementIsVisible($reportCollectionTable))
-  let $approvedIntent = await $reportCollectionTable.findElement(
+  const $approvedIntent = await $reportCollectionTable.findElement(
     By.linkText("meeting goal")
   )
   await assertElementText(
@@ -398,7 +398,7 @@ test("Publish report chain", async t => {
 test("Verify that validation and other reports/new interactions work", async t => {
   t.plan(29)
 
-  let {
+  const {
     assertElementText,
     $,
     $$,
@@ -417,7 +417,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Create a new Report"
   )
 
-  let $searchBarInput = await $("#searchBarInput")
+  const $searchBarInput = await $("#searchBarInput")
 
   async function verifyFieldIsRequired(
     $fieldGroup,
@@ -442,8 +442,8 @@ test("Verify that validation and other reports/new interactions work", async t =
     )
   }
 
-  let $meetingGoalInput = await $("#intent")
-  let $meetingGoalDiv = await t.context.driver.findElement(
+  const $meetingGoalInput = await $("#intent")
+  const $meetingGoalDiv = await t.context.driver.findElement(
     By.xpath(
       '//textarea[@id="intent"]/ancestor::div[contains(concat(" ", normalize-space(@class), " "), " form-group ")]'
     )
@@ -467,7 +467,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Meeting goal"
   )
 
-  let $engagementDate = await $("#engagementDate")
+  const $engagementDate = await $("#engagementDate")
   t.is(
     await $engagementDate.getAttribute("value"),
     "",
@@ -479,7 +479,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   await pageHelpers.clickTodayButton()
 
   // set time as well
-  let $hourInput = await $("input.bp3-timepicker-input.bp3-timepicker-hour")
+  const $hourInput = await $("input.bp3-timepicker-input.bp3-timepicker-hour")
   // clear field, enter data, fire blur event
   await $hourInput.sendKeys(
     t.context.Key.END +
@@ -487,7 +487,9 @@ test("Verify that validation and other reports/new interactions work", async t =
       "23" +
       t.context.Key.TAB
   )
-  let $minuteInput = await $("input.bp3-timepicker-input.bp3-timepicker-minute")
+  const $minuteInput = await $(
+    "input.bp3-timepicker-input.bp3-timepicker-minute"
+  )
   // clear field, enter data, fire blur event
   await $minuteInput.sendKeys(
     t.context.Key.END +
@@ -497,9 +499,9 @@ test("Verify that validation and other reports/new interactions work", async t =
   )
 
   // check date and time
-  let dateTimeFormat = "DD-MM-YYYY HH:mm"
-  let dateTimeValue = await $engagementDate.getAttribute("value")
-  let expectedDateTime = moment()
+  const dateTimeFormat = "DD-MM-YYYY HH:mm"
+  const dateTimeValue = await $engagementDate.getAttribute("value")
+  const expectedDateTime = moment()
     .hour(23)
     .minute(45)
     .format(dateTimeFormat)
@@ -509,14 +511,14 @@ test("Verify that validation and other reports/new interactions work", async t =
     'Clicking the "today" button puts the current date in the engagement field'
   )
 
-  let $locationInput = await $("#location")
+  const $locationInput = await $("#location")
   t.is(
     await $locationInput.getAttribute("value"),
     "",
     "Location field starts blank"
   )
 
-  let $locationShortcutButton = await $("#location-shortcut-list button")
+  const $locationShortcutButton = await $("#location-shortcut-list button")
   await $locationShortcutButton.click()
   t.is(
     await $locationInput.getAttribute("value"),
@@ -530,7 +532,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Cancelled reason should not be present initially",
     shortWaitMs
   )
-  let $atmosphereFormGroup = await $(".atmosphere-form-group")
+  const $atmosphereFormGroup = await $(".atmosphere-form-group")
   t.true(
     await $atmosphereFormGroup.isDisplayed(),
     "Atmospherics form group should be shown by default"
@@ -543,30 +545,30 @@ test("Verify that validation and other reports/new interactions work", async t =
     shortWaitMs
   )
 
-  let $positiveAtmosphereButton = await $("#positiveAtmos")
+  const $positiveAtmosphereButton = await $("#positiveAtmos")
   await $positiveAtmosphereButton.click()
 
-  let $atmosphereDetails = await $("#atmosphereDetails")
+  const $atmosphereDetails = await $("#atmosphereDetails")
   t.is(
     await $atmosphereDetails.getAttribute("placeholder"),
     "Why was this engagement positive? (optional)"
   )
 
-  let $neutralAtmosphereButton = await $("#neutralAtmos")
+  const $neutralAtmosphereButton = await $("#neutralAtmos")
   await $neutralAtmosphereButton.click()
   t.is(
     (await $atmosphereDetails.getAttribute("placeholder")).trim(),
     "Why was this engagement neutral?"
   )
 
-  let $negativeAtmosphereButton = await $("#negativeAtmos")
+  const $negativeAtmosphereButton = await $("#negativeAtmos")
   await $negativeAtmosphereButton.click()
   t.is(
     (await $atmosphereDetails.getAttribute("placeholder")).trim(),
     "Why was this engagement negative?"
   )
 
-  let $atmosphereDetailsGroup = await t.context.driver.findElement(
+  const $atmosphereDetailsGroup = await t.context.driver.findElement(
     By.xpath(
       '//input[@id="atmosphereDetails"]/ancestor::div[contains(concat(" ", normalize-space(@class), " "), " form-group ")]'
     )
@@ -581,7 +583,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Neutral atmospherics details"
   )
 
-  let $attendanceFieldsetTitle = await $("#attendance-fieldset .title-text")
+  const $attendanceFieldsetTitle = await $("#attendance-fieldset .title-text")
   await assertElementText(
     t,
     $attendanceFieldsetTitle,
@@ -589,7 +591,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Meeting attendance fieldset should have correct title for an uncancelled enagement"
   )
 
-  let $cancelledCheckbox = await $(".cancelled-checkbox")
+  const $cancelledCheckbox = await $(".cancelled-checkbox")
   await $cancelledCheckbox.click()
 
   await assertElementNotPresent(
@@ -598,7 +600,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "After cancelling the enagement, the atmospherics should be hidden",
     shortWaitMs
   )
-  let $cancelledReason = await $(".cancelled-reason-form-group")
+  const $cancelledReason = await $(".cancelled-reason-form-group")
   t.true(
     await $cancelledReason.isDisplayed(),
     "After cancelling the engagement, the cancellation reason should appear"
@@ -624,7 +626,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Principal attendees table starts with 1 body rows"
   )
 
-  let [
+  const [
     $advisorPrimaryCheckbox,
     $advisorName,
     $advisorPosition,
@@ -643,7 +645,9 @@ test("Verify that validation and other reports/new interactions work", async t =
   await assertElementText(t, $advisorPosition, "EF 2.2 Advisor D")
   await assertElementText(t, $advisorOrg, "EF 2.2")
 
-  let $addAttendeeShortcutButtons = await $$("#attendees-shortcut-list button")
+  const $addAttendeeShortcutButtons = await $$(
+    "#attendees-shortcut-list button"
+  )
   // Add all recent attendees
   await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
 
@@ -655,7 +659,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Clicking the shortcut buttons adds rows to the table"
   )
 
-  let $submitButton = await $("#formBottomSubmit")
+  const $submitButton = await $("#formBottomSubmit")
   await $submitButton.click()
   await pageHelpers.assertReportShowStatusText(
     t,

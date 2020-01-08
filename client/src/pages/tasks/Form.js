@@ -119,7 +119,6 @@ const BaseTaskForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Task.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >
@@ -346,7 +345,7 @@ const BaseTaskForm = props => {
   function customEnumButtons(list) {
     const buttons = []
     for (const key in list) {
-      if (list.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(list, key)) {
         buttons.push({
           id: key,
           value: key,

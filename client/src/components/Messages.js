@@ -8,6 +8,7 @@ export default class Messages extends Component {
     error: PropTypes.object,
     success: PropTypes.string
   }
+
   @autobind
   render() {
     return (

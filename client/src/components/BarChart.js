@@ -46,40 +46,40 @@ const BarChart = props => {
       left: 40,
       bottom: 0 // left and bottom MARGINs are dynamic, these are extra margins
     }
-    let label = xLabel || xProp
+    const label = xLabel || xProp
     var xLabels = {} // dict containing x-value and corresponding tick label
 
-    let xScale = d3.scaleBand().domain(
+    const xScale = d3.scaleBand().domain(
       data.map(function(d) {
         xLabels[getPropValue(d, xProp)] = getPropValue(d, label)
         return getPropValue(d, xProp)
       })
     )
-    let yMax = d3.max(data, function(d) {
+    const yMax = d3.max(data, function(d) {
       return getPropValue(d, yProp)
     })
-    let yScale = d3.scaleLinear().domain([0, yMax])
+    const yScale = d3.scaleLinear().domain([0, yMax])
 
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
-    let tmpSVG = d3
+    const tmpSVG = d3
       .select("#tmp_svg")
       .data([1])
       .enter()
       .append("svg")
-    let xText = function(d) {
+    const xText = function(d) {
       return xLabels[getPropValue(d, xProp)]
     }
-    let yText = function(d) {
+    const yText = function(d) {
       return getPropValue(d, yProp)
     }
-    let xLabelWidth = function() {
+    const xLabelWidth = function() {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
       }
     }
-    let yLabelWidth = function(d) {
+    const yLabelWidth = function(d) {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -107,26 +107,26 @@ const BarChart = props => {
     // The left margin depends on the width of the y-axis labels.
     // We add extra margin to make sure that if the label is different because
     // of the automatic formatting the labels are still displayed on the chart.
-    let marginLeft = maxYLabelWidth + MARGIN.left
+    const marginLeft = maxYLabelWidth + MARGIN.left
     // The bottom margin depends on the width of the x-axis labels.
-    let marginBottom = maxXLabelWidth + MARGIN.bottom
+    const marginBottom = maxXLabelWidth + MARGIN.bottom
 
     let chart = d3.select(node.current)
-    let chartBox = node.current.getBoundingClientRect()
-    let chartWidth = isNumeric(width) ? width : chartBox.width
-    let chartHeight = isNumeric(height) ? height : 0.7 * chartWidth
-    let xWidth = chartWidth - marginLeft - MARGIN.right
-    let yHeight = chartHeight - MARGIN.top - marginBottom
+    const chartBox = node.current.getBoundingClientRect()
+    const chartWidth = isNumeric(width) ? width : chartBox.width
+    const chartHeight = isNumeric(height) ? height : 0.7 * chartWidth
+    const xWidth = chartWidth - marginLeft - MARGIN.right
+    const yHeight = chartHeight - MARGIN.top - marginBottom
 
     xScale.rangeRound([0, xWidth]).padding(0.1)
     yScale.range([yHeight, 0])
 
-    let xAxis = d3.axisBottom(xScale).tickFormat(function(d) {
+    const xAxis = d3.axisBottom(xScale).tickFormat(function(d) {
       return xLabels[d]
     })
 
-    let yTicks = Math.min(yMax, 10)
-    let yAxis = d3.axisLeft(yScale).ticks(yTicks, "d")
+    const yTicks = Math.min(yMax, 10)
+    const yAxis = d3.axisLeft(yScale).ticks(yTicks, "d")
 
     chart.selectAll("*").remove()
     chart = chart
@@ -146,7 +146,7 @@ const BarChart = props => {
 
     chart.append("g").call(yAxis)
 
-    let bar = chart
+    const bar = chart
       .selectAll(`.${barClass}`)
       .data(data)
       .enter()

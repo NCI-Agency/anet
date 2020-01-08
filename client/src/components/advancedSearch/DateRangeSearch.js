@@ -116,7 +116,7 @@ export default class DateRangeSearch extends Component {
   }
 
   render() {
-    let { value } = this.state
+    const { value } = this.state
     let dateRangeDisplay = RANGE_TYPE_LABELS[value.relative].concat(" ")
     if (
       value.relative === BETWEEN ||
@@ -191,36 +191,36 @@ export default class DateRangeSearch extends Component {
 
   @autobind
   onChangeStart(newDate) {
-    let { value } = this.state
+    const { value } = this.state
     value.start = newDate
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   onChangeEnd(newDate) {
-    let { value } = this.state
+    const { value } = this.state
     value.end = newDate
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   onChangeRelative(newValue) {
-    let { value } = this.state
+    const { value } = this.state
     value.relative = newValue.target.value
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   toQuery() {
-    let { queryKey } = this.props
-    let { value } = this.state
+    const { queryKey } = this.props
+    const { value } = this.state
     return dateToQuery(queryKey, value)
   }
 
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

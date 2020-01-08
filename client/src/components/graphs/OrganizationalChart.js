@@ -158,7 +158,7 @@ export default class OrganizationalChart extends SVGCanvas {
       .attr("transform", d => `translate(${d.x},${d.y})`)
       .on("click", d => {
         const index = this.state.collapsed.indexOf(d.data.uuid)
-        let newCollapsed = this.state.collapsed.slice()
+        const newCollapsed = this.state.collapsed.slice()
         if (index > -1) {
           newCollapsed.splice(index, 1)
         } else {
