@@ -41,7 +41,7 @@ const BaseCreateButton = props => {
       </DropdownButton>
     )
   } else if (modelClasses.length) {
-    let modelClass = modelClasses[0]
+    const modelClass = modelClasses[0]
     return (
       <Button
         bsStyle="primary"

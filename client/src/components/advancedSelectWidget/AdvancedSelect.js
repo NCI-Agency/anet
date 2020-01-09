@@ -350,7 +350,7 @@ export default class AdvancedSelect extends Component {
     const resourceName = this.props.objectType.resourceName
     const listName = filterDefs.listName || this.props.objectType.listName
     this.setState({ isLoading: true }, () => {
-      let queryVars = { pageNum: pageNum, pageSize: 6 }
+      const queryVars = { pageNum: pageNum, pageSize: 6 }
       if (this.props.queryParams) {
         Object.assign(queryVars, this.props.queryParams)
       }

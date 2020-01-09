@@ -11,7 +11,7 @@ export default class ButtonToggleGroup extends Component {
   }
 
   render() {
-    let { children, ...props } = this.props
+    const { children, ...props } = this.props
 
     return (
       <ButtonGroup {...props}>

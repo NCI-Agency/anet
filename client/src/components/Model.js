@@ -58,7 +58,7 @@ export default class Model {
       const obj = yupSchema.cast(props)
       _forEach(yupSchema.fields, (value, key) => {
         if (
-          !obj.hasOwnProperty(key) ||
+          !Object.prototype.hasOwnProperty.call(obj, key) ||
           obj[key] === null ||
           obj[key] === undefined
         ) {
@@ -95,6 +95,7 @@ export default class Model {
   static displayName(appSettings) {
     return null
   }
+
   static listName = null
 
   static fromArray(array) {
@@ -128,8 +129,8 @@ export default class Model {
       }
     }
 
-    let resourceName = utils.resourceize(this.resourceName)
-    let uuid = instance.uuid
+    const resourceName = utils.resourceize(this.resourceName)
+    const uuid = instance.uuid
     let url = ["", resourceName, uuid].join("/")
 
     if (query) {
@@ -140,7 +141,7 @@ export default class Model {
   }
 
   static pathForNew(query) {
-    let resourceName = utils.resourceize(this.resourceName)
+    const resourceName = utils.resourceize(this.resourceName)
     let url = ["", resourceName, "new"].join("/")
 
     if (query) {

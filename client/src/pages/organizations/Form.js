@@ -15,7 +15,7 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import TaskTable from "components/TaskTable"
-import { Field, FieldArray, Form, Formik } from "formik"
+import { FastField, FieldArray, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -119,15 +119,14 @@ const BaseOrganizationForm = props => {
       label: Settings.fields.principal.org.name
     }
   ]
-  const IdentificationCodeFieldWithLabel = DictionaryField(Field)
-  const LongNameWithLabel = DictionaryField(Field)
+  const IdentificationCodeFieldWithLabel = DictionaryField(FastField)
+  const LongNameWithLabel = DictionaryField(FastField)
 
   return (
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Organization.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >
@@ -226,12 +225,12 @@ const BaseOrganizationForm = props => {
               <Fieldset>
                 {!isAdmin ? (
                   <>
-                    <Field
+                    <FastField
                       name="type"
                       component={FieldHelper.renderReadonlyField}
                       humanValue={Organization.humanNameOfType}
                     />
-                    <Field
+                    <FastField
                       name="parentOrg"
                       component={FieldHelper.renderReadonlyField}
                       label={Settings.fields.organization.parentOrg}
@@ -245,7 +244,7 @@ const BaseOrganizationForm = props => {
                         )
                       }
                     />
-                    <Field
+                    <FastField
                       name="shortName"
                       component={FieldHelper.renderReadonlyField}
                       label={Settings.fields.organization.shortName}
@@ -255,7 +254,7 @@ const BaseOrganizationForm = props => {
                       name="longName"
                       component={FieldHelper.renderReadonlyField}
                     />
-                    <Field
+                    <FastField
                       name="status"
                       component={FieldHelper.renderReadonlyField}
                       humanValue={Organization.humanNameOfStatus}
@@ -268,7 +267,7 @@ const BaseOrganizationForm = props => {
                   </>
                 ) : (
                   <>
-                    <Field
+                    <FastField
                       name="type"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={typeButtons}
@@ -295,7 +294,7 @@ const BaseOrganizationForm = props => {
                         />
                       }
                     />
-                    <Field
+                    <FastField
                       name="shortName"
                       component={FieldHelper.renderInputField}
                       label={Settings.fields.organization.shortName}
@@ -308,7 +307,7 @@ const BaseOrganizationForm = props => {
                       component={FieldHelper.renderInputField}
                       disabled={!isAdmin}
                     />
-                    <Field
+                    <FastField
                       name="status"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={statusButtons}
@@ -565,7 +564,7 @@ const BaseOrganizationForm = props => {
           <img src={REMOVE_ICON} height={14} alt="Remove this step" />
         </Button>
 
-        <Field
+        <FastField
           name={`${fieldName}.${index}.name`}
           component={FieldHelper.renderInputField}
           label="Step name"

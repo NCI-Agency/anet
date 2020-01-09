@@ -3,7 +3,7 @@ import BaseAPI from "baseAPI"
 const API = BaseAPI
 
 function loadFileAjaxSync(filePath, mimeType) {
-  let xmlhttp = new XMLHttpRequest()
+  const xmlhttp = new XMLHttpRequest()
   xmlhttp.open("GET", filePath, false)
   const authHeader = API._getAuthHeader()
   if (authHeader) {

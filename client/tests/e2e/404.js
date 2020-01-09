@@ -1,9 +1,9 @@
-let test = require("../util/test")
+const test = require("../util/test")
 
 test("Report 404", async t => {
   t.plan(1)
 
-  let { assertElementText, $ } = t.context
+  const { assertElementText, $ } = t.context
 
   await t.context.get("/reports/555")
   await assertElementText(
@@ -16,7 +16,7 @@ test("Report 404", async t => {
 test("Organization 404", async t => {
   t.plan(1)
 
-  let { assertElementText, $ } = t.context
+  const { assertElementText, $ } = t.context
 
   await t.context.get("/organizations/555")
   await assertElementText(
@@ -29,7 +29,7 @@ test("Organization 404", async t => {
 test("People 404", async t => {
   t.plan(1)
 
-  let { assertElementText, $ } = t.context
+  const { assertElementText, $ } = t.context
 
   await t.context.get("/people/555")
   await assertElementText(t, await $(".not-found-text"), "User #555 not found.")
@@ -38,7 +38,7 @@ test("People 404", async t => {
 test("Tasks 404", async t => {
   t.plan(1)
 
-  let { assertElementText, $ } = t.context
+  const { assertElementText, $ } = t.context
 
   await t.context.get("/tasks/555")
   await assertElementText(t, await $(".not-found-text"), "Task #555 not found.")
@@ -47,7 +47,7 @@ test("Tasks 404", async t => {
 test("Positions 404", async t => {
   t.plan(1)
 
-  let { assertElementText, $ } = t.context
+  const { assertElementText, $ } = t.context
 
   await t.context.get("/positions/555")
   await assertElementText(

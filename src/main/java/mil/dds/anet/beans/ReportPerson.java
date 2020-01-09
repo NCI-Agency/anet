@@ -1,17 +1,19 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 
 public class ReportPerson extends Person {
 
+  @GraphQLQuery
+  @GraphQLInputField
   boolean primary;
 
   public ReportPerson() {
     this.primary = false; // Default
   }
 
-  @GraphQLQuery(name = "primary")
   public boolean isPrimary() {
     return primary;
   }

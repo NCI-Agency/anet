@@ -11,7 +11,7 @@ export default class AvatarDisplayComponent extends React.Component {
   }
 
   render() {
-    let image =
+    const image =
       this.props.avatar === null || this.props.avatar === ""
         ? DEFAULT_AVATAR
         : "data:image/jpeg;base64," + this.props.avatar

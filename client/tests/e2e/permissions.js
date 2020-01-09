@@ -1,15 +1,15 @@
-let uuidv4 = require("uuid/v4")
-let test = require("../util/test")
+const uuidv4 = require("uuid/v4")
+const test = require("../util/test")
 
 test("checking super user permissions", async t => {
   t.plan(10)
 
-  let { pageHelpers, assertElementNotPresent, shortWaitMs } = t.context
+  const { pageHelpers, assertElementNotPresent, shortWaitMs } = t.context
 
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMyOrgLink()
 
-  let $rebeccaLink = await findSuperUserLink(t, "CTR BECCABON, Rebecca")
+  const $rebeccaLink = await findSuperUserLink(t, "CTR BECCABON, Rebecca")
 
   await $rebeccaLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($rebeccaLink))
@@ -22,7 +22,7 @@ test("checking super user permissions", async t => {
 
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMyOrgLink()
-  let $jacobLink = await findSuperUserLink(t, "CIV JACOBSON, Jacob")
+  const $jacobLink = await findSuperUserLink(t, "CIV JACOBSON, Jacob")
   await $jacobLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($jacobLink))
 
@@ -33,7 +33,7 @@ test("checking super user permissions", async t => {
   await editAndSavePositionFromCurrentUserPage(t, true)
 
   // User is super user, he/she may edit positions only for his/her own organization
-  let $otherOrgPositionLink = await getFromSearchResults(
+  const $otherOrgPositionLink = await getFromSearchResults(
     t,
     "EF 1 Manager",
     "EF 1 Manager",
@@ -51,7 +51,7 @@ test("checking super user permissions", async t => {
     shortWaitMs
   )
 
-  let $principalOrgLink = await getFromSearchResults(
+  const $principalOrgLink = await getFromSearchResults(
     t,
     "MoD",
     "MoD",
@@ -60,7 +60,7 @@ test("checking super user permissions", async t => {
   await $principalOrgLink.click()
   await validateSuperUserPrincipalOrgPermissions(t)
 
-  let $locationLink = await getFromSearchResults(
+  const $locationLink = await getFromSearchResults(
     t,
     "General Hospital",
     "General Hospital",
@@ -81,7 +81,7 @@ validateUserCannotEditOtherUser(
 test("checking regular user permissions", async t => {
   t.plan(3)
 
-  let { pageHelpers, $, assertElementNotPresent, shortWaitMs } = t.context
+  const { pageHelpers, $, assertElementNotPresent, shortWaitMs } = t.context
 
   await t.context.get("/", "jack")
   await pageHelpers.clickMyOrgLink()
@@ -92,7 +92,7 @@ test("checking regular user permissions", async t => {
 
   await validateUserCanEditUserForCurrentPage(t)
 
-  let $positionName = await $(".position-name")
+  const $positionName = await $(".position-name")
   await $positionName.click()
   await assertElementNotPresent(
     t,
@@ -123,7 +123,7 @@ test("checking admin permissions", async t => {
 
   await t.context.get("/", "arthur")
   await t.context.pageHelpers.clickMyOrgLink()
-  let $arthurLink = await findSuperUserLink(t, "CIV DMIN, Arthur")
+  const $arthurLink = await findSuperUserLink(t, "CIV DMIN, Arthur")
   await $arthurLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($arthurLink))
 
@@ -131,7 +131,7 @@ test("checking admin permissions", async t => {
   // User is admin, and can therefore edit an admin position type
   await editAndSavePositionFromCurrentUserPage(t, true)
 
-  let $principalOrgLink = await getFromSearchResults(
+  const $principalOrgLink = await getFromSearchResults(
     t,
     "MoD",
     "MoD",
@@ -140,7 +140,7 @@ test("checking admin permissions", async t => {
   await $principalOrgLink.click()
   await validateAdminPrincipalOrgPermissions(t)
 
-  let $locationLink = await getFromSearchResults(
+  const $locationLink = await getFromSearchResults(
     t,
     "General Hospital",
     "General Hospital",
@@ -155,7 +155,7 @@ test("admins can edit superusers and their positions", async t => {
 
   await t.context.get("/", "arthur")
 
-  let $rebeccaPersonLink = await getFromSearchResults(
+  const $rebeccaPersonLink = await getFromSearchResults(
     t,
     "rebecca",
     "CTR BECCABON, Rebecca",
@@ -179,11 +179,11 @@ function validateUserCannotEditOtherUser(
   test(testTitle, async t => {
     t.plan(2)
 
-    let { assertElementNotPresent, shortWaitMs } = t.context
+    const { assertElementNotPresent, shortWaitMs } = t.context
 
     await t.context.get("/", user)
 
-    let $arthurPersonLink = await getFromSearchResults(
+    const $arthurPersonLink = await getFromSearchResults(
       t,
       searchQuery,
       otherUserName,
@@ -198,7 +198,7 @@ function validateUserCannotEditOtherUser(
       shortWaitMs
     )
 
-    let $arthurPositionLink = await getFromSearchResults(
+    const $arthurPositionLink = await getFromSearchResults(
       t,
       searchQuery,
       otherUserPosition,
@@ -215,10 +215,10 @@ function validateUserCannotEditOtherUser(
 }
 
 async function findSuperUserLink(t, desiredSuperUserName) {
-  let $superUserLinks = await t.context.$$("[name=superUsers] p a")
+  const $superUserLinks = await t.context.$$("[name=superUsers] p a")
   let $foundLink
-  for (let $superUserLink of $superUserLinks) {
-    let superUserName = await $superUserLink.getText()
+  for (const $superUserLink of $superUserLinks) {
+    const superUserName = await $superUserLink.getText()
     if (superUserName === desiredSuperUserName) {
       $foundLink = $superUserLink
       break
@@ -235,7 +235,7 @@ async function findSuperUserLink(t, desiredSuperUserName) {
 }
 
 async function validateUserCanEditUserForCurrentPage(t) {
-  let {
+  const {
     $,
     assertElementText,
     shortWaitMs,
@@ -244,24 +244,27 @@ async function validateUserCanEditUserForCurrentPage(t) {
   } = t.context
 
   await t.context.driver.sleep(mediumWaitMs) // wait for transition
-  let $editPersonButton = await $(".edit-person")
+  const $editPersonButton = await $(".edit-person")
   await t.context.driver.wait(
     t.context.until.elementIsVisible($editPersonButton)
   )
   await $editPersonButton.click()
 
-  let $bioTextArea = await $(".biography .public-DraftEditor-content")
+  const $bioTextArea = await $(
+    ".biography .public-DraftEditor-content",
+    shortWaitMs // wait for Draftail to save the editor contents
+  )
   await t.context.driver.wait(
     async() => {
-      let originalBioText = await $bioTextArea.getText()
+      const originalBioText = await $bioTextArea.getText()
       return originalBioText !== ""
     },
     longWaitMs,
     "This test assumes that the current user has a non-empty biography."
   )
-  let originalBioText = await $bioTextArea.getText()
+  const originalBioText = await $bioTextArea.getText()
 
-  let fakeBioText = ` fake bio ${uuidv4()}`
+  const fakeBioText = ` fake bio ${uuidv4()}`
   await $bioTextArea.sendKeys(t.context.Key.END + fakeBioText)
   // wait for component to update (internal) state
   await t.context.driver.sleep(shortWaitMs)
@@ -278,16 +281,16 @@ async function validateUserCanEditUserForCurrentPage(t) {
 }
 
 async function editAndSavePositionFromCurrentUserPage(t, validateTrue) {
-  let { $ } = t.context
+  const { $ } = t.context
 
-  let $positionName = await $(".position-name")
+  const $positionName = await $(".position-name")
   await $positionName.click()
   await validationEditPositionOnCurrentPage(t, validateTrue)
 }
 
 async function validationEditPositionOnCurrentPage(t, validateTrue) {
-  let { $, assertElementText, until, shortWaitMs } = t.context
-  let $editButton = await $(".edit-position")
+  const { $, assertElementText, until, shortWaitMs } = t.context
+  const $editButton = await $(".edit-position")
   await t.context.driver.wait(until.elementIsVisible($editButton))
   await $editButton.click()
   await t.context.pageHelpers.clickFormBottomSubmit()
@@ -304,7 +307,7 @@ async function validationEditPositionOnCurrentPage(t, validateTrue) {
 }
 
 async function validateSuperUserPrincipalOrgPermissions(t) {
-  let { assertElementNotPresent, shortWaitMs } = t.context
+  const { assertElementNotPresent, shortWaitMs } = t.context
 
   await assertElementNotPresent(
     t,
@@ -315,9 +318,9 @@ async function validateSuperUserPrincipalOrgPermissions(t) {
 }
 
 async function validateAdminPrincipalOrgPermissions(t) {
-  let { $, assertElementEnabled } = t.context
+  const { $, assertElementEnabled } = t.context
 
-  let $editPrincipalOrgButton = await $("#editButton")
+  const $editPrincipalOrgButton = await $("#editButton")
   await t.context.driver.wait(
     t.context.until.elementIsVisible($editPrincipalOrgButton)
   )
@@ -355,9 +358,9 @@ async function validateAdminPrincipalOrgPermissions(t) {
 }
 
 async function validateSuperUserLocationPermissions(t) {
-  let { $, assertElementEnabled, assertElementDisabled } = t.context
+  const { $, assertElementEnabled, assertElementDisabled } = t.context
 
-  let $editLocationButton = await $("#editButton")
+  const $editLocationButton = await $("#editButton")
   await t.context.driver.wait(
     t.context.until.elementIsVisible($editLocationButton)
   )
@@ -375,9 +378,9 @@ async function validateSuperUserLocationPermissions(t) {
 }
 
 async function validateAdminLocationPermissions(t) {
-  let { $, assertElementEnabled } = t.context
+  const { $, assertElementEnabled } = t.context
 
-  let $editLocationButton = await $("#editButton")
+  const $editLocationButton = await $("#editButton")
   await t.context.driver.wait(
     t.context.until.elementIsVisible($editLocationButton)
   )
@@ -400,22 +403,22 @@ async function getFromSearchResults(
   resultText,
   searchResultsType
 ) {
-  let { $, $$ } = t.context
+  const { $, $$ } = t.context
 
-  let $searchBar = await $("#searchBarInput")
+  const $searchBar = await $("#searchBarInput")
   await $searchBar.clear()
   await $searchBar.sendKeys(searchQuery)
 
-  let $searchBarSubmit = await $("#searchBarSubmit")
+  const $searchBarSubmit = await $("#searchBarSubmit")
   await $searchBarSubmit.click()
 
-  let $searchResultLinks = await $$(
+  const $searchResultLinks = await $$(
     "#" + searchResultsType + "-search-results td a"
   )
 
   async function findLinkWithText(text) {
-    for (let $link of $searchResultLinks) {
-      let linkText = await $link.getText()
+    for (const $link of $searchResultLinks) {
+      const linkText = await $link.getText()
       if (linkText === text) {
         return $link
       }
@@ -425,7 +428,7 @@ async function getFromSearchResults(
     )
   }
 
-  let $resultLink = await findLinkWithText(resultText)
+  const $resultLink = await findLinkWithText(resultText)
 
   return $resultLink
 }

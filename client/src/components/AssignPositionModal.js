@@ -60,11 +60,11 @@ class BaseAssignPositionModal extends Component {
 
   render() {
     const { person, currentUser } = this.props
-    let newPosition = this.state.position
+    const newPosition = this.state.position
       ? new Position(this.state.position)
       : new Position()
 
-    let positionSearchQuery = { status: Position.STATUS.ACTIVE }
+    const positionSearchQuery = { status: Position.STATUS.ACTIVE }
     if (person.role === Person.ROLE.ADVISOR) {
       positionSearchQuery.type = [Position.TYPE.ADVISOR]
       if (currentUser.isAdmin()) {

@@ -51,6 +51,7 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       avatar(size: 256)
+      code
       position {
         uuid
         name
@@ -237,6 +238,11 @@ const BasePersonShow = props => {
                   component={FieldHelper.renderReadonlyField}
                 />
                 <Field
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.renderReadonlyField}
+                />
+                <Field
                   name="gender"
                   label={Settings.fields.person.gender}
                   component={FieldHelper.renderReadonlyField}
@@ -410,7 +416,7 @@ const BasePersonShow = props => {
   }
 
   function renderCounterparts(position) {
-    let assocTitle =
+    const assocTitle =
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
@@ -453,7 +459,7 @@ const BasePersonShow = props => {
   function renderPositionBlankSlate(person) {
     const { currentUser } = props
     // when the person is not in a position, any super user can assign them.
-    let canChangePosition = currentUser.isSuperUser()
+    const canChangePosition = currentUser.isSuperUser()
 
     if (Person.isEqual(currentUser, person)) {
       return (

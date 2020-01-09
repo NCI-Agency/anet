@@ -136,7 +136,7 @@ async function populateReport(report, user, args) {
     state,
     releasedAt: () => {
       // Set the releasedAt value on a random date between 1 and 7 days after the engagement
-      let result = new Date(engagementDate)
+      const result = new Date(engagementDate)
       result.setSeconds(
         result.getSeconds() +
           (Math.floor(Math.random() * (60 * 60 * 24 * 7)) + 1)

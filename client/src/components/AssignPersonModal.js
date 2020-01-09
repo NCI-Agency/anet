@@ -57,10 +57,10 @@ export default class AssignPersonModal extends Component {
   }
 
   render() {
-    let { position } = this.props
-    let newPerson = this.state.person
+    const { position } = this.props
+    const newPerson = this.state.person
 
-    let personSearchQuery = {
+    const personSearchQuery = {
       status: [Person.STATUS.ACTIVE]
     }
     if (position.type === Position.TYPE.PRINCIPAL) {

@@ -4,12 +4,15 @@ class Home extends Page {
   get topbar() {
     return browser.$("#topbar")
   }
+
   get securityBanner() {
     return browser.$("#topbar .banner")
   }
+
   get searchBar() {
     return browser.$("#searchBarInput")
   }
+
   get submitSearch() {
     return browser.$("#topbar #searchBarSubmit")
   }

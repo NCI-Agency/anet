@@ -30,6 +30,7 @@ const GQL_GET_APP_DATA = gql`
       emailAddress
       status
       avatar(size: 32)
+      code
       position {
         uuid
         name
@@ -152,7 +153,7 @@ const App = props => {
     organizations = Organization.fromArray(organizations)
     organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
 
-    let settings = {}
+    const settings = {}
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
     )

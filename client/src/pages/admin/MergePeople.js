@@ -101,7 +101,6 @@ const MergePeople = props => {
         enableReinitialize
         onSubmit={onSubmit}
         validationSchema={yupSchema}
-        isInitialValid={() => yupSchema.isValidSync({})}
         initialValues={{ loser: {}, winner: {}, copyPosition: false }}
       >
         {({
@@ -129,8 +128,9 @@ const MergePeople = props => {
                         label="Loser"
                         component={FieldHelper.renderSpecialField}
                         onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("loser", true, false) // onBlur doesn't work when selecting an option
                           setFieldValue("loser", value)
-                          setFieldTouched("loser") // onBlur doesn't work when selecting an option
                         }}
                         vertical
                         widget={
@@ -164,8 +164,9 @@ const MergePeople = props => {
                         label="Winner"
                         component={FieldHelper.renderSpecialField}
                         onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("winner", true, false) // onBlur doesn't work when selecting an option
                           setFieldValue("winner", value)
-                          setFieldTouched("winner") // onBlur doesn't work when selecting an option
                         }}
                         vertical
                         widget={

@@ -52,8 +52,8 @@ export default class SelectSearchFilter extends Component {
   }
 
   render() {
-    let values = this.props.values
-    let labels = this.props.labels || values.map(v => utils.sentenceCase(v))
+    const values = this.props.values
+    const labels = this.props.labels || values.map(v => utils.sentenceCase(v))
     return !this.props.asFormField ? (
       <>{labels[values.indexOf(this.state.value.value)]}</>
     ) : (
@@ -75,7 +75,7 @@ export default class SelectSearchFilter extends Component {
 
   @autobind
   onChange(event) {
-    let { value } = this.state
+    const { value } = this.state
     value.value = event.target.value
     this.setState({ value }, this.updateFilter)
   }
@@ -88,7 +88,7 @@ export default class SelectSearchFilter extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

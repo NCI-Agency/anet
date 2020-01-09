@@ -113,6 +113,10 @@ export default class Person extends Model {
         .nullable()
         .default("")
         .label(Settings.fields.person.phoneNumber),
+      code: yup
+        .string()
+        .nullable()
+        .default(""),
       endOfTourDate: yupDate
         .nullable()
         .when(["role", "status"], (role, status, schema) => {
@@ -274,9 +278,9 @@ export default class Person extends Model {
     if (!this.position || !this.position.organization) {
       return false
     }
-    let orgs = this.position.organization.descendantOrgs || []
+    const orgs = this.position.organization.descendantOrgs || []
     orgs.push(this.position.organization)
-    let orgUuids = orgs.map(o => o.uuid)
+    const orgUuids = orgs.map(o => o.uuid)
 
     return orgUuids.includes(org.uuid)
   }

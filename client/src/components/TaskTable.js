@@ -12,7 +12,7 @@ const TaskTable = props => {
   const tasksExist = _get(tasks, "length", 0) > 0
 
   return (
-    <div>
+    <div id={props.id}>
       {tasksExist ? (
         <div>
           <Table striped condensed hover responsive className="tasks_table">
@@ -69,6 +69,7 @@ const TaskTable = props => {
 }
 
 TaskTable.propTypes = {
+  id: PropTypes.string,
   tasks: PropTypes.array,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
