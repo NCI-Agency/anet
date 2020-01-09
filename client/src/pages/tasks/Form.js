@@ -9,7 +9,10 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
-import { CustomFieldsContainer } from "components/CustomFields"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -19,7 +22,6 @@ import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Form, Formik } from "formik"
-import _set from "lodash/set"
 import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -404,13 +406,7 @@ const BaseTaskForm = props => {
     )
     task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
-    // customFields should contain the JSON of all the visible custom fields
-    values.formCustomFields.invisibleCustomFields &&
-      values.formCustomFields.invisibleCustomFields.forEach(f => {
-        // TODO: workaround - invisibleCustomFields should be defined
-        _set(values, f.split("."), undefined)
-      })
-    task.customFields = JSON.stringify(values.formCustomFields)
+    task.customFields = customFieldsJSONString(values)
     const { edit } = props
     const variables = { task: task }
     if (

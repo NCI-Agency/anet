@@ -9,6 +9,7 @@ import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
+import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -520,4 +521,15 @@ ReadonlyCustomFields.propTypes = {
 }
 ReadonlyCustomFields.defaultProps = {
   fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
+}
+
+// customFields should contain the JSON of all the visible custom fields
+export const customFieldsJSONString = values => {
+  const clonedValues = _cloneDeep(values)
+  if (values.formCustomFields.invisibleCustomFields) {
+    clonedValues.formCustomFields.invisibleCustomFields.forEach(f => {
+      _set(clonedValues, f.split("."), undefined)
+    })
+  }
+  return JSON.stringify(clonedValues.formCustomFields)
 }

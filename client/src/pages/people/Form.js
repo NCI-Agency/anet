@@ -2,7 +2,10 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
-import { CustomFieldsContainer } from "components/CustomFields"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -15,7 +18,6 @@ import TriggerableConfirm from "components/TriggerableConfirm"
 import AvatarEditModal from "components/AvatarEditModal"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import _set from "lodash/set"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -603,11 +605,7 @@ const BasePersonForm = props => {
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
-    // customFields should contain the JSON of all the visible custom fields
-    values.formCustomFields.invisibleCustomFields.forEach(f => {
-      _set(values, f.split("."), undefined)
-    })
-    person.customFields = JSON.stringify(values.formCustomFields)
+    person.customFields = customFieldsJSONString(values)
     return API.mutation(props.edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person
     })

@@ -11,7 +11,10 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
-import { CustomFieldsContainer } from "components/CustomFields"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -24,7 +27,6 @@ import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
-import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
@@ -1140,13 +1142,7 @@ const BaseReportForm = props => {
     // strip tasks fields not in data model
     report.tasks = values.tasks.map(t => Object.without(t, "formCustomFields"))
     report.location = utils.getReference(report.location)
-    // customFields should contain the JSON of all the visible custom fields
-    if (values.formCustomFields.invisibleCustomFields) {
-      values.formCustomFields.invisibleCustomFields.forEach(f => {
-        _set(values, f.split("."), undefined)
-      })
-    }
-    report.customFields = JSON.stringify(values.formCustomFields)
+    report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
     const variables = { report }
     if (edit) {
