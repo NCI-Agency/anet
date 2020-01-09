@@ -30,14 +30,10 @@ test("Draft and submit a report", async t => {
 
   await pageHelpers.clickTodayButton()
 
-<<<<<<< HEAD
-  let $intent = await $("#intent")
+  const $intent = await $("#intent")
   await $intent.click() // click intent to make sure the date picker is being closed
 
-  let $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
-=======
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
->>>>>>> candidate
     "#location",
     "general hospita"
   )
@@ -56,14 +52,8 @@ test("Draft and submit a report", async t => {
     "topferness, christopf"
   )
 
-<<<<<<< HEAD
-  // click outside the overlay to make sure the $taskShortcutList closes
-  let $taskShortcutList = await $("#tasks-shortcut-list")
-  await $taskShortcutList.click()
-=======
-  const $attendeesShortcutTitle = await $("#attendees-shortcut-title")
-  await $attendeesShortcutTitle.click()
->>>>>>> candidate
+  const $attendeesShortcutList = await $("#attendees-shortcut-list")
+  await $attendeesShortcutList.click()
 
   t.is(
     await $attendeesAdvancedSelect.getAttribute("value"),
@@ -115,14 +105,8 @@ test("Draft and submit a report", async t => {
     "1.1"
   )
 
-<<<<<<< HEAD
-  // click outside the overlay to make sure the $tasksAdvancedSelect closes
-  let $tasksShortcutList = await $("#tasks-shortcut-list")
+  const $tasksShortcutList = await $("#tasks-shortcut-list")
   await $tasksShortcutList.click()
-=======
-  const $tasksShortcutTitle = await $("#tasks-shortcut-title")
-  await $tasksShortcutTitle.click()
->>>>>>> candidate
 
   t.is(
     await $tasksAdvancedSelect.getAttribute("value"),
@@ -130,20 +114,8 @@ test("Draft and submit a report", async t => {
     "Closing the tasks advanced multi select overlay empties the input field."
   )
 
-<<<<<<< HEAD
-  const taskRowSelector = ".tasks-selector table tbody tr td"
-  let $newTaskRow = await $(taskRowSelector)
-  await t.context.driver.wait(until.stalenessOf($newTaskRow))
-
-  await assertElementText(
-    t,
-    await $(taskRowSelector),
-    "1.1.B - Milestone the Second in EF 1.1"
-  )
-=======
   const $newTaskRow = await $("#tasks-tasks table tbody tr td")
   await assertElementText(t, $newTaskRow, "1.1 - Budgeting in the MoD")
->>>>>>> candidate
 
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")

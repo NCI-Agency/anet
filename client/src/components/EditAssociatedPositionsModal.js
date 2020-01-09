@@ -7,7 +7,7 @@ import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import RemoveButton from "components/RemoveButton"
-import { Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -128,14 +128,12 @@ class BaseEditAssociatedPositionsModal extends Component {
                   <Grid fluid>
                     <Row>
                       <Col md={12}>
-                        <Field
+                        <FastField
                           name="associatedPositions"
+                          label="Associated positions"
                           component={FieldHelper.renderSpecialField}
                           onChange={value =>
                             setFieldValue("associatedPositions", value)}
-                          objectType={Position}
-                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
-                          addon={POSITIONS_ICON}
                           vertical
                           widget={
                             <AdvancedMultiSelect

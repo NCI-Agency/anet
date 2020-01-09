@@ -59,6 +59,7 @@ const AuthorizationGroupForm = props => {
         dirty,
         errors,
         setFieldValue,
+        setFieldTouched,
         values,
         submitForm
       }) => {
@@ -131,7 +132,11 @@ const AuthorizationGroupForm = props => {
                   name="positions"
                   label="Positions"
                   component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("positions", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("positions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("positions", value)
+                  }}
                   widget={
                     <AdvancedMultiSelect
                       fieldName="positions"

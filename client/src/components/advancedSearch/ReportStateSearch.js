@@ -110,7 +110,7 @@ export default class ReportStateSearch extends Component {
           <span style={{ verticalAlign: "top", paddingLeft: "8px" }}>
             due to{" "}
             <select
-              id={this.props.queryKey}
+              id={`${this.props.queryKey}CancelledReason`}
               value={value.cancelledReason}
               onChange={this.changeCancelledReason}
             >

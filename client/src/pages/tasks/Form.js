@@ -62,27 +62,15 @@ const BaseTaskForm = props => {
     }
   ]
 
-<<<<<<< HEAD
-  const ShortNameField = DictionaryField(Field)
-  const LongNameField = DictionaryField(Field)
-  const TaskCustomFieldRef1 = DictionaryField(Field)
-  const TaskCustomField = DictionaryField(Field)
-  const PlannedCompletionField = DictionaryField(Field)
-  const ProjectedCompletionField = DictionaryField(Field)
-  const TaskCustomFieldEnum1 = DictionaryField(Field)
-  const TaskCustomFieldEnum2 = DictionaryField(Field)
-  const ResponsiblePositionsMultiSelect = DictionaryField(Field)
-=======
   const ShortNameField = DictionaryField(FastField)
   const LongNameField = DictionaryField(FastField)
-  const TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
+  const TaskCustomFieldRef1 = DictionaryField(FastField)
   const TaskCustomField = DictionaryField(FastField)
   const PlannedCompletionField = DictionaryField(FastField)
   const ProjectedCompletionField = DictionaryField(FastField)
   const TaskCustomFieldEnum1 = DictionaryField(FastField)
   const TaskCustomFieldEnum2 = DictionaryField(FastField)
-  const ResponsiblePositionsMultiSelect = DictionaryField(AdvancedMultiSelect)
->>>>>>> candidate
+  const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
 
   initialValues.assessment_customFieldEnum1 = ""
 
@@ -183,11 +171,15 @@ const BaseTaskForm = props => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <Field
+                <FastField
                   name="responsibleOrg"
                   label={Settings.fields.task.responsibleOrg}
                   component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("responsibleOrg", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("responsibleOrg", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("responsibleOrg", value)
+                  }}
                   widget={
                     <AdvancedSingleSelect
                       fieldName="responsibleOrg"
@@ -206,15 +198,14 @@ const BaseTaskForm = props => {
                 />
 
                 <ResponsiblePositionsMultiSelect
-<<<<<<< HEAD
                   name="responsiblePositions"
                   component={FieldHelper.renderSpecialField}
-=======
-                  fieldName="responsiblePositions"
->>>>>>> candidate
                   dictProps={Settings.fields.task.responsiblePositions}
-                  onChange={value =>
-                    setFieldValue("responsiblePositions", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("responsiblePositions", value)
+                  }}
                   widget={
                     <AdvancedMultiSelect
                       fieldName="responsiblePositions"
@@ -244,10 +235,17 @@ const BaseTaskForm = props => {
                     name="customFieldRef1"
                     component={FieldHelper.renderSpecialField}
                     dictProps={Settings.fields.task.customFieldRef1}
-                    onChange={value => setFieldValue("customFieldRef1", value)}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("customFieldRef1", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("customFieldRef1", value)
+                    }}
                     widget={
                       <AdvancedSingleSelect
                         fieldName="customFieldRef1"
+                        placeholder={
+                          Settings.fields.task.customFieldRef1.placeholder
+                        }
                         value={values.customFieldRef1}
                         overlayColumns={["Name"]}
                         overlayRenderRow={TaskSimpleOverlayRow}

@@ -503,10 +503,14 @@ const BaseReportForm = props => {
                   />
                 )}
 
-                <Field
+                <FastField
                   name="location"
                   component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("location", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("location", value)
+                  }}
                   widget={
                     <AdvancedSingleSelect
                       fieldName="location"
@@ -529,7 +533,11 @@ const BaseReportForm = props => {
                         fieldName="location"
                         objectType={Location}
                         curValue={values.location}
-                        onChange={value => setFieldValue("location", value)}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("location", value)
+                        }}
                         handleAddItem={FieldHelper.handleSingleSelectAddItem}
                       />
                     </>
@@ -623,12 +631,14 @@ const BaseReportForm = props => {
                 }
                 id="attendance-fieldset"
               >
-<<<<<<< HEAD
-                <Field
+                <FastField
                   name="attendees"
                   component={FieldHelper.renderSpecialField}
-                  onChange={value =>
-                    updateAttendees(setFieldValue, "attendees", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
+                    updateAttendees(setFieldValue, "attendees", value)
+                  }}
                   widget={
                     <AdvancedMultiSelect
                       fieldName="attendees"
@@ -637,7 +647,6 @@ const BaseReportForm = props => {
                       renderSelected={
                         <AttendeesTable
                           attendees={values.attendees}
-                          onChange={value => setFieldValue("attendees", value)}
                           showDelete
                         />
                       }
@@ -665,48 +674,15 @@ const BaseReportForm = props => {
                         fieldName="attendees"
                         objectType={Person}
                         curValue={values.attendees}
-                        onChange={value =>
-                          updateAttendees(setFieldValue, "attendees", value)}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
+                          updateAttendees(setFieldValue, "attendees", value)
+                        }}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
                     </>
                   }
-=======
-                <AdvancedMultiSelect
-                  fieldName="attendees"
-                  fieldLabel="Attendees"
-                  placeholder="Search for the meeting attendees..."
-                  value={values.attendees}
-                  renderSelected={
-                    <AttendeesTable
-                      attendees={values.attendees}
-                      onChange={value => setFieldValue("attendees", value)}
-                      showDelete
-                    />
-                  }
-                  overlayColumns={[
-                    "Name",
-                    "Position",
-                    "Location",
-                    "Organization"
-                  ]}
-                  overlayRenderRow={PersonDetailedOverlayRow}
-                  filterDefs={attendeesFilters}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("attendees", true, false)
-                    updateAttendees(setFieldValue, "attendees", value)
-                  }}
-                  objectType={Person}
-                  queryParams={{
-                    status: [Person.STATUS.ACTIVE]
-                  }}
-                  fields={Person.autocompleteQuery}
-                  addon={PEOPLE_ICON}
-                  shortcutsTitle="Recent Attendees"
-                  shortcuts={recents.persons}
-                  renderExtraCol
->>>>>>> candidate
                 />
               </Fieldset>
 
@@ -714,60 +690,46 @@ const BaseReportForm = props => {
                 title={Settings.fields.task.longLabel}
                 className="tasks-selector"
               >
-<<<<<<< HEAD
+                <FastField
+                  name="tasksLevel1"
+                  label="Objectives"
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("tasksLevel1", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="tasksLevel1"
+                      placeholder="Search for objectives"
+                      value={values.tasksLevel1}
+                      renderSelected={
+                        <TaskTable
+                          id="tasks-objectives"
+                          tasks={values.tasksLevel1}
+                          showDelete
+                          showOrganization
+                        />
+                      }
+                      overlayColumns={["Name", "Organization"]}
+                      overlayRenderRow={TaskDetailedOverlayRow}
+                      filterDefs={tasksFiltersLevel1}
+                      objectType={Task}
+                      queryParams={{ status: Task.STATUS.ACTIVE }}
+                      fields={Task.autocompleteQuery}
+                      addon={TASKS_ICON}
+                    />
+                  }
+                />
+
                 <Field
                   name="tasks"
                   label={Settings.fields.task.shortLabel}
                   component={FieldHelper.renderSpecialField}
-=======
-                <AdvancedMultiSelect
-                  fieldName="tasksLevel1"
-                  fieldLabel="Objectives"
-                  placeholder="Search for objectives"
-                  value={values.tasksLevel1}
-                  renderSelected={
-                    <TaskTable
-                      id="tasks-objectives"
-                      tasks={values.tasksLevel1}
-                      showDelete
-                      showOrganization
-                    />
-                  }
-                  overlayColumns={["Name", "Organization"]}
-                  overlayRenderRow={TaskDetailedOverlayRow}
-                  filterDefs={tasksFiltersLevel1}
-                  onChange={value => {
-                    setFieldValue("tasksLevel1", value)
-                    setFieldTouched("tasksLevel1", true)
-                  }}
-                  objectType={Task}
-                  queryParams={{ status: Task.STATUS.ACTIVE }}
-                  fields={Task.autocompleteQuery}
-                  addon={TASKS_ICON}
-                />
-
-                <AdvancedMultiSelect
-                  fieldName="tasks"
-                  fieldLabel={Settings.fields.task.shortLabel}
-                  placeholder={`Search for ${pluralize(
-                    Settings.fields.task.shortLabel
-                  )}...`}
-                  value={values.tasks}
-                  renderSelected={
-                    <TaskTable
-                      id="tasks-tasks"
-                      tasks={values.tasks}
-                      showDelete
-                      showOrganization
-                    />
-                  }
-                  overlayColumns={["Name", "Organization"]}
-                  overlayRenderRow={TaskDetailedOverlayRow}
-                  filterDefs={tasksFiltersLevel2}
->>>>>>> candidate
                   onChange={value => {
                     // validation will be done by setFieldValue
-                    setFieldTouched("tasks", true, false)
+                    setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("tasks", value)
                   }}
                   widget={
@@ -779,6 +741,7 @@ const BaseReportForm = props => {
                       value={values.tasks}
                       renderSelected={
                         <TaskTable
+                          id="tasks-tasks"
                           tasks={values.tasks}
                           showDelete
                           showOrganization
@@ -786,7 +749,7 @@ const BaseReportForm = props => {
                       }
                       overlayColumns={["Name", "Organization"]}
                       overlayRenderRow={TaskDetailedOverlayRow}
-                      filterDefs={tasksFilters}
+                      filterDefs={tasksFiltersLevel2}
                       objectType={Task}
                       queryParams={{ status: Task.STATUS.ACTIVE }}
                       fields={Task.autocompleteQuery}
@@ -804,8 +767,9 @@ const BaseReportForm = props => {
                         objectType={Task}
                         curValue={values.tasks}
                         onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
                           setFieldValue("tasks", value)
-                          setFieldTouched("tasks", true)
                         }}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
@@ -923,12 +887,15 @@ const BaseReportForm = props => {
                           />
                         }
                       />
-                      <Field
+                      <FastField
                         name="authorizationGroups"
                         label="Authorization Groups"
                         component={FieldHelper.renderSpecialField}
-                        onChange={value =>
-                          setFieldValue("authorizationGroups", value)}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("authorizationGroups", value)
+                        }}
                         widget={
                           <AdvancedMultiSelect
                             fieldName="authorizationGroups"
@@ -958,8 +925,15 @@ const BaseReportForm = props => {
                               fieldName="authorizationGroups"
                               objectType={AuthorizationGroup}
                               curValue={values.authorizationGroups}
-                              onChange={value =>
-                                setFieldValue("authorizationGroups", value)}
+                              onChange={value => {
+                                // validation will be done by setFieldValue
+                                setFieldTouched(
+                                  "authorizationGroups",
+                                  true,
+                                  false
+                                ) // onBlur doesn't work when selecting an option
+                                setFieldValue("authorizationGroups", value)
+                              }}
                               handleAddItem={
                                 FieldHelper.handleMultiSelectAddItem
                               }

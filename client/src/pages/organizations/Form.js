@@ -273,11 +273,15 @@ const BaseOrganizationForm = props => {
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
-                    <Field
+                    <FastField
                       name="parentOrg"
                       label={Settings.fields.organization.parentOrg}
                       component={FieldHelper.renderSpecialField}
-                      onChange={value => setFieldValue("parentOrg", value)}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("parentOrg", value)
+                      }}
                       widget={
                         <AdvancedSingleSelect
                           fieldName="parentOrg"
@@ -391,6 +395,7 @@ const BaseOrganizationForm = props => {
                               "planningApprovalSteps",
                               arrayHelpers,
                               setFieldValue,
+                              setFieldTouched,
                               step,
                               index,
                               approversFilters
@@ -470,6 +475,7 @@ const BaseOrganizationForm = props => {
                               "approvalSteps",
                               arrayHelpers,
                               setFieldValue,
+                              setFieldTouched,
                               step,
                               index,
                               approversFilters
@@ -488,11 +494,15 @@ const BaseOrganizationForm = props => {
                       {!isAdmin ? (
                         <TaskTable tasks={values.tasks} />
                       ) : (
-                        <Field
+                        <FastField
                           name="tasks"
                           label={Settings.fields.task.shortLabel}
                           component={FieldHelper.renderSpecialField}
-                          onChange={value => setFieldValue("tasks", value)}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("tasks", value)
+                          }}
                           widget={
                             <AdvancedMultiSelect
                               fieldName="tasks"
@@ -548,6 +558,7 @@ const BaseOrganizationForm = props => {
     fieldName,
     arrayHelpers,
     setFieldValue,
+    setFieldTouched,
     step,
     index,
     approversFilters
@@ -569,12 +580,15 @@ const BaseOrganizationForm = props => {
           component={FieldHelper.renderInputField}
           label="Step name"
         />
-        <Field
+        <FastField
           name={`${fieldName}.${index}.approvers`}
           label="Add an approver"
           component={FieldHelper.renderSpecialField}
-          onChange={value =>
-            setFieldValue(`${fieldName}.${index}.approvers`, value)}
+          onChange={value => {
+            // validation will be done by setFieldValue
+            setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option
+            setFieldValue(`${fieldName}.${index}.approvers`, value)
+          }}
           widget={
             <AdvancedMultiSelect
               fieldName={`${fieldName}.${index}.approvers`}

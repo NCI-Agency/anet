@@ -113,6 +113,7 @@ const BasePositionForm = props => {
         dirty,
         errors,
         setFieldValue,
+        setFieldTouched,
         values,
         submitForm
       }) => {
@@ -217,11 +218,15 @@ const BasePositionForm = props => {
                   )}
                 </FastField>
 
-                <Field
+                <FastField
                   name="organization"
                   label="Organization"
                   component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("organization", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("organization", value)
+                  }}
                   widget={
                     <AdvancedSingleSelect
                       fieldName="organization"
@@ -238,6 +243,7 @@ const BasePositionForm = props => {
                     />
                   }
                 />
+
                 <CodeFieldWithLabel
                   dictProps={positionSettings.code}
                   name="code"
@@ -262,11 +268,15 @@ const BasePositionForm = props => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <Field
+                <FastField
                   name="location"
                   label="Location"
                   component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("location", value)}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("location", value)
+                  }}
                   widget={
                     <AdvancedSingleSelect
                       fieldName="location"
