@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
@@ -915,6 +917,7 @@ const BaseReportForm = props => {
                               status: AuthorizationGroup.STATUS.ACTIVE
                             }}
                             fields={AuthorizationGroup.autocompleteQuery}
+                            addon={<Icon icon={IconNames.LOCK} />}
                           />
                         }
                         extraColElem={

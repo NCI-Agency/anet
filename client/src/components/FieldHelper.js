@@ -287,7 +287,7 @@ export default renderField
 
 export const FieldAddon = ({ fieldId, addon }) => {
   // allows passing a url for an image
-  if (addon.indexOf(".") !== -1) {
+  if (typeof addon === "string" && addon.indexOf(".") !== -1) {
     addon = <img src={addon} height={20} alt="" />
   }
   const focusElement = () => {
