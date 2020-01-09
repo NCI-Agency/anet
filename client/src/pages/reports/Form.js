@@ -1168,7 +1168,6 @@ const BaseReportForm = props => {
           ],
           text: JSON.stringify(values.taskAssessments[key])
         }))
-      console.log(variables.notes)
       variables.withNotes = !!variables.notes
     }
     return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
