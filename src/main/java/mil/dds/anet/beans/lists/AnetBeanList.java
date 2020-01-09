@@ -1,5 +1,6 @@
 package mil.dds.anet.beans.lists;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.List;
 import org.jdbi.v3.core.mapper.RowMapper;
@@ -7,9 +8,17 @@ import org.jdbi.v3.core.statement.Query;
 
 public class AnetBeanList<T> {
 
+  @GraphQLQuery
+  @GraphQLInputField
   List<T> list;
+  @GraphQLQuery
+  @GraphQLInputField
   Integer pageNum;
+  @GraphQLQuery
+  @GraphQLInputField
   Integer pageSize;
+  @GraphQLQuery
+  @GraphQLInputField
   Integer totalCount;
 
   public AnetBeanList() { /* Serialization Constructor */ }
@@ -36,7 +45,6 @@ public class AnetBeanList<T> {
     }
   }
 
-  @GraphQLQuery(name = "list")
   public List<T> getList() {
     return list;
   }

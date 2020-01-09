@@ -19,15 +19,15 @@ const DailyRollupChart = props => {
       left: 20,
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
-    let chartBox = node.current.getBoundingClientRect()
-    let chartWidth = (isNumeric(width) ? width : chartBox.width) - 30
+    const chartBox = node.current.getBoundingClientRect()
+    const chartWidth = (isNumeric(width) ? width : chartBox.width) - 30
     let chart = d3.select(node.current)
-    let xLabels = [].concat.apply(
+    const xLabels = [].concat.apply(
       [],
       data.map(d => d.published + d.cancelled)
     )
-    let yLabels = {}
-    let yDomain = data.map(d => {
+    const yLabels = {}
+    const yDomain = data.map(d => {
       yLabels[d.org.uuid] = d.org.shortName
       return d.org.uuid
     })
@@ -35,17 +35,17 @@ const DailyRollupChart = props => {
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
-    let tmpSVG = d3
+    const tmpSVG = d3
       .select("#tmp_svg")
       .data([1])
       .enter()
       .append("svg")
-    let xLabelWidth = function() {
+    const xLabelWidth = function() {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
       }
     }
-    let yLabelWidth = function(d) {
+    const yLabelWidth = function(d) {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -69,38 +69,38 @@ const DailyRollupChart = props => {
     tmpSVG.remove()
 
     // The left margin depends on the width of the y-axis labels.
-    let marginLeft = maxYLabelWidth + MARGIN.left
+    const marginLeft = maxYLabelWidth + MARGIN.left
     // The bottom margin depends on the width of the x-axis labels.
-    let marginBottom = maxXLabelWidth + MARGIN.bottom
-    let xWidth = chartWidth - marginLeft - MARGIN.right
+    const marginBottom = maxXLabelWidth + MARGIN.bottom
+    const xWidth = chartWidth - marginLeft - MARGIN.right
 
     // We use a dynamic yHeight, depending on how much data we have to display,
     // in order to make sure the chart is readable for lots of data
-    let yHeight = (BAR_HEIGHT + BAR_PADDING) * data.length
-    let chartHeight = yHeight + MARGIN.top + marginBottom
+    const yHeight = (BAR_HEIGHT + BAR_PADDING) * data.length
+    const chartHeight = yHeight + MARGIN.top + marginBottom
 
-    let xMax = d3.max(xLabels)
-    let xScale = d3
+    const xMax = d3.max(xLabels)
+    const xScale = d3
       .scaleLinear()
       .domain([0, xMax])
       .range([0, xWidth])
 
-    let yScale = d3
+    const yScale = d3
       .scaleBand()
       .domain(yDomain)
       .range([0, yHeight])
 
-    let xTicks = Math.min(xMax, 10)
-    let xAxisTop = d3
+    const xTicks = Math.min(xMax, 10)
+    const xAxisTop = d3
       .axisTop()
       .scale(xScale)
       .ticks(xTicks, "d")
-    let xAxis = d3
+    const xAxis = d3
       .axisBottom()
       .scale(xScale)
       .ticks(xTicks, "d")
 
-    let yAxis = d3
+    const yAxis = d3
       .axisLeft()
       .scale(yScale)
       .tickFormat(function(d) {
@@ -123,7 +123,7 @@ const DailyRollupChart = props => {
 
     chart.append("g").call(yAxis)
 
-    let bar = chart
+    const bar = chart
       .selectAll(".bar")
       .data(data)
       .enter()

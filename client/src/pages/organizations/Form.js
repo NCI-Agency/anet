@@ -127,7 +127,6 @@ const BaseOrganizationForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Organization.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >
@@ -381,9 +380,7 @@ const BaseOrganizationForm = props => {
                             </Modal.Footer>
                           </Modal>
 
-                          {(
-                            values.planningApprovalSteps || []
-                          ).map((step, index) =>
+                          {values.planningApprovalSteps.map((step, index) =>
                             renderApprovalStep(
                               "planningApprovalSteps",
                               arrayHelpers,
@@ -462,7 +459,7 @@ const BaseOrganizationForm = props => {
                             </Modal.Footer>
                           </Modal>
 
-                          {(values.approvalSteps || []).map((step, index) =>
+                          {values.approvalSteps.map((step, index) =>
                             renderApprovalStep(
                               "approvalSteps",
                               arrayHelpers,
@@ -669,7 +666,7 @@ const BaseOrganizationForm = props => {
       "tasks"
     )
     // strip tasks fields not in data model
-    organization.tasks = (values.tasks || []).map(t =>
+    organization.tasks = values.tasks.map(t =>
       Object.without(t, "formCustomFields")
     )
     organization.parentOrg = utils.getReference(organization.parentOrg)

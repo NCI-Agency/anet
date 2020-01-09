@@ -121,7 +121,6 @@ const BaseTaskForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Task.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >

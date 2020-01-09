@@ -1,14 +1,16 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class ReportSensitiveInformation extends AbstractAnetBean {
 
+  @GraphQLQuery
+  @GraphQLInputField
   private String text;
 
-  @GraphQLQuery(name = "text")
   public String getText() {
     return text;
   }

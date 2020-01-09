@@ -287,9 +287,9 @@ function getInvisibleFields(
   fieldNamePrefix,
   formikValues
 ) {
-  let prevInvisibleFields = _cloneDeep(invisibleFields)
-  let turnedInvisible = []
-  let turnedVisible = []
+  const prevInvisibleFields = _cloneDeep(invisibleFields)
+  const turnedInvisible = []
+  const turnedVisible = []
   let curInvisibleFields = []
   Object.keys(fieldsConfig).forEach(key => {
     const fieldConfig = fieldsConfig[key]

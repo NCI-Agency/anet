@@ -33,10 +33,12 @@ export default class RelatedObjectNoteModal extends Component {
     onSuccess: PropTypes.func.isRequired,
     questions: PropTypes.array
   }
+
   yupSchema = yup.object().shape({
     type: yup.string().required(),
     text: yup.string().default("")
   })
+
   state = {
     error: null
   }
@@ -49,7 +51,6 @@ export default class RelatedObjectNoteModal extends Component {
           enableReinitialize
           onSubmit={this.onSubmit}
           validationSchema={this.yupSchema}
-          isInitialValid
           initialValues={note}
         >
           {({

@@ -58,11 +58,11 @@ const Chart = props => {
       shortName: noTaskMessage,
       longName: noTaskMessage
     }
-    let reportsList = data.reportList.list || []
+    const reportsList = data.reportList.list || []
     if (!reportsList.length) {
       return []
     }
-    let simplifiedValues = reportsList.map(d => {
+    const simplifiedValues = reportsList.map(d => {
       return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
     })
     let tasks = reportsList.map(d => d.tasks)
@@ -78,7 +78,7 @@ const Chart = props => {
     // add No Task item, in order to relate to reports without Tasks
     tasks.push(noTask)
     return tasks.map(d => {
-      let r = {}
+      const r = {}
       r.task = d
       r.reportsCount =
         d.uuid === noTask.uuid

@@ -431,7 +431,7 @@ const BasePersonShow = props => {
   }
 
   function renderCounterparts(position) {
-    let assocTitle =
+    const assocTitle =
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
@@ -474,7 +474,7 @@ const BasePersonShow = props => {
   function renderPositionBlankSlate(person) {
     const { currentUser } = props
     // when the person is not in a position, any super user can assign them.
-    let canChangePosition = currentUser.isSuperUser()
+    const canChangePosition = currentUser.isSuperUser()
 
     if (Person.isEqual(currentUser, person)) {
       return (

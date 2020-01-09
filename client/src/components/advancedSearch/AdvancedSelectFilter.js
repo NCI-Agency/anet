@@ -51,7 +51,7 @@ export default class AdvancedSelectFilter extends Component {
   }
 
   render() {
-    let advancedSelectProps = Object.without(
+    const advancedSelectProps = Object.without(
       this.props,
       "value",
       "queryKey",
@@ -89,7 +89,7 @@ export default class AdvancedSelectFilter extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

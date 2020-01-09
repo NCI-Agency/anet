@@ -7,8 +7,12 @@ class Rollup extends Page {
     return browser.$("div#daily-rollup")
   }
 
-  get printButton() {
-    return browser.$("a.btn.btn-default")
+  get emailButton() {
+    return browser.$("button#email-rollup")
+  }
+
+  get emailPreviewButton() {
+    return browser.$("a#preview-rollup-email")
   }
 
   open() {

@@ -112,7 +112,6 @@ const BasePersonForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Person.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >

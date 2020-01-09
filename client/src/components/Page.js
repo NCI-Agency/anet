@@ -123,7 +123,7 @@ export const applySearchProps = (setSearchProps, searchProps) => {
 }
 
 export const getSearchQuery = searchQuery => {
-  let query = {}
+  const query = {}
   if (!_isEmpty(searchQuery.text)) {
     query.text = searchQuery.text
   }

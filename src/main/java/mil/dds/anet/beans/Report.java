@@ -1,7 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
@@ -42,37 +42,72 @@ public class Report extends AbstractCustomizableAnetBean {
     NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS
   }
 
+  // annotated below
   private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   ReportState state;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant releasedAt;
-
+  @GraphQLQuery
+  @GraphQLInputField
   Instant engagementDate;
+  @GraphQLQuery
+  @GraphQLInputField
   private Integer engagementDayOfWeek;
+  @GraphQLQuery
+  @GraphQLInputField
   private Integer duration;
+  // annotated below
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   String intent;
+  @GraphQLQuery
+  @GraphQLInputField
   String exsum; // can be null to autogenerate
+  @GraphQLQuery
+  @GraphQLInputField
   Atmosphere atmosphere;
+  @GraphQLQuery
+  @GraphQLInputField
   String atmosphereDetails;
+  @GraphQLQuery
+  @GraphQLInputField
   ReportCancelledReason cancelledReason;
-
+  // annotated below
   List<ReportPerson> attendees;
+  // annotated below
   List<Task> tasks;
-
+  @GraphQLQuery
+  @GraphQLInputField
   String keyOutcomes;
+  @GraphQLQuery
+  @GraphQLInputField
   String nextSteps;
+  @GraphQLQuery
+  @GraphQLInputField
   String reportText;
-
+  // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<Organization> advisorOrg = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<Organization> principalOrg = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<ReportPerson> primaryAdvisor = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<ReportPerson> primaryPrincipal = new ForeignObjectHolder<>();
-
+  // annotated below
   List<Comment> comments;
+  // annotated below
   private List<Tag> tags;
+  // annotated below
   private ReportSensitiveInformation reportSensitiveInformation;
+  // annotated below
   private List<AuthorizationGroup> authorizationGroups;
+  // annotated below
   private List<ReportAction> workflow;
 
   @GraphQLQuery(name = "approvalStep")
@@ -90,27 +125,24 @@ public class Report extends AbstractCustomizableAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setApprovalStepUuid(String approvalStepUuid) {
     this.approvalStep = new ForeignObjectHolder<>(approvalStepUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getApprovalStepUuid() {
     return approvalStep.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "approvalStep")
   public void setApprovalStep(ApprovalStep approvalStep) {
     this.approvalStep = new ForeignObjectHolder<>(approvalStep);
   }
 
-  @GraphQLIgnore
   public ApprovalStep getApprovalStep() {
     return approvalStep.getForeignObject();
   }
 
-  @GraphQLQuery(name = "state")
   public ReportState getState() {
     return state;
   }
@@ -119,7 +151,6 @@ public class Report extends AbstractCustomizableAnetBean {
     this.state = state;
   }
 
-  @GraphQLQuery(name = "releasedAt")
   public Instant getReleasedAt() {
     return releasedAt;
   }
@@ -128,7 +159,6 @@ public class Report extends AbstractCustomizableAnetBean {
     this.releasedAt = releasedAt;
   }
 
-  @GraphQLQuery(name = "engagementDate")
   public Instant getEngagementDate() {
     return engagementDate;
   }
@@ -143,7 +173,6 @@ public class Report extends AbstractCustomizableAnetBean {
    *
    * @return Integer engagement day of week
    */
-  @GraphQLQuery(name = "engagementDayOfWeek")
   public Integer getEngagementDayOfWeek() {
     return engagementDayOfWeek;
   }
@@ -152,7 +181,6 @@ public class Report extends AbstractCustomizableAnetBean {
     this.engagementDayOfWeek = engagementDayOfWeek;
   }
 
-  @GraphQLQuery(name = "duration")
   public Integer getDuration() {
     return duration;
   }
@@ -174,32 +202,32 @@ public class Report extends AbstractCustomizableAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setLocationUuid(String locationUuid) {
     this.location = new ForeignObjectHolder<>(locationUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getLocationUuid() {
     return location.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "location")
   public void setLocation(Location location) {
     this.location = new ForeignObjectHolder<>(location);
   }
 
-  @GraphQLIgnore
   public Location getLocation() {
     return location.getForeignObject();
   }
 
-  @GraphQLQuery(name = "intent")
   public String getIntent() {
     return intent;
   }
 
-  @GraphQLQuery(name = "exsum")
+  public void setIntent(String intent) {
+    this.intent = Utils.trimStringReturnNull(intent);
+  }
+
   public String getExsum() {
     return exsum;
   }
@@ -208,7 +236,6 @@ public class Report extends AbstractCustomizableAnetBean {
     this.exsum = Utils.trimStringReturnNull(exsum);
   }
 
-  @GraphQLQuery(name = "atmosphere")
   public Atmosphere getAtmosphere() {
     return atmosphere;
   }
@@ -217,7 +244,6 @@ public class Report extends AbstractCustomizableAnetBean {
     this.atmosphere = atmosphere;
   }
 
-  @GraphQLQuery(name = "atmosphereDetails")
   public String getAtmosphereDetails() {
     return atmosphereDetails;
   }
@@ -226,17 +252,12 @@ public class Report extends AbstractCustomizableAnetBean {
     this.atmosphereDetails = Utils.trimStringReturnNull(atmosphereDetails);
   }
 
-  @GraphQLQuery(name = "cancelledReason")
   public ReportCancelledReason getCancelledReason() {
     return cancelledReason;
   }
 
   public void setCancelledReason(ReportCancelledReason cancelledReason) {
     this.cancelledReason = cancelledReason;
-  }
-
-  public void setIntent(String intent) {
-    this.intent = Utils.trimStringReturnNull(intent);
   }
 
   @GraphQLQuery(name = "attendees")
@@ -252,11 +273,11 @@ public class Report extends AbstractCustomizableAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<ReportPerson> getAttendees() {
     return attendees;
   }
 
+  @GraphQLInputField(name = "attendees")
   public void setAttendees(List<ReportPerson> attendees) {
     this.attendees = attendees;
   }
@@ -278,7 +299,6 @@ public class Report extends AbstractCustomizableAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public ReportPerson getPrimaryAdvisor() {
     return primaryAdvisor.getForeignObject();
   }
@@ -300,7 +320,6 @@ public class Report extends AbstractCustomizableAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public ReportPerson getPrimaryPrincipal() {
     return primaryPrincipal.getForeignObject();
   }
@@ -317,16 +336,15 @@ public class Report extends AbstractCustomizableAnetBean {
         });
   }
 
+  @GraphQLInputField(name = "tasks")
   public void setTasks(List<Task> tasks) {
     this.tasks = tasks;
   }
 
-  @GraphQLIgnore
   public List<Task> getTasks() {
     return tasks;
   }
 
-  @GraphQLQuery(name = "keyOutcomes")
   public String getKeyOutcomes() {
     return keyOutcomes;
   }
@@ -335,7 +353,6 @@ public class Report extends AbstractCustomizableAnetBean {
     this.keyOutcomes = Utils.trimStringReturnNull(keyOutcomes);
   }
 
-  @GraphQLQuery(name = "reportText")
   public String getReportText() {
     return reportText;
   }
@@ -344,7 +361,6 @@ public class Report extends AbstractCustomizableAnetBean {
     this.reportText = Utils.trimStringReturnNull(reportText);
   }
 
-  @GraphQLQuery(name = "nextSteps")
   public String getNextSteps() {
     return nextSteps;
   }
@@ -366,22 +382,20 @@ public class Report extends AbstractCustomizableAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setAuthorUuid(String authorUuid) {
     this.author = new ForeignObjectHolder<>(authorUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getAuthorUuid() {
     return author.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "author")
   public void setAuthor(Person author) {
     this.author = new ForeignObjectHolder<>(author);
   }
 
-  @GraphQLIgnore
   public Person getAuthor() {
     return author.getForeignObject();
   }
@@ -400,22 +414,20 @@ public class Report extends AbstractCustomizableAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setAdvisorOrgUuid(String advisorOrgUuid) {
     this.advisorOrg = new ForeignObjectHolder<>(advisorOrgUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getAdvisorOrgUuid() {
     return advisorOrg.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "advisorOrg")
   public void setAdvisorOrg(Organization advisorOrg) {
     this.advisorOrg = new ForeignObjectHolder<>(advisorOrg);
   }
 
-  @GraphQLIgnore
   public Organization getAdvisorOrg() {
     return advisorOrg.getForeignObject();
   }
@@ -435,22 +447,20 @@ public class Report extends AbstractCustomizableAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setPrincipalOrgUuid(String principalOrgUuid) {
     this.principalOrg = new ForeignObjectHolder<>(principalOrgUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getPrincipalOrgUuid() {
     return principalOrg.getForeignUuid();
   }
 
-  @GraphQLIgnore
   public Organization getPrincipalOrg() {
     return principalOrg.getForeignObject();
   }
 
+  @GraphQLInputField(name = "principalOrg")
   public void setPrincipalOrg(Organization principalOrg) {
     this.principalOrg = new ForeignObjectHolder<>(principalOrg);
   }
@@ -464,11 +474,11 @@ public class Report extends AbstractCustomizableAnetBean {
     return comments;
   }
 
+  @GraphQLInputField(name = "comments")
   public void setComments(List<Comment> comments) {
     this.comments = comments;
   }
 
-  @GraphQLIgnore
   public List<Comment> getComments() {
     return comments;
   }
@@ -523,11 +533,11 @@ public class Report extends AbstractCustomizableAnetBean {
     });
   }
 
-  @GraphQLIgnore
   public List<ReportAction> getWorkflow() {
     return workflow;
   }
 
+  @GraphQLInputField(name = "workflow")
   public void setWorkflow(List<ReportAction> workflow) {
     this.workflow = workflow;
   }
@@ -601,11 +611,11 @@ public class Report extends AbstractCustomizableAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<Tag> getTags() {
     return tags;
   }
 
+  @GraphQLInputField(name = "tags")
   public void setTags(List<Tag> tags) {
     this.tags = tags;
   }
@@ -623,11 +633,11 @@ public class Report extends AbstractCustomizableAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public ReportSensitiveInformation getReportSensitiveInformation() {
     return reportSensitiveInformation;
   }
 
+  @GraphQLInputField(name = "reportSensitiveInformation")
   public void setReportSensitiveInformation(ReportSensitiveInformation reportSensitiveInformation) {
     this.reportSensitiveInformation = reportSensitiveInformation;
   }
@@ -642,17 +652,16 @@ public class Report extends AbstractCustomizableAnetBean {
     return authorizationGroups;
   }
 
+  @GraphQLInputField(name = "authorizationGroups")
   public void setAuthorizationGroups(List<AuthorizationGroup> authorizationGroups) {
     this.authorizationGroups = authorizationGroups;
   }
 
-  @GraphQLIgnore
   public List<AuthorizationGroup> getAuthorizationGroups() {
     return authorizationGroups;
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public boolean isFutureEngagement() {
     return engagementDate != null && engagementDate.isAfter(Utils.endOfToday());
   }

@@ -104,7 +104,6 @@ const BasePositionForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Position.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >

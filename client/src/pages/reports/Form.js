@@ -261,7 +261,6 @@ const BaseReportForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Report.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >
@@ -368,7 +367,7 @@ const BaseReportForm = props => {
             }
           }
         }
-        const primaryAdvisors = (values.attendees || []).filter(
+        const primaryAdvisors = values.attendees.filter(
           a => a.role === Person.ROLE.ADVISOR && a.primary === true
         )
         const primaryAdvisor = primaryAdvisors.length
@@ -883,7 +882,7 @@ const BaseReportForm = props => {
                 title="Engagement assessments"
                 id="engagement-assessments"
               >
-                {(values.tasks || []).map(task => {
+                {values.tasks.map(task => {
                   if (!task.customFields) {
                     return null
                   }
@@ -1126,9 +1125,9 @@ const BaseReportForm = props => {
       report.keyOutcomes = ""
     }
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
-    report.tags = (values.reportTags || []).map(tag => ({ uuid: tag.id }))
+    report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = (values.attendees || []).map(a =>
+    report.attendees = values.attendees.map(a =>
       Object.without(
         a,
         "firstName",
@@ -1139,9 +1138,7 @@ const BaseReportForm = props => {
       )
     )
     // strip tasks fields not in data model
-    report.tasks = (values.tasks || []).map(t =>
-      Object.without(t, "formCustomFields")
-    )
+    report.tasks = values.tasks.map(t => Object.without(t, "formCustomFields"))
     report.location = utils.getReference(report.location)
     // customFields should contain the JSON of all the visible custom fields
     if (values.formCustomFields.invisibleCustomFields) {
