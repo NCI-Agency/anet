@@ -142,7 +142,9 @@ const GQL_UPDATE_REPORT = gql`
       }
     }
     updateReportAssessments(report: $report, assessments: $notes)
-      @include(if: $withNotes)
+      @include(if: $withNotes) {
+      uuid
+    }
   }
 `
 const GQL_DELETE_REPORT = gql`
@@ -150,11 +152,13 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
-// const GQL_CREATE_NOTES = gql`
-//   mutation($notes: [NoteInput]) {
-//     createNotes(notes: $notes)
-//   }
-// `
+const GQL_UPDATE_NOTES = gql`
+  mutation($report: ReportInput!, $notes: [NoteInput]) {
+    updateReportAssessments(report: $report, assessments: $notes) {
+      uuid
+    }
+  }
+`
 
 const BaseReportForm = props => {
   const { currentUser, edit, title, initialValues, ...myFormProps } = props
@@ -1020,7 +1024,7 @@ const BaseReportForm = props => {
       )
     } else {
       const edit = isEditMode(autoSaveSettings.values)
-      const operation = edit ? "updateReport" : "createReport"
+      const operation = edit ? "updateReport" : "updateReportAssessments"
       save(autoSaveSettings.values, false)
         .then(response => {
           const newValues = _cloneDeep(autoSaveSettings.values)
@@ -1097,7 +1101,7 @@ const BaseReportForm = props => {
 
   function onSubmitSuccess(response, values, resetForm) {
     const edit = isEditMode(values)
-    const operation = edit ? "updateReport" : "createReport"
+    const operation = edit ? "updateReport" : "updateReportAssessments"
     const report = new Report({
       uuid: response[operation].uuid
         ? response[operation].uuid
@@ -1122,6 +1126,36 @@ const BaseReportForm = props => {
     )
   }
 
+  function createTaskAssessmentsNotes(values, reportUuid) {
+    const selectedTasksUuids = values.tasks.map(t => t.uuid)
+    return Object.keys(values.taskAssessments)
+      .filter(
+        key =>
+          selectedTasksUuids.includes(key) &&
+          !isEmptyTaskAssessment(values.taskAssessments[key])
+      )
+      .map(key => {
+        const noteObj = {
+          type: NOTE_TYPE.PARTNER_ASSESSMENT,
+          noteRelatedObjects: [
+            {
+              relatedObjectType: "tasks",
+              relatedObjectUuid: key
+            },
+            {
+              relatedObjectType: "reports",
+              relatedObjectUuid: reportUuid
+            }
+          ],
+          text: JSON.stringify(values.taskAssessments[key])
+        }
+        const initialAssessmentUuid = values.initialTaskToAssessmentUuid[key]
+        if (initialAssessmentUuid) {
+          noteObj.uuid = initialAssessmentUuid
+        }
+        return noteObj
+      })
+  }
   function save(values, sendEmail) {
     const report = Object.without(
       new Report(values),
@@ -1177,37 +1211,19 @@ const BaseReportForm = props => {
     if (edit) {
       variables.sendEditEmail = sendEmail
       // Add an additional mutation to create notes for the taskAssessments
-      const selectedTasksUuids = values.tasks.map(t => t.uuid)
-      variables.notes = Object.keys(values.taskAssessments)
-        .filter(
-          key =>
-            selectedTasksUuids.includes(key) &&
-            !isEmptyTaskAssessment(values.taskAssessments[key])
-        )
-        .map(key => {
-          const noteObj = {
-            type: NOTE_TYPE.PARTNER_ASSESSMENT,
-            noteRelatedObjects: [
-              {
-                relatedObjectType: "tasks",
-                relatedObjectUuid: key
-              },
-              {
-                relatedObjectType: "reports",
-                relatedObjectUuid: props.initialValues.uuid
-              }
-            ],
-            text: JSON.stringify(values.taskAssessments[key])
-          }
-          const initialAssessmentUuid = values.initialTaskToAssessmentUuid[key]
-          if (initialAssessmentUuid) {
-            noteObj.uuid = initialAssessmentUuid
-          }
-          return noteObj
-        })
+      variables.notes = createTaskAssessmentsNotes(values, report.uuid)
       variables.withNotes = !!variables.notes
+      return API.mutation(GQL_UPDATE_REPORT, variables)
+    } else {
+      return API.mutation(GQL_CREATE_REPORT, variables).then(response => {
+        const updateNotesVariables = { report: response.createReport }
+        updateNotesVariables.notes = createTaskAssessmentsNotes(
+          values,
+          response.createReport.uuid
+        )
+        return API.mutation(GQL_UPDATE_NOTES, updateNotesVariables)
+      })
     }
-    return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
   }
 }
 

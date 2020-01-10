@@ -1083,7 +1083,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "updateReportAssessments")
-  public void updateReportAssessments(@GraphQLRootContext Map<String, Object> context,
+  public Report updateReportAssessments(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r,
       @GraphQLArgument(name = "assessments") List<Note> assessments) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -1106,6 +1106,9 @@ public class ReportResource {
         updateAssessment(curr, existingAssessment);
       }
     }
+    // FIXME: Change this, it was added to be able to quickly also create report assessments after
+    // having created a report
+    return r;
   }
 
   private void updateAssessment(Note newAssessment, Note oldAssessment) {
