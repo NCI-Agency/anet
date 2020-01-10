@@ -34,6 +34,8 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.Note;
+import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -51,6 +53,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.DailyRollupEmail;
@@ -1076,6 +1079,42 @@ public class ReportResource {
       }
 
       return result;
+    }
+  }
+
+  @GraphQLMutation(name = "updateReportAssessments")
+  public void updateReportAssessments(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "report") Report r,
+      @GraphQLArgument(name = "assessments") List<Note> assessments) {
+    final Person user = DaoUtils.getUserFromContext(context);
+
+    for (int i = 0; i < assessments.size(); i++) {
+      Note n = assessments.get(i);
+      n.setAuthorUuid(DaoUtils.getUuid(user));
+    }
+    List<Note> existingNotes = r.loadNotes(engine.getContext()).join();
+    List<Note> existingAssessments = existingNotes.stream()
+        .filter(n -> n.getType().equals(NoteType.PARTNER_ASSESSMENT)).collect(Collectors.toList());
+    Utils.addRemoveElementsByUuid(existingAssessments, assessments,
+        newAssessment -> engine.getNoteDao().insert(newAssessment),
+        oldAssessmentUuid -> engine.getNoteDao().delete(oldAssessmentUuid));
+    for (int i = 0; i < assessments.size(); i++) {
+      Note curr = assessments.get(i);
+      Note existingAssessment = Utils.getByUuid(existingAssessments, curr.getUuid());
+      if (existingAssessment != null) {
+        // Check for updates to assessment
+        updateAssessment(curr, existingAssessment);
+      }
+    }
+  }
+
+  private void updateAssessment(Note newAssessment, Note oldAssessment) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final NoteDao noteDao = engine.getNoteDao();
+    newAssessment.setUuid(oldAssessment.getUuid()); // Always want to make changes to the existing
+                                                    // group
+    if (!newAssessment.getText().equals(oldAssessment.getText())) {
+      noteDao.update(newAssessment);
     }
   }
 }

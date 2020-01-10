@@ -141,7 +141,8 @@ const GQL_UPDATE_REPORT = gql`
         text
       }
     }
-    createNotes(notes: $notes) @include(if: $withNotes)
+    updateReportAssessments(report: $report, assessments: $notes)
+      @include(if: $withNotes)
   }
 `
 const GQL_DELETE_REPORT = gql`
@@ -258,6 +259,25 @@ const BaseReportForm = props => {
       text: tag.name
     }))
   }
+
+  const initialTaskAssessments = initialValues.notes.filter(
+    n => n.type === NOTE_TYPE.PARTNER_ASSESSMENT
+  )
+  // When updating the assessments we need the uuid of the assessment related to each task
+  initialValues.initialTaskToAssessmentUuid = initialTaskAssessments.map(
+    ta => ({
+      [ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
+        .relatedObjectUuid]: ta.uuid
+    })
+  )
+  const taskAssessmentsValues = initialTaskAssessments.map(ta => [
+    ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
+      .relatedObjectUuid,
+    JSON.parse(ta.text)
+  ])
+  // Get initial task assessments values
+  initialValues.taskAssessments = Object.fromEntries(taskAssessmentsValues)
+
   return (
     <Formik
       enableReinitialize
@@ -1094,6 +1114,14 @@ const BaseReportForm = props => {
     })
   }
 
+  function isEmptyTaskAssessment(assessment) {
+    return (
+      (Object.keys(assessment).length === 1 &&
+        Object.keys(assessment)[0] === "invisibleCustomFields") ||
+      _isEmpty(assessment)
+    )
+  }
+
   function save(values, sendEmail) {
     const report = Object.without(
       new Report(values),
@@ -1106,7 +1134,8 @@ const BaseReportForm = props => {
       "customFields", // initial JSON from the db
       "formCustomFields",
       "tasksLevel1",
-      "taskAssessments"
+      "taskAssessments",
+      "initialTaskToAssessmentUuid"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1148,22 +1177,34 @@ const BaseReportForm = props => {
     if (edit) {
       variables.sendEditEmail = sendEmail
       // Add an additional mutation to create notes for the taskAssessments
+      const selectedTasksUuids = values.tasks.map(t => t.uuid)
       variables.notes = Object.keys(values.taskAssessments)
-        .filter(key => !_isEmpty(values.taskAssessments[key]))
-        .map(key => ({
-          type: NOTE_TYPE.PARTNER_ASSESSMENT,
-          noteRelatedObjects: [
-            {
-              relatedObjectType: "tasks",
-              relatedObjectUuid: key
-            },
-            {
-              relatedObjectType: "reports",
-              relatedObjectUuid: props.initialValues.uuid
-            }
-          ],
-          text: JSON.stringify(values.taskAssessments[key])
-        }))
+        .filter(
+          key =>
+            selectedTasksUuids.includes(key) &&
+            !isEmptyTaskAssessment(values.taskAssessments[key])
+        )
+        .map(key => {
+          const noteObj = {
+            type: NOTE_TYPE.PARTNER_ASSESSMENT,
+            noteRelatedObjects: [
+              {
+                relatedObjectType: "tasks",
+                relatedObjectUuid: key
+              },
+              {
+                relatedObjectType: "reports",
+                relatedObjectUuid: props.initialValues.uuid
+              }
+            ],
+            text: JSON.stringify(values.taskAssessments[key])
+          }
+          const initialAssessmentUuid = values.initialTaskToAssessmentUuid[key]
+          if (initialAssessmentUuid) {
+            noteObj.uuid = initialAssessmentUuid
+          }
+          return noteObj
+        })
       variables.withNotes = !!variables.notes
     }
     return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
