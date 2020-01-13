@@ -126,7 +126,7 @@ const BasePositionTable = props => {
           </thead>
           <tbody>
             {Position.map(positions, pos => {
-              let nameComponents = []
+              const nameComponents = []
               pos.name && nameComponents.push(pos.name)
               pos.code && nameComponents.push(pos.code)
               return (

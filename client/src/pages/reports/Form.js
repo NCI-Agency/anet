@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
@@ -246,7 +248,6 @@ const BaseReportForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Report.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >
@@ -352,7 +353,7 @@ const BaseReportForm = props => {
             }
           }
         }
-        const primaryAdvisors = (values.attendees || []).filter(
+        const primaryAdvisors = values.attendees.filter(
           a => a.role === Person.ROLE.ADVISOR && a.primary === true
         )
         const primaryAdvisor = primaryAdvisors.length
@@ -504,22 +505,45 @@ const BaseReportForm = props => {
                   />
                 )}
 
-                <AdvancedSingleSelect
-                  fieldName="location"
-                  fieldLabel="Location"
-                  placeholder="Search for the engagement location..."
-                  value={values.location}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={LocationOverlayRow}
-                  filterDefs={locationFilters}
-                  onChange={value => setFieldValue("location", value)}
-                  objectType={Location}
-                  fields={Location.autocompleteQuery}
-                  valueKey="name"
-                  addon={LOCATIONS_ICON}
-                  shortcutsTitle="Recent Locations"
-                  shortcuts={recents.locations}
-                  renderExtraCol
+                <FastField
+                  name="location"
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("location", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="location"
+                      placeholder="Search for the engagement location..."
+                      value={values.location}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={LocationOverlayRow}
+                      filterDefs={locationFilters}
+                      objectType={Location}
+                      fields={Location.autocompleteQuery}
+                      valueKey="name"
+                      addon={LOCATIONS_ICON}
+                    />
+                  }
+                  extraColElem={
+                    <>
+                      <FieldHelper.FieldShortcuts
+                        title="Recent Locations"
+                        shortcuts={recents.locations}
+                        fieldName="location"
+                        objectType={Location}
+                        curValue={values.location}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("location", value)
+                        }}
+                        handleAddItem={FieldHelper.handleSingleSelectAddItem}
+                      />
+                    </>
+                  }
                 />
 
                 {!isFutureEngagement && (
@@ -609,40 +633,58 @@ const BaseReportForm = props => {
                 }
                 id="attendance-fieldset"
               >
-                <AdvancedMultiSelect
-                  fieldName="attendees"
-                  fieldLabel="Attendees"
-                  placeholder="Search for the meeting attendees..."
-                  value={values.attendees}
-                  renderSelected={
-                    <AttendeesTable
-                      attendees={values.attendees}
-                      onChange={value => setFieldValue("attendees", value)}
-                      showDelete
-                    />
-                  }
-                  overlayColumns={[
-                    "Name",
-                    "Position",
-                    "Location",
-                    "Organization"
-                  ]}
-                  overlayRenderRow={PersonDetailedOverlayRow}
-                  filterDefs={attendeesFilters}
+                <FastField
+                  name="attendees"
+                  component={FieldHelper.renderSpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
-                    setFieldTouched("attendees", true, false)
+                    setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
                     updateAttendees(setFieldValue, "attendees", value)
                   }}
-                  objectType={Person}
-                  queryParams={{
-                    status: [Person.STATUS.ACTIVE]
-                  }}
-                  fields={Person.autocompleteQuery}
-                  addon={PEOPLE_ICON}
-                  shortcutsTitle="Recent Attendees"
-                  shortcuts={recents.persons}
-                  renderExtraCol
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="attendees"
+                      placeholder="Search for the meeting attendees..."
+                      value={values.attendees}
+                      renderSelected={
+                        <AttendeesTable
+                          attendees={values.attendees}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={[
+                        "Name",
+                        "Position",
+                        "Location",
+                        "Organization"
+                      ]}
+                      overlayRenderRow={PersonDetailedOverlayRow}
+                      filterDefs={attendeesFilters}
+                      objectType={Person}
+                      queryParams={{
+                        status: [Person.STATUS.ACTIVE]
+                      }}
+                      fields={Person.autocompleteQuery}
+                      addon={PEOPLE_ICON}
+                    />
+                  }
+                  extraColElem={
+                    <>
+                      <FieldHelper.FieldShortcuts
+                        title="Recent attendees"
+                        shortcuts={recents.persons}
+                        fieldName="attendees"
+                        objectType={Person}
+                        curValue={values.attendees}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
+                          updateAttendees(setFieldValue, "attendees", value)
+                        }}
+                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                      />
+                    </>
+                  }
                 />
               </Fieldset>
 
@@ -650,64 +692,91 @@ const BaseReportForm = props => {
                 title={Settings.fields.task.longLabel}
                 className="tasks-selector"
               >
-                <AdvancedMultiSelect
-                  fieldName="tasksLevel1"
-                  fieldLabel="Objectives"
-                  placeholder="Search for objectives"
-                  value={values.tasksLevel1}
-                  renderSelected={
-                    <TaskTable
-                      id="tasks-objectives"
-                      tasks={values.tasksLevel1}
-                      showDelete
-                      showOrganization
-                    />
-                  }
-                  overlayColumns={["Name", "Organization"]}
-                  overlayRenderRow={TaskDetailedOverlayRow}
-                  filterDefs={tasksFiltersLevel1}
-                  onChange={value => {
-                    setFieldValue("tasksLevel1", value)
-                    setFieldTouched("tasksLevel1", true)
-                  }}
-                  objectType={Task}
-                  queryParams={{ status: Task.STATUS.ACTIVE }}
-                  fields={Task.autocompleteQuery}
-                  addon={TASKS_ICON}
-                />
-
-                <AdvancedMultiSelect
-                  fieldName="tasks"
-                  fieldLabel={Settings.fields.task.shortLabel}
-                  placeholder={`Search for ${pluralize(
-                    Settings.fields.task.shortLabel
-                  )}...`}
-                  value={values.tasks}
-                  renderSelected={
-                    <TaskTable
-                      id="tasks-tasks"
-                      tasks={values.tasks}
-                      showDelete
-                      showOrganization
-                    />
-                  }
-                  overlayColumns={["Name", "Organization"]}
-                  overlayRenderRow={TaskDetailedOverlayRow}
-                  filterDefs={tasksFiltersLevel2}
+                <FastField
+                  name="tasksLevel1"
+                  label="Objectives"
+                  component={FieldHelper.renderSpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
-                    setFieldTouched("tasks", true, false)
+                    setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("tasksLevel1", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="tasksLevel1"
+                      placeholder="Search for objectives"
+                      value={values.tasksLevel1}
+                      renderSelected={
+                        <TaskTable
+                          id="tasks-objectives"
+                          tasks={values.tasksLevel1}
+                          showDelete
+                          showOrganization
+                        />
+                      }
+                      overlayColumns={["Name", "Organization"]}
+                      overlayRenderRow={TaskDetailedOverlayRow}
+                      filterDefs={tasksFiltersLevel1}
+                      objectType={Task}
+                      queryParams={{ status: Task.STATUS.ACTIVE }}
+                      fields={Task.autocompleteQuery}
+                      addon={TASKS_ICON}
+                    />
+                  }
+                />
+
+                <Field
+                  name="tasks"
+                  label={Settings.fields.task.shortLabel}
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("tasks", value)
                   }}
-                  objectType={Task}
-                  queryParams={{ status: Task.STATUS.ACTIVE }}
-                  fields={Task.autocompleteQuery}
-                  addon={TASKS_ICON}
-                  shortcutsTitle={`Recent ${pluralize(
-                    Settings.fields.task.shortLabel
-                  )}`}
-                  shortcuts={recents.tasks}
-                  renderExtraCol
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="tasks"
+                      placeholder={`Search for ${pluralize(
+                        Settings.fields.task.shortLabel
+                      )}...`}
+                      value={values.tasks}
+                      renderSelected={
+                        <TaskTable
+                          id="tasks-tasks"
+                          tasks={values.tasks}
+                          showDelete
+                          showOrganization
+                        />
+                      }
+                      overlayColumns={["Name", "Organization"]}
+                      overlayRenderRow={TaskDetailedOverlayRow}
+                      filterDefs={tasksFiltersLevel2}
+                      objectType={Task}
+                      queryParams={{ status: Task.STATUS.ACTIVE }}
+                      fields={Task.autocompleteQuery}
+                      addon={TASKS_ICON}
+                    />
+                  }
+                  extraColElem={
+                    <>
+                      <FieldHelper.FieldShortcuts
+                        title={`Recent ${pluralize(
+                          Settings.fields.task.shortLabel
+                        )}`}
+                        shortcuts={recents.tasks}
+                        fieldName="tasks"
+                        objectType={Task}
+                        curValue={values.tasks}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("tasks", value)
+                        }}
+                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                      />
+                    </>
+                  }
                 />
               </Fieldset>
 
@@ -820,30 +889,60 @@ const BaseReportForm = props => {
                           />
                         }
                       />
-                      <AdvancedMultiSelect
-                        fieldName="authorizationGroups"
-                        fieldLabel="Authorization Groups"
-                        placeholder="Search for authorization groups..."
-                        value={values.authorizationGroups}
-                        renderSelected={
-                          <AuthorizationGroupTable
-                            authorizationGroups={values.authorizationGroups}
-                            showDelete
+                      <FastField
+                        name="authorizationGroups"
+                        label="Authorization Groups"
+                        component={FieldHelper.renderSpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("authorizationGroups", value)
+                        }}
+                        widget={
+                          <AdvancedMultiSelect
+                            fieldName="authorizationGroups"
+                            placeholder="Search for authorization groups..."
+                            value={values.authorizationGroups}
+                            renderSelected={
+                              <AuthorizationGroupTable
+                                authorizationGroups={values.authorizationGroups}
+                                showDelete
+                              />
+                            }
+                            overlayColumns={["Name", "Description"]}
+                            overlayRenderRow={AuthorizationGroupOverlayRow}
+                            filterDefs={authorizationGroupsFilters}
+                            objectType={AuthorizationGroup}
+                            queryParams={{
+                              status: AuthorizationGroup.STATUS.ACTIVE
+                            }}
+                            fields={AuthorizationGroup.autocompleteQuery}
+                            addon={<Icon icon={IconNames.LOCK} />}
                           />
                         }
-                        overlayColumns={["Name", "Description"]}
-                        overlayRenderRow={AuthorizationGroupOverlayRow}
-                        filterDefs={authorizationGroupsFilters}
-                        onChange={value =>
-                          setFieldValue("authorizationGroups", value)}
-                        objectType={AuthorizationGroup}
-                        queryParams={{
-                          status: AuthorizationGroup.STATUS.ACTIVE
-                        }}
-                        fields={AuthorizationGroup.autocompleteQuery}
-                        shortcutsTitle="Recent Authorization Groups"
-                        shortcuts={recents.authorizationGroups}
-                        renderExtraCol
+                        extraColElem={
+                          <>
+                            <FieldHelper.FieldShortcuts
+                              title="Recent Authorization Groups"
+                              shortcuts={recents.authorizationGroups}
+                              fieldName="authorizationGroups"
+                              objectType={AuthorizationGroup}
+                              curValue={values.authorizationGroups}
+                              onChange={value => {
+                                // validation will be done by setFieldValue
+                                setFieldTouched(
+                                  "authorizationGroups",
+                                  true,
+                                  false
+                                ) // onBlur doesn't work when selecting an option
+                                setFieldValue("authorizationGroups", value)
+                              }}
+                              handleAddItem={
+                                FieldHelper.handleMultiSelectAddItem
+                              }
+                            />
+                          </>
+                        }
                       />
                     </div>
                   )}
@@ -1065,7 +1164,7 @@ const BaseReportForm = props => {
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = (values.attendees || []).map(a =>
+    report.attendees = values.attendees.map(a =>
       Object.without(a, "firstName", "lastName", "position")
     )
     report.location = utils.getReference(report.location)

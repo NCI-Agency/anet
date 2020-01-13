@@ -153,7 +153,7 @@ const App = props => {
     organizations = Organization.fromArray(organizations)
     organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
 
-    let settings = {}
+    const settings = {}
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
     )

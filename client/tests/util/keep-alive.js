@@ -2,29 +2,32 @@
 // as suggested on https://www.browserstack.com/automate/node#add-on
 // and then modified to remove eslint warnings
 
-let http = require("http")
-let https = require("https")
+const http = require("http")
+const https = require("https")
 
-let keepAliveTimeout = 30 * 1000
+const keepAliveTimeout = 30 * 1000
 
-if (http.globalAgent && http.globalAgent.hasOwnProperty("keepAlive")) {
+if (
+  http.globalAgent &&
+  Object.prototype.hasOwnProperty.call(http.globalAgent, "keepAlive")
+) {
   http.globalAgent.keepAlive = true
   https.globalAgent.keepAlive = true
   http.globalAgent.keepAliveMsecs = keepAliveTimeout
   https.globalAgent.keepAliveMsecs = keepAliveTimeout
 } else {
-  let agent = new http.Agent({
+  const agent = new http.Agent({
     keepAlive: true,
     keepAliveMsecs: keepAliveTimeout
   })
 
-  let secureAgent = new https.Agent({
+  const secureAgent = new https.Agent({
     keepAlive: true,
     keepAliveMsecs: keepAliveTimeout
   })
 
-  let httpRequest = http.request
-  let httpsRequest = https.request
+  const httpRequest = http.request
+  const httpsRequest = https.request
 
   http.request = function(options, callback) {
     if (options.protocol === "https:") {

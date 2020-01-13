@@ -51,7 +51,6 @@ const AuthorizationGroupForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={AuthorizationGroup.yupSchema}
-      isInitialValid
       {...myFormProps}
     >
       {({
@@ -60,6 +59,7 @@ const AuthorizationGroupForm = props => {
         dirty,
         errors,
         setFieldValue,
+        setFieldTouched,
         values,
         submitForm
       }) => {
@@ -128,25 +128,38 @@ const AuthorizationGroupForm = props => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <AdvancedMultiSelect
-                  fieldName="positions"
-                  fieldLabel="Positions"
-                  placeholder="Search for a position..."
-                  value={values.positions}
-                  renderSelected={
-                    <PositionTable positions={values.positions} showDelete />
+                <Field
+                  name="positions"
+                  label="Positions"
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("positions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("positions", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="positions"
+                      placeholder="Search for a position..."
+                      value={values.positions}
+                      renderSelected={
+                        <PositionTable
+                          positions={values.positions}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={[
+                        "Position",
+                        "Organization",
+                        "Current Occupant"
+                      ]}
+                      overlayRenderRow={PositionOverlayRow}
+                      filterDefs={positionsFilters}
+                      objectType={Position}
+                      fields={Position.autocompleteQuery}
+                      addon={POSITIONS_ICON}
+                    />
                   }
-                  overlayColumns={[
-                    "Position",
-                    "Organization",
-                    "Current Occupant"
-                  ]}
-                  overlayRenderRow={PositionOverlayRow}
-                  filterDefs={positionsFilters}
-                  onChange={value => setFieldValue("positions", value)}
-                  objectType={Position}
-                  fields={Position.autocompleteQuery}
-                  addon={POSITIONS_ICON}
                 />
               </Fieldset>
 

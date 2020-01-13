@@ -344,7 +344,7 @@ const BaseReportShow = props => {
     <Formik
       enableReinitialize
       validationSchema={Report.yupSchema}
-      isInitialValid={() => Report.yupSchema.isValidSync(report)}
+      validateOnMount
       initialValues={report}
     >
       {({ isSubmitting, setSubmitting, isValid, setFieldValue, values }) => {
@@ -656,7 +656,7 @@ const BaseReportShow = props => {
 
               <Fieldset className="report-sub-form" title="Comments">
                 {report.comments.map(comment => {
-                  let createdAt = moment(comment.createdAt)
+                  const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
                       <LinkTo person={comment.author} />,

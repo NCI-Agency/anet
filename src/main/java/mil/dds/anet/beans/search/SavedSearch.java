@@ -2,7 +2,7 @@ package mil.dds.anet.beans.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
@@ -19,9 +19,16 @@ public class SavedSearch extends AbstractAnetBean {
     REPORTS, PEOPLE, TASKS, POSITIONS, ORGANIZATIONS, LOCATIONS
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   String name;
+  // annotated below
   private ForeignObjectHolder<Person> owner = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   SearchObjectType objectType;
+  @GraphQLQuery
+  @GraphQLInputField
   String query;
 
   public String getName() {
@@ -45,22 +52,20 @@ public class SavedSearch extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setOwnerUuid(String ownerUuid) {
     this.owner = new ForeignObjectHolder<>(ownerUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getOwnerUuid() {
     return owner.getForeignUuid();
   }
 
-  @GraphQLIgnore
   public Person getOwner() {
     return owner.getForeignObject();
   }
 
+  @GraphQLInputField(name = "owner")
   public void setOwner(Person owner) {
     this.owner = new ForeignObjectHolder<>(owner);
   }

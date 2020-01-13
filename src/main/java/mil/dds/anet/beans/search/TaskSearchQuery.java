@@ -1,5 +1,7 @@
 package mil.dds.anet.beans.search;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -7,25 +9,51 @@ import mil.dds.anet.beans.Task.TaskStatus;
 
 public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
+  @GraphQLQuery
+  @GraphQLInputField
   private String responsibleOrgUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean includeChildrenOrgs;
+  @GraphQLQuery
+  @GraphQLInputField
   private String category;
+  @GraphQLQuery
+  @GraphQLInputField
   private TaskStatus status;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant plannedCompletionEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant plannedCompletionStart;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant projectedCompletionEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant projectedCompletionStart;
+  @GraphQLQuery
+  @GraphQLInputField
   private String projectStatus;
+  @GraphQLQuery
+  @GraphQLInputField
   private String customField;
 
   // Find tasks who (don't) have the customFieldRef1 filled in
+  @GraphQLQuery
+  @GraphQLInputField
   Boolean hasCustomFieldRef1;
 
   // Search for tasks with one of the given parent Task(s)
+  @GraphQLQuery
+  @GraphQLInputField
   private List<String> customFieldRef1Uuid;
   // Include descendants recursively from the specified parent(s).
   // If true will include all tasks in the tree of the parent Task(s)
   // Including the parent Task(s).
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean customFieldRef1Recursively;
 
   public TaskSearchQuery() {

@@ -193,16 +193,12 @@ fieldset.danger {
 	background-color: #e0e0e0;
 }
 
-.header .logo img, .header input, .header button {
+.header .logo img, .header button {
 	height: 38px;
 }
 
 .header button {
 	font-weight: bold;
-}
-
-.header .row > div * {
-	margin: 0;
 }
 
 .header small span {
@@ -231,16 +227,6 @@ span.asLink:focus {
 	font-size: 18px;
 	text-align: center;
 	z-index: 10;
-}
-
-#advanced-search.popover {
-	max-width: 100%;
-}
-
-@media (min-width: 768px) {
-	#advanced-search.popover {
-		width: 750px;
-	}
 }
 
 .graphiql-container {
@@ -705,6 +691,36 @@ header.searchPagination {
 	font-size: 0.8em;
 }
 
+.advanced-select-popover .bp3-popover-content-sizing {
+	width: 100% !important;
+}
+
+.advanced-select-popover span.bp3-popover-target {
+	display: block;
+	width: 100%;
+}
+
+.advanced-select-popover .bp3-transition-container {
+	top: 35px !important;
+}
+
+.advanced-select-popover .bp3-popover-content {
+	min-width: 400px;
+	max-width: 90vw !important;
+}
+
+.advanced-search {
+	padding: 15px;
+}
+
+.advanced-search-content .form-group {
+	margin: 0 0 15px !important;
+}
+
+.advanced-search-form {
+	padding-bottom: 5px;
+}
+
 .advanced-search .col-xs-3 select {
 	margin-top: -8px;
 }
@@ -856,6 +872,11 @@ header.searchPagination {
   margin: 0em;
 }
 /* End of loading indicator */
+
+.modal.in .modal-dialog {
+	-webkit-transform: translate(0, 0);
+	transform: translate(0, 150px);
+}
 
 @media print {
 	.only-show-for-print {

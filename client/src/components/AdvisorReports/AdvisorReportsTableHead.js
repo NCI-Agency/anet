@@ -3,13 +3,13 @@ import PropTypes from "prop-types"
 import React from "react"
 
 const AdvisorReportsTableHead = props => {
-  let weekHeadings = []
-  let weekCols = []
+  const weekHeadings = []
+  const weekCols = []
 
   props.columnGroups.forEach(week => {
-    let keyWeek = `wk-${week}`
-    let keySubmitted = `s-${week}`
-    let keyAttended = `a-${week}`
+    const keyWeek = `wk-${week}`
+    const keySubmitted = `s-${week}`
+    const keyAttended = `a-${week}`
     weekHeadings.push(
       <th colSpan="2" key={keyWeek}>
         Week {week}

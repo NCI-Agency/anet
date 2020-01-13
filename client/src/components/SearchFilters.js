@@ -263,7 +263,10 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         })
       },
       State: {
-        component: ReportStateSearch
+        component: ReportStateSearch,
+        props: {
+          queryKey: "state"
+        }
       },
       "Engagement Status": {
         component: SelectSearchFilter,

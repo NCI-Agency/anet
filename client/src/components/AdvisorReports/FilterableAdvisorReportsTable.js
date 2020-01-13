@@ -74,7 +74,7 @@ const FilterableAdvisorReportsTable = props => {
       .startOf("week")
       .subtract(DEFAULT_WEEKS_AGO, "weeks")
     let currentDate = dateStart
-    let weekColumns = []
+    const weekColumns = []
     while (currentDate.isBefore(dateEnd)) {
       weekColumns.push(currentDate.week())
       currentDate = currentDate.add(1, "weeks")
@@ -83,28 +83,26 @@ const FilterableAdvisorReportsTable = props => {
   }
 
   function convertArrayOfObjectsToCSV(args) {
-    let result, csvGroupCols, csvCols, columnDelimiter, lineDelimiter, data
-
-    data = args.data || null
+    const data = args.data || null
     if (data === null || !data.length) {
       return null
     }
 
-    columnDelimiter = args.columnDelimiter || ","
-    lineDelimiter = args.lineDelimiter || "\n"
+    const columnDelimiter = args.columnDelimiter || ","
+    const lineDelimiter = args.lineDelimiter || "\n"
 
-    let weekColumns = getWeekColumns()
-    csvGroupCols = [""]
+    const weekColumns = getWeekColumns()
+    const csvGroupCols = [""]
     weekColumns.forEach(column => {
       csvGroupCols.push(column)
       csvGroupCols.push("")
     })
 
-    result = ""
+    let result = ""
     result += csvGroupCols.join(columnDelimiter)
     result += lineDelimiter
 
-    csvCols = ["Organization name"]
+    const csvCols = ["Organization name"]
     weekColumns.forEach(column => {
       csvCols.push("Reports submitted")
       csvCols.push("Engagements attended")
@@ -114,7 +112,7 @@ const FilterableAdvisorReportsTable = props => {
     result += lineDelimiter
 
     data.forEach(item => {
-      let stats = item.stats
+      const stats = item.stats
       result += item.name
       weekColumns.forEach((column, index) => {
         result += columnDelimiter
@@ -133,13 +131,12 @@ const FilterableAdvisorReportsTable = props => {
   }
 
   function downloadCSV(args) {
-    let filename
-    let csv = convertArrayOfObjectsToCSV({
+    const csv = convertArrayOfObjectsToCSV({
       data: args.data
     })
     if (csv === null) return
 
-    filename = args.filename || "export-advisor-report.csv"
+    const filename = args.filename || "export-advisor-report.csv"
     var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
 
     if (navigator.msSaveBlob) {

@@ -213,6 +213,18 @@ const OrganizationalChart = props => {
       .append("g")
       .attr("class", "org")
       .attr("transform", d => `translate(${d.x},${d.y})`)
+      .on("click", d => {
+        const index = this.state.collapsed.indexOf(d.data.uuid)
+        const newCollapsed = this.state.collapsed.slice()
+        if (index > -1) {
+          newCollapsed.splice(index, 1)
+        } else {
+          newCollapsed.push(d.data.uuid)
+        }
+        this.setState({
+          collapsed: newCollapsed
+        })
+      })
 
     nodeSelect.exit().remove()
 

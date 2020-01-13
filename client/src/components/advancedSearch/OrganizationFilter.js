@@ -98,8 +98,6 @@ export default class OrganizationFilter extends Component {
         <AdvancedSingleSelect
           {...advancedSelectProps}
           fieldName={this.props.queryKey}
-          fieldLabel={null}
-          vertical
           showRemoveButton={false}
           filterDefs={organizationWidgetFilters}
           overlayColumns={["Name"]}
@@ -112,13 +110,15 @@ export default class OrganizationFilter extends Component {
           onChange={this.onChange}
           value={this.state.value}
         />
-        <Checkbox
-          inline
-          checked={this.state.includeChildOrgs}
-          onChange={this.changeIncludeChildren}
-        >
-          Include sub-organizations
-        </Checkbox>
+        <div>
+          <Checkbox
+            inline
+            checked={this.state.includeChildOrgs}
+            onChange={this.changeIncludeChildren}
+          >
+            Include sub-organizations
+          </Checkbox>
+        </div>
       </div>
     )
   }
@@ -146,7 +146,7 @@ export default class OrganizationFilter extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       if (typeof value === "object") {
         value.includeChildOrgs = this.state.includeChildOrgs
         value.toQuery = this.toQuery

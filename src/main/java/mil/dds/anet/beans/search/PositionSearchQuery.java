@@ -1,5 +1,7 @@
 package mil.dds.anet.beans.search;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,13 +10,29 @@ import mil.dds.anet.beans.Position.PositionType;
 
 public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortBy> {
 
+  @GraphQLQuery
+  @GraphQLInputField
   Boolean matchPersonName;
+  @GraphQLQuery
+  @GraphQLInputField
   String organizationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   Boolean includeChildrenOrgs;
+  @GraphQLQuery
+  @GraphQLInputField
   List<PositionType> type;
+  @GraphQLQuery
+  @GraphQLInputField
   Boolean isFilled;
+  @GraphQLQuery
+  @GraphQLInputField
   String locationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   PositionStatus status;
+  @GraphQLQuery
+  @GraphQLInputField
   private String authorizationGroupUuid;
 
   public PositionSearchQuery() {

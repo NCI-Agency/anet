@@ -1,6 +1,6 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
@@ -17,12 +17,18 @@ public class AuthorizationGroup extends AbstractAnetBean {
     ACTIVE, INACTIVE
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   private String name;
+  @GraphQLQuery
+  @GraphQLInputField
   private String description;
+  // annotated below
   private List<Position> positions;
+  @GraphQLQuery
+  @GraphQLInputField
   private AuthorizationGroupStatus status;
 
-  @GraphQLQuery(name = "name")
   public String getName() {
     return name;
   }
@@ -31,7 +37,6 @@ public class AuthorizationGroup extends AbstractAnetBean {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  @GraphQLQuery(name = "description")
   public String getDescription() {
     return description;
   }
@@ -53,16 +58,15 @@ public class AuthorizationGroup extends AbstractAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<Position> getPositions() {
     return positions;
   }
 
+  @GraphQLInputField(name = "positions")
   public void setPositions(List<Position> positions) {
     this.positions = positions;
   }
 
-  @GraphQLQuery(name = "status")
   public AuthorizationGroupStatus getStatus() {
     return status;
   }

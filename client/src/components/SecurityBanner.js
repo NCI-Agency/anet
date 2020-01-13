@@ -21,6 +21,7 @@ class BaseSecurityBanner extends Component {
     currentUser: PropTypes.instanceOf(Person),
     appSettings: PropTypes.object
   }
+
   static defaultProps = {
     appSettings: {}
   }

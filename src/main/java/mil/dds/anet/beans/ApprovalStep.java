@@ -1,6 +1,6 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
@@ -17,10 +17,19 @@ public class ApprovalStep extends AbstractAnetBean {
     PLANNING_APPROVAL, REPORT_APPROVAL
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   ApprovalStepType type;
+  // annotated below
   List<Position> approvers;
+  @GraphQLQuery
+  @GraphQLInputField
   String nextStepUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   String advisorOrganizationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   String name;
 
   @GraphQLQuery(name = "approvers")
@@ -36,16 +45,15 @@ public class ApprovalStep extends AbstractAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<Position> getApprovers() {
     return approvers;
   }
 
+  @GraphQLInputField(name = "approvers")
   public void setApprovers(List<Position> approvers) {
     this.approvers = approvers;
   }
 
-  @GraphQLQuery(name = "nextStepUuid")
   public String getNextStepUuid() {
     return nextStepUuid;
   }
@@ -54,7 +62,6 @@ public class ApprovalStep extends AbstractAnetBean {
     this.nextStepUuid = nextStepUuid;
   }
 
-  @GraphQLQuery(name = "advisorOrganizationUuid")
   public String getAdvisorOrganizationUuid() {
     return advisorOrganizationUuid;
   }
@@ -63,7 +70,6 @@ public class ApprovalStep extends AbstractAnetBean {
     this.advisorOrganizationUuid = advisorOrganizationUuid;
   }
 
-  @GraphQLQuery(name = "name")
   public String getName() {
     return name;
   }
@@ -72,7 +78,6 @@ public class ApprovalStep extends AbstractAnetBean {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  @GraphQLQuery(name = "type")
   public ApprovalStepType getType() {
     return type;
   }

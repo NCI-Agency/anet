@@ -4,7 +4,7 @@ const initialState = {}
 
 const pages = (state = initialState, action) => {
   switch (action.type) {
-    case SET_PAGINATION:
+    case SET_PAGINATION: {
       const { paginationKey, pageNum } = action.payload
       return {
         ...state,
@@ -12,6 +12,7 @@ const pages = (state = initialState, action) => {
           pageNum
         }
       }
+    }
     case RESET_PAGINATION:
       return {}
     default:
