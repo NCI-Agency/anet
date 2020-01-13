@@ -155,12 +155,12 @@ const AdvancedSearch = props => {
                   </Popover>
                 )}
               </Col>
-              <Col md={4}>
+              <Col md={4} style={{ whiteSpace: "nowrap", textAlign: "right" }}>
                 <Button
                   className={Classes.POPOVER_DISMISS}
                   intent="danger"
                   onClick={props.onCancel}
-                  style={{ marginRight: 20 }}
+                  style={{ marginLeft: 20 }}
                 >
                   Cancel
                 </Button>
@@ -170,7 +170,7 @@ const AdvancedSearch = props => {
                   type="submit"
                   intent="success"
                   onClick={onSubmit}
-                  style={{ marginRight: 20 }}
+                  style={{ marginLeft: 20 }}
                 >
                   Search
                 </Button>
