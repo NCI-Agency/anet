@@ -23,8 +23,9 @@
 	<property name="non_clustered" value="NONCLUSTERED" dbms="mssql" />
 	<property name="non_clustered" value="" dbms="postgresql,sqlite" />
 
-	<!-- Full-text search configuration 'anet' should exist already, see `prepare-psql.sql`: -->
-	<property name="fts_config" value="'anet'" dbms="postgresql" />
+	<!-- Full-text search configuration used by PostgreSQL -->
+	<property name="fts_config_name" value="anet" dbms="postgresql" />
+	<property name="fts_config" value="'${fts_config_name}'" dbms="postgresql" />
 	<!-- Full-text search weights -->
 	<property name="fts_high" value="'A'" dbms="postgresql" />
 	<property name="fts_low" value="'B'" dbms="postgresql" />
@@ -2735,9 +2736,9 @@
 	<changeSet id="add-postgresql-fulltext" author="gjvoosten" dbms="postgresql">
 		<sql>
 			<!-- Create text search configuration -->
-			DROP TEXT SEARCH CONFIGURATION IF EXISTS anet;
-			CREATE TEXT SEARCH CONFIGURATION anet ( COPY = pg_catalog.english );
-			ALTER TEXT SEARCH CONFIGURATION anet ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;
+			DROP TEXT SEARCH CONFIGURATION IF EXISTS ${fts_config_name};
+			CREATE TEXT SEARCH CONFIGURATION ${fts_config_name} ( COPY = pg_catalog.english );
+			ALTER TEXT SEARCH CONFIGURATION ${fts_config_name} ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;
 
 			<!-- Add generated full-text columns -->
 			ALTER TABLE "authorizationGroups"
@@ -2947,7 +2948,7 @@
 				ALTER TABLE tasks DROP COLUMN full_text;
 
 				<!-- Drop text search configuration -->
-				DROP TEXT SEARCH CONFIGURATION anet;
+				DROP TEXT SEARCH CONFIGURATION ${fts_config_name};
 			</sql>
 		</rollback>
 	</changeSet>
