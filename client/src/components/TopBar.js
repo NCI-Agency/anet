@@ -113,7 +113,7 @@ class BaseTopBar extends Component {
     const { currentUser, minimalHeader, toggleMenuAction } = this.props
 
     return (
-      <div style={{ flex: "0 0 auto", zIndex: 100 }} ref={this.topbarDiv}>
+      <div style={{ flex: "0 0 auto", zIndex: 1100 }} ref={this.topbarDiv}>
         <div id="topbar">
           <GeneralBanner options={this.bannerOptions()} />
           <SecurityBanner />

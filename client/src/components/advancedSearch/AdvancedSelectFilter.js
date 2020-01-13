@@ -61,16 +61,15 @@ export default class AdvancedSelectFilter extends Component {
     return !this.props.asFormField ? (
       <>{this.props.value[this.props.valueKey]}</>
     ) : (
-      <AdvancedSingleSelect
-        {...advancedSelectProps}
-        fieldName={this.props.queryKey}
-        fieldLabel={null}
-        vertical
-        showRemoveButton={false}
-        onChange={this.onChange}
-        value={this.state.value}
-        smallOverlay
-      />
+      <div>
+        <AdvancedSingleSelect
+          {...advancedSelectProps}
+          fieldName={this.props.queryKey}
+          showRemoveButton={false}
+          onChange={this.onChange}
+          value={this.state.value}
+        />
+      </div>
     )
   }
 
