@@ -124,12 +124,7 @@ const GQL_CREATE_REPORT = gql`
   }
 `
 const GQL_UPDATE_REPORT = gql`
-  mutation(
-    $report: ReportInput!
-    $sendEditEmail: Boolean!
-    $withNotes: Boolean!
-    $notes: [NoteInput]
-  ) {
+  mutation($report: ReportInput!, $sendEditEmail: Boolean!) {
     updateReport(report: $report, sendEditEmail: $sendEditEmail) {
       uuid
       state
@@ -141,10 +136,6 @@ const GQL_UPDATE_REPORT = gql`
         text
       }
     }
-    updateReportAssessments(report: $report, assessments: $notes)
-      @include(if: $withNotes) {
-      uuid
-    }
   }
 `
 const GQL_DELETE_REPORT = gql`
@@ -152,11 +143,9 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
-const GQL_UPDATE_NOTES = gql`
+const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
   mutation($report: ReportInput!, $notes: [NoteInput]) {
-    updateReportAssessments(report: $report, assessments: $notes) {
-      uuid
-    }
+    updateReportAssessments(report: $report, assessments: $notes)
   }
 `
 
@@ -1023,12 +1012,10 @@ const BaseReportForm = props => {
         autoSaveSettings.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      const edit = isEditMode(autoSaveSettings.values)
-      const operation = edit ? "updateReport" : "updateReportAssessments"
       save(autoSaveSettings.values, false)
         .then(response => {
           const newValues = _cloneDeep(autoSaveSettings.values)
-          Object.assign(newValues, response[operation])
+          Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
             newValues.reportSensitiveInformation = {} // object must exist for Collapse children
           }
@@ -1099,14 +1086,8 @@ const BaseReportForm = props => {
       })
   }
 
-  function onSubmitSuccess(response, values, resetForm) {
+  function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
-    const operation = edit ? "updateReport" : "updateReportAssessments"
-    const report = new Report({
-      uuid: response[operation].uuid
-        ? response[operation].uuid
-        : initialValues.uuid
-    })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     resetForm()
@@ -1207,22 +1188,29 @@ const BaseReportForm = props => {
     report.location = utils.getReference(report.location)
     report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
+    const operation = edit ? "updateReport" : "createReport"
     const variables = { report }
+    return _saveReport(edit, variables, sendEmail).then(response => {
+      const report = response[operation]
+      const updateNotesVariables = { report }
+      updateNotesVariables.notes = createTaskAssessmentsNotes(
+        values,
+        report.uuid
+      )
+      return API.mutation(
+        GQL_UPDATE_REPORT_ASSESSMENTS,
+        updateNotesVariables
+      ).then(() => report)
+    })
+  }
+
+  function _saveReport(edit, variables, sendEmail) {
     if (edit) {
       variables.sendEditEmail = sendEmail
       // Add an additional mutation to create notes for the taskAssessments
-      variables.notes = createTaskAssessmentsNotes(values, report.uuid)
-      variables.withNotes = !!variables.notes
       return API.mutation(GQL_UPDATE_REPORT, variables)
     } else {
-      return API.mutation(GQL_CREATE_REPORT, variables).then(response => {
-        const updateNotesVariables = { report: response.createReport }
-        updateNotesVariables.notes = createTaskAssessmentsNotes(
-          values,
-          response.createReport.uuid
-        )
-        return API.mutation(GQL_UPDATE_NOTES, updateNotesVariables)
-      })
+      return API.mutation(GQL_CREATE_REPORT, variables)
     }
   }
 }
