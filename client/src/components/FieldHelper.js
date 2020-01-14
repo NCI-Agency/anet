@@ -17,7 +17,6 @@ import {
   ToggleButtonGroup
 } from "react-bootstrap"
 import utils from "utils"
-import LikertScale from "./graphs/LikertScale"
 
 const getFieldId = field => field.id || field.name // name property is required
 
@@ -336,21 +335,6 @@ export const renderLikertScale = ({
       </tbody>
     </Table>
   )
-  return renderField(
-    field,
-    label,
-    form,
-    widgetElem,
-    children,
-    extraColElem,
-    addon,
-    vertical
-  )
-}
-
-export const RenderLikertScale2 = ({ field, form, ...props }) => {
-  const { label, children, extraColElem, addon, vertical } = props
-  const widgetElem = <LikertScale {...field} />
   return renderField(
     field,
     label,

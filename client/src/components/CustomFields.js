@@ -24,9 +24,7 @@ import utils from "utils"
 const WIDGETS = {
   likertScale: LikertScale
 }
-const RENDERERS = {
-  likertScale: FieldHelper.RenderLikertScale2
-}
+const RENDERERS = {}
 
 const DEFAULT_CUSTOM_FIELDS_PREFIX = "formCustomFields"
 
