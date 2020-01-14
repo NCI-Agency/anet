@@ -1222,6 +1222,8 @@ const BaseReportForm = props => {
           !isEmptyTaskAssessment(values.taskAssessments[key])
       )
       .map(key => {
+        const taskAssessment = _cloneDeep(values.taskAssessments[key])
+        delete taskAssessment.invisibleCustomFields
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
@@ -1234,7 +1236,7 @@ const BaseReportForm = props => {
               relatedObjectUuid: reportUuid
             }
           ],
-          text: JSON.stringify(values.taskAssessments[key])
+          text: JSON.stringify(taskAssessment)
         }
         const initialAssessmentUuid = values.initialTaskToAssessmentUuid[key]
         if (initialAssessmentUuid) {
