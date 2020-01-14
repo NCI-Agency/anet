@@ -88,7 +88,7 @@ test("Draft and submit a report", async t => {
   )
 
   const $tasksTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Tasks and Milestones"]')
+    By.xpath('//h2/span[text()="Objectives and Efforts"]')
   )
   await $tasksTitle.click()
 
@@ -124,10 +124,6 @@ test("Draft and submit a report", async t => {
     ".reportTextField .public-DraftEditor-content",
     "engagement details",
     shortWaitMs // wait for Draftail to save the editor contents
-  )
-  await pageHelpers.writeInForm(
-    "[id='formCustomFields.inputFieldName']",
-    "custom field text"
   )
 
   const editorCssPath =
