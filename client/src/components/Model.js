@@ -102,7 +102,10 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
     })
   }
 
-  let fieldYupSchema = yup.mixed().nullable().default(null)
+  let fieldYupSchema = yup
+    .mixed()
+    .nullable()
+    .default(null)
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }
