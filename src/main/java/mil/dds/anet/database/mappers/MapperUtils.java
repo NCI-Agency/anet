@@ -46,7 +46,7 @@ public class MapperUtils {
     if (!containsColumnNamed(rs, columnName)) {
       return null;
     }
-    final Integer value = rs.getInt(columnName);
+    final int value = rs.getInt(columnName);
     return rs.wasNull() ? null : value;
   }
 
@@ -55,7 +55,7 @@ public class MapperUtils {
     if (!containsColumnNamed(rs, columnName)) {
       return null;
     }
-    final Double value = rs.getDouble(columnName);
+    final double value = rs.getDouble(columnName);
     return rs.wasNull() ? null : value;
   }
 
