@@ -6,7 +6,7 @@ const test = require("../util/test")
 var testReportURL = null
 
 test("Draft and submit a report", async t => {
-  t.plan(16)
+  t.plan(21)
 
   const {
     pageHelpers,
@@ -48,39 +48,76 @@ test("Draft and submit a report", async t => {
   const $positiveAtmosphereButton = await $("#positiveAtmos")
   await $positiveAtmosphereButton.click()
 
-  const $attendeesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+  const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
     "#attendees",
     "topferness, christopf"
   )
-
   const $attendeesShortcutList = await $("#attendees-shortcut-list")
   await $attendeesShortcutList.click()
 
   t.is(
-    await $attendeesAdvancedSelect.getAttribute("value"),
+    await $attendeesAdvancedSelect1.getAttribute("value"),
     "",
     "Closing the attendees advanced multi select overlay empties the input field."
   )
 
   const [
-    $principalPrimaryInput,
-    $principalName,
-    $principalPosition,
-    /* eslint-disable no-unused-vars */ $principalLocation /* eslint-enable no-unused-vars */,
-    $principalOrg
-  ] = await $$(".principalAttendeesTable tbody tr:last-child td")
+    $principalPrimaryInput1,
+    $principalName1,
+    $principalPosition1,
+    /* eslint-disable no-unused-vars */ $principalLocation1 /* eslint-enable no-unused-vars */,
+    $principalOrg1
+  ] = await $$(".principalAttendeesTable tbody tr:nth-child(2) td")
 
   t.true(
-    await $principalPrimaryInput.findElement(By.css("input")).isSelected(),
+    await $principalPrimaryInput1.findElement(By.css("input")).isSelected(),
     "Principal primary attendee checkbox should be checked"
   )
-  await assertElementText(t, $principalName, "CIV TOPFERNESS, Christopf")
+
+  await assertElementText(t, $principalName1, "CIV TOPFERNESS, Christopf")
   await assertElementText(
     t,
-    $principalPosition,
+    $principalPosition1,
     "Planning Captain, MOD-FO-00004"
   )
-  await assertElementText(t, $principalOrg, "MoD")
+  await assertElementText(t, $principalOrg1, "MoD")
+
+  const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
+    "#attendees",
+    "steveson, steve"
+  )
+  await $attendeesShortcutList.click()
+
+  t.is(
+    await $attendeesAdvancedSelect2.getAttribute("value"),
+    "",
+    "Closing the attendees advanced multi select overlay empties the input field."
+  )
+
+  const [
+    $principalPrimaryInput2,
+    $principalName2,
+    /* eslint-disable no-unused-vars */
+    $principalPosition2,
+    $principalLocation2,
+    $principalOrg2 /* eslint-enable no-unused-vars */
+  ] = await $$(".principalAttendeesTable tbody tr:last-child td")
+
+  await assertElementText(t, $principalName2, "LtCol STEVESON, Steve")
+  t.false(
+    await $principalPrimaryInput2.findElement(By.css("input")).isSelected(),
+    "Second principal primary attendee checkbox should not be checked"
+  )
+
+  await $principalPrimaryInput2.click()
+  t.false(
+    await $principalPrimaryInput1.findElement(By.css("input")).isSelected(),
+    "First principal primary attendee checkbox should no longer be checked"
+  )
+  t.true(
+    await $principalPrimaryInput2.findElement(By.css("input")).isSelected(),
+    "Second principal primary attendee checkbox should now be checked"
+  )
 
   const $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasksLevel1",
@@ -711,7 +748,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
   t.is(
     $advisorAttendeesRows.length + $principalAttendeesRows.length,
-    4,
+    5,
     "Clicking the shortcut buttons adds rows to the table"
   )
 

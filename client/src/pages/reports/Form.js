@@ -670,7 +670,7 @@ const BaseReportForm = props => {
                 }
                 id="attendance-fieldset"
               >
-                <FastField
+                <Field
                   name="attendees"
                   component={FieldHelper.renderSpecialField}
                   onChange={value => {
@@ -686,6 +686,7 @@ const BaseReportForm = props => {
                       renderSelected={
                         <AttendeesTable
                           attendees={values.attendees}
+                          onChange={value => setFieldValue("attendees", value)}
                           showDelete
                         />
                       }
