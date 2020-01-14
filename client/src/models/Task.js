@@ -96,10 +96,7 @@ export default class Task extends Model {
         .default([])
         .label(Settings.fields.task.responsiblePositions.label),
       // not actually in the database, the database contains the JSON customFields
-      formCustomFields: yup
-        .object()
-        .shape(Task.customFieldsSchema)
-        .nullable()
+      formCustomFields: Task.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 

@@ -160,10 +160,7 @@ export default class Person extends Model {
         .nullable()
         .default(() => Person.STATUS.ACTIVE),
       // not actually in the database, the database contains the JSON customFields
-      formCustomFields: yup
-        .object()
-        .shape(Person.customFieldsSchema)
-        .nullable()
+      formCustomFields: Person.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 

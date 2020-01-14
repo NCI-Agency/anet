@@ -90,7 +90,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
   }
   if (!_isEmpty(objectFields)) {
     const objSchema = createYupObjectShape(objectFields)
-    fieldYupSchema = fieldYupSchema.of(yup.object().shape(objSchema))
+    fieldYupSchema = fieldYupSchema.of(objSchema)
   }
   if (!_isEmpty(validations)) {
     validations.forEach(validation => {
@@ -118,8 +118,9 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
 }
 
 export const createYupObjectShape = config => {
+  let objShape = {}
   if (config) {
-    const objShape = Object.fromEntries(
+    objShape = Object.fromEntries(
       Object.entries(config)
         .map(([k, v]) => [k, createFieldYupSchema(k, config[k])])
         .filter(([k, v]) => v !== null)
@@ -128,9 +129,8 @@ export const createYupObjectShape = config => {
       .array()
       .nullable()
       .default([])
-    return objShape
   }
-  return {}
+  return yup.object().shape(objShape)
 }
 
 export default class Model {

@@ -3,7 +3,10 @@ import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LikertScale from "components/graphs/LikertScale"
-import { CUSTOM_FIELD_TYPE } from "components/Model"
+import Model, {
+  CUSTOM_FIELD_TYPE,
+  createYupObjectShape
+} from "components/Model"
 import { Field, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
@@ -164,6 +167,10 @@ const ArrayOfObjectsField = fieldProps => {
   )
   const fieldsetTitle = fieldConfig.label || ""
   const addButtonLabel = fieldConfig.addButtonLabel || "Add a new item"
+  const objSchema = createYupObjectShape(fieldConfig.objectFields)
+  const objDefault = {}
+  Model.fillObject(objDefault, objSchema)
+
   return (
     <Fieldset title={fieldsetTitle}>
       <FieldArray
@@ -172,7 +179,7 @@ const ArrayOfObjectsField = fieldProps => {
           <div>
             <Button
               className="pull-right"
-              onClick={() => addObject(arrayHelpers, value)}
+              onClick={() => addObject(objDefault, arrayHelpers)}
               bsStyle="primary"
               id="addObjectButton"
             >
@@ -228,8 +235,8 @@ const renderArrayObject = (
   )
 }
 
-const addObject = arrayHelpers => {
-  arrayHelpers.push({})
+const addObject = (objDefault, arrayHelpers) => {
+  arrayHelpers.push(objDefault)
 }
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
