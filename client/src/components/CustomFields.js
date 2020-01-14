@@ -39,6 +39,9 @@ const SpecialField = fieldProps => {
   )
 }
 
+const ReadonlySpecialField = fieldProps =>
+  SpecialField({ ...fieldProps, readonly: true })
+
 const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
   return <Field component={FieldHelper.renderInputField} {...otherFieldProps} />
@@ -473,7 +476,7 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumSetField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField,
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: ReadonlyTextField
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: ReadonlySpecialField
 }
 
 export const ReadonlyCustomFields = ({

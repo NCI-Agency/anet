@@ -3,7 +3,7 @@ import * as d3 from "d3"
 import PropTypes from "prop-types"
 import Text from "react-svg-text"
 
-const LikertScale = ({ onChange, value, levels, width, height }) => {
+const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
   const containerRef = useRef(null)
@@ -22,6 +22,9 @@ const LikertScale = ({ onChange, value, levels, width, height }) => {
   const x = scale(Number(value !== undefined ? value : 50))
 
   useEffect(() => {
+    if (readonly) {
+      return
+    }
     const handleDrag = d3.drag().on("drag", function() {
       const me = d3.select(cursorRef.current)
       const newX = Math.min(
@@ -32,7 +35,7 @@ const LikertScale = ({ onChange, value, levels, width, height }) => {
       onChange(scale.invert(newX))
     })
     handleDrag(d3.select(cursorRef.current))
-  }, [onChange, scale, scaleYPosition])
+  }, [onChange, scale, scaleYPosition, readonly])
 
   useEffect(() => {
     d3.select(cursorRef.current).attr(
@@ -96,7 +99,7 @@ const LikertScale = ({ onChange, value, levels, width, height }) => {
             stroke: "gray",
             fill: "" + activeColor,
             strokeWidth: 1,
-            cursor: "pointer"
+            cursor: readonly ? null : "pointer"
           }}
         />
         <text
@@ -125,7 +128,8 @@ LikertScale.propTypes = {
     })
   ).isRequired,
   width: PropTypes.string.isRequired,
-  height: PropTypes.string.isRequired
+  height: PropTypes.string.isRequired,
+  readonly: PropTypes.bool
 }
 
 LikertScale.defaultProps = {
