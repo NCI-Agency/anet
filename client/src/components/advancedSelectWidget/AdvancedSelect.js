@@ -238,6 +238,9 @@ export default class AdvancedSelect extends Component {
                 preventOverflow: {
                   enabled: false
                 },
+                hide: {
+                  enabled: false
+                },
                 flip: {
                   enabled: false
                 }
