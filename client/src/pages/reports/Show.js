@@ -347,7 +347,7 @@ const BaseReportShow = props => {
     report.authorizationGroups && report.authorizationGroups.length > 0
 
   const initialTaskAssessments = report.notes.filter(
-    n => n.type === NOTE_TYPE.PARTNER_ASSESSMENT
+    n => n.type === NOTE_TYPE.ASSESSMENT
   )
   const taskAssessmentsValues = initialTaskAssessments.map(ta => [
     ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]

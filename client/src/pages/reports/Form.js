@@ -258,7 +258,7 @@ const BaseReportForm = props => {
   const taskAssessments = initialValues.notes
     .filter(
       n =>
-        n.type === NOTE_TYPE.PARTNER_ASSESSMENT &&
+        n.type === NOTE_TYPE.ASSESSMENT &&
         n.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")
           .length
     )
@@ -1223,7 +1223,7 @@ const BaseReportForm = props => {
       )
       .map(key => {
         const noteObj = {
-          type: NOTE_TYPE.PARTNER_ASSESSMENT,
+          type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
             {
               relatedObjectType: "tasks",

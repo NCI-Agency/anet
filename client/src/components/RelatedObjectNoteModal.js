@@ -65,7 +65,10 @@ export default class RelatedObjectNoteModal extends Component {
             const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
             const typeName =
-              note.type === NOTE_TYPE.PARTNER_ASSESSMENT ? "assessment" : "note"
+              note.type === NOTE_TYPE.PARTNER_ASSESSMENT ||
+              note.type === NOTE_TYPE.ASSESSMENT
+                ? "assessment"
+                : "note"
             return (
               <Form>
                 <Modal.Header closeButton>

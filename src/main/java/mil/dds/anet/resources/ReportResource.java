@@ -1094,7 +1094,7 @@ public class ReportResource {
     }
     final List<Note> existingNotes = r.loadNotes(engine.getContext()).join();
     final List<Note> existingAssessments = existingNotes.stream()
-        .filter(n -> n.getType().equals(NoteType.PARTNER_ASSESSMENT)).collect(Collectors.toList());
+        .filter(n -> n.getType().equals(NoteType.ASSESSMENT)).collect(Collectors.toList());
     Utils.addRemoveElementsByUuid(existingAssessments, assessments,
         newAssessment -> engine.getNoteDao().insert(newAssessment),
         oldAssessmentUuid -> engine.getNoteDao().delete(oldAssessmentUuid));

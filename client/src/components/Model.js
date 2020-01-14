@@ -32,7 +32,8 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 export const NOTE_TYPE = {
   FREE_TEXT: "FREE_TEXT",
   CHANGE_RECORD: "CHANGE_RECORD",
-  PARTNER_ASSESSMENT: "PARTNER_ASSESSMENT"
+  PARTNER_ASSESSMENT: "PARTNER_ASSESSMENT",
+  ASSESSMENT: "ASSESSMENT"
 }
 export const yupDate = yup.date().transform(function(value, originalValue) {
   if (this.isType(value)) {
