@@ -13,6 +13,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { NOTE_TYPE } from "components/Model"
 import {
   AnchorLink,
   jumpToTop,
@@ -133,6 +134,7 @@ const GQL_GET_REPORT = gql`
           uuid
           shortName
         }
+        customFields
       }
       comments {
         uuid
@@ -343,6 +345,18 @@ const BaseReportShow = props => {
   const canEmail = !report.isDraft()
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
+
+  const initialTaskAssessments = report.notes.filter(
+    n => n.type === NOTE_TYPE.PARTNER_ASSESSMENT
+  )
+  const taskAssessmentsValues = initialTaskAssessments.map(ta => [
+    ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
+      .relatedObjectUuid,
+    JSON.parse(ta.text)
+  ])
+  // Get initial task assessments values
+  report.taskAssessments = Object.fromEntries(taskAssessmentsValues)
+
   return (
     <Formik
       enableReinitialize
@@ -633,6 +647,34 @@ const BaseReportShow = props => {
                   />
                 </Fieldset>
               )}
+
+              <Fieldset
+                title="Engagement assessments"
+                id="engagement-assessments"
+              >
+                {values.tasks.map(task => {
+                  if (!task.customFields) {
+                    return null
+                  }
+                  const taskCustomFields = JSON.parse(task.customFields)
+                  if (!taskCustomFields.assessmentDefinition) {
+                    return null
+                  }
+                  const taskAssessmentDefinition = JSON.parse(
+                    taskCustomFields.assessmentDefinition
+                  )
+                  return (
+                    <ReadonlyCustomFields
+                      key={`assessment-${values.uuid}-${task.uuid}`}
+                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      fieldsConfig={taskAssessmentDefinition}
+                      formikProps={{
+                        values
+                      }}
+                    />
+                  )
+                })}
+              </Fieldset>
 
               {report.showWorkflow() && (
                 <ReportFullWorkflow workflow={report.workflow} />
