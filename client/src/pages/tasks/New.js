@@ -29,15 +29,15 @@ const GQL_GET_ORGANIZATION = gql`
 const TaskNew = props => {
   const routerLocation = useLocation()
   const qs = utils.parseQueryString(routerLocation.search)
-  if (qs.responsibleOrgUuid) {
+  if (qs.taskedOrgUuid) {
     const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
-      uuid: qs.responsibleOrgUuid
+      uuid: qs.taskedOrgUuid
     })
     return (
       <TaskNewConditional
         {...props}
         {...queryResult}
-        orgUuid={qs.responsibleOrgUuid}
+        orgUuid={qs.taskedOrgUuid}
       />
     )
   }
@@ -65,7 +65,7 @@ const TaskNewConditional = props => {
 
   const task = new Task()
   if (data) {
-    task.responsibleOrg = new Organization(data.organization)
+    task.taskedOrganizations = [new Organization(data.organization)]
   }
 
   return (

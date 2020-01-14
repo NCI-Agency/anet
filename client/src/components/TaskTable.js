@@ -19,7 +19,7 @@ const TaskTable = props => {
             <thead>
               <tr>
                 <th>Name</th>
-                {props.showOrganization && <th>Organization</th>}
+                {props.showOrganization && <th>Tasked organizations</th>}
                 <th />
               </tr>
             </thead>
@@ -33,7 +33,13 @@ const TaskTable = props => {
                   </td>
                   {props.showOrganization && (
                     <td className="taskOrg">
-                      <LinkTo organization={task.responsibleOrg} />
+                      {task.taskedOrganizations.map(org => (
+                        <LinkTo
+                          organization={org}
+                          isLink={false}
+                          key={`${task.uuid}-${org.uuid}`}
+                        />
+                      ))}
                     </td>
                   )}
                   {props.showDelete && (

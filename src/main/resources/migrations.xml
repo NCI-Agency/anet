@@ -2725,4 +2725,27 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add_task_responsible_positions" author="vassil">
+		<createTable tableName="taskTaskedOrganizations">
+			<column name="taskUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="organizationUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<!-- <dropColumn tableName="tasks" columnName="organizationUuid"/> -->
+		<!-- Requires at least SQL Server 2016: -->
+		<!-- <sql dbms="mssql">
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskedOrgUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.responsibleOrgUuid')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.responsibleOrgUuid', NULL);
+		</sql> -->
+		<!-- Requires at least PostgreSQL 9.5: -->
+		<!-- <sql dbms="postgresql">
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{taskedOrgUuid}', TO_JSONB(o.uuid), true)
+				FROM organizations o WHERE o.id=(s.query::json->>'responsibleOrgUuid')::int;
+			UPDATE "savedSearches" SET query=query::jsonb #- '{responsibleOrgUuid}';
+		</sql>  -->
+	</changeSet>
+
 </databaseChangeLog>

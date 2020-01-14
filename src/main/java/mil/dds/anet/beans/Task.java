@@ -58,9 +58,9 @@ public class Task extends AbstractAnetBean {
   @GraphQLInputField
   TaskStatus status;
   // annotated below
-  private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
-  // annotated below
   private List<Position> responsiblePositions;
+  // annotated below
+  private List<Organization> taskedOrganizations;
 
   public void setPlannedCompletion(Instant plannedCompletion) {
     this.plannedCompletion = plannedCompletion;
@@ -166,39 +166,6 @@ public class Task extends AbstractAnetBean {
     this.status = status;
   }
 
-  @GraphQLQuery(name = "responsibleOrg")
-  public CompletableFuture<Organization> loadResponsibleOrg(
-      @GraphQLRootContext Map<String, Object> context) {
-    if (responsibleOrg.hasForeignObject()) {
-      return CompletableFuture.completedFuture(responsibleOrg.getForeignObject());
-    }
-    return new UuidFetcher<Organization>()
-        .load(context, IdDataLoaderKey.ORGANIZATIONS, responsibleOrg.getForeignUuid())
-        .thenApply(o -> {
-          responsibleOrg.setForeignObject(o);
-          return o;
-        });
-  }
-
-  @JsonIgnore
-  public void setResponsibleOrgUuid(String responsibleOrgUuid) {
-    this.responsibleOrg = new ForeignObjectHolder<>(responsibleOrgUuid);
-  }
-
-  @JsonIgnore
-  public String getResponsibleOrgUuid() {
-    return responsibleOrg.getForeignUuid();
-  }
-
-  @GraphQLInputField(name = "responsibleOrg")
-  public void setResponsibleOrg(Organization org) {
-    this.responsibleOrg = new ForeignObjectHolder<>(org);
-  }
-
-  public Organization getResponsibleOrg() {
-    return responsibleOrg.getForeignObject();
-  }
-
   @GraphQLQuery(name = "reports")
   public CompletableFuture<List<Report>> loadReports(
       @GraphQLRootContext Map<String, Object> context,
@@ -234,6 +201,28 @@ public class Task extends AbstractAnetBean {
     this.responsiblePositions = positions;
   }
 
+  @GraphQLQuery(name = "taskedOrganizations")
+  public CompletableFuture<List<Organization>> loadTaskedOrganizations(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (taskedOrganizations != null) {
+      return CompletableFuture.completedFuture(taskedOrganizations);
+    }
+    return AnetObjectEngine.getInstance().getTaskDao().getTaskedOrganizationsForTask(context, uuid)
+        .thenApply(o -> {
+          taskedOrganizations = o;
+          return o;
+        });
+  }
+
+  public List<Organization> getTaskedOrganizations() {
+    return taskedOrganizations;
+  }
+
+  @GraphQLInputField(name = "taskedOrganizations")
+  public void setTaskedOrganizations(List<Organization> organizations) {
+    this.taskedOrganizations = organizations;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Task)) {
@@ -244,12 +233,14 @@ public class Task extends AbstractAnetBean {
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
-        && Objects.equals(other.getResponsiblePositions(), responsiblePositions);
+        && Objects.equals(other.getResponsiblePositions(), responsiblePositions)
+        && Objects.equals(other.getTaskedOrganizations(), taskedOrganizations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, responsiblePositions);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, responsiblePositions,
+        taskedOrganizations);
   }
 
   @Override

@@ -333,6 +333,14 @@ public final class BatchingUtils {
                 () -> engine.getTaskDao().getResponsiblePositions(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.TASK_TASKED_ORGANIZATIONS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<Organization>>() {
+          @Override
+          public CompletionStage<List<List<Organization>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getTaskDao().getTaskedOrganizations(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
   }
 
   public void updateStats(MetricRegistry metricRegistry, DataLoaderRegistry dataLoaderRegistry) {

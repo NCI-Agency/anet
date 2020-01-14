@@ -69,7 +69,7 @@ const BaseOrganizationTasks = props => {
       action={
         isAdminUser && (
           <LinkTo
-            task={Task.pathForNew({ responsibleOrgUuid: organization.uuid })}
+            task={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
             button
           >
             Create {taskShortLabel}

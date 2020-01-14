@@ -181,7 +181,7 @@ const BaseOrganizationForm = props => {
           tasksFilters.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: props.currentUser.position.organization.uuid
+              taskedOrgUuid: props.currentUser.position.organization.uuid
             }
           }
         }

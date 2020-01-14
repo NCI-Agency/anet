@@ -16,6 +16,7 @@ import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
+import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
@@ -70,6 +71,7 @@ const BaseTaskForm = props => {
   const ProjectedCompletionField = DictionaryField(FastField)
   const TaskCustomFieldEnum1 = DictionaryField(FastField)
   const TaskCustomFieldEnum2 = DictionaryField(FastField)
+  const TaskedOrganizationsMultiSelect = DictionaryField(FastField)
   const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
 
   initialValues.assessment_customFieldEnum1 = ""
@@ -86,7 +88,7 @@ const BaseTaskForm = props => {
     })
   }
 
-  const responsibleOrgFilters = {
+  const taskedOrganizationsFilters = {
     allOrganizations: {
       label: "All organizations",
       queryVars: {}
@@ -171,27 +173,30 @@ const BaseTaskForm = props => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <FastField
-                  name="responsibleOrg"
-                  label={Settings.fields.task.responsibleOrg}
+                <TaskedOrganizationsMultiSelect
+                  name="taskedOrganizations"
                   component={FieldHelper.renderSpecialField}
+                  dictProps={Settings.fields.task.taskedOrganizations}
                   onChange={value => {
                     // validation will be done by setFieldValue
-                    setFieldTouched("responsibleOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("responsibleOrg", value)
+                    setFieldTouched("taskedOrganizations", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("taskedOrganizations", value)
                   }}
                   widget={
-                    <AdvancedSingleSelect
-                      fieldName="responsibleOrg"
-                      placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
-                      value={values.responsibleOrg}
+                    <AdvancedMultiSelect
+                      fieldName="taskedOrganizations"
+                      value={values.taskedOrganizations}
+                      renderSelected={
+                        <OrganizationTable
+                          organizations={values.taskedOrganizations}
+                          showDelete
+                        />
+                      }
                       overlayColumns={["Name"]}
                       overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={responsibleOrgFilters}
+                      filterDefs={taskedOrganizationsFilters}
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
-                      queryParams={orgSearchQuery}
-                      valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
                     />
                   }
@@ -424,10 +429,15 @@ const BaseTaskForm = props => {
       "notes",
       "assessment_customFieldEnum1"
     )
-    task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     const { edit } = props
     const variables = { task: task }
+
+    // strip attendees fields not in data model
+    variables.task.taskedOrganizations = variables.task.taskedOrganizations.map(
+      a => Object.without(a, "positions", "childrenOrgs")
+    )
+
     if (
       edit &&
       (props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||

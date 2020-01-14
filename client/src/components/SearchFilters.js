@@ -39,7 +39,7 @@ const taskFilters = props => {
     Organization: {
       component: OrganizationFilter,
       props: {
-        queryKey: "responsibleOrgUuid",
+        queryKey: "taskedOrgUuid",
         queryIncludeChildOrgsKey: "includeChildrenOrgs"
       }
     },

@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.FkBatchParams;
+import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
@@ -216,14 +217,15 @@ public class Organization extends AbstractAnetBean {
         uuid, query);
   }
 
+
   @GraphQLQuery(name = "tasks")
   public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
     if (tasks != null) {
       return CompletableFuture.completedFuture(tasks);
     }
     final TaskSearchQuery query = new TaskSearchQuery();
-    // Note: no recursion, only direct children!
-    query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"organizationUuid\""));
+    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
+        "\"taskTaskedOrganizations\"", "\"organizationUuid\"", "\"taskUuid\""));
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
         .thenApply(o -> {
           tasks = o;

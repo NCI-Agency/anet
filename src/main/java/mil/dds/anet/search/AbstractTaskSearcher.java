@@ -36,10 +36,6 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addBatchClause(query);
     }
 
-    if (query.getResponsibleOrgUuid() != null) {
-      addResponsibleOrgUuidQuery(query);
-    }
-
     qb.addEqualsClause("category", "tasks.category", query.getCategory());
     qb.addEqualsClause("status", "tasks.status", query.getStatus());
     qb.addLikeClause("projectStatus", "tasks.\"customFieldEnum1\"", query.getProjectStatus());
@@ -71,15 +67,6 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   @SuppressWarnings("unchecked")
   protected void addBatchClause(TaskSearchQuery query) {
     qb.addBatchClause((AbstractBatchParams<Task, TaskSearchQuery>) query.getBatchParams());
-  }
-
-  protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
-    if (query.getIncludeChildrenOrgs()) {
-      qb.addRecursiveClause(null, "tasks", "\"organizationUuid\"", "parent_orgs", "organizations",
-          "\"parentOrgUuid\"", "orgUuid", query.getResponsibleOrgUuid());
-    } else {
-      qb.addEqualsClause("orgUuid", "tasks.\"organizationUuid\"", query.getResponsibleOrgUuid());
-    }
   }
 
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {

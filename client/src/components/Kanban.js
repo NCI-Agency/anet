@@ -187,7 +187,13 @@ class Card extends React.Component {
                     <td>responsible org:</td>
                     <td>
                       {" "}
-                      <LinkTo organization={this.props.task.responsibleOrg} />
+                      {this.props.task.taskedOrganizations.map(org => (
+                        <LinkTo
+                          organization={org}
+                          isLink={false}
+                          key={`${org.uuid}`}
+                        />
+                      ))}
                     </td>
                   </tr>
                 </tbody>

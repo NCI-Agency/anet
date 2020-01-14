@@ -27,7 +27,7 @@ const GQL_GET_TASK = gql`
       customFieldEnum2
       plannedCompletion
       projectedCompletion
-      responsibleOrg {
+      taskedOrganizations {
         uuid
         shortName
         longName

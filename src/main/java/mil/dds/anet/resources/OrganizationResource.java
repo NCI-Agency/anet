@@ -72,9 +72,8 @@ public class OrganizationResource {
 
     if (org.getTasks() != null) {
       // Assign all of these tasks to this organization.
-      for (Task p : org.getTasks()) {
-        engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(p),
-            DaoUtils.getUuid(created));
+      for (Task task : org.getTasks()) {
+        engine.getTaskDao().addTaskedOrganizationsToTask(org, task);
       }
     }
     if (org.getPlanningApprovalSteps() != null) {
@@ -160,9 +159,8 @@ public class OrganizationResource {
     if (org.getTasks() != null) {
       logger.debug("Editing tasks for {}", org);
       Utils.addRemoveElementsByUuid(existing.loadTasks(engine.getContext()).join(), org.getTasks(),
-          newTask -> engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(newTask),
-              DaoUtils.getUuid(existing)),
-          oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(oldTaskUuid, null));
+          newTask -> engine.getTaskDao().addTaskedOrganizationsToTask(org, newTask),
+          oldTaskUuid -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org, oldTaskUuid));
     }
 
     return numRows;
