@@ -36,6 +36,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addBatchClause(query);
     }
 
+    if (query.getTaskedOrgUuid() != null) {
+      addTaskedOrgUuidQuery(query);
+    }
+
     qb.addEqualsClause("category", "tasks.category", query.getCategory());
     qb.addEqualsClause("status", "tasks.status", query.getStatus());
     qb.addLikeClause("projectStatus", "tasks.\"customFieldEnum1\"", query.getProjectStatus());
@@ -67,6 +71,20 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   @SuppressWarnings("unchecked")
   protected void addBatchClause(TaskSearchQuery query) {
     qb.addBatchClause((AbstractBatchParams<Task, TaskSearchQuery>) query.getBatchParams());
+  }
+
+  protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
+
+    qb.addFromClause(
+        "LEFT JOIN taskTaskedOrganizations ON task.uuid = taskTaskedOrganizations.\"taskUuid\"" +
+        " JOIN organizations ON taskTaskedOrganizations.\"organizationUuid\" = organuzations.uuid");
+
+    if (query.getIncludeChildrenOrgs()) {
+      qb.addRecursiveClause(null, "organizations", "uuid", "parent_orgs", "organizations",
+          "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid());
+    } else {
+      qb.addEqualsClause("orgUuid", "organizations.uuid", query.getTaskedOrgUuid());
+    }
   }
 
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
