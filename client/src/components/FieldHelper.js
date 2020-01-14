@@ -1,6 +1,10 @@
+import LinkTo from "components/LinkTo"
+import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
+import PropTypes from "prop-types"
 import React from "react"
 import {
+  Button,
   Col,
   ControlLabel,
   FormControl,
@@ -68,29 +72,19 @@ const renderField = (
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
   vertical = vertical || false // default direction of label and input = vertical
+  const id = getFieldId(field)
   let widget
   if (!addon) {
     widget = widgetElem
   } else {
-    // allows passing a url for an image
-    if (addon.indexOf(".") !== -1) {
-      addon = <img src={addon} height={20} alt="" />
-    }
-    const focusElement = () => {
-      const element = document.getElementById(id)
-      if (element && element.focus) {
-        element.focus()
-      }
-    }
     widget = (
       <InputGroup>
         {widgetElem}
         {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-        <InputGroup.Addon onClick={focusElement}>{addon}</InputGroup.Addon>
+        <FieldAddon id={id} addon={addon} />
       </InputGroup>
     )
   }
-  const id = getFieldId(field)
   const validationState = getFormGroupValidationState(field, form)
 
   // setting label or extraColElem explicitly to null will completely remove these columns!
@@ -138,7 +132,6 @@ export const renderInputField = ({
     extraColElem,
     addon,
     vertical,
-    innerRef,
     extraAddon,
     ...otherProps
   } = props
@@ -146,7 +139,6 @@ export const renderInputField = ({
     <FormControl
       {...Object.without(field, "value")}
       value={field.value === null ? "" : field.value}
-      ref={innerRef}
       {...otherProps}
     />
   )
@@ -372,3 +364,92 @@ export const RenderLikertScale2 = ({ field, form, ...props }) => {
 }
 
 export default renderField
+
+export const FieldAddon = ({ fieldId, addon }) => {
+  // allows passing a url for an image
+  if (typeof addon === "string" && addon.indexOf(".") !== -1) {
+    addon = <img src={addon} height={20} alt="" />
+  }
+  const focusElement = () => {
+    const element = document.getElementById(fieldId)
+    if (element && element.focus) {
+      element.focus()
+    }
+  }
+  return <InputGroup.Addon onClick={focusElement}>{addon}</InputGroup.Addon>
+}
+FieldAddon.propTypes = {
+  fieldId: PropTypes.string,
+  addon: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.object
+  ])
+}
+
+export function handleMultiSelectAddItem(newItem, onChange, curValue) {
+  if (!newItem || !newItem.uuid) {
+    return
+  }
+  if (!curValue.find(obj => obj.uuid === newItem.uuid)) {
+    const value = _cloneDeep(curValue)
+    value.push(newItem)
+    onChange(value)
+  }
+}
+
+export function handleMultiSelectRemoveItem(oldItem, onChange, curValue) {
+  if (curValue.find(obj => obj.uuid === oldItem.uuid)) {
+    const value = _cloneDeep(curValue)
+    const index = value.findIndex(item => item.uuid === oldItem.uuid)
+    value.splice(index, 1)
+    onChange(value)
+  }
+}
+
+export function handleSingleSelectAddItem(newItem, onChange, curValue) {
+  if (!newItem || !newItem.uuid) {
+    return
+  }
+  onChange(newItem)
+}
+
+export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
+  onChange(null)
+}
+
+export const FieldShortcuts = props => {
+  const {
+    shortcuts,
+    fieldName,
+    objectType,
+    curValue,
+    onChange,
+    handleAddItem,
+    title
+  } = props
+  return (
+    shortcuts &&
+    shortcuts.length > 0 && (
+      <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
+        <h5>{title}</h5>
+        {shortcuts.map(shortcut => {
+          const shortcutLinkProps = {
+            [objectType.getModelNameLinkTo]: shortcut,
+            isLink: false,
+            forShortcut: true
+          }
+          return (
+            <Button
+              key={shortcut.uuid}
+              bsStyle="link"
+              onClick={() => handleAddItem(shortcut, onChange, curValue)}
+            >
+              Add <LinkTo {...shortcutLinkProps} />
+            </Button>
+          )
+        })}
+      </div>
+    )
+  )
+}

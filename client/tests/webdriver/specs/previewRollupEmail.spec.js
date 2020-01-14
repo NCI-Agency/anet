@@ -12,11 +12,15 @@ describe("Preview rollup page", () => {
       Rollup.emailButton.waitForDisplayed()
       Rollup.emailButton.click()
 
+      const currentHandle = browser.getWindowHandle()
+      Rollup.emailPreviewButton.waitForExist()
       Rollup.emailPreviewButton.waitForDisplayed()
+      browser.pause(500)
       Rollup.emailPreviewButton.click()
 
-      const currentHandle = browser.getWindowHandle()
+      browser.pause(500)
       const handles = browser.getWindowHandles()
+
       // Find new window handle; NOTE: https://w3c.github.io/webdriver/#dfn-get-window-handles
       // "The order in which the window handles are returned is arbitrary."
       let switchHandle

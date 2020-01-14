@@ -113,6 +113,7 @@ const BasePositionForm = props => {
         dirty,
         errors,
         setFieldValue,
+        setFieldTouched,
         values,
         submitForm
       }) => {
@@ -217,20 +218,30 @@ const BasePositionForm = props => {
                   )}
                 </FastField>
 
-                <AdvancedSingleSelect
-                  fieldName="organization"
-                  fieldLabel="Organization"
-                  placeholder="Search the organization for this position..."
-                  value={values.organization}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={OrganizationOverlayRow}
-                  filterDefs={organizationFilters}
-                  onChange={value => setFieldValue("organization", value)}
-                  objectType={Organization}
-                  fields={Organization.autocompleteQuery}
-                  queryParams={orgSearchQuery}
-                  valueKey="shortName"
-                  addon={ORGANIZATIONS_ICON}
+                <FastField
+                  name="organization"
+                  label="Organization"
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("organization", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="organization"
+                      placeholder="Search the organization for this position..."
+                      value={values.organization}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={orgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
                 />
 
                 <CodeFieldWithLabel
@@ -257,20 +268,30 @@ const BasePositionForm = props => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <AdvancedSingleSelect
-                  fieldName="location"
-                  fieldLabel="Location"
-                  placeholder="Search for the location where this Position will operate from..."
-                  value={values.location}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={LocationOverlayRow}
-                  filterDefs={locationFilters}
-                  onChange={value => setFieldValue("location", value)}
-                  objectType={Location}
-                  fields={Location.autocompleteQuery}
-                  queryParams={{ status: Location.STATUS.ACTIVE }}
-                  valueKey="name"
-                  addon={LOCATIONS_ICON}
+                <FastField
+                  name="location"
+                  label="Location"
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("location", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="location"
+                      placeholder="Search for the location where this Position will operate from..."
+                      value={values.location}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={LocationOverlayRow}
+                      filterDefs={locationFilters}
+                      objectType={Location}
+                      fields={Location.autocompleteQuery}
+                      queryParams={{ status: Location.STATUS.ACTIVE }}
+                      valueKey="name"
+                      addon={LOCATIONS_ICON}
+                    />
+                  }
                 />
               </Fieldset>
 

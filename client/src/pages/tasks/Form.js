@@ -68,13 +68,13 @@ const BaseTaskForm = props => {
 
   const ShortNameField = DictionaryField(FastField)
   const LongNameField = DictionaryField(FastField)
-  const TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
+  const TaskCustomFieldRef1 = DictionaryField(FastField)
   const TaskCustomField = DictionaryField(FastField)
   const PlannedCompletionField = DictionaryField(FastField)
   const ProjectedCompletionField = DictionaryField(FastField)
   const TaskCustomFieldEnum1 = DictionaryField(FastField)
   const TaskCustomFieldEnum2 = DictionaryField(FastField)
-  const ResponsiblePositionsMultiSelect = DictionaryField(AdvancedMultiSelect)
+  const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
 
   initialValues.assessment_customFieldEnum1 = ""
 
@@ -175,65 +175,92 @@ const BaseTaskForm = props => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <AdvancedSingleSelect
-                  fieldName="responsibleOrg"
-                  fieldLabel={Settings.fields.task.responsibleOrg}
-                  placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
-                  value={values.responsibleOrg}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={OrganizationOverlayRow}
-                  filterDefs={responsibleOrgFilters}
-                  onChange={value => setFieldValue("responsibleOrg", value)}
-                  objectType={Organization}
-                  fields={Organization.autocompleteQuery}
-                  valueKey="shortName"
-                  queryParams={orgSearchQuery}
-                  addon={ORGANIZATIONS_ICON}
+                <FastField
+                  name="responsibleOrg"
+                  label={Settings.fields.task.responsibleOrg}
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("responsibleOrg", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("responsibleOrg", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="responsibleOrg"
+                      placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
+                      value={values.responsibleOrg}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={responsibleOrgFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={orgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
                 />
 
                 <ResponsiblePositionsMultiSelect
-                  fieldName="responsiblePositions"
+                  name="responsiblePositions"
+                  component={FieldHelper.renderSpecialField}
                   dictProps={Settings.fields.task.responsiblePositions}
-                  fieldLabel={Settings.fields.task.responsiblePositions.label}
-                  value={values.responsiblePositions}
-                  renderSelected={
-                    <PositionTable
-                      positions={values.responsiblePositions}
-                      showDelete
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("responsiblePositions", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="responsiblePositions"
+                      value={values.responsiblePositions}
+                      renderSelected={
+                        <PositionTable
+                          positions={values.responsiblePositions}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={[
+                        "Position",
+                        "Organization",
+                        "Current Occupant"
+                      ]}
+                      overlayRenderRow={PositionOverlayRow}
+                      filterDefs={positionsFilters}
+                      objectType={Position}
+                      fields={Position.autocompleteQuery}
+                      addon={POSITIONS_ICON}
                     />
                   }
-                  overlayColumns={[
-                    "Position",
-                    "Organization",
-                    "Current Occupant"
-                  ]}
-                  overlayRenderRow={PositionOverlayRow}
-                  filterDefs={positionsFilters}
-                  onChange={value =>
-                    setFieldValue("responsiblePositions", value)}
-                  objectType={Position}
-                  fields={Position.autocompleteQuery}
-                  addon={POSITIONS_ICON}
                 />
 
                 {Settings.fields.task.customFieldRef1 && (
                   <TaskCustomFieldRef1
+                    name="customFieldRef1"
+                    component={FieldHelper.renderSpecialField}
                     dictProps={Settings.fields.task.customFieldRef1}
-                    fieldName="customFieldRef1"
-                    fieldLabel={Settings.fields.task.customFieldRef1.label}
-                    placeholder={
-                      Settings.fields.task.customFieldRef1.placeholder
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("customFieldRef1", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("customFieldRef1", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="customFieldRef1"
+                        placeholder={
+                          Settings.fields.task.customFieldRef1.placeholder
+                        }
+                        value={values.customFieldRef1}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={TaskSimpleOverlayRow}
+                        filterDefs={tasksFilters}
+                        objectType={Task}
+                        fields={Task.autocompleteQuery}
+                        valueKey="shortName"
+                        queryParams={{}}
+                        addon={TASKS_ICON}
+                      />
                     }
-                    value={values.customFieldRef1}
-                    overlayColumns={["Name"]}
-                    overlayRenderRow={TaskSimpleOverlayRow}
-                    filterDefs={tasksFilters}
-                    onChange={value => setFieldValue("customFieldRef1", value)}
-                    objectType={Task}
-                    fields={Task.autocompleteQuery}
-                    valueKey="shortName"
-                    queryParams={{}}
-                    addon={TASKS_ICON}
                   />
                 )}
 
