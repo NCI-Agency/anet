@@ -253,23 +253,29 @@ const BaseReportForm = props => {
     }))
   }
 
-  const initialTaskAssessments = initialValues.notes.filter(
-    n => n.type === NOTE_TYPE.PARTNER_ASSESSMENT
-  )
-  // When updating the assessments we need the uuid of the assessment related to each task
-  initialValues.initialTaskToAssessmentUuid = initialTaskAssessments.map(
-    ta => ({
-      [ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
-        .relatedObjectUuid]: ta.uuid
-    })
-  )
-  const taskAssessmentsValues = initialTaskAssessments.map(ta => [
-    ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
-      .relatedObjectUuid,
-    JSON.parse(ta.text)
-  ])
+  const taskAssessments = initialValues.notes
+    .filter(
+      n =>
+        n.type === NOTE_TYPE.PARTNER_ASSESSMENT &&
+        n.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")
+          .length
+    )
+    .map(ta => ({
+      taskUuid: [
+        ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
+          .relatedObjectUuid
+      ],
+      assessmentUuid: ta.uuid,
+      assessment: JSON.parse(ta.text)
+    }))
+  // When updating the assessments, we need for each task the uuid of the related assessment
+  initialValues.initialTaskToAssessmentUuid = {}
   // Get initial task assessments values
-  initialValues.taskAssessments = Object.fromEntries(taskAssessmentsValues)
+  initialValues.taskAssessments = {}
+  taskAssessments.forEach(ta => {
+    initialValues.initialTaskToAssessmentUuid[ta.taskUuid] = ta.assessmentUuid
+    initialValues.taskAssessments[ta.taskUuid] = ta.assessment
+  })
 
   return (
     <Formik
