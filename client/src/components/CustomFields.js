@@ -336,7 +336,12 @@ export const CustomFieldsContainer = props => {
 
   return (
     <>
-      <Field type="text" name={invisibleFieldsFieldName} className="hidden" />
+      <Field
+        type="text"
+        value=""
+        name={invisibleFieldsFieldName}
+        className="hidden"
+      />
       <CustomFields
         invisibleFields={invisibleFields}
         updateInvisibleFields={setInvisibleFields}
