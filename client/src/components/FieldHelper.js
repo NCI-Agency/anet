@@ -377,7 +377,7 @@ export function handleMultiSelectAddItem(newItem, onChange, curValue) {
   }
   if (!curValue.find(obj => obj.uuid === newItem.uuid)) {
     const value = _cloneDeep(curValue)
-    value.push(newItem)
+    value.push(_cloneDeep(newItem))
     onChange(value)
   }
 }
