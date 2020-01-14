@@ -60,7 +60,7 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
     .nullable()
     .default(""),
   [CUSTOM_FIELD_TYPE.NUMBER]: yup
-    .mixed()
+    .number()
     .nullable()
     .default(null),
   [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
@@ -85,36 +85,36 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
 
 const createFieldYupSchema = (fieldKey, fieldConfig) => {
   const { label, validations, objectFields } = fieldConfig
-  let fieldYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
-  if (!_isEmpty(label)) {
-    fieldYupSchema = fieldYupSchema.label(label)
-  }
+  let fieldTypeYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
   if (!_isEmpty(objectFields)) {
     const objSchema = createYupObjectShape(objectFields)
-    fieldYupSchema = fieldYupSchema.of(objSchema)
+    fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)
   }
   if (!_isEmpty(validations)) {
     validations.forEach(validation => {
       const { params, type } = validation
-      if (!fieldYupSchema[type]) {
+      if (!fieldTypeYupSchema[type]) {
         return
       }
-      fieldYupSchema = !_isEmpty(params)
-        ? fieldYupSchema[type](...params)
-        : fieldYupSchema[type]()
+      fieldTypeYupSchema = !_isEmpty(params)
+        ? fieldTypeYupSchema[type](...params)
+        : fieldTypeYupSchema[type]()
     })
   }
-  if (fieldConfig.type === CUSTOM_FIELD_TYPE.NUMBER) {
-    // For number type of fields, only validate on number type when they are visible
-    fieldYupSchema = fieldYupSchema.when(
-      "invisibleCustomFields",
-      (invisibleCustomFields, schema) => {
-        return invisibleCustomFields.includes("formCustomFields." + fieldKey)
-          ? schema
-          : schema.concat(yup.number())
-      }
-    )
+
+  let fieldYupSchema = yup.mixed().nullable().default(null)
+  if (!_isEmpty(label)) {
+    fieldYupSchema = fieldYupSchema.label(label)
   }
+  // For number type of fields, only validate on number type when they are visible
+  fieldYupSchema = fieldYupSchema.when(
+    "invisibleCustomFields",
+    (invisibleCustomFields, schema) => {
+      return invisibleCustomFields.includes("formCustomFields." + fieldKey)
+        ? schema
+        : schema.concat(fieldTypeYupSchema)
+    }
+  )
   return fieldYupSchema
 }
 
