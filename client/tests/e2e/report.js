@@ -62,15 +62,18 @@ test("Draft and submit a report", async t => {
   )
 
   const [
-    $principalPrimaryInput1,
+    $principalPrimary1,
     $principalName1,
     $principalPosition1,
     /* eslint-disable no-unused-vars */ $principalLocation1 /* eslint-enable no-unused-vars */,
     $principalOrg1
   ] = await $$(".principalAttendeesTable tbody tr:nth-child(2) td")
 
+  const $principalPrimaryInput1 = await $principalPrimary1.findElement(
+    By.css("input")
+  )
   t.true(
-    await $principalPrimaryInput1.findElement(By.css("input")).isSelected(),
+    await $principalPrimaryInput1.isSelected(),
     "Principal primary attendee checkbox should be checked"
   )
 
@@ -95,7 +98,7 @@ test("Draft and submit a report", async t => {
   )
 
   const [
-    $principalPrimaryInput2,
+    $principalPrimary2,
     $principalName2,
     /* eslint-disable no-unused-vars */
     $principalPosition2,
@@ -104,19 +107,22 @@ test("Draft and submit a report", async t => {
   ] = await $$(".principalAttendeesTable tbody tr:last-child td")
 
   await assertElementText(t, $principalName2, "LtCol STEVESON, Steve")
+  const $principalPrimaryInput2 = await $principalPrimary2.findElement(
+    By.css("input")
+  )
   t.false(
-    await $principalPrimaryInput2.findElement(By.css("input")).isSelected(),
+    await $principalPrimaryInput2.isSelected(),
     "Second principal primary attendee checkbox should not be checked"
   )
 
   await $principalPrimaryInput2.click()
-  t.false(
-    await $principalPrimaryInput1.findElement(By.css("input")).isSelected(),
-    "First principal primary attendee checkbox should no longer be checked"
-  )
   t.true(
-    await $principalPrimaryInput2.findElement(By.css("input")).isSelected(),
+    await $principalPrimaryInput2.isSelected(),
     "Second principal primary attendee checkbox should now be checked"
+  )
+  t.false(
+    await $principalPrimaryInput1.isSelected(),
+    "First principal primary attendee checkbox should no longer be checked"
   )
 
   const $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
