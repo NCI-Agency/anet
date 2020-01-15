@@ -172,7 +172,6 @@ const BaseTaskShow = props => {
                         {task.taskedOrganizations.map(org => (
                           <LinkTo
                             organization={org}
-                            isLink={false}
                             key={`${org.uuid}`}
                           />
                         ))}

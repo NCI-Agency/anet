@@ -36,7 +36,6 @@ const TaskTable = props => {
                       {task.taskedOrganizations.map(org => (
                         <LinkTo
                           organization={org}
-                          isLink={false}
                           key={`${task.uuid}-${org.uuid}`}
                         />
                       ))}

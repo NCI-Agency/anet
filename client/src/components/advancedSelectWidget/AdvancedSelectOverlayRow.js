@@ -49,6 +49,7 @@ export const TaskDetailedOverlayRow = item => (
           organization={org}
           isLink={false}
           key={`${item.uuid}-${org.uuid}`}
+          style={{ paddingRight: 5 }}
         />
       ))}
     </td>
