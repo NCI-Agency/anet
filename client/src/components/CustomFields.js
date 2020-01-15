@@ -60,11 +60,12 @@ const ReadonlyTextField = fieldProps => {
 }
 
 const DateField = fieldProps => {
-  const { withTime, ...otherFieldProps } = fieldProps
+  const { name, withTime, ...otherFieldProps } = fieldProps
   return (
     <Field
+      name={name}
       component={FieldHelper.renderSpecialField}
-      widget={<CustomDateInput withTime={withTime} />}
+      widget={<CustomDateInput id={name} withTime={withTime} />}
       {...otherFieldProps}
     />
   )
