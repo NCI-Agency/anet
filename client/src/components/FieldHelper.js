@@ -137,7 +137,9 @@ export const renderInputField = ({
   const widgetElem = (
     <FormControl
       {...Object.without(field, "value")}
-      value={field.value === null ? "" : field.value}
+      value={
+        field.value === null || field.value === undefined ? "" : field.value
+      }
       {...otherProps}
     />
   )
@@ -163,7 +165,9 @@ export const renderInputFieldNoLabel = ({
   const widgetElem = (
     <FormControl
       {...Object.without(field, "value")}
-      value={field.value === null ? "" : field.value}
+      value={
+        field.value === null || field.value === undefined ? "" : field.value
+      }
       {...otherProps}
     />
   )
