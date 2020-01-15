@@ -239,7 +239,7 @@ dictionary:
         assessmentDefinition:
           type: text
           label: Assessment definition
-          placeholder: JSON that defines the effoert (you need to know what you are doing)
+          placeholder: JSON that defines the effort (you need to know what you are doing)
           componentClass: textarea
           style:
             height: 200px
@@ -334,7 +334,7 @@ dictionary:
           visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
         assetsUsed:
           type: array_of_objects
-          label: Assets used to Assist
+          label: Assets used to assist
           addButtonLabel: Add an asset
           objectLabel: Asset used
           objectFields:
@@ -422,7 +422,7 @@ dictionary:
         multipleButtons:
           type: enumset
           label: Choose one or more of the options
-          helpText: Help text for chosing multiple values
+          helpText: Help text for choosing multiple values
           choices:
             opt1:
               label: Option 1
@@ -441,7 +441,7 @@ dictionary:
         colourOptions:
           type: enum
           label: Choose one of the colours
-          helpText: Help text for chosing colours
+          helpText: Help text for choosing colours
           choices:
             GREEN:
               label: Green
