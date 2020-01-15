@@ -24,6 +24,9 @@ developmentMode: true
 redirectToHttps: false
 
 assets:
+  cacheControlHeader: max-age=259200, public
+  mimeTypes:
+    ".js.map": application/json
   overrides:
     /imagery: imagery
     /data: data
@@ -250,6 +253,7 @@ dictionary:
       emailAddress: Email
       phoneNumber: Phone
       country: Nationality
+      code: ID card number
       rank: Rank
       ranks:
         - value: CIV
@@ -461,6 +465,7 @@ dictionary:
   automaticallyInactivateUsers:
     emailRemindersDaysPrior: [15, 30, 45]
     ignoredDomainNames: []
+    checkIntervalInSecs: 86400  # 60 * 60 * 24
 
   dashboards:
     - label: dashboard0

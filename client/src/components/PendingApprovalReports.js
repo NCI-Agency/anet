@@ -79,8 +79,8 @@ const Chart = props => {
         return d
       })
       .sort((a, b) => {
-        let aIndex = pinnedOrgs.indexOf(a.advisorOrg.shortName)
-        let bIndex = pinnedOrgs.indexOf(b.advisorOrg.shortName)
+        const aIndex = pinnedOrgs.indexOf(a.advisorOrg.shortName)
+        const bIndex = pinnedOrgs.indexOf(b.advisorOrg.shortName)
         if (aIndex < 0) {
           return bIndex < 0
             ? a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName)

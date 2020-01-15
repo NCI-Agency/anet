@@ -19,7 +19,6 @@ import _uniqueId from "lodash/uniqueId"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 const DATE_FORMAT = "YYYY-MM-DD"
@@ -105,6 +104,7 @@ export default class DateRangeSearch extends Component {
 
     return (
       <select
+        id={this.props.queryKey}
         disabled={onlyBetween}
         value={this.state.value.relative}
         onChange={this.onChangeRelative}
@@ -116,7 +116,7 @@ export default class DateRangeSearch extends Component {
   }
 
   render() {
-    let { value } = this.state
+    const { value } = this.state
     let dateRangeDisplay = RANGE_TYPE_LABELS[value.relative].concat(" ")
     if (
       value.relative === BETWEEN ||
@@ -140,36 +140,34 @@ export default class DateRangeSearch extends Component {
     return !this.props.asFormField ? (
       dateRangeDisplay
     ) : (
-      <FormGroup>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center"
-          }}
-        >
-          {this.selectMenu(this.props.onlyBetween)}
-          {(value.relative === BETWEEN ||
-            value.relative === AFTER ||
-            value.relative === ON) && (
-            <CustomDateInput
-                showIcon={false}
-                value={dateStart}
-                onChange={this.onChangeStart}
-              />
-          )}
-          {value.relative === BETWEEN && (
-            <span style={{ marginLeft: 5, marginRight: 5 }}>and</span>
-          )}
-          {(value.relative === BETWEEN || value.relative === BEFORE) && (
-            <CustomDateInput
-              showIcon={false}
-              value={dateEnd}
-              onChange={this.onChangeEnd}
-            />
-          )}
-        </div>
-      </FormGroup>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center"
+        }}
+      >
+        {this.selectMenu(this.props.onlyBetween)}
+        {(value.relative === BETWEEN ||
+          value.relative === AFTER ||
+          value.relative === ON) && (
+          <CustomDateInput
+            showIcon={false}
+            value={dateStart}
+            onChange={this.onChangeStart}
+          />
+        )}
+        {value.relative === BETWEEN && (
+          <span style={{ marginLeft: 5, marginRight: 5 }}>and</span>
+        )}
+        {(value.relative === BETWEEN || value.relative === BEFORE) && (
+          <CustomDateInput
+            showIcon={false}
+            value={dateEnd}
+            onChange={this.onChangeEnd}
+          />
+        )}
+      </div>
     )
   }
 
@@ -191,36 +189,36 @@ export default class DateRangeSearch extends Component {
 
   @autobind
   onChangeStart(newDate) {
-    let { value } = this.state
+    const { value } = this.state
     value.start = newDate
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   onChangeEnd(newDate) {
-    let { value } = this.state
+    const { value } = this.state
     value.end = newDate
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   onChangeRelative(newValue) {
-    let { value } = this.state
+    const { value } = this.state
     value.relative = newValue.target.value
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   toQuery() {
-    let { queryKey } = this.props
-    let { value } = this.state
+    const { queryKey } = this.props
+    const { value } = this.state
     return dateToQuery(queryKey, value)
   }
 
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

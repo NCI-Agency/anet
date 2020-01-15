@@ -52,9 +52,9 @@ const Chart = props => {
   })
   const graphData = useMemo(() => {
     function getEngagementDateRangeArray() {
-      let dateArray = []
+      const dateArray = []
       let currentDate = moment(queryParams.engagementDateStart).clone()
-      let endDate = moment(queryParams.engagementDateEnd)
+      const endDate = moment(queryParams.engagementDateEnd)
       while (currentDate <= endDate) {
         dateArray.push(currentDate.clone())
         currentDate = currentDate.add(1, "days")
@@ -80,13 +80,13 @@ const Chart = props => {
       return d
     })
     // add days without data as we want to display them in the chart
-    let allCategories = getEngagementDateRangeArray().map(function(d) {
+    const allCategories = getEngagementDateRangeArray().map(function(d) {
       return {
         key: d.valueOf(),
         values: [{}]
       }
     })
-    let categoriesWithData = d3
+    const categoriesWithData = d3
       .nest()
       .key(function(d) {
         return moment(d.engagementDate)
@@ -101,7 +101,7 @@ const Chart = props => {
       })
       .entries(reportsList)
     const groupedData = allCategories.map(d => {
-      let categData = categoriesWithData.find(x => {
+      const categData = categoriesWithData.find(x => {
         return Number(x.key) === d.key
       })
       return Object.assign({}, d, categData)

@@ -10,7 +10,6 @@ import mil.dds.anet.database.mappers.AdminSettingMapper;
 import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class AdminDao {
 
   public static enum AdminSettingKeys {
@@ -43,6 +42,7 @@ public class AdminDao {
     return cachedSettings.get(key.toString());
   }
 
+  @InTransaction
   public List<AdminSetting> getAllSettings() {
     return getDbHandle().createQuery("/* getAllAdminSettings */ SELECT * FROM \"adminSettings\"")
         .map(new AdminSettingMapper()).list();
@@ -51,6 +51,7 @@ public class AdminDao {
   /**
    * Saves an adminSetting to the database, inserting if it does not exist yet.
    */
+  @InTransaction
   public int saveSetting(AdminSetting setting) {
     if (cachedSettings == null) {
       initCache();

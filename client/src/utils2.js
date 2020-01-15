@@ -76,9 +76,9 @@ export function enhanceHtml(html, report) {
 }
 
 export async function createLinkToElement(type, uuid) {
+  const org = await getOrganizationByUuid(uuid)
   switch (type) {
     case "organizations":
-      let org = await getOrganizationByUuid(uuid)
       return (
         <>
           <LinkTo organization={org} isLink />

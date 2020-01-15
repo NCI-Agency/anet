@@ -92,7 +92,4 @@ AuthorizationGroupEdit.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(AuthorizationGroupEdit)
+export default connect(null, mapDispatchToProps)(AuthorizationGroupEdit)

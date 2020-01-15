@@ -12,7 +12,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -84,7 +84,7 @@ const BasePositionForm = props => {
     }
   ])
 
-  const CodeFieldWithLabel = DictionaryField(Field)
+  const CodeFieldWithLabel = DictionaryField(FastField)
 
   // For advisor types of positions, add permissions property.
   // The permissions property allows selecting a
@@ -104,7 +104,6 @@ const BasePositionForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Position.yupSchema}
-      isInitialValid
       initialValues={initialValues}
       {...myFormProps}
     >
@@ -114,6 +113,7 @@ const BasePositionForm = props => {
         dirty,
         errors,
         setFieldValue,
+        setFieldTouched,
         values,
         submitForm
       }) => {
@@ -187,13 +187,13 @@ const BasePositionForm = props => {
               <Fieldset title={title} action={action} />
               <Fieldset>
                 {props.edit ? (
-                  <Field
+                  <FastField
                     name="type"
                     component={FieldHelper.renderReadonlyField}
                     humanValue={Position.humanNameOfType}
                   />
                 ) : (
-                  <Field
+                  <FastField
                     name="type"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={typeButtons}
@@ -201,7 +201,7 @@ const BasePositionForm = props => {
                   />
                 )}
 
-                <Field
+                <FastField
                   name="status"
                   component={FieldHelper.renderButtonToggleGroup}
                   buttons={statusButtons}
@@ -216,22 +216,32 @@ const BasePositionForm = props => {
                       </span>
                     </HelpBlock>
                   )}
-                </Field>
+                </FastField>
 
-                <AdvancedSingleSelect
-                  fieldName="organization"
-                  fieldLabel="Organization"
-                  placeholder="Search the organization for this position..."
-                  value={values.organization}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={OrganizationOverlayRow}
-                  filterDefs={organizationFilters}
-                  onChange={value => setFieldValue("organization", value)}
-                  objectType={Organization}
-                  fields={Organization.autocompleteQuery}
-                  queryParams={orgSearchQuery}
-                  valueKey="shortName"
-                  addon={ORGANIZATIONS_ICON}
+                <FastField
+                  name="organization"
+                  label="Organization"
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("organization", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="organization"
+                      placeholder="Search the organization for this position..."
+                      value={values.organization}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={orgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
                 />
 
                 <CodeFieldWithLabel
@@ -240,7 +250,7 @@ const BasePositionForm = props => {
                   component={FieldHelper.renderInputField}
                 />
 
-                <Field
+                <FastField
                   name="name"
                   component={FieldHelper.renderInputField}
                   label={Settings.fields.position.name}
@@ -248,7 +258,7 @@ const BasePositionForm = props => {
                 />
 
                 {!isPrincipal && (
-                  <Field
+                  <FastField
                     name="permissions"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={permissionsButtons}
@@ -258,20 +268,30 @@ const BasePositionForm = props => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <AdvancedSingleSelect
-                  fieldName="location"
-                  fieldLabel="Location"
-                  placeholder="Search for the location where this Position will operate from..."
-                  value={values.location}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={LocationOverlayRow}
-                  filterDefs={locationFilters}
-                  onChange={value => setFieldValue("location", value)}
-                  objectType={Location}
-                  fields={Location.autocompleteQuery}
-                  queryParams={{ status: Location.STATUS.ACTIVE }}
-                  valueKey="name"
-                  addon={LOCATIONS_ICON}
+                <FastField
+                  name="location"
+                  label="Location"
+                  component={FieldHelper.renderSpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("location", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="location"
+                      placeholder="Search for the location where this Position will operate from..."
+                      value={values.location}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={LocationOverlayRow}
+                      filterDefs={locationFilters}
+                      objectType={Location}
+                      fields={Location.autocompleteQuery}
+                      queryParams={{ status: Location.STATUS.ACTIVE }}
+                      valueKey="name"
+                      addon={LOCATIONS_ICON}
+                    />
+                  }
                 />
               </Fieldset>
 

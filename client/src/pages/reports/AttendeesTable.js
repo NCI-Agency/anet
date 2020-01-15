@@ -58,17 +58,21 @@ const TableBody = props => {
   return (
     <tbody>
       {enableDivider && <AttendeeDividerRow />}
-      {Person.map(attendees.filter(p => p.role === role), person =>
-        handleAttendeeRow(person)
+      {Person.map(
+        attendees.filter(p => p.role === role),
+        person => handleAttendeeRow(person)
       )}
     </tbody>
   )
 }
 TableBody.propTypes = {
-  attendees: PropTypes.array,
+  attendees: PropTypes.array.isRequired,
   handleAttendeeRow: PropTypes.func,
   role: PropTypes.string,
   enableDivider: PropTypes.bool
+}
+TableBody.defaultProps = {
+  attendees: []
 }
 
 const TableContainer = props => {

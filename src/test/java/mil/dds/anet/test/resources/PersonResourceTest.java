@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -43,7 +44,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
   private static final String POSITION_FIELDS = "uuid name code type status";
   private static final String PERSON_FIELDS =
-      "uuid name status role emailAddress phoneNumber rank biography country avatar"
+      "uuid name status role emailAddress phoneNumber rank biography country avatar code"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
   private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
   private static final String DEFAULT_AVATAR_PATH = "src/test/resources/assets/default_avatar.png";
@@ -65,6 +66,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
     newPerson.setGender("Female");
     newPerson.setCountry("Canada");
+    newPerson.setCode("123456");
     newPerson.setEndOfTourDate(
         ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
     String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
@@ -79,6 +81,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     newPerson.setName("testCreatePerson updated name");
     newPerson.setCountry("The Commonwealth of Canada");
+    newPerson.setCode("A123456");
 
     // update avatar
     byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
@@ -95,6 +98,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, newPerson.getUuid(),
         new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
+    assertThat(retPerson.getCode()).isEqualTo(newPerson.getCode());
     assertThat(retPerson.getAvatar()).isNotNull();
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
@@ -256,12 +260,6 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
-    query.setText("advisor"); // Search against biographies
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
-    assertThat(searchResults.getList().size()).isGreaterThan(1);
-
     query.setText(null);
     query.setRole(Role.ADVISOR);
     searchResults =

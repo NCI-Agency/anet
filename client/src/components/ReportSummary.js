@@ -4,7 +4,7 @@ import LinkTo from "components/LinkTo"
 import { mapDispatchToProps, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import Tag from "components/Tag"
-import UltimatePagination from "components/UltimatePagination"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
@@ -143,6 +143,10 @@ const ReportSummary = props => {
     ...props
   })
   if (done) {
+    if (setTotalCount) {
+      // Reset the total count
+      setTotalCount(null)
+    }
     return result
   }
 
@@ -159,17 +163,17 @@ const ReportSummary = props => {
 
   return (
     <div>
-      <UltimatePagination
-        Component="header"
+      <UltimatePaginationTopDown
         className="pull-right"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPage}
-      />
-      {reports.map(report => (
-        <ReportSummaryRow report={report} key={report.uuid} />
-      ))}
+      >
+        {reports.map(report => (
+          <ReportSummaryRow report={report} key={report.uuid} />
+        ))}
+      </UltimatePaginationTopDown>
     </div>
   )
 
@@ -198,15 +202,15 @@ const ReportSummaryRow = props => {
           {/* If the parent does not fetch report.updatedAt, we will not display this
             so we do not get a broken view.
           */
-            report.updatedAt && (
-              <span>
+          report.updatedAt && (
+            <span>
               : last saved at{" "}
-                {moment(report.updatedAt).format(
-                  Settings.dateFormats.forms.displayShort.withTime
-                )}
-              </span>
-            )
-          }
+              {moment(report.updatedAt).format(
+                Settings.dateFormats.forms.displayShort.withTime
+              )}
+            </span>
+          )
+}
         </p>
       )}
 
@@ -365,7 +369,4 @@ const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ReportSummary)
+export default connect(mapStateToProps, mapDispatchToProps)(ReportSummary)

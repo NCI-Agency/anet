@@ -136,7 +136,7 @@ class LinkSourceAnet extends Component {
   onConfirm = value => {
     const { editorState, entityType, onComplete } = this.props
 
-    let nextState = createEntity(
+    const nextState = createEntity(
       editorState,
       entityType.type,
       {

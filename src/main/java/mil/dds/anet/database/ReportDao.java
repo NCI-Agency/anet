@@ -55,7 +55,6 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   private static final String[] fields = {"uuid", "state", "createdAt", "updatedAt",
@@ -85,6 +84,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     }
   }
 
+  @InTransaction
   public Report insert(Report r, Person user) {
     DaoUtils.setInsertFields(r);
     return insertInternal(r, user);
@@ -172,6 +172,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     return getByUuid(uuid, null);
   }
 
+  @InTransaction
   public Report getByUuid(String uuid, Person user) {
     /* Check whether uuid is purely numerical, and if so, query on legacyId */
     final String queryDescriptor;
@@ -187,17 +188,13 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       keyField = "uuid";
       key = uuid;
     }
-    final Report result = getDbHandle()
+    return getDbHandle()
         .createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + "FROM reports "
             + "WHERE reports.\"" + keyField + "\" = :key")
         .bind("key", key).map(new ReportMapper()).findFirst().orElse(null);
-    if (result == null) {
-      return null;
-    }
-    result.setUser(user);
-    return result;
   }
 
+  @InTransaction
   public int update(Report r, Person user) {
     DaoUtils.setUpdateFields(r);
     return updateInternal(r, user);
@@ -245,6 +242,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason())).execute();
   }
 
+  @InTransaction
   public void updateToDraftState(Report r) {
     getDbHandle().createUpdate(
         "/* UpdateFutureEngagementToDraft */ UPDATE reports SET state = :state , \"approvalStepUuid\" = NULL "
@@ -253,6 +251,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .execute();
   }
 
+  @InTransaction
   public int addAttendeeToReport(ReportPerson rp, Report r) {
     return getDbHandle().createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
         + "(\"personUuid\", \"reportUuid\", \"isPrimary\") VALUES (:personUuid, :reportUuid, :isPrimary)")
@@ -260,6 +259,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("isPrimary", rp.isPrimary()).execute();
   }
 
+  @InTransaction
   public int removeAttendeeFromReport(Person p, Report r) {
     return getDbHandle()
         .createUpdate("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
@@ -267,6 +267,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("personUuid", p.getUuid()).execute();
   }
 
+  @InTransaction
   public int updateAttendeeOnReport(ReportPerson rp, Report r) {
     return getDbHandle().createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
         + "SET \"isPrimary\" = :isPrimary WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
@@ -274,7 +275,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("isPrimary", rp.isPrimary()).execute();
   }
 
-
+  @InTransaction
   public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
     return getDbHandle().createUpdate(
         "/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupUuid\", \"reportUuid\") "
@@ -282,6 +283,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", a.getUuid()).execute();
   }
 
+  @InTransaction
   public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
     return getDbHandle().createUpdate(
         "/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
@@ -289,6 +291,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", a.getUuid()).execute();
   }
 
+  @InTransaction
   public int addTaskToReport(Task p, Report r) {
     return getDbHandle()
         .createUpdate(
@@ -297,6 +300,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("taskUuid", p.getUuid()).execute();
   }
 
+  @InTransaction
   public int removeTaskFromReport(String taskUuid, Report r) {
     return getDbHandle()
         .createUpdate("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
@@ -304,6 +308,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("taskUuid", taskUuid).execute();
   }
 
+  @InTransaction
   public int addTagToReport(Tag t, Report r) {
     return getDbHandle()
         .createUpdate(
@@ -312,6 +317,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("tagUuid", t.getUuid()).execute();
   }
 
+  @InTransaction
   public int removeTagFromReport(Tag t, Report r) {
     return getDbHandle()
         .createUpdate("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
@@ -325,6 +331,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         reportUuid);
   }
 
+  @InTransaction
   public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
     return getDbHandle().createQuery(
         "/* getAuthorizationGroupsForReport */ SELECT * FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
@@ -352,6 +359,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
    * Deletes a given report from the database. Ensures consistency by removing all references to a
    * report before deleting a report.
    */
+  @InTransaction
   @Override
   public int deleteInternal(String reportUuid) {
     // Delete tags
@@ -447,6 +455,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   /* Generates Advisor Report Insights for Organizations */
+  @InTransaction
   public List<Map<String, Object>> getAdvisorReportInsights(Instant start, Instant end,
       String orgUuid) {
     final Map<String, Object> sqlArgs = new HashMap<String, Object>();
@@ -557,10 +566,10 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-    sqlArgs.put("positionAdvisor", Position.PositionType.ADVISOR.ordinal());
-    sqlArgs.put("reportDraft", ReportState.DRAFT.ordinal());
-    sqlArgs.put("reportPending", ReportState.PENDING_APPROVAL.ordinal());
-    sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
+    sqlArgs.put("positionAdvisor", DaoUtils.getEnumId(Position.PositionType.ADVISOR));
+    sqlArgs.put("reportDraft", DaoUtils.getEnumId(ReportState.DRAFT));
+    sqlArgs.put("reportPending", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
+    sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
 
     return getDbHandle().createQuery(String.format(sql.toString(), fmtArgs)).bindMap(sqlArgs)
         .map(new MapMapper(false)).list();
@@ -574,8 +583,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
    * @param orgs the list of orgs for whose reports to find, null means all
    * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
    */
-  private List<Map<String, Object>> rollupQuery(Instant start, Instant end,
-      OrganizationType orgType, List<Organization> orgs, boolean missingOrgReports) {
+  @InTransaction
+  public List<Map<String, Object>> rollupQuery(Instant start, Instant end, OrganizationType orgType,
+      List<Organization> orgs, boolean missingOrgReports) {
     String orgColumn =
         String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationUuid"
             : "principalOrganizationUuid");
@@ -793,6 +803,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
    * have just become past engagements. These reports need to get the draft state as they need to go
    * through the report approval chain before being published.
    */
+  @InTransaction
   public List<Report> getFutureToPastReports(Instant end) {
     final Map<String, Object> sqlArgs = new HashMap<String, Object>();
     StringBuilder sql = new StringBuilder();
@@ -845,13 +856,13 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append("       WHERE \"approvalSteps\".type = :planningApprovalStepType )");
     sql.append(" ))");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-    sqlArgs.put("reportApproved", ReportState.APPROVED.ordinal());
-    sqlArgs.put("reportRejected", ReportState.REJECTED.ordinal());
-    sqlArgs.put("reportPendingApproval", ReportState.PENDING_APPROVAL.ordinal());
-    sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
-    sqlArgs.put("planningApprovalStepType", ApprovalStepType.PLANNING_APPROVAL.ordinal());
-    return getDbHandle().createQuery(String.format(sql.toString())).bindMap(sqlArgs)
-        .map(new ReportMapper()).list();
+    sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));
+    sqlArgs.put("reportRejected", DaoUtils.getEnumId(ReportState.REJECTED));
+    sqlArgs.put("reportPendingApproval", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
+    sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
+    sqlArgs.put("planningApprovalStepType", DaoUtils.getEnumId(ApprovalStepType.PLANNING_APPROVAL));
+    return getDbHandle().createQuery(sql.toString()).bindMap(sqlArgs).map(new ReportMapper())
+        .list();
   }
 
 }

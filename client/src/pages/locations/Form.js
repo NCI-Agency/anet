@@ -7,7 +7,7 @@ import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location, Person } from "models"
 import PropTypes from "prop-types"
@@ -53,7 +53,6 @@ const BaseLocationForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      isInitialValid
       {...myFormProps}
     >
       {({
@@ -72,7 +71,7 @@ const BaseLocationForm = props => {
           autoPan: true,
           onMove: (event, map) => onMarkerMove(event, map, setFieldValue)
         }
-        if (Location.hasCoordinates(values.coord)) {
+        if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
             lat: values.lat,
             lng: values.lng
@@ -98,13 +97,13 @@ const BaseLocationForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field
+                <FastField
                   name="name"
                   component={FieldHelper.renderInputField}
                   disabled={!canEditName}
                 />
 
-                <Field
+                <FastField
                   name="status"
                   component={FieldHelper.renderButtonToggleGroup}
                   buttons={statusButtons}

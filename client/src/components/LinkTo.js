@@ -83,7 +83,7 @@ export default class LinkTo extends Component {
     } else {
       componentProps.className = className
     }
-    let modelName = Object.keys(componentProps).find(
+    const modelName = Object.keys(componentProps).find(
       key => MODEL_NAMES.indexOf(key) !== -1
     )
     if (!modelName) {
@@ -110,13 +110,13 @@ export default class LinkTo extends Component {
     // Avatar
     const avatarComponent = showAvatar &&
       !button &&
-      modelFields.hasOwnProperty("avatar") && (
+      Object.prototype.hasOwnProperty.call(modelFields, "avatar") && (
         <AvatarDisplayComponent
-        avatar={modelInstance.avatar}
-        height={32}
-        width={32}
-        style={{ marginLeft: 5, marginRight: 5 }}
-      />
+          avatar={modelInstance.avatar}
+          height={32}
+          width={32}
+          style={{ marginLeft: 5, marginRight: 5 }}
+        />
     )
 
     if (!isLink) {
@@ -131,7 +131,7 @@ export default class LinkTo extends Component {
     let to = modelFields
     if (!isModel) {
       if (to.indexOf("?")) {
-        let components = to.split("?")
+        const components = to.split("?")
         to = { pathname: components[0], search: components[1] }
       }
     } else {

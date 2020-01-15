@@ -22,7 +22,7 @@ const BaseReportNew = props => {
 
   const report = new Report()
   if (props.currentUser && props.currentUser.uuid) {
-    let person = new Person(props.currentUser)
+    const person = new Person(props.currentUser)
     person.primary = true
     report.attendees.push(person)
   }
@@ -57,7 +57,4 @@ const ReportNew = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportNew)
+export default connect(null, mapDispatchToProps)(ReportNew)

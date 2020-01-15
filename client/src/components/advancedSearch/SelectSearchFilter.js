@@ -2,7 +2,6 @@ import autobind from "autobind-decorator"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 export default class SelectSearchFilter extends Component {
@@ -53,26 +52,30 @@ export default class SelectSearchFilter extends Component {
   }
 
   render() {
-    let values = this.props.values
-    let labels = this.props.labels || values.map(v => utils.sentenceCase(v))
+    const values = this.props.values
+    const labels = this.props.labels || values.map(v => utils.sentenceCase(v))
     return !this.props.asFormField ? (
       <>{labels[values.indexOf(this.state.value.value)]}</>
     ) : (
-      <FormGroup>
-        <select value={this.state.value.value} onChange={this.onChange}>
+      <div>
+        <select
+          id={this.props.queryKey}
+          value={this.state.value.value}
+          onChange={this.onChange}
+        >
           {values.map((v, idx) => (
             <option key={idx} value={v}>
               {labels[idx]}
             </option>
           ))}
         </select>
-      </FormGroup>
+      </div>
     )
   }
 
   @autobind
   onChange(event) {
-    let { value } = this.state
+    const { value } = this.state
     value.value = event.target.value
     this.setState({ value }, this.updateFilter)
   }
@@ -85,7 +88,7 @@ export default class SelectSearchFilter extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

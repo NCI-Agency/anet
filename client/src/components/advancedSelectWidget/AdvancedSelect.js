@@ -1,25 +1,21 @@
+import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
 import API from "api"
 import { gql } from "apollo-boost"
-import { renderInputField } from "components/FieldHelper"
-import LinkTo from "components/LinkTo"
+import * as FieldHelper from "components/FieldHelper"
 import UltimatePagination from "components/UltimatePagination"
-import { Field } from "formik"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Button, Col, Overlay, Popover, Row } from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
-import "./AdvancedMultiSelect.css"
+import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
+import "./AdvancedSelect.css"
 
-const MOBILE_WIDTH = 733
+const hasMultipleItems = object => Object.keys(object).length > 1
 
 const AdvancedSelectTarget = ({ overlayRef }) => (
   <Row>
     <Col
-      sm={12}
-      lg={9}
       className="form-group"
       ref={overlayRef}
       style={{ position: "relative", marginBottom: 0 }}
@@ -32,33 +28,32 @@ AdvancedSelectTarget.propTypes = {
   })
 }
 
-const FilterList = props => {
-  const { items, currentFilter, handleOnClick } = props
-  return (
-    <ul className="overlayFilters">
-      {Object.keys(items).map(filterType => (
-        <li
-          key={filterType}
-          className={currentFilter === filterType ? "active" : null}
-        >
-          <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
-            {items[filterType].label}
-          </Button>
-        </li>
-      ))}
-    </ul>
+const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
+  hasMultipleItems(items) && (
+    <Col md={4} xsHidden smHidden>
+      <ul className="advanced-select-filters">
+        {Object.keys(items).map(filterType => (
+          <li
+            key={filterType}
+            className={currentFilter === filterType ? "active" : null}
+          >
+            <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
+              {items[filterType].label}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </Col>
   )
-}
-FilterList.propTypes = {
+FilterAsNav.propTypes = {
   items: PropTypes.object,
   currentFilter: PropTypes.string,
   handleOnClick: PropTypes.func
 }
 
-const SelectFilterInputField = props => {
-  const { items, handleOnChange } = props
-  return (
-    <>
+const FilterAsDropdown = ({ items, handleOnChange }) =>
+  hasMultipleItems(items) && (
+    <Col style={{ minHeight: "80px" }} mdHidden lgHidden>
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -69,19 +64,23 @@ const SelectFilterInputField = props => {
           ))}
         </select>
       </p>
-    </>
+    </Col>
   )
-}
-SelectFilterInputField.propTypes = {
+FilterAsDropdown.propTypes = {
   items: PropTypes.object,
   handleOnChange: PropTypes.func
 }
 
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
-  fieldLabel: PropTypes.string, // input field label
   placeholder: PropTypes.string, // input field placeholder
   searchTerms: PropTypes.string,
+  addon: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.object
+  ]),
+  extraAddon: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
   overlayTableClassName: PropTypes.string,
@@ -94,40 +93,22 @@ export const propTypes = {
   overlayRenderRow: PropTypes.func.isRequired,
   closeOverlayOnAdd: PropTypes.bool, // set to true if you want the overlay to be closed after an add action
   filterDefs: PropTypes.object, // config of the search filters
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
   // Required: ANET Object Type (Person, Report, etc) to search for.
   objectType: PropTypes.func.isRequired,
   // Optional: Parameters to pass to all search filters.
   queryParams: PropTypes.object,
   // Optional: GraphQL string of fields to return from search.
   fields: PropTypes.string,
-  shortcuts: PropTypes.array,
-  shortcutsTitle: PropTypes.string,
-  renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
-  addon: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.func,
-    PropTypes.object
-  ]),
-  extraAddon: PropTypes.object,
   handleAddItem: PropTypes.func,
-  handleRemoveItem: PropTypes.func,
-  smallOverlay: PropTypes.bool, // set to true if you want to display the filters on top
-  vertical: PropTypes.bool,
-  showEmbedded: PropTypes.bool // Whether to show the table embedded instead of a popover
+  handleRemoveItem: PropTypes.func
 }
 
 export default class AdvancedSelect extends Component {
   static defaultProps = {
-    fieldLabel: "Add item",
     filterDefs: {},
-    shortcuts: [],
-    shortcutsTitle: "Recents",
-    renderExtraCol: false,
     closeOverlayOnAdd: false,
-    searchTerms: "",
-    smallOverlay: false,
-    showEmbedded: false
+    searchTerms: ""
   }
 
   state = {
@@ -135,13 +116,12 @@ export default class AdvancedSelect extends Component {
     filterType: Object.keys(this.props.filterDefs)[0], // per default use the first filter
     results: {},
     showOverlay: false,
-    inputFocused: false,
     isLoading: false
   }
 
-  latestRequest = null
   overlayContainer = React.createRef()
   overlayTarget = React.createRef()
+  searchInput = React.createRef()
 
   componentDidMount() {
     this.setState({
@@ -165,191 +145,147 @@ export default class AdvancedSelect extends Component {
 
   render() {
     const {
+      closeOverlayOnAdd,
       fieldName,
-      fieldLabel,
       placeholder,
       value,
-      vertical,
       renderSelected,
       onChange,
       objectType,
       queryParams,
       fields,
-      shortcuts,
-      shortcutsTitle,
-      renderExtraCol,
-      addon,
-      extraAddon,
       handleAddItem,
       handleRemoveItem,
-      showEmbedded,
+      addon,
+      extraAddon,
       ...overlayProps
     } = this.props
+
     const {
       overlayTableClassName,
       overlayColumns,
       overlayRenderRow,
-      filterDefs,
-      smallOverlay
+      filterDefs
     } = overlayProps
-    const { results, filterType, isLoading } = this.state
+
+    const {
+      results,
+      filterType,
+      isLoading,
+      searchTerms,
+      showOverlay
+    } = this.state
+
     const renderSelectedWithDelete = renderSelected
       ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
       : null
     const items = results && results[filterType] ? results[filterType].list : []
 
-    const tableContainer = (
-      <ContainerDimensions>
-        {({ width }) => {
-          const hasLeftNav =
-            width >= MOBILE_WIDTH && Object.keys(filterDefs).length > 1
-          const hasTopNav =
-            (width < MOBILE_WIDTH || smallOverlay) &&
-            Object.keys(filterDefs).length > 1
-          return (
-            <Row className="border-between">
-              {hasLeftNav && (
-                <Col sm={4} md={3}>
-                  <div>
-                    <FilterList
-                      items={filterDefs}
-                      currentFilter={this.state.filterType}
-                      handleOnClick={this.changeFilterType}
-                    />
-                  </div>
-                </Col>
-              )}
+    const advancedSearchPopoverContent = (
+      <Row className="border-between">
+        <FilterAsNav
+          items={filterDefs}
+          currentFilter={filterType}
+          handleOnClick={this.changeFilterType}
+        />
 
-              <Col
-                sm={hasLeftNav ? 8 : 12}
-                md={hasLeftNav ? 9 : 12}
-                style={{ minHeight: "80px" }}
-              >
-                {hasTopNav && (
-                  <div>
-                    <SelectFilterInputField
-                      items={filterDefs}
-                      handleOnChange={this.handleOnChangeSelect}
-                    />
-                  </div>
-                )}
-                <this.props.overlayTable
-                  fieldName={fieldName}
-                  items={items}
-                  selectedItems={value}
-                  handleAddItem={item => {
-                    handleAddItem(item)
-                    if (this.props.closeOverlayOnAdd) {
-                      this.handleHideOverlay()
-                    }
-                  }}
-                  handleRemoveItem={handleRemoveItem}
-                  objectType={objectType}
-                  columns={[""].concat(overlayColumns)}
-                  renderRow={overlayRenderRow}
-                  isLoading={isLoading}
-                  loaderMessage="No results found"
-                  tableClassName={overlayTableClassName}
-                />
-                {this.paginationFor(filterType)}
-              </Col>
-            </Row>
-          )
-        }}
-      </ContainerDimensions>
+        <FilterAsDropdown
+          items={filterDefs}
+          handleOnChange={this.handleOnChangeSelect}
+        />
+
+        <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
+          <this.props.overlayTable
+            fieldName={fieldName}
+            items={items}
+            selectedItems={value}
+            handleAddItem={item => {
+              handleAddItem(item)
+              if (closeOverlayOnAdd) {
+                this.handleHideOverlay()
+              }
+            }}
+            handleRemoveItem={handleRemoveItem}
+            objectType={objectType}
+            columns={[""].concat(overlayColumns)}
+            renderRow={overlayRenderRow}
+            isLoading={isLoading}
+            loaderMessage={
+              <div style={{ width: "300px" }}>No results found</div>
+            }
+            tableClassName={overlayTableClassName}
+          />
+          {this.paginationFor(filterType)}
+        </Col>
+      </Row>
     )
 
     return (
       <>
-        <Field
-          name={fieldName}
-          label={fieldLabel}
-          component={renderInputField}
-          value={this.state.searchTerms}
-          placeholder={placeholder}
-          onChange={this.changeSearchTerms}
-          onFocus={this.handleInputFocus}
-          onBlur={this.handleInputBlur}
-          innerRef={this.overlayTarget}
-          extraColElem={renderExtraCol ? this.renderShortcutsTitle() : ""}
-          addon={addon}
-          extraAddon={extraAddon}
-          vertical={vertical}
-        />
-        {showEmbedded ? (
-          tableContainer
-        ) : (
-          <Overlay
-            show={this.state.showOverlay}
-            container={this.overlayContainer.current}
-            target={this.overlayTarget.current}
-            rootClose
-            onHide={this.handleHideOverlay}
-            placement="bottom"
-            animation={false}
-            delayHide={200}
-          >
+        <div id={`${fieldName}-popover`}>
+          <InputGroup>
             <Popover
-              id={`${fieldName}-popover`}
-              title={null}
-              placement="bottom"
-              style={{
-                width: "100%",
-                maxWidth: "100%",
-                boxShadow: "0 6px 20px hsla(0, 0%, 0%, 0.4)"
+              className="advanced-select-popover"
+              popoverClassName="bp3-popover-content-sizing"
+              content={advancedSearchPopoverContent}
+              isOpen={showOverlay}
+              captureDismiss
+              interactionKind={PopoverInteractionKind.CLICK}
+              onInteraction={this.handleInteraction}
+              usePortal={false}
+              position={Position.BOTTOM}
+              modifiers={{
+                preventOverflow: {
+                  enabled: false
+                },
+                flip: {
+                  enabled: false
+                }
               }}
             >
-              {tableContainer}
+              <FormControl
+                name={fieldName}
+                value={searchTerms || ""}
+                placeholder={placeholder}
+                onChange={this.changeSearchTerms}
+                onFocus={this.handleInputFocus}
+                inputRef={this.searchInput}
+              />
             </Popover>
-          </Overlay>
-        )}
+            {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+            {addon && (
+              <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+            )}
+          </InputGroup>
+        </div>
         <AdvancedSelectTarget overlayRef={this.overlayContainer} />
         <Row>
-          {vertical ? (
-            <Col sm={12}>{renderSelectedWithDelete}</Col>
-          ) : (
-            <>
-              <Col sm={2} />
-              <Col sm={7}>{renderSelectedWithDelete}</Col>
-              <Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
-            </>
-          )}
+          <Col sm={12}>{renderSelectedWithDelete}</Col>
         </Row>
       </>
     )
   }
 
   handleInputFocus = () => {
-    if (this.state.showOverlay === true) {
-      // Overlay is already open and we do input focus, no need to fetch data
-      this.setState({
-        inputFocused: true
-      })
-    } else {
-      this.setState(
-        {
-          searchTerms: "",
-          inputFocused: true,
-          showOverlay: true,
-          isLoading: true
-        },
-        this.fetchResults()
-      )
+    if (this.state.showOverlay) {
+      return // Overlay is already open and we do not need to fetch data
     }
+    this.setState(
+      {
+        showOverlay: true,
+        searchTerms: "",
+        isLoading: true
+      },
+      this.fetchResults()
+    )
   }
 
-  handleInputBlur = () => {
-    this.setState({
-      inputFocused: false
-    })
+  handleInteraction = (showOverlay, event) => {
+    const inputFocus = this.searchInput.current.contains(event && event.target)
+    return this.setState({ showOverlay: showOverlay || inputFocus })
   }
 
   handleHideOverlay = () => {
-    // Do not hide the overlay when the trigger input has the focus,
-    // or the table is embedded in the modal
-    if (this.state.inputFocused || this.props.showEmbedded) {
-      return
-    }
     this.setState({
       filterType: Object.keys(this.props.filterDefs)[0],
       searchTerms: "",
@@ -426,7 +362,7 @@ export default class AdvancedSelect extends Component {
     const resourceName = this.props.objectType.resourceName
     const listName = filterDefs.listName || this.props.objectType.listName
     this.setState({ isLoading: true }, () => {
-      let queryVars = { pageNum: pageNum, pageSize: 6 }
+      const queryVars = { pageNum: pageNum, pageSize: 6 }
       if (this.props.queryParams) {
         Object.assign(queryVars, this.props.queryParams)
       }
@@ -436,7 +372,7 @@ export default class AdvancedSelect extends Component {
       if (this.state.searchTerms) {
         Object.assign(queryVars, { text: this.state.searchTerms + "*" })
       }
-      let thisRequest = (this.latestRequest = API.query(
+      const thisRequest = (this.latestRequest = API.query(
         gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
@@ -492,47 +428,6 @@ export default class AdvancedSelect extends Component {
 
   goToPage = pageNum => {
     this.fetchResults(pageNum)
-  }
-
-  renderShortcutsTitle = () => {
-    return (
-      <div
-        id={`${this.props.fieldName}-shortcut-title`}
-        className="shortcut-title"
-      >
-        <h5>{this.props.shortcutsTitle}</h5>
-      </div>
-    )
-  }
-
-  renderShortcuts = () => {
-    const shortcuts = this.props.shortcuts
-    return (
-      shortcuts &&
-      shortcuts.length > 0 && (
-        <div
-          id={`${this.props.fieldName}-shortcut-list`}
-          className="shortcut-list"
-        >
-          {shortcuts.map(shortcut => {
-            const shortcutLinkProps = {
-              [this.props.objectType.getModelNameLinkTo]: shortcut,
-              isLink: false,
-              forShortcut: true
-            }
-            return (
-              <Button
-                key={shortcut.uuid}
-                bsStyle="link"
-                onClick={() => this.props.handleAddItem(shortcut)}
-              >
-                Add <LinkTo {...shortcutLinkProps} />
-              </Button>
-            )
-          })}
-        </div>
-      )
-    )
   }
 }
 

@@ -25,12 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
       "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
-      "pendingVerification", "createdAt", "updatedAt", "avatar"};
+      "pendingVerification", "avatar", "code", "createdAt", "updatedAt"};
   public static String TABLE_NAME = "people";
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
@@ -79,9 +78,9 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     StringBuilder sql = new StringBuilder();
     sql.append("/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-        + "gender, country, avatar, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
+        + "gender, country, avatar, code, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
-        + ":gender, :country, :avatar, ");
+        + ":gender, :country, :avatar, :code, ");
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("CAST(:endOfTourDate AS datetime2), ");
@@ -104,7 +103,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, "
         + "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
-        + "\"avatar\" = :avatar,"
+        + "\"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, ");
@@ -130,6 +129,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
   }
 
+  @InTransaction
   public List<Person> findByDomainUsername(String domainUsername) {
     return getDbHandle()
         .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
@@ -142,6 +142,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .list();
   }
 
+  @InTransaction
   public List<Person> getRecentPeople(Person author, int maxResults) {
     String sql;
     if (DaoUtils.isMsSql()) {
@@ -163,6 +164,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("maxResults", maxResults).map(new PersonMapper()).list();
   }
 
+  @InTransaction
   public int mergePeople(Person winner, Person loser) {
     // delete duplicates where other is primary, or where neither is primary
     getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
@@ -234,6 +236,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
+  @InTransaction
   public void clearEmptyBiographies() {
     // Search all people with a not null biography field
     final PersonSearchQuery query = new PersonSearchQuery();

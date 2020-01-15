@@ -3,6 +3,7 @@ package mil.dds.anet.integrationtest.emails;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
+
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.List;
 import mil.dds.anet.AnetApplication;
@@ -11,6 +12,7 @@ import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -28,6 +30,8 @@ public class EmailServerTest {
       new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
   private static SmtpConfiguration smtpConfig;
 
+  private FakeSmtpServer emailServer;
+
   @BeforeClass
   public static void setUpClass() {
     smtpConfig = RULE.getConfiguration().getSmtp();
@@ -37,6 +41,17 @@ public class EmailServerTest {
   public void setup() throws Exception {
     assumeTrue(Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+
+    emailServer = new FakeSmtpServer(smtpConfig);
+
+    // Clear the email server before starting test
+    emailServer.clearEmailServer();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    // Clear the email server after test
+    emailServer.clearEmailServer();
   }
 
   /**
@@ -46,10 +61,6 @@ public class EmailServerTest {
    */
   @Test
   public void runTest() throws Exception {
-    final FakeSmtpServer emailServer = new FakeSmtpServer(smtpConfig);
-
-    emailServer.clearEmailServer();
-
     emailServer.sendEmail("to@example.com", "from@example.com", null, null, "Test subject",
         "Hello there!", null);
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();

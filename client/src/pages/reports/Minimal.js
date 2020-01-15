@@ -412,12 +412,12 @@ const ReportMinimal = props => {
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
-                  <div
+                    <div
                       dangerouslySetInnerHTML={{
-                      __html: report.reportSensitiveInformation.text
-                    }}
+                        __html: report.reportSensitiveInformation.text
+                      }}
                     />
-                </Fieldset>
+                  </Fieldset>
               )}
 
               {report.showWorkflow() && (
@@ -426,7 +426,7 @@ const ReportMinimal = props => {
 
               <Fieldset className="report-sub-form" title="Comments">
                 {report.comments.map(comment => {
-                  let createdAt = moment(comment.createdAt)
+                  const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
                       <LinkTo person={comment.author} />,
@@ -504,7 +504,4 @@ ReportMinimal.propTypes = {
   ...pagePropTypes
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportMinimal)
+export default connect(null, mapDispatchToProps)(ReportMinimal)

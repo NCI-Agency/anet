@@ -50,9 +50,9 @@ const Chart = props => {
       return []
     }
     // The server returns values from 1 to 7
-    let daysOfWeekInt = [1, 2, 3, 4, 5, 6, 7]
+    const daysOfWeekInt = [1, 2, 3, 4, 5, 6, 7]
     // The day of the week (returned by the server) with value 1 is Sunday
-    let daysOfWeek = [
+    const daysOfWeek = [
       "Sunday",
       "Monday",
       "Tuesday",
@@ -62,7 +62,7 @@ const Chart = props => {
       "Saturday"
     ]
     // Set the order in which to display the days of the week
-    let displayOrderDaysOfWeek = [
+    const displayOrderDaysOfWeek = [
       "Monday",
       "Tuesday",
       "Wednesday",
@@ -71,15 +71,15 @@ const Chart = props => {
       "Saturday",
       "Sunday"
     ]
-    let reportsList = data.reportList.list || []
+    const reportsList = data.reportList.list || []
     if (!reportsList.length) {
       return []
     }
-    let simplifiedValues = reportsList.map(d => {
+    const simplifiedValues = reportsList.map(d => {
       return { reportUuid: d.uuid, dayOfWeek: d.engagementDayOfWeek }
     })
     return displayOrderDaysOfWeek.map(d => {
-      let r = {}
+      const r = {}
       r.dayOfWeekInt = daysOfWeekInt[daysOfWeek.indexOf(d)]
       r.dayOfWeekString = d
       r.reportsCount = simplifiedValues.filter(

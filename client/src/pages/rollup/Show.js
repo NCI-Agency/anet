@@ -118,10 +118,10 @@ const Chart = props => {
         return d
       })
       .sort((a, b) => {
-        let aIndex = pinnedOrgs.indexOf(a.org.shortName)
-        let bIndex = pinnedOrgs.indexOf(b.org.shortName)
+        const aIndex = pinnedOrgs.indexOf(a.org.shortName)
+        const bIndex = pinnedOrgs.indexOf(b.org.shortName)
         if (aIndex < 0) {
-          let nameOrder = a.org.shortName.localeCompare(b.org.shortName)
+          const nameOrder = a.org.shortName.localeCompare(b.org.shortName)
           return bIndex < 0
             ? nameOrder === 0
               ? a.org.uuid - b.org.uuid
@@ -371,13 +371,18 @@ const BaseRollupShow = props => {
         action={
           <span>
             <Button
+              id="print-rollup"
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={printPreview}
             >
               Print
             </Button>
-            <Button onClick={toggleEmailModal} bsStyle="primary">
+            <Button
+              id="email-rollup"
+              onClick={toggleEmailModal}
+              bsStyle="primary"
+            >
               Email rollup
             </Button>
           </span>
@@ -423,12 +428,14 @@ const BaseRollupShow = props => {
 
   function getQueryParams() {
     const sqParams = getSearchQuery(searchQuery)
+    const maxReportAge =
+      1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     const reportsQueryParams = {
       state: [Report.STATE.PUBLISHED], // Specifically excluding cancelled engagements.
       releasedAtStart: getRollupStart().valueOf(),
       releasedAtEnd: getRollupEnd().valueOf(),
       engagementDateStart: moment(getRollupStart())
-        .subtract(appSettings.maxReportAge, "days")
+        .subtract(maxReportAge, "days")
         .valueOf(),
       sortBy: "ENGAGEMENT_DATE",
       sortOrder: "DESC",
@@ -532,6 +539,7 @@ const BaseRollupShow = props => {
           </Modal.Body>
           <Modal.Footer>
             <Button
+              id="preview-rollup-email"
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={showPreview}
@@ -539,6 +547,7 @@ const BaseRollupShow = props => {
               Preview
             </Button>
             <Button
+              id="send-rollup-email"
               bsStyle="primary"
               type="button"
               onClick={submitForm}
@@ -581,8 +590,8 @@ const BaseRollupShow = props => {
       variables.orgType = orgType
     }
     return API.query(GQL_SHOW_ROLLUP_EMAIL, variables).then(data => {
-      let rollupWindow = window.open("", "rollup")
-      let doc = rollupWindow.document
+      const rollupWindow = window.open("", "rollup")
+      const doc = rollupWindow.document
       doc.clear()
       doc.open()
       doc.write(data.showRollupEmail)
@@ -654,7 +663,4 @@ const RollupShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(RollupShow)
+export default connect(mapStateToProps, mapDispatchToProps)(RollupShow)

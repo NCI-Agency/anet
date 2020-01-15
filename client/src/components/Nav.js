@@ -244,9 +244,6 @@ const Nav = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  null,
-  { pure: false }
-)(Nav)
+export default connect(mapStateToProps, mapDispatchToProps, null, {
+  pure: false
+})(Nav)

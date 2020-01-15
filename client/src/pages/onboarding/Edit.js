@@ -30,6 +30,7 @@ const GQL_GET_PERSON = gql`
       endOfTourDate
       domainUsername
       avatar(size: 256)
+      code
       position {
         uuid
         name
@@ -91,7 +92,4 @@ const OnboardingEdit = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(OnboardingEdit)
+export default connect(null, mapDispatchToProps)(OnboardingEdit)

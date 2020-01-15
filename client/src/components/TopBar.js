@@ -67,7 +67,7 @@ class BaseTopBar extends Component {
   }
 
   updateBannerVisibility() {
-    let visibilitySetting = parseInt(
+    const visibilitySetting = parseInt(
       this.props.appSettings[GENERAL_BANNER_VISIBILITY],
       10
     )
@@ -113,7 +113,7 @@ class BaseTopBar extends Component {
     const { currentUser, minimalHeader, toggleMenuAction } = this.props
 
     return (
-      <div style={{ flex: "0 0 auto", zIndex: 100 }} ref={this.topbarDiv}>
+      <div style={{ flex: "0 0 auto", zIndex: 1100 }} ref={this.topbarDiv}>
         <div id="topbar">
           <GeneralBanner options={this.bannerOptions()} />
           <SecurityBanner />
@@ -147,7 +147,4 @@ const mapDispatchToProps = dispatch => ({
   resetPages: () => dispatch(resetPages())
 })
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(TopBar)
+export default connect(null, mapDispatchToProps)(TopBar)

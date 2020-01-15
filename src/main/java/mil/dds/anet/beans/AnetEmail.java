@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,26 +10,28 @@ import mil.dds.anet.emails.AnetEmailAction;
 public class AnetEmail {
   private Integer id;
   private AnetEmailAction action;
+  @GraphQLQuery
+  @GraphQLInputField
   private List<String> toAddresses;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant createdAt;
+  @GraphQLQuery
+  @GraphQLInputField
   private String comment;
 
-  @GraphQLIgnore
   public Integer getId() {
     return id;
   }
 
-  @GraphQLIgnore
   public void setId(Integer id) {
     this.id = id;
   }
 
-  @GraphQLIgnore
   public AnetEmailAction getAction() {
     return action;
   }
 
-  @GraphQLIgnore
   public void setAction(AnetEmailAction action) {
     this.action = action;
   }

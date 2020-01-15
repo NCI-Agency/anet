@@ -101,7 +101,6 @@ const MergePeople = props => {
         enableReinitialize
         onSubmit={onSubmit}
         validationSchema={yupSchema}
-        isInitialValid={() => yupSchema.isValidSync({})}
         initialValues={{ loser: {}, winner: {}, copyPosition: false }}
       >
         {({
@@ -124,23 +123,30 @@ const MergePeople = props => {
                 <Row>
                   <Col md={6}>
                     <Row>
-                      <AdvancedSingleSelect
-                        fieldName="loser"
-                        fieldLabel="Loser"
-                        placeholder="Select the duplicate person"
-                        value={values.loser}
-                        overlayColumns={["Name"]}
-                        overlayRenderRow={PersonSimpleOverlayRow}
-                        filterDefs={peopleFilters}
+                      <Field
+                        name="loser"
+                        label="Loser"
+                        component={FieldHelper.renderSpecialField}
                         onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("loser", true, false) // onBlur doesn't work when selecting an option
                           setFieldValue("loser", value)
-                          setFieldTouched("loser") // onBlur doesn't work when selecting an option
                         }}
-                        objectType={Person}
-                        valueKey="name"
-                        fields={personFields}
-                        addon={PEOPLE_ICON}
                         vertical
+                        widget={
+                          <AdvancedSingleSelect
+                            fieldName="loser"
+                            placeholder="Select the duplicate person"
+                            value={values.loser}
+                            overlayColumns={["Name"]}
+                            overlayRenderRow={PersonSimpleOverlayRow}
+                            filterDefs={peopleFilters}
+                            objectType={Person}
+                            valueKey="name"
+                            fields={personFields}
+                            addon={PEOPLE_ICON}
+                          />
+                        }
                       />
                     </Row>
                     <Row>
@@ -153,23 +159,30 @@ const MergePeople = props => {
                   </Col>
                   <Col md={6}>
                     <Row>
-                      <AdvancedSingleSelect
-                        fieldName="winner"
-                        fieldLabel="Winner"
-                        placeholder="Select the OTHER duplicate person"
-                        value={values.winner}
-                        overlayColumns={["Name"]}
-                        overlayRenderRow={PersonSimpleOverlayRow}
-                        filterDefs={peopleFilters}
+                      <Field
+                        name="winner"
+                        label="Winner"
+                        component={FieldHelper.renderSpecialField}
                         onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("winner", true, false) // onBlur doesn't work when selecting an option
                           setFieldValue("winner", value)
-                          setFieldTouched("winner") // onBlur doesn't work when selecting an option
                         }}
-                        objectType={Person}
-                        valueKey="name"
-                        fields={personFields}
-                        addon={PEOPLE_ICON}
                         vertical
+                        widget={
+                          <AdvancedSingleSelect
+                            fieldName="winner"
+                            placeholder="Select the OTHER duplicate person"
+                            value={values.winner}
+                            overlayColumns={["Name"]}
+                            overlayRenderRow={PersonSimpleOverlayRow}
+                            filterDefs={peopleFilters}
+                            objectType={Person}
+                            valueKey="name"
+                            fields={personFields}
+                            addon={PEOPLE_ICON}
+                          />
+                        }
                       />
                     </Row>
                     <Row>
@@ -200,9 +213,9 @@ const MergePeople = props => {
                       winner &&
                       !_isEmpty(winner.position) && (
                         <Alert bsStyle="danger">
-                        <b>Danger:</b> Position on Loser (
-                        {loser.position.name}) will be left unfilled
-                      </Alert>
+                          <b>Danger:</b> Position on Loser (
+                          {loser.position.name}) will be left unfilled
+                        </Alert>
                     )}
                   </Col>
                 </Row>
@@ -357,7 +370,4 @@ const MergePeople = props => {
 
 MergePeople.propTypes = { ...pagePropTypes }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(MergePeople)
+export default connect(null, mapDispatchToProps)(MergePeople)

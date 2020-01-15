@@ -1,183 +1,73 @@
-import { Report, Position, Task, Location } from "models"
+import { Report, Person, Position, Task, Location } from "models"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
 import { fuzzy, runGQL, populate } from "../simutils"
+import { getRandomObject } from "./NoteStories"
 
-async function getRandomPerson(user, variables) {
-  const positionsQuery = Object.assign({}, variables, {
-    pageNum: 0,
-    pageSize: 1
-  })
-  const totalCount = (await runGQL(user, {
-    query: `
-        query ($positionsQuery: PositionSearchQueryInput) {
-          positionList(query: $positionsQuery) {
-            totalCount
-          }
-        }
-      `,
-    variables: {
-      positionsQuery
-    }
-  })).data.positionList.totalCount
-  let positions = null
-  if (totalCount > 0) {
-    positionsQuery.pageNum = faker.random.number({ max: totalCount - 1 })
-    positions = (await runGQL(user, {
-      query: `
-          query ($positionsQuery: PositionSearchQueryInput) {
-            positionList(query: $positionsQuery) {
-              list {
-                uuid
-                type
-                person {
-                  uuid
-                  name
-                  role
-                }
-              }
-            }
-          }
-        `,
-      variables: {
-        positionsQuery
-      }
-    })).data.positionList.list
+const getRandomPerson = async function(user, hasPosition, type, role) {
+  if (hasPosition) {
+    const position = await getRandomObject(
+      user,
+      "positions",
+      {
+        status: Position.STATUS.ACTIVE,
+        isFilled: true,
+        type: type
+      },
+      "uuid type person { uuid name role }"
+    )
+    return position === null ? null : position.person
+  } else {
+    const person = await getRandomObject(
+      user,
+      "people",
+      {
+        role
+      },
+      "uuid name role"
+    )
+    return person
   }
-  return _isEmpty(positions) ? null : positions[0].person
-}
-
-export const randomAdvisor = async function(user) {
-  return getRandomPerson(user, {
-    status: Position.STATUS.ACTIVE,
-    isFilled: true,
-    type: [Position.TYPE.ADVISOR]
-  })
-}
-
-export const randomPrincipal = async function(user) {
-  return getRandomPerson(user, {
-    status: Position.STATUS.ACTIVE,
-    isFilled: true,
-    type: [Position.TYPE.PRINCIPAL]
-  })
 }
 
 async function populateReport(report, user, args) {
-  const emptyArray = () => {
-    return []
-  }
-
-  /* eslint-disable no-unused-vars */
-  const emptyObject = () => {
-    return {}
-  }
-  /* eslint-enable no-unused-vars */
-
-  async function activeLocation() {
-    const totalCount = (await runGQL(user, {
-      query: `
-        query ($locationQuery: LocationSearchQueryInput) {
-          locationList(query: $locationQuery) {
-            totalCount
-          }
-        }
-      `,
-      variables: {
-        locationQuery: {
-          pageNum: 0,
-          pageSize: 1,
-          status: Location.STATUS.ACTIVE
-        }
-      }
-    })).data.locationList.totalCount
-    let activeLocations = null
-    if (totalCount > 0) {
-      const random = faker.random.number({ max: totalCount - 1 })
-      activeLocations = (await runGQL(user, {
-        query: `
-          query ($locationQuery: LocationSearchQueryInput) {
-            locationList(query: $locationQuery) {
-              list {
-                uuid
-              }
-            }
-          }
-        `,
-        variables: {
-          locationQuery: {
-            pageNum: random,
-            pageSize: 1,
-            status: Location.STATUS.ACTIVE
-          }
-        }
-      })).data.locationList.list
-    }
-    return _isEmpty(activeLocations) ? null : activeLocations[0]
-  }
-
-  async function activeTask() {
-    const totalCount = (await runGQL(user, {
-      query: `
-        query ($taskQuery: TaskSearchQueryInput) {
-          taskList(query: $taskQuery) {
-            totalCount
-          }
-        }
-      `,
-      variables: {
-        taskQuery: {
-          pageNum: 0,
-          pageSize: 1,
-          status: Task.STATUS.ACTIVE
-        }
-      }
-    })).data.taskList.totalCount
-    let activeTasks = null
-    if (totalCount > 0) {
-      const random = faker.random.number({ max: totalCount - 1 })
-      activeTasks = (await runGQL(user, {
-        query: `
-          query ($taskQuery: TaskSearchQueryInput) {
-            taskList(query: $taskQuery) {
-              list {
-                uuid
-              }
-            }
-          }
-        `,
-        variables: {
-          taskQuery: {
-            pageNum: random,
-            pageSize: 1,
-            status: Task.STATUS.ACTIVE
-          }
-        }
-      })).data.taskList.list
-    }
-    return _isEmpty(activeTasks) ? null : activeTasks[0]
-  }
-
-  const location = await activeLocation()
+  const location = await getRandomObject(user, "locations", {
+    status: Location.STATUS.ACTIVE
+  })
+  let author
   async function getAttendees() {
     const attendees = []
     const nbOfAdvisors = faker.random.number({ min: 1, max: 5 })
     let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
-      const advisor = await randomAdvisor(user)
+      const advisor = await getRandomPerson(
+        user,
+        primary,
+        [Position.TYPE.ADVISOR],
+        Person.ROLE.ADVISOR
+      )
       if (advisor) {
         advisor.primary = primary
         primary = false
         attendees.push(advisor)
       }
     }
+    // Pick random advisor attendee as author
+    const n = faker.random.number({ min: 0, max: attendees.length - 1 })
+    author = Object.assign({}, attendees[n])
+    delete author.primary
 
     const nbOfPrincipals = faker.random.number({ min: 1, max: 5 })
     primary = true
     for (let i = 0; i < nbOfPrincipals; i++) {
-      const principal = await randomPrincipal(user)
+      const principal = await getRandomPerson(
+        user,
+        primary,
+        [Position.TYPE.PRINCIPAL],
+        Person.ROLE.PRINCIPAL
+      )
       if (principal) {
         principal.primary = primary
         primary = false
@@ -185,7 +75,15 @@ async function populateReport(report, user, args) {
       }
     }
 
-    return [..._uniqWith(attendees, _isEqual)]
+    const seenUuids = []
+    return attendees.filter(a => {
+      if (seenUuids.includes(a.uuid)) {
+        return false
+      } else {
+        seenUuids.push(a.uuid)
+        return true
+      }
+    })
   }
   const attendees = await getAttendees()
   async function getTasks() {
@@ -193,7 +91,9 @@ async function populateReport(report, user, args) {
     const nbOfTasks = faker.random.number({ min: 1, max: 3 })
 
     for (let i = 0; i < nbOfTasks; i++) {
-      reportTasks.push(await activeTask())
+      reportTasks.push(
+        await getRandomObject(user, "tasks", { status: Task.STATUS.ACTIVE })
+      )
     }
 
     return [..._uniqWith(reportTasks, _isEqual)]
@@ -224,18 +124,19 @@ async function populateReport(report, user, args) {
       faker.random.arrayElement(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
     atmosphereDetails: () => faker.lorem.sentence(),
     location,
+    author,
     attendees,
     tasks,
     reportText: () => faker.lorem.paragraphs(),
     nextSteps: () => faker.lorem.sentence(),
     keyOutcomes: () => faker.lorem.sentence(),
-    tags: emptyArray,
+    tags: () => [],
     reportSensitiveInformation: () => null,
-    authorizationGroups: emptyArray,
+    authorizationGroups: () => [],
     state,
     releasedAt: () => {
       // Set the releasedAt value on a random date between 1 and 7 days after the engagement
-      let result = new Date(engagementDate)
+      const result = new Date(engagementDate)
       result.setSeconds(
         result.getSeconds() +
           (Math.floor(Math.random() * (60 * 60 * 24 * 7)) + 1)
@@ -252,6 +153,7 @@ async function populateReport(report, user, args) {
     .atmosphere.always()
     .atmosphereDetails.always()
     .location.always()
+    .author.always()
     .attendees.always()
     .tasks.always()
     .reportText.always()
@@ -272,17 +174,20 @@ const createReport = async function(user, grow, args) {
     console.debug(`Creating report ${report.intent.green}`)
     const { reportTags, cancelled, ...reportStripped } = report // TODO: we need to do this more generically
 
-    return (await runGQL(user, {
-      query:
-        "mutation($report: ReportInput!) { createReport(report: $report) { uuid } }",
-      variables: { report: reportStripped }
-    })).data.createReport
+    return (
+      await runGQL(user, {
+        query:
+          "mutation($report: ReportInput!) { createReport(report: $report) { uuid } }",
+        variables: { report: reportStripped }
+      })
+    ).data.createReport
   }
 }
 
 const updateDraftReport = async function(user) {
-  const totalCount = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
       query {
         reportList(query: {
           pageNum: 0,
@@ -294,14 +199,16 @@ const updateDraftReport = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.reportList.totalCount
+      variables: {}
+    })
+  ).data.reportList.totalCount
   if (totalCount === 0) {
     return null
   }
   const random = faker.random.number({ max: totalCount - 1 })
-  const reports = (await runGQL(user, {
-    query: `
+  const reports = (
+    await runGQL(user, {
+      query: `
       query {
         reportList(query: {
           pageNum: ${random},
@@ -327,25 +234,29 @@ const updateDraftReport = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.reportList.list
+      variables: {}
+    })
+  ).data.reportList.list
   const report = !_isEmpty(reports) && reports[0]
   if (!report) {
     return null
   }
 
   if (await populateReport(report, user)) {
-    return (await runGQL(user, {
-      query:
-        "mutation($report: ReportInput!) { updateReport(report: $report) { uuid } }",
-      variables: { report: report }
-    })).data.updateReport
+    return (
+      await runGQL(user, {
+        query:
+          "mutation($report: ReportInput!) { updateReport(report: $report) { uuid } }",
+        variables: { report: report }
+      })
+    ).data.updateReport
   }
 }
 
 const submitDraftReport = async function(user) {
-  const totalCount = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
       query {
         reportList(query: {
           pageNum: 0,
@@ -357,14 +268,16 @@ const submitDraftReport = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.reportList.totalCount
+      variables: {}
+    })
+  ).data.reportList.totalCount
   if (totalCount === 0) {
     return null
   }
   const random = faker.random.number({ max: totalCount - 1 })
-  const reports = (await runGQL(user, {
-    query: `
+  const reports = (
+    await runGQL(user, {
+      query: `
       query {
         reportList(query: {
           pageNum: ${random},
@@ -378,22 +291,26 @@ const submitDraftReport = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.reportList.list
+      variables: {}
+    })
+  ).data.reportList.list
   const report = _isEmpty(reports) && reports[0]
   if (!report) {
     return null
   }
 
-  return (await runGQL(user, {
-    query: "mutation($uuid: String!) { submitReport(uuid: $uuid) { uuid } }",
-    variables: { uuid: report.uuid }
-  })).data.submitReport
+  return (
+    await runGQL(user, {
+      query: "mutation($uuid: String!) { submitReport(uuid: $uuid) { uuid } }",
+      variables: { uuid: report.uuid }
+    })
+  ).data.submitReport
 }
 
 const approveReport = async function(user) {
-  const totalCount = (await runGQL(user, {
-    query: `
+  const totalCount = (
+    await runGQL(user, {
+      query: `
       query {
         reportList(query: {
           pageNum: 0,
@@ -404,14 +321,16 @@ const approveReport = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.reportList.totalCount
+      variables: {}
+    })
+  ).data.reportList.totalCount
   if (totalCount === 0) {
     return null
   }
   const random = faker.random.number({ max: totalCount - 1 })
-  const reports = (await runGQL(user, {
-    query: `
+  const reports = (
+    await runGQL(user, {
+      query: `
       query {
         reportList(query: {
           pageNum: ${random},
@@ -424,17 +343,21 @@ const approveReport = async function(user) {
         }
       }
     `,
-    variables: {}
-  })).data.reportList.list
+      variables: {}
+    })
+  ).data.reportList.list
   const report = _isEmpty(reports) && reports[0]
   if (!report) {
     return null
   }
 
-  return (await runGQL(user, {
-    query: "mutation ($uuid: String!) { approveReport(uuid: $uuid) { uuid } }",
-    variables: { uuid: report.uuid }
-  })).data.approveReport
+  return (
+    await runGQL(user, {
+      query:
+        "mutation ($uuid: String!) { approveReport(uuid: $uuid) { uuid } }",
+      variables: { uuid: report.uuid }
+    })
+  ).data.approveReport
 }
 
 export { createReport, updateDraftReport, submitDraftReport, approveReport }

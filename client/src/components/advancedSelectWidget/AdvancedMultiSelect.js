@@ -2,17 +2,18 @@ import AdvancedSelect, {
   propTypes as advancedSelectPropTypes
 } from "components/advancedSelectWidget/AdvancedSelect"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
-import _cloneDeep from "lodash/cloneDeep"
+import * as FieldHelper from "components/FieldHelper"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 
 export default class AdvancedMultiSelect extends Component {
   static propTypes = {
     ...advancedSelectPropTypes,
-    value: PropTypes.array
+    value: PropTypes.array.isRequired
   }
 
   static defaultProps = {
+    value: [],
     overlayTable: AdvancedMultiSelectOverlayTable
   }
 
@@ -27,22 +28,18 @@ export default class AdvancedMultiSelect extends Component {
   }
 
   handleAddItem = newItem => {
-    if (!newItem || !newItem.uuid) {
-      return
-    }
-    if (!this.props.value.find(obj => obj.uuid === newItem.uuid)) {
-      const value = _cloneDeep(this.props.value)
-      value.push(newItem)
-      this.props.onChange(value)
-    }
+    FieldHelper.handleMultiSelectAddItem(
+      newItem,
+      this.props.onChange,
+      this.props.value
+    )
   }
 
   handleRemoveItem = oldItem => {
-    if (this.props.value.find(obj => obj.uuid === oldItem.uuid)) {
-      const value = _cloneDeep(this.props.value)
-      const index = value.findIndex(item => item.uuid === oldItem.uuid)
-      value.splice(index, 1)
-      this.props.onChange(value)
-    }
+    FieldHelper.handleMultiSelectRemoveItem(
+      oldItem,
+      this.props.onChange,
+      this.props.value
+    )
   }
 }

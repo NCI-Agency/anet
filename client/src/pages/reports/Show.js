@@ -220,9 +220,7 @@ const GQL_DELETE_REPORT = gql`
 `
 const GQL_EMAIL_REPORT = gql`
   mutation($uuid: String!, $email: AnetEmailInput!) {
-    emailReport(uuid: $uuid, email: $email) {
-      uuid
-    }
+    emailReport(uuid: $uuid, email: $email)
   }
 `
 const GQL_SUBMIT_REPORT = gql`
@@ -347,7 +345,7 @@ const BaseReportShow = props => {
     <Formik
       enableReinitialize
       validationSchema={Report.yupSchema}
-      isInitialValid={() => Report.yupSchema.isValidSync(report)}
+      validateOnMount
       initialValues={report}
     >
       {({ isSubmitting, setSubmitting, isValid, setFieldValue, values }) => {
@@ -605,20 +603,20 @@ const BaseReportShow = props => {
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
-                  <div
+                    <div
                       dangerouslySetInnerHTML={{
-                      __html: report.reportSensitiveInformation.text
-                    }}
+                        __html: report.reportSensitiveInformation.text
+                      }}
                     />
-                  {(hasAuthorizationGroups && (
+                    {(hasAuthorizationGroups && (
                       <div>
-                      <h5>Authorized groups:</h5>
-                      <AuthorizationGroupTable
+                        <h5>Authorized groups:</h5>
+                        <AuthorizationGroupTable
                           authorizationGroups={values.authorizationGroups}
                         />
-                    </div>
-                  )) || <h5>No groups are authorized!</h5>}
-                </Fieldset>
+                      </div>
+                    )) || <h5>No groups are authorized!</h5>}
+                  </Fieldset>
               )}
 
               {report.showWorkflow() && (
@@ -657,7 +655,7 @@ const BaseReportShow = props => {
 
               <Fieldset className="report-sub-form" title="Comments">
                 {report.comments.map(comment => {
-                  let createdAt = moment(comment.createdAt)
+                  const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
                       <LinkTo person={comment.author} />,
@@ -1266,7 +1264,4 @@ const ReportShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(ReportShow)
+export default connect(null, mapDispatchToProps)(ReportShow)

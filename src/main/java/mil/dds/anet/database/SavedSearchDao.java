@@ -10,7 +10,6 @@ import mil.dds.anet.database.mappers.SavedSearchMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "savedSearches";
@@ -35,6 +34,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
     return idBatcher.getByIds(uuids);
   }
 
+  @InTransaction
   public List<SavedSearch> getSearchesByOwner(Person owner) {
     return getDbHandle().createQuery(
         "/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")

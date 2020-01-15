@@ -2,6 +2,7 @@ import AdvancedSelect, {
   propTypes as advancedSelectPropTypes
 } from "components/advancedSelectWidget/AdvancedSelect"
 import { AdvancedSingleSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
+import * as FieldHelper from "components/FieldHelper"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -55,14 +56,11 @@ export default class AdvancedSingleSelect extends Component {
   }
 
   handleAddItem = newItem => {
-    if (!newItem || !newItem.uuid) {
-      return
-    }
-    this.props.onChange(newItem)
+    FieldHelper.handleSingleSelectAddItem(newItem, this.props.onChange)
   }
 
   handleRemoveItem = oldItem => {
-    this.props.onChange(null)
+    FieldHelper.handleSingleSelectRemoveItem(oldItem, this.props.onChange)
   }
 
   refreshSearch = () => {

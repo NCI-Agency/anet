@@ -10,7 +10,6 @@ import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@InTransaction
 public class EmailDao {
 
   @Inject
@@ -25,6 +24,7 @@ public class EmailDao {
     return handle.get();
   }
 
+  @InTransaction
   public List<AnetEmail> getAll() {
     return getDbHandle()
         .createQuery(
@@ -32,6 +32,7 @@ public class EmailDao {
         .map(emailMapper).list();
   }
 
+  @InTransaction
   public void deletePendingEmails(List<Integer> processedEmails) {
     if (!processedEmails.isEmpty()) {
       getDbHandle()
@@ -41,6 +42,7 @@ public class EmailDao {
     }
   }
 
+  @InTransaction
   public void createPendingEmail(String jobSpec) {
     getDbHandle().createUpdate(
         "/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")

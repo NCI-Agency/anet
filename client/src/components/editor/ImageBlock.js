@@ -15,6 +15,7 @@ class ImageBlock extends Component {
       alt: ""
     }
   }
+
   componentDidMount() {
     const { blockProps } = this.props
     const { entity } = blockProps

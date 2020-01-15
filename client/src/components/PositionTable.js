@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import { mapDispatchToProps, useBoilerplate } from "components/Page"
-import UltimatePagination from "components/UltimatePagination"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Position } from "models"
 import PropTypes from "prop-types"
@@ -41,14 +41,15 @@ const GQL_GET_POSITION_LIST = gql`
 `
 
 const PositionTable = props => {
-  if (props.positions) {
-    return <BasePositionTable {...props} />
+  if (props.queryParams) {
+    return <PaginatedPositions {...props} />
   }
-  return <PaginatedPositions {...props} />
+  return <BasePositionTable {...props} />
 }
 
 PositionTable.propTypes = {
-  positions: PropTypes.array // list of positions, when no pagination wanted
+  // query variables for positions, when query & pagination wanted:
+  queryParams: PropTypes.object
 }
 
 const PaginatedPositions = props => {
@@ -79,110 +80,101 @@ const PaginatedPositions = props => {
 }
 
 PaginatedPositions.propTypes = {
-  queryParams: PropTypes.object // query variables for positions, when pagination wanted
+  queryParams: PropTypes.object
 }
 
 const BasePositionTable = props => {
   let positions
-  let numPages = 0
   if (props.paginatedPositions) {
     var { pageSize, pageNum, totalCount } = props.paginatedPositions
-    numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
     positions = props.paginatedPositions.list
-    pageNum++
   } else {
     positions = props.positions
   }
 
-  let positionsExist = _get(positions, "length", 0) > 0
+  if (_get(positions, "length", 0) === 0) {
+    return <em>No positions found</em>
+  }
+
   return (
     <div>
-      {positionsExist ? (
-        <div>
-          {numPages > 1 && (
-            <UltimatePagination
-              Component="header"
-              componentClassName="searchPagination"
-              className="pull-right"
-              pageNum={pageNum}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              goToPage={props.goToPage}
-            />
-          )}
-
-          <Table
-            striped
-            condensed
-            hover
-            responsive
-            className="positions_table"
-            id={props.id}
-          >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Location</th>
-                <th>Organization</th>
-                <th>Current Occupant</th>
-                <th>Status</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {Position.map(positions, pos => {
-                let nameComponents = []
-                pos.name && nameComponents.push(pos.name)
-                pos.code && nameComponents.push(pos.code)
-                return (
-                  <tr key={pos.uuid}>
-                    <td>
-                      <LinkTo position={pos}>
-                        {nameComponents.join(" - ")}
-                      </LinkTo>
-                    </td>
-                    <td>
-                      <LinkTo anetLocation={pos.location} />
-                    </td>
-                    <td>
-                      {pos.organization && (
-                        <LinkTo organization={pos.organization} />
-                      )}
-                    </td>
-                    <td>{pos.person && <LinkTo person={pos.person} />}</td>
-                    <td>{utils.sentenceCase(pos.status)}</td>
-                    {props.showDelete && (
-                      <td
-                        onClick={() => props.onDelete(pos)}
-                        id={"positionDelete_" + pos.uuid}
-                      >
-                        <span style={{ cursor: "pointer" }}>
-                          <img
-                            src={REMOVE_ICON}
-                            height={14}
-                            alt="Remove position"
-                          />
-                        </span>
-                      </td>
+      <UltimatePaginationTopDown
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={props.goToPage}
+      >
+        <Table
+          striped
+          condensed
+          hover
+          responsive
+          className="positions_table"
+          id={props.id}
+        >
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Organization</th>
+              <th>Current Occupant</th>
+              <th>Status</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {Position.map(positions, pos => {
+              const nameComponents = []
+              pos.name && nameComponents.push(pos.name)
+              pos.code && nameComponents.push(pos.code)
+              return (
+                <tr key={pos.uuid}>
+                  <td>
+                    <LinkTo position={pos}>{nameComponents.join(" - ")}</LinkTo>
+                  </td>
+                  <td>
+                    <LinkTo anetLocation={pos.location} />
+                  </td>
+                  <td>
+                    {pos.organization && (
+                      <LinkTo organization={pos.organization} />
                     )}
-                  </tr>
-                )
-              })}
-            </tbody>
-          </Table>
-        </div>
-      ) : (
-        <em>No positions found</em>
-      )}
+                  </td>
+                  <td>{pos.person && <LinkTo person={pos.person} />}</td>
+                  <td>{utils.sentenceCase(pos.status)}</td>
+                  {props.showDelete && (
+                    <td
+                      onClick={() => props.onDelete(pos)}
+                      id={"positionDelete_" + pos.uuid}
+                    >
+                      <span style={{ cursor: "pointer" }}>
+                        <img
+                          src={REMOVE_ICON}
+                          height={14}
+                          alt="Remove position"
+                        />
+                      </span>
+                    </td>
+                  )}
+                </tr>
+              )
+            })}
+          </tbody>
+        </Table>
+      </UltimatePaginationTopDown>
     </div>
   )
 }
 
 BasePositionTable.propTypes = {
   id: PropTypes.string,
-  positions: PropTypes.array, // list of positions, when no pagination wanted
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
+  // list of positions, when no pagination wanted:
+  positions: PropTypes.array,
+  // list of positions, when pagination wanted:
   paginatedPositions: PropTypes.shape({
     totalCount: PropTypes.number,
     pageNum: PropTypes.number,
@@ -192,7 +184,4 @@ BasePositionTable.propTypes = {
   goToPage: PropTypes.func
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(PositionTable)
+export default connect(null, mapDispatchToProps)(PositionTable)

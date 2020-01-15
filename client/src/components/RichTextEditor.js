@@ -189,10 +189,11 @@ class RichTextEditor extends Component {
           inlineStyles={INLINE_STYLES}
           maxListNesting={4}
           onSave={rawContent => {
-            if (onHandleBlur) {
+            if (onChange) {
               onChange(toHTML(rawContent))
             }
           }}
+          onBlur={onHandleBlur}
           stateSaveInterval={100}
           plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
           rawContentState={value ? fromHTML(value) : null}

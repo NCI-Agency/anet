@@ -339,8 +339,8 @@ public class Utils {
    * 
    * More info: https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats
    * 
-   * @param email The domain user name to check
-   * @param whitelistDomainNames The list of ignaored domain user names (wildcards allowed)
+   * @param domainUserName The domain user name to check
+   * @param ignoredDomainNames The list of ignored domain user names (wildcards allowed)
    * @return Whether the domain user name is ignored
    */
   public static boolean isDomainUserNameIgnored(final String domainUserName,

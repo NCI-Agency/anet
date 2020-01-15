@@ -178,7 +178,7 @@ const BaseInsightsShow = props => {
   )
 
   function getCutoffDate() {
-    let maxReportAge =
+    const maxReportAge =
       1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment()
       .subtract(maxReportAge, "days")
@@ -234,7 +234,4 @@ const InsightsShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(InsightsShow)
+export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)
