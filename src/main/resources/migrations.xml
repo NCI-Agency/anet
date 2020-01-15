@@ -2725,7 +2725,8 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="add_task_responsible_positions" author="vassil">
+	<changeSet id="add_task_responsible_organizations" author="gjvoosten">
+		<!-- Add new m2m table -->
 		<createTable tableName="taskTaskedOrganizations">
 			<column name="taskUuid" type="${uuid_type}">
 				<constraints nullable="false" />
@@ -2734,18 +2735,99 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<!-- <dropColumn tableName="tasks" columnName="organizationUuid"/> -->
+
+		<!-- Add FK constraints and indexes -->
+		<addForeignKeyConstraint baseColumnNames="taskUuid" baseTableName="taskTaskedOrganizations"
+			constraintName="FK_taskTaskedOrganizations_task" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="uuid" referencedTableName="tasks" />
+		<addForeignKeyConstraint baseColumnNames="organizationUuid" baseTableName="taskTaskedOrganizations"
+			constraintName="FK_taskTaskedOrganizations_organization" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="uuid" referencedTableName="organizations" />
+		<createIndex
+			indexName="IDX_taskTaskedOrganizations_taskUuid" tableName="taskTaskedOrganizations">
+			<column name="taskUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_taskTaskedOrganizations_organizationUuid" tableName="taskTaskedOrganizations">
+			<column name="organizationUuid"/>
+		</createIndex>
+
+		<!-- Migrate saved searches -->
 		<!-- Requires at least SQL Server 2016: -->
-		<!-- <sql dbms="mssql">
-			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskedOrgUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.responsibleOrgUuid')));
+		<sql dbms="mssql">
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskedOrgUuid', JSON_VALUE(query, '$.responsibleOrgUuid'));
 			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.responsibleOrgUuid', NULL);
-		</sql> -->
+		</sql>
 		<!-- Requires at least PostgreSQL 9.5: -->
-		<!-- <sql dbms="postgresql">
-			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{taskedOrgUuid}', TO_JSONB(o.uuid), true)
-				FROM organizations o WHERE o.id=(s.query::json->>'responsibleOrgUuid')::int;
+		<sql dbms="postgresql">
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{taskedOrgUuid}', s.query::jsonb->'responsibleOrgUuid', true);
 			UPDATE "savedSearches" SET query=query::jsonb #- '{responsibleOrgUuid}';
-		</sql>  -->
+		</sql>
+
+		<!-- Migrate task responsible organizations -->
+		<sql>
+			INSERT INTO "taskTaskedOrganizations" ( "taskUuid", "organizationUuid")
+				SELECT uuid, "organizationUuid" FROM tasks
+				WHERE "organizationUuid" IS NOT NULL;
+		</sql>
+
+		<!-- Drop old index and FK constraint -->
+		<dropIndex
+			indexName="IDX_tasks_organizationUuid" tableName="tasks"/>
+		<dropForeignKeyConstraint
+			baseTableName="tasks" constraintName="FK_tasks_organization"/>
+
+		<!-- Finally, drop old column -->
+		<dropColumn tableName="tasks" columnName="organizationUuid"/>
+
+		<rollback>
+			<!-- Recreate old column -->
+			<addColumn tableName="tasks">
+				<column name="organizationUuid" type="${uuid_type}" />
+			</addColumn>
+
+			<!-- Recreate old FK constraint and index -->
+			<addForeignKeyConstraint
+				baseTableName="tasks" constraintName="FK_tasks_organization" baseColumnNames="organizationUuid"
+				referencedTableName="organizations" referencedColumnNames="uuid"
+				onDelete="NO ACTION" onUpdate="NO ACTION" />
+			<createIndex
+				indexName="IDX_tasks_organizationUuid" tableName="tasks">
+				<column name="organizationUuid"/>
+			</createIndex>
+
+			<!-- Migrate back task responsible organizations; pick the first one (there might be more) -->
+			<sql dbms="mssql">
+				UPDATE tasks
+				SET "organizationUuid" = (
+					SELECT TOP(1) "organizationUuid" FROM "taskTaskedOrganizations"
+					WHERE "taskUuid" = tasks.uuid
+				);
+			</sql>
+			<sql dbms="postgresql">
+				UPDATE tasks
+				SET "organizationUuid" = (
+					SELECT "organizationUuid" FROM "taskTaskedOrganizations"
+					WHERE "taskUuid" = tasks.uuid
+					LIMIT 1
+				);
+			</sql>
+
+			<!-- Migrate back saved searches -->
+			<!-- Requires at least SQL Server 2016: -->
+			<sql dbms="mssql">
+				UPDATE savedSearches SET query=JSON_MODIFY(query, '$.responsibleOrgUuid', JSON_VALUE(query, '$.taskedOrgUuid'));
+				UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskedOrgUuid', NULL);
+			</sql>
+			<!-- Requires at least PostgreSQL 9.5: -->
+			<sql dbms="postgresql">
+				UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{responsibleOrgUuid}', s.query::jsonb->'taskedOrgUuid', true);
+				UPDATE "savedSearches" SET query=query::jsonb #- '{taskedOrgUuid}';
+			</sql>
+
+			<!-- Finally, drop new m2m table (also drops FK constraints and indexes) -->
+			<dropTable tableName="taskTaskedOrganizations" />
+		</rollback>
 	</changeSet>
 
 </databaseChangeLog>
