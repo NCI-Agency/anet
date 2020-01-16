@@ -2760,7 +2760,7 @@
 		</sql>
 		<!-- Requires at least PostgreSQL 9.5: -->
 		<sql dbms="postgresql">
-			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{taskedOrgUuid}', s.query::jsonb->'responsibleOrgUuid', true);
+			UPDATE "savedSearches" SET query=JSONB_SET(query::jsonb, '{taskedOrgUuid}', query::jsonb->'responsibleOrgUuid', true);
 			UPDATE "savedSearches" SET query=query::jsonb #- '{responsibleOrgUuid}';
 		</sql>
 
@@ -2821,7 +2821,7 @@
 			</sql>
 			<!-- Requires at least PostgreSQL 9.5: -->
 			<sql dbms="postgresql">
-				UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{responsibleOrgUuid}', s.query::jsonb->'taskedOrgUuid', true);
+				UPDATE "savedSearches" SET query=JSONB_SET(query::jsonb, '{responsibleOrgUuid}', query::jsonb->'taskedOrgUuid', true);
 				UPDATE "savedSearches" SET query=query::jsonb #- '{taskedOrgUuid}';
 			</sql>
 
