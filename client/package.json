@@ -144,7 +144,7 @@
     "react-redux-loading-bar": "^4.6.0",
     "react-router-bootstrap": "^0.25.0",
     "react-router-dom": "^5.1.2",
-    "react-scroll": "^1.7.15",
+    "react-scroll": "^1.7.14",
     "react-tag-input": "^6.4.2",
     "react-toastify": "^5.5.0",
     "react-tooltip": "^3.11.2",
