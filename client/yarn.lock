@@ -409,10 +409,10 @@
   dependencies:
     "@babel/types" "^7.7.4"
 
-"@babel/helper-plugin-utils@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@babel/helper-plugin-utils/-/helper-plugin-utils-7.0.0.tgz#bbb3fbee98661c569034237cc03967ba99b4f250"
-  integrity sha512-CYAOUCARwExnEixLdB6sDm2dIJ/YgEAKDM1MOeMeZu9Ld/bDgVo8aiWrXwcY7OBh+1Ea2uUcVRcxKk0GJvW7QA==
+"@babel/helper-plugin-utils@^7.0.0", "@babel/helper-plugin-utils@^7.8.3":
+  version "7.8.3"
+  resolved "https://registry.yarnpkg.com/@babel/helper-plugin-utils/-/helper-plugin-utils-7.8.3.tgz#9ea293be19babc0f52ff8ca88b34c3611b208670"
+  integrity sha512-j+fq49Xds2smCUNYmEHF9kGNkhbet6yVIBp4e6oeQpH1RUs/Ir06xUKzDjDkGcaaokPiTNs2JBWHjaE4csUkZQ==
 
 "@babel/helper-regex@^7.0.0", "@babel/helper-regex@^7.4.4":
   version "7.4.4"
@@ -1398,12 +1398,12 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-transform-proto-to-assign@^7.7.4":
-  version "7.7.4"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-proto-to-assign/-/plugin-transform-proto-to-assign-7.7.4.tgz#0c8cbeae745f2cb6a2a0ba60ebc8a21720be04f2"
-  integrity sha512-Nz8pspc1cCO3apXw9XvH/hNtHRH4CRMXcD0Drh1yyzlFgqJsea1VK4hQbDpAvd15WYH0ggJQMRXnqi78sgJOlQ==
+"@babel/plugin-transform-proto-to-assign@^7.8.3":
+  version "7.8.3"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-proto-to-assign/-/plugin-transform-proto-to-assign-7.8.3.tgz#5538c1ee498a844c59274b0b1381ea198ad4c284"
+  integrity sha512-qo1wEJ/It4B5a7vScMkXfgsGSNMHwl28lh3hrG0LTywFt2FMp5dtod35aWSfaWmWmsXwVmWXtBPgXYGQFLGwbw==
   dependencies:
-    "@babel/helper-plugin-utils" "^7.0.0"
+    "@babel/helper-plugin-utils" "^7.8.3"
     lodash "^4.17.13"
 
 "@babel/plugin-transform-react-constant-elements@7.2.0", "@babel/plugin-transform-react-constant-elements@^7.0.0":
