@@ -184,18 +184,18 @@ const ArrayOfObjectsField = fieldProps => {
             >
               {addButtonLabel}
             </Button>
-            {value.map((obj, index) =>
-              renderArrayObject(
-                name,
-                fieldConfig,
-                formikProps,
-                invisibleFields,
-                updateInvisibleFields,
-                arrayHelpers,
-                obj,
-                index
-              )
-            )}
+            {value.map((obj, index) => (
+              <ArrayObject
+                key={index}
+                fieldName={name}
+                fieldConfig={fieldConfig}
+                formikProps={formikProps}
+                invisibleFields={invisibleFields}
+                updateInvisibleFields={updateInvisibleFields}
+                arrayHelpers={arrayHelpers}
+                index={index}
+              />
+            ))}
           </div>
         )}
       />
@@ -203,19 +203,18 @@ const ArrayOfObjectsField = fieldProps => {
   )
 }
 
-const renderArrayObject = (
+const ArrayObject = ({
   fieldName,
   fieldConfig,
   formikProps,
   invisibleFields,
   updateInvisibleFields,
   arrayHelpers,
-  obj,
   index
-) => {
+}) => {
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
   return (
-    <Fieldset title={`${objLabel} ${index + 1}`} key={index}>
+    <Fieldset title={`${objLabel} ${index + 1}`}>
       <Button
         className="pull-right"
         title={`Remove this ${objLabel}`}
@@ -232,6 +231,15 @@ const renderArrayObject = (
       />
     </Fieldset>
   )
+}
+ArrayObject.propTypes = {
+  fieldName: PropTypes.string.isRequired,
+  fieldConfig: PropTypes.object.isRequired,
+  formikProps: PropTypes.object.isRequired,
+  invisibleFields: PropTypes.array.isRequired,
+  updateInvisibleFields: PropTypes.func.isRequired,
+  arrayHelpers: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired
 }
 
 const addObject = (objDefault, arrayHelpers) => {
@@ -252,9 +260,15 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
         name={name}
         render={arrayHelpers => (
           <div>
-            {value.map((obj, index) =>
-              renderReadonlyArrayObject(name, fieldConfig, formikProps, index)
-            )}
+            {value.map((obj, index) => (
+              <ReadonlyArrayObject
+                key={index}
+                fieldName={name}
+                fieldConfig={fieldConfig}
+                formikProps={formikProps}
+                index={index}
+              />
+            ))}
           </div>
         )}
       />
@@ -262,15 +276,15 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
   )
 }
 
-const renderReadonlyArrayObject = (
+const ReadonlyArrayObject = ({
   fieldName,
   fieldConfig,
   formikProps,
   index
-) => {
+}) => {
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
   return (
-    <Fieldset title={`${objLabel} ${index + 1}`} key={index}>
+    <Fieldset title={`${objLabel} ${index + 1}`}>
       <ReadonlyCustomFields
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
@@ -278,6 +292,12 @@ const renderReadonlyArrayObject = (
       />
     </Fieldset>
   )
+}
+ReadonlyArrayObject.propTypes = {
+  fieldName: PropTypes.string.isRequired,
+  fieldConfig: PropTypes.object.isRequired,
+  formikProps: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired
 }
 
 const FIELD_COMPONENTS = {
@@ -511,8 +531,8 @@ export const ReadonlyCustomFields = ({
         let extraProps = {}
         if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
           extraProps = {
-            fieldConfig: fieldConfig,
-            formikProps: formikProps
+            fieldConfig,
+            formikProps
           }
         }
         const FieldComponent = READONLY_FIELD_COMPONENTS[type]
