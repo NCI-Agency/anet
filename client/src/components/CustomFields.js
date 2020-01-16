@@ -398,32 +398,39 @@ const CustomField = ({
     fieldName
   ])
   const FieldComponent = FIELD_COMPONENTS[type]
-  const isVisible = !invisibleFields.includes(fieldName)
-  let extraProps = {}
-  if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
-    extraProps = {
-      fieldConfig,
-      formikProps,
-      invisibleFields,
-      updateInvisibleFields
-    }
-  }
-  return (
-    isVisible && (
-      <FieldComponent
-        name={fieldName}
-        onChange={handleChange}
-        {...fieldProps}
-        {...extraProps}
-      >
-        {helpText && (
-          <HelpBlock>
-            <span className="text-success">{helpText}</span>
-          </HelpBlock>
-        )}
-      </FieldComponent>
-    )
+  const extraProps = useMemo(
+    () =>
+      type !== CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS
+        ? {}
+        : {
+          fieldConfig,
+          formikProps,
+          invisibleFields,
+          updateInvisibleFields
+        },
+    [fieldConfig, formikProps, invisibleFields, type, updateInvisibleFields]
   )
+  return (
+    <FieldComponent
+      name={fieldName}
+      onChange={handleChange}
+      {...fieldProps}
+      {...extraProps}
+    >
+      {helpText && (
+        <HelpBlock>
+          <span className="text-success">{helpText}</span>
+        </HelpBlock>
+      )}
+    </FieldComponent>
+  )
+}
+CustomField.propTypes = {
+  fieldConfig: PropTypes.object,
+  fieldName: PropTypes.string.isRequired,
+  formikProps: PropTypes.object,
+  invisibleFields: PropTypes.array,
+  updateInvisibleFields: PropTypes.func
 }
 
 const CustomFields = ({
@@ -474,11 +481,12 @@ const CustomFields = ({
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
-        return (
+        const fieldName = `${fieldNamePrefix}.${key}`
+        return invisibleFields.includes(fieldName) ? null : (
           <CustomField
             key={key}
             fieldConfig={fieldConfig}
-            fieldName={`${fieldNamePrefix}.${key}`}
+            fieldName={fieldName}
             formikProps={formikProps}
             invisibleFields={invisibleFields}
             updateInvisibleFields={updateInvisibleFields}
