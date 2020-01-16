@@ -76,7 +76,7 @@ const BaseAdminIndex = props => {
                   <Field
                     key={key}
                     name={key}
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                   />
                 ))}
               </Fieldset>

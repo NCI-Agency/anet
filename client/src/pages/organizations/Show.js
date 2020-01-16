@@ -258,32 +258,32 @@ const BaseOrganizationShow = props => {
               <Fieldset id="info">
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfStatus}
                 />
 
                 <Field
                   name="type"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfType}
                 />
 
                 <LongNameWithLabel
                   dictProps={orgSettings.longName}
                   name="longName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <IdentificationCodeFieldWithLabel
                   dictProps={orgSettings.identificationCode}
                   name="identificationCode"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
                   <Field
                     name="parentOrg"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     label={Settings.fields.organization.parentOrg}
                     humanValue={
                       organization.parentOrg && (
@@ -300,7 +300,7 @@ const BaseOrganizationShow = props => {
                 {organization.isAdvisorOrg() && (
                   <Field
                     name="superUsers"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     label="Super users"
                     humanValue={
                       <>
@@ -329,7 +329,7 @@ const BaseOrganizationShow = props => {
                   organization.childrenOrgs.length > 0 && (
                     <Field
                       name="childrenOrgs"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label="Sub organizations"
                       humanValue={
                         <ListGroup>

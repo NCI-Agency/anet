@@ -2,7 +2,7 @@ import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useCallback, useMemo } from "react"
 import {
   Button,
   Col,
@@ -44,7 +44,7 @@ const getHelpBlock = (field, form) => {
   return fieldTouched && fieldError && <HelpBlock>{fieldError}</HelpBlock>
 }
 
-const renderFieldNoLabel = (field, form, widgetElem, children) => {
+const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   const id = getFieldId(field)
   const validationState = getFormGroupValidationState(field, form)
   return (
@@ -55,36 +55,42 @@ const renderFieldNoLabel = (field, form, widgetElem, children) => {
     </FormGroup>
   )
 }
+FieldNoLabel.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  widgetElem: PropTypes.object,
+  children: PropTypes.any
+}
 
-const renderField = (
+const Field = ({
   field,
-  label,
   form,
+  label,
   widgetElem,
   children,
   extraColElem,
   addon,
   vertical,
   extraAddon
-) => {
+}) => {
+  const id = getFieldId(field)
+  const widget = useMemo(
+    () =>
+      !addon ? (
+        widgetElem
+      ) : (
+        <InputGroup>
+          {widgetElem}
+          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+          <FieldAddon id={id} addon={addon} />
+        </InputGroup>
+      ),
+    [addon, extraAddon, id, widgetElem]
+  )
+  const validationState = getFormGroupValidationState(field, form)
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
-  vertical = vertical || false // default direction of label and input = vertical
-  const id = getFieldId(field)
-  let widget
-  if (!addon) {
-    widget = widgetElem
-  } else {
-    widget = (
-      <InputGroup>
-        {widgetElem}
-        {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-        <FieldAddon id={id} addon={addon} />
-      </InputGroup>
-    )
-  }
-  const validationState = getFormGroupValidationState(field, form)
 
   // setting label or extraColElem explicitly to null will completely remove these columns!
   const widgetWidth =
@@ -119,117 +125,182 @@ const renderField = (
     </FormGroup>
   )
 }
+Field.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  label: PropTypes.string,
+  widgetElem: PropTypes.object,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  extraAddon: PropTypes.object
+}
+Field.defaultProps = {
+  vertical: false // default direction of label and input = horizontal
+}
 
-export const renderInputField = ({
+export const InputField = ({
   field, // { name, value, onChange, onBlur }
   form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
+  label,
+  children,
+  extraColElem,
+  addon,
+  vertical,
+  extraAddon,
+  ...otherProps
 }) => {
-  const {
-    label,
-    children,
-    extraColElem,
-    addon,
-    vertical,
-    extraAddon,
-    ...otherProps
-  } = props
-  const widgetElem = (
-    <FormControl
-      {...Object.without(field, "value")}
-      value={
-        field.value === null || field.value === undefined ? "" : field.value
-      }
-      {...otherProps}
+  const widgetElem = useMemo(
+    () => (
+      <FormControl
+        {...Object.without(field, "value")}
+        value={
+          field.value === null || field.value === undefined ? "" : field.value
+        }
+        {...otherProps}
+      />
+    ),
+    [field, otherProps]
+  )
+  return (
+    <Field
+      field={field}
+      form={form}
+      label={label}
+      widgetElem={widgetElem}
+      children={children}
+      extraColElem={extraColElem}
+      addon={addon}
+      vertical={vertical}
+      extraAddon={extraAddon}
     />
   )
-  return renderField(
-    field,
-    label,
-    form,
-    widgetElem,
-    children,
-    extraColElem,
-    addon,
-    vertical,
-    extraAddon
-  )
+}
+InputField.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  label: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  extraAddon: PropTypes.object
 }
 
-export const renderInputFieldNoLabel = ({
+export const InputFieldNoLabel = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
+  children,
+  ...otherProps
 }) => {
-  const { children, ...otherProps } = props
-  const widgetElem = (
-    <FormControl
-      {...Object.without(field, "value")}
-      value={
-        field.value === null || field.value === undefined ? "" : field.value
-      }
-      {...otherProps}
+  const widgetElem = useMemo(
+    () => (
+      <FormControl
+        {...Object.without(field, "value")}
+        value={
+          field.value === null || field.value === undefined ? "" : field.value
+        }
+        {...otherProps}
+      />
+    ),
+    [field, otherProps]
+  )
+  return (
+    <FieldNoLabel
+      field={field}
+      form={form}
+      widgetElem={widgetElem}
+      children={children}
     />
   )
-  return renderFieldNoLabel(field, form, widgetElem, children)
+}
+InputFieldNoLabel.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  children: PropTypes.any
 }
 
-export const renderReadonlyField = ({
+export const ReadonlyField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
+  label,
+  children,
+  extraColElem,
+  addon,
+  vertical,
+  humanValue,
+  ...otherProps
 }) => {
-  const {
-    label,
-    children,
-    extraColElem,
-    addon,
-    vertical,
-    humanValue,
-    ...otherProps
-  } = props
-  const widgetElem = (
-    <FormControl.Static componentClass="div" {...field} {...otherProps}>
-      {getHumanValue(field, humanValue)}
-    </FormControl.Static>
+  const widgetElem = useMemo(
+    () => (
+      <FormControl.Static componentClass="div" {...field} {...otherProps}>
+        {getHumanValue(field, humanValue)}
+      </FormControl.Static>
+    ),
+    [field, humanValue, otherProps]
   )
-  return renderField(
-    field,
-    label,
-    form,
-    widgetElem,
-    children,
-    extraColElem,
-    addon,
-    vertical
+  return (
+    <Field
+      field={field}
+      form={form}
+      label={label}
+      widgetElem={widgetElem}
+      children={children}
+      extraColElem={extraColElem}
+      addon={addon}
+      vertical={vertical}
+    />
   )
 }
+ReadonlyField.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  label: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  humanValue: PropTypes.any
+}
 
-export const renderSpecialField = ({
+export const SpecialField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
+  label,
+  children,
+  extraColElem,
+  addon,
+  vertical,
+  widget,
+  ...otherProps
 }) => {
-  const {
-    label,
-    children,
-    extraColElem,
-    addon,
-    vertical,
-    widget,
-    ...otherProps
-  } = props
-  const widgetElem = React.cloneElement(widget, { ...field, ...otherProps })
-  return renderField(
-    field,
-    label,
-    form,
-    widgetElem,
-    children,
-    extraColElem,
-    addon,
-    vertical
+  const widgetElem = useMemo(
+    () => React.cloneElement(widget, { ...field, ...otherProps }),
+    [field, otherProps, widget]
   )
+  return (
+    <Field
+      field={field}
+      form={form}
+      label={label}
+      widgetElem={widgetElem}
+      children={children}
+      extraColElem={extraColElem}
+      addon={addon}
+      vertical={vertical}
+    />
+  )
+}
+SpecialField.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  label: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  widget: PropTypes.any
 }
 
 export const customEnumButtons = list => {
@@ -247,124 +318,174 @@ export const customEnumButtons = list => {
   return buttons
 }
 
-const renderButtonToggleGroup = (
+const ButtonToggleGroup = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   type,
-  props
-) => {
-  const {
-    label,
-    children,
-    extraColElem,
-    addon,
-    vertical,
-    buttons,
-    ...otherProps
-  } = props
-  const widgetElem = (
-    <ToggleButtonGroup
-      type={type}
-      defaultValue={field.value}
-      {...field}
-      {...otherProps}
-    >
-      {buttons.map((button, index) => {
-        if (!button) {
-          return null
-        }
-        let { label, value, color, style, ...props } = button
-        if (color) {
-          if (field.value === value) {
-            style = { ...style, backgroundColor: color }
-          }
-          style = { ...style, borderColor: color, borderWidth: "2px" }
-        }
-        return (
-          <ToggleButton {...props} key={value} value={value} style={style}>
-            {label}
-          </ToggleButton>
-        )
-      })}
-    </ToggleButtonGroup>
-  )
-  return renderField(
-    field,
-    label,
-    form,
-    widgetElem,
-    children,
-    extraColElem,
-    addon,
-    vertical
-  )
-}
-
-export const renderRadioButtonToggleGroup = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
-}) => renderButtonToggleGroup(field, form, "radio", props)
-
-export const renderCheckboxButtonToggleGroup = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
-}) => renderButtonToggleGroup(field, form, "checkbox", props)
-
-export const renderLikertScale = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
+  label,
+  children,
+  extraColElem,
+  addon,
+  vertical,
+  buttons,
+  ...otherProps
 }) => {
-  const { label, children, extraColElem, addon, vertical, buttons } = props
-  const { value, ...fieldProps } = field
-  const widgetElem = (
-    <Table striped condensed hover responsive style={{ marginBottom: 0 }}>
-      <tbody>
-        <tr>
-          {buttons.map((button, index) => {
-            return <td key={button.value}>{button.label}</td>
-          })}
-        </tr>
-        <tr>
-          {buttons.map((button, index) => {
-            return (
-              <td key={button.value}>
-                <Radio value={button.value} {...fieldProps} />
-              </td>
-            )
-          })}
-        </tr>
-      </tbody>
-    </Table>
+  const widgetElem = useMemo(
+    () => (
+      <ToggleButtonGroup
+        type={type}
+        defaultValue={field.value}
+        {...field}
+        {...otherProps}
+      >
+        {buttons.map((button, index) => {
+          if (!button) {
+            return null
+          }
+          let { label, value, color, style, ...props } = button
+          if (color) {
+            if (field.value === value) {
+              style = { ...style, backgroundColor: color }
+            }
+            style = { ...style, borderColor: color, borderWidth: "2px" }
+          }
+          return (
+            <ToggleButton {...props} key={value} value={value} style={style}>
+              {label}
+            </ToggleButton>
+          )
+        })}
+      </ToggleButtonGroup>
+    ),
+    [buttons, field, otherProps, type]
   )
-  return renderField(
-    field,
-    label,
-    form,
-    widgetElem,
-    children,
-    extraColElem,
-    addon,
-    vertical
+  return (
+    <Field
+      field={field}
+      form={form}
+      label={label}
+      widgetElem={widgetElem}
+      children={children}
+      extraColElem={extraColElem}
+      addon={addon}
+      vertical={vertical}
+    />
   )
 }
+ButtonToggleGroup.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  type: PropTypes.string,
+  label: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  buttons: PropTypes.array
+}
 
-export default renderField
+export const RadioButtonToggleGroup = ({
+  field, // { name, value, onChange, onBlur }
+  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  ...props
+}) => <ButtonToggleGroup field={field} form={form} type="radio" {...props} />
+RadioButtonToggleGroup.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object
+}
+
+export const CheckboxButtonToggleGroup = ({
+  field, // { name, value, onChange, onBlur }
+  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  ...props
+}) => <ButtonToggleGroup field={field} form={form} type="checkbox" {...props} />
+CheckboxButtonToggleGroup.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object
+}
+
+export const LikertScale = ({
+  field, // { name, value, onChange, onBlur }
+  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  label,
+  children,
+  extraColElem,
+  addon,
+  vertical,
+  buttons,
+  ...otherProps
+}) => {
+  const { value, ...fieldProps } = field
+  const widgetElem = useMemo(
+    () => (
+      <Table striped condensed hover responsive style={{ marginBottom: 0 }}>
+        <tbody>
+          <tr>
+            {buttons.map((button, index) => {
+              return <td key={button.value}>{button.label}</td>
+            })}
+          </tr>
+          <tr>
+            {buttons.map((button, index) => {
+              return (
+                <td key={button.value}>
+                  <Radio value={button.value} {...fieldProps} />
+                </td>
+              )
+            })}
+          </tr>
+        </tbody>
+      </Table>
+    ),
+    [buttons, fieldProps]
+  )
+  return (
+    <Field
+      field={field}
+      form={form}
+      label={label}
+      widgetElem={widgetElem}
+      children={children}
+      extraColElem={extraColElem}
+      addon={addon}
+      vertical={vertical}
+    />
+  )
+}
+LikertScale.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  type: PropTypes.string,
+  label: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  buttons: PropTypes.array
+}
+
+export default Field
 
 export const FieldAddon = ({ fieldId, addon }) => {
-  // allows passing a url for an image
-  if (typeof addon === "string" && addon.indexOf(".") !== -1) {
-    addon = <img src={addon} height={20} alt="" />
-  }
-  const focusElement = () => {
+  const addonComponent = useMemo(
+    () =>
+      // allows passing a url for an image
+      typeof addon === "string" && addon.indexOf(".") !== -1 ? (
+        <img src={addon} height={20} alt="" />
+      ) : (
+        addon
+      ),
+    [addon]
+  )
+  const focusElement = useCallback(() => {
     const element = document.getElementById(fieldId)
     if (element && element.focus) {
       element.focus()
     }
-  }
-  return <InputGroup.Addon onClick={focusElement}>{addon}</InputGroup.Addon>
+  }, [fieldId])
+  return (
+    <InputGroup.Addon onClick={focusElement}>{addonComponent}</InputGroup.Addon>
+  )
 }
 FieldAddon.propTypes = {
   fieldId: PropTypes.string,
@@ -406,16 +527,15 @@ export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
   onChange(null)
 }
 
-export const FieldShortcuts = props => {
-  const {
-    shortcuts,
-    fieldName,
-    objectType,
-    curValue,
-    onChange,
-    handleAddItem,
-    title
-  } = props
+export const FieldShortcuts = ({
+  shortcuts,
+  fieldName,
+  objectType,
+  curValue,
+  onChange,
+  handleAddItem,
+  title
+}) => {
   return (
     shortcuts &&
     shortcuts.length > 0 && (

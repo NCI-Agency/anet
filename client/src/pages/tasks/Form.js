@@ -159,18 +159,18 @@ const BaseTaskForm = props => {
                 <ShortNameField
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
                 <LongNameField
                   dictProps={Settings.fields.task.longName}
                   name="longName"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
                 <FastField
                   name="status"
-                  component={FieldHelper.renderRadioButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
@@ -178,7 +178,7 @@ const BaseTaskForm = props => {
                 <FastField
                   name="responsibleOrg"
                   label={Settings.fields.task.responsibleOrg}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("responsibleOrg", true, false) // onBlur doesn't work when selecting an option
@@ -203,7 +203,7 @@ const BaseTaskForm = props => {
 
                 <ResponsiblePositionsMultiSelect
                   name="responsiblePositions"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   dictProps={Settings.fields.task.responsiblePositions}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -237,7 +237,7 @@ const BaseTaskForm = props => {
                 {Settings.fields.task.customFieldRef1 && (
                   <TaskCustomFieldRef1
                     name="customFieldRef1"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     dictProps={Settings.fields.task.customFieldRef1}
                     onChange={value => {
                       // validation will be done by setFieldValue
@@ -267,14 +267,14 @@ const BaseTaskForm = props => {
                 <TaskCustomField
                   dictProps={Settings.fields.task.customField}
                   name="customField"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
                     dictProps={Settings.fields.task.plannedCompletion}
                     name="plannedCompletion"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value =>
                       setFieldValue("plannedCompletion", value)}
                     onBlur={() => setFieldTouched("plannedCompletion")}
@@ -286,7 +286,7 @@ const BaseTaskForm = props => {
                   <ProjectedCompletionField
                     dictProps={Settings.fields.task.projectedCompletion}
                     name="projectedCompletion"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value =>
                       setFieldValue("projectedCompletion", value)}
                     onBlur={() => setFieldTouched("projectedCompletion")}
@@ -302,7 +302,7 @@ const BaseTaskForm = props => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.renderRadioButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroup}
                       buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
@@ -313,7 +313,7 @@ const BaseTaskForm = props => {
                       <FastField
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         onChange={value =>
                           setFieldValue("assessment_customFieldEnum1", value)}
                         widget={
@@ -341,7 +341,7 @@ const BaseTaskForm = props => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.renderRadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}

@@ -191,32 +191,32 @@ const BasePositionShow = props => {
               <Fieldset>
                 <Field
                   name="name"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   label={Settings.fields.position.name}
                 />
 
                 <CodeFieldWithLabel
                   dictProps={positionSettings.code}
                   name="code"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <Field
                   name="type"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfType}
                 />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfStatus}
                 />
 
                 {position.organization && (
                   <Field
                     name="organization"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       position.organization && (
                         <LinkTo organization={position.organization}>
@@ -231,7 +231,7 @@ const BasePositionShow = props => {
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
                       <LinkTo anetLocation={position.location} />

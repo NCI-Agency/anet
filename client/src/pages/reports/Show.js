@@ -491,7 +491,7 @@ const BaseReportShow = props => {
                 <Field
                   name="intent"
                   label="Summary"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <div id="intent" className="form-control-static">
                       <p>
@@ -518,7 +518,7 @@ const BaseReportShow = props => {
 
                 <Field
                   name="engagementDate"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.engagementDate &&
                     moment(report.engagementDate).format(
@@ -531,13 +531,13 @@ const BaseReportShow = props => {
                   <Field
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && <LinkTo anetLocation={report.location} />
                   }
@@ -547,7 +547,7 @@ const BaseReportShow = props => {
                   <Field
                     name="cancelledReason"
                     label="Cancelled Reason"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={utils.sentenceCase(report.cancelledReason)}
                   />
                 )}
@@ -556,7 +556,7 @@ const BaseReportShow = props => {
                   <Field
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       <>
                         {utils.sentenceCase(report.atmosphere)}
@@ -571,7 +571,7 @@ const BaseReportShow = props => {
                   <Field
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       report.tags &&
                       report.tags.map((tag, i) => (
@@ -583,21 +583,21 @@ const BaseReportShow = props => {
 
                 <Field
                   name="author"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo person={report.author} />}
                 />
 
                 <Field
                   name="advisorOrg"
                   label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.advisorOrg} />}
                 />
 
                 <Field
                   name="principalOrg"
                   label={Settings.fields.principal.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.principalOrg} />}
                 />
               </Fieldset>
@@ -734,7 +734,7 @@ const BaseReportShow = props => {
                 <Field
                   name="newComment"
                   label="Add a comment"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   placeholder="Type a comment here"
                   className="add-new-comment"
@@ -854,7 +854,7 @@ const BaseReportShow = props => {
         <Field
           name="approvalComment"
           label="Approval comment"
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           componentClass="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
@@ -892,7 +892,7 @@ const BaseReportShow = props => {
         <Field
           name="requestChangesComment"
           label="Request changes comment"
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           componentClass="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
@@ -917,7 +917,7 @@ const BaseReportShow = props => {
         <Modal.Body>
           <Field
             name="to"
-            component={FieldHelper.renderInputField}
+            component={FieldHelper.InputField}
             validate={email => handleEmailValidation(email)}
             vertical
           >
@@ -933,7 +933,7 @@ const BaseReportShow = props => {
 
           <Field
             name="comment"
-            component={FieldHelper.renderInputField}
+            component={FieldHelper.InputField}
             componentClass="textarea"
             vertical
           />
