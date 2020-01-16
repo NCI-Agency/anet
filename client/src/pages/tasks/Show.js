@@ -170,10 +170,7 @@ const BaseTaskShow = props => {
                     task.taskedOrganizations && (
                       <>
                         {task.taskedOrganizations.map(org => (
-                          <LinkTo
-                            organization={org}
-                            key={`${org.uuid}`}
-                          />
+                          <LinkTo organization={org} key={`${org.uuid}`} />
                         ))}
                       </>
                     )
