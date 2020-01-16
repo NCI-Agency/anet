@@ -45,7 +45,13 @@ const ReadonlySpecialField = fieldProps =>
 
 const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
-  return <FastField component={FieldHelper.InputField} {...otherFieldProps} />
+  return (
+    <FastField
+      onChange={value => onChange(value, false)}
+      component={FieldHelper.InputField}
+      {...otherFieldProps}
+    />
+  )
 }
 
 const ReadonlyTextField = fieldProps => {
@@ -389,10 +395,15 @@ const CustomField = ({
     ...fieldProps
   } = fieldConfig
   const { setFieldValue } = formikProps
-  const handleChange = useMemo(() => value => setFieldValue(fieldName, value), [
-    setFieldValue,
-    fieldName
-  ])
+  const handleChange = useMemo(
+    () => (value, shouldValidate: true) => {
+      const val =
+        typeof value === "object" && value.target ? value.target.value : value
+      const sv = shouldValidate === undefined ? true : shouldValidate
+      setFieldValue(fieldName, val, sv)
+    },
+    [setFieldValue, fieldName]
+  )
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(
     () =>

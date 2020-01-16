@@ -328,6 +328,9 @@ dictionary:
               type: text
               label: Item
               placeholder: Enter description of the item that has been agreed to
+              validations:
+                - type: required
+                  params: [You must provide the text field]
             dueDate:
               type: date
               label: Due date

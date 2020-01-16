@@ -283,6 +283,7 @@ const BaseReportForm = props => {
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
+      validateOnChange={false}
       validationSchema={Report.yupSchema}
       initialValues={initialValues}
       {...myFormProps}
@@ -516,8 +517,10 @@ const BaseReportForm = props => {
                 <FastField
                   name="engagementDate"
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("engagementDate", value)}
-                  onBlur={() => setFieldTouched("engagementDate")}
+                  onChange={value => {
+                    setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
+                    setFieldValue("engagementDate", value, true)
+                  }}
                   widget={
                     <CustomDateInput
                       id="engagementDate"
@@ -548,7 +551,7 @@ const BaseReportForm = props => {
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("location", value)
+                    setFieldValue("location", value, true)
                   }}
                   widget={
                     <AdvancedSingleSelect
@@ -575,7 +578,7 @@ const BaseReportForm = props => {
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("location", value)
+                          setFieldValue("location", value, true)
                         }}
                         handleAddItem={FieldHelper.handleSingleSelectAddItem}
                       />
@@ -599,7 +602,8 @@ const BaseReportForm = props => {
                           // set a default reason when cancelled has been checked and no reason has been selected
                           setFieldValue(
                             "cancelledReason",
-                            cancelledReasonOptions[0].value
+                            cancelledReasonOptions[0].value,
+                            true
                           )}
                       >
                         This engagement was cancelled
@@ -612,6 +616,10 @@ const BaseReportForm = props => {
                     name="cancelledReason"
                     label="due to"
                     component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldValue("cancelledReason", value, true)
+                    }}
                     widget={
                       <FastField
                         component="select"
@@ -633,7 +641,7 @@ const BaseReportForm = props => {
                     label={Settings.fields.report.atmosphere}
                     component={FieldHelper.RadioButtonToggleGroup}
                     buttons={atmosphereButtons}
-                    onChange={value => setFieldValue("atmosphere", value)}
+                    onChange={value => setFieldValue("atmosphere", value, true)}
                     className="atmosphere-form-group"
                   />
                 )}
@@ -656,7 +664,7 @@ const BaseReportForm = props => {
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
                     component={FieldHelper.SpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
+                    onChange={value => setFieldValue("reportTags", value, true)}
                     widget={<ReportTags suggestions={tagSuggestions} />}
                   />
                 )}
@@ -686,7 +694,8 @@ const BaseReportForm = props => {
                       renderSelected={
                         <AttendeesTable
                           attendees={values.attendees}
-                          onChange={value => setFieldValue("attendees", value)}
+                          onChange={value =>
+                            setFieldValue("attendees", value, true)}
                           showDelete
                         />
                       }
@@ -737,7 +746,7 @@ const BaseReportForm = props => {
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasksLevel1", value)
+                    setFieldValue("tasksLevel1", value, true)
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -770,7 +779,7 @@ const BaseReportForm = props => {
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasks", value)
+                    setFieldValue("tasks", value, true)
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -809,7 +818,7 @@ const BaseReportForm = props => {
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tasks", value)
+                          setFieldValue("tasks", value, true)
                         }}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
@@ -893,7 +902,7 @@ const BaseReportForm = props => {
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("reportText", value)}
+                  onChange={value => setFieldValue("reportText", value, true)}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
@@ -924,7 +933,8 @@ const BaseReportForm = props => {
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value
+                            value,
+                            true
                           )}
                         widget={
                           <RichTextEditor
@@ -947,7 +957,7 @@ const BaseReportForm = props => {
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("authorizationGroups", value)
+                          setFieldValue("authorizationGroups", value, true)
                         }}
                         widget={
                           <AdvancedMultiSelect
@@ -986,7 +996,11 @@ const BaseReportForm = props => {
                                   true,
                                   false
                                 ) // onBlur doesn't work when selecting an option
-                                setFieldValue("authorizationGroups", value)
+                                setFieldValue(
+                                  "authorizationGroups",
+                                  value,
+                                  true
+                                )
                               }}
                               handleAddItem={
                                 FieldHelper.handleMultiSelectAddItem
@@ -1091,7 +1105,7 @@ const BaseReportForm = props => {
         attendee.primary = attendee.primary || false
       }
     })
-    setFieldValue(field, attendees)
+    setFieldValue(field, attendees, true)
   }
 
   function countCharsLeft(elemId, maxChars, event) {
