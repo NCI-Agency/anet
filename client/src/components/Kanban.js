@@ -184,7 +184,7 @@ class Card extends React.Component {
                     </td>
                   </tr>
                   <tr>
-                    <td>responsible org:</td>
+                    <td>tasked organizations:</td>
                     <td>
                       {" "}
                       {this.props.task.taskedOrganizations.map(org => (

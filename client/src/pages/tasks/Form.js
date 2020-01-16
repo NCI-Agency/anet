@@ -433,9 +433,8 @@ const BaseTaskForm = props => {
     const { edit } = props
     const variables = { task: task }
 
-    // strip attendees fields not in data model
     variables.task.taskedOrganizations = variables.task.taskedOrganizations.map(
-      a => Object.without(a, "positions", "childrenOrgs")
+      a => utils.getReference(a)
     )
 
     if (

@@ -232,7 +232,8 @@ dictionary:
             label: Red
             color: '#ff8279'
       taskedOrganizations:
-        label: Tasked organization
+        label: Tasked organizations
+        placeholder: Search for an organization...
       responsiblePositions:
         label: Responsible positions
         placeholder: Search for a position...

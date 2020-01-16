@@ -116,10 +116,10 @@ public class TaskResource {
             dao.removePositionFromTask(p, t);
           }
         } catch (InterruptedException | ExecutionException e) {
-          throw new WebApplicationException("failed to load Responsible Positions", e);
+          throw new WebApplicationException("failed to load responsible positions", e);
         }
       }
-      // Update positions:
+      // Update tasked organizations:
       if (t.getTaskedOrganizations() != null) {
         try {
           final List<Organization> existingTaskedOrganizations =
@@ -137,7 +137,7 @@ public class TaskResource {
             dao.removeTaskedOrganizationsFromTask(org, t.getUuid());
           }
         } catch (InterruptedException | ExecutionException e) {
-          throw new WebApplicationException("failed to load Responsible Positions", e);
+          throw new WebApplicationException("failed to load tasked organizations", e);
         }
       }
 

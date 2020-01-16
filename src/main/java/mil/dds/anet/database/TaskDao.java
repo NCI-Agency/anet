@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +119,6 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
         .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
     final TaskBatch tb = getDbHandle().attach(TaskBatch.class);
-    System.out.println("*************** Inserting " + p.getTaskedOrganizations());
     if (p.getTaskedOrganizations() != null) {
       tb.inserttaskTaskedOrganizations(p.getUuid(), p.getTaskedOrganizations());
     }
