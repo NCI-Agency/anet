@@ -7,7 +7,7 @@ import Model, {
   CUSTOM_FIELD_TYPE,
   createYupObjectShape
 } from "components/Model"
-import { Field, FieldArray } from "formik"
+import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
@@ -32,7 +32,7 @@ const SpecialField = fieldProps => {
   const { widget, ...otherFieldProps } = fieldProps
   const SpecialFieldWidget = WIDGETS[widget]
   return (
-    <Field
+    <FastField
       component={FieldHelper.SpecialField}
       widget={<SpecialFieldWidget />}
       {...otherFieldProps}
@@ -45,20 +45,24 @@ const ReadonlySpecialField = fieldProps =>
 
 const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
-  return <Field component={FieldHelper.InputField} {...otherFieldProps} />
+  return <FastField component={FieldHelper.InputField} {...otherFieldProps} />
 }
 
 const ReadonlyTextField = fieldProps => {
   const { name, label } = fieldProps
   return (
-    <Field name={name} label={label} component={FieldHelper.ReadonlyField} />
+    <FastField
+      name={name}
+      label={label}
+      component={FieldHelper.ReadonlyField}
+    />
   )
 }
 
 const DateField = fieldProps => {
   const { name, withTime, ...otherFieldProps } = fieldProps
   return (
-    <Field
+    <FastField
       name={name}
       component={FieldHelper.SpecialField}
       widget={<CustomDateInput id={name} withTime={withTime} />}
@@ -70,7 +74,7 @@ const DateField = fieldProps => {
 const ReadonlyDateField = fieldProps => {
   const { name, label, withTime } = fieldProps
   return (
-    <Field
+    <FastField
       name={name}
       label={label}
       component={FieldHelper.ReadonlyField}
@@ -92,7 +96,7 @@ const ReadonlyDateTimeField = props => <ReadonlyDateField {...props} withTime />
 const EnumField = fieldProps => {
   const { choices, renderer, ...otherFieldProps } = fieldProps
   return (
-    <Field
+    <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
       component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroup}
       {...otherFieldProps}
@@ -111,7 +115,7 @@ const enumHumanValue = (choices, fieldVal) => {
 const ReadonlyEnumField = fieldProps => {
   const { name, label, choices } = fieldProps
   return (
-    <Field
+    <FastField
       name={name}
       label={label}
       component={FieldHelper.ReadonlyField}
@@ -123,7 +127,7 @@ const ReadonlyEnumField = fieldProps => {
 const EnumSetField = fieldProps => {
   const { choices, renderer, ...otherFieldProps } = fieldProps
   return (
-    <Field
+    <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
       component={RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroup}
       {...otherFieldProps}
@@ -134,7 +138,7 @@ const EnumSetField = fieldProps => {
 const ReadonlyEnumSetField = fieldProps => {
   const { name, label, choices } = fieldProps
   return (
-    <Field
+    <FastField
       name={name}
       label={label}
       component={FieldHelper.ReadonlyField}
@@ -347,7 +351,7 @@ export const CustomFieldsContainer = props => {
 
   return (
     <>
-      <Field
+      <FastField
         type="text"
         value=""
         name={invisibleFieldsFieldName}
