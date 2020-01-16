@@ -517,7 +517,7 @@ const BaseRollupShow = props => {
             </h5>
             <Field
               name="to"
-              component={FieldHelper.renderInputField}
+              component={FieldHelper.InputField}
               validate={email => handleEmailValidation(email)}
               vertical
             >
@@ -532,7 +532,7 @@ const BaseRollupShow = props => {
             </Field>
             <Field
               name="comment"
-              component={FieldHelper.renderInputField}
+              component={FieldHelper.InputField}
               componentClass="textarea"
               vertical
             />

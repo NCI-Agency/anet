@@ -282,7 +282,7 @@ const ReportMinimal = props => {
                 <Field
                   name="intent"
                   label="Summary"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <div id="intent" className="form-control-static">
                       <p>
@@ -309,7 +309,7 @@ const ReportMinimal = props => {
 
                 <Field
                   name="engagementDate"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.engagementDate &&
                     moment(report.engagementDate).format(
@@ -322,13 +322,13 @@ const ReportMinimal = props => {
                   <Field
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && <LinkTo anetLocation={report.location} />
                   }
@@ -338,7 +338,7 @@ const ReportMinimal = props => {
                   <Field
                     name="cancelledReason"
                     label="Cancelled Reason"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={utils.sentenceCase(report.cancelledReason)}
                   />
                 )}
@@ -347,7 +347,7 @@ const ReportMinimal = props => {
                   <Field
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       <>
                         {utils.sentenceCase(report.atmosphere)}
@@ -362,7 +362,7 @@ const ReportMinimal = props => {
                   <Field
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       report.tags &&
                       report.tags.map((tag, i) => (
@@ -374,21 +374,21 @@ const ReportMinimal = props => {
 
                 <Field
                   name="author"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo person={report.author} />}
                 />
 
                 <Field
                   name="advisorOrg"
                   label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.advisorOrg} />}
                 />
 
                 <Field
                   name="principalOrg"
                   label={Settings.fields.principal.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.principalOrg} />}
                 />
               </Fieldset>

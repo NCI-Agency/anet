@@ -149,7 +149,7 @@ const BaseTaskShow = props => {
                 <ShortNameField
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {/* Override componentClass and style from dictProps */}
@@ -158,19 +158,19 @@ const BaseTaskShow = props => {
                   componentClass="div"
                   style={{}}
                   name="longName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Task.humanNameOfStatus}
                 />
 
                 <Field
                   name="responsibleOrg"
                   label={Settings.fields.task.responsibleOrg}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     task.responsibleOrg && (
                       <LinkTo organization={task.responsibleOrg}>
@@ -184,7 +184,7 @@ const BaseTaskShow = props => {
                   <TaskCustomFieldRef1
                     dictProps={Settings.fields.task.customFieldRef1}
                     name="customFieldRef1"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.customFieldRef1 && (
                         <LinkTo task={task.customFieldRef1}>
@@ -199,14 +199,14 @@ const BaseTaskShow = props => {
                 <TaskCustomField
                   dictProps={Settings.fields.task.customField}
                   name="customField"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
                     dictProps={Settings.fields.task.plannedCompletion}
                     name="plannedCompletion"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.plannedCompletion &&
                       moment(task.plannedCompletion).format(
@@ -220,7 +220,7 @@ const BaseTaskShow = props => {
                   <ProjectedCompletionField
                     dictProps={Settings.fields.task.projectedCompletion}
                     name="projectedCompletion"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.projectedCompletion &&
                       moment(task.projectedCompletion).format(
@@ -237,7 +237,7 @@ const BaseTaskShow = props => {
                       "enum"
                     )}
                     name="customFieldEnum1"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
@@ -248,7 +248,7 @@ const BaseTaskShow = props => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
               </Fieldset>

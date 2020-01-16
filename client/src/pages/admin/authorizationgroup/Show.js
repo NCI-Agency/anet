@@ -111,14 +111,11 @@ const BaseAuthorizationGroupShow = props => {
                 action={action}
               />
               <Fieldset>
-                <Field
-                  name="name"
-                  component={FieldHelper.renderReadonlyField}
-                />
+                <Field name="name" component={FieldHelper.ReadonlyField} />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={AuthorizationGroup.humanNameOfStatus}
                 />
               </Fieldset>

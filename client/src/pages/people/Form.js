@@ -204,7 +204,7 @@ const BasePersonForm = props => {
                     <Col sm={5}>
                       <FastField
                         name="lastName"
-                        component={FieldHelper.renderInputFieldNoLabel}
+                        component={FieldHelper.InputFieldNoLabel}
                         display="inline"
                         placeholder="LAST NAME"
                         disabled={!canEditName}
@@ -217,7 +217,7 @@ const BasePersonForm = props => {
                     <Col sm={6}>
                       <FastField
                         name="firstName"
-                        component={FieldHelper.renderInputFieldNoLabel}
+                        component={FieldHelper.InputFieldNoLabel}
                         display="inline"
                         placeholder="First name(s) - Lower-case except for the first letter of each name"
                         disabled={!canEditName}
@@ -307,7 +307,7 @@ const BasePersonForm = props => {
                 {isAdmin && (
                   <FastField
                     name="domainUsername"
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     extraColElem={
                       <span className="text-danger">
                         Be careful when changing this field; you might lock
@@ -320,13 +320,13 @@ const BasePersonForm = props => {
                 {edit ? (
                   <FastField
                     name="role"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfRole(values.role)}
                   />
                 ) : (
                   <FastField
                     name="role"
-                    component={FieldHelper.renderRadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={roleButtons}
                     onChange={value => {
                       const roleCountries = getCountries(value)
@@ -354,19 +354,19 @@ const BasePersonForm = props => {
                 {disableStatusChange ? (
                   <FastField
                     name="status"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
                 ) : isNewUser ? (
                   <FastField
                     name="status"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
                 ) : (
                   <Field
                     name="status"
-                    component={FieldHelper.renderRadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={statusButtons}
                     onChange={value => setFieldValue("status", value)}
                   >
@@ -399,17 +399,17 @@ const BasePersonForm = props => {
                   name="emailAddress"
                   label={Settings.fields.person.emailAddress}
                   type="email"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
                 <FastField
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
                 <FastField
                   name="rank"
                   label={Settings.fields.person.rank}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -425,7 +425,7 @@ const BasePersonForm = props => {
                 <FastField
                   name="gender"
                   label={Settings.fields.person.gender}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -437,7 +437,7 @@ const BasePersonForm = props => {
                 <FastField
                   name="country"
                   label={Settings.fields.person.country}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -452,13 +452,13 @@ const BasePersonForm = props => {
                 <FastField
                   name="code"
                   label={Settings.fields.person.code}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   disabled={!isAdmin}
                 />
                 <FastField
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   value={values.endOfTourDate}
                   onChange={value => setFieldValue("endOfTourDate", value)}
                   onBlur={() => setFieldTouched("endOfTourDate")}
@@ -472,7 +472,7 @@ const BasePersonForm = props => {
                 </FastField>
                 <FastField
                   name="biography"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => setFieldValue("biography", value)}
                   widget={
                     <RichTextEditor

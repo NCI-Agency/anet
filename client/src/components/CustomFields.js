@@ -33,7 +33,7 @@ const SpecialField = fieldProps => {
   const SpecialFieldWidget = WIDGETS[widget]
   return (
     <Field
-      component={FieldHelper.renderSpecialField}
+      component={FieldHelper.SpecialField}
       widget={<SpecialFieldWidget />}
       {...otherFieldProps}
     />
@@ -45,17 +45,13 @@ const ReadonlySpecialField = fieldProps =>
 
 const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
-  return <Field component={FieldHelper.renderInputField} {...otherFieldProps} />
+  return <Field component={FieldHelper.InputField} {...otherFieldProps} />
 }
 
 const ReadonlyTextField = fieldProps => {
   const { name, label } = fieldProps
   return (
-    <Field
-      name={name}
-      label={label}
-      component={FieldHelper.renderReadonlyField}
-    />
+    <Field name={name} label={label} component={FieldHelper.ReadonlyField} />
   )
 }
 
@@ -64,7 +60,7 @@ const DateField = fieldProps => {
   return (
     <Field
       name={name}
-      component={FieldHelper.renderSpecialField}
+      component={FieldHelper.SpecialField}
       widget={<CustomDateInput id={name} withTime={withTime} />}
       {...otherFieldProps}
     />
@@ -77,7 +73,7 @@ const ReadonlyDateField = fieldProps => {
     <Field
       name={name}
       label={label}
-      component={FieldHelper.renderReadonlyField}
+      component={FieldHelper.ReadonlyField}
       humanValue={fieldVal =>
         fieldVal &&
         moment(fieldVal).format(
@@ -98,9 +94,7 @@ const EnumField = fieldProps => {
   return (
     <Field
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={
-        RENDERERS[renderer] || FieldHelper.renderRadioButtonToggleGroup
-      }
+      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroup}
       {...otherFieldProps}
     />
   )
@@ -120,7 +114,7 @@ const ReadonlyEnumField = fieldProps => {
     <Field
       name={name}
       label={label}
-      component={FieldHelper.renderReadonlyField}
+      component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
     />
   )
@@ -131,9 +125,7 @@ const EnumSetField = fieldProps => {
   return (
     <Field
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={
-        RENDERERS[renderer] || FieldHelper.renderCheckboxButtonToggleGroup
-      }
+      component={RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroup}
       {...otherFieldProps}
     />
   )
@@ -145,7 +137,7 @@ const ReadonlyEnumSetField = fieldProps => {
     <Field
       name={name}
       label={label}
-      component={FieldHelper.renderReadonlyField}
+      component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
     />
   )

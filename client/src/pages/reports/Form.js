@@ -491,7 +491,7 @@ const BaseReportForm = props => {
                 <FastField
                   name="intent"
                   label={Settings.fields.report.intent}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
@@ -515,7 +515,7 @@ const BaseReportForm = props => {
 
                 <FastField
                   name="engagementDate"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => setFieldValue("engagementDate", value)}
                   onBlur={() => setFieldTouched("engagementDate")}
                   widget={
@@ -538,13 +538,13 @@ const BaseReportForm = props => {
                   <FastField
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                   />
                 )}
 
                 <FastField
                   name="location"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
@@ -586,7 +586,7 @@ const BaseReportForm = props => {
                 {!isFutureEngagement && (
                   <FastField
                     name="cancelled"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
                       <Checkbox
@@ -611,7 +611,7 @@ const BaseReportForm = props => {
                   <FastField
                     name="cancelledReason"
                     label="due to"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     widget={
                       <FastField
                         component="select"
@@ -631,7 +631,7 @@ const BaseReportForm = props => {
                   <FastField
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderRadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={atmosphereButtons}
                     onChange={value => setFieldValue("atmosphere", value)}
                     className="atmosphere-form-group"
@@ -643,7 +643,7 @@ const BaseReportForm = props => {
                     <Field
                       name="atmosphereDetails"
                       label={Settings.fields.report.atmosphereDetails}
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
                         values.atmosphere === "POSITIVE" ? "(optional)" : ""
                       }`}
@@ -655,7 +655,7 @@ const BaseReportForm = props => {
                   <FastField
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value => setFieldValue("reportTags", value)}
                     widget={<ReportTags suggestions={tagSuggestions} />}
                   />
@@ -672,7 +672,7 @@ const BaseReportForm = props => {
               >
                 <Field
                   name="attendees"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
@@ -733,7 +733,7 @@ const BaseReportForm = props => {
                 <FastField
                   name="tasksLevel1"
                   label="Objectives"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
@@ -766,7 +766,7 @@ const BaseReportForm = props => {
                 <Field
                   name="tasks"
                   label={Settings.fields.task.shortLabel}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
@@ -843,7 +843,7 @@ const BaseReportForm = props => {
                   <FastField
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     componentClass="textarea"
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
@@ -868,7 +868,7 @@ const BaseReportForm = props => {
                   <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps}
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     componentClass="textarea"
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
@@ -892,7 +892,7 @@ const BaseReportForm = props => {
                 <FastField
                   name="reportText"
                   label={Settings.fields.report.reportText}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => setFieldValue("reportText", value)}
                   widget={
                     <RichTextEditor
@@ -919,7 +919,7 @@ const BaseReportForm = props => {
                     <div>
                       <FastField
                         name="reportSensitiveInformation.text"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         label="Report sensitive information text"
                         onChange={value =>
                           setFieldValue(
@@ -943,7 +943,7 @@ const BaseReportForm = props => {
                       <FastField
                         name="authorizationGroups"
                         label="Authorization Groups"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option

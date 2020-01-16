@@ -97,11 +97,11 @@ const AuthorizationGroupForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field name="name" component={FieldHelper.renderInputField} />
+                <Field name="name" component={FieldHelper.InputField} />
 
                 <Field
                   name="description"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   maxLength={Settings.maxTextFieldLength}
                   onKeyUp={event =>
@@ -123,7 +123,7 @@ const AuthorizationGroupForm = props => {
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderRadioButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
@@ -131,7 +131,7 @@ const AuthorizationGroupForm = props => {
                 <Field
                   name="positions"
                   label="Positions"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("positions", true, false) // onBlur doesn't work when selecting an option

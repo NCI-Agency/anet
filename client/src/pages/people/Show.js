@@ -207,54 +207,54 @@ const BasePersonShow = props => {
                 <Field
                   name="rank"
                   label={Settings.fields.person.rank}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="role"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Person.humanNameOfRole(values.role)}
                 />
                 {isAdmin && (
                   <Field
                     name="domainUsername"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Person.humanNameOfStatus(values.status)}
                 />
                 <Field
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="emailAddress"
                   label={Settings.fields.person.emailAddress}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={emailHumanValue}
                 />
                 <Field
                   name="country"
                   label={Settings.fields.person.country}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="code"
                   label={Settings.fields.person.code}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="gender"
                   label={Settings.fields.person.gender}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     person.endOfTourDate &&
                     moment(person.endOfTourDate).format(
@@ -265,7 +265,7 @@ const BasePersonShow = props => {
                 <Field
                   name="biography"
                   className="biography"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <div
                       dangerouslySetInnerHTML={{ __html: person.biography }}

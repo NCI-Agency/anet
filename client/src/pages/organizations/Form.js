@@ -227,12 +227,12 @@ const BaseOrganizationForm = props => {
                   <>
                     <FastField
                       name="type"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfType}
                     />
                     <FastField
                       name="parentOrg"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
@@ -246,37 +246,37 @@ const BaseOrganizationForm = props => {
                     />
                     <FastField
                       name="shortName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.shortName}
                     />
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
                     <FastField
                       name="status"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfStatus}
                     />
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
                   </>
                 ) : (
                   <>
                     <FastField
                       name="type"
-                      component={FieldHelper.renderRadioButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroup}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
                     <FastField
                       name="parentOrg"
                       label={Settings.fields.organization.parentOrg}
-                      component={FieldHelper.renderSpecialField}
+                      component={FieldHelper.SpecialField}
                       onChange={value => {
                         // validation will be done by setFieldValue
                         setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
@@ -300,7 +300,7 @@ const BaseOrganizationForm = props => {
                     />
                     <FastField
                       name="shortName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       label={Settings.fields.organization.shortName}
                       placeholder="e.g. EF1.1"
                       disabled={!isAdmin}
@@ -308,12 +308,12 @@ const BaseOrganizationForm = props => {
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       disabled={!isAdmin}
                     />
                     <FastField
                       name="status"
-                      component={FieldHelper.renderRadioButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroup}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                       disabled={!isAdmin}
@@ -321,7 +321,7 @@ const BaseOrganizationForm = props => {
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                     />
                   </>
                 )}
@@ -497,7 +497,7 @@ const BaseOrganizationForm = props => {
                         <FastField
                           name="tasks"
                           label={Settings.fields.task.shortLabel}
-                          component={FieldHelper.renderSpecialField}
+                          component={FieldHelper.SpecialField}
                           onChange={value => {
                             // validation will be done by setFieldValue
                             setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
@@ -577,13 +577,13 @@ const BaseOrganizationForm = props => {
 
         <FastField
           name={`${fieldName}.${index}.name`}
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           label="Step name"
         />
         <FastField
           name={`${fieldName}.${index}.approvers`}
           label="Add an approver"
-          component={FieldHelper.renderSpecialField}
+          component={FieldHelper.SpecialField}
           onChange={value => {
             // validation will be done by setFieldValue
             setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option
