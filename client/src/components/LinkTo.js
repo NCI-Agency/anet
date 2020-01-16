@@ -47,6 +47,8 @@ export default class LinkTo extends Component {
 
     target: PropTypes.string,
     whenUnspecified: PropTypes.string,
+    modelType: PropTypes.string,
+    model: PropTypes.object,
     ...modelPropTypes
   }
 
@@ -57,7 +59,9 @@ export default class LinkTo extends Component {
     isLink: true,
     edit: false,
     button: false,
-    whenUnspecified: "Unspecified"
+    whenUnspecified: "Unspecified",
+    modelType: null,
+    model: null
   }
 
   render() {
@@ -71,6 +75,8 @@ export default class LinkTo extends Component {
       isLink,
       whenUnspecified,
       className,
+      modelType,
+      model,
       ...componentProps
     } = this.props
 
@@ -83,15 +89,16 @@ export default class LinkTo extends Component {
     } else {
       componentProps.className = className
     }
-    const modelName = Object.keys(componentProps).find(
-      key => MODEL_NAMES.indexOf(key) !== -1
-    )
+
+    const modelName = modelType || Object.keys(componentProps).find(
+        key => MODEL_NAMES.indexOf(key) !== -1)
+
     if (!modelName) {
       console.error("You called LinkTo without passing a Model as a prop")
       return null
     }
 
-    const modelFields = this.props[modelName]
+    const modelFields = model || this.props[modelName]
     if (_isEmpty(modelFields)) return <span>{whenUnspecified}</span>
 
     const ModelClass = Models[modelName]

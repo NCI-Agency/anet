@@ -1,8 +1,17 @@
 import React from "react"
-import LinkTo from "components/LinkTo"
 import { gql } from "apollo-boost"
 import parse from "html-react-parser"
 import API from "api"
+import LinkAnetEntity from "components/editor/LinkAnetEntity"
+
+const parsedEntityLinkType = new Map([
+  ["reports", "report"],
+  ["people", "person"],
+  ["organizations", "organization"],
+  ["positions", "position"],
+  ["locations", "anetLocation"],
+  ["tasks", "task"]
+])
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -60,31 +69,42 @@ const GQL_GET_TASK = gql`
     }
   }
 `
+export function getEntityInfoFromUrl(url) {
+  var splittedUrl = url.split(/[\\//]/)
+  var type = splittedUrl[splittedUrl.length - 2]
+  type = parsedEntityLinkType.get(type)
+  var uuid = splittedUrl[splittedUrl.length - 1]
+
+  return { type, uuid }
+}
 
 // Enhanced HTML so that links will be converted to LinkTo components
 export function enhanceHtml(html, report) {
   return parse(html, {
     replace: domNode => {
       if (domNode.attribs && domNode.attribs.href) {
-        var splittedUrl = domNode.attribs.href.split(/[\\//]/)
-        var type = splittedUrl[splittedUrl.length - 2]
-        var uuid = splittedUrl[splittedUrl.length - 1]
-        return createLinkToElement(type, uuid)
+        return <LinkAnetEntity url={domNode.attribs.href} />
       }
     }
   })
 }
 
-export async function createLinkToElement(type, uuid) {
-  const org = await getOrganizationByUuid(uuid)
+export function getEntityByUuid(type, uuid) {
   switch (type) {
-    case "organizations":
-      return (
-        <>
-          <LinkTo organization={org} isLink />
-        </>
-      )
+    case "report":
+      return getReportByUuid(uuid)
+    case "person":
+      return getPersonByUuid(uuid)
+    case "organization":
+      return getOrganizationByUuid(uuid)
+    case "position":
+      return getPositionByUuid(uuid)
+    case "anetLocation":
+      return getLocationByUuid(uuid)
+    case "task":
+      return getTaskByUuid(uuid)
     default:
+      console.log("Unknown entity type: " + type)
       return null
   }
 }

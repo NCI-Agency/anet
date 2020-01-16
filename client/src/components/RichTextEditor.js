@@ -84,9 +84,7 @@ const ENTITY_CONTROL = {
 
 const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
-    // a tags will become LINK entities, marked as mutable, with only the URL as data.
     if (nodeName === "a") {
-      // return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", { url: node.href }
       return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", {
         url: node.href,
         value: node.href
