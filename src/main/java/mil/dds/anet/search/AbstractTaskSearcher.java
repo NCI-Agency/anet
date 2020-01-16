@@ -76,10 +76,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
 
     qb.addFromClause(
-        "LEFT JOIN taskTaskedOrganizations ON task.uuid = taskTaskedOrganizations.\"taskUuid\"");
+        "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
 
     if (query.getIncludeChildrenOrgs()) {
-      qb.addRecursiveClause(null, "taskTaskedOrganizations", "organizationUuid", "parent_orgs",
+      qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"", "parent_orgs",
           "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid());
     } else {
       qb.addEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
