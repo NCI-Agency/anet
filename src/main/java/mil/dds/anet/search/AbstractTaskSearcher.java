@@ -79,8 +79,9 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
 
     if (query.getIncludeChildrenOrgs()) {
-      qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"", "parent_orgs",
-          "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid());
+      qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
+          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
+          true);
     } else {
       qb.addEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
           query.getTaskedOrgUuid());
@@ -90,7 +91,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
     if (query.getCustomFieldRef1Recursively()) {
       qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks", "tasks",
-          "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
+          "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid(), true);
     } else {
       qb.addInListClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
           query.getCustomFieldRef1Uuid());

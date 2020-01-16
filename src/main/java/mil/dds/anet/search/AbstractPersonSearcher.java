@@ -50,7 +50,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     if (query.getOrgUuid() != null) {
       if (query.getIncludeChildOrgs()) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
-            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid());
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(), true);
       } else {
         qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
       }

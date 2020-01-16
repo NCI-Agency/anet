@@ -265,7 +265,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     } else {
       qb.addRecursiveClause(outerQb, "reports",
           new String[] {"\"advisorOrganizationUuid\"", "\"principalOrganizationUuid\""},
-          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid());
+          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(), true);
     }
   }
 
@@ -281,7 +281,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"advisorOrganizationUuid\"",
           "advisor_parent_orgs", "organizations", "\"parentOrgUuid\"", "advisorOrganizationUuid",
-          query.getAdvisorOrgUuid());
+          query.getAdvisorOrgUuid(), true);
     }
   }
 
@@ -297,7 +297,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"principalOrganizationUuid\"",
           "principal_parent_orgs", "organizations", "\"parentOrgUuid\"",
-          "principalOrganizationUuid", query.getPrincipalOrgUuid());
+          "principalOrganizationUuid", query.getPrincipalOrgUuid(), true);
     }
   }
 

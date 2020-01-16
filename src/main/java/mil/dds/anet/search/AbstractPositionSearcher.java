@@ -45,7 +45,7 @@ public abstract class AbstractPositionSearcher
     if (query.getOrganizationUuid() != null) {
       if (query.getIncludeChildrenOrgs()) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
-            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid());
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid(), true);
       } else {
         qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"",
             query.getOrganizationUuid());
