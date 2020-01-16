@@ -225,7 +225,7 @@ public class Organization extends AbstractAnetBean {
     }
     final TaskSearchQuery query = new TaskSearchQuery();
     query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
-        "\"taskTaskedOrganizations\"", "\"organizationUuid\"", "\"taskUuid\""));
+        "\"taskTaskedOrganizations\"", "\"taskUuid\"", "\"organizationUuid\""));
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
         .thenApply(o -> {
           tasks = o;
