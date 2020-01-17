@@ -90,8 +90,9 @@ export default class LinkTo extends Component {
       componentProps.className = className
     }
 
-    const modelName = modelType || Object.keys(componentProps).find(
-        key => MODEL_NAMES.indexOf(key) !== -1)
+    const modelName =
+      modelType ||
+      Object.keys(componentProps).find(key => MODEL_NAMES.indexOf(key) !== -1)
 
     if (!modelName) {
       console.error("You called LinkTo without passing a Model as a prop")

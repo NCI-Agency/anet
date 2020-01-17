@@ -2,16 +2,10 @@ import React from "react"
 import { gql } from "apollo-boost"
 import parse from "html-react-parser"
 import API from "api"
-import LinkAnetEntity from "components/editor/LinkAnetEntity"
+import LinkAnet from "components/editor/LinkAnet"
 
-const parsedEntityLinkType = new Map([
-  ["reports", "report"],
-  ["people", "person"],
-  ["organizations", "organization"],
-  ["positions", "position"],
-  ["locations", "anetLocation"],
-  ["tasks", "task"]
-])
+const UUID_REGEX =
+  "^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$"
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -69,13 +63,30 @@ const GQL_GET_TASK = gql`
     }
   }
 `
-export function getEntityInfoFromUrl(url) {
-  var splittedUrl = url.split(/[\\//]/)
-  var type = splittedUrl[splittedUrl.length - 2]
-  type = parsedEntityLinkType.get(type)
-  var uuid = splittedUrl[splittedUrl.length - 1]
 
-  return { type, uuid }
+export const parsedEntityLinkType = new Map([
+  ["reports", "report"],
+  ["people", "person"],
+  ["organizations", "organization"],
+  ["positions", "position"],
+  ["locations", "anetLocation"],
+  ["tasks", "task"]
+])
+
+export function getEntityInfoFromUrl(url) {
+  const splittedUrl = url.split(/[\\//]/)
+
+  if (splittedUrl.length > 1) {
+    var type = splittedUrl[splittedUrl.length - 2]
+    const uuid = splittedUrl[splittedUrl.length - 1]
+
+    if (parsedEntityLinkType.has(type) && new RegExp(UUID_REGEX).test(uuid)) {
+      type = parsedEntityLinkType.get(type)
+      return { type, uuid }
+    }
+  }
+
+  return null
 }
 
 // Enhanced HTML so that links will be converted to LinkTo components
@@ -83,7 +94,7 @@ export function enhanceHtml(html, report) {
   return parse(html, {
     replace: domNode => {
       if (domNode.attribs && domNode.attribs.href) {
-        return <LinkAnetEntity url={domNode.attribs.href} />
+        return <LinkAnet url={domNode.attribs.href} />
       }
     }
   })

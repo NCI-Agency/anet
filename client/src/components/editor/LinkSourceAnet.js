@@ -135,14 +135,13 @@ class LinkSourceAnet extends Component {
 
   onConfirm = value => {
     const { editorState, entityType, onComplete } = this.props
-
+    const objectType = this.state.objectType.toLowerCase()
     const nextState = createEntity(
       editorState,
       entityType.type,
       {
-        url: "\\" + this.state.objectType.toLowerCase() + "/" + value.uuid,
-        value: "\\" + this.state.objectType.toLowerCase() + "/" + value.uuid,
-        objectType: this.state.objectType
+        url: "\\" + objectType + "/" + value.uuid,
+        value: "\\" + objectType + "/" + value.uuid
       },
       value.name ||
         value.shortName ||

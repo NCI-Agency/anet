@@ -75,7 +75,7 @@ const ENTITY_CONTROL = {
     ],
     source: LinkSourceAnet,
     decorator: LinkAnet,
-    attributes: ["url", "value", "objectType"],
+    attributes: ["url", "value"],
     whitelist: {
       href: "^(?![#/])"
     }
