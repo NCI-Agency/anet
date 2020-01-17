@@ -28,6 +28,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
@@ -296,11 +297,13 @@ const BaseReportForm = props => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateField,
         touched,
         submitForm,
         resetForm,
         setSubmitting
       }) => {
+        const validateFieldDebounced = _debounce(validateField, 400)
         const currentOrgUuid =
           currentUser.position && currentUser.position.organization
             ? currentUser.position.organization.uuid
@@ -496,6 +499,10 @@ const BaseReportForm = props => {
                   componentClass="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
+                  onChange={event => {
+                    setFieldValue("intent", event.target.value, false)
+                    validateFieldDebounced("intent")
+                  }}
                   onKeyUp={event =>
                     countCharsLeft(
                       "intentCharsLeft",
@@ -542,6 +549,9 @@ const BaseReportForm = props => {
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldValue("duration", event.target.value, true)
+                    }}
                   />
                 )}
 
@@ -645,18 +655,24 @@ const BaseReportForm = props => {
                     className="atmosphere-form-group"
                   />
                 )}
-                {!isFutureEngagement &&
-                  !values.cancelled &&
-                  values.atmosphere && (
-                    <Field
-                      name="atmosphereDetails"
-                      label={Settings.fields.report.atmosphereDetails}
-                      component={FieldHelper.InputField}
-                      placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                        values.atmosphere === "POSITIVE" ? "(optional)" : ""
-                      }`}
-                      className="atmosphere-details"
-                    />
+                {!isFutureEngagement && !values.cancelled && values.atmosphere && (
+                  <Field
+                    name="atmosphereDetails"
+                    label={Settings.fields.report.atmosphereDetails}
+                    component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldValue(
+                        "atmosphereDetails",
+                        event.target.value,
+                        false
+                      )
+                      validateFieldDebounced("atmosphereDetails")
+                    }}
+                    placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
+                      values.atmosphere === "POSITIVE" ? "(optional)" : ""
+                    }`}
+                    className="atmosphere-details"
+                  />
                 )}
 
                 {Settings.fields.report.reportTags && (
@@ -834,7 +850,8 @@ const BaseReportForm = props => {
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
-                      values
+                      values,
+                      validateField
                     }}
                   />
                 </Fieldset>
@@ -853,6 +870,10 @@ const BaseReportForm = props => {
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}
                     component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldValue("keyOutcomes", event.target.value, false)
+                      validateFieldDebounced("keyOutcomes")
+                    }}
                     componentClass="textarea"
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
@@ -879,6 +900,10 @@ const BaseReportForm = props => {
                     label={Settings.fields.report.nextSteps}
                     component={FieldHelper.InputField}
                     componentClass="textarea"
+                    onChange={event => {
+                      setFieldValue("nextSteps", event.target.value, false)
+                      validateFieldDebounced("nextSteps")
+                    }}
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
                       countCharsLeft(
@@ -1037,7 +1062,8 @@ const BaseReportForm = props => {
                       formikProps={{
                         setFieldTouched,
                         setFieldValue,
-                        values
+                        values,
+                        validateField
                       }}
                     />
                   )

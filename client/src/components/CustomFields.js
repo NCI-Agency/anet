@@ -10,6 +10,7 @@ import Model, {
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
+import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import _set from "lodash/set"
@@ -90,7 +91,8 @@ const ReadonlyDateField = fieldProps => {
           withTime
             ? Settings.dateFormats.forms.displayShort.withTime
             : Settings.dateFormats.forms.displayShort.date
-        )}
+        )
+      }
     />
   )
 }
@@ -352,7 +354,7 @@ export const CustomFieldsContainer = props => {
   const { setFieldValue } = formikProps
   const invisibleFieldsFieldName = `${fieldNamePrefix}.invisibleCustomFields`
   useEffect(() => {
-    setFieldValue(invisibleFieldsFieldName, invisibleFields)
+    setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
   }, [invisibleFieldsFieldName, invisibleFields, setFieldValue])
 
   return (
@@ -394,13 +396,15 @@ const CustomField = ({
     visibleWhen,
     ...fieldProps
   } = fieldConfig
-  const { setFieldValue } = formikProps
+  const { setFieldValue, validateField } = formikProps
   const handleChange = useMemo(
     () => (value, shouldValidate: true) => {
       const val =
         typeof value === "object" && value.target ? value.target.value : value
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldValue(fieldName, val, sv)
+      const validateFieldDebounced = _debounce(validateField, 400)
+      validateFieldDebounced(fieldName)
     },
     [setFieldValue, fieldName]
   )
@@ -410,11 +414,11 @@ const CustomField = ({
       type !== CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS
         ? {}
         : {
-          fieldConfig,
-          formikProps,
-          invisibleFields,
-          updateInvisibleFields
-        },
+            fieldConfig,
+            formikProps,
+            invisibleFields,
+            updateInvisibleFields
+          },
     [fieldConfig, formikProps, invisibleFields, type, updateInvisibleFields]
   )
   return (

@@ -113,7 +113,8 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
   fieldYupSchema = fieldYupSchema.when(
     "invisibleCustomFields",
     (invisibleCustomFields, schema) => {
-      return invisibleCustomFields.includes("formCustomFields." + fieldKey)
+      return invisibleCustomFields &&
+        invisibleCustomFields.includes("formCustomFields." + fieldKey)
         ? schema
         : schema.concat(fieldTypeYupSchema)
     }

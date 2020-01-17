@@ -125,6 +125,7 @@ const BasePersonForm = props => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateField,
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
@@ -493,7 +494,8 @@ const BasePersonForm = props => {
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
-                      values
+                      values,
+                      validateField
                     }}
                   />
                 </Fieldset>
