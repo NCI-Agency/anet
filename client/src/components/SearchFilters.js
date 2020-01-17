@@ -34,13 +34,19 @@ import TASKS_ICON from "resources/tasks.png"
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
 
+export const RECURSE_STRATEGY = {
+  NONE: "NONE",
+  CHILDREN: "CHILDREN",
+  PARENTS: "PARENTS"
+}
+
 const taskFilters = props => {
   const taskFiltersObj = {
     Organization: {
       component: OrganizationFilter,
       props: {
         queryKey: "taskedOrgUuid",
-        queryIncludeChildOrgsKey: "includeChildrenOrgs"
+        queryOrgRecurseStrategyKey: "orgRecurseStrategy"
       }
     },
     Status: {
@@ -227,7 +233,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         component: OrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryIncludeChildOrgsKey: "includeOrgChildren"
+          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       "Engagement Date": {
@@ -326,7 +332,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         component: OrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryIncludeChildOrgsKey: "includeChildOrgs"
+          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       Role: {
@@ -430,7 +436,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         component: OrganizationFilter,
         props: {
           queryKey: "organizationUuid",
-          queryIncludeChildOrgsKey: "includeChildrenOrgs",
+          queryOrgRecurseStrategyKey: "orgRecurseStrategy",
           ref: organizationFilterRef
         }
       },

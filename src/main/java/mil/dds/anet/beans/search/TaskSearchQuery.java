@@ -14,7 +14,7 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
   private String taskedOrgUuid;
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean includeChildrenOrgs;
+  private RecurseStrategy orgRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   private String category;
@@ -68,12 +68,12 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
     this.taskedOrgUuid = taskedOrgUuid;
   }
 
-  public boolean getIncludeChildrenOrgs() {
-    return Boolean.TRUE.equals(includeChildrenOrgs);
+  public RecurseStrategy getOrgRecurseStrategy() {
+    return orgRecurseStrategy;
   }
 
-  public void setIncludeChildrenOrgs(Boolean includeChildrenOrgs) {
-    this.includeChildrenOrgs = includeChildrenOrgs;
+  public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
+    this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
   public String getCategory() {
@@ -166,7 +166,7 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), taskedOrgUuid, includeChildrenOrgs, category, status,
+    return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category, status,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
         customFieldRef1Recursively);
@@ -179,7 +179,7 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
     }
     final TaskSearchQuery other = (TaskSearchQuery) obj;
     return super.equals(obj) && Objects.equals(getTaskedOrgUuid(), other.getTaskedOrgUuid())
-        && Objects.equals(getIncludeChildrenOrgs(), other.getIncludeChildrenOrgs())
+        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getCategory(), other.getCategory())
         && Objects.equals(getStatus(), other.getStatus())
         && Objects.equals(getPlannedCompletionEnd(), other.getPlannedCompletionEnd())

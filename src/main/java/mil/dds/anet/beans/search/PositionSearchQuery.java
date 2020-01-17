@@ -18,7 +18,7 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   String organizationUuid;
   @GraphQLQuery
   @GraphQLInputField
-  Boolean includeChildrenOrgs;
+  RecurseStrategy orgRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   List<PositionType> type;
@@ -56,12 +56,12 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     this.organizationUuid = orgUuid;
   }
 
-  public boolean getIncludeChildrenOrgs() {
-    return Boolean.TRUE.equals(includeChildrenOrgs);
+  public RecurseStrategy getOrgRecurseStrategy() {
+    return orgRecurseStrategy;
   }
 
-  public void setIncludeChildrenOrgs(Boolean includeChildrenOrgs) {
-    this.includeChildrenOrgs = includeChildrenOrgs;
+  public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
+    this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
   public List<PositionType> getType() {
@@ -106,8 +106,8 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, includeChildrenOrgs,
-        type, isFilled, locationUuid, status, authorizationGroupUuid);
+    return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, orgRecurseStrategy, type,
+        isFilled, locationUuid, status, authorizationGroupUuid);
   }
 
   @Override
@@ -118,7 +118,7 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     final PositionSearchQuery other = (PositionSearchQuery) obj;
     return super.equals(obj) && Objects.equals(getMatchPersonName(), other.getMatchPersonName())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid())
-        && Objects.equals(getIncludeChildrenOrgs(), other.getIncludeChildrenOrgs())
+        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getType(), other.getType())
         && Objects.equals(getIsFilled(), other.getIsFilled())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())

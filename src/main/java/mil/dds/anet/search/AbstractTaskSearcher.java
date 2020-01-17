@@ -3,6 +3,7 @@ package mil.dds.anet.search;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -23,6 +24,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     return qb.buildAndRun(getDbHandle(), query, new TaskMapper());
   }
 
+  @Override
   protected void buildQuery(TaskSearchQuery query) {
     qb.addSelectClause("tasks.*");
     qb.addTotalCount();
@@ -78,10 +80,11 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     qb.addFromClause(
         "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
 
-    if (query.getIncludeChildrenOrgs()) {
+    if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
       qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
           "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
-          true);
+          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
     } else {
       qb.addEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
           query.getTaskedOrgUuid());

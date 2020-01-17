@@ -3,6 +3,7 @@ package mil.dds.anet.search;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.PositionDao;
@@ -23,6 +24,7 @@ public abstract class AbstractPositionSearcher
     return qb.buildAndRun(getDbHandle(), query, new PositionMapper());
   }
 
+  @Override
   protected void buildQuery(PositionSearchQuery query) {
     qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
     qb.addTotalCount();
@@ -43,9 +45,11 @@ public abstract class AbstractPositionSearcher
     qb.addInClause("types", "positions.type", query.getType());
 
     if (query.getOrganizationUuid() != null) {
-      if (query.getIncludeChildrenOrgs()) {
+      if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+          || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
-            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid(), true);
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid(),
+            RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
         qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"",
             query.getOrganizationUuid());

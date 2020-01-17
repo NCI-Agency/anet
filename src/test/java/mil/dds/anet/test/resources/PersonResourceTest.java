@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -29,6 +28,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -246,14 +246,14 @@ public class PersonResourceTest extends AbstractResourceTest {
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
 
-    query.setIncludeChildOrgs(true);
+    query.setRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList()).containsAll(parentOnlyResults.getList());
 
-    query.setIncludeChildOrgs(true);
+    query.setRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});

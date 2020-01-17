@@ -7,9 +7,10 @@ import _isEqualWith from "lodash/isEqualWith"
 import { Organization } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Checkbox } from "react-bootstrap"
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {
@@ -27,7 +28,7 @@ export default class OrganizationFilter extends Component {
     // The queryKey property tells this filter what property to set on the
     // search query (ie authorUuid, organizationUuid, etc).
     queryKey: PropTypes.string.isRequired,
-    queryIncludeChildOrgsKey: PropTypes.string.isRequired,
+    queryOrgRecurseStrategyKey: PropTypes.string.isRequired,
     value: PropTypes.any,
     onChange: PropTypes.func,
     queryParams: PropTypes.object,
@@ -44,7 +45,7 @@ export default class OrganizationFilter extends Component {
     const value = props.value || {}
     this.state = {
       value: value,
-      includeChildOrgs: value.includeChildOrgs || false,
+      orgRecurseStrategy: value.orgRecurseStrategy || RECURSE_STRATEGY.NONE,
       queryParams: props.queryParams || {}
     }
   }
@@ -64,7 +65,8 @@ export default class OrganizationFilter extends Component {
       this.setState(
         {
           value: this.props.value,
-          includeChildOrgs: this.props.value.includeChildOrgs || false
+          orgRecurseStrategy:
+            this.props.value.orgRecurseStrategy || RECURSE_STRATEGY.NONE
         },
         this.updateFilter
       )
@@ -76,13 +78,15 @@ export default class OrganizationFilter extends Component {
       this.props,
       "value",
       "queryKey",
-      "queryIncludeChildOrgsKey",
+      "queryOrgRecurseStrategyKey",
       "queryParams",
       "asFormField"
     )
     let msg = this.props.value.shortName
-    if (msg && this.state.includeChildOrgs) {
+  if (msg && (this.state.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN)) {
       msg += ", including sub-organizations"
+    } else if (msg && (this.state.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS)) {
+      msg += ", including parent organizations"
     }
     const organizationWidgetFilters = {
       all: {
@@ -111,21 +115,28 @@ export default class OrganizationFilter extends Component {
           value={this.state.value}
         />
         <div>
-          <Checkbox
-            inline
-            checked={this.state.includeChildOrgs}
-            onChange={this.changeIncludeChildren}
+          <ToggleButtonGroup
+            type="radio"
+            name="orgRecurseStrategy"
+            value={this.state.orgRecurseStrategy}
+            onChange={this.changeOrgRecurseStrategy}
           >
-            Include sub-organizations
-          </Checkbox>
+            <ToggleButton value={RECURSE_STRATEGY.NONE}>exact match</ToggleButton>
+            <ToggleButton value={RECURSE_STRATEGY.CHILDREN}>
+              include sub-orgs
+            </ToggleButton>
+            <ToggleButton value={RECURSE_STRATEGY.PARENTS}>
+              include parent orgs
+            </ToggleButton>
+          </ToggleButtonGroup>
         </div>
       </div>
     )
   }
 
   @autobind
-  changeIncludeChildren(event) {
-    this.setState({ includeChildOrgs: event.target.checked }, this.updateFilter)
+  changeOrgRecurseStrategy(value) {
+    this.setState({ orgRecurseStrategy: value }, this.updateFilter)
   }
 
   @autobind
@@ -139,7 +150,7 @@ export default class OrganizationFilter extends Component {
   toQuery() {
     return {
       [this.props.queryKey]: this.state.value.uuid,
-      [this.props.queryIncludeChildOrgsKey]: this.state.includeChildOrgs
+      [this.props.queryOrgRecurseStrategyKey]: this.state.orgRecurseStrategy
     }
   }
 
@@ -148,7 +159,7 @@ export default class OrganizationFilter extends Component {
     if (this.props.asFormField) {
       const { value } = this.state
       if (typeof value === "object") {
-        value.includeChildOrgs = this.state.includeChildOrgs
+        value.orgRecurseStrategy = this.state.orgRecurseStrategy
         value.toQuery = this.toQuery
       }
       this.props.onChange(value)
@@ -165,11 +176,11 @@ export default class OrganizationFilter extends Component {
           const toQueryValue = {
             [this.props.queryKey]: query[this.props.queryKey]
           }
-          if (query[this.props.queryIncludeChildOrgsKey]) {
-            data.organization.includeChildOrgs =
-              query[this.props.queryIncludeChildOrgsKey]
-            toQueryValue[this.props.queryIncludeChildOrgsKey] =
-              query[this.props.queryIncludeChildOrgsKey]
+          if (query[this.props.queryOrgRecurseStrategyKey]) {
+            data.organization.orgRecurseStrategy =
+              query[this.props.queryOrgRecurseStrategyKey]
+            toQueryValue[this.props.queryOrgRecurseStrategyKey] =
+              query[this.props.queryOrgRecurseStrategyKey]
           }
           return {
             key: key,

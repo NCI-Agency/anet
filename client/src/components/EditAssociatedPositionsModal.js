@@ -13,6 +13,7 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import RECURSE_STRATEGY from "components/SearchFilters"
 
 const GQL_UPDATE_ASSOCIATED_POSITION = gql`
   mutation($position: PositionInput!) {
@@ -98,7 +99,7 @@ class BaseEditAssociatedPositionsModal extends Component {
         // Super Users can only assign a position in their organization!
         positionSearchQuery.organizationUuid =
           currentUser.position.organization.uuid
-        positionSearchQuery.includeChildrenOrgs = true
+        positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
       }
     } else {
       positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
