@@ -30,7 +30,7 @@ class LinkExternalEntity extends React.Component {
 
     return (
       <a href={url} title={url} target="_blank" rel="noopener noreferrer">
-        <Icon icon={icon.svgPath} viewBox={icon.viewBox} />
+        <Icon icon={icon.svgPath} viewBox={icon.viewBox} width="16" height="16" />
         {children || url}
       </a>
     )

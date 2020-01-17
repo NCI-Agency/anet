@@ -22,7 +22,7 @@ const GQL_GET_PERSON = gql`
       uuid
       name
       role
-      avatar(size: 256)
+      avatar(size: 32)
     }
   }
 `

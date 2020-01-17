@@ -26,7 +26,7 @@ const LinkAnet = ({
       </LinkAnetEntity>
     )
   } else {
-    // External link
+    // Non-ANET entity link
     return <LinkExternalEntity url={urlLink}>{children}</LinkExternalEntity>
   }
 }
