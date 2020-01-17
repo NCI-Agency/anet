@@ -135,16 +135,9 @@ const EnumSetField = fieldProps => {
   )
 }
 
-const ReadonlyEnumSetField = fieldProps => {
-  const { name, label, choices } = fieldProps
-  return (
-    <FastField
-      name={name}
-      label={label}
-      component={FieldHelper.ReadonlyField}
-      humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
-    />
-  )
+const getArrayObjectValue = (values, fieldName) => {
+  const nameKeys = fieldName.split(".")
+  return nameKeys.reduce((v, key) => (v && v[key] ? v[key] : []), values)
 }
 
 const ArrayOfObjectsField = fieldProps => {
@@ -155,17 +148,14 @@ const ArrayOfObjectsField = fieldProps => {
     invisibleFields,
     updateInvisibleFields
   } = fieldProps
-  const nameKeys = name.split(".")
-  const value = nameKeys.reduce(
-    (v, key) => (v && v[key] ? v[key] : []),
-    formikProps.values
-  )
+  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [formikProps.values, name])
+  const objDefault = useMemo(() => {
+    const objDefault = {}
+    const objSchema = createYupObjectShape(fieldConfig.objectFields)
+    return Model.fillObject(objDefault, objSchema)
+  }, [fieldConfig.objectFields])
   const fieldsetTitle = fieldConfig.label || ""
   const addButtonLabel = fieldConfig.addButtonLabel || "Add a new item"
-  const objSchema = createYupObjectShape(fieldConfig.objectFields)
-  const objDefault = {}
-  Model.fillObject(objDefault, objSchema)
-
   return (
     <Fieldset title={fieldsetTitle}>
       <FieldArray
@@ -244,11 +234,7 @@ const addObject = (objDefault, arrayHelpers) => {
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
   const { name, fieldConfig, formikProps } = fieldProps
-  const nameKeys = name.split(".")
-  const value = nameKeys.reduce(
-    (v, key) => (v && v[key] ? v[key] : []),
-    formikProps.values
-  )
+  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [formikProps.values, name])
   const fieldsetTitle = fieldConfig.label || ""
   return (
     <Fieldset title={fieldsetTitle}>
@@ -509,7 +495,7 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
   [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
-  [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumSetField,
+  [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField,
   [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: ReadonlySpecialField
 }
