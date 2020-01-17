@@ -149,6 +149,7 @@
     "react-toastify": "^5.5.0",
     "react-tooltip": "^3.11.2",
     "react-ultimate-pagination": "^1.2.0",
+    "react-use-dimensions": "^1.2.1",
     "redux": "^4.0.5",
     "redux-persist": "^6.0.0",
     "weakset": "^1.0.0",

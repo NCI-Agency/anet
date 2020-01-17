@@ -91,8 +91,7 @@ const ReadonlyDateField = fieldProps => {
           withTime
             ? Settings.dateFormats.forms.displayShort.withTime
             : Settings.dateFormats.forms.displayShort.date
-        )
-      }
+        )}
     />
   )
 }
@@ -406,7 +405,7 @@ const CustomField = ({
       const validateFieldDebounced = _debounce(validateField, 400)
       validateFieldDebounced(fieldName)
     },
-    [setFieldValue, fieldName]
+    [setFieldValue, fieldName, validateField]
   )
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(
@@ -414,11 +413,11 @@ const CustomField = ({
       type !== CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS
         ? {}
         : {
-            fieldConfig,
-            formikProps,
-            invisibleFields,
-            updateInvisibleFields
-          },
+          fieldConfig,
+          formikProps,
+          invisibleFields,
+          updateInvisibleFields
+        },
     [fieldConfig, formikProps, invisibleFields, type, updateInvisibleFields]
   )
   return (

@@ -2,15 +2,12 @@ import React, { useEffect, useRef } from "react"
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 import Text from "react-svg-text"
+import useDimensions from "react-use-dimensions"
 
 const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
-  const containerRef = useRef(null)
-  const containerBox = containerRef.current?.getBoundingClientRect() || {
-    width: 0,
-    height: 0
-  }
+  const [containerRef, containerBox] = useDimensions()
 
   const MARGIN = 20
   const scaleYPosition = containerBox.height - 30
