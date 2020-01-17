@@ -134,8 +134,7 @@ public class AnetEmailWorker implements Runnable {
       runInternal();
     } catch (Throwable e) {
       // Cannot let this thread die, otherwise ANET will stop sending emails until you
-      // reboot the
-      // server :(
+      // reboot the server :(
       logger.error("Exception in run()", e);
     }
   }
@@ -208,9 +207,8 @@ public class AnetEmailWorker implements Runnable {
         .removeIf(emailAddress -> !Utils.isEmailWhitelisted(emailAddress, activeDomainNames));
     if (email.getToAddresses().size() == 0) {
       // This email will never get sent... just kill it off
-      // log.error("Unable to send email of subject {}, because there are no valid to
-      // email
-      // addresses");
+      // log.error("Unable to send email of subject {}, because there are no valid
+      // to email addresses");
       return;
     }
 

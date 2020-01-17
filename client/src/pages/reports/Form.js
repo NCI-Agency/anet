@@ -788,7 +788,7 @@ const BaseReportForm = props => {
                 }
                 id="meeting-details"
               >
-                {!isFutureEngagement && !values.cancelled && (
+                {Settings.fields.report.keyOutcomes && !isFutureEngagement && !values.cancelled && (
                   <FastField
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}
