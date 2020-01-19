@@ -8279,7 +8279,8 @@ fake-tag@^1.0.0:
 
 "faker@https://github.com/Marak/faker.js.git":
   version "4.1.0"
-  resolved "https://github.com/Marak/faker.js.git#9fd8d7d37b398842d0784a116a340f7aa6afb89b"
+  uid "3b2fa4aebccee52ae1bafc15d575061fb30c3cf1"
+  resolved "https://github.com/Marak/faker.js.git#3b2fa4aebccee52ae1bafc15d575061fb30c3cf1"
 
 fast-deep-equal@^1.0.0:
   version "1.1.0"
