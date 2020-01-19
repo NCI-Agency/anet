@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -246,14 +247,14 @@ public class PersonResourceTest extends AbstractResourceTest {
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
 
-    query.setRecurseStrategy(RecurseStrategy.CHILDREN);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList()).containsAll(parentOnlyResults.getList());
 
-    query.setRecurseStrategy(RecurseStrategy.CHILDREN);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});

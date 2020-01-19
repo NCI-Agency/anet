@@ -34,10 +34,10 @@ taskRecents(maxResults: 6) {
     uuid
     shortName
     longName
-    responsibleOrg {
-      uuid
-      shortName
-    }
+      taskedOrganizations {
+        uuid
+        shortName
+      }
   }
 }
 authorizationGroupRecents(maxResults: 6) {

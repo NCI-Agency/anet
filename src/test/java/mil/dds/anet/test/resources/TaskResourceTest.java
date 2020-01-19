@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +28,7 @@ import org.junit.Test;
 public class TaskResourceTest extends AbstractResourceTest {
 
   private static final String FIELDS =
-      "uuid shortName longName category customFieldRef1 { uuid } responsibleOrg { uuid } status";
+      "uuid shortName longName category customFieldRef1 { uuid } taskedOrganizations { uuid } status";
 
   @Test
   public void taskTest() {
@@ -83,17 +84,18 @@ public class TaskResourceTest extends AbstractResourceTest {
         orgs.getList().stream().filter(o -> o.getShortName().equals("EF8")).findFirst().get();
     assertThat(ef8).isNotNull();
 
-    a.setResponsibleOrg(ef8);
+    a.setTaskedOrganizations(Collections.singletonList(ef8));
     final Integer nrUpdated2 =
         graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
     assertThat(nrUpdated2).isEqualTo(1);
     final Task returned2 = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid,
         new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(returned2.getResponsibleOrgUuid()).isEqualTo(ef8.getUuid());
+    assertThat(returned2.getTaskedOrganizations().iterator().next().getUuid())
+        .isEqualTo(ef8.getUuid());
 
     // Fetch the tasks off the organization
     final TaskSearchQuery queryTasks = new TaskSearchQuery();
-    queryTasks.setResponsibleOrgUuid(ef8.getUuid());
+    queryTasks.setTaskedOrgUuid(ef8.getUuid());
     final AnetBeanList<Task> tasks =
         graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
             queryTasks, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
@@ -138,7 +140,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     assertThat(ef2).isNotNull();
 
     query.setText(null);
-    query.setResponsibleOrgUuid(ef2.getUuid());
+    query.setTaskedOrgUuid(ef2.getUuid());
     final AnetBeanList<Task> searchObjects2 =
         graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
@@ -146,11 +148,13 @@ public class TaskResourceTest extends AbstractResourceTest {
     assertThat(searchObjects2.getList()).isNotEmpty();
     final List<Task> searchResults2 = searchObjects2.getList();
     assertThat(searchResults2).isNotEmpty();
-    assertThat(searchResults2.stream().filter(p -> p.getResponsibleOrgUuid().equals(ef2.getUuid()))
+    assertThat(searchResults2.stream()
+        .filter(p -> p.getTaskedOrganizations().stream()
+            .anyMatch(org -> org.getUuid().equals(ef2.getUuid())))
         .count()).isEqualTo(searchResults2.size());
 
     // Search by category
-    query.setResponsibleOrgUuid(null);
+    query.setTaskedOrgUuid(null);
     query.setText("expenses");
     query.setCategory("Milestone");
     final AnetBeanList<Task> searchObjects3 =
@@ -233,7 +237,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     final Task taskPrincipal =
         TestData.createTask("Test task principal " + UUID.randomUUID().toString(),
             "Test permissions principal org", "Test-PT-Principal");
-    taskPrincipal.setResponsibleOrg(principalOrg);
+    taskPrincipal.setTaskedOrganizations(Collections.singletonList(principalOrg));
     try {
       final String tPrincipalUuid = graphQLHelper.createObject(user, "createTask", "task",
           "TaskInput", taskPrincipal, new TypeReference<GraphQlResponse<Task>>() {});
@@ -251,7 +255,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     // own organization
     final Task taskOwn = TestData.createTask("Test task own " + UUID.randomUUID().toString(),
         "Test permissions own org", "Test-PT-Own");
-    taskOwn.setResponsibleOrg(organization);
+    taskOwn.setTaskedOrganizations(Collections.singletonList(organization));
     try {
       final String tOwnUuid = graphQLHelper.createObject(user, "createTask", "task", "TaskInput",
           taskOwn, new TypeReference<GraphQlResponse<Task>>() {});
@@ -280,7 +284,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     final Organization advisorOrg = foundOrg.get();
     final Task taskOther = TestData.createTask("Test task other " + UUID.randomUUID().toString(),
         "Test permissions other org", "Test-PT-Other");
-    taskOther.setResponsibleOrg(advisorOrg);
+    taskOther.setTaskedOrganizations(Collections.singletonList(advisorOrg));
     try {
       graphQLHelper.createObject(user, "createTask", "task", "TaskInput", taskOther,
           new TypeReference<GraphQlResponse<Task>>() {});

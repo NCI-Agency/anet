@@ -83,9 +83,12 @@ export default class OrganizationFilter extends Component {
       "asFormField"
     )
     let msg = this.props.value.shortName
-  if (msg && (this.state.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN)) {
+    if (msg && this.state.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN) {
       msg += ", including sub-organizations"
-    } else if (msg && (this.state.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS)) {
+    } else if (
+      msg &&
+      this.state.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS
+    ) {
       msg += ", including parent organizations"
     }
     const organizationWidgetFilters = {
@@ -121,7 +124,9 @@ export default class OrganizationFilter extends Component {
             value={this.state.orgRecurseStrategy}
             onChange={this.changeOrgRecurseStrategy}
           >
-            <ToggleButton value={RECURSE_STRATEGY.NONE}>exact match</ToggleButton>
+            <ToggleButton value={RECURSE_STRATEGY.NONE}>
+              exact match
+            </ToggleButton>
             <ToggleButton value={RECURSE_STRATEGY.CHILDREN}>
               include sub-orgs
             </ToggleButton>

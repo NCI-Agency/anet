@@ -53,7 +53,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
           || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
-            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(), RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+            "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
+            RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
         qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
       }

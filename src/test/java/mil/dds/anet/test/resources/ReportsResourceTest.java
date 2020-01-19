@@ -233,7 +233,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Create some tasks for this organization
     final String topUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("test-1", "Test Top Task", "TOP", null, advisorOrg, TaskStatus.ACTIVE),
+        TestData.createTask("test-1", "Test Top Task", "TOP", null,
+            Collections.singletonList(advisorOrg), TaskStatus.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(topUuid).isNotNull();
     final Task top = graphQLHelper.getObjectById(admin, "task", TASK_FIELDS, topUuid,

@@ -106,8 +106,8 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, orgRecurseStrategy, type,
-        isFilled, locationUuid, status, authorizationGroupUuid);
+    return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, orgRecurseStrategy,
+        type, isFilled, locationUuid, status, authorizationGroupUuid);
   }
 
   @Override
