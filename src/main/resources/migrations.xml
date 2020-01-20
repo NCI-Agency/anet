@@ -2767,6 +2767,7 @@
 			ALTER TABLE people
 				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
 					setweight(to_tsvector(${fts_config}, coalesce(people.name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people.code, '')), ${fts_high})
 					|| setweight(to_tsvector(${fts_config}, coalesce(people."domainUsername", '')), ${fts_high})
 					|| setweight(to_tsvector(${fts_config}, coalesce(people."emailAddress", '')), ${fts_high})
 					|| setweight(to_tsvector(${fts_config}, coalesce(people."phoneNumber", '')), ${fts_high})
