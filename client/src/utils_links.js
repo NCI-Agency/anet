@@ -64,7 +64,16 @@ const GQL_GET_TASK = gql`
   }
 `
 
-export const parsedEntityLinkType = new Map([
+const parsedEntityLinkTypeQuery = new Map([
+  ["report", GQL_GET_REPORT],
+  ["person", GQL_GET_PERSON],
+  ["organization", GQL_GET_ORGANIZATION],
+  ["position", GQL_GET_POSITION],
+  ["anetLocation", GQL_GET_LOCATION],
+  ["task", GQL_GET_TASK]
+])
+
+const parsedEntityLinkType = new Map([
   ["reports", "report"],
   ["people", "person"],
   ["organizations", "organization"],
@@ -101,81 +110,13 @@ export function enhanceHtml(html, report) {
 }
 
 export function getEntityByUuid(type, uuid) {
-  switch (type) {
-    case "report":
-      return getReportByUuid(uuid)
-    case "person":
-      return getPersonByUuid(uuid)
-    case "organization":
-      return getOrganizationByUuid(uuid)
-    case "position":
-      return getPositionByUuid(uuid)
-    case "anetLocation":
-      return getLocationByUuid(uuid)
-    case "task":
-      return getTaskByUuid(uuid)
-    default:
-      console.log("Unknown entity type: " + type)
-      return null
-  }
-}
-
-export function getReportByUuid(uuid) {
-  return API.query(GQL_GET_REPORT, {
+  const query = parsedEntityLinkTypeQuery.get(type)
+  return API.query(query, {
     uuid: uuid
   }).then(data => {
-    if (data.report) {
-      return data.report
-    }
-  })
-}
-
-export function getPersonByUuid(uuid) {
-  return API.query(GQL_GET_PERSON, {
-    uuid: uuid
-  }).then(data => {
-    if (data.person) {
-      return data.person
-    }
-  })
-}
-
-export function getOrganizationByUuid(uuid) {
-  return API.query(GQL_GET_ORGANIZATION, {
-    uuid: uuid
-  }).then(data => {
-    if (data.organization) {
-      return data.organization
-    }
-  })
-}
-
-export function getPositionByUuid(uuid) {
-  return API.query(GQL_GET_POSITION, {
-    uuid: uuid
-  }).then(data => {
-    if (data.position) {
-      return data.position
-    }
-  })
-}
-
-export function getLocationByUuid(uuid) {
-  return API.query(GQL_GET_LOCATION, {
-    uuid: uuid
-  }).then(data => {
-    if (data.location) {
-      return data.location
-    }
-  })
-}
-
-export function getTaskByUuid(uuid) {
-  return API.query(GQL_GET_TASK, {
-    uuid: uuid
-  }).then(data => {
-    if (data.task) {
-      return data.task
+    const entity = data.report || data.person || data.organization || data.position || data.location || data.task
+    if (entity) {
+      return entity
     }
   })
 }
