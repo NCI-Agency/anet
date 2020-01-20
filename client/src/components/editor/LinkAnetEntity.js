@@ -9,9 +9,6 @@ class LinkAnetEntity extends React.Component {
     this.state = {
       entity: null
     }
-
-    this.state.type = props.type
-    this.state.uuid = props.uuid
   }
 
   static propTypes = {
@@ -21,14 +18,14 @@ class LinkAnetEntity extends React.Component {
   }
 
   componentDidMount() {
-    getEntityByUuid(this.state.type, this.state.uuid).then(x =>
+    getEntityByUuid(this.props.type, this.props.uuid).then(x =>
       this.setState({ entity: x })
     )
   }
 
   render() {
     return (
-      <LinkTo modelType={this.state.type} model={this.state.entity}>
+      <LinkTo modelType={this.props.type} model={this.state.entity}>
         {this.props.children}
       </LinkTo>
     )
