@@ -17,24 +17,22 @@ const MAIL_ICON = {
   viewBox: "0, 0, 32, 32"
 }
 
-class LinkExternalEntity extends React.Component {
-  static propTypes = {
-    url: PropTypes.string,
-    children: PropTypes.any
-  }
+const LinkExternalEntity = props => {
+  const { url, children } = props
 
-  render() {
-    const { url, children } = this.props
+  const icon = url.startsWith("mailto:") ? MAIL_ICON : LINK_ICON
 
-    const icon = url.startsWith("mailto:") ? MAIL_ICON : LINK_ICON
+  return (
+    <a href={url} title={url} target="_blank" rel="noopener noreferrer">
+      <Icon icon={icon.svgPath} viewBox={icon.viewBox} width="16" height="16" />
+      {children || url}
+    </a>
+  )
+}
 
-    return (
-      <a href={url} title={url} target="_blank" rel="noopener noreferrer">
-        <Icon icon={icon.svgPath} viewBox={icon.viewBox} width="16" height="16" />
-        {children || url}
-      </a>
-    )
-  }
+LinkExternalEntity.propTypes = {
+  url: PropTypes.string.isRequired,
+  children: PropTypes.any
 }
 
 export default LinkExternalEntity

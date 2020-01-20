@@ -1,35 +1,28 @@
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState, useEffect } from "react"
 import LinkTo from "components/LinkTo"
 import { getEntityByUuid } from "utils_links"
 
-class LinkAnetEntity extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      entity: null
-    }
-  }
+const LinkAnetEntity = props => {
+  const { type, uuid, children } = props
 
-  static propTypes = {
-    type: PropTypes.string,
-    uuid: PropTypes.string,
-    children: PropTypes.any
-  }
+  const [entity, setEntity] = useState()
 
-  componentDidMount() {
-    getEntityByUuid(this.props.type, this.props.uuid).then(x =>
-      this.setState({ entity: x })
-    )
-  }
+  useEffect(() => {
+    getEntityByUuid(type, uuid).then(data => setEntity(data))
+  }, [type, uuid])
 
-  render() {
-    return (
-      <LinkTo modelType={this.props.type} model={this.state.entity}>
-        {this.props.children}
-      </LinkTo>
-    )
-  }
+  return (
+    <LinkTo modelType={type} model={entity}>
+      {children}
+    </LinkTo>
+  )
+}
+
+LinkAnetEntity.propTypes = {
+  type: PropTypes.string.isRequired,
+  uuid: PropTypes.string.isRequired,
+  children: PropTypes.any
 }
 
 export default LinkAnetEntity
