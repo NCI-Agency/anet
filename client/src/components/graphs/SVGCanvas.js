@@ -3,10 +3,17 @@ import React from "react"
 import { Button } from "react-bootstrap"
 import DOWNLOAD_ICON from "resources/download.png"
 
-const SVGCanvas = props => {
+const SVGCanvas = ({
+  width,
+  height,
+  exportTitle,
+  zoomFn,
+  svgRef,
+  children
+}) => {
   const exportSvg = () => {
     var svgBlob = new Blob(
-      ['<?xml version="1.0" standalone="no"?>', props.svgRef.current.outerHTML],
+      ['<?xml version="1.0" standalone="no"?>', svgRef.current.outerHTML],
       {
         type: "image/svg+xml;charset=utf-8"
       }
@@ -14,7 +21,7 @@ const SVGCanvas = props => {
     var svgUrl = URL.createObjectURL(svgBlob)
     var downloadLink = document.createElement("a")
     downloadLink.href = svgUrl
-    downloadLink.download = props.exportTitle
+    downloadLink.download = exportTitle
     document.body.appendChild(downloadLink)
     downloadLink.click()
     document.body.removeChild(downloadLink)
@@ -22,7 +29,7 @@ const SVGCanvas = props => {
 
   return (
     <div>
-      {props.zoomFn && (
+      {zoomFn && (
         <div
           style={{
             display: "flex",
@@ -32,11 +39,11 @@ const SVGCanvas = props => {
             left: "15px"
           }}
         >
-          <Button onClick={() => props.zoomFn(1)}>+</Button>
-          <Button onClick={() => props.zoomFn(-1)}>-</Button>
+          <Button onClick={() => zoomFn(1)}>+</Button>
+          <Button onClick={() => zoomFn(-1)}>-</Button>
         </div>
       )}
-      {props.exportTitle && (
+      {exportTitle && (
         <div
           style={{
             display: "flex",
@@ -50,18 +57,18 @@ const SVGCanvas = props => {
             <img
               src={DOWNLOAD_ICON}
               height={16}
-              alt={`Export ${props.exportTitle}`}
+              alt={`Export ${exportTitle}`}
             />
           </Button>
         </div>
       )}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width={props.width}
-        height={props.height}
-        ref={props.svgRef}
+        width={width}
+        height={height}
+        ref={svgRef}
       >
-        {props.children}
+        {children}
       </svg>
     </div>
   )

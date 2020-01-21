@@ -74,26 +74,24 @@ const sortPositions = (positions, truncateLimit) => {
 const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
 const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
 
-const OrganizationalChart = props => {
+const OrganizationalChart = ({ org, width, height: initialHeight }) => {
   const [expanded, setExpanded] = useState([])
   const [personnelDepth, setPersonnelDepth] = useState(5)
   const history = useHistory()
-  const svgContainer = useRef(null)
   const canvasRef = useRef(null)
   const linkRef = useRef(null)
   const nodeRef = useRef(null)
   const tree = useRef(d3.tree())
   const [root, setRoot] = useState(null)
-  const [height, setHeight] = useState(props.height)
+  const [height, setHeight] = useState(initialHeight)
   const nodeSize = [200, 100 + 11 * personnelDepth]
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
-    uuid: props.org.uuid
+    uuid: org.uuid
   })
 
   const { done, result } = useBoilerplate({
     loading,
-    error,
-    ...props
+    error
   })
 
   const canvas = d3.select(canvasRef.current)
@@ -152,28 +150,23 @@ const OrganizationalChart = props => {
     const bounds = calculateBounds(root)
     const scale = Math.min(
       1.2,
-      1 / Math.max(bounds.size[0] / props.width, bounds.size[1] / height)
+      1 / Math.max(bounds.size[0] / width, bounds.size[1] / height)
     )
     canvas.attr(
       "transform",
-      `translate(${props.width / 2 - scale * bounds.center[0]},${height / 2 -
+      `translate(${width / 2 - scale * bounds.center[0]},${height / 2 -
         scale * bounds.center[1]}) scale(${scale})`
     )
 
     setHeight(scale * bounds.size[1] + 50)
-  }, [nodeSize, canvas, data, height, props.width, root])
+  }, [nodeSize, canvas, data, height, width, root])
 
   useEffect(() => {
     data && setExpanded([data.organization.uuid])
   }, [data])
 
   useLayoutEffect(() => {
-    if (
-      !svgContainer.current ||
-      !data?.organization ||
-      !tree.current ||
-      !root
-    ) {
+    if (!(link && node && data?.organization && tree.current && root)) {
       return
     }
 
@@ -386,7 +379,7 @@ const OrganizationalChart = props => {
         } ${d.name}`
         return result.length > 31 ? result.substring(0, 28) + "..." : result
       })
-  }, [data, expanded, history, personnelDepth, svgContainer, root, link, node])
+  }, [data, expanded, history, personnelDepth, root, link, node])
 
   if (done) {
     return result
@@ -394,10 +387,9 @@ const OrganizationalChart = props => {
 
   return (
     <SVGCanvas
-      width={props.width}
+      width={width}
       height={height}
       exportTitle={`${data.shortName} organization chart`}
-      ref={svgContainer}
       zoomFn={increment =>
         setPersonnelDepth(Math.max(0, personnelDepth + increment))}
     >
