@@ -119,7 +119,13 @@ export function getEntityByUuid(type, uuid) {
   return API.query(query, {
     uuid: uuid
   }).then(data => {
-    const entity = data.report || data.person || data.organization || data.position || data.location || data.task
+    const entity =
+      data.report ||
+      data.person ||
+      data.organization ||
+      data.position ||
+      data.location ||
+      data.task
     if (entity) {
       return entity
     }
