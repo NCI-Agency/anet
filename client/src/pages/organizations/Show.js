@@ -9,8 +9,8 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -123,7 +123,11 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const BaseOrganizationShow = props => {
+const BaseOrganizationShow = ({
+  pageDispatchers,
+  currentUser,
+  ...myFormProps
+}) => {
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const { uuid } = useParams()
@@ -137,7 +141,7 @@ const BaseOrganizationShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -146,7 +150,6 @@ const BaseOrganizationShow = props => {
   const organization = new Organization(data ? data.organization : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
@@ -403,7 +406,7 @@ const BaseOrganizationShow = props => {
 }
 
 BaseOrganizationShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -419,4 +422,7 @@ const OrganizationShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(OrganizationShow)
+export default connect(
+  mapStateToProps,
+  mapPageDispatchersToProps
+)(OrganizationShow)

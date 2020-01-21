@@ -1,13 +1,11 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
-import { mapDispatchToProps } from "components/Page"
 import _isEqual from "lodash/isEqual"
 import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
-import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -41,8 +39,7 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const ReportCalendar = props => {
-  const { queryParams, setTotalCount } = props
+const ReportCalendar = ({ queryParams, setTotalCount }) => {
   const history = useHistory()
   const prevReportQuery = useRef(null)
   const apiPromise = useRef(null)
@@ -115,4 +112,4 @@ ReportCalendar.propTypes = {
   setTotalCount: PropTypes.func
 }
 
-export default connect(null, mapDispatchToProps)(ReportCalendar)
+export default ReportCalendar

@@ -13,8 +13,8 @@ import Fieldset from "components/Fieldset"
 import FutureEngagementsByLocation from "components/FutureEngagementsByLocation"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
@@ -90,8 +90,12 @@ export const INSIGHT_DETAILS = {
   }
 }
 
-const BaseInsightsShow = props => {
-  const { appSettings, searchQuery } = props
+const BaseInsightsShow = ({
+  pageDispatchers,
+  appSettings,
+  searchQuery,
+  setSearchQuery
+}) => {
   const { insight } = useParams()
   const flexStyle = {
     display: "flex",
@@ -143,7 +147,7 @@ const BaseInsightsShow = props => {
     [ADVISOR_REPORTS]: {}
   }
   let queryParams
-  if (props.searchQuery === DEFAULT_SEARCH_QUERY) {
+  if (searchQuery === DEFAULT_SEARCH_QUERY) {
     // when going from a different page to the insight page, use the default
     // insight search query
     queryParams = setInsightDefaultSearchQuery()
@@ -155,7 +159,7 @@ const BaseInsightsShow = props => {
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: insightConfig.searchProps,
-    ...props
+    pageDispatchers
   })
   const hasSearchCriteria =
     _isEmpty(insightDefaultQueryParams[insight]) || !_isEmpty(queryParams)
@@ -191,7 +195,7 @@ const BaseInsightsShow = props => {
 
   function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
-    props.setSearchQuery({
+    setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
@@ -210,7 +214,7 @@ const BaseInsightsShow = props => {
 }
 
 BaseInsightsShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   searchQuery: SearchQueryPropType,
   setSearchQuery: PropTypes.func.isRequired,
   appSettings: PropTypes.object
@@ -219,11 +223,12 @@ BaseInsightsShow.propTypes = {
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
+
 const mapDispatchToProps = (dispatch, ownProps) => {
-  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
   return {
     setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
-    ...pageDispatchToProps
+    ...pageDispatchers
   }
 }
 

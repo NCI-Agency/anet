@@ -1,7 +1,6 @@
 import { clearSearchQuery, resetPages } from "actions"
 import { Settings } from "api"
 import AppContext from "components/AppContext"
-import { pageDispatchers, propTypes as pagePropTypes } from "components/Page"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
@@ -18,8 +17,7 @@ import { ScrollLink, scrollSpy } from "react-scroll"
 import { bindActionCreators } from "redux"
 import utils from "utils"
 
-export const AnchorNavItem = props => {
-  const { to, children, ...remainingProps } = props
+export const AnchorNavItem = ({ to, disabled, children }) => {
   const ScrollLinkNavItem = ScrollLink(NavItem)
   return (
     <ResponsiveLayoutContext.Consumer>
@@ -37,16 +35,17 @@ export const AnchorNavItem = props => {
           }}
           // TODO: fix the need for offset
           offset={-context.topbarOffset}
-          {...remainingProps}
+          disabled={disabled}
         >
-          {props.children}
+          {children}
         </ScrollLinkNavItem>
       )}
     </ResponsiveLayoutContext.Consumer>
   )
 }
 AnchorNavItem.propTypes = {
-  to: PropTypes.string,
+  to: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   children: PropTypes.node
 }
 
@@ -64,10 +63,15 @@ SidebarLink.propTypes = {
   id: PropTypes.string
 }
 
-const BaseNav = props => {
+const BaseNav = ({
+  currentUser,
+  organizations,
+  appSettings,
+  resetPages,
+  clearSearchQuery
+}) => {
   useEffect(() => scrollSpy.update(), [])
 
-  const { currentUser, organizations, appSettings, resetPages } = props
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
   const externalDocumentationUrlText =
     appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
@@ -127,7 +131,7 @@ const BaseNav = props => {
           <Link
             to={Organization.pathFor(org)}
             key={org.uuid}
-            onClick={props.clearSearchQuery}
+            onClick={clearSearchQuery}
           >
             <MenuItem>{org.shortName}</MenuItem>
           </Link>
@@ -146,7 +150,7 @@ const BaseNav = props => {
       )}
 
       {currentUser.isAdmin() && (
-        <LinkContainer to="/admin" onClick={props.clearSearchQuery}>
+        <LinkContainer to="/admin" onClick={clearSearchQuery}>
           <NavItem>Admin</NavItem>
         </LinkContainer>
       )}
@@ -178,7 +182,7 @@ const BaseNav = props => {
             <Link
               to={"/insights/" + insight}
               key={insight}
-              onClick={props.clearSearchQuery}
+              onClick={clearSearchQuery}
             >
               <MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
             </Link>
@@ -192,7 +196,7 @@ const BaseNav = props => {
             <Link
               to={`/dashboards/${dashboard.type}/${dashboard.label}`}
               key={dashboard.label}
-              onClick={props.clearSearchQuery}
+              onClick={clearSearchQuery}
             >
               <MenuItem>{dashboard.label}</MenuItem>
             </Link>
@@ -204,7 +208,6 @@ const BaseNav = props => {
 }
 
 BaseNav.propTypes = {
-  ...pagePropTypes,
   currentUser: PropTypes.instanceOf(Person),
   appSettings: PropTypes.object,
   organizations: PropTypes.array,
@@ -221,8 +224,7 @@ const mapDispatchToProps = (dispatch, ownProps) =>
   bindActionCreators(
     {
       clearSearchQuery: () => clearSearchQuery(),
-      resetPages: () => resetPages(),
-      ...pageDispatchers
+      resetPages: () => resetPages()
     },
     dispatch
   )

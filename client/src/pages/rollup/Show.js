@@ -14,8 +14,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import MosaicLayout from "components/MosaicLayout"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import ReportCollection, {
@@ -98,14 +98,20 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
-const Chart = props => {
-  const { rollupStart, rollupEnd, focusedOrg, setFocusedOrg, orgType } = props
+const Chart = ({
+  pageDispatchers,
+  rollupStart,
+  rollupEnd,
+  focusedOrg,
+  setFocusedOrg,
+  orgType
+}) => {
   const variables = getVariables()
   const { loading, error, data } = API.useApiQuery(GQL_ROLLUP_GRAPH, variables)
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const graphData = useMemo(() => {
     if (!data) {
@@ -203,6 +209,7 @@ const Chart = props => {
 }
 
 Chart.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   rollupStart: PropTypes.object,
   rollupEnd: PropTypes.object,
   focusedOrg: PropTypes.object,
@@ -210,9 +217,7 @@ Chart.propTypes = {
   orgType: PropTypes.string
 }
 
-const Collection = props => {
-  const { queryParams } = props
-
+const Collection = ({ queryParams }) => {
   return (
     <div className="scrollable">
       <ReportCollection
@@ -228,9 +233,7 @@ Collection.propTypes = {
   queryParams: PropTypes.object
 }
 
-const Map = props => {
-  const { queryParams } = props
-
+const Map = ({ queryParams }) => {
   return (
     <div className="non-scrollable">
       <ContainerDimensions>
@@ -252,8 +255,7 @@ Map.propTypes = {
   queryParams: PropTypes.object
 }
 
-const BaseRollupShow = props => {
-  const { appSettings, searchQuery } = props
+const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
   const history = useHistory()
   const routerLocation = useLocation()
   const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
@@ -266,7 +268,7 @@ const BaseRollupShow = props => {
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   const VISUALIZATIONS = [
@@ -409,6 +411,7 @@ const BaseRollupShow = props => {
   function renderChart(id) {
     return (
       <Chart
+        pageDispatchers={pageDispatchers}
         rollupStart={getRollupStart()}
         rollupEnd={getRollupEnd()}
         focusedOrg={focusedOrg}
@@ -651,7 +654,7 @@ const BaseRollupShow = props => {
 BaseRollupShow.propTypes = {
   appSettings: PropTypes.object,
   searchQuery: SearchQueryPropType,
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -664,4 +667,4 @@ const RollupShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(RollupShow)
+export default connect(mapStateToProps, mapPageDispatchersToProps)(RollupShow)
