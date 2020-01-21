@@ -148,7 +148,10 @@ const ArrayOfObjectsField = fieldProps => {
     invisibleFields,
     updateInvisibleFields
   } = fieldProps
-  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [formikProps.values, name])
+  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
+    formikProps.values,
+    name
+  ])
   const objDefault = useMemo(() => {
     const objDefault = {}
     const objSchema = createYupObjectShape(fieldConfig.objectFields)
@@ -234,7 +237,10 @@ const addObject = (objDefault, arrayHelpers) => {
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
   const { name, fieldConfig, formikProps } = fieldProps
-  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [formikProps.values, name])
+  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
+    formikProps.values,
+    name
+  ])
   const fieldsetTitle = fieldConfig.label || ""
   return (
     <Fieldset title={fieldsetTitle}>
