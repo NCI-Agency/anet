@@ -1,3 +1,4 @@
+import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
@@ -10,8 +11,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
-import ORGANIZATIONS_ICON from "resources/organizations.png"
-import EXPAND_ICON from "resources/plus.png"
+import { renderBlueprintIconAsSvg } from "utils"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
@@ -70,6 +70,9 @@ const sortPositions = (positions, truncateLimit) => {
     ? allResults.slice(0, truncateLimit)
     : allResults
 }
+
+const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
+const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
 
 const OrganizationalChart = props => {
   const [expanded, setExpanded] = useState([])
@@ -213,18 +216,6 @@ const OrganizationalChart = props => {
       .append("g")
       .attr("class", "org")
       .attr("transform", d => `translate(${d.x},${d.y})`)
-      .on("click", d => {
-        const index = this.state.collapsed.indexOf(d.data.uuid)
-        const newCollapsed = this.state.collapsed.slice()
-        if (index > -1) {
-          newCollapsed.splice(index, 1)
-        } else {
-          newCollapsed.push(d.data.uuid)
-        }
-        this.setState({
-          collapsed: newCollapsed
-        })
-      })
 
     nodeSelect.exit().remove()
 
@@ -235,7 +226,7 @@ const OrganizationalChart = props => {
 
     iconNodeG
       .filter(d => d.data.childrenOrgs.length > 0)
-      .append("image")
+      .append("svg")
       .attr("class", "orgChildIcon")
       .attr("width", 12)
       .attr("height", 12)
@@ -244,9 +235,14 @@ const OrganizationalChart = props => {
       .on("click", d => setExpanded(expanded => _xor(expanded, [d.data.uuid])))
 
     node
-      .selectAll("image.orgChildIcon")
-      .attr("href", d =>
-        expanded.indexOf(d.data.uuid) > -1 ? ORGANIZATIONS_ICON : EXPAND_ICON
+      .selectAll("svg.orgChildIcon")
+      .attr("viewBox", d =>
+        expanded.includes(d.data.uuid)
+          ? COLLAPSE_ICON.viewBox
+          : EXPAND_ICON.viewBox
+      )
+      .html(d =>
+        expanded.includes(d.data.uuid) ? COLLAPSE_ICON.html : EXPAND_ICON.html
       )
 
     iconNodeG

@@ -1,10 +1,12 @@
-import decodeQuery from "querystring/decode"
-import encodeQuery from "querystring/encode"
+import { Icon } from "@blueprintjs/core"
+import { IconSvgPaths16, IconSvgPaths20 } from "@blueprintjs/icons"
 import { Settings } from "api"
 import * as changeCase from "change-case"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
+import decodeQuery from "querystring/decode"
+import encodeQuery from "querystring/encode"
 import React from "react"
 
 const WILDCARD = "*"
@@ -192,4 +194,26 @@ Promise.prototype.log = function() {
     console.log(data)
     return data
   })
+}
+
+export const renderBlueprintIconAsSvg = (iconName, iconSize: Icon.SIZE_STANDARD) => {
+  // choose which pixel grid is most appropriate for given icon size
+  const pixelGridSize =
+    iconSize >= Icon.SIZE_LARGE ? Icon.SIZE_LARGE : Icon.SIZE_STANDARD
+  const viewBox = `0 0 ${pixelGridSize} ${pixelGridSize}`
+  const svgPathsRecord =
+    pixelGridSize === Icon.SIZE_STANDARD ? IconSvgPaths16 : IconSvgPaths20
+  const pathStrings = svgPathsRecord[iconName]
+  const paths =
+    pathStrings === null
+      ? ""
+      : pathStrings.map((d, i) => `<path d="${d}" fillRule="evenodd" />`)
+  return {
+    viewBox,
+    html: `<g>
+        <desc>{iconName}</desc>
+        <rect fill="transparent" width="${pixelGridSize}" height="${pixelGridSize}"/>
+        ${paths.join("")}
+      </g>` // we use a rect to simulate pointer-events: bounding-box
+  }
 }
