@@ -188,12 +188,12 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   }
 
   @InTransaction
-  public int removeTaskedOrganizationsFromTask(Organization o, String taskUUID) {
+  public int removeTaskedOrganizationsFromTask(Organization o, String taskUuid) {
     return getDbHandle()
         .createUpdate(
             "/* removeTaskedOrganizationsFromTask*/ DELETE FROM \"taskTaskedOrganizations\" "
                 + "WHERE \"taskUuid\" = :taskUuid AND \"organizationUuid\" = :organizationUuid")
-        .bind("taskUuid", taskUUID).bind("organizationUuid", o.getUuid()).execute();
+        .bind("taskUuid", taskUuid).bind("organizationUuid", o.getUuid()).execute();
   }
 
   public CompletableFuture<List<Organization>> getTaskedOrganizationsForTask(

@@ -318,7 +318,7 @@ INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, cu
 		(N'076793eb-9950-4ea6-bbd5-2d8b8827828c', '1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
 		(N'30bc5708-c12d-4a21-916c-5acd7f6f11da', '1.3.B', 'Tracking your expenses', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
 		(N'df920c99-10ea-44e8-940f-cb1d1cbd22da', '1.3.C', 'Knowing when you run out of money', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
-		(N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7', 'EF 2', 'Transparency, Accountability, O (TAO)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+		(N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7', 'EF 2', 'Transparency, Accountability, O (TAO)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(N'75d4009d-7c79-42e0-aa2f-d79d158ec8d6', '2.A', 'This is the first Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
 		(N'2200a820-c4c7-4c9c-946c-f0c9c9e045c5', '2.B', 'This is the second Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
 		(N'0701a964-5d79-4090-8f35-a40856556675', '2.C', 'This is the third Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
