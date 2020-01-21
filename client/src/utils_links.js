@@ -86,7 +86,7 @@ export function getEntityInfoFromUrl(url) {
   const splittedUrl = url.split(/[\\//]/)
 
   if (splittedUrl.length > 1) {
-    var type = splittedUrl[splittedUrl.length - 2]
+    let type = splittedUrl[splittedUrl.length - 2]
     const uuid = splittedUrl[splittedUrl.length - 1]
 
     if (parsedEntityLinkType.has(type) && new RegExp(UUID_REGEX).test(uuid)) {
@@ -110,6 +110,11 @@ export function enhanceHtml(html, report) {
 }
 
 export function getEntityByUuid(type, uuid) {
+  if (!parsedEntityLinkTypeQuery.get(type)) {
+    console.log("Unsupported entity type: " + type)
+    return
+  }
+
   const query = parsedEntityLinkTypeQuery.get(type)
   return API.query(query, {
     uuid: uuid

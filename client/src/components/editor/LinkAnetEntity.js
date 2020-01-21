@@ -3,9 +3,7 @@ import React, { useState, useEffect } from "react"
 import LinkTo from "components/LinkTo"
 import { getEntityByUuid } from "utils_links"
 
-const LinkAnetEntity = props => {
-  const { type, uuid, children } = props
-
+const LinkAnetEntity = ({ type, uuid, children }) => {
   const [entity, setEntity] = useState()
 
   useEffect(() => {

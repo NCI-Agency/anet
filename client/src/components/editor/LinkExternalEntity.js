@@ -17,9 +17,7 @@ const MAIL_ICON = {
   viewBox: "0, 0, 32, 32"
 }
 
-const LinkExternalEntity = props => {
-  const { url, children } = props
-
+const LinkExternalEntity = ({ url, children }) => {
   const icon = url.startsWith("mailto:") ? MAIL_ICON : LINK_ICON
 
   return (
