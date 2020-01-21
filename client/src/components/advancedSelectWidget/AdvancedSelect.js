@@ -121,7 +121,6 @@ export default class AdvancedSelect extends Component {
 
   overlayContainer = React.createRef()
   overlayTarget = React.createRef()
-  searchInput = React.createRef()
 
   componentDidMount() {
     this.setState({
@@ -252,7 +251,9 @@ export default class AdvancedSelect extends Component {
                 placeholder={placeholder}
                 onChange={this.changeSearchTerms}
                 onFocus={this.handleInputFocus}
-                inputRef={this.searchInput}
+                inputRef={ref => {
+                  this.searchInput = ref
+                }}
               />
             </Popover>
             {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
@@ -284,7 +285,7 @@ export default class AdvancedSelect extends Component {
   }
 
   handleInteraction = (showOverlay, event) => {
-    const inputFocus = this.searchInput.current.contains(event && event.target)
+    const inputFocus = this.searchInput.contains(event && event.target)
     return this.setState({ showOverlay: showOverlay || inputFocus })
   }
 
