@@ -1,7 +1,8 @@
+import { setPagination } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import { pageDispatchers, useBoilerplate } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
@@ -11,6 +12,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import { bindActionCreators } from "redux"
 
 const GQL_GET_REPORT_LIST = gql`
   query($reportQuery: ReportSearchQueryInput) {
@@ -221,6 +223,15 @@ ReportTable.propTypes = {
   setPagination: PropTypes.func.isRequired,
   pagination: PropTypes.object.isRequired
 }
+
+const mapDispatchToProps = (dispatch, ownProps) =>
+  bindActionCreators(
+    {
+      setPagination: (pageKey, pageNum) => setPagination(pageKey, pageNum),
+      ...pageDispatchers
+    },
+    dispatch
+  )
 
 const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination

@@ -1,7 +1,8 @@
+import { setPagination } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import { pageDispatchers, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import Tag from "components/Tag"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -15,6 +16,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Col, Grid, Label, Row } from "react-bootstrap"
 import { connect } from "react-redux"
+import { bindActionCreators } from "redux"
 import utils from "utils"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -364,6 +366,15 @@ const ReportSummaryRow = props => {
 ReportSummaryRow.propTypes = {
   report: PropTypes.object.isRequired
 }
+
+const mapDispatchToProps = (dispatch, ownProps) =>
+  bindActionCreators(
+    {
+      setPagination: (pageKey, pageNum) => setPagination(pageKey, pageNum),
+      ...pageDispatchers
+    },
+    dispatch
+  )
 
 const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination

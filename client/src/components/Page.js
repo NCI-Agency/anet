@@ -1,4 +1,4 @@
-import { setPageProps, setPagination, setSearchProps } from "actions"
+import { setPageProps, setSearchProps } from "actions"
 import NotFound from "components/NotFound"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
@@ -10,9 +10,15 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   showLoading: () => dispatch(showLoading()),
   hideLoading: () => dispatch(hideLoading()),
   setPageProps: pageProps => dispatch(setPageProps(pageProps)),
-  setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
-  setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum))
+  setSearchProps: searchProps => dispatch(setSearchProps(searchProps))
 })
+
+export const pageDispatchers = {
+  showLoading: () => showLoading(),
+  hideLoading: () => hideLoading(),
+  setPageProps: pageProps => setPageProps(pageProps),
+  setSearchProps: searchProps => setSearchProps(searchProps)
+}
 
 export const propTypes = {
   showLoading: PropTypes.func.isRequired,

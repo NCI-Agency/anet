@@ -2,7 +2,8 @@ import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   SEARCH_OBJECT_LABELS,
-  SEARCH_OBJECT_TYPES
+  SEARCH_OBJECT_TYPES,
+  setPagination
 } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
@@ -14,7 +15,7 @@ import { AnchorNavItem } from "components/Nav"
 import {
   getSearchQuery,
   jumpToTop,
-  mapDispatchToProps,
+  pageDispatchers,
   propTypes as pagePropTypes,
   useBoilerplate
 } from "components/Page"
@@ -45,6 +46,7 @@ import {
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
+import { bindActionCreators } from "redux"
 import DOWNLOAD_ICON from "resources/download.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -966,6 +968,15 @@ Search.propTypes = {
   pagination: PropTypes.object.isRequired,
   setPagination: PropTypes.func.isRequired
 }
+
+const mapDispatchToProps = (dispatch, ownProps) =>
+  bindActionCreators(
+    {
+      setPagination: (pageKey, pageNum) => setPagination(pageKey, pageNum),
+      ...pageDispatchers
+    },
+    dispatch
+  )
 
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery,
