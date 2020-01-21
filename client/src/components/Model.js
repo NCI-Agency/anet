@@ -109,15 +109,14 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }
-  // For number type of fields, only validate on number type when they are visible
+  // Only use the field type specific schema when the field is visible, no validation needed when the field is invisible
   fieldYupSchema = fieldYupSchema.when(
     "invisibleCustomFields",
-    (invisibleCustomFields, schema) => {
-      return invisibleCustomFields &&
-        invisibleCustomFields.includes("formCustomFields." + fieldKey)
+    (invisibleCustomFields, schema) =>
+      invisibleCustomFields &&
+      invisibleCustomFields.includes("formCustomFields." + fieldKey)
         ? schema
         : schema.concat(fieldTypeYupSchema)
-    }
   )
   return fieldYupSchema
 }
