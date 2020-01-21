@@ -402,8 +402,10 @@ const CustomField = ({
         typeof value === "object" && value.target ? value.target.value : value
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldValue(fieldName, val, sv)
-      const validateFieldDebounced = _debounce(validateField, 400)
-      validateFieldDebounced(fieldName)
+      if (!sv) {
+        const validateFieldDebounced = _debounce(validateField, 400)
+        validateFieldDebounced(fieldName)
+      }
     },
     [setFieldValue, fieldName, validateField]
   )
