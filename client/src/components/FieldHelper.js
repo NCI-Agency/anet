@@ -302,6 +302,16 @@ SpecialField.propTypes = {
   vertical: PropTypes.bool,
   widget: PropTypes.any
 }
+SpecialField.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  label: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  widget: PropTypes.any
+}
 
 export const customEnumButtons = list => {
   const buttons = []

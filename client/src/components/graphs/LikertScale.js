@@ -2,23 +2,22 @@ import React, { useEffect, useRef } from "react"
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 import Text from "react-svg-text"
+import useDimensions from "react-use-dimensions"
 
 const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
-  const containerRef = useRef(null)
-  const containerBox = containerRef.current?.getBoundingClientRect() || {
-    width: 0,
-    height: 0
-  }
-
+  const [containerRef, containerBox] = useDimensions()
+  const containerHeight = containerBox.height || 0
+  const containerWidth = containerBox.width || 0
+  const containerX = containerBox.x || 0
   const MARGIN = 20
-  const scaleYPosition = containerBox.height - 30
+  const scaleYPosition = containerHeight - 30
 
   const scale = d3
     .scaleLinear()
     .domain([0, 10])
-    .range([MARGIN, containerBox.width - 2 * MARGIN])
+    .range([MARGIN, containerWidth - 2 * MARGIN])
   const x = scale(Number(value !== undefined ? value : 50))
 
   useEffect(() => {
@@ -57,8 +56,7 @@ const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
       width={width}
       xmlns="http://www.w3.org/2000/svg"
       ref={containerRef}
-      onClick={e =>
-        e.clientX && onChange(scale.invert(e.clientX - containerBox.x))}
+      onClick={e => e.clientX && onChange(scale.invert(e.clientX - containerX))}
     >
       {levels.map((level, index) => {
         const startX = scale(index === 0 ? 0 : levels[index - 1].endValue)
@@ -73,7 +71,7 @@ const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
               style={{ fill: fillColor, stroke: "gray", strokeWidth: 1 }}
               y={0}
               x={startX}
-              height={containerBox.height - 11}
+              height={containerHeight - 11}
               width={endX - startX}
             />
             <Text

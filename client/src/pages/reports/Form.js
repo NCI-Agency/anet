@@ -28,6 +28,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
@@ -283,6 +284,7 @@ const BaseReportForm = props => {
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
+      validateOnChange={false}
       validationSchema={Report.yupSchema}
       initialValues={initialValues}
       {...myFormProps}
@@ -295,11 +297,13 @@ const BaseReportForm = props => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateField,
         touched,
         submitForm,
         resetForm,
         setSubmitting
       }) => {
+        const validateFieldDebounced = _debounce(validateField, 400)
         const currentOrgUuid =
           currentUser.position && currentUser.position.organization
             ? currentUser.position.organization.uuid
@@ -495,6 +499,10 @@ const BaseReportForm = props => {
                   componentClass="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
+                  onChange={event => {
+                    setFieldValue("intent", event.target.value, false)
+                    validateFieldDebounced("intent")
+                  }}
                   onKeyUp={event =>
                     countCharsLeft(
                       "intentCharsLeft",
@@ -516,7 +524,10 @@ const BaseReportForm = props => {
                 <FastField
                   name="engagementDate"
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("engagementDate", value)}
+                  onChange={value => {
+                    setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
+                    setFieldValue("engagementDate", value, true)
+                  }}
                   onBlur={() => setFieldTouched("engagementDate")}
                   widget={
                     <CustomDateInput
@@ -539,6 +550,9 @@ const BaseReportForm = props => {
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldValue("duration", event.target.value, true)
+                    }}
                   />
                 )}
 
@@ -548,7 +562,7 @@ const BaseReportForm = props => {
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("location", value)
+                    setFieldValue("location", value, true)
                   }}
                   widget={
                     <AdvancedSingleSelect
@@ -575,7 +589,7 @@ const BaseReportForm = props => {
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("location", value)
+                          setFieldValue("location", value, true)
                         }}
                         handleAddItem={FieldHelper.handleSingleSelectAddItem}
                       />
@@ -599,7 +613,8 @@ const BaseReportForm = props => {
                           // set a default reason when cancelled has been checked and no reason has been selected
                           setFieldValue(
                             "cancelledReason",
-                            cancelledReasonOptions[0].value
+                            cancelledReasonOptions[0].value,
+                            true
                           )}
                       >
                         This engagement was cancelled
@@ -612,6 +627,10 @@ const BaseReportForm = props => {
                     name="cancelledReason"
                     label="due to"
                     component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldValue("cancelledReason", value, true)
+                    }}
                     widget={
                       <FastField
                         component="select"
@@ -633,22 +652,28 @@ const BaseReportForm = props => {
                     label={Settings.fields.report.atmosphere}
                     component={FieldHelper.RadioButtonToggleGroup}
                     buttons={atmosphereButtons}
-                    onChange={value => setFieldValue("atmosphere", value)}
+                    onChange={value => setFieldValue("atmosphere", value, true)}
                     className="atmosphere-form-group"
                   />
                 )}
-                {!isFutureEngagement &&
-                  !values.cancelled &&
-                  values.atmosphere && (
-                    <Field
-                      name="atmosphereDetails"
-                      label={Settings.fields.report.atmosphereDetails}
-                      component={FieldHelper.InputField}
-                      placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                        values.atmosphere === "POSITIVE" ? "(optional)" : ""
-                      }`}
-                      className="atmosphere-details"
-                    />
+                {!isFutureEngagement && !values.cancelled && values.atmosphere && (
+                  <Field
+                    name="atmosphereDetails"
+                    label={Settings.fields.report.atmosphereDetails}
+                    component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldValue(
+                        "atmosphereDetails",
+                        event.target.value,
+                        false
+                      )
+                      validateFieldDebounced("atmosphereDetails")
+                    }}
+                    placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
+                      values.atmosphere === "POSITIVE" ? "(optional)" : ""
+                    }`}
+                    className="atmosphere-details"
+                  />
                 )}
 
                 {Settings.fields.report.reportTags && (
@@ -656,7 +681,7 @@ const BaseReportForm = props => {
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
                     component={FieldHelper.SpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
+                    onChange={value => setFieldValue("reportTags", value, true)}
                     widget={<ReportTags suggestions={tagSuggestions} />}
                   />
                 )}
@@ -686,7 +711,8 @@ const BaseReportForm = props => {
                       renderSelected={
                         <AttendeesTable
                           attendees={values.attendees}
-                          onChange={value => setFieldValue("attendees", value)}
+                          onChange={value =>
+                            setFieldValue("attendees", value, true)}
                           showDelete
                         />
                       }
@@ -737,7 +763,7 @@ const BaseReportForm = props => {
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasksLevel1", value)
+                    setFieldValue("tasksLevel1", value, true)
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -770,7 +796,7 @@ const BaseReportForm = props => {
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasks", value)
+                    setFieldValue("tasks", value, true)
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -809,7 +835,7 @@ const BaseReportForm = props => {
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tasks", value)
+                          setFieldValue("tasks", value, true)
                         }}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
@@ -825,7 +851,8 @@ const BaseReportForm = props => {
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
-                      values
+                      values,
+                      validateField
                     }}
                   />
                 </Fieldset>
@@ -844,6 +871,10 @@ const BaseReportForm = props => {
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}
                     component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldValue("keyOutcomes", event.target.value, false)
+                      validateFieldDebounced("keyOutcomes")
+                    }}
                     componentClass="textarea"
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
@@ -870,6 +901,10 @@ const BaseReportForm = props => {
                     label={Settings.fields.report.nextSteps}
                     component={FieldHelper.InputField}
                     componentClass="textarea"
+                    onChange={event => {
+                      setFieldValue("nextSteps", event.target.value, false)
+                      validateFieldDebounced("nextSteps")
+                    }}
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
                       countCharsLeft(
@@ -893,7 +928,7 @@ const BaseReportForm = props => {
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("reportText", value)}
+                  onChange={value => setFieldValue("reportText", value, true)}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
@@ -924,7 +959,8 @@ const BaseReportForm = props => {
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value
+                            value,
+                            true
                           )}
                         widget={
                           <RichTextEditor
@@ -947,7 +983,7 @@ const BaseReportForm = props => {
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("authorizationGroups", value)
+                          setFieldValue("authorizationGroups", value, true)
                         }}
                         widget={
                           <AdvancedMultiSelect
@@ -986,7 +1022,11 @@ const BaseReportForm = props => {
                                   true,
                                   false
                                 ) // onBlur doesn't work when selecting an option
-                                setFieldValue("authorizationGroups", value)
+                                setFieldValue(
+                                  "authorizationGroups",
+                                  value,
+                                  true
+                                )
                               }}
                               handleAddItem={
                                 FieldHelper.handleMultiSelectAddItem
@@ -1023,7 +1063,8 @@ const BaseReportForm = props => {
                       formikProps={{
                         setFieldTouched,
                         setFieldValue,
-                        values
+                        values,
+                        validateField
                       }}
                     />
                   )
@@ -1091,7 +1132,7 @@ const BaseReportForm = props => {
         attendee.primary = attendee.primary || false
       }
     })
-    setFieldValue(field, attendees)
+    setFieldValue(field, attendees, true)
   }
 
   function countCharsLeft(elemId, maxChars, event) {

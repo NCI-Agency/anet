@@ -134,6 +134,7 @@ const BaseTaskForm = props => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateField,
         submitForm
       }) => {
         const action = (
@@ -360,7 +361,8 @@ const BaseTaskForm = props => {
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
-                      values
+                      values,
+                      validateField
                     }}
                   />
                 </Fieldset>
