@@ -1,6 +1,5 @@
 import { setPageProps, setSearchProps } from "actions"
 import NotFound from "components/NotFound"
-import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
@@ -24,12 +23,7 @@ export const propTypes = {
   showLoading: PropTypes.func.isRequired,
   hideLoading: PropTypes.func.isRequired,
   setPageProps: PropTypes.func.isRequired,
-  setSearchProps: PropTypes.func.isRequired,
-  searchQuery: PropTypes.shape({
-    text: PropTypes.string,
-    filters: PropTypes.any,
-    objectType: PropTypes.string
-  })
+  setSearchProps: PropTypes.func.isRequired
 }
 
 export const AnchorLink = function(props) {
@@ -126,29 +120,6 @@ export const applySearchProps = (setSearchProps, searchProps) => {
   if (searchProps && typeof setSearchProps === "function") {
     setSearchProps(Object.assign({}, searchProps))
   }
-}
-
-export const getSearchQuery = searchQuery => {
-  const query = {}
-  if (!_isEmpty(searchQuery.text)) {
-    query.text = searchQuery.text
-  }
-  if (searchQuery.filters) {
-    searchQuery.filters.forEach(filter => {
-      if (filter.value) {
-        if (filter.value.toQuery) {
-          const toQuery =
-            typeof filter.value.toQuery === "function"
-              ? filter.value.toQuery()
-              : filter.value.toQuery
-          Object.assign(query, toQuery)
-        } else {
-          query[filter.key] = filter.value
-        }
-      }
-    })
-  }
-  return query
 }
 
 export const usePrevious = value => {

@@ -1,12 +1,9 @@
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import { AnchorNavItem } from "components/Nav"
-import {
-  getSearchQuery,
-  mapDispatchToProps,
-  propTypes as pagePropTypes
-} from "components/Page"
+import { mapDispatchToProps, propTypes as pagePropTypes } from "components/Page"
 import ReportCollection from "components/ReportCollection"
+import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import { Person, Report } from "models"
 import PropTypes from "prop-types"
@@ -88,7 +85,8 @@ const BaseMyReports = props => {
 
 BaseMyReports.propTypes = {
   ...pagePropTypes,
-  currentUser: PropTypes.instanceOf(Person)
+  currentUser: PropTypes.instanceOf(Person),
+  searchQuery: SearchQueryPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({

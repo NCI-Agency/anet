@@ -9,11 +9,11 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
-  getSearchQuery,
   mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes,
   useBoilerplate
 } from "components/Page"
+import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
@@ -325,6 +325,7 @@ const DecisivesDashboardImpl = props => {
 
 DecisivesDashboardImpl.propTypes = {
   ...pagePropTypes,
+  searchQuery: SearchQueryPropType,
   setSearchQuery: PropTypes.func.isRequired,
   decisives: PropTypes.array
 }

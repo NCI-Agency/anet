@@ -1,10 +1,7 @@
 import { clearSearchQuery, resetPages } from "actions"
 import { Settings } from "api"
 import AppContext from "components/AppContext"
-import {
-  mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes
-} from "components/Page"
+import { pageDispatchers, propTypes as pagePropTypes } from "components/Page"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
@@ -18,6 +15,7 @@ import {
 } from "react-router-bootstrap"
 import { useLocation } from "react-router-dom"
 import { ScrollLink, scrollSpy } from "react-scroll"
+import { bindActionCreators } from "redux"
 import utils from "utils"
 
 export const AnchorNavItem = props => {
@@ -219,18 +217,15 @@ BaseNav.defaultProps = {
   organizations: []
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  searchQuery: state.searchQuery
-})
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
-  return {
-    clearSearchQuery: () => dispatch(clearSearchQuery()),
-    resetPages: () => dispatch(resetPages()),
-    ...pageDispatchToProps
-  }
-}
+const mapDispatchToProps = (dispatch, ownProps) =>
+  bindActionCreators(
+    {
+      clearSearchQuery: () => clearSearchQuery(),
+      resetPages: () => resetPages(),
+      ...pageDispatchers
+    },
+    dispatch
+  )
 
 const Nav = props => (
   <AppContext.Consumer>
@@ -244,6 +239,6 @@ const Nav = props => (
   </AppContext.Consumer>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps, null, {
+export default connect(null, mapDispatchToProps, null, {
   pure: false
 })(Nav)

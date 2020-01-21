@@ -14,7 +14,6 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import MosaicLayout from "components/MosaicLayout"
 import {
-  getSearchQuery,
   mapDispatchToProps,
   propTypes as pagePropTypes,
   useBoilerplate
@@ -25,6 +24,7 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
+import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
 import { Organization, Report } from "models"
 import moment from "moment"
@@ -650,6 +650,7 @@ const BaseRollupShow = props => {
 
 BaseRollupShow.propTypes = {
   appSettings: PropTypes.object,
+  searchQuery: SearchQueryPropType,
   ...pagePropTypes
 }
 

@@ -13,7 +13,6 @@ import Fieldset from "components/Fieldset"
 import FutureEngagementsByLocation from "components/FutureEngagementsByLocation"
 import Messages from "components/Messages"
 import {
-  getSearchQuery,
   mapDispatchToProps as pageMapDispatchToProps,
   propTypes as pagePropTypes,
   useBoilerplate
@@ -21,6 +20,7 @@ import {
 import PendingApprovalReports from "components/PendingApprovalReports"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
+import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
@@ -211,6 +211,7 @@ const BaseInsightsShow = props => {
 
 BaseInsightsShow.propTypes = {
   ...pagePropTypes,
+  searchQuery: SearchQueryPropType,
   setSearchQuery: PropTypes.func.isRequired,
   appSettings: PropTypes.object
 }

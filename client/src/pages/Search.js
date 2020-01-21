@@ -13,7 +13,6 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  getSearchQuery,
   jumpToTop,
   pageDispatchers,
   propTypes as pagePropTypes,
@@ -21,7 +20,11 @@ import {
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import ReportCollection from "components/ReportCollection"
-import { SearchDescription } from "components/SearchFilters"
+import {
+  SearchDescription,
+  SearchQueryPropType,
+  getSearchQuery
+} from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
@@ -800,7 +803,7 @@ const Search = props => {
         <h2 className="only-show-for-print">
           Search query: {searchQuery.text}
           <br />
-          Filters: <SearchDescription query={searchQuery} />
+          Filters: <SearchDescription searchQuery={searchQuery} />
         </h2>
       )}
       {_isEmpty(searchQueryParams) && (
@@ -966,7 +969,8 @@ const Search = props => {
 Search.propTypes = {
   ...pagePropTypes,
   pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
+  setPagination: PropTypes.func.isRequired,
+  searchQuery: SearchQueryPropType
 }
 
 const mapDispatchToProps = (dispatch, ownProps) =>

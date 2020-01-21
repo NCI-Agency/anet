@@ -10,7 +10,8 @@ import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import searchFilters, {
   POSTITION_ORGANIZATION_FILTER_KEY,
-  POSTITION_POSITION_TYPE_FILTER_KEY
+  POSTITION_POSITION_TYPE_FILTER_KEY,
+  SearchQueryPropType
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -46,11 +47,11 @@ function updateOrganizationFilterState(organizationFilter, positionType) {
 }
 
 const AdvancedSearch = props => {
-  const { query, text } = props
+  const { searchQuery, text } = props
   const history = useHistory()
-  const [objectType, setObjectType] = useState(query.objectType)
+  const [objectType, setObjectType] = useState(searchQuery.objectType)
   const [filters, setFilters] = useState(
-    query.filters ? query.filters.slice() : []
+    searchQuery.filters ? searchQuery.filters.slice() : []
   )
   const [positionTypeFilter, setPositionTypeFilter] = useState(null)
   const [organizationFilter, setOrganizationFilter] = useState(null)
@@ -249,7 +250,7 @@ const AdvancedSearch = props => {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    query: _cloneDeep(state.searchQuery),
+    searchQuery: _cloneDeep(state.searchQuery),
     onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
     searchObjectTypes: state.searchProps.searchObjectTypes
   }
@@ -260,11 +261,7 @@ AdvancedSearch.propTypes = {
   onCancel: PropTypes.func,
   setSearchQuery: PropTypes.func.isRequired,
   resetPagination: PropTypes.func.isRequired,
-  query: PropTypes.shape({
-    text: PropTypes.string,
-    filters: PropTypes.any,
-    objectType: PropTypes.string
-  }),
+  searchQuery: SearchQueryPropType,
   onSearchGoToSearchPage: PropTypes.bool,
   searchObjectTypes: PropTypes.array,
   text: PropTypes.string
