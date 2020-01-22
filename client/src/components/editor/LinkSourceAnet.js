@@ -199,8 +199,10 @@ class LinkSourceAnet extends Component {
             onChange={this.changeObjectType}
           >
             {Object.values(ENTITY_TYPES).map(entityType => {
-              const entityName = entityType === "anetLocation" ? "location" : entityType
-              const capitalized = entityName[0].toUpperCase() + entityName.slice(1)
+              const entityName =
+                entityType === "anetLocation" ? "location" : entityType
+              const capitalized =
+                entityName[0].toUpperCase() + entityName.slice(1)
               return (
                 <Button key={entityType} value={entityType}>
                   {pluralize(capitalized)}
