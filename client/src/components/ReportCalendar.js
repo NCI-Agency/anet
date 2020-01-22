@@ -1,6 +1,7 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
+import { PageDispatchersPropType } from "components/Page"
 import _isEqual from "lodash/isEqual"
 import { Person, Report } from "models"
 import moment from "moment"
@@ -39,7 +40,11 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const ReportCalendar = ({ queryParams, setTotalCount }) => {
+const ReportCalendar = ({
+  pageDispatchers: { showLoading, hideLoading },
+  queryParams,
+  setTotalCount
+}) => {
   const history = useHistory()
   const prevReportQuery = useRef(null)
   const apiPromise = useRef(null)
@@ -73,6 +78,7 @@ const ReportCalendar = ({ queryParams, setTotalCount }) => {
       setTotalCount(null)
     }
     // Store API promise to use in optimised case
+    showLoading()
     apiPromise.current = API.query(GQL_GET_REPORT_LIST, {
       reportQuery
     }).then(data => {
@@ -81,7 +87,7 @@ const ReportCalendar = ({ queryParams, setTotalCount }) => {
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      return reports.map(r => {
+      const results = reports.map(r => {
         const who =
           (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
         const where =
@@ -102,12 +108,15 @@ const ReportCalendar = ({ queryParams, setTotalCount }) => {
             !Settings.engagementsIncludeTimeAndDuration || r.duration === null
         }
       })
+      hideLoading()
+      return results
     })
     return apiPromise.current
   }
 }
 
 ReportCalendar.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func
 }

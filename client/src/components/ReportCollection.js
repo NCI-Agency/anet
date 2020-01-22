@@ -70,6 +70,7 @@ const ReportCollection = ({
         <div>
           {viewFormat === FORMAT_CALENDAR && (
             <ReportCalendar
+              pageDispatchers={pageDispatchers}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
             />
