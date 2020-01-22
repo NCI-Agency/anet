@@ -94,20 +94,24 @@ const renderError = (error, modelName, uuid) => {
 
 const toggleLoading = (loading, showLoading, hideLoading) => {
   if (loading) {
-    showLoading()
+    if (typeof showLoading === "function") {
+      showLoading()
+    }
   } else {
-    hideLoading()
+    if (typeof hideLoading === "function") {
+      hideLoading()
+    }
   }
 }
 
 const applyPageProps = (setPageProps, pageProps) => {
-  if (pageProps) {
+  if (pageProps && typeof setPageProps === "function") {
     setPageProps(Object.assign({}, pageProps))
   }
 }
 
 const applySearchProps = (setSearchProps, searchProps) => {
-  if (searchProps) {
+  if (searchProps && typeof setSearchProps === "function") {
     setSearchProps(Object.assign({}, searchProps))
   }
 }

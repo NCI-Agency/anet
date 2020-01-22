@@ -169,6 +169,7 @@ const BaseInsightsShow = ({
       {hasSearchCriteria ? (
         <Fieldset id={insight} title={insightConfig.title} style={flexStyle}>
           <InsightComponent
+            pageDispatchers={pageDispatchers}
             style={mosaicLayoutStyle}
             queryParams={queryParams}
           />

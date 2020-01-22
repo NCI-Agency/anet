@@ -3,7 +3,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { useBoilerplate } from "components/Page"
+import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
@@ -31,14 +31,14 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const Chart = props => {
-  const {
-    chartId,
-    queryParams,
-    focusedSelection,
-    goToSelection,
-    selectedBarClass
-  } = props
+const Chart = ({
+  pageDispatchers,
+  chartId,
+  queryParams,
+  focusedSelection,
+  goToSelection,
+  selectedBarClass
+}) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
@@ -46,7 +46,7 @@ const Chart = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const graphData = useMemo(() => {
     if (!data) {
@@ -121,6 +121,7 @@ const Chart = props => {
 }
 
 Chart.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   chartId: PropTypes.string,
   queryParams: PropTypes.object,
   focusedSelection: PropTypes.object,
@@ -128,9 +129,7 @@ Chart.propTypes = {
   selectedBarClass: PropTypes.string
 }
 
-const Collection = props => {
-  const { id, queryParams } = props
-
+const Collection = ({ id, queryParams }) => {
   return (
     <div className="scrollable">
       <ReportCollection
@@ -147,9 +146,7 @@ Collection.propTypes = {
   queryParams: PropTypes.object
 }
 
-const Map = props => {
-  const { queryParams } = props
-
+const Map = ({ queryParams }) => {
   return (
     <div className="non-scrollable">
       <ContainerDimensions>
@@ -174,8 +171,7 @@ Map.propTypes = {
 /*
  * Component displaying a chart with number of reports per Task.
  */
-const ReportsByTask = props => {
-  const { queryParams, style } = props
+const ReportsByTask = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
 
   const taskShortLabel = Settings.fields.task.shortLabel
@@ -226,6 +222,7 @@ const ReportsByTask = props => {
   function renderChart(id) {
     return (
       <Chart
+        pageDispatchers={pageDispatchers}
         chartId={chartId}
         queryParams={queryParams}
         focusedSelection={focusedSelection}
@@ -281,6 +278,7 @@ const ReportsByTask = props => {
 }
 
 ReportsByTask.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   style: PropTypes.object
 }

@@ -17,7 +17,12 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  jumpToTop,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
@@ -30,6 +35,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
+import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -139,12 +145,17 @@ const GQL_DELETE_REPORT = gql`
   }
 `
 
-const BaseReportForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseReportForm = ({
+  pageDispatchers,
+  currentUser,
+  edit,
+  title,
+  initialValues,
+  showSensitiveInfo: ssi,
+  ...myFormProps
+}) => {
   const history = useHistory()
-  const [showSensitiveInfo, setShowSensitiveInfo] = useState(
-    props.showSensitiveInfo
-  )
+  const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
   // some autosave settings
@@ -164,7 +175,7 @@ const BaseReportForm = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -864,7 +875,7 @@ const BaseReportForm = props => {
                 </Button>
 
                 <Collapse in={showSensitiveInfo}>
-                  {(values.reportSensitiveInformation || !props.edit) && (
+                  {(values.reportSensitiveInformation || !edit) && (
                     <div>
                       <FastField
                         name="reportSensitiveInformation.text"
@@ -1178,6 +1189,7 @@ const BaseReportForm = props => {
 }
 
 BaseReportForm.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
@@ -1197,4 +1209,4 @@ const ReportForm = props => (
   </AppContext.Consumer>
 )
 
-export default ReportForm
+export default connect(null, mapPageDispatchersToProps)(ReportForm)
