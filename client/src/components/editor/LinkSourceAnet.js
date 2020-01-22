@@ -113,14 +113,14 @@ const widgetPropsTask = {
   addon: TASKS_ICON
 }
 
-var widgetTypeMapping = new Map([
-  [SEARCH_OBJECT_TYPES.REPORTS, widgetPropsReport],
-  [SEARCH_OBJECT_TYPES.PEOPLE, widgetPropsPeople],
-  [SEARCH_OBJECT_TYPES.ORGANIZATIONS, widgetPropsOrganization],
-  [SEARCH_OBJECT_TYPES.POSITIONS, widgetPropsPosition],
-  [SEARCH_OBJECT_TYPES.LOCATIONS, widgetPropsLocation],
-  [SEARCH_OBJECT_TYPES.TASKS, widgetPropsTask]
-])
+const widgetTypeMapping = {
+  [SEARCH_OBJECT_TYPES.REPORTS]: widgetPropsReport,
+  [SEARCH_OBJECT_TYPES.PEOPLE]: widgetPropsPeople,
+  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: widgetPropsOrganization,
+  [SEARCH_OBJECT_TYPES.POSITIONS]: widgetPropsPosition,
+  [SEARCH_OBJECT_TYPES.LOCATIONS]: widgetPropsLocation,
+  [SEARCH_OBJECT_TYPES.TASKS]: widgetPropsTask
+}
 
 class LinkSourceAnet extends Component {
   constructor(props) {
@@ -139,7 +139,7 @@ class LinkSourceAnet extends Component {
 
     // Retrieve entity URL and label
     const objectType = this.state.objectType.toLowerCase()
-    const entityTypeName = parsedEntityLinkType.get(objectType)
+    const entityTypeName = parsedEntityLinkType[objectType]
     const ModelClass = Models[entityTypeName]
     const modelInstance = new ModelClass(value)
     const entityLabel = modelInstance.toString()
@@ -180,7 +180,7 @@ class LinkSourceAnet extends Component {
 
     this.setState({
       objectType: objectType,
-      advancedSelectProps: widgetTypeMapping.get(objectType)
+      advancedSelectProps: widgetTypeMapping[objectType]
     })
 
     // Filter and type changed, need to update search results

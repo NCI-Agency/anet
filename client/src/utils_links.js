@@ -64,6 +64,15 @@ const GQL_GET_TASK = gql`
   }
 `
 
+const parsedEntityLinkTypeQuery = {
+  [ENTITY_TYPES.REPORT]: GQL_GET_REPORT,
+  [ENTITY_TYPES.PERSON]: GQL_GET_PERSON,
+  [ENTITY_TYPES.ORGANIZATION]: GQL_GET_ORGANIZATION,
+  [ENTITY_TYPES.POSITION]: GQL_GET_POSITION,
+  [ENTITY_TYPES.LOCATION]: GQL_GET_LOCATION,
+  [ENTITY_TYPES.TASK]: GQL_GET_TASK
+}
+
 export const ENTITY_TYPES = {
   REPORT: "report",
   PERSON: "person",
@@ -73,34 +82,27 @@ export const ENTITY_TYPES = {
   TASK: "task"
 }
 
-const parsedEntityLinkTypeQuery = new Map([
-  [ENTITY_TYPES.REPORT, GQL_GET_REPORT],
-  [ENTITY_TYPES.PERSON, GQL_GET_PERSON],
-  [ENTITY_TYPES.ORGANIZATION, GQL_GET_ORGANIZATION],
-  [ENTITY_TYPES.POSITION, GQL_GET_POSITION],
-  [ENTITY_TYPES.LOCATION, GQL_GET_LOCATION],
-  [ENTITY_TYPES.TASK, GQL_GET_TASK]
-])
-
-export const parsedEntityLinkType = new Map([
-  ["reports", "report"],
-  ["people", "person"],
-  ["organizations", "organization"],
-  ["positions", "position"],
-  ["locations", "anetLocation"],
-  ["tasks", "task"]
-])
+export const parsedEntityLinkType = {
+  reports: ENTITY_TYPES.REPORT,
+  people: ENTITY_TYPES.PERSON,
+  organizations: ENTITY_TYPES.ORGANIZATION,
+  positions: ENTITY_TYPES.POSITION,
+  locations: ENTITY_TYPES.LOCATION,
+  tasks: ENTITY_TYPES.TASK
+}
 
 export function getEntityInfoFromUrl(url) {
   const splittedUrl = url.split(/[\\//]/)
 
   if (splittedUrl.length > 1) {
-    let type = splittedUrl[splittedUrl.length - 2]
+    const typeRaw = splittedUrl[splittedUrl.length - 2]
     const uuid = splittedUrl[splittedUrl.length - 1]
+    const type = parsedEntityLinkType[typeRaw]
 
-    if (parsedEntityLinkType.has(type) && new RegExp(UUID_REGEX).test(uuid)) {
-      type = parsedEntityLinkType.get(type)
-      return { type, uuid }
+    if (type && new RegExp(UUID_REGEX).test(uuid)) {
+      return { type: type, uuid: uuid }
+    } else {
+      console.log(`Failed to parse entity type (${type}) or UUID (${uuid}).`)
     }
   }
 
@@ -119,13 +121,13 @@ export function enhanceHtml(html, report) {
 }
 
 export function getEntityByUuid(type, uuid) {
-  if (!parsedEntityLinkTypeQuery.get(type)) {
-    console.log("Unsupported entity type: " + type)
+  const entityQuery = parsedEntityLinkTypeQuery[type]
+  if (!entityQuery) {
+    console.log(`Unsupported entity type: ${type}`)
     return
   }
 
-  const query = parsedEntityLinkTypeQuery.get(type)
-  return API.query(query, {
+  return API.query(entityQuery, {
     uuid: uuid
   }).then(data => {
     const entity =
