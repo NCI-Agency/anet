@@ -22,13 +22,9 @@ import {
   LocationOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 
-import {
-  SEARCH_OBJECT_LABELS,
-  SEARCH_OBJECT_TYPES,
-  DEFAULT_SEARCH_PROPS
-} from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
-import { parsedEntityLinkType } from "utils_links"
+import { ENTITY_TYPES } from "utils_links"
+import pluralize from "pluralize"
 import createEntity from "./utils/createEntity"
 
 const entityFilters = {
@@ -114,12 +110,12 @@ const widgetPropsTask = {
 }
 
 const widgetTypeMapping = {
-  [SEARCH_OBJECT_TYPES.REPORTS]: widgetPropsReport,
-  [SEARCH_OBJECT_TYPES.PEOPLE]: widgetPropsPeople,
-  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: widgetPropsOrganization,
-  [SEARCH_OBJECT_TYPES.POSITIONS]: widgetPropsPosition,
-  [SEARCH_OBJECT_TYPES.LOCATIONS]: widgetPropsLocation,
-  [SEARCH_OBJECT_TYPES.TASKS]: widgetPropsTask
+  [ENTITY_TYPES.REPORT]: widgetPropsReport,
+  [ENTITY_TYPES.PERSON]: widgetPropsPeople,
+  [ENTITY_TYPES.ORGANIZATION]: widgetPropsOrganization,
+  [ENTITY_TYPES.POSITION]: widgetPropsPosition,
+  [ENTITY_TYPES.LOCATION]: widgetPropsLocation,
+  [ENTITY_TYPES.TASK]: widgetPropsTask
 }
 
 class LinkSourceAnet extends Component {
@@ -127,7 +123,7 @@ class LinkSourceAnet extends Component {
     super(props)
 
     this.state = {
-      objectType: SEARCH_OBJECT_TYPES.REPORTS,
+      objectType: ENTITY_TYPES.REPORT,
       advancedSelectProps: widgetPropsReport
     }
 
@@ -138,9 +134,7 @@ class LinkSourceAnet extends Component {
     const { editorState, entityType, onComplete } = this.props
 
     // Retrieve entity URL and label
-    const objectType = this.state.objectType.toLowerCase()
-    const entityTypeName = parsedEntityLinkType[objectType]
-    const ModelClass = Models[entityTypeName]
+    const ModelClass = Models[this.state.objectType]
     const modelInstance = new ModelClass(value)
     const entityLabel = modelInstance.toString()
     const entityUrl = ModelClass.pathFor(modelInstance)
@@ -204,11 +198,15 @@ class LinkSourceAnet extends Component {
             value={this.state.objectType}
             onChange={this.changeObjectType}
           >
-            {DEFAULT_SEARCH_PROPS.searchObjectTypes.map(type => (
-              <Button key={type} value={type}>
-                {SEARCH_OBJECT_LABELS[type]}
-              </Button>
-            ))}
+            {Object.values(ENTITY_TYPES).map(entityType => {
+              const entityName = entityType === "anetLocation" ? "location" : entityType
+              const capitalized = entityName[0].toUpperCase() + entityName.slice(1)
+              return (
+                <Button key={entityType} value={entityType}>
+                  {pluralize(capitalized)}
+                </Button>
+              )
+            })}
           </ButtonToggleGroup>
         </Modal.Body>
 
