@@ -46,8 +46,16 @@ function updateOrganizationFilterState(organizationFilter, positionType) {
   }
 }
 
-const AdvancedSearch = props => {
-  const { searchQuery, text } = props
+const AdvancedSearch = ({
+  onSearch,
+  onCancel,
+  setSearchQuery,
+  resetPagination,
+  searchQuery,
+  onSearchGoToSearchPage,
+  searchObjectTypes,
+  text
+}) => {
   const history = useHistory()
   const [objectType, setObjectType] = useState(searchQuery.objectType)
   const [filters, setFilters] = useState(
@@ -96,7 +104,7 @@ const AdvancedSearch = props => {
                 >
                   {Object.keys(ALL_FILTERS).map(
                     type =>
-                      props.searchObjectTypes.indexOf(type) !== -1 && (
+                      searchObjectTypes.indexOf(type) !== -1 && (
                         <Button key={type} value={type}>
                           {SEARCH_OBJECT_LABELS[type]}
                         </Button>
@@ -160,7 +168,7 @@ const AdvancedSearch = props => {
                 <Button
                   className={Classes.POPOVER_DISMISS}
                   intent="danger"
-                  onClick={props.onCancel}
+                  onClick={onCancel}
                   style={{ marginLeft: 20 }}
                 >
                   Cancel
@@ -230,17 +238,17 @@ const AdvancedSearch = props => {
   }
 
   function onSubmit(event) {
-    if (typeof props.onSearch === "function") {
-      props.onSearch()
+    if (typeof onSearch === "function") {
+      onSearch()
     }
     // We only update the Redux state on submit
-    props.resetPagination()
-    props.setSearchQuery({
+    resetPagination()
+    setSearchQuery({
       objectType,
       filters,
       text
     })
-    if (props.onSearchGoToSearchPage) {
+    if (onSearchGoToSearchPage) {
       history.push({
         pathname: "/search"
       })
@@ -275,8 +283,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch)
 
-const SearchFilter = props => {
-  const { onRemove, filter, element } = props
+const SearchFilter = ({ onRemove, filter, organizationFilter, element }) => {
   const label = filter.key
   const ChildComponent = element.component
   const { queryKey } = element.props || undefined
@@ -306,7 +313,7 @@ const SearchFilter = props => {
 
     if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
       updateOrganizationFilterState(
-        props.organizationFilter,
+        organizationFilter,
         filter.value.value || ""
       )
     }

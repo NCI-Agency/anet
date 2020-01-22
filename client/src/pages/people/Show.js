@@ -91,7 +91,7 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const BasePersonShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
+const BasePersonShow = ({ pageDispatchers, currentUser }) => {
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
@@ -143,7 +143,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 
   return (
-    <Formik enableReinitialize initialValues={person} {...myFormProps}>
+    <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
         const action = (
           <div>

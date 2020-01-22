@@ -151,8 +151,7 @@ const BaseReportForm = ({
   edit,
   title,
   initialValues,
-  showSensitiveInfo: ssi,
-  ...myFormProps
+  showSensitiveInfo: ssi
 }) => {
   const history = useHistory()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
@@ -260,7 +259,6 @@ const BaseReportForm = ({
       onSubmit={onSubmit}
       validationSchema={Report.yupSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,

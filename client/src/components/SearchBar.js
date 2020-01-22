@@ -45,14 +45,13 @@ SearchPopover.propTypes = {
   children: PropTypes.any.isRequired
 }
 
-const SearchBar = props => {
-  const {
-    searchQuery,
-    searchObjectTypes,
-    resetPagination,
-    setSearchQuery,
-    onSearchGoToSearchPage
-  } = props
+const SearchBar = ({
+  searchQuery,
+  searchObjectTypes,
+  resetPagination,
+  setSearchQuery,
+  onSearchGoToSearchPage
+}) => {
   const history = useHistory()
   // (Re)set searchTerms if the searchQuery.text prop changes
   const latestQueryText = useRef(searchQuery.text)

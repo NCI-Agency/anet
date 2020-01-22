@@ -64,7 +64,7 @@ export const getSearchQuery = searchQuery => {
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
 
-const taskFilters = props => {
+const taskFilters = () => {
   const taskFiltersObj = {
     Organization: {
       component: OrganizationFilter,
@@ -520,11 +520,10 @@ const extraFilters = function(positionTypeFilterRef, organizationFilterRef) {
   return filters
 }
 
-const SearchFilterDisplay = props => {
-  const { filter, element } = props
+const SearchFilterDisplay = ({ filter, element, showSeparator }) => {
   const label = filter.key
   const ChildComponent = element.component
-  const sep = props.showSeparator ? ", " : ""
+  const sep = showSeparator ? ", " : ""
   return (
     <>
       <b>{label}</b>:{" "}
@@ -549,8 +548,7 @@ SearchFilterDisplay.propTypes = {
   showSeparator: PropTypes.bool
 }
 
-export const SearchDescription = props => {
-  const { searchQuery, showPlaceholders } = props
+export const SearchDescription = ({ searchQuery, showPlaceholders }) => {
   const allFilters = searchFilters()
   const filterDefs =
     searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]

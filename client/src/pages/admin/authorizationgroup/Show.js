@@ -53,11 +53,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const BaseAuthorizationGroupShow = ({
-  pageDispatchers,
-  currentUser,
-  ...myFormProps
-}) => {
+const BaseAuthorizationGroupShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(
@@ -85,11 +81,7 @@ const BaseAuthorizationGroupShow = ({
   const canEdit = currentUser.isSuperUser()
 
   return (
-    <Formik
-      enableReinitialize
-      initialValues={authorizationGroup}
-      {...myFormProps}
-    >
+    <Formik enableReinitialize initialValues={authorizationGroup}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo authorizationGroup={authorizationGroup} edit button="primary">

@@ -93,7 +93,7 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
-const BasePositionShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
+const BasePositionShow = ({ pageDispatchers, currentUser }) => {
   const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
   const [
@@ -149,7 +149,7 @@ const BasePositionShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
     (!position.person || !position.person.uuid)
 
   return (
-    <Formik enableReinitialize initialValues={position} {...myFormProps}>
+    <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo

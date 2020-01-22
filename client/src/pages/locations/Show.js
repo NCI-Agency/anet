@@ -52,7 +52,7 @@ Coordinate.propTypes = {
   coord: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
-const BaseLocationShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
+const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
@@ -77,7 +77,7 @@ const BaseLocationShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
   const canEdit = currentUser.isSuperUser()
 
   return (
-    <Formik enableReinitialize initialValues={location} {...myFormProps}>
+    <Formik enableReinitialize initialValues={location}>
       {({ values }) => {
         const marker = {
           id: location.uuid || 0,

@@ -32,16 +32,15 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const ReportMap = props => {
-  const {
-    pageDispatchers,
-    queryParams,
-    setTotalCount,
-    mapId,
-    width,
-    height,
-    marginBottom
-  } = props
+const ReportMap = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  mapId,
+  width,
+  height,
+  marginBottom
+}) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery

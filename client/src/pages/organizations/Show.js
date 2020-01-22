@@ -123,11 +123,7 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const BaseOrganizationShow = ({
-  pageDispatchers,
-  currentUser,
-  ...myFormProps
-}) => {
+const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const { uuid } = useParams()
@@ -196,7 +192,7 @@ const BaseOrganizationShow = ({
     reportQueryParams.state = Report.STATE.PENDING_APPROVAL
   }
   return (
-    <Formik enableReinitialize initialValues={organization} {...myFormProps}>
+    <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
         const action = (
           <div>

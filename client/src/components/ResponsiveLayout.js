@@ -65,8 +65,7 @@ const loadingBar = {
 
 export const ResponsiveLayoutContext = React.createContext()
 
-const ResponsiveLayout = props => {
-  const { pageProps, sidebarData, children } = props
+const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
   const history = useHistory()
   const [floatingMenu, setFloatingMenu] = useState(false)
   const [topbarHeight, setTopbarHeight] = useState(0)

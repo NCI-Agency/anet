@@ -72,7 +72,7 @@ const GQL_GET_TASK = gql`
   }
 `
 
-const BaseTaskShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
+const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
@@ -115,7 +115,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser, ...myFormProps }) => {
       ))
 
   return (
-    <Formik enableReinitialize initialValues={task} {...myFormProps}>
+    <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo task={task} edit button="primary">
