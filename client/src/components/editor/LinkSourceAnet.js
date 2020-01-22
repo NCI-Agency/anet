@@ -136,18 +136,18 @@ class LinkSourceAnet extends Component {
   onConfirm = value => {
     const { editorState, entityType, onComplete } = this.props
     const objectType = this.state.objectType.toLowerCase()
-    const separator = value.shortName && value.longName ? " " : ""
+    const shortName = value.shortName ? value.shortName : ""
+    const longName = value.longName ? value.longName : ""
+    const separator = shortName && longName ? " " : ""
+    const entityName = value.name || shortName + separator + longName || value.intent
+    const entityLabel = entityName && entityName.length > 0 && entityName.trim() ? entityName : value.uuid
     const nextState = createEntity(
       editorState,
       entityType.type,
       {
-        url: "\\" + objectType + "/" + value.uuid,
-        value: "\\" + objectType + "/" + value.uuid
+        url: "\\" + objectType + "/" + value.uuid
       },
-      value.name ||
-        value.shortName + separator + value.longName ||
-        value.intent ||
-        value.uuid,
+      entityLabel,
       "IMMUTABLE"
     )
 

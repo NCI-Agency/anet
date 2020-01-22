@@ -75,7 +75,7 @@ const ENTITY_CONTROL = {
     ],
     source: LinkSourceAnet,
     decorator: LinkAnet,
-    attributes: ["url", "value"],
+    attributes: ["url"],
     whitelist: {
       href: "^(?![#/])"
     }
@@ -86,8 +86,7 @@ const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
     if (nodeName === "a") {
       return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", {
-        url: node.href,
-        value: node.href
+        url: node.href
       })
     }
 

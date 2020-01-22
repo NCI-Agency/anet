@@ -13,10 +13,8 @@ const LinkAnet = ({
   url
 }) => {
   const urlLink =
-    url ||
-    (contentState &&
-      (contentState.getEntity(entityKey).getData().value ||
-        contentState.getEntity(entityKey).getData().url))
+    url || (contentState && contentState.getEntity(entityKey).getData().url)
+
   const isAnetEntityLink = getEntityInfoFromUrl(urlLink)
 
   if (isAnetEntityLink) {
