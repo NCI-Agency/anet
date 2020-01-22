@@ -64,16 +64,25 @@ const GQL_GET_TASK = gql`
   }
 `
 
+export const ENTITY_TYPES = {
+  REPORT: "report",
+  PERSON: "person",
+  ORGANIZATION: "organization",
+  POSITION: "position",
+  LOCATION: "anetLocation",
+  TASK: "task"
+}
+
 const parsedEntityLinkTypeQuery = new Map([
-  ["report", GQL_GET_REPORT],
-  ["person", GQL_GET_PERSON],
-  ["organization", GQL_GET_ORGANIZATION],
-  ["position", GQL_GET_POSITION],
-  ["anetLocation", GQL_GET_LOCATION],
-  ["task", GQL_GET_TASK]
+  [ENTITY_TYPES.REPORT, GQL_GET_REPORT],
+  [ENTITY_TYPES.PERSON, GQL_GET_PERSON],
+  [ENTITY_TYPES.ORGANIZATION, GQL_GET_ORGANIZATION],
+  [ENTITY_TYPES.POSITION, GQL_GET_POSITION],
+  [ENTITY_TYPES.LOCATION, GQL_GET_LOCATION],
+  [ENTITY_TYPES.TASK, GQL_GET_TASK]
 ])
 
-const parsedEntityLinkType = new Map([
+export const parsedEntityLinkType = new Map([
   ["reports", "report"],
   ["people", "person"],
   ["organizations", "organization"],

@@ -12,7 +12,7 @@ import PEOPLE_ICON from "resources/people.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import POSITIONS_ICON from "resources/positions.png"
-import { Organization, Person, Position, Task, Location, Report } from "models"
+import * as Models from "models"
 import {
   ReportDetailedOverlayRow,
   OrganizationOverlayRow,
@@ -28,6 +28,7 @@ import {
   DEFAULT_SEARCH_PROPS
 } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import { parsedEntityLinkType } from "utils_links"
 import createEntity from "./utils/createEntity"
 
 const entityFilters = {
@@ -44,71 +45,71 @@ const peopleFilters = {
   },
   activeAdvisors: {
     label: "All advisors",
-    queryVars: { role: Person.ROLE.ADVISOR, matchPositionName: true }
+    queryVars: { role: Models.Person.ROLE.ADVISOR, matchPositionName: true }
   },
   activePrincipals: {
     label: "All principals",
-    queryVars: { role: Person.ROLE.PRINCIPAL }
+    queryVars: { role: Models.Person.ROLE.PRINCIPAL }
   }
 }
 
 const widgetPropsReport = {
-  objectType: Report,
+  objectType: Models.Report,
   overlayRenderRow: ReportDetailedOverlayRow,
   overlayColumns: ["Goal", "Author", "Updated"],
   filterDefs: entityFilters,
   queryParams: {},
-  fields: Report.autocompleteQuery,
+  fields: Models.Report.autocompleteQuery,
   addon: REPORTS_ICON
 }
 
 const widgetPropsPeople = {
-  objectType: Person,
+  objectType: Models.Person,
   overlayRenderRow: PersonDetailedOverlayRow,
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   filterDefs: peopleFilters,
   queryParams: {},
-  fields: Person.autocompleteQuery,
+  fields: Models.Person.autocompleteQuery,
   addon: PEOPLE_ICON
 }
 
 const widgetPropsOrganization = {
-  objectType: Organization,
+  objectType: Models.Organization,
   overlayRenderRow: OrganizationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: {},
-  fields: Organization.autocompleteQuery,
+  fields: Models.Organization.autocompleteQuery,
   addon: ORGANIZATIONS_ICON
 }
 
 const widgetPropsPosition = {
-  objectType: Position,
+  objectType: Models.Position,
   overlayRenderRow: PositionOverlayRow,
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
   queryParams: {},
-  fields: Position.autocompleteQuery,
+  fields: Models.Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
 
 const widgetPropsLocation = {
-  objectType: Location,
+  objectType: Models.Location,
   overlayRenderRow: LocationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Location.STATUS.ACTIVE },
-  fields: Location.autocompleteQuery,
+  queryParams: { status: Models.Location.STATUS.ACTIVE },
+  fields: Models.Location.autocompleteQuery,
   addon: LOCATIONS_ICON
 }
 
 const widgetPropsTask = {
-  objectType: Task,
+  objectType: Models.Task,
   overlayRenderRow: TaskSimpleOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Task.STATUS.ACTIVE },
-  fields: Task.autocompleteQuery,
+  queryParams: { status: Models.Task.STATUS.ACTIVE },
+  fields: Models.Task.autocompleteQuery,
   addon: TASKS_ICON
 }
 
@@ -135,17 +136,20 @@ class LinkSourceAnet extends Component {
 
   onConfirm = value => {
     const { editorState, entityType, onComplete } = this.props
+
+    // Retrieve entity URL and label
     const objectType = this.state.objectType.toLowerCase()
-    const shortName = value.shortName ? value.shortName : ""
-    const longName = value.longName ? value.longName : ""
-    const separator = shortName && longName ? " " : ""
-    const entityName = value.name || shortName + separator + longName || value.intent
-    const entityLabel = entityName && entityName.length > 0 && entityName.trim() ? entityName : value.uuid
+    const entityTypeName = parsedEntityLinkType.get(objectType)
+    const ModelClass = Models[entityTypeName]
+    const modelInstance = new ModelClass(value)
+    const entityLabel = modelInstance.toString()
+    const entityUrl = ModelClass.pathFor(modelInstance)
+
     const nextState = createEntity(
       editorState,
       entityType.type,
       {
-        url: "\\" + objectType + "/" + value.uuid
+        url: entityUrl
       },
       entityLabel,
       "IMMUTABLE"
