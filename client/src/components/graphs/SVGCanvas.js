@@ -79,7 +79,7 @@ SVGCanvas.propTypes = {
   height: PropTypes.number.isRequired,
   exportTitle: PropTypes.string,
   zoomFn: PropTypes.func,
-  svgRef: PropTypes.object,
+  svgRef: PropTypes.object.isRequired,
   children: PropTypes.node
 }
 
