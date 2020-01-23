@@ -7,8 +7,8 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -53,7 +53,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const BaseAuthorizationGroupShow = props => {
+const BaseAuthorizationGroupShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(
@@ -67,7 +67,7 @@ const BaseAuthorizationGroupShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -78,15 +78,10 @@ const BaseAuthorizationGroupShow = props => {
   )
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
   const canEdit = currentUser.isSuperUser()
 
   return (
-    <Formik
-      enableReinitialize
-      initialValues={authorizationGroup}
-      {...myFormProps}
-    >
+    <Formik enableReinitialize initialValues={authorizationGroup}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo authorizationGroup={authorizationGroup} edit button="primary">
@@ -150,7 +145,7 @@ const BaseAuthorizationGroupShow = props => {
 }
 
 BaseAuthorizationGroupShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -165,4 +160,4 @@ const AuthorizationGroupShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(AuthorizationGroupShow)
+export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupShow)

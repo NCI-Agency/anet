@@ -2,11 +2,10 @@ import API from "api"
 import { gql } from "apollo-boost"
 import OrganizationAdvisorsTable from "components/AdvisorReports/OrganizationAdvisorsTable"
 import Toolbar from "components/AdvisorReports/Toolbar"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import _debounce from "lodash/debounce"
 import moment from "moment"
 import React, { useState } from "react"
-import { connect } from "react-redux"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
   query {
@@ -24,7 +23,7 @@ const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
 
 const DEFAULT_WEEKS_AGO = 3
 
-const FilterableAdvisorReportsTable = props => {
+const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
   const [filterText, setFilterText] = useState("")
   const [selectedData, setSelectedData] = useState([])
   const { loading, error, data } = API.useApiQuery(
@@ -33,7 +32,7 @@ const FilterableAdvisorReportsTable = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -158,4 +157,8 @@ const FilterableAdvisorReportsTable = props => {
   }
 }
 
-export default connect(null, mapDispatchToProps)(FilterableAdvisorReportsTable)
+FilterableAdvisorReportsTable.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
+
+export default FilterableAdvisorReportsTable

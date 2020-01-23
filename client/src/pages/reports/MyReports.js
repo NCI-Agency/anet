@@ -2,11 +2,11 @@ import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import { AnchorNavItem } from "components/Nav"
 import {
-  getSearchQuery,
-  mapDispatchToProps,
-  propTypes as pagePropTypes
+  PageDispatchersPropType,
+  mapPageDispatchersToProps
 } from "components/Page"
 import ReportCollection from "components/ReportCollection"
+import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import { Person, Report } from "models"
 import PropTypes from "prop-types"
@@ -14,8 +14,11 @@ import React from "react"
 import { Nav } from "react-bootstrap"
 import { connect } from "react-redux"
 
-const BaseMyReports = props => {
-  const { searchQuery } = props
+const BaseMyReports = ({
+  pageDispatchers,
+  searchQuery,
+  currentUser: { uuid }
+}) => {
   const sectionQueryParams = {
     draft: {
       state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
@@ -37,7 +40,7 @@ const BaseMyReports = props => {
     }
   }
   Object.keys(sectionQueryParams).forEach(
-    key => (sectionQueryParams[key].authorUuid = props.currentUser.uuid)
+    key => (sectionQueryParams[key].authorUuid = uuid)
   )
 
   return (
@@ -77,7 +80,7 @@ const BaseMyReports = props => {
     return (
       <Fieldset title={title} id={id}>
         <ReportCollection
-          paginationKey={`r_${id}_${props.currentUser.uuid}`}
+          paginationKey={`r_${id}_${uuid}`}
           queryParams={queryParams}
           mapId={id}
         />
@@ -87,8 +90,9 @@ const BaseMyReports = props => {
 }
 
 BaseMyReports.propTypes = {
-  ...pagePropTypes,
-  currentUser: PropTypes.instanceOf(Person)
+  pageDispatchers: PageDispatchersPropType,
+  currentUser: PropTypes.instanceOf(Person),
+  searchQuery: SearchQueryPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -101,4 +105,4 @@ const MyReports = props => (
   </AppContext.Consumer>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(MyReports)
+export default connect(mapStateToProps, mapPageDispatchersToProps)(MyReports)

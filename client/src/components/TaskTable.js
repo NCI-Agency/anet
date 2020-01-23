@@ -7,19 +7,18 @@ import React from "react"
 import { Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
-const TaskTable = props => {
-  const { tasks } = props
+const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
   const tasksExist = _get(tasks, "length", 0) > 0
 
   return (
-    <div id={props.id}>
+    <div id={id}>
       {tasksExist ? (
         <div>
           <Table striped condensed hover responsive className="tasks_table">
             <thead>
               <tr>
                 <th>Name</th>
-                {props.showOrganization && <th>Organization</th>}
+                {showOrganization && <th>Organization</th>}
                 <th />
               </tr>
             </thead>
@@ -31,14 +30,14 @@ const TaskTable = props => {
                       {task.shortName} - {task.longName}
                     </LinkTo>
                   </td>
-                  {props.showOrganization && (
+                  {showOrganization && (
                     <td className="taskOrg">
                       <LinkTo organization={task.responsibleOrg} />
                     </td>
                   )}
-                  {props.showDelete && (
+                  {showDelete && (
                     <td
-                      onClick={() => props.onDelete(task)}
+                      onClick={() => onDelete(task)}
                       id={"taskDelete_" + task.uuid}
                     >
                       <span style={{ cursor: "pointer" }}>

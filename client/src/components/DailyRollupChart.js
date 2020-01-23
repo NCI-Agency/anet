@@ -4,8 +4,15 @@ import React, { useEffect, useRef } from "react"
 import ReactTooltip from "react-tooltip"
 import "./BarChart.css"
 
-const DailyRollupChart = props => {
-  const { width, height, chartId, data, onBarClick, tooltip, barColors } = props
+const DailyRollupChart = ({
+  width,
+  height,
+  chartId,
+  data,
+  onBarClick,
+  tooltip,
+  barColors
+}) => {
   const node = useRef(null)
   useEffect(() => {
     if (!node.current) {

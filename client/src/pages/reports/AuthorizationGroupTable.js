@@ -3,8 +3,11 @@ import React from "react"
 import { Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
-const AuthorizationGroupTable = props => {
-  const { authorizationGroups, showDelete, onDelete } = props
+const AuthorizationGroupTable = ({
+  authorizationGroups,
+  showDelete,
+  onDelete
+}) => {
   return (
     <Table striped condensed hover responsive>
       <thead>

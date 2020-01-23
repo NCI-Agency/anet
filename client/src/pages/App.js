@@ -3,8 +3,8 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
@@ -94,7 +94,7 @@ const GQL_GET_APP_DATA = gql`
   }
 `
 
-const App = props => {
+const App = ({ pageDispatchers, pageProps }) => {
   let appState = processData(window.ANET_DATA)
   const history = useHistory()
   const routerLocation = useLocation()
@@ -102,7 +102,8 @@ const App = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageProps,
+    pageDispatchers
   })
   if (done) {
     return result
@@ -121,8 +122,6 @@ const App = props => {
   ) {
     return <Redirect to="/onboarding" />
   }
-
-  const { pageProps } = props
 
   return (
     <AppContext.Provider
@@ -163,7 +162,7 @@ const App = props => {
 }
 
 App.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   pageProps: PropTypes.object
 }
 
@@ -171,4 +170,4 @@ const mapStateToProps = (state, ownProps) => ({
   pageProps: state.pageProps
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(mapStateToProps, mapPageDispatchersToProps)(App)

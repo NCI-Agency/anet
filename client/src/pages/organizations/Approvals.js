@@ -5,8 +5,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-const OrganizationApprovals = props => {
-  const { organization } = props
+const OrganizationApprovals = ({ organization }) => {
   const approvalSteps = organization.approvalSteps
   const planningApprovalSteps = organization.planningApprovalSteps
 

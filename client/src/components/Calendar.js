@@ -11,8 +11,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import "./Calendar.css"
 
-const Calendar = props => {
-  const { events, eventClick, calendarComponentRef } = props
+const Calendar = ({ events, eventClick, calendarComponentRef }) => {
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
