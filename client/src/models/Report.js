@@ -231,7 +231,8 @@ export default class Report extends Model {
           (cancelled, engagementDate, schema) =>
             cancelled
               ? schema.nullable()
-              : Settings.fields.report.keyOutcomes && !Report.isFuture(engagementDate)
+              : Settings.fields.report.keyOutcomes &&
+                !Report.isFuture(engagementDate)
                 ? schema.required(
                   `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`
                 )

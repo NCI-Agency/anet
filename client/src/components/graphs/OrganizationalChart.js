@@ -1,4 +1,3 @@
-import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
@@ -16,7 +15,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
-import { renderBlueprintIconAsSvg } from "utils"
+import COLLAPSE_ICON from "resources/organizations.png"
+import EXPAND_ICON from "resources/plus.png"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
@@ -76,8 +76,9 @@ const sortPositions = (positions, truncateLimit) => {
     : allResults
 }
 
-const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
-const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
+// TODO: enable once innerhtml in svg is polyfilled
+// const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
+// const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
 
 const OrganizationalChart = ({
   pageDispatchers,
@@ -230,7 +231,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .filter(d => d.data.childrenOrgs.length > 0)
-      .append("svg")
+      .append("image")
       .attr("class", "orgChildIcon")
       .attr("width", 12)
       .attr("height", 12)
@@ -239,14 +240,9 @@ const OrganizationalChart = ({
       .on("click", d => setExpanded(expanded => _xor(expanded, [d.data.uuid])))
 
     node
-      .selectAll("svg.orgChildIcon")
-      .attr("viewBox", d =>
-        expanded.includes(d.data.uuid)
-          ? COLLAPSE_ICON.viewBox
-          : EXPAND_ICON.viewBox
-      )
-      .html(d =>
-        expanded.includes(d.data.uuid) ? COLLAPSE_ICON.html : EXPAND_ICON.html
+      .selectAll("image.orgChildIcon")
+      .attr("href", d =>
+        expanded.includes(d.data.uuid) ? COLLAPSE_ICON : EXPAND_ICON
       )
 
     iconNodeG

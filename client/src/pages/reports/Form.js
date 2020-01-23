@@ -797,29 +797,31 @@ const BaseReportForm = ({
                 }
                 id="meeting-details"
               >
-                {Settings.fields.report.keyOutcomes && !isFutureEngagement && !values.cancelled && (
-                  <FastField
-                    name="keyOutcomes"
-                    label={Settings.fields.report.keyOutcomes}
-                    component={FieldHelper.renderInputField}
-                    componentClass="textarea"
-                    maxLength={Settings.maxTextFieldLength}
-                    onKeyUp={event =>
-                      countCharsLeft(
-                        "keyOutcomesCharsLeft",
-                        Settings.maxTextFieldLength,
-                        event
-                      )}
-                    extraColElem={
-                      <>
-                        <span id="keyOutcomesCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            initialValues.keyOutcomes.length}
-                        </span>{" "}
-                        characters remaining
-                      </>
-                    }
-                  />
+                {Settings.fields.report.keyOutcomes &&
+                  !isFutureEngagement &&
+                  !values.cancelled && (
+                    <FastField
+                      name="keyOutcomes"
+                      label={Settings.fields.report.keyOutcomes}
+                      component={FieldHelper.renderInputField}
+                      componentClass="textarea"
+                      maxLength={Settings.maxTextFieldLength}
+                      onKeyUp={event =>
+                        countCharsLeft(
+                          "keyOutcomesCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )}
+                      extraColElem={
+                        <>
+                          <span id="keyOutcomesCharsLeft">
+                            {Settings.maxTextFieldLength -
+                              initialValues.keyOutcomes.length}
+                          </span>{" "}
+                          characters remaining
+                        </>
+                      }
+                    />
                 )}
 
                 {!isFutureEngagement && (
