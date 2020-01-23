@@ -27,6 +27,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -172,7 +173,6 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(history.get(1).getEndTime()).isNotNull();
     assertThat(history.get(1).getStartTime()).isBefore(history.get(1).getEndTime());
 
-
     // Create a principal
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
     queryOrgs.setText("Ministry");
@@ -273,7 +273,6 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(jack.getUuid());
   }
-
 
   @Test
   public void tashkilTest() {
@@ -421,14 +420,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(searchResults.stream().filter(p -> p.getOrganizationUuid() == ef1.getUuid())
         .collect(Collectors.toList())).hasSameElementsAs(searchResults);
 
-    query.setIncludeChildrenOrgs(true);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
             new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isNotEmpty();
 
-    query.setIncludeChildrenOrgs(false);
+    query.setOrgRecurseStrategy(RecurseStrategy.NONE);
     query.setText("a");
     query.setSortBy(PositionSearchSortBy.NAME);
     query.setSortOrder(SortOrder.DESC);

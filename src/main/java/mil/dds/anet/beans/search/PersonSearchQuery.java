@@ -20,7 +20,7 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
   List<PersonStatus> status;
   @GraphQLQuery
   @GraphQLInputField
-  Boolean includeChildOrgs;
+  RecurseStrategy orgRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   String rank;
@@ -84,12 +84,12 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
     this.status = status;
   }
 
-  public boolean getIncludeChildOrgs() {
-    return Boolean.TRUE.equals(includeChildOrgs);
+  public RecurseStrategy getOrgRecurseStrategy() {
+    return orgRecurseStrategy;
   }
 
-  public void setIncludeChildOrgs(Boolean includeChildOrgs) {
-    this.includeChildOrgs = includeChildOrgs;
+  public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
+    this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
   public String getRank() {

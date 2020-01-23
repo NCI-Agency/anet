@@ -21,6 +21,7 @@ import {
   Table
 } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
   mutation($uuid: String!) {
@@ -77,7 +78,7 @@ class BaseAssignPositionModal extends Component {
         positionSearchQuery.type.push(Position.TYPE.SUPER_USER)
         positionSearchQuery.organizationUuid =
           currentUser.position.organization.uuid
-        positionSearchQuery.includeChildrenOrgs = true
+        positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
       }
     } else if (person.role === Person.ROLE.PRINCIPAL) {
       positionSearchQuery.type = [Position.TYPE.PRINCIPAL]

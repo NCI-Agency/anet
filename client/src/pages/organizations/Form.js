@@ -178,7 +178,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
           tasksFilters.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: currentUser.position.organization.uuid
+              taskedOrgUuid: currentUser.position.organization.uuid
             }
           }
         }

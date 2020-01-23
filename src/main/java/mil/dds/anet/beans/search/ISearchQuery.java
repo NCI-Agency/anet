@@ -5,6 +5,10 @@ public interface ISearchQuery<T extends ISortBy> {
     ASC, DESC
   }
 
+  public enum RecurseStrategy {
+    NONE, CHILDREN, PARENTS
+  }
+
   public boolean isTextPresent();
 
   public String getText();
