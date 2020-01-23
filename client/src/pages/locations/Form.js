@@ -29,8 +29,7 @@ const GQL_UPDATE_LOCATION = gql`
   }
 `
 
-const BaseLocationForm = props => {
-  const { currentUser, edit, title, ...myFormProps } = props
+const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const canEditName =
@@ -53,7 +52,7 @@ const BaseLocationForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      {...myFormProps}
+      initialValues={initialValues}
     >
       {({
         handleSubmit,
@@ -169,12 +168,11 @@ const BaseLocationForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateLocation" : "createLocation"
     const location = new Location({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -189,10 +187,9 @@ const BaseLocationForm = props => {
 
   function save(values, form) {
     const location = Object.without(new Location(values), "notes")
-    return API.mutation(
-      props.edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION,
-      { location }
-    )
+    return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
+      location
+    })
   }
 }
 

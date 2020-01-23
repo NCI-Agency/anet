@@ -41,9 +41,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Redirect, Route, Switch } from "react-router-dom"
 
-const BaseRouting = props => {
-  const { currentUser } = props
-
+const BaseRouting = ({ currentUser }) => {
   return (
     <Switch>
       <Route exact path="/" component={Home} />

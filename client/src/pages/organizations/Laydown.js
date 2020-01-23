@@ -10,9 +10,8 @@ import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 
-const BaseOrganizationLaydown = props => {
+const BaseOrganizationLaydown = ({ currentUser, organization }) => {
   const [showInactivePositions, setShowInactivePositions] = useState(false)
-  const { currentUser, organization } = props
   const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
 
   const numInactivePos = organization.positions.filter(

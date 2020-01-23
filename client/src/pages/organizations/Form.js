@@ -47,8 +47,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const ApproverTable = props => {
-  const { approvers, onDelete } = props
+const ApproverTable = ({ approvers, onDelete }) => {
   return (
     <Table striped condensed hover responsive>
       <thead>
@@ -84,8 +83,7 @@ ApproverTable.propTypes = {
   onDelete: PropTypes.func
 }
 
-const BaseOrganizationForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] = useState(
@@ -128,7 +126,6 @@ const BaseOrganizationForm = props => {
       onSubmit={onSubmit}
       validationSchema={Organization.yupSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -177,11 +174,11 @@ const BaseOrganizationForm = props => {
             queryVars: {}
           }
         }
-        if (props.currentUser.position) {
+        if (currentUser.position) {
           tasksFilters.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              taskedOrgUuid: props.currentUser.position.organization.uuid
+              taskedOrgUuid: currentUser.position.organization.uuid
             }
           }
         }
@@ -206,12 +203,12 @@ const BaseOrganizationForm = props => {
             }
           }
         }
-        if (props.currentUser.position) {
+        if (currentUser.position) {
           approversFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
               matchPersonName: true,
-              organizationUuid: props.currentUser.position.organization.uuid
+              organizationUuid: currentUser.position.organization.uuid
             }
           }
         }
@@ -671,7 +668,6 @@ const BaseOrganizationForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateOrganization" : "createOrganization"
     const organization = new Organization({
       uuid: response[operation].uuid
@@ -698,7 +694,7 @@ const BaseOrganizationForm = props => {
     )
     organization.parentOrg = utils.getReference(organization.parentOrg)
     return API.mutation(
-      props.edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
+      edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
     )
   }

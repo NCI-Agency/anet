@@ -6,8 +6,8 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
   AnchorLink,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
@@ -188,7 +188,7 @@ const GQL_GET_REPORT = gql`
   }
 `
 
-const ReportMinimal = props => {
+const ReportMinimal = ({ pageDispatchers }) => {
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -200,7 +200,7 @@ const ReportMinimal = props => {
     uuid,
     pageProps: PAGE_PROPS_MIN_HEAD,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -501,7 +501,7 @@ const ReportMinimal = props => {
 }
 
 ReportMinimal.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(ReportMinimal)
+export default connect(null, mapPageDispatchersToProps)(ReportMinimal)

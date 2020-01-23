@@ -46,8 +46,7 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const BaseTaskForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -122,7 +121,6 @@ const BaseTaskForm = props => {
       onSubmit={onSubmit}
       validationSchema={Task.yupSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -404,12 +402,11 @@ const BaseTaskForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateTask" : "createTask"
     const task = new Task({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -430,7 +427,6 @@ const BaseTaskForm = props => {
       "assessment_customFieldEnum1"
     )
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
-    const { edit } = props
     const variables = { task: task }
 
     variables.task.taskedOrganizations = variables.task.taskedOrganizations.map(
@@ -439,7 +435,7 @@ const BaseTaskForm = props => {
 
     if (
       edit &&
-      (props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
+      (initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
         !utils.isEmptyHtml(values.assessment_customFieldEnum1))
     ) {
       // Add an additional mutation to create a change record
@@ -448,13 +444,13 @@ const BaseTaskForm = props => {
         noteRelatedObjects: [
           {
             relatedObjectType: "tasks",
-            relatedObjectUuid: props.initialValues.uuid
+            relatedObjectUuid: initialValues.uuid
           }
         ],
         text: JSON.stringify({
           text: values.assessment_customFieldEnum1,
           changedField: "customFieldEnum1",
-          oldValue: props.initialValues.customFieldEnum1,
+          oldValue: initialValues.customFieldEnum1,
           newValue: values.customFieldEnum1
         })
       }

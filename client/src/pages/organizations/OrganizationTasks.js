@@ -3,7 +3,11 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { Person, Task } from "models"
 import pluralize from "pluralize"
@@ -28,8 +32,12 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 
-const BaseOrganizationTasks = props => {
-  const { queryParams } = props
+const BaseOrganizationTasks = ({
+  pageDispatchers,
+  queryParams,
+  currentUser,
+  organization
+}) => {
   const [pageNum, setPageNum] = useState(0)
   const taskQuery = Object.assign({}, queryParams, { pageNum })
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
@@ -38,7 +46,7 @@ const BaseOrganizationTasks = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -46,7 +54,6 @@ const BaseOrganizationTasks = props => {
 
   const paginatedTasks = data.taskList
   const tasks = paginatedTasks ? paginatedTasks.list : []
-  const { currentUser, organization } = props
   const isAdminUser = currentUser && currentUser.isAdmin()
   const taskShortLabel = Settings.fields.task.shortLabel
 
@@ -110,6 +117,7 @@ const BaseOrganizationTasks = props => {
 }
 
 BaseOrganizationTasks.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person),
   organization: PropTypes.object.isRequired,
   queryParams: PropTypes.object
@@ -123,4 +131,4 @@ const OrganizationTasks = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(OrganizationTasks)
+export default connect(null, mapPageDispatchersToProps)(OrganizationTasks)
