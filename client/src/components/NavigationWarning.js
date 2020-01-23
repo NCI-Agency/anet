@@ -5,8 +5,7 @@ import { Prompt } from "react-router-dom"
 const LEAVE_WARNING =
   "Are you sure you wish to navigate away from the page? You will lose unsaved changes."
 
-const NavigationWarning = props => {
-  const { isBlocking } = props
+const NavigationWarning = ({ isBlocking }) => {
   useEffect(() => {
     window.addEventListener("beforeunload", onBeforeUnloadListener)
 

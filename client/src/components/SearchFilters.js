@@ -15,6 +15,7 @@ import {
   TagOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import _isEmpty from "lodash/isEmpty"
 import {
   Location,
   Organization,
@@ -31,10 +32,39 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 
+export const SearchQueryPropType = PropTypes.shape({
+  text: PropTypes.string,
+  filters: PropTypes.any,
+  objectType: PropTypes.string
+})
+
+export const getSearchQuery = searchQuery => {
+  const query = {}
+  if (!_isEmpty(searchQuery.text)) {
+    query.text = searchQuery.text
+  }
+  if (searchQuery.filters) {
+    searchQuery.filters.forEach(filter => {
+      if (filter.value) {
+        if (filter.value.toQuery) {
+          const toQuery =
+            typeof filter.value.toQuery === "function"
+              ? filter.value.toQuery()
+              : filter.value.toQuery
+          Object.assign(query, toQuery)
+        } else {
+          query[filter.key] = filter.value
+        }
+      }
+    })
+  }
+  return query
+}
+
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
 
-const taskFilters = props => {
+const taskFilters = () => {
   const taskFiltersObj = {
     Organization: {
       component: OrganizationFilter,
@@ -490,11 +520,10 @@ const extraFilters = function(positionTypeFilterRef, organizationFilterRef) {
   return filters
 }
 
-const SearchFilterDisplay = props => {
-  const { filter, element } = props
+const SearchFilterDisplay = ({ filter, element, showSeparator }) => {
   const label = filter.key
   const ChildComponent = element.component
-  const sep = props.showSeparator ? ", " : ""
+  const sep = showSeparator ? ", " : ""
   return (
     <>
       <b>{label}</b>:{" "}
@@ -519,19 +548,18 @@ SearchFilterDisplay.propTypes = {
   showSeparator: PropTypes.bool
 }
 
-export const SearchDescription = props => {
-  const { query, showPlaceholders } = props
+export const SearchDescription = ({ searchQuery, showPlaceholders }) => {
   const allFilters = searchFilters()
   const filterDefs =
-    query.objectType && SEARCH_OBJECT_TYPES[query.objectType]
-      ? allFilters[SEARCH_OBJECT_TYPES[query.objectType]].filters
+    searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
+      ? allFilters[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters
       : {}
-  const filters = query.filters.filter(f => filterDefs[f.key])
+  const filters = searchQuery.filters.filter(f => filterDefs[f.key])
   return (
     <span className="asLink">
-      {query.objectType ? (
+      {searchQuery.objectType ? (
         <>
-          <b>{SEARCH_OBJECT_LABELS[query.objectType]}</b>
+          <b>{SEARCH_OBJECT_LABELS[searchQuery.objectType]}</b>
           {filters.length > 0 ? (
             <>
               <> filtered on </>
@@ -559,11 +587,7 @@ export const SearchDescription = props => {
 }
 
 SearchDescription.propTypes = {
-  query: PropTypes.shape({
-    text: PropTypes.string,
-    filters: PropTypes.any,
-    objectType: PropTypes.string
-  }),
+  searchQuery: SearchQueryPropType,
   showPlaceholders: PropTypes.bool
 }
 
