@@ -8,12 +8,21 @@ import "./BarChart.css"
 /*
  * A bar chart component displaying horizontal bars, grouped per category
  */
-const HorizontalBarChart = props => {
+const HorizontalBarChart = ({
+  width,
+  height,
+  chartId,
+  data,
+  onBarClick,
+  tooltip,
+  selectedBarClass,
+  selectedBar
+}) => {
   /*
    * Example for the data property structure when displaying number of
    * engagements per location, grouped by day:
    *
-   *  props.data = {
+   *  data = {
    *    categoryLabels: {
    *      1540677600000: "28 Oct 2018",
    *      1540767600000: "29 Oct 2018",
@@ -63,16 +72,6 @@ const HorizontalBarChart = props => {
    *    ]
    *  }
    */
-  const {
-    width,
-    height,
-    chartId,
-    data,
-    onBarClick,
-    tooltip,
-    selectedBarClass,
-    selectedBar
-  } = props
   const node = useRef(null)
   useEffect(() => {
     if (!node.current) {

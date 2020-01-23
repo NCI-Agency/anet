@@ -1,7 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import React from "react"
@@ -9,11 +9,11 @@ import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 
-const OnboardingShow = props => {
+const OnboardingShow = ({ pageDispatchers }) => {
   useBoilerplate({
     pageProps: PAGE_PROPS_MIN_HEAD,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   const history = useHistory()
 
@@ -41,6 +41,6 @@ const OnboardingShow = props => {
   }
 }
 
-OnboardingShow.propTypes = { ...pagePropTypes }
+OnboardingShow.propTypes = { pageDispatchers: PageDispatchersPropType }
 
-export default connect(null, mapDispatchToProps)(OnboardingShow)
+export default connect(null, mapPageDispatchersToProps)(OnboardingShow)

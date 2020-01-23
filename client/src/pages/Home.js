@@ -12,9 +12,9 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
 import {
+  PageDispatchersPropType,
   jumpToTop,
-  mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
@@ -61,8 +61,7 @@ const GQL_GET_REPORT_COUNT = gql`
   }
 `
 
-const HomeTile = props => {
-  const { query, setSearchQuery } = props
+const HomeTile = ({ query, setSearchQuery, pageDispatchers }) => {
   const history = useHistory()
   const reportQuery = Object.assign({}, query.query, {
     // we're only interested in the totalCount, so just get at most one report
@@ -74,7 +73,7 @@ const HomeTile = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
 
   const totalCount = data && data.reportList && data.reportList.totalCount
@@ -111,12 +110,12 @@ const HomeTile = props => {
 }
 
 HomeTile.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   query: PropTypes.object.isRequired,
   setSearchQuery: PropTypes.func.isRequired
 }
 
-const HomeTiles = props => {
-  const { currentUser, setSearchQuery } = props
+const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   // queries will contain the queries that will show up on the home tiles
   // Based on the users role. They are all report searches
   const queries = getQueriesForUser(currentUser)
@@ -131,6 +130,7 @@ const HomeTiles = props => {
               key={index}
               query={query}
               setSearchQuery={setSearchQuery}
+              pageDispatchers={pageDispatchers}
             />
           ))}
       </Row>
@@ -288,12 +288,12 @@ const HomeTiles = props => {
 }
 
 HomeTiles.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   setSearchQuery: PropTypes.func.isRequired,
   currentUser: PropTypes.instanceOf(Person)
 }
 
-const SavedSearches = props => {
+const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
   const history = useHistory()
   const [stateError, setStateError] = useState(null)
   const [selectedSearch, setSelectedSearch] = useState(null)
@@ -303,7 +303,7 @@ const SavedSearches = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -374,7 +374,7 @@ const SavedSearches = props => {
 
   function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
-    props.setSearchQuery({
+    setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
@@ -396,11 +396,10 @@ const SavedSearches = props => {
 
 SavedSearches.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-const BaseHome = props => {
-  const { currentUser } = props
+const BaseHome = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
@@ -409,7 +408,7 @@ const BaseHome = props => {
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   return (
@@ -454,11 +453,18 @@ const BaseHome = props => {
       <Messages success={stateSuccess} />
 
       <Fieldset className="home-tile-row" title="My ANET snapshot">
-        <HomeTiles {...props} />
+        <HomeTiles
+          currentUser={currentUser}
+          setSearchQuery={setSearchQuery}
+          pageDispatchers={pageDispatchers}
+        />
       </Fieldset>
 
       <Fieldset title="Saved searches">
-        <SavedSearches {...props} />
+        <SavedSearches
+          setSearchQuery={setSearchQuery}
+          pageDispatchers={pageDispatchers}
+        />
       </Fieldset>
     </div>
   )
@@ -467,14 +473,14 @@ const BaseHome = props => {
 BaseHome.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
   currentUser: PropTypes.instanceOf(Person),
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
   return {
     setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
-    ...pageDispatchToProps
+    ...pageDispatchers
   }
 }
 

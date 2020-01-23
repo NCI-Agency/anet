@@ -1,13 +1,12 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
-import { mapDispatchToProps } from "components/Page"
+import { PageDispatchersPropType } from "components/Page"
 import _isEqual from "lodash/isEqual"
 import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
-import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -41,8 +40,11 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const ReportCalendar = props => {
-  const { queryParams, setTotalCount } = props
+const ReportCalendar = ({
+  pageDispatchers: { showLoading, hideLoading },
+  queryParams,
+  setTotalCount
+}) => {
   const history = useHistory()
   const prevReportQuery = useRef(null)
   const apiPromise = useRef(null)
@@ -76,6 +78,7 @@ const ReportCalendar = props => {
       setTotalCount(null)
     }
     // Store API promise to use in optimised case
+    showLoading()
     apiPromise.current = API.query(GQL_GET_REPORT_LIST, {
       reportQuery
     }).then(data => {
@@ -84,7 +87,7 @@ const ReportCalendar = props => {
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      return reports.map(r => {
+      const results = reports.map(r => {
         const who =
           (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
         const where =
@@ -105,14 +108,17 @@ const ReportCalendar = props => {
             !Settings.engagementsIncludeTimeAndDuration || r.duration === null
         }
       })
+      hideLoading()
+      return results
     })
     return apiPromise.current
   }
 }
 
 ReportCalendar.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func
 }
 
-export default connect(null, mapDispatchToProps)(ReportCalendar)
+export default ReportCalendar

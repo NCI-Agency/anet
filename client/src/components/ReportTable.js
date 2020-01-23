@@ -1,7 +1,7 @@
 import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
@@ -10,7 +10,6 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
-import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
   query($reportQuery: ReportSearchQueryInput) {
@@ -102,16 +101,16 @@ const GQL_GET_REPORT_LIST = gql`
 
 const DEFAULT_PAGESIZE = 10
 
-const ReportTable = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    showAuthors,
-    showStatus,
-    paginationKey,
-    pagination,
-    setPagination
-  } = props
+const ReportTable = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  showAuthors,
+  showStatus,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
@@ -137,7 +136,7 @@ const ReportTable = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     if (setTotalCount) {
@@ -213,17 +212,14 @@ const ReportTable = props => {
 }
 
 ReportTable.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   showAuthors: PropTypes.bool,
   showStatus: PropTypes.bool,
   paginationKey: PropTypes.string.isRequired,
-  setPagination: PropTypes.func.isRequired,
-  pagination: PropTypes.object.isRequired
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  pagination: state.pagination
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(ReportTable)
+export default ReportTable

@@ -373,3 +373,13 @@ export const FieldShortcuts = props => {
     )
   )
 }
+
+FieldShortcuts.propTypes = {
+  shortcuts: PropTypes.arrayOf(PropTypes.shape({ uuid: PropTypes.string })),
+  fieldName: PropTypes.string.isRequired,
+  objectType: PropTypes.object.isRequired,
+  curValue: PropTypes.object,
+  onChange: PropTypes.func,
+  handleAddItem: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired
+}

@@ -17,8 +17,7 @@ const HOPSCOTCH_CONFIG = {
   bubbleWidth: 400
 }
 
-const BaseGuidedTour = props => {
-  const { autostart, currentUser, title, tour, onEnd } = props
+const BaseGuidedTour = ({ autostart, currentUser, title, tour, onEnd }) => {
   const history = useHistory()
   const [runningTour, setRunningTour] = useState(false)
   const startTour = useCallback(() => {

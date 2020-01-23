@@ -1,7 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { AuthorizationGroup } from "models"
@@ -9,11 +9,11 @@ import React from "react"
 import { connect } from "react-redux"
 import AuthorizationGroupForm from "./Form"
 
-const AuthorizationGroupNew = props => {
+const AuthorizationGroupNew = ({ pageDispatchers }) => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   const authorizationGroup = new AuthorizationGroup()
@@ -29,7 +29,7 @@ const AuthorizationGroupNew = props => {
 }
 
 AuthorizationGroupNew.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(AuthorizationGroupNew)
+export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupNew)
