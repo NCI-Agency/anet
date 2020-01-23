@@ -83,11 +83,11 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
     .default(null)
 }
 
-const createFieldYupSchema = (fieldKey, fieldConfig) => {
+const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
   const { label, validations, objectFields } = fieldConfig
   let fieldTypeYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
   if (!_isEmpty(objectFields)) {
-    const objSchema = createYupObjectShape(objectFields)
+    const objSchema = createYupObjectShape(objectFields, fieldPrefix)
     fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)
   }
   if (!_isEmpty(validations)) {
@@ -114,19 +114,19 @@ const createFieldYupSchema = (fieldKey, fieldConfig) => {
     "invisibleCustomFields",
     (invisibleCustomFields, schema) =>
       invisibleCustomFields &&
-      invisibleCustomFields.includes("formCustomFields." + fieldKey)
+      invisibleCustomFields.includes(`${fieldPrefix}.${fieldKey}`)
         ? schema
         : schema.concat(fieldTypeYupSchema)
   )
   return fieldYupSchema
 }
 
-export const createYupObjectShape = config => {
+export const createYupObjectShape = (config, prefix = "formCustomFields") => {
   let objShape = {}
   if (config) {
     objShape = Object.fromEntries(
       Object.entries(config)
-        .map(([k, v]) => [k, createFieldYupSchema(k, config[k])])
+        .map(([k, v]) => [k, createFieldYupSchema(k, config[k], prefix)])
         .filter(([k, v]) => v !== null)
     )
     objShape.invisibleCustomFields = yup

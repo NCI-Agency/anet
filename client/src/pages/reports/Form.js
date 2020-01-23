@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
@@ -20,7 +21,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import { NOTE_TYPE } from "components/Model"
+import { createYupObjectShape, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop, useBoilerplate } from "components/Page"
 import ReportTags from "components/ReportTags"
@@ -43,6 +44,7 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
+import * as yup from "yup"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
@@ -160,6 +162,8 @@ const BaseReportForm = props => {
   )
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  // We need the report tasks in order to be able to dynamically update the yup schema for the selected task assessments
+  const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
   const autoSaveSettings = {
@@ -279,13 +283,36 @@ const BaseReportForm = props => {
     initialValues.initialTaskToAssessmentUuid[ta.taskUuid] = ta.assessmentUuid
     initialValues.taskAssessments[ta.taskUuid] = ta.assessment
   })
+
+  // Update the task assessments schema according to the selected report tasks
+  const taskAssessmentsSchemaShape = {}
+  reportTasks
+    .filter(t => t.customFields)
+    .forEach(t => {
+      taskAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
+        JSON.parse(JSON.parse(t.customFields).assessmentDefinition),
+        `taskAssessments.${t.uuid}`
+      )
+    })
+  let reportSchema = Report.yupSchema
+  if (!_isEmpty(taskAssessmentsSchemaShape)) {
+    const taskAssessmentsSchema = yup.object().shape({
+      taskAssessments: yup
+        .object()
+        .shape(taskAssessmentsSchemaShape)
+        .nullable()
+        .default(null)
+    })
+    reportSchema = Report.yupSchema.concat(taskAssessmentsSchema)
+  }
   let validateFieldDebounced
+
   return (
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
       validateOnChange={false}
-      validationSchema={Report.yupSchema}
+      validationSchema={reportSchema}
       initialValues={initialValues}
       {...myFormProps}
     >
@@ -512,7 +539,8 @@ const BaseReportForm = props => {
                       "intentCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )}
+                    )
+                  }
                   extraColElem={
                     <>
                       <span id="intentCharsLeft">
@@ -621,7 +649,8 @@ const BaseReportForm = props => {
                             "cancelledReason",
                             cancelledReasonOptions[0].value,
                             true
-                          )}
+                          )
+                        }
                       >
                         This engagement was cancelled
                       </Checkbox>
@@ -719,7 +748,8 @@ const BaseReportForm = props => {
                         <AttendeesTable
                           attendees={values.attendees}
                           onChange={value =>
-                            setFieldValue("attendees", value, true)}
+                            setFieldValue("attendees", value, true)
+                          }
                           showDelete
                         />
                       }
@@ -804,6 +834,7 @@ const BaseReportForm = props => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("tasks", value, true)
+                    setReportTasks(value)
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -890,7 +921,8 @@ const BaseReportForm = props => {
                         "keyOutcomesCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )}
+                      )
+                    }
                     extraColElem={
                       <>
                         <span id="keyOutcomesCharsLeft">
@@ -920,7 +952,8 @@ const BaseReportForm = props => {
                         "nextStepsCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )}
+                      )
+                    }
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
@@ -970,7 +1003,8 @@ const BaseReportForm = props => {
                             "reportSensitiveInformation.text",
                             value,
                             true
-                          )}
+                          )
+                        }
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
@@ -1096,7 +1130,8 @@ const BaseReportForm = props => {
                   {canDelete && (
                     <ConfirmDelete
                       onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)}
+                        onConfirmDelete(values.uuid, resetForm)
+                      }
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"

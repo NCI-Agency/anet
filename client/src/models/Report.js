@@ -260,12 +260,7 @@ export default class Report extends Model {
         .nullable()
         .default([]),
       // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Report.customFieldsSchema.nullable(),
-      // not actually in the database, used to be able to fill assessments
-      taskAssessments: yup
-        .object()
-        .nullable()
-        .default({})
+      formCustomFields: Report.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 
