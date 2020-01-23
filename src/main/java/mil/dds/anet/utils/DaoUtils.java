@@ -2,8 +2,6 @@ package mil.dds.anet.utils;
 
 import com.google.common.base.Joiner;
 import java.lang.invoke.MethodHandles;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,9 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,26 +89,6 @@ public class DaoUtils {
   public static void setUpdateFields(AbstractAnetBean bean) {
     final Instant now = Instant.now();
     bean.setUpdatedAt(now);
-  }
-
-  public static void setCustomizableBeanFields(AbstractCustomizableAnetBean bean, ResultSet rs,
-      String tableName) throws SQLException {
-    MapperUtils.setCommonBeanFields(bean, rs, tableName);
-
-    final String customFieldsCol = getQualifiedFieldName(tableName, "customFields");
-    if (MapperUtils.containsColumnNamed(rs, customFieldsCol)) {
-      bean.setCustomFields(rs.getString(customFieldsCol));
-    }
-  }
-
-  private static String getQualifiedFieldName(String tableName, String fieldName) {
-    final StringBuilder result = new StringBuilder();
-    if (!Utils.isEmptyOrNull(tableName)) {
-      result.append(tableName);
-      result.append("_");
-    }
-    result.append(fieldName);
-    return result.toString();
   }
 
   public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {

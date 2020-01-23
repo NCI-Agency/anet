@@ -7,7 +7,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -32,7 +31,7 @@ public class PersonMapper implements RowMapper<Person> {
     if (rs.getObject("people_uuid") == null) {
       return null;
     }
-    DaoUtils.setCustomizableBeanFields(a, rs, "people");
+    MapperUtils.setCustomizableBeanFields(a, rs, "people");
     a.setName(MapperUtils.getOptionalString(rs, "people_name"));
     a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", PersonStatus.class));
     a.setRole(MapperUtils.getEnumIdx(rs, "people_role", Role.class));

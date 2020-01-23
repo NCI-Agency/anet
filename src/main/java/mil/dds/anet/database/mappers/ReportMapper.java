@@ -6,7 +6,6 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -15,7 +14,7 @@ public class ReportMapper implements RowMapper<Report> {
   @Override
   public Report map(ResultSet rs, StatementContext ctx) throws SQLException {
     Report r = new Report();
-    DaoUtils.setCustomizableBeanFields(r, rs, "reports");
+    MapperUtils.setCustomizableBeanFields(r, rs, "reports");
 
     r.setState(MapperUtils.getEnumIdx(rs, "reports_state", ReportState.class));
     r.setEngagementDate(MapperUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));

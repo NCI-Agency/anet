@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -13,7 +12,7 @@ public class TaskMapper implements RowMapper<Task> {
   @Override
   public Task map(ResultSet r, StatementContext ctx) throws SQLException {
     Task p = new Task();
-    DaoUtils.setCustomizableBeanFields(p, r, null);
+    MapperUtils.setCustomizableBeanFields(p, r, null);
     p.setLongName(r.getString("longName"));
     p.setShortName(r.getString("shortName"));
     p.setCategory(r.getString("category"));

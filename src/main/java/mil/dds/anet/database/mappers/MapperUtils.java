@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,16 @@ public class MapperUtils {
 
     // Only present when batch searching
     bean.setBatchUuid(getOptionalString(rs, "batchUuid"));
+  }
+
+  public static void setCustomizableBeanFields(AbstractCustomizableAnetBean bean, ResultSet rs,
+      String tableName) throws SQLException {
+    setCommonBeanFields(bean, rs, tableName);
+  
+    final String customFieldsCol = getQualifiedFieldName(tableName, "customFields");
+    if (containsColumnNamed(rs, customFieldsCol)) {
+      bean.setCustomFields(rs.getString(customFieldsCol));
+    }
   }
 
   public static Integer getOptionalInt(final ResultSet rs, final String columnName)
