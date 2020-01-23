@@ -26,6 +26,7 @@ const BaseReportNew = props => {
     person.primary = true
     report.attendees.push(person)
   }
+  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
 
   return (
     <div className="report-new">
@@ -41,7 +42,10 @@ const BaseReportNew = props => {
         />
       </div>
 
-      <ReportForm initialValues={report} title="Create a new Report" />
+      <ReportForm
+        initialValues={reportInitialValues}
+        title="Create a new Report"
+      />
     </div>
   )
 }

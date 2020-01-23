@@ -13,7 +13,6 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { NOTE_TYPE } from "components/Model"
 import {
   AnchorLink,
   jumpToTop,
@@ -346,16 +345,8 @@ const BaseReportShow = props => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  const initialTaskAssessments = report.notes.filter(
-    n => n.type === NOTE_TYPE.ASSESSMENT
-  )
-  const taskAssessmentsValues = initialTaskAssessments.map(ta => [
-    ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
-      .relatedObjectUuid,
-    JSON.parse(ta.text)
-  ])
   // Get initial task assessments values
-  report.taskAssessments = Object.fromEntries(taskAssessmentsValues)
+  report = Object.assign(report, report.getTaskAssessments())
 
   return (
     <Formik

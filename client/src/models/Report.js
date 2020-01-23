@@ -1,5 +1,9 @@
 import { Settings } from "api"
-import Model, { createYupObjectShape, yupDate } from "components/Model"
+import Model, {
+  createYupObjectShape,
+  NOTE_TYPE,
+  yupDate
+} from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
@@ -396,5 +400,33 @@ export default class Report extends Model {
       return !lastApprovalStep ? "" : lastApprovalStep.createdAt
     } else {
     }
+  }
+
+  getTaskAssessments() {
+    const notesToAssessments = this.notes
+      .filter(
+        n =>
+          n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")
+            .length
+      )
+      .map(ta => ({
+        taskUuid: [
+          ta.noteRelatedObjects.filter(
+            ro => ro.relatedObjectType === "tasks"
+          )[0].relatedObjectUuid
+        ],
+        assessmentUuid: ta.uuid,
+        assessment: JSON.parse(ta.text)
+      }))
+    // When updating the assessments, we need for each task the uuid of the related assessment
+    const taskToAssessmentUuid = {}
+    // Get initial task assessments values
+    const taskAssessments = {}
+    notesToAssessments.forEach(ta => {
+      taskToAssessmentUuid[ta.taskUuid] = ta.assessmentUuid
+      taskAssessments[ta.taskUuid] = ta.assessment
+    })
+    return { taskToAssessmentUuid, taskAssessments }
   }
 }

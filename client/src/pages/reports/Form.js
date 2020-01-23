@@ -260,30 +260,6 @@ const BaseReportForm = props => {
     }))
   }
 
-  const taskAssessments = initialValues.notes
-    .filter(
-      n =>
-        n.type === NOTE_TYPE.ASSESSMENT &&
-        n.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")
-          .length
-    )
-    .map(ta => ({
-      taskUuid: [
-        ta.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")[0]
-          .relatedObjectUuid
-      ],
-      assessmentUuid: ta.uuid,
-      assessment: JSON.parse(ta.text)
-    }))
-  // When updating the assessments, we need for each task the uuid of the related assessment
-  initialValues.initialTaskToAssessmentUuid = {}
-  // Get initial task assessments values
-  initialValues.taskAssessments = {}
-  taskAssessments.forEach(ta => {
-    initialValues.initialTaskToAssessmentUuid[ta.taskUuid] = ta.assessmentUuid
-    initialValues.taskAssessments[ta.taskUuid] = ta.assessment
-  })
-
   // Update the task assessments schema according to the selected report tasks
   const taskAssessmentsSchemaShape = {}
   reportTasks
@@ -294,17 +270,17 @@ const BaseReportForm = props => {
         `taskAssessments.${t.uuid}`
       )
     })
-  let reportSchema = Report.yupSchema
-  if (!_isEmpty(taskAssessmentsSchemaShape)) {
-    const taskAssessmentsSchema = yup.object().shape({
-      taskAssessments: yup
-        .object()
-        .shape(taskAssessmentsSchemaShape)
-        .nullable()
-        .default(null)
-    })
-    reportSchema = Report.yupSchema.concat(taskAssessmentsSchema)
-  }
+  const reportSchema = _isEmpty(taskAssessmentsSchemaShape)
+    ? Report.yupSchema
+    : Report.yupSchema.concat(
+        yup.object().shape({
+          taskAssessments: yup
+            .object()
+            .shape(taskAssessmentsSchemaShape)
+            .nullable()
+            .default(null)
+        })
+      )
   let validateFieldDebounced
 
   return (
@@ -1324,7 +1300,7 @@ const BaseReportForm = props => {
           ],
           text: JSON.stringify(taskAssessment)
         }
-        const initialAssessmentUuid = values.initialTaskToAssessmentUuid[key]
+        const initialAssessmentUuid = values.taskToAssessmentUuid[key]
         if (initialAssessmentUuid) {
           noteObj.uuid = initialAssessmentUuid
         }
@@ -1344,7 +1320,7 @@ const BaseReportForm = props => {
       "formCustomFields",
       "tasksLevel1",
       "taskAssessments",
-      "initialTaskToAssessmentUuid"
+      "taskToAssessmentUuid"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.

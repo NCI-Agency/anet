@@ -122,6 +122,7 @@ const ReportEdit = props => {
     data.report.formCustomFields = JSON.parse(data.report.customFields)
   }
   const report = new Report(data ? data.report : {})
+  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
 
   return (
     <div className="report-edit">
@@ -136,7 +137,7 @@ const ReportEdit = props => {
       />
       <ReportForm
         edit
-        initialValues={report}
+        initialValues={reportInitialValues}
         title={`Report #${report.uuid}`}
         showSensitiveInfo={
           !!report.reportSensitiveInformation &&
