@@ -69,5 +69,10 @@ public class AdminDao {
         .bind("value", setting.getValue()).execute();
   }
 
-
+  @InTransaction
+  public void updateMaterializedView(String viewName) {
+    // Can't use a prepared statement with a parameter here, alas
+    getDbHandle()
+        .execute(String.format("REFRESH MATERIALIZED VIEW CONCURRENTLY \"%1$s\"", viewName));
+  }
 }

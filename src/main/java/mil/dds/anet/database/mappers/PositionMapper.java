@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -27,7 +26,7 @@ public class PositionMapper implements RowMapper<Position> {
   }
 
   public static Position fillInFields(Position p, ResultSet rs) throws SQLException {
-    DaoUtils.setCommonBeanFields(p, rs, "positions");
+    MapperUtils.setCommonBeanFields(p, rs, "positions");
     p.setName(rs.getString("positions_name"));
     p.setCode(rs.getString("positions_code"));
     p.setType(MapperUtils.getEnumIdx(rs, "positions_type", PositionType.class));

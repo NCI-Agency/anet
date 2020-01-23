@@ -12,8 +12,8 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -93,7 +93,7 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const BasePersonShow = props => {
+const BasePersonShow = ({ pageDispatchers, currentUser }) => {
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
@@ -111,7 +111,7 @@ const BasePersonShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -122,7 +122,6 @@ const BasePersonShow = props => {
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
   // The position for this person's counterparts
   const position = person.position
   const assignedRole =
@@ -148,7 +147,7 @@ const BasePersonShow = props => {
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 
   return (
-    <Formik enableReinitialize initialValues={person} {...myFormProps}>
+    <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
         const action = (
           <div>
@@ -472,7 +471,6 @@ const BasePersonShow = props => {
   }
 
   function renderPositionBlankSlate(person) {
-    const { currentUser } = props
     // when the person is not in a position, any super user can assign them.
     const canChangePosition = currentUser.isSuperUser()
 
@@ -517,7 +515,7 @@ const BasePersonShow = props => {
 }
 
 BasePersonShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -527,4 +525,4 @@ const PersonShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(PersonShow)
+export default connect(null, mapPageDispatchersToProps)(PersonShow)

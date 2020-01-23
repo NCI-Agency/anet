@@ -29,8 +29,7 @@ const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const AuthorizationGroupForm = props => {
-  const { edit, title, ...myFormProps } = props
+const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -51,7 +50,7 @@ const AuthorizationGroupForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={AuthorizationGroup.yupSchema}
-      {...myFormProps}
+      initialValues={initialValues}
     >
       {({
         handleSubmit,
@@ -114,7 +113,7 @@ const AuthorizationGroupForm = props => {
                     <>
                       <span id="descriptionCharsLeft">
                         {Settings.maxTextFieldLength -
-                          props.initialValues.description.length}
+                          initialValues.description.length}
                       </span>{" "}
                       characters remaining
                     </>
@@ -207,14 +206,13 @@ const AuthorizationGroupForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit
       ? "updateAuthorizationGroup"
       : "createAuthorizationGroup"
     const authGroup = new AuthorizationGroup({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -233,9 +231,7 @@ const AuthorizationGroupForm = props => {
       "notes"
     )
     return API.mutation(
-      props.edit
-        ? GQL_UPDATE_AUTHORIZATION_GROUP
-        : GQL_CREATE_AUTHORIZATION_GROUP,
+      edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,
       { authorizationGroup }
     )
   }

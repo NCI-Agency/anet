@@ -57,7 +57,9 @@ import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
+import mil.dds.anet.threads.MaterializedViewRefreshWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.HttpsRedirectFilter;
 import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -233,6 +235,14 @@ public class AnetApplication extends Application<AnetConfiguration> {
     scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
     runAccountDeactivationWorker(configuration, scheduler, engine);
+
+    if (DaoUtils.isPostgresql()) {
+      // Wait 60 seconds between updates of PostgreSQL materialized views,
+      // starting 30 seconds after boot-up.
+      final MaterializedViewRefreshWorker materializedViewRefreshWorker =
+          new MaterializedViewRefreshWorker(engine.getAdminDao());
+      scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
+    }
 
     // Create all of the HTTP Resources.
     LoggingResource loggingResource = new LoggingResource();

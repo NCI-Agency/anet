@@ -75,6 +75,10 @@ public class DaoUtils {
     return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.MSSQL;
   }
 
+  public static boolean isPostgresql() {
+    return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.POSTGRESQL;
+  }
+
   public static String getNewUuid() {
     return UUID.randomUUID().toString();
   }
@@ -91,30 +95,9 @@ public class DaoUtils {
     bean.setUpdatedAt(now);
   }
 
-  public static void setCommonBeanFields(AbstractAnetBean bean, ResultSet rs, String tableName)
-      throws SQLException {
-    // Should always be there
-    bean.setUuid(rs.getString(getQualifiedFieldName(tableName, "uuid")));
-
-    // Not all beans have createdAt and/or updatedAt
-    final String createdAtCol = getQualifiedFieldName(tableName, "createdAt");
-    if (MapperUtils.containsColumnNamed(rs, createdAtCol)) {
-      bean.setCreatedAt(getInstantAsLocalDateTime(rs, createdAtCol));
-    }
-    final String updatedAtCol = getQualifiedFieldName(tableName, "updatedAt");
-    if (MapperUtils.containsColumnNamed(rs, updatedAtCol)) {
-      bean.setUpdatedAt(getInstantAsLocalDateTime(rs, updatedAtCol));
-    }
-
-    // Only present when batch searching
-    if (MapperUtils.containsColumnNamed(rs, "batchUuid")) {
-      bean.setBatchUuid(rs.getString("batchUuid"));
-    }
-  }
-
   public static void setCustomizableBeanFields(AbstractCustomizableAnetBean bean, ResultSet rs,
       String tableName) throws SQLException {
-    setCommonBeanFields(bean, rs, tableName);
+    MapperUtils.setCommonBeanFields(bean, rs, tableName);
 
     final String customFieldsCol = getQualifiedFieldName(tableName, "customFields");
     if (MapperUtils.containsColumnNamed(rs, customFieldsCol)) {
@@ -144,18 +127,6 @@ public class DaoUtils {
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
   }
 
-  public static Double getOptionalDouble(final ResultSet rs, final String columnName)
-      throws SQLException {
-    final Double value = rs.getDouble(columnName);
-    return rs.wasNull() ? null : value;
-  }
-
-  public static Integer getOptionalInt(final ResultSet rs, final String columnName)
-      throws SQLException {
-    final Integer value = rs.getInt(columnName);
-    return rs.wasNull() ? null : value;
-  }
-
   public static Person getUser(Map<String, Object> context, Person user) {
     if (context != null && context.containsKey("user")) {
       user = getUserFromContext(context);
@@ -173,17 +144,6 @@ public class DaoUtils {
 
   public static ZoneOffset getDefaultZoneOffset() {
     return ZoneOffset.UTC;
-  }
-
-  public static Instant getInstantAsLocalDateTime(ResultSet rs, String field) throws SQLException {
-    // We would like to do <code>rs.getObject(field, java.time.Instant.class)</code>
-    // but the MSSQL JDBC driver does not support that (yet).
-    // However, as of the 7.1.0 preview, at least java.time.LocalDateTime *is* supported.
-    final LocalDateTime result = rs.getObject(field, LocalDateTime.class);
-    if (result != null) {
-      return result.toInstant(getDefaultZoneOffset());
-    }
-    return null;
   }
 
   public static void addInstantAsLocalDateTime(Map<String, Object> args, String parameterName,

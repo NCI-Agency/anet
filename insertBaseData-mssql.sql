@@ -303,94 +303,83 @@ INSERT INTO approvers (approvalStepUuid, positionUuid)
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps WHERE name='EF 2.2 Secondary Reviewers'), (SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'));
 
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)	VALUES (N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', 'EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid)
-	VALUES (N'fdf107e7-a88a-4dc4-b744-748e9aaffabc', '1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'7b2ad5c3-018b-48f5-b679-61fbbda21693', '1.1.A', 'Milestone the First in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.1'), (SELECT uuid from organizations where shortName='EF 1.1'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'1b5eb36b-456c-46b7-ae9e-1c89e9075292', '1.1.B', 'Milestone the Second in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.1'), (SELECT uuid from organizations where shortName='EF 1.1'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'7fdef880-1bf3-4e56-8476-79166324023f', '1.1.C', 'Milestone the Third in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.1'), (SELECT uuid from organizations where shortName='EF 1.1'));
+	VALUES
+		(N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', 'EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'fdf107e7-a88a-4dc4-b744-748e9aaffabc', '1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
+		(N'7b2ad5c3-018b-48f5-b679-61fbbda21693', '1.1.A', 'Milestone the First in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
+		(N'1b5eb36b-456c-46b7-ae9e-1c89e9075292', '1.1.B', 'Milestone the Second in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
+		(N'7fdef880-1bf3-4e56-8476-79166324023f', '1.1.C', 'Milestone the Third in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
+		(N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+		(N'9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+		(N'6bbb1be9-4655-48d7-83f2-bc474781544a', '1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+		(N'076793eb-9950-4ea6-bbd5-2d8b8827828c', '1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
+		(N'30bc5708-c12d-4a21-916c-5acd7f6f11da', '1.3.B', 'Tracking your expenses', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
+		(N'df920c99-10ea-44e8-940f-cb1d1cbd22da', '1.3.C', 'Knowing when you run out of money', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
+		(N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7', 'EF 2', 'Transparency, Accountability, O (TAO)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'75d4009d-7c79-42e0-aa2f-d79d158ec8d6', '2.A', 'This is the first Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+		(N'2200a820-c4c7-4c9c-946c-f0c9c9e045c5', '2.B', 'This is the second Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+		(N'0701a964-5d79-4090-8f35-a40856556675', '2.C', 'This is the third Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+		(N'42afd501-1a2c-4758-9da5-f996b2c97156', '2.D', 'Keep track of the petty cash drawer', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7'),
+		(N'44089923-7367-4e97-82c3-dfe6b270d493', 'EF 3', 'Rule of Law', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'39d0c437-720c-4d78-8768-7f3dee5b3cd0', '3.a', 'Get some Lawyers to read a book', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'44089923-7367-4e97-82c3-dfe6b270d493'),
+		(N'a710a076-be5c-4982-b870-50dd5d340eb3', '3.b', 'Get some Lawyers to wear a suit to court', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'44089923-7367-4e97-82c3-dfe6b270d493'),
+		(N'c00633c5-5479-41b2-b188-89d2a9922924', '3.c', 'Get some Lawyers to cross-examine witnesses in a non-hostile fashion', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'44089923-7367-4e97-82c3-dfe6b270d493'),
+		(N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9', 'EF 4', 'Force Gen (Training)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'c098a5b3-8d80-429d-ada2-fd57dc331e2a', '4.a', 'Get a website for people to apply on', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'eddf19f6-f6e1-44f5-9093-f3e2ade59428', '4.b', 'Hire People', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'0cb03167-2772-4d3e-8382-5870da58022a', '4.b.1', 'Get an HR team', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'df8fd269-b382-486e-9bc6-f3f4b77a03b0', '4.b.2', 'Review resumes for hiring', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'17f35bc6-a0f3-4f79-8813-2176a7d7ca2f', '4.b.3', 'Invite people to come interview', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'32788f96-b72c-4314-8286-7f59b683cba2', '4.b.4', 'Interview candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'cca1678a-58d7-4213-9c67-f894879df776', '4.b.5', 'Extend Job Offers to successful candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'98342fa0-9106-4ef1-bc47-e4af2f5da330', '4.c', 'Onboard new Employees', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+		(N'242efaa3-d5de-4970-996d-50ca90ef6480', 'EF 5', 'Force Sustainment (Logistics)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'12b8dbcc-8f31-444a-9437-00fe00fc1f7b', 'EF6', 'C2 Operations', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'19364d81-3203-483d-a6bf-461d58888c76', 'EF7', 'Intelligence', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'9b9f4205-0721-4893-abf8-69e020d4db23', 'EF8', 'Stratcom', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(lower(newid()), 'TAAC-N', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(lower(newid()), 'TAAC-S', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(lower(newid()), 'TAAC-E', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(lower(newid()), 'TAAC-W', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(lower(newid()), 'TAAC-C', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(lower(newid()), 'TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid, customFields)
-	VALUES (N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', 'EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1'), (SELECT uuid from organizations WHERE shortName='EF 1.2'), '{ "assessmentDefinition": "{ \"assessment\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"Test Assessment 1\", \"helpText\": \"Please provide assessment for something important\", \"levels\": [ { \"color\": \"red\", \"endValue\": 2, \"label\": \"test\" }, { \"color\": \"#FFBF00\", \"endValue\": 8, \"label\": \"mid\" }, { \"color\": \"green\", \"endValue\": 10, \"label\": \"high\" } ] } }" }');
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations where shortName='EF 1.2'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations where shortName='EF 1.2'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'6bbb1be9-4655-48d7-83f2-bc474781544a', '1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations where shortName='EF 1.2'));
+INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, customFields)
+	VALUES
+		(N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', 'EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', '{ "assessmentDefinition": "{ \"assessment\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"Test Assessment 1\", \"helpText\": \"Please provide assessment for something important\", \"levels\": [ { \"color\": \"red\", \"endValue\": 2, \"label\": \"test\" }, { \"color\": \"#FFBF00\", \"endValue\": 8, \"label\": \"mid\" }, { \"color\": \"green\", \"endValue\": 10, \"label\": \"high\" } ] } }" }'),
+		(N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', '{ "assessmentDefinition": "{ \"frenchFlag\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"French Flag assessment\", \"helpText\": \"Please tell us which is the best color in the French flaf\", \"levels\": [ { \"color\": \"blue\", \"endValue\": 3.3, \"label\": \"blue\" }, { \"color\": \"white\", \"endValue\": 6.6, \"label\": \"white\" }, { \"color\": \"red\", \"endValue\": 10, \"label\": \"red\" } ] } }" }');
 
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid, customFields)
-	VALUES (N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1'), (SELECT uuid FROM organizations WHERE shortName='EF 1.3'),'{ "assessmentDefinition": "{ \"frenchFlag\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"French Flag assessment\", \"helpText\": \"Please tell us which is the best color in the French flaf\", \"levels\": [ { \"color\": \"blue\", \"endValue\": 3.3, \"label\": \"blue\" }, { \"color\": \"white\", \"endValue\": 6.6, \"label\": \"white\" }, { \"color\": \"red\", \"endValue\": 10, \"label\": \"red\" } ] } }" }');
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'076793eb-9950-4ea6-bbd5-2d8b8827828c', '1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.3'), (SELECT uuid from organizations where shortName='EF 1.3'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'30bc5708-c12d-4a21-916c-5acd7f6f11da', '1.3.B', 'Tracking your expenses', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.3'), (SELECT uuid from organizations where shortName='EF 1.3'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'df920c99-10ea-44e8-940f-cb1d1cbd22da', '1.3.C', 'Knowing when you run out of money', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 1.3'), (SELECT uuid from organizations where shortName='EF 1.3'));
-
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, organizationUuid)
-	VALUES (N'cd35abe7-a5c9-4b3e-885b-4c72bf564ed7', 'EF 2', 'Transparency, Accountability, O (TAO)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from organizations where shortName='EF 2'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'75d4009d-7c79-42e0-aa2f-d79d158ec8d6', '2.A', 'This is the first Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 2'), (SELECT uuid from organizations where shortName='EF 2'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'2200a820-c4c7-4c9c-946c-f0c9c9e045c5', '2.B', 'This is the second Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 2'), (SELECT uuid from organizations where shortName='EF 2'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'0701a964-5d79-4090-8f35-a40856556675', '2.C', 'This is the third Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 2'), (SELECT uuid from organizations where shortName='EF 2'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'42afd501-1a2c-4758-9da5-f996b2c97156', '2.D', 'Keep track of the petty cash drawer', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 2'), (SELECT uuid from organizations where shortName='EF 2'));
-
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (N'44089923-7367-4e97-82c3-dfe6b270d493', 'EF 3', 'Rule of Law', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'39d0c437-720c-4d78-8768-7f3dee5b3cd0', '3.a', 'Get some Lawyers to read a book', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 3'), (SELECT uuid from organizations where shortName='EF 3'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'a710a076-be5c-4982-b870-50dd5d340eb3', '3.b', 'Get some Lawyers to wear a suit to court', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 3'), (SELECT uuid from organizations where shortName='EF 3'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'c00633c5-5479-41b2-b188-89d2a9922924', '3.c', 'Get some Lawyers to cross-examine witnesses in a non-hostile fashion', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 3'), (SELECT uuid from organizations where shortName='EF 3'));
-
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9', 'EF 4', 'Force Gen (Training)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'c098a5b3-8d80-429d-ada2-fd57dc331e2a', '4.a', 'Get a website for people to apply on', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'eddf19f6-f6e1-44f5-9093-f3e2ade59428', '4.b', 'Hire People', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'0cb03167-2772-4d3e-8382-5870da58022a', '4.b.1', 'Get an HR team', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'df8fd269-b382-486e-9bc6-f3f4b77a03b0', '4.b.2', 'Review resumes for hiring', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'17f35bc6-a0f3-4f79-8813-2176a7d7ca2f', '4.b.3', 'Invite people to come interview', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'32788f96-b72c-4314-8286-7f59b683cba2', '4.b.4', 'Interview candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'cca1678a-58d7-4213-9c67-f894879df776', '4.b.5', 'Extend Job Offers to successful candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, organizationUuid)
-	VALUES (N'98342fa0-9106-4ef1-bc47-e4af2f5da330', '4.c', 'Onboard new Employees', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from tasks where shortName = 'EF 4'), (SELECT uuid from organizations where shortName='EF 4'));
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (N'242efaa3-d5de-4970-996d-50ca90ef6480', 'EF 5', 'Force Sustainment (Logistics)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (N'12b8dbcc-8f31-444a-9437-00fe00fc1f7b', 'EF6', 'C2 Operations', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (N'19364d81-3203-483d-a6bf-461d58888c76', 'EF7', 'Intelligence', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (N'9b9f4205-0721-4893-abf8-69e020d4db23', 'EF8', 'Stratcom', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TAAC-N', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TAAC-S', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TAAC-E', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TAAC-W', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TAAC-C', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO taskTaskedOrganizations (taskUuid, organizationUuid)
+  VALUES
+		((SELECT uuid from tasks where shortName = '1.1.A'), (SELECT uuid from organizations where shortName='EF 1.1')),
+		((SELECT uuid from tasks where shortName = '1.1.B'), (SELECT uuid from organizations where shortName='EF 1.1')),
+		((SELECT uuid from tasks where shortName = '1.1.C'), (SELECT uuid from organizations where shortName='EF 1.1')),
+		-- ((SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations WHERE shortName='EF 1.2')),
+		-- ((SELECT uuid from tasks where shortName = '1.2.A'), (SELECT uuid from organizations where shortName='EF 1.2')),
+		-- ((SELECT uuid from tasks where shortName = '1.2.B'), (SELECT uuid from organizations where shortName='EF 1.2')),
+		-- ((SELECT uuid from tasks where shortName = '1.2.C'), (SELECT uuid from organizations where shortName='EF 1.2')),
+		-- ((SELECT uuid from tasks where shortName = 'EF 1.3'), (SELECT uuid FROM organizations WHERE shortName='EF 1.3')),
+		-- ((SELECT uuid from tasks where shortName = '1.3.A'), (SELECT uuid from organizations where shortName='EF 1.3')),
+		-- ((SELECT uuid from tasks where shortName = '1.3.B'), (SELECT uuid from organizations where shortName='EF 1.3')),
+		-- ((SELECT uuid from tasks where shortName = '1.3.C'), (SELECT uuid from organizations where shortName='EF 1.3')),
+		((SELECT uuid from tasks where shortName = 'EF 2'), (SELECT uuid from organizations where shortName='EF 2')),
+		((SELECT uuid from tasks where shortName = '2.A'), (SELECT uuid from organizations where shortName='EF 2')),
+		((SELECT uuid from tasks where shortName = '2.B'), (SELECT uuid from organizations where shortName='EF 2')),
+		((SELECT uuid from tasks where shortName = '2.C'), (SELECT uuid from organizations where shortName='EF 2')),
+		((SELECT uuid from tasks where shortName = '2.D'), (SELECT uuid from organizations where shortName='EF 2')),
+		((SELECT uuid from tasks where shortName = '3.a'), (SELECT uuid from organizations where shortName='EF 3')),
+		((SELECT uuid from tasks where shortName = '3.b'), (SELECT uuid from organizations where shortName='EF 3')),
+		((SELECT uuid from tasks where shortName = '3.c'), (SELECT uuid from organizations where shortName='EF 3')),
+		((SELECT uuid from tasks where shortName = '4.a'), (SELECT uuid from organizations where shortName='EF 4')),
+		((SELECT uuid from tasks where shortName = '4.b'), (SELECT uuid from organizations where shortName='EF 4')),
+		((SELECT uuid from tasks where shortName = '4.b.1'), (SELECT uuid from organizations where shortName='EF 4')),
+		((SELECT uuid from tasks where shortName = '4.b.2'), (SELECT uuid from organizations where shortName='EF 4')),
+		((SELECT uuid from tasks where shortName = '4.b.3'), (SELECT uuid from organizations where shortName='EF 4')),
+		((SELECT uuid from tasks where shortName = '4.b.4'), (SELECT uuid from organizations where shortName='EF 4')),
+		((SELECT uuid from tasks where shortName = '4.b.5'), (SELECT uuid from organizations where shortName='EF 4')),
+		((SELECT uuid from tasks where shortName = '4.c'), (SELECT uuid from organizations where shortName='EF 4'));
 
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
 	VALUES (N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

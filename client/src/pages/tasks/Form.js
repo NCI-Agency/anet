@@ -20,6 +20,7 @@ import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
+import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
@@ -49,8 +50,7 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const BaseTaskForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -74,6 +74,7 @@ const BaseTaskForm = props => {
   const ProjectedCompletionField = DictionaryField(FastField)
   const TaskCustomFieldEnum1 = DictionaryField(FastField)
   const TaskCustomFieldEnum2 = DictionaryField(FastField)
+  const TaskedOrganizationsMultiSelect = DictionaryField(FastField)
   const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
 
   initialValues.assessment_customFieldEnum1 = ""
@@ -90,7 +91,7 @@ const BaseTaskForm = props => {
     })
   }
 
-  const responsibleOrgFilters = {
+  const taskedOrganizationsFilters = {
     allOrganizations: {
       label: "All organizations",
       queryVars: {}
@@ -124,7 +125,6 @@ const BaseTaskForm = props => {
       onSubmit={onSubmit}
       validationSchema={Task.yupSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -176,27 +176,30 @@ const BaseTaskForm = props => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <FastField
-                  name="responsibleOrg"
-                  label={Settings.fields.task.responsibleOrg}
+                <TaskedOrganizationsMultiSelect
+                  name="taskedOrganizations"
                   component={FieldHelper.SpecialField}
+                  dictProps={Settings.fields.task.taskedOrganizations}
                   onChange={value => {
                     // validation will be done by setFieldValue
-                    setFieldTouched("responsibleOrg", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("responsibleOrg", value)
+                    setFieldTouched("taskedOrganizations", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("taskedOrganizations", value)
                   }}
                   widget={
-                    <AdvancedSingleSelect
-                      fieldName="responsibleOrg"
-                      placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
-                      value={values.responsibleOrg}
+                    <AdvancedMultiSelect
+                      fieldName="taskedOrganizations"
+                      value={values.taskedOrganizations}
+                      renderSelected={
+                        <OrganizationTable
+                          organizations={values.taskedOrganizations}
+                          showDelete
+                        />
+                      }
                       overlayColumns={["Name"]}
                       overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={responsibleOrgFilters}
+                      filterDefs={taskedOrganizationsFilters}
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
-                      queryParams={orgSearchQuery}
-                      valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
                     />
                   }
@@ -406,12 +409,11 @@ const BaseTaskForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateTask" : "createTask"
     const task = new Task({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -433,14 +435,17 @@ const BaseTaskForm = props => {
       "customFields", // initial JSON from the db
       "formCustomFields"
     )
-    task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     task.customFields = customFieldsJSONString(values)
-    const { edit } = props
     const variables = { task: task }
+
+    variables.task.taskedOrganizations = variables.task.taskedOrganizations.map(
+      a => utils.getReference(a)
+    )
+
     if (
       edit &&
-      (props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
+      (initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
         !utils.isEmptyHtml(values.assessment_customFieldEnum1))
     ) {
       // Add an additional mutation to create a change record
@@ -449,13 +454,13 @@ const BaseTaskForm = props => {
         noteRelatedObjects: [
           {
             relatedObjectType: "tasks",
-            relatedObjectUuid: props.initialValues.uuid
+            relatedObjectUuid: initialValues.uuid
           }
         ],
         text: JSON.stringify({
           text: values.assessment_customFieldEnum1,
           changedField: "customFieldEnum1",
-          oldValue: props.initialValues.customFieldEnum1,
+          oldValue: initialValues.customFieldEnum1,
           newValue: values.customFieldEnum1
         })
       }

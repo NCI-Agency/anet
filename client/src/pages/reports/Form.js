@@ -23,7 +23,12 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import { createYupObjectShape, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  jumpToTop,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
@@ -38,6 +43,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
+import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -86,7 +92,7 @@ const GQL_GET_RECENTS = gql`
         uuid
         shortName
         longName
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }
@@ -154,12 +160,16 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
   }
 `
 
-const BaseReportForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseReportForm = ({
+  pageDispatchers,
+  currentUser,
+  edit,
+  title,
+  initialValues,
+  showSensitiveInfo: ssi
+}) => {
   const history = useHistory()
-  const [showSensitiveInfo, setShowSensitiveInfo] = useState(
-    props.showSensitiveInfo
-  )
+  const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
   // We need the report tasks in order to be able to dynamically update the yup schema for the selected task assessments
@@ -181,7 +191,7 @@ const BaseReportForm = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -290,7 +300,6 @@ const BaseReportForm = props => {
       validateOnChange={false}
       validationSchema={reportSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -388,14 +397,14 @@ const BaseReportForm = props => {
           tasksFiltersLevel1.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: currentOrgUuid,
+              taskedOrgUuid: currentOrgUuid,
               hasCustomFieldRef1: false
             }
           }
           tasksFiltersLevel2.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: currentOrgUuid,
+              taskedOrgUuid: currentOrgUuid,
               hasCustomFieldRef1: true
             }
           }
@@ -414,14 +423,14 @@ const BaseReportForm = props => {
           tasksFiltersLevel1.assignedToReportOrg = {
             label: "Assigned to organization of report",
             queryVars: {
-              responsibleOrgUuid: primaryAdvisor.position.organization.uuid,
+              taskedOrgUuid: primaryAdvisor.position.organization.uuid,
               hasCustomFieldRef1: false
             }
           }
           tasksFiltersLevel2.assignedToReportOrg = {
             label: "Assigned to organization of report",
             queryVars: {
-              responsibleOrgUuid: primaryAdvisor.position.organization.uuid,
+              taskedOrgUuid: primaryAdvisor.position.organization.uuid,
               hasCustomFieldRef1: true
             }
           }
@@ -791,7 +800,7 @@ const BaseReportForm = props => {
                           showOrganization
                         />
                       }
-                      overlayColumns={["Name", "Organization"]}
+                      overlayColumns={["Name", "Tasked organizations"]}
                       overlayRenderRow={TaskDetailedOverlayRow}
                       filterDefs={tasksFiltersLevel1}
                       objectType={Task}
@@ -827,7 +836,7 @@ const BaseReportForm = props => {
                           showOrganization
                         />
                       }
-                      overlayColumns={["Name", "Organization"]}
+                      overlayColumns={["Name", "Tasked organizations"]}
                       overlayRenderRow={TaskDetailedOverlayRow}
                       filterDefs={tasksFiltersLevel2}
                       objectType={Task}
@@ -880,7 +889,7 @@ const BaseReportForm = props => {
                 }
                 id="meeting-details"
               >
-                {!isFutureEngagement && !values.cancelled && (
+                {Settings.fields.report.keyOutcomes && !isFutureEngagement && !values.cancelled && (
                   <FastField
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}
@@ -968,7 +977,7 @@ const BaseReportForm = props => {
                 </Button>
 
                 <Collapse in={showSensitiveInfo}>
-                  {(values.reportSensitiveInformation || !props.edit) && (
+                  {(values.reportSensitiveInformation || !edit) && (
                     <div>
                       <FastField
                         name="reportSensitiveInformation.text"
@@ -1386,6 +1395,7 @@ const BaseReportForm = props => {
 }
 
 BaseReportForm.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
@@ -1405,4 +1415,4 @@ const ReportForm = props => (
   </AppContext.Consumer>
 )
 
-export default ReportForm
+export default connect(null, mapPageDispatchersToProps)(ReportForm)

@@ -31,7 +31,7 @@ public class MssqlOrganizationSearcher extends AbstractOrganizationSearcher {
         "(c_organizations.rank IS NOT NULL OR organizations.identificationCode LIKE :likeQuery"
             + " OR organizations.shortName LIKE :likeQuery)");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 

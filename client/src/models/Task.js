@@ -13,7 +13,8 @@ export const {
   customFieldEnum1,
   customFieldEnum2,
   plannedCompletion,
-  projectedCompletion
+  projectedCompletion,
+  responsiblePositions
 } = Settings.fields.task
 
 export default class Task extends Model {
@@ -53,11 +54,11 @@ export default class Task extends Model {
         .string()
         .nullable()
         .default(""),
-      responsibleOrg: yup
-        .object()
+      taskedOrganizations: yup
+        .array()
         .nullable()
-        .default({})
-        .label(Settings.fields.task.responsibleOrg),
+        .default([])
+        .label(Settings.fields.task.taskedOrganizations.label),
       customFieldRef1: yup
         .object()
         .nullable()
@@ -77,7 +78,7 @@ export default class Task extends Model {
         .string()
         .nullable()
         .default("")
-        .label(customField.label),
+        .label(customField && customField.label),
       projectedCompletion: yupDate
         .nullable()
         .default(null)
@@ -94,14 +95,14 @@ export default class Task extends Model {
         .array()
         .nullable()
         .default([])
-        .label(Settings.fields.task.responsiblePositions.label),
+        .label(responsiblePositions && responsiblePositions.label),
       // not actually in the database, the database contains the JSON customFields
       formCustomFields: Task.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, shortName, longName, responsibleOrg { uuid, shortName }, customFields"
+    "uuid, shortName, longName, taskedOrganizations { uuid, shortName }, customFields"
 
   static autocompleteTemplate(task) {
     return <span>{[task.shortName, task.longName].join(" - ")}</span>

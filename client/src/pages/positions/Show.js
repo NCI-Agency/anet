@@ -11,9 +11,9 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
+  PageDispatchersPropType,
   jumpToTop,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -93,7 +93,7 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
-const BasePositionShow = props => {
+const BasePositionShow = ({ pageDispatchers, currentUser }) => {
   const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
   const [
@@ -116,14 +116,13 @@ const BasePositionShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
 
   const position = new Position(data ? data.position : {})
-  const { currentUser, ...myFormProps } = props
   const CodeFieldWithLabel = DictionaryField(Field)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
@@ -150,7 +149,7 @@ const BasePositionShow = props => {
     (!position.person || !position.person.uuid)
 
   return (
-    <Formik enableReinitialize initialValues={position} {...myFormProps}>
+    <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo
@@ -438,8 +437,8 @@ const PositionShow = props => (
 )
 
 BasePositionShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
-export default connect(null, mapDispatchToProps)(PositionShow)
+export default connect(null, mapPageDispatchersToProps)(PositionShow)

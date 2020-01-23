@@ -22,7 +22,7 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
    * we do a prefix match on the string else we do an inflectional match.
    */
   @Override
-  public String getFullTextQuery(String text) {
+  public String getContainsQuery(String text) {
     String cleanText = stripWildcards(text);
     if (text.endsWith("*")) {
       cleanText = "\"" + cleanText + "*\"";
@@ -30,6 +30,11 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
       cleanText = "FORMSOF(INFLECTIONAL, \"" + cleanText + "\")";
     }
     return cleanText;
+  }
+
+  @Override
+  public String getFullTextQuery(String text) {
+    return text;
   }
 
   @Override

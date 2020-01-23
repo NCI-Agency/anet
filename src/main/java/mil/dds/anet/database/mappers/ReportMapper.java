@@ -18,26 +18,26 @@ public class ReportMapper implements RowMapper<Report> {
     DaoUtils.setCustomizableBeanFields(r, rs, "reports");
 
     r.setState(MapperUtils.getEnumIdx(rs, "reports_state", ReportState.class));
-    r.setEngagementDate(DaoUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));
-    r.setDuration(DaoUtils.getOptionalInt(rs, "reports_duration"));
-    r.setReleasedAt(DaoUtils.getInstantAsLocalDateTime(rs, "reports_releasedAt"));
-    r.setLocationUuid(rs.getString("reports_locationUuid"));
-    r.setApprovalStepUuid(rs.getString("reports_approvalStepUuid"));
+    r.setEngagementDate(MapperUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));
+    r.setDuration(MapperUtils.getOptionalInt(rs, "reports_duration"));
+    r.setReleasedAt(MapperUtils.getInstantAsLocalDateTime(rs, "reports_releasedAt"));
+    r.setLocationUuid(MapperUtils.getOptionalString(rs, "reports_locationUuid"));
+    r.setApprovalStepUuid(MapperUtils.getOptionalString(rs, "reports_approvalStepUuid"));
 
-    r.setIntent(rs.getString("reports_intent"));
-    r.setExsum(rs.getString("reports_exsum"));
+    r.setIntent(MapperUtils.getOptionalString(rs, "reports_intent"));
+    r.setExsum(MapperUtils.getOptionalString(rs, "reports_exsum"));
     r.setAtmosphere(MapperUtils.getEnumIdx(rs, "reports_atmosphere", Atmosphere.class));
-    r.setAtmosphereDetails(rs.getString("reports_atmosphereDetails"));
+    r.setAtmosphereDetails(MapperUtils.getOptionalString(rs, "reports_atmosphereDetails"));
     r.setCancelledReason(
         MapperUtils.getEnumIdx(rs, "reports_cancelledReason", ReportCancelledReason.class));
 
-    r.setReportText(rs.getString("reports_text"));
-    r.setKeyOutcomes(rs.getString("reports_keyOutcomes"));
-    r.setNextSteps(rs.getString("reports_nextSteps"));
+    r.setReportText(MapperUtils.getOptionalString(rs, "reports_text"));
+    r.setKeyOutcomes(MapperUtils.getOptionalString(rs, "reports_keyOutcomes"));
+    r.setNextSteps(MapperUtils.getOptionalString(rs, "reports_nextSteps"));
 
-    r.setAuthorUuid(rs.getString("reports_authorUuid"));
-    r.setAdvisorOrgUuid(rs.getString("reports_advisorOrganizationUuid"));
-    r.setPrincipalOrgUuid(rs.getString("reports_principalOrganizationUuid"));
+    r.setAuthorUuid(MapperUtils.getOptionalString(rs, "reports_authorUuid"));
+    r.setAdvisorOrgUuid(MapperUtils.getOptionalString(rs, "reports_advisorOrganizationUuid"));
+    r.setPrincipalOrgUuid(MapperUtils.getOptionalString(rs, "reports_principalOrganizationUuid"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

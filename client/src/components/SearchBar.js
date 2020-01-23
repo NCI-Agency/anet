@@ -1,7 +1,10 @@
 import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import AdvancedSearch from "components/AdvancedSearch"
-import { SearchDescription } from "components/SearchFilters"
+import {
+  SearchDescription,
+  SearchQueryPropType
+} from "components/SearchFilters"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
@@ -45,30 +48,29 @@ SearchPopover.propTypes = {
   children: PropTypes.any.isRequired
 }
 
-const SearchBar = props => {
-  const {
-    query,
-    searchObjectTypes,
-    resetPagination,
-    setSearchQuery,
-    onSearchGoToSearchPage
-  } = props
+const SearchBar = ({
+  searchQuery,
+  searchObjectTypes,
+  resetPagination,
+  setSearchQuery,
+  onSearchGoToSearchPage
+}) => {
   const history = useHistory()
-  // (Re)set searchTerms if the query.text prop changes
-  const latestQueryText = useRef(query.text)
-  const queryTextUnchanged = _isEqual(latestQueryText.current, query.text)
-  const [searchTerms, setSearchTerms] = useState(query.text)
+  // (Re)set searchTerms if the searchQuery.text prop changes
+  const latestQueryText = useRef(searchQuery.text)
+  const queryTextUnchanged = _isEqual(latestQueryText.current, searchQuery.text)
+  const [searchTerms, setSearchTerms] = useState(searchQuery.text)
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
 
   useEffect(() => {
     if (!queryTextUnchanged) {
-      latestQueryText.current = query.text
-      setSearchTerms(query.text)
+      latestQueryText.current = searchQuery.text
+      setSearchTerms(searchQuery.text)
     }
-  }, [query, setSearchTerms, queryTextUnchanged])
+  }, [searchQuery, setSearchTerms, queryTextUnchanged])
 
-  const placeholder = query.objectType
-    ? "Filter " + SEARCH_OBJECT_LABELS[query.objectType]
+  const placeholder = searchQuery.objectType
+    ? "Filter " + SEARCH_OBJECT_LABELS[searchQuery.objectType]
     : "Search for " +
       searchObjectTypes.map(type => SEARCH_OBJECT_LABELS[type]).join(", ")
 
@@ -99,7 +101,7 @@ const SearchBar = props => {
         </InputGroup>
       </Form>
       <SearchPopover popoverContent={popoverContent}>
-        <SearchDescription query={query} showPlaceholders />
+        <SearchDescription searchQuery={searchQuery} showPlaceholders />
       </SearchPopover>
     </>
   )
@@ -129,17 +131,13 @@ const SearchBar = props => {
 SearchBar.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
   onSearchGoToSearchPage: PropTypes.bool,
-  query: PropTypes.shape({
-    text: PropTypes.string,
-    filters: PropTypes.any,
-    objectType: PropTypes.string
-  }),
+  searchQuery: SearchQueryPropType,
   searchObjectTypes: PropTypes.array,
   resetPagination: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  query: state.searchQuery,
+  searchQuery: state.searchQuery,
   onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
   searchObjectTypes: state.searchProps.searchObjectTypes
 })

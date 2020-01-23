@@ -8,8 +8,8 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -39,7 +39,7 @@ const GQL_GET_TASK = gql`
       customFieldEnum2
       plannedCompletion
       projectedCompletion
-      responsibleOrg {
+      taskedOrganizations {
         uuid
         shortName
         longName
@@ -74,7 +74,7 @@ const GQL_GET_TASK = gql`
   }
 `
 
-const BaseTaskShow = props => {
+const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
@@ -87,7 +87,7 @@ const BaseTaskShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -108,7 +108,6 @@ const BaseTaskShow = props => {
 
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
 
   // Admins can edit tasks or users in positions related to the task
   const canEdit =
@@ -121,7 +120,7 @@ const BaseTaskShow = props => {
       ))
 
   return (
-    <Formik enableReinitialize initialValues={task} {...myFormProps}>
+    <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo task={task} edit button="primary">
@@ -168,14 +167,16 @@ const BaseTaskShow = props => {
                 />
 
                 <Field
-                  name="responsibleOrg"
-                  label={Settings.fields.task.responsibleOrg}
+                  name="taskedOrganizations"
+                  label={Settings.fields.task.taskedOrganizations.label}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    task.responsibleOrg && (
-                      <LinkTo organization={task.responsibleOrg}>
-                        {task.responsibleOrg.shortName}
-                      </LinkTo>
+                    task.taskedOrganizations && (
+                      <>
+                        {task.taskedOrganizations.map(org => (
+                          <LinkTo organization={org} key={`${org.uuid}`} />
+                        ))}
+                      </>
                     )
                   }
                 />
@@ -291,7 +292,7 @@ const BaseTaskShow = props => {
 }
 
 BaseTaskShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -301,4 +302,4 @@ const TaskShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(TaskShow)
+export default connect(null, mapPageDispatchersToProps)(TaskShow)

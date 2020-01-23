@@ -1,4 +1,4 @@
-import API from "api"
+import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
@@ -8,63 +8,48 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
-import { Position } from "models"
+import { Organization } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import REMOVE_ICON from "resources/delete.png"
-import utils from "utils"
 
-const GQL_GET_POSITION_LIST = gql`
-  query($positionQuery: PositionSearchQueryInput) {
-    positionList(query: $positionQuery) {
+const GQL_GET_ORGANIZATION_LIST = gql`
+  query($organizationQuery: OrganizationSearchQueryInput) {
+    organizationList(query: $organizationQuery) {
       pageNum
       pageSize
       totalCount
       list {
         uuid
-        name
-        code
-        type
-        status
-        organization {
-          uuid
-          shortName
-        }
-        person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
-        }
+        shortName
       }
     }
   }
 `
 
-const PositionTable = props => {
+const OrganizationTable = props => {
   if (props.queryParams) {
-    return <PaginatedPositions {...props} />
+    return <PaginatedOrganizations {...props} />
   }
-  return <BasePositionTable {...props} />
+  return <BaseOrganizationTable {...props} />
 }
 
-PositionTable.propTypes = {
-  // query variables for positions, when query & pagination wanted:
+OrganizationTable.propTypes = {
+  // query variables for organizations, when query & pagination wanted:
   queryParams: PropTypes.object
 }
 
-const PaginatedPositions = ({
+const PaginatedOrganizations = ({
   queryParams,
   pageDispatchers,
   ...otherProps
 }) => {
   const [pageNum, setPageNum] = useState(0)
-  const positionQuery = Object.assign({}, queryParams, { pageNum })
-  const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
-    positionQuery
+  const organizationQuery = Object.assign({}, queryParams, { pageNum })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION_LIST, {
+    organizationQuery
   })
   const { done, result } = useBoilerplate({
     loading,
@@ -79,12 +64,12 @@ const PaginatedPositions = ({
     pageSize,
     pageNum: curPage,
     totalCount,
-    list: positions
-  } = data.positionList
+    list: organizations
+  } = data.organizationList
 
   return (
-    <BasePositionTable
-      positions={positions}
+    <BaseOrganizationTable
+      organizations={organizations}
       pageSize={pageSize}
       pageNum={curPage}
       totalCount={totalCount}
@@ -94,23 +79,23 @@ const PaginatedPositions = ({
   )
 }
 
-PaginatedPositions.propTypes = {
+PaginatedOrganizations.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object
 }
 
-const BasePositionTable = ({
+const BaseOrganizationTable = ({
   id,
   showDelete,
   onDelete,
-  positions,
+  organizations,
   pageSize,
   pageNum,
   totalCount,
   goToPage
 }) => {
-  if (_get(positions, "length", 0) === 0) {
-    return <em>No positions found</em>
+  if (_get(organizations, "length", 0) === 0) {
+    return <em>No organizations found</em>
   }
 
   return (
@@ -128,49 +113,43 @@ const BasePositionTable = ({
           condensed
           hover
           responsive
-          className="positions_table"
+          className="organizations_table"
           id={id}
         >
           <thead>
             <tr>
               <th>Name</th>
-              <th>Location</th>
-              <th>Organization</th>
-              <th>Current Occupant</th>
-              <th>Status</th>
+              {Settings.fields.advisor.org.identificationCode && (
+                <th>{Settings.fields.advisor.org.identificationCode.label}</th>
+              )}
               <th />
             </tr>
           </thead>
           <tbody>
-            {Position.map(positions, pos => {
+            {Organization.map(organizations, org => {
               const nameComponents = []
-              pos.name && nameComponents.push(pos.name)
-              pos.code && nameComponents.push(pos.code)
+              org.shortName && nameComponents.push(org.shortName)
+              org.longName && nameComponents.push(org.longName)
               return (
-                <tr key={pos.uuid}>
+                <tr key={org.uuid}>
                   <td>
-                    <LinkTo position={pos}>{nameComponents.join(" - ")}</LinkTo>
+                    <LinkTo organization={org}>
+                      {nameComponents.join(" - ")}
+                    </LinkTo>
                   </td>
-                  <td>
-                    <LinkTo anetLocation={pos.location} />
-                  </td>
-                  <td>
-                    {pos.organization && (
-                      <LinkTo organization={pos.organization} />
-                    )}
-                  </td>
-                  <td>{pos.person && <LinkTo person={pos.person} />}</td>
-                  <td>{utils.sentenceCase(pos.status)}</td>
+                  {Settings.fields.advisor.org.identificationCode && (
+                    <td>{org.identificationCode}</td>
+                  )}
                   {showDelete && (
                     <td
-                      onClick={() => onDelete(pos)}
-                      id={"positionDelete_" + pos.uuid}
+                      onClick={() => onDelete(org)}
+                      id={"organizationDelete_" + org.uuid}
                     >
                       <span style={{ cursor: "pointer" }}>
                         <img
                           src={REMOVE_ICON}
                           height={14}
-                          alt="Remove position"
+                          alt="Remove organization"
                         />
                       </span>
                     </td>
@@ -185,12 +164,12 @@ const BasePositionTable = ({
   )
 }
 
-BasePositionTable.propTypes = {
+BaseOrganizationTable.propTypes = {
   id: PropTypes.string,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
-  // list of positions:
-  positions: PropTypes.array.isRequired,
+  // list of organizations:
+  organizations: PropTypes.array,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
@@ -198,4 +177,4 @@ BasePositionTable.propTypes = {
   goToPage: PropTypes.func
 }
 
-export default connect(null, mapPageDispatchersToProps)(PositionTable)
+export default connect(null, mapPageDispatchersToProps)(OrganizationTable)

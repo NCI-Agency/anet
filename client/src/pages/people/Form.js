@@ -47,15 +47,14 @@ const GQL_UPDATE_PERSON = gql`
   }
 `
 
-const BasePersonForm = props => {
-  const {
-    currentUser,
-    edit,
-    title,
-    saveText,
-    initialValues,
-    ...myFormProps
-  } = props
+const BasePersonForm = ({
+  loadAppData,
+  currentUser,
+  edit,
+  title,
+  saveText,
+  initialValues
+}) => {
   const history = useHistory()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -115,7 +114,6 @@ const BasePersonForm = props => {
       onSubmit={onSubmit}
       validationSchema={Person.yupSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -568,10 +566,9 @@ const BasePersonForm = props => {
     if (onSaveRedirectToHome) {
       localStorage.clear()
       localStorage.newUser = "true"
-      props.loadAppData()
+      loadAppData()
       history.push("/")
     } else {
-      const { edit } = props
       const operation = edit ? "updatePerson" : "createPerson"
       const person = new Person({
         uuid: response[operation].uuid
@@ -579,7 +576,7 @@ const BasePersonForm = props => {
           : initialValues.uuid
       })
       if (Person.isEqual(currentUser, values)) {
-        props.loadAppData()
+        loadAppData()
       }
       if (!edit) {
         history.replace(Person.pathForEdit(person))
@@ -608,7 +605,7 @@ const BasePersonForm = props => {
       true
     )
     person.customFields = customFieldsJSONString(values)
-    return API.mutation(props.edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
+    return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person
     })
   }

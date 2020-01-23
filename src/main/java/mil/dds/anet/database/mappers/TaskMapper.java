@@ -20,11 +20,10 @@ public class TaskMapper implements RowMapper<Task> {
     p.setCustomField(r.getString("customField"));
     p.setCustomFieldEnum1(r.getString("customFieldEnum1"));
     p.setCustomFieldEnum2(r.getString("customFieldEnum2"));
-    p.setPlannedCompletion(DaoUtils.getInstantAsLocalDateTime(r, "plannedCompletion"));
-    p.setProjectedCompletion(DaoUtils.getInstantAsLocalDateTime(r, "projectedCompletion"));
+    p.setPlannedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "plannedCompletion"));
+    p.setProjectedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "projectedCompletion"));
     p.setStatus(MapperUtils.getEnumIdx(r, "status", TaskStatus.class));
     p.setCustomFieldRef1Uuid(r.getString("customFieldRef1Uuid"));
-    p.setResponsibleOrgUuid(r.getString("organizationUuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {
       ctx.define("totalCount", r.getInt("totalCount"));

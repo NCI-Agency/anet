@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import com.google.common.collect.ObjectArrays;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -57,13 +59,18 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
-  private static final String[] fields =
-      {"uuid", "state", "createdAt", "updatedAt", "engagementDate", "duration", "locationUuid",
-          "approvalStepUuid", "intent", "exsum", "atmosphere", "cancelledReason",
-          "advisorOrganizationUuid", "principalOrganizationUuid", "releasedAt", "atmosphereDetails",
-          "text", "keyOutcomes", "nextSteps", "authorUuid", "customFields"};
+  // Must always retrieve these e.g. for ORDER BY
+  public static final String[] minimalFields =
+      {"uuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
+  public static final String[] additionalFields = {"state", "duration", "intent", "exsum",
+      "locationUuid", "approvalStepUuid", "advisorOrganizationUuid", "principalOrganizationUuid",
+      "authorUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text", "keyOutcomes",
+      "nextSteps", "customFields"};
+  public static final String[] allFields =
+      ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
-  public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static final String REPORT_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
 
   private String weekFormat;
 
@@ -353,7 +360,12 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   @Override
   public AnetBeanList<Report> search(ReportSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query);
+    return search(null, query);
+  }
+
+  public AnetBeanList<Report> search(Set<String> subFields, ReportSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(subFields,
+        query);
   }
 
   /*
@@ -810,7 +822,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     StringBuilder sql = new StringBuilder();
 
     sql.append("/* getFutureToPastReports */");
-    sql.append(" SELECT " + ReportDao.REPORT_FIELDS);
+    sql.append(
+        " SELECT reports.uuid AS reports_uuid, reports.\"authorUuid\" AS \"reports_authorUuid\"");
     sql.append(" FROM reports");
     // We are not interested in draft reports, as they will remain draft.
     // We are not interested in cancelled reports, as they will remain cancelled.

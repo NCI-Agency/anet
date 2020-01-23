@@ -194,7 +194,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, longLabel, longName, responsibleOrg, responsiblePositions]
+        required: [shortLabel, shortName, longLabel, longName, taskedOrganizations, responsiblePositions]
         properties:
           shortLabel:
             type: string
@@ -222,11 +222,8 @@ properties:
             "$ref": "#/definitions/choiceField"
           customFieldEnum2:
             "$ref": "#/definitions/choiceField"
-          responsibleOrg:
-            type: string
-            title: The label for a task's responsible organization
-            description: Used in the UI where a label for a task's responsible organization is shown.
-            examples: [Responsible organization]
+          taskedOrganizations:
+            "$ref": "#/definitions/inputField"
           responsiblePositions:
             "$ref": "#/definitions/inputField"
           customFields:
@@ -235,7 +232,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,keyOutcomes,reportText]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
         properties:
           intent:
             type: string
