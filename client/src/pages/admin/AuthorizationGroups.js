@@ -3,8 +3,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import React from "react"
@@ -29,7 +29,7 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   }
 `
 
-const AuthorizationGroups = props => {
+const AuthorizationGroups = ({ pageDispatchers }) => {
   const query = {
     pageSize: 0 // retrieve all
   }
@@ -44,7 +44,7 @@ const AuthorizationGroups = props => {
     error,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -61,6 +61,6 @@ const AuthorizationGroups = props => {
   )
 }
 
-AuthorizationGroups.propTypes = { ...pagePropTypes }
+AuthorizationGroups.propTypes = { pageDispatchers: PageDispatchersPropType }
 
-export default connect(null, mapDispatchToProps)(AuthorizationGroups)
+export default connect(null, mapPageDispatchersToProps)(AuthorizationGroups)

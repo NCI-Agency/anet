@@ -7,9 +7,9 @@ import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
+  PageDispatchersPropType,
   jumpToTop,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
@@ -33,7 +33,7 @@ const GQL_MERGE_PEOPLE = gql`
   }
 `
 
-const MergePeople = props => {
+const MergePeople = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
   const yupSchema = yup.object().shape({
@@ -77,7 +77,7 @@ const MergePeople = props => {
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   const personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
@@ -368,6 +368,8 @@ const MergePeople = props => {
   }
 }
 
-MergePeople.propTypes = { ...pagePropTypes }
+MergePeople.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
 
-export default connect(null, mapDispatchToProps)(MergePeople)
+export default connect(null, mapPageDispatchersToProps)(MergePeople)

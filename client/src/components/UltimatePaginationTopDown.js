@@ -2,17 +2,15 @@ import PropTypes from "prop-types"
 import React from "react"
 import UltimatePagination from "components/UltimatePagination"
 
-const UltimatePaginationTopDown = props => {
-  const {
-    componentClassName,
-    className,
-    pageNum,
-    pageSize,
-    totalCount,
-    goToPage,
-    children
-  } = props
-
+const UltimatePaginationTopDown = ({
+  componentClassName,
+  className,
+  pageNum,
+  pageSize,
+  totalCount,
+  goToPage,
+  children
+}) => {
   return (
     <>
       <UltimatePagination

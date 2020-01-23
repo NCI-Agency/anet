@@ -4,8 +4,8 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Person, Position } from "models"
@@ -36,8 +36,7 @@ const screenshotCss = {
   boxShadow: "0px 0px 10px #aaa"
 }
 
-const BaseHelp = props => {
-  const { currentUser } = props
+const BaseHelp = ({ appSettings, currentUser, pageDispatchers }) => {
   if (
     currentUser.uuid &&
     currentUser.position &&
@@ -55,30 +54,37 @@ const BaseHelp = props => {
     })
     return (
       <BaseHelpConditional
-        {...props}
+        appSettings={appSettings}
+        currentUser={currentUser}
+        pageDispatchers={pageDispatchers}
         {...queryResult}
         orgUuid={currentUser.position.organization.uuid}
       />
     )
   }
-  return <BaseHelpConditional {...props} />
+  return (
+    <BaseHelpConditional
+      currentUser={currentUser}
+      pageDispatchers={pageDispatchers}
+    />
+  )
 }
 
 BaseHelp.propTypes = {
+  appSettings: PropTypes.object,
   currentUser: PropTypes.instanceOf(Person),
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-const BaseHelpConditional = props => {
-  const {
-    loading,
-    error,
-    data,
-    orgUuid,
-    appSettings,
-    currentUser,
-    ...otherProps
-  } = props
+const BaseHelpConditional = ({
+  loading,
+  error,
+  data,
+  orgUuid,
+  appSettings,
+  currentUser,
+  pageDispatchers
+}) => {
   const url = appSettings.HELP_LINK_URL
   const email = appSettings.CONTACT_EMAIL
   const { done, result } = useBoilerplate({
@@ -88,7 +94,7 @@ const BaseHelpConditional = props => {
     uuid: orgUuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...otherProps
+    pageDispatchers
   })
   if (done) {
     return result
@@ -174,7 +180,7 @@ BaseHelpConditional.propTypes = {
   orgUuid: PropTypes.string,
   appSettings: PropTypes.object,
   currentUser: PropTypes.instanceOf(Person),
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
 const Help = props => (
@@ -189,4 +195,4 @@ const Help = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(Help)
+export default connect(null, mapPageDispatchersToProps)(Help)

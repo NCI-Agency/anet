@@ -2,7 +2,11 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AdvisorReportsRow from "components/AdvisorReports/AdvisorReportsRow"
 import AdvisorReportsTableHead from "components/AdvisorReports/AdvisorReportsTableHead"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
 import React from "react"
@@ -23,8 +27,7 @@ const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
   }
 `
 
-const AdvisorReportsTable = props => {
-  const orgUuid = props.orgUuid
+const AdvisorReportsTable = ({ pageDispatchers, columnGroups, orgUuid }) => {
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_ADVISOR_REPORTS_INSIGHT,
     {
@@ -35,8 +38,8 @@ const AdvisorReportsTable = props => {
     loading,
     error,
     modelName: "Organization",
-    orgUuid,
-    ...props
+    uuid: orgUuid,
+    pageDispatchers
   })
   if (done) {
     return result
@@ -47,7 +50,7 @@ const AdvisorReportsTable = props => {
     return (
       <AdvisorReportsRow
         row={advisor}
-        columnGroups={props.columnGroups}
+        columnGroups={columnGroups}
         key={_uniqueId(`${advisor.uuid}_`)}
       />
     )
@@ -61,7 +64,7 @@ const AdvisorReportsTable = props => {
       </caption>
       <AdvisorReportsTableHead
         title={Settings.fields.advisor.person.name}
-        columnGroups={props.columnGroups}
+        columnGroups={columnGroups}
       />
       <tbody>{rows}</tbody>
     </Table>
@@ -69,8 +72,9 @@ const AdvisorReportsTable = props => {
 }
 
 AdvisorReportsTable.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   columnGroups: PropTypes.array,
   orgUuid: PropTypes.string
 }
 
-export default connect(null, mapDispatchToProps)(AdvisorReportsTable)
+export default connect(null, mapPageDispatchersToProps)(AdvisorReportsTable)

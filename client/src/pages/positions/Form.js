@@ -36,8 +36,7 @@ const GQL_UPDATE_POSITION = gql`
   }
 `
 
-const BasePositionForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -105,7 +104,6 @@ const BasePositionForm = props => {
       onSubmit={onSubmit}
       validationSchema={Position.yupSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -186,7 +184,7 @@ const BasePositionForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                {props.edit ? (
+                {edit ? (
                   <FastField
                     name="type"
                     component={FieldHelper.renderReadonlyField}
@@ -333,12 +331,11 @@ const BasePositionForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updatePosition" : "createPosition"
     const position = new Position({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -363,10 +360,9 @@ const BasePositionForm = props => {
     position.organization = utils.getReference(position.organization)
     position.person = utils.getReference(position.person)
     position.code = position.code || null // Need to null out empty position codes
-    return API.mutation(
-      props.edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION,
-      { position }
-    )
+    return API.mutation(edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION, {
+      position
+    })
   }
 }
 

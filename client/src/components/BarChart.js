@@ -20,21 +20,20 @@ function getPropValue(obj, prop) {
   })
 }
 
-const BarChart = props => {
-  const {
-    width,
-    height,
-    chartId,
-    data,
-    xProp, // data property to use for the x-axis domain
-    yProp, // data property to use for the y-axis domain
-    xLabel, // data property to use for the x-axis ticks label
-    barClass,
-    onBarClick,
-    tooltip,
-    selectedBarClass,
-    selectedBar
-  } = props
+const BarChart = ({
+  width,
+  height,
+  chartId,
+  data,
+  xProp, // data property to use for the x-axis domain
+  yProp, // data property to use for the y-axis domain
+  xLabel, // data property to use for the x-axis ticks label
+  barClass,
+  onBarClick,
+  tooltip,
+  selectedBarClass,
+  selectedBar
+}) => {
   const node = useRef(null)
   useEffect(() => {
     if (!node.current) {
