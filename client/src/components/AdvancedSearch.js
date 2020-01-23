@@ -91,6 +91,10 @@ const AdvancedSearch = ({
     </Menu>
   )
 
+  const possibleFilterTypes = Object.keys(ALL_FILTERS).filter(type =>
+    searchObjectTypes.includes(type)
+  )
+
   return (
     <Formik>
       {() => (
@@ -102,18 +106,28 @@ const AdvancedSearch = ({
                   value={objectType}
                   onChange={changeObjectType}
                 >
-                  {Object.keys(ALL_FILTERS).map(
+                  {possibleFilterTypes.map(
                     type =>
-                      searchObjectTypes.indexOf(type) !== -1 && (
-                        <Button key={type} value={type}>
+                        <Button
+                          key={type}
+                          value={type}
+                          disabled={possibleFilterTypes.length < 2}
+                        >
                           {SEARCH_OBJECT_LABELS[type]}
                         </Button>
-                      )
                   )}
                 </ButtonToggleGroup>
               </Col>
               <Col xs={1}>
-                <Button bsStyle="link" onClick={clearObjectType}>
+                <Button
+                  bsStyle="link"
+                  onClick={clearObjectType}
+                  style={
+                    possibleFilterTypes.length > 1 && objectType
+                      ? {}
+                      : { visibility: "hidden" }
+                  }
+                >
                   <img src={REMOVE_ICON} height={14} alt="Clear type" />
                 </Button>
               </Col>
@@ -173,7 +187,7 @@ const AdvancedSearch = ({
                     }}
                   >
                     <Button bsStyle="link" id="addFilterDropdown">
-                      + Add another filter
+                      + Add {filters.length > 0 && "another"} filter
                     </Button>
                   </Popover>
                 )}
