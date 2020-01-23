@@ -2,13 +2,18 @@ import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
-import { useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import * as d3 from "d3"
 import _xor from "lodash/xor"
 import { Symbol } from "milsymbol"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import { renderBlueprintIconAsSvg } from "utils"
@@ -74,7 +79,12 @@ const sortPositions = (positions, truncateLimit) => {
 const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
 const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
 
-const OrganizationalChart = ({ org, width, height: initialHeight }) => {
+const OrganizationalChart = ({
+  pageDispatchers,
+  org,
+  width,
+  height: initialHeight
+}) => {
   const [expanded, setExpanded] = useState([])
   const [personnelDepth, setPersonnelDepth] = useState(5)
   const history = useHistory()
@@ -91,7 +101,8 @@ const OrganizationalChart = ({ org, width, height: initialHeight }) => {
 
   const { done, result } = useBoilerplate({
     loading,
-    error
+    error,
+    pageDispatchers
   })
 
   const canvas = d3.select(canvasRef.current)
@@ -402,9 +413,10 @@ const OrganizationalChart = ({ org, width, height: initialHeight }) => {
 }
 
 OrganizationalChart.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   org: PropTypes.object.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired
 }
 
-export default OrganizationalChart
+export default connect(null, mapPageDispatchersToProps)(OrganizationalChart)
