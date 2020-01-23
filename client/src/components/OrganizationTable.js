@@ -1,7 +1,11 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Organization } from "models"
@@ -37,8 +41,11 @@ OrganizationTable.propTypes = {
   queryParams: PropTypes.object
 }
 
-const PaginatedOrganizations = props => {
-  const { queryParams, ...otherProps } = props
+const PaginatedOrganizations = ({
+  queryParams,
+  pageDispatchers,
+  ...otherProps
+}) => {
   const [pageNum, setPageNum] = useState(0)
   const organizationQuery = Object.assign({}, queryParams, { pageNum })
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION_LIST, {
@@ -47,17 +54,25 @@ const PaginatedOrganizations = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
 
-  const paginatedOrganizations = data.organizationList
+  const {
+    pageSize,
+    pageNum: curPage,
+    totalCount,
+    list: organizations
+  } = data.organizationList
 
   return (
     <BaseOrganizationTable
-      paginatedOrganizations={paginatedOrganizations}
+      organizations={organizations}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
       goToPage={setPageNum}
       {...otherProps}
     />
@@ -65,18 +80,20 @@ const PaginatedOrganizations = props => {
 }
 
 PaginatedOrganizations.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object
 }
 
-const BaseOrganizationTable = props => {
-  let organizations
-  if (props.paginatedOrganizations) {
-    var { pageSize, pageNum, totalCount } = props.paginatedOrganizations
-    organizations = props.paginatedOrganizations.list
-  } else {
-    organizations = props.organizations
-  }
-
+const BaseOrganizationTable = ({
+  id,
+  showDelete,
+  onDelete,
+  organizations,
+  pageSize,
+  pageNum,
+  totalCount,
+  goToPage
+}) => {
   if (_get(organizations, "length", 0) === 0) {
     return <em>No organizations found</em>
   }
@@ -89,7 +106,7 @@ const BaseOrganizationTable = props => {
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
-        goToPage={props.goToPage}
+        goToPage={goToPage}
       >
         <Table
           striped
@@ -97,7 +114,7 @@ const BaseOrganizationTable = props => {
           hover
           responsive
           className="organizations_table"
-          id={props.id}
+          id={id}
         >
           <thead>
             <tr>
@@ -123,9 +140,9 @@ const BaseOrganizationTable = props => {
                   {Settings.fields.advisor.org.identificationCode && (
                     <td>{org.identificationCode}</td>
                   )}
-                  {props.showDelete && (
+                  {showDelete && (
                     <td
-                      onClick={() => props.onDelete(org)}
+                      onClick={() => onDelete(org)}
                       id={"organizationDelete_" + org.uuid}
                     >
                       <span style={{ cursor: "pointer" }}>
@@ -151,16 +168,13 @@ BaseOrganizationTable.propTypes = {
   id: PropTypes.string,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
-  // list of organizations, when no pagination wanted:
+  // list of organizations:
   organizations: PropTypes.array,
-  // list of organizations, when pagination wanted:
-  paginatedOrganizations: PropTypes.shape({
-    totalCount: PropTypes.number,
-    pageNum: PropTypes.number,
-    pageSize: PropTypes.number,
-    list: PropTypes.array.isRequired
-  }),
+  // fill these when pagination wanted:
+  totalCount: PropTypes.number,
+  pageNum: PropTypes.number,
+  pageSize: PropTypes.number,
   goToPage: PropTypes.func
 }
 
-export default connect(null, mapDispatchToProps)(OrganizationTable)
+export default connect(null, mapPageDispatchersToProps)(OrganizationTable)
