@@ -279,7 +279,7 @@ const BaseReportForm = props => {
     initialValues.initialTaskToAssessmentUuid[ta.taskUuid] = ta.assessmentUuid
     initialValues.taskAssessments[ta.taskUuid] = ta.assessment
   })
-
+  let validateFieldDebounced
   return (
     <Formik
       enableReinitialize
@@ -298,12 +298,15 @@ const BaseReportForm = props => {
         setFieldTouched,
         values,
         validateField,
+        validateForm,
         touched,
         submitForm,
         resetForm,
         setSubmitting
       }) => {
-        const validateFieldDebounced = _debounce(validateField, 400)
+        if (!validateFieldDebounced) {
+          validateFieldDebounced = _debounce(validateField, 400)
+        }
         const currentOrgUuid =
           currentUser.position && currentUser.position.organization
             ? currentUser.position.organization.uuid
@@ -500,6 +503,7 @@ const BaseReportForm = props => {
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
                   onChange={event => {
+                    setFieldTouched("intent", true, false)
                     setFieldValue("intent", event.target.value, false)
                     validateFieldDebounced("intent")
                   }}
@@ -551,7 +555,9 @@ const BaseReportForm = props => {
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
                     onChange={event => {
-                      setFieldValue("duration", event.target.value, true)
+                      setFieldTouched("duration", true, false)
+                      setFieldValue("duration", event.target.value, false)
+                      validateFieldDebounced("duration")
                     }}
                   />
                 )}
@@ -662,6 +668,7 @@ const BaseReportForm = props => {
                     label={Settings.fields.report.atmosphereDetails}
                     component={FieldHelper.InputField}
                     onChange={event => {
+                      setFieldTouched("atmosphereDetails", true, false)
                       setFieldValue(
                         "atmosphereDetails",
                         event.target.value,
@@ -852,7 +859,7 @@ const BaseReportForm = props => {
                       setFieldTouched,
                       setFieldValue,
                       values,
-                      validateField
+                      validateForm
                     }}
                   />
                 </Fieldset>
@@ -872,6 +879,7 @@ const BaseReportForm = props => {
                     label={Settings.fields.report.keyOutcomes}
                     component={FieldHelper.InputField}
                     onChange={event => {
+                      setFieldTouched("keyOutcomes", true, false)
                       setFieldValue("keyOutcomes", event.target.value, false)
                       validateFieldDebounced("keyOutcomes")
                     }}
@@ -902,6 +910,7 @@ const BaseReportForm = props => {
                     component={FieldHelper.InputField}
                     componentClass="textarea"
                     onChange={event => {
+                      setFieldTouched("nextSteps", true, false)
                       setFieldValue("nextSteps", event.target.value, false)
                       validateFieldDebounced("nextSteps")
                     }}
@@ -1064,7 +1073,7 @@ const BaseReportForm = props => {
                         setFieldTouched,
                         setFieldValue,
                         values,
-                        validateField
+                        validateForm
                       }}
                     />
                   )

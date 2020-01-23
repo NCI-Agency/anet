@@ -387,19 +387,20 @@ const CustomField = ({
     visibleWhen,
     ...fieldProps
   } = fieldConfig
-  const { setFieldValue, validateField } = formikProps
+  const { setFieldValue, setFieldTouched, validateForm } = formikProps
+  const validateFormDebounced = _debounce(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate: true) => {
       const val =
         typeof value === "object" && value.target ? value.target.value : value
       const sv = shouldValidate === undefined ? true : shouldValidate
-      setFieldValue(fieldName, val, sv)
+      setFieldTouched(fieldName, true, false)
+      setFieldValue(fieldName, val, false)
       if (!sv) {
-        const validateFieldDebounced = _debounce(validateField, 400)
-        validateFieldDebounced(fieldName)
+        validateFormDebounced()
       }
     },
-    [setFieldValue, fieldName, validateField]
+    [fieldName, setFieldTouched, setFieldValue, validateFormDebounced]
   )
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(

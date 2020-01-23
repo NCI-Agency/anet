@@ -254,6 +254,13 @@ dictionary:
       keyOutcomes: Key outcomes
       reportText: Key details
       customFields:
+        required_text_field:
+          type: text
+          label: Required text field
+          placeholder:  Enter the text field
+          validations:
+            - type: required
+              params: [You must provide the Required text field]
         multipleButtons:
           type: enumset
           label: Engagement types
