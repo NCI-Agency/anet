@@ -210,6 +210,11 @@ public class TaskResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  public void taskCreateAdminPermissionTest() throws UnsupportedEncodingException {
+    createTask(admin);
+  }
+
+  @Test
   public void taskCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
     createTask(getSuperUser());
   }
@@ -222,7 +227,7 @@ public class TaskResourceTest extends AbstractResourceTest {
   private void createTask(Person user) {
     final String orgFields = "uuid shortName longName status identificationCode type";
     final Position position = user.getPosition();
-    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
     final Organization organization = position.getOrganization();
 
     // principal organization
@@ -241,13 +246,13 @@ public class TaskResourceTest extends AbstractResourceTest {
     try {
       final String tPrincipalUuid = graphQLHelper.createObject(user, "createTask", "task",
           "TaskInput", taskPrincipal, new TypeReference<GraphQlResponse<Task>>() {});
-      if (isSuperUser) {
+      if (isAdmin) {
         assertThat(tPrincipalUuid).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isAdmin) {
         fail("Unexpected ForbiddenException");
       }
     }
@@ -259,13 +264,13 @@ public class TaskResourceTest extends AbstractResourceTest {
     try {
       final String tOwnUuid = graphQLHelper.createObject(user, "createTask", "task", "TaskInput",
           taskOwn, new TypeReference<GraphQlResponse<Task>>() {});
-      if (isSuperUser) {
+      if (isAdmin) {
         assertThat(tOwnUuid).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isAdmin) {
         fail("Unexpected ForbiddenException");
       }
     }

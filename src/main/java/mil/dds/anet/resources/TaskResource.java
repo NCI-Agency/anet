@@ -51,7 +51,7 @@ public class TaskResource {
   public Task createTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task p) {
     final Person user = DaoUtils.getUserFromContext(context);
-    // TODO: Vassil: set permissions
+    AuthUtils.assertAdministrator(user);
     try {
       p = dao.insert(p);
       AnetAuditLogger.log("Task {} created by {}", p, user);
@@ -61,30 +61,11 @@ public class TaskResource {
     }
   }
 
-  private void assertCanUpdateTask(Person user, Task t) {
-    String permError = "You do not have permission to edit this task.";
-
-    if (AuthUtils.isAdmin(user) == false) {
-      final Position userPosition = user.getPosition();
-      if (userPosition == null) {
-        throw new WebApplicationException(permError, Status.FORBIDDEN);
-      } else {
-        final List<Position> responsiblePositions =
-            dao.getResponsiblePositionsForTask(engine.getContext(), t.getUuid()).join();
-        Optional<Position> existingPosition = responsiblePositions.stream()
-            .filter(el -> el.getUuid().equals(userPosition.getUuid())).findFirst();
-        if (!existingPosition.isPresent()) {
-          throw new WebApplicationException(permError, Status.FORBIDDEN);
-        }
-      }
-    }
-  }
-
   @GraphQLMutation(name = "updateTask")
   public Integer updateTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task t) {
     Person user = DaoUtils.getUserFromContext(context);
-    assertCanUpdateTask(user, t);
+    AuthUtils.assertAdministrator(user);
 
     // Check for loops in the hierarchy
     final Map<String, Task> children =
