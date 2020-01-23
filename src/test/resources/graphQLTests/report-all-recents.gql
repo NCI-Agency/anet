@@ -19,12 +19,12 @@ personRecents(maxResults: 6) {
       type
       status
       organization {
-	uuid
-	shortName
+        uuid
+        shortName
       }
       location {
-	uuid
-	name
+        uuid
+        name
       }
     }
   }
