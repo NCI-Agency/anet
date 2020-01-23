@@ -1,37 +1,46 @@
 package mil.dds.anet.search.pg;
 
+import java.util.Set;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   private final String isoDowFormat;
-  private final PostgresqlSearchQueryBuilder<Report, ReportSearchQuery> outerQb;
 
   public PostgresqlReportSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Report, ReportSearchQuery>(""));
-    this.isoDowFormat = "EXTRACT(ISODOW FROM %s)";
-    outerQb = new PostgresqlSearchQueryBuilder<Report, ReportSearchQuery>("PostgresqlReportSearch");
+    super(new PostgresqlSearchQueryBuilder<Report, ReportSearchQuery>("PostgresqlReportSearch"));
+    this.isoDowFormat = "EXTRACT(DOW FROM %s)+1"; // We need Sunday=1, Monday=2, etc.
   }
 
+  @InTransaction
   @Override
-  public AnetBeanList<Report> runSearch(ReportSearchQuery query) {
-    return runSearch(outerQb, query);
+  public AnetBeanList<Report> runSearch(Set<String> subFields, ReportSearchQuery query) {
+    buildQuery(subFields, query);
+    return qb.buildAndRun(getDbHandle(), query, new ReportMapper());
+  }
+
+  protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
+    qb.addSelectClause(getTableFields(subFields));
+    qb.addTotalCount();
+    qb.addFromClause("reports");
+    super.buildQuery(subFields, query);
   }
 
   @Override
   protected void addTextQuery(ReportSearchQuery query) {
-    final String text = qb.getFullTextQuery(query.getText());
-    qb.addLikeClauses("text", new String[] {"reports.text", "reports.intent",
-        "reports.\"keyOutcomes\"", "reports.\"nextSteps\"", "tags.name", "tags.description"}, text);
+    addFullTextSearch("reports", query.getText(), query.isSortByPresent());
   }
 
   @Override
   protected void addBatchClause(ReportSearchQuery query) {
-    addBatchClause(outerQb, query);
+    addBatchClause(qb, query);
   }
 
   @Override
@@ -49,25 +58,28 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   @Override
   protected void addOrgUuidQuery(ReportSearchQuery query) {
-    addOrgUuidQuery(outerQb, query);
+    addOrgUuidQuery(qb, query);
   }
 
   @Override
   protected void addAdvisorOrgUuidQuery(ReportSearchQuery query) {
-    addAdvisorOrgUuidQuery(outerQb, query);
+    addAdvisorOrgUuidQuery(qb, query);
   }
 
   @Override
   protected void addPrincipalOrgUuidQuery(ReportSearchQuery query) {
-    addPrincipalOrgUuidQuery(outerQb, query);
+    addPrincipalOrgUuidQuery(qb, query);
   }
 
   @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
-    if (qb == outerQb) {
-      // ordering must be on the outer query
-      super.addOrderByClauses(qb, query);
+    if (query.isTextPresent() && !query.isSortByPresent()) {
+      // We're doing a full-text search without an explicit sort order,
+      // so sort first on the search pseudo-rank.
+      qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));
     }
+
+    super.addOrderByClauses(qb, query);
   }
 
 }

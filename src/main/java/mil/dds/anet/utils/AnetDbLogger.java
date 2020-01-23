@@ -34,7 +34,8 @@ public class AnetDbLogger implements SqlLogger {
                 " <REPORTS_SENSITIVE_INFORMATION_FIELDS> ")
             .replace(CommentDao.COMMENT_FIELDS, " <COMMENT_FIELDS> ")
             .replaceAll("LEFT JOIN (CONTAINS|FREETEXT)TABLE[^=]*= (\\S+)\\.\\[Key\\]", "<$1_$2>")
-            .replaceFirst("(EXP|ISNULL|CASE).* AS (search_rank)", "<$1>");
+            .replaceFirst("LEFT JOIN (mv_fts_\\S+) ON \\S+\\s*=\\s*\\S+", "<$1>")
+            .replaceFirst("\\(?(EXP|ISNULL|CASE|ts_rank).* AS (search_rank)", "<$2>");
     logger.debug("{}\t{}", context.getElapsedTime(ChronoUnit.MILLIS), msg);
   }
 }

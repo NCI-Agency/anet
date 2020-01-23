@@ -1,5 +1,9 @@
 package mil.dds.anet.search;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import java.util.Map;
+import java.util.Set;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -12,19 +16,33 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, PersonSearchQuery>
     implements IPersonSearcher {
 
+  private static final Set<String> ALL_FIELDS = Sets.newHashSet(PersonDao.allFields);
+  private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(PersonDao.minimalFields);
+  private static final Map<String, String> FIELD_MAPPING = ImmutableMap.of();
+
   public AbstractPersonSearcher(AbstractSearchQueryBuilder<Person, PersonSearchQuery> qb) {
     super(qb);
   }
 
   @InTransaction
   @Override
-  public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
-    buildQuery(query);
+  public AnetBeanList<Person> runSearch(Set<String> subFields, PersonSearchQuery query) {
+    buildQuery(subFields, query);
     return qb.buildAndRun(getDbHandle(), query, new PersonMapper());
   }
 
+  @Override
   protected void buildQuery(PersonSearchQuery query) {
-    qb.addSelectClause(PersonDao.PERSON_FIELDS);
+    throw new UnsupportedOperationException();
+  }
+
+  protected String getTableFields(Set<String> subFields) {
+    return getTableFields(PersonDao.TABLE_NAME, ALL_FIELDS, MINIMAL_FIELDS, FIELD_MAPPING,
+        subFields);
+  }
+
+  protected void buildQuery(Set<String> subFields, PersonSearchQuery query) {
+    qb.addSelectClause(getTableFields(subFields));
     qb.addTotalCount();
     qb.addFromClause("people");
 
