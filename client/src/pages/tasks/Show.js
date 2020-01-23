@@ -38,7 +38,7 @@ const GQL_GET_TASK = gql`
       customFieldEnum2
       plannedCompletion
       projectedCompletion
-      responsibleOrg {
+      taskedOrganizations {
         uuid
         shortName
         longName
@@ -162,14 +162,16 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 />
 
                 <Field
-                  name="responsibleOrg"
-                  label={Settings.fields.task.responsibleOrg}
+                  name="taskedOrganizations"
+                  label={Settings.fields.task.taskedOrganizations.label}
                   component={FieldHelper.renderReadonlyField}
                   humanValue={
-                    task.responsibleOrg && (
-                      <LinkTo organization={task.responsibleOrg}>
-                        {task.responsibleOrg.shortName}
-                      </LinkTo>
+                    task.taskedOrganizations && (
+                      <>
+                        {task.taskedOrganizations.map(org => (
+                          <LinkTo organization={org} key={`${org.uuid}`} />
+                        ))}
+                      </>
                     )
                   }
                 />

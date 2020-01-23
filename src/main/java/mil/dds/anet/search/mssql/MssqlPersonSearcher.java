@@ -30,7 +30,7 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
     qb.addFromClause(
         "LEFT JOIN CONTAINSTABLE (people, (name, emailAddress), :containsQuery) c_people"
             + " ON people.uuid = c_people.[Key]"
-            + " LEFT JOIN FREETEXTTABLE(people, (name), :freetextQuery) f_people"
+            + " LEFT JOIN FREETEXTTABLE(people, (name), :fullTextQuery) f_people"
             + " ON people.uuid = f_people.[Key]");
     final StringBuilder whereRank =
         new StringBuilder("(c_people.rank IS NOT NULL OR f_people.rank IS NOT NULL"
@@ -43,8 +43,8 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
     whereRank.append(")");
     qb.addWhereClause(whereRank.toString());
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
-    qb.addSqlArg("freetextQuery", text);
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
+    qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 

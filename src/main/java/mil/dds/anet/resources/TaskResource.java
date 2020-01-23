@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
@@ -50,14 +51,7 @@ public class TaskResource {
   public Task createTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task p) {
     final Person user = DaoUtils.getUserFromContext(context);
-    if (!AuthUtils.isAdmin(user)) {
-      if (p.getResponsibleOrgUuid() == null) {
-        throw new WebApplicationException("You must select a responsible organization",
-            Status.FORBIDDEN);
-      }
-      // Admin Users can only create tasks within their organization.
-      AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrgUuid(), true);
-    }
+    AuthUtils.assertAdministrator(user);
     try {
       p = dao.insert(p);
       AnetAuditLogger.log("Task {} created by {}", p, user);
@@ -67,30 +61,11 @@ public class TaskResource {
     }
   }
 
-  private void assertCanUpdateTask(Person user, Task t) {
-    String permError = "You do not have permission to edit this task.";
-
-    if (AuthUtils.isAdmin(user) == false) {
-      final Position userPosition = user.getPosition();
-      if (userPosition == null) {
-        throw new WebApplicationException(permError, Status.FORBIDDEN);
-      } else {
-        final List<Position> responsiblePositions =
-            dao.getResponsiblePositionsForTask(engine.getContext(), t.getUuid()).join();
-        Optional<Position> existingPosition = responsiblePositions.stream()
-            .filter(el -> el.getUuid().equals(userPosition.getUuid())).findFirst();
-        if (!existingPosition.isPresent()) {
-          throw new WebApplicationException(permError, Status.FORBIDDEN);
-        }
-      }
-    }
-  }
-
   @GraphQLMutation(name = "updateTask")
   public Integer updateTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task t) {
     Person user = DaoUtils.getUserFromContext(context);
-    assertCanUpdateTask(user, t);
+    AuthUtils.assertAdministrator(user);
 
     // Check for loops in the hierarchy
     final Map<String, Task> children =
@@ -122,9 +97,31 @@ public class TaskResource {
             dao.removePositionFromTask(p, t);
           }
         } catch (InterruptedException | ExecutionException e) {
-          throw new WebApplicationException("failed to load Responsible Positions", e);
+          throw new WebApplicationException("failed to load responsible positions", e);
         }
       }
+      // Update tasked organizations:
+      if (t.getTaskedOrganizations() != null) {
+        try {
+          final List<Organization> existingTaskedOrganizations =
+              dao.getTaskedOrganizationsForTask(engine.getContext(), t.getUuid()).get();
+          for (final Organization org : t.getTaskedOrganizations()) {
+            Optional<Organization> existingOrganization = existingTaskedOrganizations.stream()
+                .filter(el -> el.getUuid().equals(org.getUuid())).findFirst();
+            if (existingOrganization.isPresent()) {
+              existingTaskedOrganizations.remove(existingOrganization.get());
+            } else {
+              dao.addTaskedOrganizationsToTask(org, t);
+            }
+          }
+          for (final Organization org : existingTaskedOrganizations) {
+            dao.removeTaskedOrganizationsFromTask(org, t.getUuid());
+          }
+        } catch (InterruptedException | ExecutionException e) {
+          throw new WebApplicationException("failed to load tasked organizations", e);
+        }
+      }
+
       AnetAuditLogger.log("Task {} updatedby {}", t, user);
       // GraphQL mutations *have* to return something, so we return the number of updated rows
       return numRows;

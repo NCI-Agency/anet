@@ -128,7 +128,7 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }

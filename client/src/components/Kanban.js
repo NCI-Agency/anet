@@ -158,10 +158,16 @@ const Card = ({ task }) => {
                   </td>
                 </tr>
                 <tr>
-                  <td>responsible org:</td>
+                  <td>tasked organizations:</td>
                   <td>
                     {" "}
-                    <LinkTo organization={task.responsibleOrg} />
+                    {this.props.task.taskedOrganizations.map(org => (
+                      <LinkTo
+                        organization={org}
+                        isLink={false}
+                        key={`${org.uuid}`}
+                      />
+                    ))}
                   </td>
                 </tr>
               </tbody>

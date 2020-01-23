@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -13,7 +12,7 @@ public class NoteMapper implements RowMapper<Note> {
   @Override
   public Note map(ResultSet rs, StatementContext ctx) throws SQLException {
     final Note n = new Note();
-    DaoUtils.setCommonBeanFields(n, rs, null);
+    MapperUtils.setCommonBeanFields(n, rs, null);
     n.setType(MapperUtils.getEnumIdx(rs, "type", NoteType.class));
     n.setText(rs.getString("text"));
     n.setAuthorUuid(rs.getString("authorUuid"));

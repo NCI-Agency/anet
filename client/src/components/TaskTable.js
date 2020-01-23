@@ -18,7 +18,7 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
             <thead>
               <tr>
                 <th>Name</th>
-                {showOrganization && <th>Organization</th>}
+                {showOrganization && <th>Tasked organizations</th>}
                 <th />
               </tr>
             </thead>
@@ -32,7 +32,12 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
                   </td>
                   {showOrganization && (
                     <td className="taskOrg">
-                      <LinkTo organization={task.responsibleOrg} />
+                      {task.taskedOrganizations.map(org => (
+                        <LinkTo
+                          organization={org}
+                          key={`${task.uuid}-${org.uuid}`}
+                        />
+                      ))}
                     </td>
                   )}
                   {showDelete && (

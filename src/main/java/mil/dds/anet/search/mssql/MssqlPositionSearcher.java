@@ -35,7 +35,7 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     whereRank.append(")");
     qb.addWhereClause(whereRank.toString());
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 

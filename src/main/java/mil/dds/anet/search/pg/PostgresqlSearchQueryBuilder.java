@@ -19,8 +19,17 @@ public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends 
   }
 
   @Override
-  public String getFullTextQuery(String text) {
+  public String getContainsQuery(String text) {
     return "%" + stripWildcards(text) + "%";
+  }
+
+  @Override
+  public String getFullTextQuery(String text) {
+    String cleanText = stripWildcards(text);
+    if (text.endsWith("*")) {
+      cleanText = cleanText + ":*";
+    }
+    return cleanText;
   }
 
   @Override

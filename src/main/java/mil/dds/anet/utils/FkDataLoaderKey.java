@@ -19,4 +19,5 @@ public enum FkDataLoaderKey {
   REPORT_TAGS, // report.tags
   REPORT_TASKS, // report.tasks
   TASK_RESPONSIBLE_POSITIONS, // task.responsiblePositions
+  TASK_TASKED_ORGANIZATIONS, // task.taskedOrganizations
 }
