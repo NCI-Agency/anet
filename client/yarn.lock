@@ -2128,10 +2128,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@blueprintjs/core@^3.23.0":
-  version "3.23.0"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.23.0.tgz#fc6cf564e178476f7f6d0dbce06e0fb202429ac8"
-  integrity sha512-/Qfbk5JzJFAeay1RAX/v0mGNoYF2GxgKd3PceyUqC3t5MRy5EdhAFP45c+UfZuyR92i6lZTWHCIwqRP2iUEhFA==
+"@blueprintjs/core@^3.23.0", "@blueprintjs/core@^3.23.1":
+  version "3.23.1"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.23.1.tgz#346bd5430494cc2965fa9cac7366dc94c9dcf918"
+  integrity sha512-Lh+uCYAf2a54L739/NntMKUHkMoCintbs/NidX1j950KL0GW0J95niFqmN2B3oV/uJdXsPjZKj6VyOBlI+tUIA==
   dependencies:
     "@blueprintjs/icons" "^3.12.0"
     "@types/dom4" "^2.0.1"
