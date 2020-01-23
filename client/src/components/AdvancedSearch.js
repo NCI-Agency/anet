@@ -136,8 +136,22 @@ const AdvancedSearch = ({
               )}
             </div>
 
-            <Row style={{ borderTop: "1px solid #ddd", paddingTop: "15px" }}>
-              <Col md={6} mdOffset={2}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                borderTop: "1px solid #ddd",
+                paddingTop: "15px"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexGrow: 1
+                }}
+              >
                 {!objectType ? (
                   "To add filters, first pick a type above"
                 ) : !moreFiltersAvailable ? (
@@ -163,8 +177,14 @@ const AdvancedSearch = ({
                     </Button>
                   </Popover>
                 )}
-              </Col>
-              <Col md={4} style={{ whiteSpace: "nowrap", textAlign: "right" }}>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "flex-end"
+                }}
+              >
                 <Button
                   className={Classes.POPOVER_DISMISS}
                   intent="danger"
@@ -183,8 +203,8 @@ const AdvancedSearch = ({
                 >
                   Search
                 </Button>
-              </Col>
-            </Row>
+              </div>
+            </div>
           </Form>
         </div>
       )}
@@ -290,21 +310,23 @@ const SearchFilter = ({ onRemove, filter, organizationFilter, element }) => {
 
   return (
     <FormGroup controlId={queryKey}>
-      <Col xs={1} sm={2}>
-        <ControlLabel>{label}</ControlLabel>
-      </Col>
-      <Col xs={10} sm={9}>
-        <ChildComponent
-          value={filter.value || ""}
-          onChange={onChange}
-          {...element.props}
-        />
-      </Col>
-      <Col xs={1} sm={1}>
-        <Button bsStyle="link" onClick={() => onRemove(filter)}>
-          <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
-        </Button>
-      </Col>
+      <Row>
+        <Col xs={1} sm={2} style={{ textAlign: "right" }}>
+          <ControlLabel>{label}</ControlLabel>
+        </Col>
+        <Col xs={10} sm={9}>
+          <ChildComponent
+            value={filter.value || ""}
+            onChange={onChange}
+            {...element.props}
+          />
+        </Col>
+        <Col xs={1} sm={1}>
+          <Button bsStyle="link" onClick={() => onRemove(filter)}>
+            <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
+          </Button>
+        </Col>
+      </Row>
     </FormGroup>
   )
 
