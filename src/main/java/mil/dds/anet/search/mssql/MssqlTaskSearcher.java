@@ -25,7 +25,7 @@ public class MssqlTaskSearcher extends AbstractTaskSearcher {
         + " ON tasks.uuid = c_tasks.[Key]");
     qb.addWhereClause("(c_tasks.rank IS NOT NULL OR tasks.shortName LIKE :likeQuery)");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 

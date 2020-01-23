@@ -23,7 +23,7 @@ public class MssqlLocationSearcher extends AbstractLocationSearcher {
         + " ON locations.uuid = c_locations.[Key]");
     qb.addWhereClause("c_locations.rank IS NOT NULL");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
   }
 
   @Override

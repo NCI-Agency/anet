@@ -13,7 +13,8 @@ export const {
   customFieldEnum1,
   customFieldEnum2,
   plannedCompletion,
-  projectedCompletion
+  projectedCompletion,
+  responsiblePositions
 } = Settings.fields.task
 
 export default class Task extends Model {
@@ -72,7 +73,7 @@ export default class Task extends Model {
         .string()
         .nullable()
         .default("")
-        .label(customField.label),
+        .label(customField && customField.label),
       projectedCompletion: yupDate
         .nullable()
         .default(null)
@@ -89,7 +90,7 @@ export default class Task extends Model {
         .array()
         .nullable()
         .default([])
-        .label(Settings.fields.task.responsiblePositions.label)
+        .label(responsiblePositions && responsiblePositions.label)
     })
     .concat(Model.yupSchema)
 

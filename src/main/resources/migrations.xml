@@ -10,6 +10,7 @@
 	<property name="uuid_type" value="varchar(36)" />
 	<!-- Convenience functions to generate UUIDv4 on various databases -->
 	<property name="uuid_function" value="lower(newid())" dbms="mssql" />
+	<!-- Extension "uuid-ossp" should exist already, see `prepare-psql.sql`: -->
 	<property name="uuid_function" value="uuid_generate_v4()" dbms="postgresql" />
 	<!-- Not really a UUID but who cares? -->
 	<property name="uuid_function" value="lower(hex(randomblob(16)))" dbms="sqlite" />
@@ -21,6 +22,13 @@
 	<!-- Use a NONCLUSTERED index only for MSSQL -->
 	<property name="non_clustered" value="NONCLUSTERED" dbms="mssql" />
 	<property name="non_clustered" value="" dbms="postgresql,sqlite" />
+
+	<!-- Full-text search configuration used by PostgreSQL -->
+	<property name="fts_config_name" value="anet" dbms="postgresql" />
+	<property name="fts_config" value="'${fts_config_name}'" dbms="postgresql" />
+	<!-- Full-text search weights -->
+	<property name="fts_high" value="'A'" dbms="postgresql" />
+	<property name="fts_low" value="'B'" dbms="postgresql" />
 
 	<changeSet id="1" author="hpitelka">
 		<createTable tableName="people">
@@ -2827,6 +2835,227 @@
 
 			<!-- Finally, drop new m2m table (also drops FK constraints and indexes) -->
 			<dropTable tableName="taskTaskedOrganizations" />
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add-postgresql-fulltext" author="gjvoosten" dbms="postgresql">
+		<sql>
+			<!-- Create text search configuration -->
+			DROP TEXT SEARCH CONFIGURATION IF EXISTS ${fts_config_name};
+			CREATE TEXT SEARCH CONFIGURATION ${fts_config_name} ( COPY = pg_catalog.english );
+			ALTER TEXT SEARCH CONFIGURATION ${fts_config_name} ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;
+
+			<!-- Add generated full-text columns -->
+			ALTER TABLE "authorizationGroups"
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."identificationCode", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(organizations."shortName", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE notes
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(notes.text, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(people.name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people.code, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people."domainUsername", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people."emailAddress", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people."phoneNumber", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(people.biography, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE positions
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(positions.name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(positions.code, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE reports
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(reports.intent, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(reports."keyOutcomes", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(reports."nextSteps", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(reports.text, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tags
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(tags.name, '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(tags.description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tasks
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(tasks."shortName", '')), ${fts_high})
+					|| setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", '')), ${fts_high})
+				) STORED;
+
+			<!-- Create full-text materialized views and indexes -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_fts_authorizationGroups"(uuid, full_text) AS
+				SELECT
+					"authorizationGroups".uuid,
+					"authorizationGroups".full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM "authorizationGroups"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'authorizationGroups'
+					AND "noteRelatedObjects"."relatedObjectUuid" = "authorizationGroups".uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY "authorizationGroups".uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_authorizationGroups_uuid" ON "mv_fts_authorizationGroups"(uuid);
+			CREATE INDEX "FT_mv_fts_authorizationGroups" ON "mv_fts_authorizationGroups" USING gin(full_text);
+			CREATE INDEX "TR_authorizationGroups_uuid" ON "mv_fts_authorizationGroups" USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+				SELECT
+					locations.uuid,
+					locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM locations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY locations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+				SELECT
+					organizations.uuid,
+					organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM organizations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
+				SELECT
+					people.uuid,
+					people.full_text
+					|| coalesce(tsvector_agg(positions.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM people
+				LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
+					AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY people.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
+			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
+				SELECT
+					positions.uuid,
+					positions.full_text
+					|| coalesce(tsvector_agg(people.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM positions
+				LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'positions'
+					AND "noteRelatedObjects"."relatedObjectUuid" = positions.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY positions.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
+			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
+				SELECT
+					reports.uuid,
+					reports.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM reports
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'reports'
+					AND "noteRelatedObjects"."relatedObjectUuid" = reports.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY reports.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_reports_uuid" ON mv_fts_reports(uuid);
+			CREATE INDEX "FT_mv_fts_reports" ON mv_fts_reports USING gin(full_text);
+			CREATE INDEX "TR_reports_uuid" ON mv_fts_reports USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tags(uuid, full_text) AS
+				SELECT
+					tags.uuid,
+					tags.full_text
+				FROM tags
+				GROUP BY tags.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tags" ON mv_fts_tags(uuid);
+			CREATE INDEX "FT_mv_fts_tags" ON mv_fts_tags USING gin(full_text);
+			CREATE INDEX "TR_tags_uuid" ON mv_fts_tags USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
+				SELECT
+					tasks.uuid,
+					tasks.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM tasks
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
+					AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY tasks.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tasks" ON mv_fts_tasks(uuid);
+			CREATE INDEX "FT_mv_fts_tasks" ON mv_fts_tasks USING gin(full_text);
+			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin(uuid gin_trgm_ops);
+		</sql>
+		<rollback>
+			<sql>
+				<!-- Drop full-text materialized views (incl. indexes) -->
+				DROP MATERIALIZED VIEW "mv_fts_authorizationGroups";
+				DROP MATERIALIZED VIEW mv_fts_locations;
+				DROP MATERIALIZED VIEW mv_fts_organizations;
+				DROP MATERIALIZED VIEW mv_fts_people;
+				DROP MATERIALIZED VIEW mv_fts_positions;
+				DROP MATERIALIZED VIEW mv_fts_reports;
+				DROP MATERIALIZED VIEW mv_fts_tags;
+				DROP MATERIALIZED VIEW mv_fts_tasks;
+
+				<!-- Drop generated full-text columns -->
+				ALTER TABLE "authorizationGroups" DROP COLUMN full_text;
+				ALTER TABLE locations DROP COLUMN full_text;
+				ALTER TABLE organizations DROP COLUMN full_text;
+				ALTER TABLE notes DROP COLUMN full_text;
+				ALTER TABLE people DROP COLUMN full_text;
+				ALTER TABLE positions DROP COLUMN full_text;
+				ALTER TABLE reports DROP COLUMN full_text;
+				ALTER TABLE tags DROP COLUMN full_text;
+				ALTER TABLE tasks DROP COLUMN full_text;
+
+				<!-- Drop text search configuration -->
+				DROP TEXT SEARCH CONFIGURATION ${fts_config_name};
+			</sql>
 		</rollback>
 	</changeSet>
 

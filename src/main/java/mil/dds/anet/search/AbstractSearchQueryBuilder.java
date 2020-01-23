@@ -122,6 +122,8 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     return stripWildcards(text) + "%";
   }
 
+  public abstract String getContainsQuery(String text);
+
   public abstract String getFullTextQuery(String text);
 
   /**
