@@ -232,15 +232,12 @@ public class Task extends AbstractAnetBean {
     return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
-        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
-        && Objects.equals(other.getResponsiblePositions(), responsiblePositions)
-        && Objects.equals(other.getTaskedOrganizations(), taskedOrganizations);
+        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, responsiblePositions,
-        taskedOrganizations);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
   }
 
   @Override
