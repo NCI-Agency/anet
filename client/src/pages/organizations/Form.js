@@ -694,9 +694,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
       "tasks"
     )
     // strip tasks fields not in data model
-    organization.tasks = values.tasks.map(t =>
-      Object.without(t, "formCustomFields")
-    )
+    organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
     return API.mutation(
       edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,

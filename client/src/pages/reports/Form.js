@@ -1357,7 +1357,7 @@ const BaseReportForm = ({
       )
     )
     // strip tasks fields not in data model
-    report.tasks = values.tasks.map(t => Object.without(t, "formCustomFields"))
+    report.tasks = values.tasks.map(t => utils.getReference(t))
     report.location = utils.getReference(report.location)
     report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
