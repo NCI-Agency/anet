@@ -499,6 +499,6 @@ allprojects {
 
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
-	version = '10.16.0'
+	version = '12.14.1'
 	download = true
 }
