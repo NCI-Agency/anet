@@ -11,8 +11,6 @@ import {
   FormGroup,
   HelpBlock,
   InputGroup,
-  Radio,
-  Table,
   ToggleButton,
   ToggleButtonGroup
 } from "react-bootstrap"
@@ -412,66 +410,6 @@ export const CheckboxButtonToggleGroup = ({
 CheckboxButtonToggleGroup.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object
-}
-
-export const LikertScale = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  label,
-  children,
-  extraColElem,
-  addon,
-  vertical,
-  buttons,
-  ...otherProps
-}) => {
-  const { value, ...fieldProps } = field
-  const widgetElem = useMemo(
-    () => (
-      <Table striped condensed hover responsive style={{ marginBottom: 0 }}>
-        <tbody>
-          <tr>
-            {buttons.map((button, index) => {
-              return <td key={button.value}>{button.label}</td>
-            })}
-          </tr>
-          <tr>
-            {buttons.map((button, index) => {
-              return (
-                <td key={button.value}>
-                  <Radio value={button.value} {...fieldProps} />
-                </td>
-              )
-            })}
-          </tr>
-        </tbody>
-      </Table>
-    ),
-    [buttons, fieldProps]
-  )
-  return (
-    <Field
-      field={field}
-      form={form}
-      label={label}
-      widgetElem={widgetElem}
-      children={children}
-      extraColElem={extraColElem}
-      addon={addon}
-      vertical={vertical}
-    />
-  )
-}
-LikertScale.propTypes = {
-  field: PropTypes.object,
-  form: PropTypes.object,
-  type: PropTypes.string,
-  label: PropTypes.string,
-  children: PropTypes.any,
-  extraColElem: PropTypes.object,
-  addon: PropTypes.object,
-  vertical: PropTypes.bool,
-  buttons: PropTypes.array
 }
 
 export default Field
