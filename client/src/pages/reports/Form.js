@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
@@ -283,14 +282,14 @@ const BaseReportForm = ({
   const reportSchema = _isEmpty(taskAssessmentsSchemaShape)
     ? Report.yupSchema
     : Report.yupSchema.concat(
-        yup.object().shape({
-          taskAssessments: yup
-            .object()
-            .shape(taskAssessmentsSchemaShape)
-            .nullable()
-            .default(null)
-        })
-      )
+      yup.object().shape({
+        taskAssessments: yup
+          .object()
+          .shape(taskAssessmentsSchemaShape)
+          .nullable()
+          .default(null)
+      })
+    )
   let validateFieldDebounced
 
   return (
@@ -524,8 +523,7 @@ const BaseReportForm = ({
                       "intentCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )
-                  }
+                    )}
                   extraColElem={
                     <>
                       <span id="intentCharsLeft">
@@ -634,8 +632,7 @@ const BaseReportForm = ({
                             "cancelledReason",
                             cancelledReasonOptions[0].value,
                             true
-                          )
-                        }
+                          )}
                       >
                         This engagement was cancelled
                       </Checkbox>
@@ -733,8 +730,7 @@ const BaseReportForm = ({
                         <AttendeesTable
                           attendees={values.attendees}
                           onChange={value =>
-                            setFieldValue("attendees", value, true)
-                          }
+                            setFieldValue("attendees", value, true)}
                           showDelete
                         />
                       }
@@ -908,8 +904,7 @@ const BaseReportForm = ({
                           "keyOutcomesCharsLeft",
                           Settings.maxTextFieldLength,
                           event
-                        )
-                      }
+                        )}
                       extraColElem={
                         <>
                           <span id="keyOutcomesCharsLeft">
@@ -920,7 +915,7 @@ const BaseReportForm = ({
                         </>
                       }
                     />
-                  )}
+                )}
 
                 {!isFutureEngagement && (
                   <FastField
@@ -939,8 +934,7 @@ const BaseReportForm = ({
                         "nextStepsCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )
-                    }
+                      )}
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
@@ -990,8 +984,7 @@ const BaseReportForm = ({
                             "reportSensitiveInformation.text",
                             value,
                             true
-                          )
-                        }
+                          )}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
@@ -1117,8 +1110,7 @@ const BaseReportForm = ({
                   {canDelete && (
                     <ConfirmDelete
                       onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)
-                      }
+                        onConfirmDelete(values.uuid, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
