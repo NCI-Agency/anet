@@ -45,7 +45,7 @@ public class MapperUtils {
   public static void setCustomizableBeanFields(AbstractCustomizableAnetBean bean, ResultSet rs,
       String tableName) throws SQLException {
     setCommonBeanFields(bean, rs, tableName);
-  
+
     final String customFieldsCol = getQualifiedFieldName(tableName, "customFields");
     if (containsColumnNamed(rs, customFieldsCol)) {
       bean.setCustomFields(rs.getString(customFieldsCol));
