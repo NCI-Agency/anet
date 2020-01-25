@@ -109,7 +109,7 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   @Override
   public Task insertInternal(Task p) {
     getDbHandle().createUpdate("/* insertTask */ INSERT INTO tasks "
-        + "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"organizationUuid\", \"createdAt\", \"updatedAt\", status, "
+        + "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"createdAt\", \"updatedAt\", status, "
         + "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\", \"customFields\") "
         + "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :createdAt, :updatedAt, :status, "
         + ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion, :customFields)")
