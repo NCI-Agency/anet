@@ -3,5 +3,3 @@ import "locale-compare-polyfill"
 
 // fetch() polyfill for making API calls.
 import "cross-fetch/polyfill"
-
-import "weakset"
