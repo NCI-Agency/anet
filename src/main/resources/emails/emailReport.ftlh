@@ -439,7 +439,7 @@ ${sender.name} sent you a report from ANET:
                 Name
               </th>
               <th>
-                Organization
+                Tasked organizations
               </th>
             </tr>
           </thead>
@@ -450,9 +450,11 @@ ${sender.name} sent you a report from ANET:
                 <a href="/tasks/${task.uuid}">${(task.shortName)!} - ${(task.longName)!}</a>
               </td>
               <td class="taskOrg">
-                <#if task.loadResponsibleOrg(context).get()??>
-                  <#assign responsibleOrg = task.getResponsibleOrg()>
-                  <a href="/organizations/${responsibleOrg.uuid}">${(responsibleOrg.shortName)!(responsibleOrg.longName)!(responsibleOrg.identificationCode)!}</a>
+                <#if task.loadTaskedOrganizations(context).get()??>
+                  <#assign taskedOrgs = task.getTaskedOrganizations()>
+                    <#list taskedOrgs as taskedOrg>
+                      <a href="/organizations/${taskedOrg.uuid}">${(taskedOrg.shortName)!}</a>&nbsp;
+                    </#list>
                 </#if>
               </td>
             </tr>

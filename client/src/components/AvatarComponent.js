@@ -29,14 +29,14 @@ export default class AvatarComponent extends React.Component {
   }
 
   render() {
-    let previewImage = this.props.showPreview && (
+    const previewImage = this.props.showPreview && (
       <div style={{ float: "left" }}>
         <div style={{ fontWeight: "bold" }}>Preview</div>
         <img src={this.state.preview} alt="Preview" />
       </div>
     )
 
-    let image =
+    const image =
       this.props.editCurrent &&
       (this.props.src === null || this.props.src === ""
         ? DEFAULT_AVATAR

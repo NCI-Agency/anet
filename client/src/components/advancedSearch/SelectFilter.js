@@ -32,7 +32,7 @@ const SelectFilter = props => {
     <>{optionsLabels[options.indexOf(value.value)]}</>
   ) : (
     <FormGroup>
-      <select value={value.value} onChange={handleChange}>
+      <select id={queryKey} value={value.value} onChange={handleChange}>
         {options.map((v, idx) => (
           <option key={idx} value={v}>
             {optionsLabels[idx]}

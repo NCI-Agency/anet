@@ -1,25 +1,25 @@
-let util = require("util")
-let config = require("config")
-let user = config.has("browserstack_user")
+const util = require("util")
+const config = require("config")
+const user = config.has("browserstack_user")
   ? config.get("browserstack_user")
   : process.env.BROWSERSTACK_USER
-let key = config.has("browserstack_key")
+const key = config.has("browserstack_key")
   ? config.get("browserstack_key")
   : process.env.BROWSERSTACK_ACCESS_KEY
-let localIdentifier = config.has("browserstack_localIdentifier")
+const localIdentifier = config.has("browserstack_localIdentifier")
   ? config.get("browserstack_localIdentifier")
   : process.env.BROWSERSTACK_LOCAL_IDENTIFIER
-let debug = config.has("browserstack_debug")
+const debug = config.has("browserstack_debug")
   ? config.get("browserstack_debug")
   : process.env.BROWSERSTACK_DEBUG
 
 // Note: if the official timezone is "America/New_York", BrowserStack uses just "New_York"!
-let moment = require("moment-timezone")
-let localTz = moment.tz.guess()
-let tzParts = localTz.split("/")
-let bsTz = tzParts[tzParts.length - 1]
+const moment = require("moment-timezone")
+const localTz = moment.tz.guess()
+const tzParts = localTz.split("/")
+const bsTz = tzParts[tzParts.length - 1]
 
-let capabilities = {
+const capabilities = {
   maxInstances: 1,
   // Ideally, we'd like to test with:
   //   browserName: 'IE',
@@ -27,7 +27,7 @@ let capabilities = {
   // but that is so prone to unexpected failures as to be unusable.
   // So test with latest stable Chrome instead.
   browserName: "Chrome",
-  browser_version: "76.0",
+  browser_version: "79.0",
   "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: ["--start-maximized"]

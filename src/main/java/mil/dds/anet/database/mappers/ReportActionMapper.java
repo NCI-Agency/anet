@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -16,7 +15,7 @@ public class ReportActionMapper implements RowMapper<ReportAction> {
     aa.setPersonUuid(rs.getString("personUuid"));
     aa.setReportUuid(rs.getString("reportUuid"));
     aa.setStepUuid(rs.getString("approvalStepUuid"));
-    aa.setCreatedAt(DaoUtils.getInstantAsLocalDateTime(rs, "createdAt"));
+    aa.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
     aa.setType(MapperUtils.getEnumIdx(rs, "type", ActionType.class));
     return aa;
   }

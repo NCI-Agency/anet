@@ -17,7 +17,7 @@ const CheckboxFilter = props => {
     <>{msg}</>
   ) : (
     <FormGroup>
-      <Checkbox readOnly checked={value.value}>
+      <Checkbox id={queryKey} readOnly checked={value.value}>
         {msg}
       </Checkbox>
     </FormGroup>

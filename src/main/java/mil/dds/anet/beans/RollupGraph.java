@@ -1,14 +1,20 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 
 public class RollupGraph {
 
+  @GraphQLQuery
+  @GraphQLInputField
   Organization org;
+  @GraphQLQuery
+  @GraphQLInputField
   int published;
+  @GraphQLQuery
+  @GraphQLInputField
   int cancelled;
 
-  @GraphQLQuery(name = "org")
   public Organization getOrg() {
     return org;
   }
@@ -17,7 +23,6 @@ public class RollupGraph {
     this.org = org;
   }
 
-  @GraphQLQuery(name = "published")
   public int getPublished() {
     return published;
   }
@@ -26,7 +31,6 @@ public class RollupGraph {
     this.published = published;
   }
 
-  @GraphQLQuery(name = "cancelled")
   public int getCancelled() {
     return cancelled;
   }

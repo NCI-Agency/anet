@@ -18,28 +18,26 @@
   display: none;
 }
 
-.overlayFilters {
+.advanced-select-filters {
   list-style-type: none;
 }
-.overlayFilters > li > button {
+.advanced-select-filters > li > button {
   text-decoration: none;
   text-align: right;
   border-radius: 4px;
 }
-.overlayFilters > li > button:hover,
-.overlayFilters > li > button:focus {
+.advanced-select-filters > li > button:hover,
+.advanced-select-filters > li > button:focus {
   text-decoration: none;
   outline: none;
 }
-.overlayFilters > li > button:hover {
+.advanced-select-filters > li > button:hover {
   background-color: #e0e0e0;
 }
-.overlayFilters > li.active > button {
+.advanced-select-filters > li.active > button {
   border: 2px solid #1772B8;
 }
 
-.attendeesOverlayTable.table > tbody > tr > td,
-.advisorAttendeesTable.table > tbody > tr > td,
-.principalAttendeesTable.table > tbody > tr > td  {
+.advanced-select-popover table > tbody > tr > td {
   vertical-align: middle;
 }

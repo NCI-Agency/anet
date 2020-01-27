@@ -4,6 +4,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -144,8 +145,6 @@ public class ReportResource {
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
-    // Needed for sensitive information, e.g. when autoSaving a new report
-    r.setUser(author);
     r = dao.insert(r, author);
     AnetAuditLogger.log("Report {} created by author {} ", r, author);
     return r;
@@ -352,7 +351,6 @@ public class ReportResource {
 
     // Clear and re-load sensitive information; needed in case of autoSave by the client form, or
     // when sensitive info is 'empty' HTML
-    r.setUser(editor);
     try {
       r.setReportSensitiveInformation(null);
       r.loadReportSensitiveInformation(engine.getContext()).get();
@@ -832,9 +830,10 @@ public class ReportResource {
 
   @GraphQLQuery(name = "reportList")
   public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLEnvironment Set<String> subFields,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(query);
+    return dao.search(subFields, query);
   }
 
   /**

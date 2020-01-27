@@ -24,7 +24,6 @@ const TextInputFilter = props => {
     setValue({ value: event.target.value })
   }
 }
-
 TextInputFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([
@@ -38,7 +37,6 @@ TextInputFilter.propTypes = {
   // Passed by the SearchFilterDisplay row
   asFormField: PropTypes.bool
 }
-
 TextInputFilter.defaultProps = {
   asFormField: true
 }

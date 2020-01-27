@@ -14,9 +14,9 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
   AnchorLink,
+  PageDispatchersPropType,
   jumpToTop,
-  mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -128,7 +128,7 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }
@@ -258,7 +258,7 @@ const GQL_APPROVE_REPORT = gql`
   }
 `
 
-const BaseReportShow = props => {
+const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const history = useHistory()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -274,7 +274,7 @@ const BaseReportShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -305,7 +305,6 @@ const BaseReportShow = props => {
 
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
-  const { currentUser } = props
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAuthor = Person.isEqual(currentUser, report.author)
 
@@ -344,7 +343,7 @@ const BaseReportShow = props => {
     <Formik
       enableReinitialize
       validationSchema={Report.yupSchema}
-      isInitialValid={() => Report.yupSchema.isValidSync(report)}
+      validateOnMount
       initialValues={report}
     >
       {({ isSubmitting, setSubmitting, isValid, setFieldValue, values }) => {
@@ -656,7 +655,7 @@ const BaseReportShow = props => {
 
               <Fieldset className="report-sub-form" title="Comments">
                 {report.comments.map(comment => {
-                  let createdAt = moment(comment.createdAt)
+                  const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
                       <LinkTo person={comment.author} />,
@@ -733,7 +732,6 @@ const BaseReportShow = props => {
   )
 
   function renderNoPositionAssignedText() {
-    const { currentUser } = props
     const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
     const supportEmail = Settings.SUPPORT_EMAIL_ADDR
     const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
@@ -1010,7 +1008,7 @@ const BaseReportShow = props => {
 
   function deserializeCallback(message, objectType, filters, text) {
     // We update the Redux state
-    props.setSearchQuery({
+    setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
@@ -1246,16 +1244,16 @@ const BaseReportShow = props => {
 }
 
 BaseReportShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   setSearchQuery: PropTypes.func.isRequired,
   currentUser: PropTypes.instanceOf(Person)
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
   return {
     setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
-    ...pageDispatchToProps
+    ...pageDispatchers
   }
 }
 

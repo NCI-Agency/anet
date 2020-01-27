@@ -1,4 +1,4 @@
-let test = require("../util/test")
+const test = require("../util/test")
 
 // Ava provides a nice ability to run tests in parallel, but we need to run these tests
 // synchronously because too much parallel activity causes webdriver to throw EPIPE errors.
@@ -11,7 +11,7 @@ test("Home Page", async t => {
   // do not offer test planning.
   t.plan(7)
 
-  let {
+  const {
     assertElementText,
     assertElementNotPresent,
     assertElementTextIsInt,
@@ -23,7 +23,7 @@ test("Home Page", async t => {
   await t.context.get("/")
 
   // Use a CSS selector to find an element that we care about on the page.
-  let [
+  const [
     $draftReports,
     $reportsPending,
     $orgReports,
@@ -37,9 +37,9 @@ test("Home Page", async t => {
   await assertElementTextIsInt(t, $plannedEngagements)
   await assertElementTextIsInt(t, $sensitiveInfo)
 
-  let $tourLauncher = await $(".persistent-tour-launcher")
+  const $tourLauncher = await $(".persistent-tour-launcher")
   await $tourLauncher.click()
-  let $hopscotchTitle = await $(".hopscotch-title")
+  const $hopscotchTitle = await $(".hopscotch-title")
   await assertElementText(
     t,
     $hopscotchTitle,
@@ -47,10 +47,10 @@ test("Home Page", async t => {
     "Clicking the hopscotch launch button starts the hopscotch tour"
   )
 
-  let $hopscotchNext = await $(".hopscotch-next")
+  const $hopscotchNext = await $(".hopscotch-next")
   await $hopscotchNext.click()
 
-  let $myReportsLink = await $("#leftNav > li:nth-child(3) > a")
+  const $myReportsLink = await $("#leftNav > li:nth-child(3) > a")
   await $myReportsLink.click()
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await assertElementNotPresent(

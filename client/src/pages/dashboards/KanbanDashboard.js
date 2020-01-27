@@ -3,8 +3,8 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import Kanban from "components/Kanban"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Task } from "models"
@@ -24,7 +24,7 @@ const GQL_GET_TASK_LIST = gql`
         customFieldEnum1
         createdAt
         updatedAt
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }
@@ -51,7 +51,7 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 
-const KanbanDashboard = props => {
+const KanbanDashboard = ({ pageDispatchers }) => {
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dashboardData, setDashboardData] = useState({})
@@ -64,13 +64,17 @@ const KanbanDashboard = props => {
     fetchData()
   }, [dashboardSettings.data])
 
-  return <KanbanDashboardImpl dashboardData={dashboardData} {...props} />
+  return (
+    <KanbanDashboardImpl
+      dashboardData={dashboardData}
+      pageDispatchers={pageDispatchers}
+    />
+  )
 }
 
-KanbanDashboard.propTypes = { ...pagePropTypes }
+KanbanDashboard.propTypes = { pageDispatchers: PageDispatchersPropType }
 
-const KanbanDashboardImpl = props => {
-  const { dashboardData } = props
+const KanbanDashboardImpl = ({ pageDispatchers, dashboardData }) => {
   const taskQuery = {
     pageNum: 0,
     pageSize: 0,
@@ -84,7 +88,7 @@ const KanbanDashboardImpl = props => {
     error,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -98,8 +102,8 @@ const KanbanDashboardImpl = props => {
 }
 
 KanbanDashboardImpl.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   dashboardData: PropTypes.object
 }
 
-export default connect(null, mapDispatchToProps)(KanbanDashboard)
+export default connect(null, mapPageDispatchersToProps)(KanbanDashboard)

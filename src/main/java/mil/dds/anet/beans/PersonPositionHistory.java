@@ -2,6 +2,7 @@ package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
@@ -22,9 +23,15 @@ import mil.dds.anet.views.UuidFetcher;
  */
 public class PersonPositionHistory extends AbstractAnetBean {
 
+  // annotated below
   private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<Position> position = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   Instant startTime;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant endTime;
 
   @Override
@@ -32,6 +39,11 @@ public class PersonPositionHistory extends AbstractAnetBean {
   @GraphQLIgnore
   public String getUuid() {
     throw new WebApplicationException("no UUID field on PersonPositionHistory");
+  }
+
+  @Override
+  public void setUuid(String uuid) {
+    // just ignore
   }
 
   @GraphQLQuery(name = "person")
@@ -47,22 +59,20 @@ public class PersonPositionHistory extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setPersonUuid(String personUuid) {
     this.person = new ForeignObjectHolder<>(personUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getPersonUuid() {
     return person.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "person")
   public void setPerson(Person person) {
     this.person = new ForeignObjectHolder<>(person);
   }
 
-  @GraphQLIgnore
   public Person getPerson() {
     return person.getForeignObject();
   }
@@ -80,27 +90,24 @@ public class PersonPositionHistory extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setPositionUuid(String positionUuid) {
     this.position = new ForeignObjectHolder<>(positionUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getPositionUuid() {
     return position.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "position")
   public void setPosition(Position position) {
     this.position = new ForeignObjectHolder<>(position);
   }
 
-  @GraphQLIgnore
   public Position getPosition() {
     return position.getForeignObject();
   }
 
-  @GraphQLQuery(name = "startTime")
   public Instant getStartTime() {
     return startTime;
   }
@@ -109,7 +116,6 @@ public class PersonPositionHistory extends AbstractAnetBean {
     this.startTime = startTime;
   }
 
-  @GraphQLQuery(name = "endTime")
   public Instant getEndTime() {
     return endTime;
   }

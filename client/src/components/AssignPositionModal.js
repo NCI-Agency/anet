@@ -12,6 +12,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
@@ -65,7 +66,7 @@ const BaseAssignPositionModal = props => {
 
   const newPosition = position ? new Position(position) : new Position()
 
-  let positionSearchQuery = { status: Position.STATUS.ACTIVE }
+  const positionSearchQuery = { status: Position.STATUS.ACTIVE }
   if (person.role === Person.ROLE.ADVISOR) {
     positionSearchQuery.type = [Position.TYPE.ADVISOR]
     if (currentUser.isAdmin()) {
@@ -78,7 +79,7 @@ const BaseAssignPositionModal = props => {
       positionSearchQuery.type.push(Position.TYPE.SUPER_USER)
       positionSearchQuery.organizationUuid =
         currentUser.position.organization.uuid
-      positionSearchQuery.includeChildrenOrgs = true
+      positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
     }
   } else if (person.role === Person.ROLE.PRINCIPAL) {
     positionSearchQuery.type = [Position.TYPE.PRINCIPAL]

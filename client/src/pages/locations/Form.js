@@ -7,7 +7,7 @@ import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location, Person } from "models"
 import PropTypes from "prop-types"
@@ -29,8 +29,7 @@ const GQL_UPDATE_LOCATION = gql`
   }
 `
 
-const BaseLocationForm = props => {
-  const { currentUser, edit, title, ...myFormProps } = props
+const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const canEditName =
@@ -53,8 +52,7 @@ const BaseLocationForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      isInitialValid
-      {...myFormProps}
+      initialValues={initialValues}
     >
       {({
         handleSubmit,
@@ -98,13 +96,13 @@ const BaseLocationForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field
+                <FastField
                   name="name"
                   component={FieldHelper.renderInputField}
                   disabled={!canEditName}
                 />
 
-                <Field
+                <FastField
                   name="status"
                   component={FieldHelper.renderButtonToggleGroup}
                   buttons={statusButtons}
@@ -170,12 +168,11 @@ const BaseLocationForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateLocation" : "createLocation"
     const location = new Location({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -190,10 +187,9 @@ const BaseLocationForm = props => {
 
   function save(values, form) {
     const location = Object.without(new Location(values), "notes")
-    return API.mutation(
-      props.edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION,
-      { location }
-    )
+    return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
+      location
+    })
   }
 }
 

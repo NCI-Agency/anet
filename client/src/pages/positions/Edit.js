@@ -2,8 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -58,7 +58,7 @@ const GQL_GET_POSITION = gql`
   }
 `
 
-const PositionEdit = props => {
+const PositionEdit = ({ pageDispatchers }) => {
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION, {
     uuid
@@ -70,7 +70,7 @@ const PositionEdit = props => {
     uuid,
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -99,7 +99,7 @@ const PositionEdit = props => {
 }
 
 PositionEdit.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(PositionEdit)
+export default connect(null, mapPageDispatchersToProps)(PositionEdit)

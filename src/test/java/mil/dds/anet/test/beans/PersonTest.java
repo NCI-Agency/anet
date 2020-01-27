@@ -175,7 +175,6 @@ public class PersonTest extends BeanTester<Person> {
     ReportPerson rp = new ReportPerson();
     rp.setName(p.getName());
     rp.setUuid(p.getUuid());
-    rp.setUuid(p.getUuid());
     rp.setPhoneNumber(p.getPhoneNumber());
     rp.setEmailAddress(p.getEmailAddress());
     rp.setBiography(p.getBiography());

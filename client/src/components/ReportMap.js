@@ -1,7 +1,11 @@
 import API from "api"
 import { gql } from "apollo-boost"
 import Leaflet from "components/Leaflet"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import _escape from "lodash/escape"
 import { Location } from "models"
 import PropTypes from "prop-types"
@@ -28,15 +32,15 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const ReportMap = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    mapId,
-    width,
-    height,
-    marginBottom
-  } = props
+const ReportMap = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  mapId,
+  width,
+  height,
+  marginBottom
+}) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
@@ -44,7 +48,7 @@ const ReportMap = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const markers = useMemo(() => {
     const reports = data ? data.reportList.list : []
@@ -91,6 +95,7 @@ const ReportMap = props => {
 }
 
 ReportMap.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   mapId: PropTypes.string, // pass this when you have more than one map on a page
@@ -99,4 +104,4 @@ ReportMap.propTypes = {
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
-export default connect(null, mapDispatchToProps)(ReportMap)
+export default connect(null, mapPageDispatchersToProps)(ReportMap)

@@ -41,12 +41,12 @@ export default {
   },
 
   validateEmail: function(emailValue, domainNames, wildcardDomains) {
-    let email = emailValue.split("@")
+    const email = emailValue.split("@")
     if (email.length < 2 || email[1].length === 0) {
       throw new Error("Please provide a valid email address")
     }
-    let from = email[0].trim()
-    let domain = email[1].toLowerCase()
+    const from = email[0].trim()
+    const domain = email[1].toLowerCase()
     return (
       this.validateWithWhitelist(from, domain, domainNames) ||
       this.validateWithWildcard(domain, wildcardDomains)
@@ -140,7 +140,7 @@ export default {
     const { history, location } = window
     hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""
     if (history.replaceState) {
-      let loc = window.location
+      const loc = window.location
       history.replaceState(
         null,
         null,
@@ -160,7 +160,7 @@ Object.forEach = function(source, func) {
 
 Object.map = function(source, func) {
   return Object.keys(source).map(key => {
-    let value = source[key]
+    const value = source[key]
     return func(key, value)
   })
 }
@@ -168,7 +168,7 @@ Object.map = function(source, func) {
 Object.get = function(source, keypath) {
   const keys = keypath.split(".")
   while (keys[0]) {
-    let key = keys.shift()
+    const key = keys.shift()
     source = source[key]
     if (source === undefined || source === null) return source
   }
@@ -176,10 +176,10 @@ Object.get = function(source, keypath) {
 }
 
 Object.without = function(source, ...keys) {
-  let copy = Object.assign({}, source)
+  const copy = Object.assign({}, source)
   let i = keys.length
   while (i--) {
-    let key = keys[i]
+    const key = keys[i]
     copy[key] = undefined
     delete copy[key]
   }

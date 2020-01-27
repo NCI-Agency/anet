@@ -1,7 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Person } from "models"
@@ -9,11 +9,11 @@ import React from "react"
 import { connect } from "react-redux"
 import PersonForm from "./Form"
 
-const PersonNew = props => {
+const PersonNew = ({ pageDispatchers }) => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   const person = new Person()
@@ -22,7 +22,7 @@ const PersonNew = props => {
 }
 
 PersonNew.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(PersonNew)
+export default connect(null, mapPageDispatchersToProps)(PersonNew)

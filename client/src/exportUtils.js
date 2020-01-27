@@ -92,7 +92,7 @@ const GQL_GET_TASK_LIST = gql`
         shortName
         longName
         status
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }

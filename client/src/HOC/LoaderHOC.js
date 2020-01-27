@@ -11,7 +11,7 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
 const LoaderHOC = isLoading => dataPropName => WrappedComponent => {
   return class LoaderHOC extends Component {
     static propTypes = {
-      loaderMessage: PropTypes.string
+      loaderMessage: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
     }
 
     isLoadingData(prop) {

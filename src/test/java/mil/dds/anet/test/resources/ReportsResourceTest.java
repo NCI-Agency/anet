@@ -233,7 +233,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Create some tasks for this organization
     final String topUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("test-1", "Test Top Task", "TOP", null, advisorOrg, TaskStatus.ACTIVE),
+        TestData.createTask("test-1", "Test Top Task", "TOP", null,
+            Collections.singletonList(advisorOrg), TaskStatus.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(topUuid).isNotNull();
     final Task top = graphQLHelper.getObjectById(admin, "task", TASK_FIELDS, topUuid,
@@ -558,7 +559,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Put billet in EF1
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF 1");
+    // FIXME: decide what the search should do in both cases
+    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> results = graphQLHelper.searchObjects(nick, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -779,7 +781,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
             queryTasks, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
     assertThat(taskResults).isNotNull();
     assertThat(taskResults.getList()).isNotEmpty();
-    Task task = taskResults.getList().get(0);
+    Task task = taskResults.getList().stream().filter(t -> "1.1.A".equals(t.getShortName()))
+        .findFirst().get();
 
     // Search by Task
     query.setAttendeeUuid(null);
@@ -799,7 +802,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Search by direct organization
     OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF 1");
+    // FIXME: decide what the search should do in both cases
+    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -1441,7 +1445,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Report returned2 = graphQLHelper.getObjectById(elizabeth, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // elizabeth should be allowed to see it
-    returned2.setUser(elizabeth);
     assertThat(returned2.getReportSensitiveInformation()).isNotNull();
     assertThat(returned2.getReportSensitiveInformation().getText())
         .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
@@ -1460,7 +1463,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Report returned3 = graphQLHelper.getObjectById(jack, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // jack should not be allowed to see it
-    returned3.setUser(jack);
     assertThat(returned3.getReportSensitiveInformation()).isNull();
   }
 
@@ -1490,7 +1492,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult).isNotEmpty();
     final Report report = reportResult.get();
-    report.setUser(erin);
     // erin is the author, so should be able to see the sensitive information
     assertThat(report.getReportSensitiveInformation()).isNotNull();
     assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
@@ -1515,7 +1516,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult2).isNotEmpty();
     final Report report2 = reportResult2.get();
-    report2.setUser(reina);
     // reina is in the authorization group, so should be able to see the sensitive information
     assertThat(report2.getReportSensitiveInformation()).isNotNull();
     assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
@@ -1540,7 +1540,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult3).isNotEmpty();
     final Report report3 = reportResult3.get();
-    report3.setUser(elizabeth);
     // elizabeth is not in the authorization group, so should not be able to see the sensitive
     // information
     assertThat(report3.getReportSensitiveInformation()).isNull();

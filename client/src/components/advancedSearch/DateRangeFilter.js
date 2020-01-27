@@ -78,6 +78,7 @@ const DateRangeFilter = props => {
       : [betweenOption, ...remainingOptions]
     return (
       <select
+        id={queryKey}
         disabled={onlyBetween}
         value={value.relative}
         onChange={handleChangeRelative}

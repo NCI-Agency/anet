@@ -6,8 +6,9 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import { Organization } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { Checkbox } from "react-bootstrap"
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {
@@ -22,30 +23,33 @@ const OrganizationFilter = props => {
   const {
     asFormField,
     queryKey,
-    queryIncludeChildOrgsKey,
+    queryOrgRecurseStrategyKey,
     orgFilterQueryParams
   } = props
   const defaultValue = {
     value: props.value.value || {},
-    includeChildOrgs: props.value.includeChildOrgs || false
+    orgRecurseStrategy: props.value.orgRecurseStrategy || RECURSE_STRATEGY.NONE
   }
   const toQuery = val => {
     return {
       [queryKey]: val.value.uuid,
-      [queryIncludeChildOrgsKey]: val.includeChildOrgs
+      [queryOrgRecurseStrategyKey]: val.orgRecurseStrategy
     }
   }
   const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
 
   let msg = value.value.shortName
-  if (msg && value.includeChildOrgs) {
+  if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN) {
     msg += ", including sub-organizations"
+  } else if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS) {
+    msg += ", including parent organizations"
   }
+
   const advancedSelectProps = Object.without(
     props,
     "value",
     "queryKey",
-    "queryIncludeChildOrgsKey",
+    "queryOrgRecurseStrategyKey",
     "orgFilterQueryParams",
     "asFormField"
   )
@@ -77,13 +81,22 @@ const OrganizationFilter = props => {
         onChange={handleChangeOrg}
         value={value.value}
       />
-      <Checkbox
-        inline
-        checked={value.includeChildOrgs}
-        onChange={handleChangeIncludeChildOrgs}
-      >
-        Include sub-organizations
-      </Checkbox>
+      <div>
+        <ToggleButtonGroup
+          type="radio"
+          name="orgRecurseStrategy"
+          value={value.orgRecurseStrategy}
+          onChange={handleChangeOrgRecurseStrategy}
+        >
+          <ToggleButton value={RECURSE_STRATEGY.NONE}>exact match</ToggleButton>
+          <ToggleButton value={RECURSE_STRATEGY.CHILDREN}>
+            include sub-orgs
+          </ToggleButton>
+          <ToggleButton value={RECURSE_STRATEGY.PARENTS}>
+            include parent orgs
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </div>
     </div>
   )
 
@@ -96,20 +109,13 @@ const OrganizationFilter = props => {
     }
   }
 
-  function handleChangeIncludeChildOrgs(event) {
-    const isChecked = event.target.checked // synthetic event outside async context
-    setValue(prevValue => ({ ...prevValue, includeChildOrgs: isChecked }))
+  function handleChangeOrgRecurseStrategy(value) {
+    setValue(prevValue => ({ ...prevValue, orgRecurseStrategy: value }))
   }
 }
 OrganizationFilter.propTypes = {
-  // An OrganizationFilter filter allows users to search the ANET database
-  // for existing organizations and use that records ID as the search term.
-  // If a position type has been selected, it will only search for organizations
-  // of the related type.
-  // The queryKey property tells this filter what property to set on the
-  // search query (ie authorUuid, organizationUuid, etc).
   queryKey: PropTypes.string.isRequired,
-  queryIncludeChildOrgsKey: PropTypes.string.isRequired,
+  queryOrgRecurseStrategyKey: PropTypes.string.isRequired,
   value: PropTypes.any,
   onChange: PropTypes.func,
   orgFilterQueryParams: PropTypes.object,
@@ -120,7 +126,7 @@ OrganizationFilter.defaultProps = {
 }
 
 export const deserializeOrganizationFilter = (props, query, key) => {
-  const { queryKey, queryIncludeChildOrgsKey } = props
+  const { queryKey, queryOrgRecurseStrategyKey } = props
   if (query[queryKey]) {
     return API.query(GQL_GET_ORGANIZATION, {
       uuid: query[queryKey]
@@ -130,10 +136,10 @@ export const deserializeOrganizationFilter = (props, query, key) => {
           [queryKey]: query[queryKey]
         }
         const value = { value: data.organization }
-        const includeChildOrgs = query[queryIncludeChildOrgsKey]
-        if (includeChildOrgs) {
-          value.includeChildOrgs = includeChildOrgs
-          toQueryValue[queryIncludeChildOrgsKey] = includeChildOrgs
+        const orgRecurseStrategy = query[queryOrgRecurseStrategyKey]
+        if (orgRecurseStrategy) {
+          value.orgRecurseStrategy = orgRecurseStrategy
+          toQueryValue[queryOrgRecurseStrategyKey] = orgRecurseStrategy
         }
         return {
           key: key,

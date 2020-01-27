@@ -27,7 +27,7 @@ const CANCELLATION_REASON_LABELS = {
 }
 
 const ReportStateFilter = props => {
-  const { asFormField } = props
+  const { asFormField, queryKey } = props
   const isOnlyCancelled = val => {
     return val.state.length === 1 && val.state[0] === Report.STATE.CANCELLED
   }
@@ -38,7 +38,7 @@ const ReportStateFilter = props => {
   }
   const toQuery = val => {
     const onlyCancelled = isOnlyCancelled(val)
-    let query = { state: val.state }
+    const query = { state: val.state }
     if (onlyCancelled && val.cancelledReason) {
       query.cancelledReason = val.cancelledReason
     }
@@ -58,7 +58,12 @@ const ReportStateFilter = props => {
     stateDisplay
   ) : (
     <FormGroup>
-      <select value={value.state} onChange={handleChangeState} multiple>
+      <select
+        id={queryKey}
+        value={value.state}
+        onChange={handleChangeState}
+        multiple
+      >
         {Object.keys(STATE_LABELS).map(key => (
           <option key={key} value={key}>
             {STATE_LABELS[key]}
@@ -69,6 +74,7 @@ const ReportStateFilter = props => {
         <span style={{ verticalAlign: "top", paddingLeft: "8px" }}>
           due to{" "}
           <select
+            id={queryKey}
             value={value.cancelledReason}
             onChange={handleChangeCancelledReason}
           >
@@ -100,6 +106,7 @@ const ReportStateFilter = props => {
   }
 }
 ReportStateFilter.propTypes = {
+  queryKey: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.shape({

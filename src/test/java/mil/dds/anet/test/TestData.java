@@ -1,5 +1,6 @@
 package mil.dds.anet.test;
 
+import java.util.List;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Location.LocationStatus;
@@ -40,13 +41,13 @@ public class TestData {
   }
 
   public static Task createTask(String shortName, String longName, String category,
-      Task customFieldRef1, Organization responsibleOrg, Task.TaskStatus status) {
+      Task customFieldRef1, List<Organization> taskedOrganizations, Task.TaskStatus status) {
     Task p = new Task();
     p.setShortName(shortName);
     p.setLongName(longName);
     p.setCategory(category);
     p.setCustomFieldRef1(customFieldRef1);
-    p.setResponsibleOrg(responsibleOrg);
+    p.setTaskedOrganizations(taskedOrganizations);
     p.setStatus(status);
     return p;
   }

@@ -166,6 +166,11 @@ export default class Report extends Model {
         .object()
         .nullable()
         .default({}),
+      // not actually in the database, but used for validation:
+      tasksLevel1: yup
+        .array()
+        .nullable()
+        .default([]),
       tasks: yup
         .array()
         .nullable()
@@ -226,7 +231,8 @@ export default class Report extends Model {
           (cancelled, engagementDate, schema) =>
             cancelled
               ? schema.nullable()
-              : !Report.isFuture(engagementDate)
+              : Settings.fields.report.keyOutcomes &&
+                !Report.isFuture(engagementDate)
                 ? schema.required(
                   `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`
                 )
