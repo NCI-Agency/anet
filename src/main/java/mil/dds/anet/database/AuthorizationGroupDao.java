@@ -9,12 +9,10 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
-import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -160,15 +158,6 @@ public class AuthorizationGroupDao
         .bind("maxResults", maxResults)
         .bind("activeStatus", DaoUtils.getEnumId(AuthorizationGroupStatus.ACTIVE))
         .map(new AuthorizationGroupMapper()).list();
-  }
-
-  @InTransaction
-  public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
-    return getDbHandle().createQuery("/* getReportsForAuthorizationGroup */ SELECT "
-        + ReportDao.REPORT_FIELDS + "FROM reports, \"reportAuthorizationGroups\" "
-        + "WHERE \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = :authorizationGroupUuid "
-        + "AND \"reportAuthorizationGroups\".\"reportUuid\" = reports.uuid")
-        .bind("authorizationGroupUuid", a.getUuid()).map(new ReportMapper()).list();
   }
 
 }

@@ -35,7 +35,7 @@ test("Draft and submit a report", async t => {
 
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
-    "general hospita"
+    "general hospit"
   )
 
   t.is(

@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -14,7 +13,7 @@ public class OrganizationMapper implements RowMapper<Organization> {
   @Override
   public Organization map(ResultSet r, StatementContext ctx) throws SQLException {
     Organization org = new Organization();
-    DaoUtils.setCommonBeanFields(org, r, "organizations");
+    MapperUtils.setCommonBeanFields(org, r, "organizations");
     org.setShortName(r.getString("organizations_shortName"));
     org.setLongName(r.getString("organizations_longName"));
     org.setStatus(MapperUtils.getEnumIdx(r, "organizations_status", OrganizationStatus.class));

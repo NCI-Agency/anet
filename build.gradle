@@ -341,6 +341,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	imageId = dockerPullDB.getImage()
 	containerName = dbContainerName
 	description = "Creates an ANET ${dbType} SQL DB container named " + dbContainerName + "."
+	hostConfig.shmSize = 1024*1024*1024L
 	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isMssql) {
 	  withEnvVar('ACCEPT_EULA', 'Y')
@@ -498,6 +499,6 @@ allprojects {
 
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
-	version = '10.16.0'
+	version = '12.14.1'
 	download = true
 }

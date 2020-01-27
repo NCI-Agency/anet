@@ -7,7 +7,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -27,27 +26,27 @@ public class PersonMapper implements RowMapper<Person> {
     return p;
   }
 
-  public static <T extends Person> T fillInFields(T a, ResultSet r) throws SQLException {
+  public static <T extends Person> T fillInFields(T a, ResultSet rs) throws SQLException {
     // This hits when we do a join but there's no Person record.
-    if (r.getObject("people_uuid") == null) {
+    if (rs.getObject("people_uuid") == null) {
       return null;
     }
-    DaoUtils.setCommonBeanFields(a, r, "people");
-    a.setName(r.getString("people_name"));
-    a.setStatus(MapperUtils.getEnumIdx(r, "people_status", PersonStatus.class));
-    a.setRole(MapperUtils.getEnumIdx(r, "people_role", Role.class));
-    a.setEmailAddress(r.getString("people_emailAddress"));
-    a.setPhoneNumber(r.getString("people_phoneNumber"));
-    a.setCountry(r.getString("people_country"));
-    a.setGender(r.getString("people_gender"));
-    a.setCode(r.getString("people_code"));
-    a.setEndOfTourDate(DaoUtils.getInstantAsLocalDateTime(r, "people_endOfTourDate"));
-    a.setRank(r.getString("people_rank"));
-    a.setBiography(r.getString("people_biography"));
-    a.setDomainUsername(r.getString("people_domainUsername"));
-    a.setPendingVerification(r.getBoolean("people_pendingVerification"));
-    Blob avatarBlob = r.getBlob("people_avatar");
-    String avatar =
+    MapperUtils.setCommonBeanFields(a, rs, "people");
+    a.setName(MapperUtils.getOptionalString(rs, "people_name"));
+    a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", PersonStatus.class));
+    a.setRole(MapperUtils.getEnumIdx(rs, "people_role", Role.class));
+    a.setEmailAddress(MapperUtils.getOptionalString(rs, "people_emailAddress"));
+    a.setPhoneNumber(MapperUtils.getOptionalString(rs, "people_phoneNumber"));
+    a.setCountry(MapperUtils.getOptionalString(rs, "people_country"));
+    a.setGender(MapperUtils.getOptionalString(rs, "people_gender"));
+    a.setCode(MapperUtils.getOptionalString(rs, "people_code"));
+    a.setEndOfTourDate(MapperUtils.getInstantAsLocalDateTime(rs, "people_endOfTourDate"));
+    a.setRank(MapperUtils.getOptionalString(rs, "people_rank"));
+    a.setBiography(MapperUtils.getOptionalString(rs, "people_biography"));
+    a.setDomainUsername(MapperUtils.getOptionalString(rs, "people_domainUsername"));
+    a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
+    final Blob avatarBlob = MapperUtils.getOptionalBlob(rs, "people_avatar");
+    final String avatar =
         avatarBlob == null ? null : new String(avatarBlob.getBytes(1L, (int) avatarBlob.length()));
     a.setAvatar(avatar);
 

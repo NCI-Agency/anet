@@ -27,12 +27,12 @@ public class MssqlAuthorizationGroupSearcher extends AbstractAuthorizationGroupS
     qb.addFromClause(
         "LEFT JOIN CONTAINSTABLE (authorizationGroups, (name, description), :containsQuery) c_authorizationGroups"
             + " ON authorizationGroups.uuid = c_authorizationGroups.[Key]"
-            + " LEFT JOIN FREETEXTTABLE(authorizationGroups, (name, description), :freetextQuery) f_authorizationGroups"
+            + " LEFT JOIN FREETEXTTABLE(authorizationGroups, (name, description), :fullTextQuery) f_authorizationGroups"
             + " ON authorizationGroups.uuid = f_authorizationGroups.[Key]");
     qb.addWhereClause("c_authorizationGroups.rank IS NOT NULL");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
-    qb.addSqlArg("freetextQuery", text);
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
+    qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));
   }
 
   @Override

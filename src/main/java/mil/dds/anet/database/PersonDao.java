@@ -1,11 +1,13 @@
 package mil.dds.anet.database;
 
+import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
@@ -27,12 +29,17 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
-  private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
-      "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
-      "pendingVerification", "avatar", "code", "createdAt", "updatedAt"};
+  // Must always retrieve these e.g. for ORDER BY
+  public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
+  public static String[] additionalFields =
+      {"status", "role", "emailAddress", "phoneNumber", "biography", "country", "gender",
+          "endOfTourDate", "domainUsername", "pendingVerification", "avatar", "code", "updatedAt"};
+  public static final String[] allFields =
+      ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static String TABLE_NAME = "people";
-  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
-  public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
+  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
+  public static String PERSON_FIELDS_NOAS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -126,7 +133,12 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   @Override
   public AnetBeanList<Person> search(PersonSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
+    return search(null, query);
+  }
+
+  public AnetBeanList<Person> search(Set<String> subFields, PersonSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(subFields,
+        query);
   }
 
   @InTransaction

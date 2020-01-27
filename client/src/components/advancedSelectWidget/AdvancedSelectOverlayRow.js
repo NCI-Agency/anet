@@ -46,7 +46,14 @@ export const TaskDetailedOverlayRow = item => (
       </span>
     </td>
     <td className="taskOrg">
-      <LinkTo organization={item.responsibleOrg} isLink={false} />
+      {item.taskedOrganizations.map(org => (
+        <LinkTo
+          organization={org}
+          isLink={false}
+          key={`${item.uuid}-${org.uuid}`}
+          style={{ paddingRight: 5 }}
+        />
+      ))}
     </td>
   </React.Fragment>
 )

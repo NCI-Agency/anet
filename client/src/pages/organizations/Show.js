@@ -356,7 +356,7 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                   queryParams={{
                     status: Task.STATUS.ACTIVE,
                     pageSize: 10,
-                    responsibleOrgUuid: organization.uuid
+                    taskedOrgUuid: organization.uuid
                   }}
                 />
               )}

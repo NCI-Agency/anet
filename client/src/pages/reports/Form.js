@@ -83,7 +83,7 @@ const GQL_GET_RECENTS = gql`
         uuid
         shortName
         longName
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }
@@ -350,14 +350,14 @@ const BaseReportForm = ({
           tasksFiltersLevel1.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: currentOrgUuid,
+              taskedOrgUuid: currentOrgUuid,
               hasCustomFieldRef1: false
             }
           }
           tasksFiltersLevel2.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: currentOrgUuid,
+              taskedOrgUuid: currentOrgUuid,
               hasCustomFieldRef1: true
             }
           }
@@ -376,14 +376,14 @@ const BaseReportForm = ({
           tasksFiltersLevel1.assignedToReportOrg = {
             label: "Assigned to organization of report",
             queryVars: {
-              responsibleOrgUuid: primaryAdvisor.position.organization.uuid,
+              taskedOrgUuid: primaryAdvisor.position.organization.uuid,
               hasCustomFieldRef1: false
             }
           }
           tasksFiltersLevel2.assignedToReportOrg = {
             label: "Assigned to organization of report",
             queryVars: {
-              responsibleOrgUuid: primaryAdvisor.position.organization.uuid,
+              taskedOrgUuid: primaryAdvisor.position.organization.uuid,
               hasCustomFieldRef1: true
             }
           }
@@ -723,7 +723,7 @@ const BaseReportForm = ({
                           showOrganization
                         />
                       }
-                      overlayColumns={["Name", "Organization"]}
+                      overlayColumns={["Name", "Tasked organizations"]}
                       overlayRenderRow={TaskDetailedOverlayRow}
                       filterDefs={tasksFiltersLevel1}
                       objectType={Task}
@@ -758,7 +758,7 @@ const BaseReportForm = ({
                           showOrganization
                         />
                       }
-                      overlayColumns={["Name", "Organization"]}
+                      overlayColumns={["Name", "Tasked organizations"]}
                       overlayRenderRow={TaskDetailedOverlayRow}
                       filterDefs={tasksFiltersLevel2}
                       objectType={Task}
@@ -797,7 +797,7 @@ const BaseReportForm = ({
                 }
                 id="meeting-details"
               >
-                {!isFutureEngagement && !values.cancelled && (
+                {Settings.fields.report.keyOutcomes && !isFutureEngagement && !values.cancelled && (
                   <FastField
                     name="keyOutcomes"
                     label={Settings.fields.report.keyOutcomes}

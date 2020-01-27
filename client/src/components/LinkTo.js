@@ -129,7 +129,7 @@ export default class LinkTo extends Component {
 
     if (!isLink) {
       return (
-        <span>
+        <span {...componentProps}>
           {avatarComponent}
           {modelInstance.toString()}
         </span>

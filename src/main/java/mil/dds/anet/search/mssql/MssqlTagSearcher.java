@@ -23,12 +23,12 @@ public class MssqlTagSearcher extends AbstractTagSearcher {
     }
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
         + " ON tags.uuid = c_tags.[Key]"
-        + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
+        + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :fullTextQuery) f_tags"
         + " ON tags.uuid = f_tags.[Key]");
     qb.addWhereClause("c_tags.rank IS NOT NULL");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
-    qb.addSqlArg("freetextQuery", text);
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
+    qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));
   }
 
   @Override
