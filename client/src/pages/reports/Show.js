@@ -40,7 +40,7 @@ import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { deserializeQueryParams } from "searchUtils"
 import utils from "utils"
-import { enhanceHtml } from "utils_links"
+import { parseHtmlWithLinkTo } from "utils_links"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
@@ -595,7 +595,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
 
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
-                  {enhanceHtml(report.reportText)}
+                  {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
 

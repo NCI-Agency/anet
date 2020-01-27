@@ -34,6 +34,7 @@ import React, { useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import { parseHtmlWithLinkTo } from "utils_links"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -261,11 +262,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                   name="biography"
                   className="biography"
                   component={FieldHelper.renderReadonlyField}
-                  humanValue={
-                    <div
-                      dangerouslySetInnerHTML={{ __html: person.biography }}
-                    />
-                  }
+                  humanValue={parseHtmlWithLinkTo(person.biography)}
                 />
               </Fieldset>
 
