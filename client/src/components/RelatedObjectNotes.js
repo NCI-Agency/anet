@@ -1,26 +1,28 @@
+import API, { Settings } from "api"
+import { gql } from "apollo-boost"
 import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
+import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import { JSONPath } from "jsonpath-plus"
 import _isEmpty from "lodash/isEmpty"
-import _isEqual from "lodash/isEqual"
+import _isEqualWith from "lodash/isEqualWith"
 import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useEffect, useRef, useState } from "react"
+import { Button, Panel } from "react-bootstrap"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
-import "./BlueprintOverrides.css"
-import { Button, Panel } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
-import Pie from "components/graphs/Pie"
+import "./BlueprintOverrides.css"
+
+import utils from "utils"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -30,131 +32,96 @@ const GQL_DELETE_NOTE = gql`
 
 export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 
-class BaseRelatedObjectNotes extends Component {
-  static propTypes = {
-    currentUser: PropTypes.instanceOf(Person),
-    notesElemId: PropTypes.string.isRequired,
-    notes: PropTypes.arrayOf(Model.notePropTypes),
-    relatedObject: PropTypes.shape({
-      relatedObjectType: PropTypes.string.isRequired,
-      relatedObjectUuid: PropTypes.string.isRequired
-    }),
-    relatedObjectValue: PropTypes.shape({
-      role: PropTypes.string.isRequired,
-      rank: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired
-    })
-  }
+const BaseRelatedObjectNotes = ({
+  currentUser,
+  notesElemId,
+  relatedObject,
+  relatedObjectValue,
+  notes: notesProp
+}) => {
+  const latestNotesProp = useRef(notesProp)
+  const notesPropUnchanged = _isEqualWith(
+    latestNotesProp.current,
+    notesProp,
+    utils.treatFunctionsAsEqual
+  )
 
-  static defaultProps = {
-    notesElemId: "notes-view",
-    notes: []
-  }
+  // TODO: display somewhere the error state
+  const [error, setError] = useState(null) // eslint-disable-line no-unused-vars
+  const [hidden, setHidden] = useState(true)
+  const [
+    showRelatedObjectNoteModalKey,
+    setShowRelatedObjectNoteModalKey
+  ] = useState(null)
+  const [noteType, setNoteType] = useState(null)
+  const [notes, setNotes] = useState(notesProp)
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      success: null,
-      error: null,
-      hide: true,
-      showRelatedObjectNoteModalKey: null,
-      noteType: null,
-      notes: this.props.notes
+  useEffect(() => {
+    if (!notesPropUnchanged) {
+      latestNotesProp.current = notesProp
+      setError(null)
+      setNotes(notesProp)
     }
+  }, [notesPropUnchanged, notesProp])
+
+  const toggleHidden = () => {
+    setHidden(!hidden)
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!_isEqual(prevProps.notes, this.props.notes)) {
-      this.setState({
-        success: null,
-        error: null,
-        notes: this.props.notes
-      })
-    }
+  const showRelatedObjectNoteModal = (key, type) => {
+    setError(null)
+    setShowRelatedObjectNoteModalKey(key)
+    setNoteType(type)
   }
 
-  toggleHide = () => {
-    this.setState({ hide: !this.state.hide })
+  const cancelRelatedObjectNoteModal = () => {
+    setError(null)
+    setShowRelatedObjectNoteModalKey(null)
+    setNoteType(null)
   }
 
-  showRelatedObjectNoteModal = (key, type) => {
-    this.setState({
-      success: null,
-      error: null,
-      showRelatedObjectNoteModalKey: key,
-      noteType: type
-    })
+  const hideNewRelatedObjectNoteModal = note => {
+    notes.unshift(note) // add new note at the front
+    setError(null)
+    setShowRelatedObjectNoteModalKey(null)
+    setNoteType(null)
+    setNotes(notes)
   }
 
-  cancelRelatedObjectNoteModal = () => {
-    this.setState({
-      success: null,
-      error: null,
-      showRelatedObjectNoteModalKey: null,
-      noteType: null
-    })
+  const hideEditRelatedObjectNoteModal = note => {
+    const newNotes = notes.filter(item => item.uuid !== note.uuid) // remove old note
+    newNotes.unshift(note) // add updated note at the front
+    setError(null)
+    setShowRelatedObjectNoteModalKey(null)
+    setNoteType(null)
+    setNotes(newNotes)
   }
 
-  hideNewRelatedObjectNoteModal = note => {
-    this.state.notes.unshift(note) // add new note at the front
-    this.setState({
-      success: "note added",
-      error: null,
-      showRelatedObjectNoteModalKey: null,
-      noteType: null,
-      notes: this.state.notes
-    })
-  }
-
-  hideEditRelatedObjectNoteModal = note => {
-    const notes = this.state.notes.filter(item => item.uuid !== note.uuid) // remove old note
-    notes.unshift(note) // add updated note at the front
-    this.setState({
-      success: "note updated",
-      error: null,
-      showRelatedObjectNoteModalKey: null,
-      noteType: null,
-      notes: notes
-    })
-  }
-
-  deleteNote = uuid => {
+  const deleteNote = uuid => {
+    const newNotes = notes.filter(item => item.uuid !== uuid) // remove note
     API.mutation(GQL_DELETE_NOTE, { uuid })
       .then(data => {
-        this.setState({
-          success: "note deleted",
-          error: null,
-          notes: this.state.notes.filter(item => item.uuid !== uuid) // remove note
-        })
+        setError(null)
+        setNotes(newNotes) // remove note
       })
       .catch(error => {
-        this.setState({
-          success: null,
-          error: error
-        })
+        setError(error)
       })
   }
 
-  render() {
-    const notesElem = document.getElementById(this.props.notesElemId)
-    return notesElem && ReactDOM.createPortal(this.renderPortal(), notesElem)
-  }
-
-  renderPortal = () => {
-    const { currentUser } = this.props
-    const { notes } = this.state
+  const renderPortal = () => {
     const noNotes = _isEmpty(notes)
     const nrNotes = noNotes ? 0 : notes.length
     const badgeLabel = nrNotes > 10 ? "10+" : null
     const questions =
-      this.props.relatedObject &&
+      relatedObject &&
       Settings.fields.principal.person.assessment &&
-      this.props.relatedObject.relatedObjectType === "people" &&
-      this.props.relatedObjectValue.role === Person.ROLE.PRINCIPAL
+      relatedObject.relatedObjectType === "people" &&
+      relatedObjectValue.role === Person.ROLE.PRINCIPAL
         ? Settings.fields.principal.person.assessment.questions.filter(
           question =>
             !question.test ||
-              !_isEmpty(JSONPath(question.test, this.props.relatedObjectValue))
+              !_isEmpty(JSONPath(question.test, relatedObjectValue))
         )
         : []
     const assessments = notes.filter(
@@ -174,7 +141,7 @@ class BaseRelatedObjectNotes extends Component {
       return counters
     }, {})
 
-    return this.state.hide ? (
+    return hidden ? (
       <div style={{ minWidth: 50, padding: 5, marginRight: 15 }}>
         <NotificationBadge
           count={nrNotes}
@@ -182,7 +149,7 @@ class BaseRelatedObjectNotes extends Component {
           style={{ fontSize: "8px", padding: 4 }}
           effect={["none", "none"]}
         />
-        <Button bsSize="small" onClick={this.toggleHide} title="Show notes">
+        <Button bsSize="small" onClick={toggleHidden} title="Show notes">
           <Icon icon={IconNames.COMMENT} />
         </Button>
       </div>
@@ -205,7 +172,7 @@ class BaseRelatedObjectNotes extends Component {
           }}
         >
           <h4 style={{ paddingRight: 5 }}>Notes</h4>
-          <Button bsSize="small" onClick={this.toggleHide} title="Hide notes">
+          <Button bsSize="small" onClick={toggleHidden} title="hidden notes">
             <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
           </Button>
         </div>
@@ -223,7 +190,7 @@ class BaseRelatedObjectNotes extends Component {
             bsStyle="primary"
             style={{ margin: "5px" }}
             onClick={() =>
-              this.showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)}
+              showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)}
           >
             Post new note
           </Button>
@@ -232,10 +199,7 @@ class BaseRelatedObjectNotes extends Component {
               bsStyle="primary"
               style={{ margin: "5px" }}
               onClick={() =>
-                this.showRelatedObjectNoteModal(
-                  "new",
-                  NOTE_TYPE.PARTNER_ASSESSMENT
-                )}
+                showRelatedObjectNoteModal("new", NOTE_TYPE.PARTNER_ASSESSMENT)}
             >
               Assess Person
             </Button>
@@ -244,13 +208,13 @@ class BaseRelatedObjectNotes extends Component {
         <br />
         <RelatedObjectNoteModal
           note={{
-            type: this.state.noteType,
-            noteRelatedObjects: [{ ...this.props.relatedObject }]
+            type: noteType,
+            noteRelatedObjects: [{ ...relatedObject }]
           }}
           questions={questions}
-          showModal={this.state.showRelatedObjectNoteModalKey === "new"}
-          onCancel={this.cancelRelatedObjectNoteModal}
-          onSuccess={this.hideNewRelatedObjectNoteModal}
+          showModal={showRelatedObjectNoteModalKey === "new"}
+          onCancel={cancelRelatedObjectNoteModal}
+          onSuccess={hideNewRelatedObjectNoteModal}
         />
         {noNotes && (
           <div>
@@ -262,8 +226,7 @@ class BaseRelatedObjectNotes extends Component {
           <Panel bsStyle="primary" style={{ width: "100%" }}>
             <Panel.Heading>
               Summary of <b>{assessments.length}</b> assessments for{" "}
-              {this.props.relatedObjectValue.rank}{" "}
-              {this.props.relatedObjectValue.name}
+              {relatedObjectValue.rank} {relatedObjectValue.name}
             </Panel.Heading>
             <Panel.Body>
               {questions.map(question => {
@@ -344,8 +307,7 @@ class BaseRelatedObjectNotes extends Component {
                     <>
                       <Button
                         title="Edit note"
-                        onClick={() =>
-                          this.showRelatedObjectNoteModal(note.uuid)}
+                        onClick={() => showRelatedObjectNoteModal(note.uuid)}
                         bsSize="xsmall"
                         bsStyle="primary"
                       >
@@ -354,14 +316,12 @@ class BaseRelatedObjectNotes extends Component {
                       <RelatedObjectNoteModal
                         note={note}
                         questions={questions}
-                        showModal={
-                          this.state.showRelatedObjectNoteModalKey === note.uuid
-                        }
-                        onCancel={this.cancelRelatedObjectNoteModal}
-                        onSuccess={this.hideEditRelatedObjectNoteModal}
+                        showModal={showRelatedObjectNoteModalKey === note.uuid}
+                        onCancel={cancelRelatedObjectNoteModal}
+                        onSuccess={hideEditRelatedObjectNoteModal}
                       />
                       <ConfirmDelete
-                        onConfirmDelete={() => this.deleteNote(note.uuid)}
+                        onConfirmDelete={() => deleteNote(note.uuid)}
                         objectType="note"
                         objectDisplay={"#" + note.uuid}
                         title="Delete note"
@@ -425,6 +385,27 @@ class BaseRelatedObjectNotes extends Component {
       </div>
     )
   }
+
+  const notesElem = document.getElementById(notesElemId)
+  return notesElem && ReactDOM.createPortal(renderPortal(), notesElem)
+}
+BaseRelatedObjectNotes.propTypes = {
+  currentUser: PropTypes.instanceOf(Person),
+  notesElemId: PropTypes.string.isRequired,
+  notes: PropTypes.arrayOf(Model.notePropTypes),
+  relatedObject: PropTypes.shape({
+    relatedObjectType: PropTypes.string.isRequired,
+    relatedObjectUuid: PropTypes.string.isRequired
+  }),
+  relatedObjectValue: PropTypes.shape({
+    role: PropTypes.string.isRequired,
+    rank: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired
+  })
+}
+BaseRelatedObjectNotes.defaultProps = {
+  notesElemId: "notes-view",
+  notes: []
 }
 
 const RelatedObjectNotes = props => (
