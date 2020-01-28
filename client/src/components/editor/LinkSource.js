@@ -55,7 +55,7 @@ class LinkSource extends Component {
         const contentState = editorState.getCurrentContent()
         const contentStateWithEntity = contentState.createEntity(
           entityType.type,
-          "MUTABLE",
+          "IMMUTABLE",
           entityData
         )
 
@@ -67,7 +67,7 @@ class LinkSource extends Component {
           entityType.type,
           entityData,
           url,
-          "MUTABLE"
+          "IMMUTABLE"
         )
       }
     }

@@ -100,11 +100,11 @@ const linkifyPlugin = () => ({
           "LINK",
           { url: text },
           text,
-          "MUTABLE"
+          "IMMUTABLE"
         )
       } else {
         const content = nextState.getCurrentContent()
-        const contentWithEntity = content.createEntity("LINK", "MUTABLE", {
+        const contentWithEntity = content.createEntity("LINK", "IMMUTABLE", {
           url: text
         })
         const entityKey = contentWithEntity.getLastCreatedEntityKey()
