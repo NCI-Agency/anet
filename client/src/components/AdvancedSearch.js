@@ -23,8 +23,7 @@ import {
   Col,
   ControlLabel,
   FormControl,
-  FormGroup,
-  Row
+  FormGroup
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -106,16 +105,15 @@ const AdvancedSearch = ({
                   value={objectType}
                   onChange={changeObjectType}
                 >
-                  {possibleFilterTypes.map(
-                    type =>
-                        <Button
-                          key={type}
-                          value={type}
-                          disabled={possibleFilterTypes.length < 2}
-                        >
-                          {SEARCH_OBJECT_LABELS[type]}
-                        </Button>
-                  )}
+                  {possibleFilterTypes.map(type => (
+                    <Button
+                      key={type}
+                      value={type}
+                      disabled={possibleFilterTypes.length < 2}
+                    >
+                      {SEARCH_OBJECT_LABELS[type]}
+                    </Button>
+                  ))}
                 </ButtonToggleGroup>
               </Col>
               <Col xs={1}>
@@ -324,23 +322,23 @@ const SearchFilter = ({ onRemove, filter, organizationFilter, element }) => {
 
   return (
     <FormGroup controlId={queryKey}>
-      <Row>
-        <Col xs={1} sm={2} style={{ textAlign: "right" }}>
-          <ControlLabel>{label}</ControlLabel>
-        </Col>
-        <Col xs={10} sm={9}>
+      <Col sm={3} lg={2} componentClass={ControlLabel}>
+        {label}
+      </Col>
+      <Col sm={8} lg={9}>
+        <div>
           <ChildComponent
             value={filter.value || ""}
             onChange={onChange}
             {...element.props}
           />
-        </Col>
-        <Col xs={1} sm={1}>
-          <Button bsStyle="link" onClick={() => onRemove(filter)}>
-            <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
-          </Button>
-        </Col>
-      </Row>
+        </div>
+      </Col>
+      <Col sm={1} lg={1}>
+        <Button bsStyle="link" onClick={() => onRemove(filter)}>
+          <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
+        </Button>
+      </Col>
     </FormGroup>
   )
 

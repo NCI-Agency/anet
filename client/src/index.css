@@ -732,11 +732,12 @@ header.searchPagination {
 	height: 64px;
 }
 
-.advanced-search .col-xs-1 .btn {
+.advanced-search .col-xs-1 .btn, .advanced-search .col-sm-1 .btn {
 	padding-left: 0;
+	text-align: left;
 }
 
-.advanced-search .col-xs-1 .btn img {
+.advanced-search .col-xs-1 .btn img, .advanced-search .col-sm-1 .btn img {
 	vertical-align: baseline;
 }
 
