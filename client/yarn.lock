@@ -11534,10 +11534,10 @@ jsonify@~0.0.0:
   resolved "https://registry.yarnpkg.com/jsonify/-/jsonify-0.0.0.tgz#2c74b6ee41d93ca51b7b5aaee8f503631d252a73"
   integrity sha1-LHS27kHZPKUbe1qu6PUDYx0lKnM=
 
-jsonpath-plus@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-2.0.0.tgz#3ebf30b79e2262d69826084ba03c406a9de440a0"
-  integrity sha512-ksXaz9+3SIZ5BMxgr7MQueYcR515VRZPuoDhIymUd1JcF6BnVaYJS7k4NJni4EHhvJaOIGGiPqT8+ifsGp6mBw==
+jsonpath-plus@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-3.0.0.tgz#194ab4792a5e9b4ed27bf442188c8eb7e697a04b"
+  integrity sha512-WQwgWEBgn+SJU1tlDa/GiY5/ngRpa9yrSj8n4BYPHcwoxTDaMEaYCHMOn42hIHHDd3CrUoRr3+HpsK0hCKoxzA==
 
 jsonwebtoken@^8.1.0:
   version "8.5.1"

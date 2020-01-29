@@ -121,7 +121,7 @@
     "graphiql": "^0.14.2",
     "graphql": "^14.5.8",
     "hopscotch": "^0.3.1",
-    "jsonpath-plus": "^2.0.0",
+    "jsonpath-plus": "^3.0.0",
     "leaflet": "^1.6.0",
     "leaflet-geosearch": "^2.7.0",
     "leaflet-gesture-handling": "^1.1.8",
