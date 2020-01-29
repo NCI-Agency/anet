@@ -8,6 +8,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -132,6 +133,7 @@ const GQL_GET_REPORT = gql`
           uuid
           shortName
         }
+        customFields
       }
       comments {
         uuid
@@ -208,6 +210,7 @@ const GQL_GET_REPORT = gql`
         name
         description
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -290,6 +293,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       text: tag.name
     }))
     data.report.to = ""
+    data.report.formCustomFields = JSON.parse(data.report.customFields)
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })
@@ -339,6 +343,10 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const canEmail = !report.isDraft()
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
+
+  // Get initial task assessments values
+  report = Object.assign(report, report.getTaskAssessments())
+
   return (
     <Formik
       enableReinitialize
@@ -473,7 +481,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 <Field
                   name="intent"
                   label="Summary"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <div id="intent" className="form-control-static">
                       <p>
@@ -500,7 +508,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
 
                 <Field
                   name="engagementDate"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.engagementDate &&
                     moment(report.engagementDate).format(
@@ -513,13 +521,13 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   <Field
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && <LinkTo anetLocation={report.location} />
                   }
@@ -529,7 +537,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   <Field
                     name="cancelledReason"
                     label="Cancelled Reason"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={utils.sentenceCase(report.cancelledReason)}
                   />
                 )}
@@ -538,7 +546,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   <Field
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       <>
                         {utils.sentenceCase(report.atmosphere)}
@@ -553,7 +561,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   <Field
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       report.tags &&
                       report.tags.map((tag, i) => (
@@ -565,21 +573,21 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
 
                 <Field
                   name="author"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo person={report.author} />}
                 />
 
                 <Field
                   name="advisorOrg"
                   label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.advisorOrg} />}
                 />
 
                 <Field
                   name="principalOrg"
                   label={Settings.fields.principal.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.principalOrg} />}
                 />
               </Fieldset>
@@ -618,6 +626,45 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                     )) || <h5>No groups are authorized!</h5>}
                   </Fieldset>
               )}
+
+              {Settings.fields.report.customFields && (
+                <Fieldset title="Engagement information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.report.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
+
+              <Fieldset
+                title="Engagement assessments"
+                id="engagement-assessments"
+              >
+                {values.tasks.map(task => {
+                  if (!task.customFields) {
+                    return null
+                  }
+                  const taskCustomFields = JSON.parse(task.customFields)
+                  if (!taskCustomFields.assessmentDefinition) {
+                    return null
+                  }
+                  const taskAssessmentDefinition = JSON.parse(
+                    taskCustomFields.assessmentDefinition
+                  )
+                  return (
+                    <ReadonlyCustomFields
+                      key={`assessment-${values.uuid}-${task.uuid}`}
+                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      fieldsConfig={taskAssessmentDefinition}
+                      formikProps={{
+                        values
+                      }}
+                    />
+                  )
+                })}
+              </Fieldset>
 
               {report.showWorkflow() && (
                 <ReportFullWorkflow workflow={report.workflow} />
@@ -677,7 +724,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 <Field
                   name="newComment"
                   label="Add a comment"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   placeholder="Type a comment here"
                   className="add-new-comment"
@@ -796,7 +843,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
         <Field
           name="approvalComment"
           label="Approval comment"
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           componentClass="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
@@ -834,7 +881,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
         <Field
           name="requestChangesComment"
           label="Request changes comment"
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           componentClass="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
@@ -859,7 +906,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
         <Modal.Body>
           <Field
             name="to"
-            component={FieldHelper.renderInputField}
+            component={FieldHelper.InputField}
             validate={email => handleEmailValidation(email)}
             vertical
           >
@@ -875,7 +922,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
 
           <Field
             name="comment"
-            component={FieldHelper.renderInputField}
+            component={FieldHelper.InputField}
             componentClass="textarea"
             vertical
           />

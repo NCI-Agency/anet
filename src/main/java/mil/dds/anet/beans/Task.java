@@ -16,10 +16,10 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Task extends AbstractAnetBean {
+public class Task extends AbstractCustomizableAnetBean {
 
   /** Pseudo uuid to represent 'no task'. */
   public static final String DUMMY_TASK_UUID = "-1";
@@ -232,7 +232,8 @@ public class Task extends AbstractAnetBean {
     return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
-        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid());
+        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
+        && Objects.equals(other.getCustomFields(), customFields);
   }
 
   @Override

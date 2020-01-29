@@ -43,6 +43,7 @@ const GQL_GET_PERSON = gql`
           identificationCode
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -73,6 +74,7 @@ const PersonEdit = ({ pageDispatchers }) => {
     const parsedFullName = Person.parseFullName(data.person.name)
     data.person.firstName = parsedFullName.firstName
     data.person.lastName = parsedFullName.lastName
+    data.person.formCustomFields = JSON.parse(data.person.customFields)
   }
   const person = new Person(data ? data.person : {})
   const legendText = person.isNewUser()

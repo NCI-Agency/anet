@@ -98,20 +98,20 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
               <Fieldset>
                 <FastField
                   name="name"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   disabled={!canEditName}
                 />
 
                 <FastField
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <>
                       <Coordinate coord={values.lat} />,{" "}

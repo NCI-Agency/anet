@@ -132,7 +132,7 @@ class BaseEditAssociatedPositionsModal extends Component {
                         <FastField
                           name="associatedPositions"
                           label="Associated positions"
-                          component={FieldHelper.renderSpecialField}
+                          component={FieldHelper.SpecialField}
                           onChange={value =>
                             setFieldValue("associatedPositions", value)}
                           vertical

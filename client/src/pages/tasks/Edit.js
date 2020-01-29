@@ -56,6 +56,7 @@ const GQL_GET_TASK = gql`
           avatar(size: 32)
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -78,7 +79,9 @@ const TaskEdit = ({ pageDispatchers }) => {
   if (done) {
     return result
   }
-
+  if (data) {
+    data.task.formCustomFields = JSON.parse(data.task.customFields)
+  }
   const task = new Task(data ? data.task : {})
 
   return (

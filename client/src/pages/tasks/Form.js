@@ -9,6 +9,10 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -130,6 +134,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateForm,
         submitForm
       }) => {
         const action = (
@@ -155,25 +160,25 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 <ShortNameField
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
                 <LongNameField
                   dictProps={Settings.fields.task.longName}
                   name="longName"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
                 <FastField
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
 
                 <TaskedOrganizationsMultiSelect
                   name="taskedOrganizations"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   dictProps={Settings.fields.task.taskedOrganizations}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -202,7 +207,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
 
                 <ResponsiblePositionsMultiSelect
                   name="responsiblePositions"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   dictProps={Settings.fields.task.responsiblePositions}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -236,7 +241,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 {Settings.fields.task.customFieldRef1 && (
                   <TaskCustomFieldRef1
                     name="customFieldRef1"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     dictProps={Settings.fields.task.customFieldRef1}
                     onChange={value => {
                       // validation will be done by setFieldValue
@@ -266,14 +271,14 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 <TaskCustomField
                   dictProps={Settings.fields.task.customField}
                   name="customField"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
                     dictProps={Settings.fields.task.plannedCompletion}
                     name="plannedCompletion"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value =>
                       setFieldValue("plannedCompletion", value)}
                     onBlur={() => setFieldTouched("plannedCompletion")}
@@ -285,7 +290,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                   <ProjectedCompletionField
                     dictProps={Settings.fields.task.projectedCompletion}
                     name="projectedCompletion"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value =>
                       setFieldValue("projectedCompletion", value)}
                     onBlur={() => setFieldTouched("projectedCompletion")}
@@ -301,8 +306,8 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.renderButtonToggleGroup}
-                      buttons={customEnumButtons(
+                      component={FieldHelper.RadioButtonToggleGroup}
+                      buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
@@ -312,7 +317,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                       <FastField
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         onChange={value =>
                           setFieldValue("assessment_customFieldEnum1", value)}
                         widget={
@@ -340,14 +345,31 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.renderButtonToggleGroup}
-                    buttons={customEnumButtons(
+                    component={FieldHelper.RadioButtonToggleGroup}
+                    buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}
                     onChange={value => setFieldValue("customFieldEnum2", value)}
                   />
                 )}
               </Fieldset>
+
+              {Settings.fields.task.customFields && (
+                <Fieldset
+                  title={`${Settings.fields.task.shortLabel} information`}
+                  id="custom-fields"
+                >
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.task.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
 
               <div className="submit-buttons">
                 <div>
@@ -371,21 +393,6 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
       }}
     </Formik>
   )
-
-  function customEnumButtons(list) {
-    const buttons = []
-    for (const key in list) {
-      if (Object.prototype.hasOwnProperty.call(list, key)) {
-        buttons.push({
-          id: key,
-          value: key,
-          label: list[key].label,
-          color: list[key].color
-        })
-      }
-    }
-    return buttons
-  }
 
   function onCancel() {
     history.goBack()
@@ -424,9 +431,12 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
     const task = Object.without(
       new Task(values),
       "notes",
-      "assessment_customFieldEnum1"
+      "assessment_customFieldEnum1",
+      "customFields", // initial JSON from the db
+      "formCustomFields"
     )
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
+    task.customFields = customFieldsJSONString(values)
     const variables = { task: task }
 
     variables.task.taskedOrganizations = variables.task.taskedOrganizations.map(

@@ -13,9 +13,14 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import { createYupObjectShape, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import {
   PageDispatchersPropType,
@@ -28,6 +33,8 @@ import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _debounce from "lodash/debounce"
+import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
@@ -42,6 +49,7 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
+import * as yup from "yup"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
@@ -87,6 +95,7 @@ const GQL_GET_RECENTS = gql`
           uuid
           shortName
         }
+        customFields
       }
     }
     authorizationGroupRecents(maxResults: 6) {
@@ -144,6 +153,11 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
+const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
+  mutation($report: ReportInput!, $notes: [NoteInput]) {
+    updateReportAssessments(report: $report, assessments: $notes)
+  }
+`
 
 const BaseReportForm = ({
   pageDispatchers,
@@ -157,6 +171,8 @@ const BaseReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  // We need the report tasks in order to be able to dynamically update the yup schema for the selected task assessments
+  const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
   const autoSaveSettings = {
@@ -253,11 +269,35 @@ const BaseReportForm = ({
     }))
   }
 
+  // Update the task assessments schema according to the selected report tasks
+  const taskAssessmentsSchemaShape = {}
+  reportTasks
+    .filter(t => t.customFields)
+    .forEach(t => {
+      taskAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
+        JSON.parse(JSON.parse(t.customFields).assessmentDefinition),
+        `taskAssessments.${t.uuid}`
+      )
+    })
+  const reportSchema = _isEmpty(taskAssessmentsSchemaShape)
+    ? Report.yupSchema
+    : Report.yupSchema.concat(
+      yup.object().shape({
+        taskAssessments: yup
+          .object()
+          .shape(taskAssessmentsSchemaShape)
+          .nullable()
+          .default(null)
+      })
+    )
+  let validateFieldDebounced
+
   return (
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Report.yupSchema}
+      validateOnChange={false}
+      validationSchema={reportSchema}
       initialValues={initialValues}
     >
       {({
@@ -268,11 +308,16 @@ const BaseReportForm = ({
         setFieldValue,
         setFieldTouched,
         values,
+        validateField,
+        validateForm,
         touched,
         submitForm,
         resetForm,
         setSubmitting
       }) => {
+        if (!validateFieldDebounced) {
+          validateFieldDebounced = _debounce(validateField, 400)
+        }
         const currentOrgUuid =
           currentUser.position && currentUser.position.organization
             ? currentUser.position.organization.uuid
@@ -336,9 +381,10 @@ const BaseReportForm = ({
           forSelectedObjectives: {
             label: "For selected objectives",
             queryVars: {
-              customFieldRef1Uuid: values.tasksLevel1.length
-                ? values.tasksLevel1.map(t => t.uuid)
-                : [""]
+              customFieldRef1Uuid:
+                values.tasksLevel1 && values.tasksLevel1.length
+                  ? values.tasksLevel1.map(t => t.uuid)
+                  : [""]
             }
           },
           allTasks: {
@@ -463,10 +509,15 @@ const BaseReportForm = ({
                 <FastField
                   name="intent"
                   label={Settings.fields.report.intent}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
+                  onChange={event => {
+                    setFieldTouched("intent", true, false)
+                    setFieldValue("intent", event.target.value, false)
+                    validateFieldDebounced("intent")
+                  }}
                   onKeyUp={event =>
                     countCharsLeft(
                       "intentCharsLeft",
@@ -487,8 +538,11 @@ const BaseReportForm = ({
 
                 <FastField
                   name="engagementDate"
-                  component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("engagementDate", value)}
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
+                    setFieldValue("engagementDate", value, true)
+                  }}
                   onBlur={() => setFieldTouched("engagementDate")}
                   widget={
                     <CustomDateInput
@@ -510,17 +564,22 @@ const BaseReportForm = ({
                   <FastField
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldTouched("duration", true, false)
+                      setFieldValue("duration", event.target.value, false)
+                      validateFieldDebounced("duration")
+                    }}
                   />
                 )}
 
                 <FastField
                   name="location"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("location", value)
+                    setFieldValue("location", value, true)
                   }}
                   widget={
                     <AdvancedSingleSelect
@@ -547,7 +606,7 @@ const BaseReportForm = ({
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("location", value)
+                          setFieldValue("location", value, true)
                         }}
                         handleAddItem={FieldHelper.handleSingleSelectAddItem}
                       />
@@ -558,7 +617,7 @@ const BaseReportForm = ({
                 {!isFutureEngagement && (
                   <FastField
                     name="cancelled"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
                       <Checkbox
@@ -571,7 +630,8 @@ const BaseReportForm = ({
                           // set a default reason when cancelled has been checked and no reason has been selected
                           setFieldValue(
                             "cancelledReason",
-                            cancelledReasonOptions[0].value
+                            cancelledReasonOptions[0].value,
+                            true
                           )}
                       >
                         This engagement was cancelled
@@ -583,7 +643,11 @@ const BaseReportForm = ({
                   <FastField
                     name="cancelledReason"
                     label="due to"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldValue("cancelledReason", value, true)
+                    }}
                     widget={
                       <FastField
                         component="select"
@@ -603,32 +667,39 @@ const BaseReportForm = ({
                   <FastField
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={atmosphereButtons}
-                    onChange={value => setFieldValue("atmosphere", value)}
+                    onChange={value => setFieldValue("atmosphere", value, true)}
                     className="atmosphere-form-group"
                   />
                 )}
-                {!isFutureEngagement &&
-                  !values.cancelled &&
-                  values.atmosphere && (
-                    <Field
-                      name="atmosphereDetails"
-                      label={Settings.fields.report.atmosphereDetails}
-                      component={FieldHelper.renderInputField}
-                      placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                        values.atmosphere === "POSITIVE" ? "(optional)" : ""
-                      }`}
-                      className="atmosphere-details"
-                    />
+                {!isFutureEngagement && !values.cancelled && values.atmosphere && (
+                  <Field
+                    name="atmosphereDetails"
+                    label={Settings.fields.report.atmosphereDetails}
+                    component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldTouched("atmosphereDetails", true, false)
+                      setFieldValue(
+                        "atmosphereDetails",
+                        event.target.value,
+                        false
+                      )
+                      validateFieldDebounced("atmosphereDetails")
+                    }}
+                    placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
+                      values.atmosphere === "POSITIVE" ? "(optional)" : ""
+                    }`}
+                    className="atmosphere-details"
+                  />
                 )}
 
                 {Settings.fields.report.reportTags && (
                   <FastField
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
+                    component={FieldHelper.SpecialField}
+                    onChange={value => setFieldValue("reportTags", value, true)}
                     widget={<ReportTags suggestions={tagSuggestions} />}
                   />
                 )}
@@ -642,9 +713,9 @@ const BaseReportForm = ({
                 }
                 id="attendance-fieldset"
               >
-                <FastField
+                <Field
                   name="attendees"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
@@ -658,6 +729,8 @@ const BaseReportForm = ({
                       renderSelected={
                         <AttendeesTable
                           attendees={values.attendees}
+                          onChange={value =>
+                            setFieldValue("attendees", value, true)}
                           showDelete
                         />
                       }
@@ -704,11 +777,11 @@ const BaseReportForm = ({
                 <FastField
                   name="tasksLevel1"
                   label="Objectives"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasksLevel1", value)
+                    setFieldValue("tasksLevel1", value, true)
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -737,11 +810,12 @@ const BaseReportForm = ({
                 <Field
                   name="tasks"
                   label={Settings.fields.task.shortLabel}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasks", value)
+                    setFieldValue("tasks", value, true)
+                    setReportTasks(value)
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -780,7 +854,7 @@ const BaseReportForm = ({
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tasks", value)
+                          setFieldValue("tasks", value, true)
                         }}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
@@ -788,6 +862,20 @@ const BaseReportForm = ({
                   }
                 />
               </Fieldset>
+
+              {Settings.fields.report.customFields && (
+                <Fieldset title="Engagement information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.report.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
 
               <Fieldset
                 title={
@@ -797,37 +885,49 @@ const BaseReportForm = ({
                 }
                 id="meeting-details"
               >
-                {Settings.fields.report.keyOutcomes && !isFutureEngagement && !values.cancelled && (
-                  <FastField
-                    name="keyOutcomes"
-                    label={Settings.fields.report.keyOutcomes}
-                    component={FieldHelper.renderInputField}
-                    componentClass="textarea"
-                    maxLength={Settings.maxTextFieldLength}
-                    onKeyUp={event =>
-                      countCharsLeft(
-                        "keyOutcomesCharsLeft",
-                        Settings.maxTextFieldLength,
-                        event
-                      )}
-                    extraColElem={
-                      <>
-                        <span id="keyOutcomesCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            initialValues.keyOutcomes.length}
-                        </span>{" "}
-                        characters remaining
-                      </>
-                    }
-                  />
+                {Settings.fields.report.keyOutcomes &&
+                  !isFutureEngagement &&
+                  !values.cancelled && (
+                    <FastField
+                      name="keyOutcomes"
+                      label={Settings.fields.report.keyOutcomes}
+                      component={FieldHelper.InputField}
+                      onChange={event => {
+                        setFieldTouched("keyOutcomes", true, false)
+                        setFieldValue("keyOutcomes", event.target.value, false)
+                        validateFieldDebounced("keyOutcomes")
+                      }}
+                      componentClass="textarea"
+                      maxLength={Settings.maxTextFieldLength}
+                      onKeyUp={event =>
+                        countCharsLeft(
+                          "keyOutcomesCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )}
+                      extraColElem={
+                        <>
+                          <span id="keyOutcomesCharsLeft">
+                            {Settings.maxTextFieldLength -
+                              initialValues.keyOutcomes.length}
+                          </span>{" "}
+                          characters remaining
+                        </>
+                      }
+                    />
                 )}
 
                 {!isFutureEngagement && (
                   <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps}
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     componentClass="textarea"
+                    onChange={event => {
+                      setFieldTouched("nextSteps", true, false)
+                      setFieldValue("nextSteps", event.target.value, false)
+                      validateFieldDebounced("nextSteps")
+                    }}
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
                       countCharsLeft(
@@ -850,8 +950,8 @@ const BaseReportForm = ({
                 <FastField
                   name="reportText"
                   label={Settings.fields.report.reportText}
-                  component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("reportText", value)}
+                  component={FieldHelper.SpecialField}
+                  onChange={value => setFieldValue("reportText", value, true)}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
@@ -877,12 +977,13 @@ const BaseReportForm = ({
                     <div>
                       <FastField
                         name="reportSensitiveInformation.text"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         label="Report sensitive information text"
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value
+                            value,
+                            true
                           )}
                         widget={
                           <RichTextEditor
@@ -901,11 +1002,11 @@ const BaseReportForm = ({
                       <FastField
                         name="authorizationGroups"
                         label="Authorization Groups"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("authorizationGroups", value)
+                          setFieldValue("authorizationGroups", value, true)
                         }}
                         widget={
                           <AdvancedMultiSelect
@@ -944,7 +1045,11 @@ const BaseReportForm = ({
                                   true,
                                   false
                                 ) // onBlur doesn't work when selecting an option
-                                setFieldValue("authorizationGroups", value)
+                                setFieldValue(
+                                  "authorizationGroups",
+                                  value,
+                                  true
+                                )
                               }}
                               handleAddItem={
                                 FieldHelper.handleMultiSelectAddItem
@@ -956,6 +1061,37 @@ const BaseReportForm = ({
                     </div>
                   )}
                 </Collapse>
+              </Fieldset>
+
+              <Fieldset
+                title="Engagement assessments"
+                id="engagement-assessments"
+              >
+                {values.tasks.map(task => {
+                  if (!task.customFields) {
+                    return null
+                  }
+                  const taskCustomFields = JSON.parse(task.customFields)
+                  if (!taskCustomFields.assessmentDefinition) {
+                    return null
+                  }
+                  const taskAssessmentDefinition = JSON.parse(
+                    taskCustomFields.assessmentDefinition
+                  )
+                  return (
+                    <CustomFieldsContainer
+                      key={`assessment-${values.uuid}-${task.uuid}`}
+                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      fieldsConfig={taskAssessmentDefinition}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  )
+                })}
               </Fieldset>
 
               <div className="submit-buttons">
@@ -1019,7 +1155,7 @@ const BaseReportForm = ({
         attendee.primary = attendee.primary || false
       }
     })
-    setFieldValue(field, attendees)
+    setFieldValue(field, attendees, true)
   }
 
   function countCharsLeft(elemId, maxChars, event) {
@@ -1047,12 +1183,10 @@ const BaseReportForm = ({
         autoSaveSettings.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      const edit = isEditMode(autoSaveSettings.values)
-      const operation = edit ? "updateReport" : "createReport"
       save(autoSaveSettings.values, false)
         .then(response => {
           const newValues = _cloneDeep(autoSaveSettings.values)
-          Object.assign(newValues, response[operation])
+          Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
             newValues.reportSensitiveInformation = {} // object must exist for Collapse children
           }
@@ -1123,14 +1257,8 @@ const BaseReportForm = ({
       })
   }
 
-  function onSubmitSuccess(response, values, resetForm) {
+  function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
-    const operation = edit ? "updateReport" : "createReport"
-    const report = new Report({
-      uuid: response[operation].uuid
-        ? response[operation].uuid
-        : initialValues.uuid
-    })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     resetForm()
@@ -1142,6 +1270,46 @@ const BaseReportForm = ({
     })
   }
 
+  function isEmptyTaskAssessment(assessment) {
+    return (
+      (Object.keys(assessment).length === 1 &&
+        Object.keys(assessment)[0] === "invisibleCustomFields") ||
+      _isEmpty(assessment)
+    )
+  }
+
+  function createTaskAssessmentsNotes(values, reportUuid) {
+    const selectedTasksUuids = values.tasks.map(t => t.uuid)
+    return Object.keys(values.taskAssessments)
+      .filter(
+        key =>
+          selectedTasksUuids.includes(key) &&
+          !isEmptyTaskAssessment(values.taskAssessments[key])
+      )
+      .map(key => {
+        const taskAssessment = _cloneDeep(values.taskAssessments[key])
+        delete taskAssessment.invisibleCustomFields
+        const noteObj = {
+          type: NOTE_TYPE.ASSESSMENT,
+          noteRelatedObjects: [
+            {
+              relatedObjectType: "tasks",
+              relatedObjectUuid: key
+            },
+            {
+              relatedObjectType: "reports",
+              relatedObjectUuid: reportUuid
+            }
+          ],
+          text: JSON.stringify(taskAssessment)
+        }
+        const initialAssessmentUuid = values.taskToAssessmentUuid[key]
+        if (initialAssessmentUuid) {
+          noteObj.uuid = initialAssessmentUuid
+        }
+        return noteObj
+      })
+  }
   function save(values, sendEmail) {
     const report = Object.without(
       new Report(values),
@@ -1150,7 +1318,12 @@ const BaseReportForm = ({
       "reportTags",
       "showSensitiveInfo",
       "attendees",
-      "tasksLevel1"
+      "tasks",
+      "customFields", // initial JSON from the db
+      "formCustomFields",
+      "tasksLevel1",
+      "taskAssessments",
+      "taskToAssessmentUuid"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1174,15 +1347,44 @@ const BaseReportForm = ({
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
     report.attendees = values.attendees.map(a =>
-      Object.without(a, "firstName", "lastName", "position")
+      Object.without(
+        a,
+        "firstName",
+        "lastName",
+        "position",
+        "customFields",
+        "formCustomFields"
+      )
     )
+    // strip tasks fields not in data model
+    report.tasks = values.tasks.map(t => utils.getReference(t))
     report.location = utils.getReference(report.location)
+    report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
+    const operation = edit ? "updateReport" : "createReport"
     const variables = { report }
+    return _saveReport(edit, variables, sendEmail).then(response => {
+      const report = response[operation]
+      const updateNotesVariables = { report }
+      updateNotesVariables.notes = createTaskAssessmentsNotes(
+        values,
+        report.uuid
+      )
+      return API.mutation(
+        GQL_UPDATE_REPORT_ASSESSMENTS,
+        updateNotesVariables
+      ).then(() => report)
+    })
+  }
+
+  function _saveReport(edit, variables, sendEmail) {
     if (edit) {
       variables.sendEditEmail = sendEmail
+      // Add an additional mutation to create notes for the taskAssessments
+      return API.mutation(GQL_UPDATE_REPORT, variables)
+    } else {
+      return API.mutation(GQL_CREATE_REPORT, variables)
     }
-    return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
   }
 }
 

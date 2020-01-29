@@ -4,7 +4,10 @@ import * as d3 from "d3"
 
 export default class SVGCanvas extends React.Component {
   static propTypes = {
-    size: PropTypes.object.isRequired
+    size: PropTypes.shape({
+      width: PropTypes.number.isRequired,
+      height: PropTypes.number.isRequired
+    }).isRequired
   }
 
   render() {

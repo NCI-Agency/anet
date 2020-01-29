@@ -2,6 +2,10 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -119,6 +123,7 @@ const BasePersonForm = ({
         setFieldValue,
         setFieldTouched,
         values,
+        validateForm,
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
@@ -198,7 +203,7 @@ const BasePersonForm = ({
                     <Col sm={5}>
                       <FastField
                         name="lastName"
-                        component={FieldHelper.renderInputFieldNoLabel}
+                        component={FieldHelper.InputFieldNoLabel}
                         display="inline"
                         placeholder="LAST NAME"
                         disabled={!canEditName}
@@ -211,7 +216,7 @@ const BasePersonForm = ({
                     <Col sm={6}>
                       <FastField
                         name="firstName"
-                        component={FieldHelper.renderInputFieldNoLabel}
+                        component={FieldHelper.InputFieldNoLabel}
                         display="inline"
                         placeholder="First name(s) - Lower-case except for the first letter of each name"
                         disabled={!canEditName}
@@ -301,7 +306,7 @@ const BasePersonForm = ({
                 {isAdmin && (
                   <FastField
                     name="domainUsername"
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     extraColElem={
                       <span className="text-danger">
                         Be careful when changing this field; you might lock
@@ -314,13 +319,13 @@ const BasePersonForm = ({
                 {edit ? (
                   <FastField
                     name="role"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfRole(values.role)}
                   />
                 ) : (
                   <FastField
                     name="role"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={roleButtons}
                     onChange={value => {
                       const roleCountries = getCountries(value)
@@ -348,19 +353,19 @@ const BasePersonForm = ({
                 {disableStatusChange ? (
                   <FastField
                     name="status"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
                 ) : isNewUser ? (
                   <FastField
                     name="status"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
                 ) : (
                   <Field
                     name="status"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={statusButtons}
                     onChange={value => setFieldValue("status", value)}
                   >
@@ -393,17 +398,17 @@ const BasePersonForm = ({
                   name="emailAddress"
                   label={Settings.fields.person.emailAddress}
                   type="email"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
                 <FastField
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
                 <FastField
                   name="rank"
                   label={Settings.fields.person.rank}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -419,7 +424,7 @@ const BasePersonForm = ({
                 <FastField
                   name="gender"
                   label={Settings.fields.person.gender}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -431,7 +436,7 @@ const BasePersonForm = ({
                 <FastField
                   name="country"
                   label={Settings.fields.person.country}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -446,13 +451,13 @@ const BasePersonForm = ({
                 <FastField
                   name="code"
                   label={Settings.fields.person.code}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   disabled={!isAdmin}
                 />
                 <FastField
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   value={values.endOfTourDate}
                   onChange={value => setFieldValue("endOfTourDate", value)}
                   onBlur={() => setFieldTouched("endOfTourDate")}
@@ -466,7 +471,7 @@ const BasePersonForm = ({
                 </FastField>
                 <FastField
                   name="biography"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => setFieldValue("biography", value)}
                   widget={
                     <RichTextEditor
@@ -479,6 +484,21 @@ const BasePersonForm = ({
                   }
                 />
               </Fieldset>
+
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.person.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
+
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -573,7 +593,9 @@ const BasePersonForm = ({
       new Person(values),
       "notes",
       "firstName",
-      "lastName"
+      "lastName",
+      "customFields", // initial JSON from the db
+      "formCustomFields"
     )
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
@@ -582,6 +604,7 @@ const BasePersonForm = ({
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
+    person.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person
     })
