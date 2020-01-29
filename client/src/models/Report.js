@@ -1,5 +1,9 @@
 import { Settings } from "api"
-import Model, { yupDate } from "components/Model"
+import Model, {
+  createYupObjectShape,
+  NOTE_TYPE,
+  yupDate
+} from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
@@ -45,6 +49,11 @@ export default class Report extends Model {
     NEUTRAL: "NEUTRAL"
   }
 
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createYupObjectShape(
+    Settings.fields.report.customFields
+  )
+
   static yupSchema = yup
     .object()
     .shape({
@@ -60,9 +69,7 @@ export default class Report extends Model {
         .default(null),
       duration: yup
         .number()
-        .integer()
         .nullable()
-        .positive()
         .default(null),
       // not actually in the database, but used for validation:
       cancelled: yup
@@ -256,7 +263,9 @@ export default class Report extends Model {
       authorizationGroups: yup
         .array()
         .nullable()
-        .default([])
+        .default([]),
+      // not actually in the database, the database contains the JSON customFields
+      formCustomFields: Report.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 
@@ -392,5 +401,33 @@ export default class Report extends Model {
       return !lastApprovalStep ? "" : lastApprovalStep.createdAt
     } else {
     }
+  }
+
+  getTaskAssessments() {
+    const notesToAssessments = this.notes
+      .filter(
+        n =>
+          n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")
+            .length
+      )
+      .map(ta => ({
+        taskUuid: [
+          ta.noteRelatedObjects.filter(
+            ro => ro.relatedObjectType === "tasks"
+          )[0].relatedObjectUuid
+        ],
+        assessmentUuid: ta.uuid,
+        assessment: JSON.parse(ta.text)
+      }))
+    // When updating the assessments, we need for each task the uuid of the related assessment
+    const taskToAssessmentUuid = {}
+    // Get initial task assessments values
+    const taskAssessments = {}
+    notesToAssessments.forEach(ta => {
+      taskToAssessmentUuid[ta.taskUuid] = ta.assessmentUuid
+      taskAssessments[ta.taskUuid] = ta.assessment
+    })
+    return { taskToAssessmentUuid, taskAssessments }
   }
 }

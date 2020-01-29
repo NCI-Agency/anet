@@ -157,22 +157,25 @@ class BaseRelatedObjectNotes extends Component {
               !_isEmpty(JSONPath(question.test, this.props.relatedObjectValue))
         )
         : []
-    const assessments = notes.filter(
+    const partnerAssessments = notes.filter(
       note => note.type === NOTE_TYPE.PARTNER_ASSESSMENT
     )
-    const assessmentsSummary = assessments.reduce((counters, assessment) => {
-      const assessmentJson = JSON.parse(assessment.text)
+    const partnerAssessmentsSummary = partnerAssessments.reduce(
+      (counters, assessment) => {
+        const assessmentJson = JSON.parse(assessment.text)
 
-      questions.forEach(question => {
-        if (!counters[question.id]) counters[question.id] = {}
-        const counter = counters[question.id]
-        if (assessmentJson[question.id]) {
-          counter[assessmentJson[question.id]] =
-            ++counter[assessmentJson[question.id]] || 1
-        }
-      })
-      return counters
-    }, {})
+        questions.forEach(question => {
+          if (!counters[question.id]) counters[question.id] = {}
+          const counter = counters[question.id]
+          if (assessmentJson[question.id]) {
+            counter[assessmentJson[question.id]] =
+              ++counter[assessmentJson[question.id]] || 1
+          }
+        })
+        return counters
+      },
+      {}
+    )
 
     return this.state.hide ? (
       <div style={{ minWidth: 50, padding: 5, marginRight: 15 }}>
@@ -258,10 +261,10 @@ class BaseRelatedObjectNotes extends Component {
           </div>
         )}
 
-        {assessments.length > 0 && questions.length > 0 && (
+        {partnerAssessments.length > 0 && questions.length > 0 && (
           <Panel bsStyle="primary" style={{ width: "100%" }}>
             <Panel.Heading>
-              Summary of <b>{assessments.length}</b> assessments for{" "}
+              Summary of <b>{partnerAssessments.length}</b> assessments for{" "}
               {this.props.relatedObjectValue.rank}{" "}
               {this.props.relatedObjectValue.name}
             </Panel.Heading>
@@ -274,9 +277,9 @@ class BaseRelatedObjectNotes extends Component {
                     <Pie
                       width={70}
                       height={70}
-                      data={assessmentsSummary[question.id]}
+                      data={partnerAssessmentsSummary[question.id]}
                       label={Object.values(
-                        assessmentsSummary[question.id]
+                        partnerAssessmentsSummary[question.id]
                       ).reduce((acc, cur) => acc + cur, 0)}
                       segmentFill={entity => {
                         const matching = question.choice.filter(
@@ -294,7 +297,13 @@ class BaseRelatedObjectNotes extends Component {
                       <React.Fragment key={choice.value}>
                         <span style={{ backgroundColor: choice.color }}>
                           {choice.label} :
-                          <b>{assessmentsSummary[question.id][choice.value]}</b>{" "}
+                          <b>
+                            {
+                              partnerAssessmentsSummary[question.id][
+                                choice.value
+                              ]
+                            }
+                          </b>{" "}
                         </span>
                       </React.Fragment>
                     ))}
@@ -316,7 +325,9 @@ class BaseRelatedObjectNotes extends Component {
           {notes.map(note => {
             const updatedAt = moment(note.updatedAt).fromNow()
             const byMe = Person.isEqual(currentUser, note.author)
-            const canEdit = byMe || currentUser.isAdmin()
+            const canEdit =
+              note.type !== NOTE_TYPE.ASSESSMENT &&
+              (byMe || currentUser.isAdmin())
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
             const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
@@ -399,6 +410,22 @@ class BaseRelatedObjectNotes extends Component {
                         <h4>
                           <u>
                             <b>Partner assessment</b>
+                          </u>
+                        </h4>
+                        {Object.keys(jsonFields)
+                          .filter(field => field !== "text")
+                          .map(field => (
+                            <p key={field}>
+                              <i>{field}</i>: <b>{jsonFields[field]}</b>
+                            </p>
+                          ))}
+                      </>
+                    )}
+                    {note.type === NOTE_TYPE.ASSESSMENT && (
+                      <>
+                        <h4>
+                          <u>
+                            <b>Assessment</b>
                           </u>
                         </h4>
                         {Object.keys(jsonFields)

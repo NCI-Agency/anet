@@ -73,6 +73,7 @@ const GQL_GET_REPORT = gql`
           uuid
           shortName
         }
+        customFields
       }
       tags {
         uuid
@@ -88,6 +89,7 @@ const GQL_GET_REPORT = gql`
         name
         description
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -117,8 +119,10 @@ const ReportEdit = ({ pageDispatchers }) => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
+    data.report.formCustomFields = JSON.parse(data.report.customFields)
   }
   const report = new Report(data ? data.report : {})
+  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
 
   return (
     <div className="report-edit">
@@ -133,7 +137,7 @@ const ReportEdit = ({ pageDispatchers }) => {
       />
       <ReportForm
         edit
-        initialValues={report}
+        initialValues={reportInitialValues}
         title={`Report #${report.uuid}`}
         showSensitiveInfo={
           !!report.reportSensitiveInformation &&

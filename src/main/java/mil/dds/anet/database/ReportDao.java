@@ -62,10 +62,10 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields =
       {"uuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
-  public static final String[] additionalFields =
-      {"state", "duration", "intent", "exsum", "locationUuid", "approvalStepUuid",
-          "advisorOrganizationUuid", "principalOrganizationUuid", "authorUuid", "atmosphere",
-          "cancelledReason", "atmosphereDetails", "text", "keyOutcomes", "nextSteps"};
+  public static final String[] additionalFields = {"state", "duration", "intent", "exsum",
+      "locationUuid", "approvalStepUuid", "advisorOrganizationUuid", "principalOrganizationUuid",
+      "authorUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text", "keyOutcomes",
+      "nextSteps", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
@@ -111,7 +111,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         + "text, \"keyOutcomes\", \"nextSteps\", \"authorUuid\", "
         + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
-        + "\"principalOrganizationUuid\") VALUES "
+        + "\"principalOrganizationUuid\", \"customFields\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
         + ":exsum, :reportText, :keyOutcomes, :nextSteps, :authorUuid, ");
     if (DaoUtils.isMsSql()) {
@@ -120,7 +120,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       sql.append(":engagementDate, :releasedAt, ");
     }
     sql.append(
-        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
+        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid, :customFields)");
 
     getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -238,8 +238,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append(
         "duration = :duration, atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
             + "\"cancelledReason\" = :cancelledReason, "
-            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
-            + "WHERE uuid = :uuid");
+            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid, "
+            + "\"customFields\" = :customFields " + "WHERE uuid = :uuid");
 
     return getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))

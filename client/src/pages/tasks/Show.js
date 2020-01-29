@@ -2,6 +2,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -67,6 +68,7 @@ const GQL_GET_TASK = gql`
           avatar(size: 32)
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -91,6 +93,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     return result
   }
 
+  if (data) {
+    data.task.formCustomFields = JSON.parse(data.task.customFields)
+  }
   const task = new Task(data ? data.task : {})
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
@@ -143,7 +148,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 <ShortNameField
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {/* Override componentClass and style from dictProps */}
@@ -152,19 +157,19 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   componentClass="div"
                   style={{}}
                   name="longName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Task.humanNameOfStatus}
                 />
 
                 <Field
                   name="taskedOrganizations"
                   label={Settings.fields.task.taskedOrganizations.label}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     task.taskedOrganizations && (
                       <>
@@ -180,7 +185,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   <TaskCustomFieldRef1
                     dictProps={Settings.fields.task.customFieldRef1}
                     name="customFieldRef1"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.customFieldRef1 && (
                         <LinkTo task={task.customFieldRef1}>
@@ -195,14 +200,14 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 <TaskCustomField
                   dictProps={Settings.fields.task.customField}
                   name="customField"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
                     dictProps={Settings.fields.task.plannedCompletion}
                     name="plannedCompletion"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.plannedCompletion &&
                       moment(task.plannedCompletion).format(
@@ -216,7 +221,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   <ProjectedCompletionField
                     dictProps={Settings.fields.task.projectedCompletion}
                     name="projectedCompletion"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.projectedCompletion &&
                       moment(task.projectedCompletion).format(
@@ -233,7 +238,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       "enum"
                     )}
                     name="customFieldEnum1"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
@@ -244,10 +249,24 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
               </Fieldset>
+
+              {Settings.fields.task.customFields && (
+                <Fieldset
+                  title={`${Settings.fields.task.shortLabel} information`}
+                  id="custom-fields"
+                >
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.task.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             <Fieldset title="Responsible positions">

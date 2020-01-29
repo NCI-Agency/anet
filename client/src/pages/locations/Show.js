@@ -109,20 +109,17 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Location ${location.name}`} action={action} />
               <Fieldset>
-                <Field
-                  name="name"
-                  component={FieldHelper.renderReadonlyField}
-                />
+                <Field name="name" component={FieldHelper.ReadonlyField} />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfStatus}
                 />
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <>
                       <Coordinate coord={location.lat} />,{" "}

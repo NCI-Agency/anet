@@ -187,13 +187,13 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                 {edit ? (
                   <FastField
                     name="type"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Position.humanNameOfType}
                   />
                 ) : (
                   <FastField
                     name="type"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={typeButtons}
                     onChange={value => setFieldValue("type", value)}
                   />
@@ -201,7 +201,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
 
                 <FastField
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 >
@@ -219,7 +219,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                 <FastField
                   name="organization"
                   label="Organization"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
@@ -245,12 +245,12 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                 <CodeFieldWithLabel
                   dictProps={positionSettings.code}
                   name="code"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
                 <FastField
                   name="name"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   label={Settings.fields.position.name}
                   placeholder="Name/Description of Position"
                 />
@@ -258,7 +258,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                 {!isPrincipal && (
                   <FastField
                     name="permissions"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={permissionsButtons}
                     onChange={value => setFieldValue("permissions", value)}
                   />
@@ -269,7 +269,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                 <FastField
                   name="location"
                   label="Location"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option

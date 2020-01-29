@@ -31,7 +31,7 @@ public class PersonMapper implements RowMapper<Person> {
     if (rs.getObject("people_uuid") == null) {
       return null;
     }
-    MapperUtils.setCommonBeanFields(a, rs, "people");
+    MapperUtils.setCustomizableBeanFields(a, rs, "people");
     a.setName(MapperUtils.getOptionalString(rs, "people_name"));
     a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", PersonStatus.class));
     a.setRole(MapperUtils.getEnumIdx(rs, "people_role", Role.class));

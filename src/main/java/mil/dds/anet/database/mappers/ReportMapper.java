@@ -14,7 +14,7 @@ public class ReportMapper implements RowMapper<Report> {
   @Override
   public Report map(ResultSet rs, StatementContext ctx) throws SQLException {
     Report r = new Report();
-    MapperUtils.setCommonBeanFields(r, rs, "reports");
+    MapperUtils.setCustomizableBeanFields(r, rs, "reports");
 
     r.setState(MapperUtils.getEnumIdx(rs, "reports_state", ReportState.class));
     r.setEngagementDate(MapperUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));
