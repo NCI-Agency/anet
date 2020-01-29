@@ -42,11 +42,11 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
             <ContainerDimensions>
               {({ width, height }) => (
                 <OrganizationalChart
-                  width={width}
-                  height={height}
                   label="test"
                   org={organization}
-                  size={{ width: "100%", height: 800 }}
+                  exportTitle={`Organization diagram for ${organization}`}
+                  width={width}
+                  height={height}
                 />
               )}
             </ContainerDimensions>
