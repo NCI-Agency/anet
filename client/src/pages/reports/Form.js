@@ -23,13 +23,14 @@ import Messages from "components/Messages"
 import { createYupObjectShape, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -380,7 +381,8 @@ const BaseReportForm = ({
             label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
               taskedOrgUuid: currentOrg.uuid,
-              hasCustomFieldRef1: true
+              hasCustomFieldRef1: true,
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
@@ -398,7 +400,8 @@ const BaseReportForm = ({
             label: `Assigned to ${primaryAdvisor.position.organization}`,
             queryVars: {
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
-              hasCustomFieldRef1: true
+              hasCustomFieldRef1: true,
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
