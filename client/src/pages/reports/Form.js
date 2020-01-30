@@ -776,14 +776,12 @@ const BaseReportForm = ({
                           tasks={values.tasks}
                           showParent
                           showDelete
-                          showOrganization
+                          showDescription
                         />
                       }
                       overlayColumns={[
                         "Effort", // TODO: Implement conditional labels, until then, we need to be explicit here
-                        "Objective",
-                        "Tasked organizations",
-                        "Description"
+                        "Objective"
                       ]}
                       overlayRenderRow={TaskDetailedOverlayRow}
                       filterDefs={tasksFiltersLevel}

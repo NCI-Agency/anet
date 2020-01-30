@@ -13,6 +13,7 @@ const TaskTable = ({
   showParent,
   showOrganization,
   showDelete,
+  showDescription,
   onDelete
 }) => {
   const tasksExist = _get(tasks, "length", 0) > 0
@@ -28,7 +29,7 @@ const TaskTable = ({
                 {/* TODO: Implement conditional labels, until then, we need to be explicit here */}
                 {showParent && <th>Objective</th>}
                 {showOrganization && <th>Tasked organizations</th>}
-                <th>Description</th>
+                {showDescription && <th>Description</th>}
                 <th />
               </tr>
             </thead>
@@ -57,9 +58,11 @@ const TaskTable = ({
                       ))}
                     </td>
                   )}
-                  <td className="taskLongName">
-                    <span>{task.longName}</span>
-                  </td>
+                  {showDescription && (
+                    <td className="taskLongName">
+                      <span>{task.longName}</span>
+                    </td>
+                  )}
                   {showDelete && (
                     <td
                       onClick={() => onDelete(task)}
@@ -98,7 +101,8 @@ TaskTable.propTypes = {
   showParent: PropTypes.bool,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
-  showOrganization: PropTypes.bool
+  showOrganization: PropTypes.bool,
+  showDescription: PropTypes.bool
 }
 
 TaskTable.defaultProps = {

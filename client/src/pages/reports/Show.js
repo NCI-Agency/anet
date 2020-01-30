@@ -600,7 +600,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               </Fieldset>
               {/* TODO: Implement conditional labels, until then, we need to be explicit here */}
               <Fieldset title="Efforts">
-                <TaskTable tasks={report.tasks} showParent showOrganization />
+                <TaskTable tasks={report.tasks} showParent />
               </Fieldset>
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>

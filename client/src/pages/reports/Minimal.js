@@ -398,7 +398,7 @@ const ReportMinimal = ({ pageDispatchers }) => {
               </Fieldset>
 
               <Fieldset title={Settings.fields.task.longLabel}>
-                <TaskTable tasks={report.tasks} showOrganization />
+                <TaskTable tasks={report.tasks} showParent />
               </Fieldset>
 
               {report.reportText && (
