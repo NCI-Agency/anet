@@ -125,25 +125,6 @@ test("Draft and submit a report", async t => {
     "First principal primary attendee checkbox should no longer be checked"
   )
 
-  const $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
-    "#tasksLevel1",
-    "budget and planning"
-  )
-
-  const $tasksTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Objectives and Efforts"]')
-  )
-  await $tasksTitle.click()
-
-  t.is(
-    await $objectivesAdvancedSelect.getAttribute("value"),
-    "",
-    "Closing the objectives advanced multi select overlay empties the input field."
-  )
-
-  const $newObjectivesRow = await $("#tasks-objectives table tbody tr td")
-  await assertElementText(t, $newObjectivesRow, "EF 1 - Budget and Planning")
-
   const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
     "1.1"

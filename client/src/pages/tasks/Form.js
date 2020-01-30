@@ -99,9 +99,9 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
   }
 
   const tasksFilters = {
-    allTasks: {
-      label: "All tasks",
-      queryVars: {}
+    allObjectives: {
+      label: "All objectives", // TODO: Implement conditional labels, until then, we need to be explicit here
+      queryVars: { hasCustomFieldRef1: false }
     }
   }
   const positionsFilters = {
@@ -354,21 +354,22 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 )}
               </Fieldset>
 
-              {Settings.fields.task.customFields && (
-                <Fieldset
-                  title={`${Settings.fields.task.shortLabel} information`}
-                  id="custom-fields"
-                >
-                  <CustomFieldsContainer
-                    fieldsConfig={Settings.fields.task.customFields}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
-                    }}
-                  />
-                </Fieldset>
+              {currentUser.isAdmin() && // TODO: Only show task custom fields to admins until we implement visibility per role
+                Settings.fields.task.customFields && (
+                  <Fieldset
+                    title={`${Settings.fields.task.shortLabel} information`}
+                    id="custom-fields"
+                  >
+                    <CustomFieldsContainer
+                      fieldsConfig={Settings.fields.task.customFields}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
               )}
 
               <div className="submit-buttons">

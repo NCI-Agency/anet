@@ -201,9 +201,9 @@ dictionary:
   fields:
 
     task:
-      shortLabel: Effort / Task
+      shortLabel: Objective / Effort
       shortName:
-        label: Effort number
+        label: Objective / Effort number
         placeholder: Enter an effort name, example....
 
       longLabel: Objectives and Efforts

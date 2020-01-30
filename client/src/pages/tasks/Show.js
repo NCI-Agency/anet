@@ -254,18 +254,19 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 )}
               </Fieldset>
 
-              {Settings.fields.task.customFields && (
-                <Fieldset
-                  title={`${Settings.fields.task.shortLabel} information`}
-                  id="custom-fields"
-                >
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.task.customFields}
-                    formikProps={{
-                      values
-                    }}
-                  />
-                </Fieldset>
+              {currentUser.isAdmin() && // TODO: Only show task custom fields to admins until we implement visibility per role
+                Settings.fields.task.customFields && (
+                  <Fieldset
+                    title={`${Settings.fields.task.shortLabel} information`}
+                    id="custom-fields"
+                  >
+                    <ReadonlyCustomFields
+                      fieldsConfig={Settings.fields.task.customFields}
+                      formikProps={{
+                        values
+                      }}
+                    />
+                  </Fieldset>
               )}
             </Form>
 
