@@ -7,12 +7,12 @@ import {
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
+import { LAST_MONTH } from "dateUtils"
 import { Task } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
-import { LAST_MONTH } from "dateUtils"
 
 const GQL_GET_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {

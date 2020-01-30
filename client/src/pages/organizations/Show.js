@@ -52,7 +52,7 @@ const GQL_GET_ORGANIZATION = gql`
         longName
         identificationCode
       }
-      childrenOrgs {
+      childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
         uuid
         shortName
         longName
@@ -257,32 +257,32 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
               <Fieldset id="info">
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfStatus}
                 />
 
                 <Field
                   name="type"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfType}
                 />
 
                 <LongNameWithLabel
                   dictProps={orgSettings.longName}
                   name="longName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <IdentificationCodeFieldWithLabel
                   dictProps={orgSettings.identificationCode}
                   name="identificationCode"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
                   <Field
                     name="parentOrg"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     label={Settings.fields.organization.parentOrg}
                     humanValue={
                       organization.parentOrg && (
@@ -299,7 +299,7 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                 {organization.isAdvisorOrg() && (
                   <Field
                     name="superUsers"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     label="Super users"
                     humanValue={
                       <>
@@ -328,7 +328,7 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                   organization.childrenOrgs.length > 0 && (
                     <Field
                       name="childrenOrgs"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label="Sub organizations"
                       humanValue={
                         <ListGroup>

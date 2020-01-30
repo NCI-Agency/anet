@@ -20,10 +20,10 @@ import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Report extends AbstractAnetBean {
+public class Report extends AbstractCustomizableAnetBean {
 
   public enum ReportState {
     DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, // -
@@ -688,7 +688,8 @@ public class Report extends AbstractAnetBean {
         && Objects.equals(r.getAuthorUuid(), getAuthorUuid())
         && Objects.equals(r.getComments(), comments) && Objects.equals(r.getTags(), tags)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
-        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
+        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups)
+        && Objects.equals(r.getCustomFields(), customFields);
   }
 
   @Override

@@ -6,7 +6,7 @@ const test = require("../util/test")
 var testReportURL = null
 
 test("Draft and submit a report", async t => {
-  t.plan(16)
+  t.plan(21)
 
   const {
     pageHelpers,
@@ -16,7 +16,8 @@ test("Draft and submit a report", async t => {
     assertElementNotPresent,
     By,
     until,
-    shortWaitMs
+    shortWaitMs,
+    mediumWaitMs
   } = t.context
 
   await httpRequestSmtpServer("DELETE")
@@ -47,39 +48,82 @@ test("Draft and submit a report", async t => {
   const $positiveAtmosphereButton = await $("#positiveAtmos")
   await $positiveAtmosphereButton.click()
 
-  const $attendeesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+  const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
     "#attendees",
     "topferness, christopf"
   )
-
   const $attendeesShortcutList = await $("#attendees-shortcut-list")
   await $attendeesShortcutList.click()
 
   t.is(
-    await $attendeesAdvancedSelect.getAttribute("value"),
+    await $attendeesAdvancedSelect1.getAttribute("value"),
     "",
     "Closing the attendees advanced multi select overlay empties the input field."
   )
 
   const [
-    $principalPrimaryInput,
-    $principalName,
-    $principalPosition,
-    /* eslint-disable no-unused-vars */ $principalLocation /* eslint-enable no-unused-vars */,
-    $principalOrg
-  ] = await $$(".principalAttendeesTable tbody tr:last-child td")
+    $principalPrimary1,
+    $principalName1,
+    $principalPosition1,
+    /* eslint-disable no-unused-vars */ $principalLocation1 /* eslint-enable no-unused-vars */,
+    $principalOrg1
+  ] = await $$(".principalAttendeesTable tbody tr:nth-child(2) td")
 
+  const $principalPrimaryInput1 = await $principalPrimary1.findElement(
+    By.css("input")
+  )
   t.true(
-    await $principalPrimaryInput.findElement(By.css("input")).isSelected(),
+    await $principalPrimaryInput1.isSelected(),
     "Principal primary attendee checkbox should be checked"
   )
-  await assertElementText(t, $principalName, "CIV TOPFERNESS, Christopf")
+
+  await assertElementText(t, $principalName1, "CIV TOPFERNESS, Christopf")
   await assertElementText(
     t,
-    $principalPosition,
+    $principalPosition1,
     "Planning Captain, MOD-FO-00004"
   )
-  await assertElementText(t, $principalOrg, "MoD")
+  await assertElementText(t, $principalOrg1, "MoD")
+
+  const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
+    "#attendees",
+    "steveson, steve"
+  )
+  await $attendeesShortcutList.click()
+
+  t.is(
+    await $attendeesAdvancedSelect2.getAttribute("value"),
+    "",
+    "Closing the attendees advanced multi select overlay empties the input field."
+  )
+
+  const [
+    $principalPrimary2,
+    $principalName2,
+    /* eslint-disable no-unused-vars */
+    $principalPosition2,
+    $principalLocation2,
+    $principalOrg2 /* eslint-enable no-unused-vars */
+  ] = await $$(".principalAttendeesTable tbody tr:last-child td")
+
+  await assertElementText(t, $principalName2, "LtCol STEVESON, Steve")
+  const $principalPrimaryInput2 = await $principalPrimary2.findElement(
+    By.css("input")
+  )
+  t.false(
+    await $principalPrimaryInput2.isSelected(),
+    "Second principal primary attendee checkbox should not be checked"
+  )
+
+  await $principalPrimaryInput2.click()
+  t.true(
+    await $principalPrimaryInput2.isSelected(),
+    "Second principal primary attendee checkbox should now be checked"
+  )
+  t.false(
+    await $principalPrimaryInput1.isSelected(),
+    "First principal primary attendee checkbox should no longer be checked"
+  )
 
   const $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasksLevel1",
@@ -87,7 +131,7 @@ test("Draft and submit a report", async t => {
   )
 
   const $tasksTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Tasks and Milestones"]')
+    By.xpath('//h2/span[text()="Objectives and Efforts"]')
   )
   await $tasksTitle.click()
 
@@ -153,7 +197,10 @@ test("Draft and submit a report", async t => {
   )
 
   const $formButtonSubmit = await $("#formBottomSubmit")
-  await t.context.driver.wait(until.elementIsEnabled($formButtonSubmit))
+  await t.context.driver.wait(
+    until.elementIsEnabled($formButtonSubmit),
+    mediumWaitMs
+  )
   await $formButtonSubmit.click()
   await pageHelpers.assertReportShowStatusText(
     t,
@@ -170,7 +217,10 @@ test("Draft and submit a report", async t => {
 
   const $submitReportButton = await $("#submitReportButton")
   await $submitReportButton.click()
-  await t.context.driver.wait(until.stalenessOf($submitReportButton))
+  await t.context.driver.wait(
+    until.stalenessOf($submitReportButton),
+    mediumWaitMs
+  )
   await assertElementNotPresent(
     t,
     "#submitReportButton",
@@ -185,7 +235,10 @@ test("Draft and submit a report", async t => {
   const $allertSuccess = await t.context.driver.findElement(
     By.css(".alert-success")
   )
-  await t.context.driver.wait(until.elementIsVisible($allertSuccess))
+  await t.context.driver.wait(
+    until.elementIsVisible($allertSuccess),
+    mediumWaitMs
+  )
   await assertElementText(
     t,
     $allertSuccess,
@@ -210,6 +263,7 @@ test("Publish report chain", async t => {
     Key,
     until,
     shortWaitMs,
+    mediumWaitMs,
     longWaitMs
   } = t.context
 
@@ -226,9 +280,15 @@ test("Publish report chain", async t => {
     $plannedEngagementsErin
     /* eslint-enable no-unused-vars */
   ] = $homeTileErin
-  await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
+  await t.context.driver.wait(
+    until.elementIsVisible($reportsPendingErin),
+    mediumWaitMs
+  )
   await $reportsPendingErin.click()
-  await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
+  await t.context.driver.wait(
+    until.stalenessOf($reportsPendingErin),
+    mediumWaitMs
+  )
   const $reportCollection = await $(".report-collection em")
   await assertElementText(
     t,
@@ -248,9 +308,15 @@ test("Publish report chain", async t => {
     $plannedEngagementsJacob
     /* eslint-enable no-unused-vars */
   ] = $homeTileJacob
-  await t.context.driver.wait(until.elementIsVisible($reportsPendingJacob))
+  await t.context.driver.wait(
+    until.elementIsVisible($reportsPendingJacob),
+    mediumWaitMs
+  )
   await $reportsPendingJacob.click()
-  await t.context.driver.wait(until.stalenessOf($reportsPendingJacob))
+  await t.context.driver.wait(
+    until.stalenessOf($reportsPendingJacob),
+    mediumWaitMs
+  )
 
   const $reportsPendingJacobSummaryTab = await $(
     ".report-collection button[value='summary']"
@@ -263,16 +329,25 @@ test("Publish report chain", async t => {
   const $readReportButtonJacob = await $(
     ".read-report-button[href='" + testReportURL + "']"
   )
-  await t.context.driver.wait(until.elementIsEnabled($readReportButtonJacob))
+  await t.context.driver.wait(
+    until.elementIsEnabled($readReportButtonJacob),
+    mediumWaitMs
+  )
   await $readReportButtonJacob.click()
   await pageHelpers.assertReportShowStatusText(
     t,
     "This report is PENDING approvals."
   )
   const $jacobApproveButton = await $(".approve-button")
-  await t.context.driver.wait(until.elementIsEnabled($jacobApproveButton))
+  await t.context.driver.wait(
+    until.elementIsEnabled($jacobApproveButton),
+    mediumWaitMs
+  )
   await $jacobApproveButton.click()
-  await t.context.driver.wait(until.stalenessOf($jacobApproveButton))
+  await t.context.driver.wait(
+    until.stalenessOf($jacobApproveButton),
+    mediumWaitMs
+  )
 
   await t.context.get("/", "rebecca")
   const $homeTile = await $$(".home-tile")
@@ -284,9 +359,12 @@ test("Publish report chain", async t => {
     $plannedEngagements
     /* eslint-enable no-unused-vars */
   ] = $homeTile
-  await t.context.driver.wait(until.elementIsVisible($reportsPending))
+  await t.context.driver.wait(
+    until.elementIsVisible($reportsPending),
+    mediumWaitMs
+  )
   await $reportsPending.click()
-  await t.context.driver.wait(until.stalenessOf($reportsPending))
+  await t.context.driver.wait(until.stalenessOf($reportsPending), mediumWaitMs)
 
   const $reportsPendingRebeccaSummaryTab = await $(
     ".report-collection button[value='summary']"
@@ -299,7 +377,10 @@ test("Publish report chain", async t => {
   const $readReportButtonRebecca = await $(
     ".read-report-button[href='" + testReportURL + "']"
   )
-  await t.context.driver.wait(until.elementIsEnabled($readReportButtonRebecca))
+  await t.context.driver.wait(
+    until.elementIsEnabled($readReportButtonRebecca),
+    mediumWaitMs
+  )
   await $readReportButtonRebecca.click()
 
   await pageHelpers.assertReportShowStatusText(
@@ -308,7 +389,10 @@ test("Publish report chain", async t => {
   )
   const $rebeccaApproveButton = await $(".approve-button")
   await $rebeccaApproveButton.click()
-  await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
+  await t.context.driver.wait(
+    until.stalenessOf($rebeccaApproveButton),
+    mediumWaitMs
+  )
 
   // Admin user needs to publish the report
   await t.context.get("/", "arthur")
@@ -323,9 +407,12 @@ test("Publish report chain", async t => {
     /* eslint-enable no-unused-vars */
     $approvedReports
   ] = $homeTileArthur
-  await t.context.driver.wait(until.elementIsVisible($approvedReports))
+  await t.context.driver.wait(
+    until.elementIsVisible($approvedReports),
+    mediumWaitMs
+  )
   await $approvedReports.click()
-  await t.context.driver.wait(until.stalenessOf($approvedReports))
+  await t.context.driver.wait(until.stalenessOf($approvedReports), mediumWaitMs)
 
   const $reportsApprovedSummaryTab = await $(
     ".report-collection button[value='summary']"
@@ -335,13 +422,19 @@ test("Publish report chain", async t => {
   const $readApprovedReportButton = await $(
     ".read-report-button[href='" + testReportURL + "']"
   )
-  await t.context.driver.wait(until.elementIsEnabled($readApprovedReportButton))
+  await t.context.driver.wait(
+    until.elementIsEnabled($readApprovedReportButton),
+    mediumWaitMs
+  )
   await $readApprovedReportButton.click()
 
   await pageHelpers.assertReportShowStatusText(t, "This report is APPROVED.")
   const $arthurPublishButton = await $(".publish-button")
   await $arthurPublishButton.click()
-  await t.context.driver.wait(until.stalenessOf($arthurPublishButton))
+  await t.context.driver.wait(
+    until.stalenessOf($arthurPublishButton),
+    mediumWaitMs
+  )
 
   // check if page is redirected to search results
 
@@ -356,7 +449,7 @@ test("Publish report chain", async t => {
   const $rollupLink = await t.context.driver.findElement(
     By.linkText("Daily rollup")
   )
-  await t.context.driver.wait(until.elementIsEnabled($rollupLink))
+  await t.context.driver.wait(until.elementIsEnabled($rollupLink), mediumWaitMs)
   await $rollupLink.click()
   const currentPathname = await t.context.getCurrentPathname()
   t.is(
@@ -382,7 +475,10 @@ test("Publish report chain", async t => {
   await $rollupTableTab.click()
 
   const $reportCollectionTable = await $(".report-collection table")
-  await t.context.driver.wait(until.elementIsVisible($reportCollectionTable))
+  await t.context.driver.wait(
+    until.elementIsVisible($reportCollectionTable),
+    mediumWaitMs
+  )
   const $approvedIntent = await $reportCollectionTable.findElement(
     By.linkText("meeting goal")
   )
@@ -658,7 +754,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
   t.is(
     $advisorAttendeesRows.length + $principalAttendeesRows.length,
-    4,
+    5,
     "Clicking the shortcut buttons adds rows to the table"
   )
 

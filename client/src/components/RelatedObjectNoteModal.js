@@ -39,45 +39,6 @@ const RelatedObjectNoteModal = ({
   const [error, setError] = useState(null)
   const edit = !!note.uuid
 
-  const onSubmit = (values, form) => {
-    return save(values, form)
-      .then(response => onSubmitSuccess(response, values, form))
-      .catch(error => {
-        setError(error, () => {
-          form.setSubmitting(false)
-        })
-      })
-  }
-
-  const onSubmitSuccess = (response, values, form) => {
-    const operation = edit ? "updateNote" : "createNote"
-    onSuccess(response[operation])
-  }
-
-  const save = (values, form) => {
-    const updatedNote = {
-      uuid: values.uuid,
-      author: values.author,
-      type: values.type,
-      noteRelatedObjects: values.noteRelatedObjects,
-      text: values.text
-    }
-    const isJson = updatedNote.type !== NOTE_TYPE.FREE_TEXT
-    if (isJson) {
-      const { uuid, author, type, noteRelatedObjects, ...jsonFields } = values
-      updatedNote.text = JSON.stringify(jsonFields)
-    }
-    return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
-      updatedNote
-    })
-  }
-
-  const close = () => {
-    // Reset state before closing (cancel)
-    setError(null)
-    onCancel()
-  }
-
   return (
     <Modal show={showModal} onHide={close}>
       <Formik
@@ -98,7 +59,10 @@ const RelatedObjectNoteModal = ({
           const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
           const noteText = isJson ? jsonFields.text : note.text
           const typeName =
-            note.type === NOTE_TYPE.PARTNER_ASSESSMENT ? "assessment" : "note"
+            note.type === NOTE_TYPE.PARTNER_ASSESSMENT ||
+            note.type === NOTE_TYPE.ASSESSMENT
+              ? "assessment"
+              : "note"
           return (
             <Form>
               <Modal.Header closeButton>
@@ -125,7 +89,7 @@ const RelatedObjectNoteModal = ({
                           <Field
                             name={question.id}
                             label=""
-                            component={FieldHelper.renderButtonToggleGroup}
+                            component={FieldHelper.RadioButtonToggleGroup}
                             buttons={question.choice}
                             onChange={value => {
                               setFieldValue(question.id, value)
@@ -141,7 +105,7 @@ const RelatedObjectNoteModal = ({
                   <Field
                     name="text"
                     value={noteText}
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value => setFieldValue("text", value)}
                     widget={
                       <RichTextEditor
@@ -174,6 +138,43 @@ const RelatedObjectNoteModal = ({
       </Formik>
     </Modal>
   )
+  function onSubmit(values, form) {
+    return save(values, form)
+      .then(response => onSubmitSuccess(response, values, form))
+      .catch(error => {
+        setError(error)
+        form.setSubmitting(false)
+      })
+  }
+
+  function onSubmitSuccess(response, values, form) {
+    const operation = edit ? "updateNote" : "createNote"
+    onSuccess(response[operation])
+  }
+
+  function save(values, form) {
+    const updatedNote = {
+      uuid: values.uuid,
+      author: values.author,
+      type: values.type,
+      noteRelatedObjects: values.noteRelatedObjects,
+      text: values.text
+    }
+    const isJson = updatedNote.type !== NOTE_TYPE.FREE_TEXT
+    if (isJson) {
+      const { uuid, author, type, noteRelatedObjects, ...jsonFields } = values
+      updatedNote.text = JSON.stringify(jsonFields)
+    }
+    return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
+      updatedNote
+    })
+  }
+
+  function close() {
+    // Reset state before closing (cancel)
+    setError(null)
+    onCancel()
+  }
 }
 RelatedObjectNoteModal.propTypes = {
   note: Model.notePropTypes,

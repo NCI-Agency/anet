@@ -30,6 +30,9 @@ export const SearchPopover = ({ popoverContent, children }) => {
         preventOverflow: {
           enabled: false
         },
+        hide: {
+          enabled: false
+        },
         flip: {
           enabled: false
         }

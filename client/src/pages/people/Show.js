@@ -4,6 +4,7 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -86,6 +87,7 @@ const GQL_GET_PERSON = gql`
           name
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -114,7 +116,9 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
   if (done) {
     return result
   }
-
+  if (data) {
+    data.person.formCustomFields = JSON.parse(data.person.customFields)
+  }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
@@ -202,54 +206,54 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 <Field
                   name="rank"
                   label={Settings.fields.person.rank}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="role"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Person.humanNameOfRole(values.role)}
                 />
                 {isAdmin && (
                   <Field
                     name="domainUsername"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Person.humanNameOfStatus(values.status)}
                 />
                 <Field
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="emailAddress"
                   label={Settings.fields.person.emailAddress}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={emailHumanValue}
                 />
                 <Field
                   name="country"
                   label={Settings.fields.person.country}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="code"
                   label={Settings.fields.person.code}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="gender"
                   label={Settings.fields.person.gender}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     person.endOfTourDate &&
                     moment(person.endOfTourDate).format(
@@ -260,7 +264,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 <Field
                   name="biography"
                   className="biography"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <div
                       dangerouslySetInnerHTML={{ __html: person.biography }}
@@ -396,6 +400,17 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                   </Table>
                 )}
               </Fieldset>
+
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.person.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
             </Form>
           </div>
         )

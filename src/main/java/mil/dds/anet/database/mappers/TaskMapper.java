@@ -12,7 +12,7 @@ public class TaskMapper implements RowMapper<Task> {
   @Override
   public Task map(ResultSet r, StatementContext ctx) throws SQLException {
     Task p = new Task();
-    MapperUtils.setCommonBeanFields(p, r, null);
+    MapperUtils.setCustomizableBeanFields(p, r, null);
     p.setLongName(r.getString("longName"));
     p.setShortName(r.getString("shortName"));
     p.setCategory(r.getString("category"));

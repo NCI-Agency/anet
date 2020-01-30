@@ -38,13 +38,22 @@ test("Move someone in and out of a position", async t => {
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
   const $removePersonButton = await $("button.remove-person-from-position")
-  await t.context.driver.wait(until.elementIsVisible($removePersonButton))
+  await t.context.driver.wait(
+    until.elementIsVisible($removePersonButton),
+    mediumWaitMs
+  )
   await $removePersonButton.click()
-  await t.context.driver.wait(until.stalenessOf($removePersonButton))
+  await t.context.driver.wait(
+    until.stalenessOf($removePersonButton),
+    mediumWaitMs
+  )
   await t.context.driver.sleep(mediumWaitMs) // wait (a bit longer) for dialog to disappear
 
   const $notAssignedMsg = await $("p.not-assigned-to-position-message")
-  await t.context.driver.wait(until.elementIsVisible($notAssignedMsg))
+  await t.context.driver.wait(
+    until.elementIsVisible($notAssignedMsg),
+    mediumWaitMs
+  )
   await assertElementText(
     t,
     $notAssignedMsg,
@@ -70,7 +79,10 @@ test("Move someone in and out of a position", async t => {
     t.fail(`Could not find ${positionName} in the vacant positions table.`)
   }
 
-  await t.context.driver.wait(until.elementIsVisible($positionToFillCell))
+  await t.context.driver.wait(
+    until.elementIsVisible($positionToFillCell),
+    mediumWaitMs
+  )
   const $positionToFillLink = await $positionToFillCell.findElement(By.css("a"))
   await $positionToFillLink.click()
   let currentPathname = await t.context.getCurrentPathname()
@@ -106,7 +118,7 @@ test("Move someone in and out of a position", async t => {
   )
   const $saveButton = await $("button.save-button")
   await $saveButton.click()
-  await t.context.driver.wait(until.stalenessOf($saveButton))
+  await t.context.driver.wait(until.stalenessOf($saveButton), mediumWaitMs)
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to disappear
 
   await assertElementText(t, await $("h4.assigned-person-name"), personName)
