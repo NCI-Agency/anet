@@ -117,11 +117,17 @@ const AdvancedSearch = ({
                 </ButtonToggleGroup>
               </Col>
               <Col xs={1}>
-                {possibleFilterTypes.length > 1 && objectType && (
-                  <Button bsStyle="link" onClick={clearObjectType}>
-                    <img src={REMOVE_ICON} height={14} alt="Clear type" />
-                  </Button>
-                )}
+                <Button
+                  bsStyle="link"
+                  onClick={clearObjectType}
+                  style={
+                    possibleFilterTypes.length > 1 && objectType
+                      ? {}
+                      : { visibility: "hidden" }
+                  }
+                >
+                  <img src={REMOVE_ICON} height={14} alt="Clear type" />
+                </Button>
               </Col>
             </FormGroup>
 
