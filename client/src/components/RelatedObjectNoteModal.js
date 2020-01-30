@@ -24,7 +24,6 @@ const GQL_UPDATE_NOTE = gql`
     }
   }
 `
-
 const RelatedObjectNoteModal = ({
   note,
   showModal,
@@ -166,7 +165,7 @@ const RelatedObjectNoteModal = ({
       updatedNote.text = JSON.stringify(jsonFields)
     }
     return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
-      updatedNote
+      note: updatedNote
     })
   }
 
