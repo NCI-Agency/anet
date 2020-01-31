@@ -58,35 +58,42 @@ const ReportStateFilter = props => {
     stateDisplay
   ) : (
     <FormGroup>
-      <select
-        id={queryKey}
-        value={value.state}
-        onChange={handleChangeState}
-        multiple
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row"
+        }}
       >
-        {Object.keys(STATE_LABELS).map(key => (
-          <option key={key} value={key}>
-            {STATE_LABELS[key]}
-          </option>
-        ))}
-      </select>
-      {onlyCancelled && (
-        <span style={{ verticalAlign: "top", paddingLeft: "8px" }}>
-          due to{" "}
-          <select
-            id={queryKey}
-            value={value.cancelledReason}
-            onChange={handleChangeCancelledReason}
-          >
-            <option value="">Everything</option>
-            {Object.keys(CANCELLATION_REASON_LABELS).map(key => (
-              <option key={key} value={key}>
-                {CANCELLATION_REASON_LABELS[key]}
-              </option>
-            ))}
-          </select>
-        </span>
-      )}
+        <select
+          id={queryKey}
+          value={value.state}
+          onChange={handleChangeState}
+          multiple
+        >
+          {Object.keys(STATE_LABELS).map(key => (
+            <option key={key} value={key}>
+              {STATE_LABELS[key]}
+            </option>
+          ))}
+        </select>
+        {onlyCancelled && (
+          <div style={{ verticalAlign: "top", paddingLeft: "8px" }}>
+            due to{" "}
+            <select
+              id={queryKey}
+              value={value.cancelledReason}
+              onChange={handleChangeCancelledReason}
+            >
+              <option value="">Everything</option>
+              {Object.keys(CANCELLATION_REASON_LABELS).map(key => (
+                <option key={key} value={key}>
+                  {CANCELLATION_REASON_LABELS[key]}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
     </FormGroup>
   )
 

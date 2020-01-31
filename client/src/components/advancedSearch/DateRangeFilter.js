@@ -116,7 +116,8 @@ const DateRangeFilter = props => {
         style={{
           display: "flex",
           flexDirection: "row",
-          alignItems: "center"
+          alignItems: "center",
+          flexWrap: "wrap"
         }}
       >
         {selectMenu(onlyBetween)}

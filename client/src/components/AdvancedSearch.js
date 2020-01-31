@@ -22,8 +22,7 @@ import {
   Col,
   ControlLabel,
   FormControl,
-  FormGroup,
-  Row
+  FormGroup
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -87,6 +86,10 @@ const AdvancedSearch = ({
     </Menu>
   )
 
+  const possibleFilterTypes = Object.keys(ALL_FILTERS).filter(type =>
+    searchObjectTypes.includes(type)
+  )
+
   return (
     <Formik>
       {() => (
@@ -98,20 +101,23 @@ const AdvancedSearch = ({
                   value={objectType}
                   onChange={changeObjectType}
                 >
-                  {Object.keys(ALL_FILTERS).map(
-                    type =>
-                      searchObjectTypes.indexOf(type) !== -1 && (
-                        <Button key={type} value={type}>
-                          {SEARCH_OBJECT_LABELS[type]}
-                        </Button>
-                      )
-                  )}
+                  {possibleFilterTypes.map(type => (
+                    <Button
+                      key={type}
+                      value={type}
+                      disabled={possibleFilterTypes.length < 2}
+                    >
+                      {SEARCH_OBJECT_LABELS[type]}
+                    </Button>
+                  ))}
                 </ButtonToggleGroup>
               </Col>
               <Col xs={1}>
-                <Button bsStyle="link" onClick={clearObjectType}>
-                  <img src={REMOVE_ICON} height={14} alt="Clear type" />
-                </Button>
+                {possibleFilterTypes.length > 1 && objectType && (
+                  <Button bsStyle="link" onClick={clearObjectType}>
+                    <img src={REMOVE_ICON} height={14} alt="Clear type" />
+                  </Button>
+                )}
               </Col>
             </FormGroup>
 
@@ -133,8 +139,22 @@ const AdvancedSearch = ({
               )}
             </div>
 
-            <Row style={{ borderTop: "1px solid #ddd", paddingTop: "15px" }}>
-              <Col md={6} mdOffset={2}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                borderTop: "1px solid #ddd",
+                paddingTop: "15px"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexGrow: 1
+                }}
+              >
                 {!objectType ? (
                   "To add filters, first pick a type above"
                 ) : !moreFiltersAvailable ? (
@@ -156,12 +176,18 @@ const AdvancedSearch = ({
                     }}
                   >
                     <Button bsStyle="link" id="addFilterDropdown">
-                      + Add another filter
+                      + Add {filters.length > 0 && "another"} filter
                     </Button>
                   </Popover>
                 )}
-              </Col>
-              <Col md={4} style={{ whiteSpace: "nowrap", textAlign: "right" }}>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "flex-end"
+                }}
+              >
                 <Button
                   className={Classes.POPOVER_DISMISS}
                   intent="danger"
@@ -180,8 +206,8 @@ const AdvancedSearch = ({
                 >
                   Search
                 </Button>
-              </Col>
-            </Row>
+              </div>
+            </div>
           </Form>
         </div>
       )}
@@ -275,18 +301,20 @@ const SearchFilter = ({
 
   return (
     <FormGroup controlId={queryKey}>
-      <Col xs={1} sm={2}>
-        <ControlLabel>{label}</ControlLabel>
+      <Col sm={3} lg={2} componentClass={ControlLabel}>
+        {label}
       </Col>
-      <Col xs={10} sm={9}>
-        <ChildComponent
-          value={filter.value || ""}
-          onChange={onChange}
-          orgFilterQueryParams={orgFilterQueryParams}
-          {...element.props}
-        />
+      <Col sm={8} lg={9}>
+        <div>
+          <ChildComponent
+            value={filter.value || ""}
+            onChange={onChange}
+            orgFilterQueryParams={orgFilterQueryParams}
+            {...element.props}
+          />
+        </div>
       </Col>
-      <Col xs={1} sm={1}>
+      <Col sm={1} lg={1}>
         <Button bsStyle="link" onClick={() => onRemove(filter)}>
           <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
         </Button>
