@@ -95,7 +95,6 @@ const GQL_GET_APP_DATA = gql`
 `
 
 const App = ({ pageDispatchers, pageProps }) => {
-  let appState = processData(window.ANET_DATA)
   const history = useHistory()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
@@ -114,7 +113,7 @@ const App = ({ pageDispatchers, pageProps }) => {
       <Messages error={error || { message: "Could not load initial data" }} />
     )
   }
-  appState = processData(data)
+  const appState = processData(data)
   // if this is a new user, redirect to onboarding
   if (
     appState.currentUser.isNewUser() &&
