@@ -23,7 +23,7 @@
     "@babel/plugin-transform-proto-to-assign": "^7.8.3",
     "@babel/preset-react": "^7.8.3",
     "@babel/register": "^7.8.3",
-    "@babel/runtime": "^7.8.3",
+    "@babel/runtime": "^7.8.4",
     "@storybook/addon-actions": "^5.3.9",
     "@storybook/react": "^5.3.9",
     "@wdio/browserstack-service": "^5.18.1",
