@@ -293,7 +293,9 @@ const ReportMinimal = ({ pageDispatchers }) => {
                         <p>
                           <span>
                             <strong>
-                              {Settings.fields.report.keyOutcomes}:
+                              {Settings.fields.report.keyOutcomes ||
+                                "Key outcomes"}
+                              :
                             </strong>{" "}
                             {report.keyOutcomes}&nbsp;
                           </span>

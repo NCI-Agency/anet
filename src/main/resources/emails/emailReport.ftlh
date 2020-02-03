@@ -248,9 +248,13 @@ ${sender.name} sent you a report from ANET:
             <p>
               <strong>${fields.report.intent}:</strong> ${(report.intent)!}
             </p>
-            <p>
-              <span><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</span>
-            </p>
+            <#if report.keyOutcomes??>
+              <#if fields.report.keyOutcomes??>
+                <p>
+                  <span><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</span>
+                </p>
+              </#if>
+            </#if>
             <p>
               <strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}
             </p>
@@ -310,17 +314,19 @@ ${sender.name} sent you a report from ANET:
       </div>
 
       <#if report.loadTags(context).get()??>
-        <#assign tags = report.getTags()>
-        <div class="form-group">
-          <label for="tags" class="col-sm-2 control-label">${fields.report.reportTags}</label>
-          <div class="col-sm-7">
-            <div id="tags" class="form-control-static">
-              <#list tags as tag>
-                <span class="reportTag label label-info">${(tag.name)!}</span>
-              </#list>
+        <#if fields.report.reportTags??>
+          <#assign tags = report.getTags()>
+          <div class="form-group">
+            <label for="tags" class="col-sm-2 control-label">${fields.report.reportTags}</label>
+            <div class="col-sm-7">
+              <div id="tags" class="form-control-static">
+                <#list tags as tag>
+                  <span class="reportTag label label-info">${(tag.name)!}</span>
+                </#list>
+              </div>
             </div>
           </div>
-        </div>
+        </#if>
       </#if>
 
       <div class="form-group">
