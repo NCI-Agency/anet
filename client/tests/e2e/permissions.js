@@ -266,6 +266,10 @@ async function validateUserCanEditUserForCurrentPage(t) {
 
   const fakeBioText = ` fake bio ${uuidv4()}`
   await $bioTextArea.sendKeys(t.context.Key.END + fakeBioText)
+  await t.context.pageHelpers.writeInForm(
+    "[id='formCustomFields.inputFieldName']",
+    "custom field text"
+  )
   // wait for component to update (internal) state
   await t.context.driver.sleep(shortWaitMs)
 
@@ -289,9 +293,9 @@ async function editAndSavePositionFromCurrentUserPage(t, validateTrue) {
 }
 
 async function validationEditPositionOnCurrentPage(t, validateTrue) {
-  const { $, assertElementText, until, shortWaitMs } = t.context
+  const { $, assertElementText, until, shortWaitMs, mediumWaitMs } = t.context
   const $editButton = await $(".edit-position")
-  await t.context.driver.wait(until.elementIsVisible($editButton))
+  await t.context.driver.wait(until.elementIsVisible($editButton), mediumWaitMs)
   await $editButton.click()
   await t.context.pageHelpers.clickFormBottomSubmit()
   await t.context.driver.sleep(shortWaitMs) // wait for transition

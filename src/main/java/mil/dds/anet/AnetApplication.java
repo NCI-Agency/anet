@@ -1,11 +1,17 @@
 package mil.dds.anet;
 
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
@@ -27,6 +33,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -65,12 +72,7 @@ import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -160,8 +162,11 @@ public class AnetApplication extends Application<AnetConfiguration> {
     logger.info("datasource url: {}", dbUrl);
 
     // Check the dictionary
-    final JSONObject dictionary = getDictionary(configuration);
-    logger.info("dictionary: {}", dictionary.toString(2));
+    final JsonNode dictionary = getDictionary(configuration);
+    try {
+      logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionary));
+    } catch (JsonProcessingException exception) {
+    }
 
     // We want to use our own custom DB logger in order to clean up the logs a bit.
     final Injector injector = InjectorLookup.getInjector(this).get();
@@ -296,33 +301,32 @@ public class AnetApplication extends Application<AnetConfiguration> {
     }
   }
 
-  protected static JSONObject getDictionary(AnetConfiguration configuration)
+  protected static JsonNode getDictionary(AnetConfiguration configuration)
       throws IllegalArgumentException {
     try (final InputStream inputStream =
         AnetApplication.class.getResourceAsStream("/anet-schema.yml")) {
       if (inputStream == null) {
         logger.error("ANET schema [anet-schema.yml] not found");
       } else {
-        final Object obj = yamlMapper.readValue(inputStream, Object.class);
-        final JSONObject rawSchema =
-            new JSONObject(new JSONTokener(jsonMapper.writeValueAsString(obj)));
-        final Schema schema = SchemaLoader.load(rawSchema);
-        final JSONObject dictionary = new JSONObject(configuration.getDictionary());
-        schema.validate(dictionary);
+        JsonSchemaFactory factory =
+            JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
+                .objectMapper(yamlMapper).build();
+
+        JsonSchema schema = factory.getSchema(inputStream);
+        final JsonNode dictionary = jsonMapper.valueToTree(configuration.getDictionary());
+        Set<ValidationMessage> errors = schema.validate(dictionary);
+        for (ValidationMessage error : errors) {
+          logger.error(error.getMessage());
+        }
+        if (!errors.isEmpty()) {
+          throw new IllegalArgumentException("Invalid dictionary in the configuration");
+        }
         return dictionary;
       }
     } catch (IOException e) {
       logger.error("Error closing ANET schema", e);
-    } catch (ValidationException e) {
-      logger.error("Dictionary invalid against ANET schema:");
-      logValidationErrors(e);
     }
-    throw new IllegalArgumentException("Missing or invalid dictionary in the configuration");
-  }
-
-  private static void logValidationErrors(ValidationException e) {
-    logger.error(e.getMessage());
-    e.getCausingExceptions().stream().forEach(AnetApplication::logValidationErrors);
+    throw new IllegalArgumentException("Missing dictionary in the configuration");
   }
 
   /*

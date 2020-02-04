@@ -923,7 +923,7 @@ const Search = ({
                 <Form>
                   <Field
                     name="name"
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     placeholder="Give this saved search a name"
                     vertical
                   />

@@ -126,7 +126,7 @@ const MergePeople = ({ pageDispatchers }) => {
                       <Field
                         name="loser"
                         label="Loser"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("loser", true, false) // onBlur doesn't work when selecting an option
@@ -162,7 +162,7 @@ const MergePeople = ({ pageDispatchers }) => {
                       <Field
                         name="winner"
                         label="Winner"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           setFieldTouched("winner", true, false) // onBlur doesn't work when selecting an option
@@ -199,7 +199,7 @@ const MergePeople = ({ pageDispatchers }) => {
                     {canCopyPosition(loser, winner) && (
                       <Field
                         name="copyPosition"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         label={null}
                         widget={
                           <Checkbox inline checked={values.copyPosition}>
@@ -245,49 +245,49 @@ const MergePeople = ({ pageDispatchers }) => {
       <>
         <Field
           name="uuid"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.uuid}
           vertical
         />
         <Field
           name="name"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.name}
           vertical
         />
         <Field
           name="status"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.humanNameOfStatus()}
           vertical
         />
         <Field
           name="role"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.humanNameOfRole()}
           vertical
         />
         <Field
           name="rank"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.rank}
           vertical
         />
         <Field
           name="emailAddress"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.emailAddress}
           vertical
         />
         <Field
           name="domainUsername"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.domainUsername}
           vertical
         />
         <Field
           name="createdAt"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={
             person.createdAt &&
             moment(person.createdAt).format(
@@ -298,13 +298,13 @@ const MergePeople = ({ pageDispatchers }) => {
         />
         <Field
           name="position"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={person.position && <LinkTo position={person.position} />}
           vertical
         />
         <Field
           name="organization"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={
             person.position && (
               <LinkTo organization={person.position.organization} />
@@ -315,7 +315,7 @@ const MergePeople = ({ pageDispatchers }) => {
         <Field
           name="numReports"
           label="Number of Reports Written"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={
             person.authoredReports && person.authoredReports.totalCount
           }
@@ -324,7 +324,7 @@ const MergePeople = ({ pageDispatchers }) => {
         <Field
           name="numReportsIn"
           label="Number of Reports Attended"
-          component={FieldHelper.renderReadonlyField}
+          component={FieldHelper.ReadonlyField}
           humanValue={
             person.attendedReports && person.attendedReports.totalCount
           }

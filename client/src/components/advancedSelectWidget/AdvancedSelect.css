@@ -41,3 +41,7 @@
 .advanced-select-popover table > tbody > tr > td {
   vertical-align: middle;
 }
+
+.advanced-select-popover > .bp3-overlay > .bp3-transition-container {
+  width: 100%;
+}

@@ -93,7 +93,12 @@ export default class ReportStateSearch extends Component {
     return !this.props.asFormField ? (
       stateDisplay
     ) : (
-      <div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row"
+        }}
+      >
         <select
           id={this.props.queryKey}
           value={value.state}
@@ -107,7 +112,7 @@ export default class ReportStateSearch extends Component {
           ))}
         </select>
         {onlyCancelled && (
-          <span style={{ verticalAlign: "top", paddingLeft: "8px" }}>
+          <div style={{ verticalAlign: "top", paddingLeft: "8px" }}>
             due to{" "}
             <select
               id={`${this.props.queryKey}CancelledReason`}
@@ -121,7 +126,7 @@ export default class ReportStateSearch extends Component {
                 </option>
               ))}
             </select>
-          </span>
+          </div>
         )}
       </div>
     )

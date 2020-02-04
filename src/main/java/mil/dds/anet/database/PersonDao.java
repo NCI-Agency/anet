@@ -31,9 +31,9 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   // Must always retrieve these e.g. for ORDER BY
   public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static String[] additionalFields =
-      {"status", "role", "emailAddress", "phoneNumber", "biography", "country", "gender",
-          "endOfTourDate", "domainUsername", "pendingVerification", "avatar", "code", "updatedAt"};
+  public static String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
+      "biography", "country", "gender", "endOfTourDate", "domainUsername", "pendingVerification",
+      "avatar", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static String TABLE_NAME = "people";
@@ -85,7 +85,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     StringBuilder sql = new StringBuilder();
     sql.append("/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-        + "gender, country, avatar, code, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
+        + "gender, country, avatar, code, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
         + ":gender, :country, :avatar, :code, ");
     if (DaoUtils.isMsSql()) {
@@ -94,7 +94,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     } else {
       sql.append(":endOfTourDate, ");
     }
-    sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
+    sql.append(":biography, :domainUsername, :createdAt, :updatedAt, :customFields);");
     getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -113,7 +113,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         + "\"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
-        + "\"updatedAt\" = :updatedAt, ");
+        + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, ");
 
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.

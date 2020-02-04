@@ -144,7 +144,8 @@ export default class DateRangeSearch extends Component {
         style={{
           display: "flex",
           flexDirection: "row",
-          alignItems: "center"
+          alignItems: "center",
+          flexWrap: "wrap"
         }}
       >
         {this.selectMenu(this.props.onlyBetween)}

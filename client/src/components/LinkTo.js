@@ -49,6 +49,7 @@ export default class LinkTo extends Component {
     whenUnspecified: PropTypes.string,
     modelType: PropTypes.string,
     model: PropTypes.object,
+    style: PropTypes.object,
     ...modelPropTypes
   }
 
@@ -77,6 +78,7 @@ export default class LinkTo extends Component {
       className,
       modelType,
       model,
+      style,
       ...componentProps
     } = this.props
 
@@ -129,7 +131,7 @@ export default class LinkTo extends Component {
 
     if (!isLink) {
       return (
-        <span {...componentProps}>
+        <span style={style}>
           {avatarComponent}
           {modelInstance.toString()}
         </span>

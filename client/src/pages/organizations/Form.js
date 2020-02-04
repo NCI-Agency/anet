@@ -224,12 +224,12 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                   <>
                     <FastField
                       name="type"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfType}
                     />
                     <FastField
                       name="parentOrg"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
@@ -243,37 +243,37 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                     />
                     <FastField
                       name="shortName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.shortName}
                     />
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
                     <FastField
                       name="status"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfStatus}
                     />
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
                   </>
                 ) : (
                   <>
                     <FastField
                       name="type"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroup}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
                     <FastField
                       name="parentOrg"
                       label={Settings.fields.organization.parentOrg}
-                      component={FieldHelper.renderSpecialField}
+                      component={FieldHelper.SpecialField}
                       onChange={value => {
                         // validation will be done by setFieldValue
                         setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
@@ -297,7 +297,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                     />
                     <FastField
                       name="shortName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       label={Settings.fields.organization.shortName}
                       placeholder="e.g. EF1.1"
                       disabled={!isAdmin}
@@ -305,12 +305,12 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       disabled={!isAdmin}
                     />
                     <FastField
                       name="status"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroup}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                       disabled={!isAdmin}
@@ -318,7 +318,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                     />
                   </>
                 )}
@@ -494,7 +494,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                         <FastField
                           name="tasks"
                           label={Settings.fields.task.shortLabel}
-                          component={FieldHelper.renderSpecialField}
+                          component={FieldHelper.SpecialField}
                           onChange={value => {
                             // validation will be done by setFieldValue
                             setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
@@ -574,13 +574,13 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
 
         <FastField
           name={`${fieldName}.${index}.name`}
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           label="Step name"
         />
         <FastField
           name={`${fieldName}.${index}.approvers`}
           label="Add an approver"
-          component={FieldHelper.renderSpecialField}
+          component={FieldHelper.SpecialField}
           onChange={value => {
             // validation will be done by setFieldValue
             setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option
@@ -690,13 +690,16 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
       new Organization(values),
       "notes",
       "childrenOrgs",
-      "positions"
+      "positions",
+      "tasks"
     )
+    // strip tasks fields not in data model
+    organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
     return API.mutation(
       edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
-    )
+    ).then()
   }
 }
 

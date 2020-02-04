@@ -15,9 +15,9 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 
-public class Person extends AbstractAnetBean implements Principal {
+public class Person extends AbstractCustomizableAnetBean implements Principal {
 
   public static enum PersonStatus {
     ACTIVE, INACTIVE, NEW_USER
@@ -287,7 +287,8 @@ public class Person extends AbstractAnetBean implements Principal {
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)
                 ? (updatedAt.equals(other.getUpdatedAt()))
-                : (other.getUpdatedAt() == null);
+                : (other.getUpdatedAt() == null)
+                    && Objects.equals(other.getCustomFields(), customFields);
     return b;
   }
 
