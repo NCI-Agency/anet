@@ -26,7 +26,7 @@ export default class AdvancedSingleSelect extends Component {
         handleAddItem={this.handleAddItem}
         handleRemoveItem={this.handleRemoveItem}
         closeOverlayOnAdd
-        searchTerms={
+        selectedValueAsString={
           !_isEmpty(this.props.value)
             ? this.props.value[this.props.valueKey]
             : ""

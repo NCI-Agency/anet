@@ -5,10 +5,11 @@ import * as FieldHelper from "components/FieldHelper"
 import UltimatePagination from "components/UltimatePagination"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
-import _isEqual from "lodash/isEqual"
+import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
+import utils from "utils"
 import "./AdvancedSelect.css"
 
 const hasMultipleItems = object => Object.keys(object).length > 1
@@ -74,7 +75,7 @@ FilterAsDropdown.propTypes = {
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
   placeholder: PropTypes.string, // input field placeholder
-  searchTerms: PropTypes.string,
+  selectedValueAsString: PropTypes.string,
   addon: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -104,267 +105,98 @@ export const propTypes = {
   handleRemoveItem: PropTypes.func
 }
 
-export default class AdvancedSelect extends Component {
-  static defaultProps = {
-    filterDefs: {},
-    closeOverlayOnAdd: false,
-    searchTerms: ""
-  }
+const AdvancedSelect = ({
+  fieldName,
+  placeholder,
+  selectedValueAsString,
+  addon,
+  extraAddon,
+  value,
+  renderSelected,
+  overlayTableClassName,
+  overlayTable: OverlayTable,
+  overlayColumns,
+  overlayRenderRow,
+  closeOverlayOnAdd,
+  filterDefs,
+  onChange,
+  objectType,
+  queryParams,
+  fields,
+  handleAddItem,
+  handleRemoveItem
+}) => {
+  const latestSelectedValueAsString = useRef(selectedValueAsString)
+  const selectedValueAsStringUnchanged = _isEqualWith(
+    latestSelectedValueAsString.current,
+    selectedValueAsString,
+    utils.treatFunctionsAsEqual
+  )
+  const overlayContainer = useRef()
+  const searchInput = useRef()
 
-  state = {
-    searchTerms: this.props.searchTerms,
-    filterType: Object.keys(this.props.filterDefs)[0], // per default use the first filter
-    results: {},
-    showOverlay: false,
-    isLoading: false
-  }
+  const [searchTerms, setSearchTerms] = useState(selectedValueAsString || "")
+  const [filterType, setFilterType] = useState(Object.keys(filterDefs)[0]) // per default use the first filter
+  const [pageNum, setPageNum] = useState(0)
+  const [results, setResults] = useState({})
+  const [showOverlay, setShowOverlay] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [doFetchResults, setDoFetchResults] = useState(false)
+  const [doDebounceFetchResults, setDoDebounceFetchResults] = useState(false)
 
-  overlayContainer = React.createRef()
-  overlayTarget = React.createRef()
+  // When the overlay is being closed, we should reset the searchTerms to the selected value
+  const resetSearchTerms = !showOverlay && selectedValueAsString !== searchTerms
 
-  componentDidMount() {
-    this.setState({
-      searchTerms: this.props.searchTerms || ""
-    })
-  }
+  const renderSelectedWithDelete = renderSelected
+    ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
+    : null
+  const items = results && results[filterType] ? results[filterType].list : []
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!_isEqual(prevProps.searchTerms, this.props.searchTerms)) {
-      this.setState({ searchTerms: this.props.searchTerms })
+  useEffect(() => {
+    if (!selectedValueAsStringUnchanged) {
+      latestSelectedValueAsString.current = selectedValueAsString
+      setSearchTerms(selectedValueAsString)
+    } else if (resetSearchTerms) {
+      setSearchTerms(selectedValueAsString)
     }
-    if (
-      !_isEqual(prevState.showOverlay, this.state.showOverlay) &&
-      this.state.showOverlay === false &&
-      !_isEqual(this.props.searchTerms, this.state.searchTerms)
-    ) {
-      // When the overlay is being closed, update the searchTerms with the selected value
-      this.setState({ searchTerms: this.props.searchTerms || "" })
-    }
-  }
+    setDoFetchResults(false)
+  }, [selectedValueAsStringUnchanged, selectedValueAsString, resetSearchTerms])
 
-  render() {
-    const {
-      closeOverlayOnAdd,
-      fieldName,
-      placeholder,
-      value,
-      renderSelected,
-      onChange,
-      objectType,
-      queryParams,
-      fields,
-      handleAddItem,
-      handleRemoveItem,
-      addon,
-      extraAddon,
-      ...overlayProps
-    } = this.props
-
-    const {
-      overlayTableClassName,
-      overlayColumns,
-      overlayRenderRow,
-      filterDefs
-    } = overlayProps
-
-    const {
-      results,
-      filterType,
-      isLoading,
-      searchTerms,
-      showOverlay
-    } = this.state
-
-    const renderSelectedWithDelete = renderSelected
-      ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
-      : null
-    const items = results && results[filterType] ? results[filterType].list : []
-
-    const advancedSearchPopoverContent = (
-      <Row className="border-between">
-        <FilterAsNav
-          items={filterDefs}
-          currentFilter={filterType}
-          handleOnClick={this.changeFilterType}
-        />
-
-        <FilterAsDropdown
-          items={filterDefs}
-          handleOnChange={this.handleOnChangeSelect}
-        />
-
-        <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
-          <this.props.overlayTable
-            fieldName={fieldName}
-            items={items}
-            selectedItems={value}
-            handleAddItem={item => {
-              handleAddItem(item)
-              if (closeOverlayOnAdd) {
-                this.handleHideOverlay()
-              }
-            }}
-            handleRemoveItem={handleRemoveItem}
-            objectType={objectType}
-            columns={[""].concat(overlayColumns)}
-            renderRow={overlayRenderRow}
-            isLoading={isLoading}
-            loaderMessage={
-              <div style={{ width: "300px" }}>No results found</div>
-            }
-            tableClassName={overlayTableClassName}
-          />
-          {this.paginationFor(filterType)}
-        </Col>
-      </Row>
-    )
-
-    return (
-      <>
-        <div id={`${fieldName}-popover`}>
-          <InputGroup>
-            <Popover
-              className="advanced-select-popover"
-              popoverClassName="bp3-popover-content-sizing"
-              content={advancedSearchPopoverContent}
-              isOpen={showOverlay}
-              captureDismiss
-              interactionKind={PopoverInteractionKind.CLICK}
-              onInteraction={this.handleInteraction}
-              usePortal={false}
-              position={Position.BOTTOM}
-              modifiers={{
-                preventOverflow: {
-                  enabled: false
-                },
-                hide: {
-                  enabled: false
-                },
-                flip: {
-                  enabled: false
-                }
-              }}
-            >
-              <FormControl
-                name={fieldName}
-                value={searchTerms || ""}
-                placeholder={placeholder}
-                onChange={this.changeSearchTerms}
-                onFocus={this.handleInputFocus}
-                inputRef={ref => {
-                  this.searchInput = ref
-                }}
-              />
-            </Popover>
-            {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-            {addon && (
-              <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-            )}
-          </InputGroup>
-        </div>
-        <AdvancedSelectTarget overlayRef={this.overlayContainer} />
-        <Row>
-          <Col sm={12}>{renderSelectedWithDelete}</Col>
-        </Row>
-      </>
-    )
-  }
-
-  handleInputFocus = () => {
-    if (this.state.showOverlay) {
-      return // Overlay is already open and we do not need to fetch data
-    }
-    this.setState(
-      {
-        showOverlay: true,
-        searchTerms: "",
-        isLoading: true
-      },
-      this.fetchResults()
-    )
-  }
-
-  handleInteraction = (showOverlay, event) => {
-    const inputFocus = this.searchInput.contains(event && event.target)
-    return this.setState({ showOverlay: showOverlay || inputFocus })
-  }
-
-  handleHideOverlay = () => {
-    this.setState({
-      filterType: Object.keys(this.props.filterDefs)[0],
-      searchTerms: "",
-      results: {},
-      isLoading: false,
-      showOverlay: false
-    })
-  }
-
-  changeSearchTerms = event => {
-    // Reset the results state when the search terms change
-    this.setState(
-      {
-        isLoading: true,
-        searchTerms: event.target.value,
-        results: {}
-      },
-      () => this.fetchResultsDebounced()
-    )
-  }
-
-  handleOnChangeSelect = event => {
-    this.changeFilterType(event.target.value)
-  }
-
-  changeFilterType = filterType => {
-    // When changing the filter type, only fetch the results if they were not fetched before
-    const { results } = this.state
-    const filterResults = results[filterType]
-    const doFetchResults = _isEmpty(filterResults)
-    this.setState({ filterType, isLoading: doFetchResults }, () => {
-      if (doFetchResults) {
-        this.fetchResults()
-      }
-    })
-  }
-
-  fetchResults = (pageNum = 0) => {
-    const { filterType, results } = this.state
-    const filterDefs = this.props.filterDefs[filterType]
-    if (filterDefs.list) {
-      // No need to fetch the data, it is already provided in the filter definition
-      this.setState({
-        isLoading: !_isEmpty(filterDefs.list),
-        results: {
-          ...results,
+  useEffect(() => {
+    function fetchResults() {
+      const selectedFilterDefs = filterDefs[filterType]
+      if (selectedFilterDefs.list) {
+        // No need to fetch the data, it is already provided in the filter definition
+        setIsLoading(!_isEmpty(selectedFilterDefs.list))
+        setResults(oldResults => ({
+          ...oldResults,
           [filterType]: {
-            list: filterDefs.list,
+            list: selectedFilterDefs.list,
             pageNum: pageNum,
             pageSize: 6,
-            totalCount: filterDefs.list.length
+            totalCount: selectedFilterDefs.list.length
           }
-        }
-      })
-    } else {
-      // GraphQL search type of query
-      this.queryResults(filterDefs, filterType, results, pageNum)
+        }))
+      } else {
+        // GraphQL search type of query
+        queryResults(selectedFilterDefs)
+      }
     }
-  }
 
-  queryResults = (filterDefs, filterType, oldResults, pageNum) => {
-    const resourceName = this.props.objectType.resourceName
-    const listName = filterDefs.listName || this.props.objectType.listName
-    this.setState({ isLoading: true }, () => {
+    function queryResults(selectedFilterDefs) {
+      const resourceName = objectType.resourceName
+      const listName = selectedFilterDefs.listName || objectType.listName
       const queryVars = { pageNum: pageNum, pageSize: 6 }
-      if (this.props.queryParams) {
-        Object.assign(queryVars, this.props.queryParams)
+      if (queryParams) {
+        Object.assign(queryVars, queryParams)
       }
-      if (filterDefs.queryVars) {
-        Object.assign(queryVars, filterDefs.queryVars)
+      if (selectedFilterDefs.queryVars) {
+        Object.assign(queryVars, selectedFilterDefs.queryVars)
       }
-      if (this.state.searchTerms) {
-        Object.assign(queryVars, { text: this.state.searchTerms + "*" })
+      if (searchTerms) {
+        Object.assign(queryVars, { text: searchTerms + "*" })
       }
-      const thisRequest = (this.latestRequest = API.query(
+      API.query(
         gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
@@ -372,33 +204,161 @@ export default class AdvancedSelect extends Component {
               pageSize
               totalCount
               list {
-                ${this.props.fields}
+                ${fields}
               }
             }
           }
         `,
         { query: queryVars }
       ).then(data => {
-        // If this is true there's a newer request happening, stop everything
-        if (thisRequest !== this.latestRequest) {
-          return
-        }
         const isLoading = data[listName].totalCount !== 0
-        this.setState({
-          isLoading,
-          results: {
-            ...oldResults,
-            [filterType]: data[listName]
-          }
-        })
-      }))
-    })
+        setIsLoading(isLoading)
+        setResults(oldResults => ({
+          ...oldResults,
+          [filterType]: data[listName]
+        }))
+      })
+    }
+    const debouncedFetchResults = _debounce(fetchResults, 400)
+    if (doDebounceFetchResults) {
+      debouncedFetchResults()
+      setDoDebounceFetchResults(false)
+      setDoFetchResults(false)
+    } else if (doFetchResults) {
+      fetchResults()
+    }
+  }, [searchTerms, filterDefs, filterType, setIsLoading, setResults, objectType, doFetchResults, queryParams, fields, pageNum, doDebounceFetchResults])
+
+  const advancedSearchPopoverContent = (
+    <Row className="border-between">
+      <FilterAsNav
+        items={filterDefs}
+        currentFilter={filterType}
+        handleOnClick={changeFilterType}
+      />
+
+      <FilterAsDropdown
+        items={filterDefs}
+        handleOnChange={handleOnChangeSelect}
+      />
+
+      <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
+        <OverlayTable
+          fieldName={fieldName}
+          items={items}
+          selectedItems={value}
+          handleAddItem={item => {
+            handleAddItem(item)
+            if (closeOverlayOnAdd) {
+              handleHideOverlay()
+            }
+          }}
+          handleRemoveItem={handleRemoveItem}
+          objectType={objectType}
+          columns={[""].concat(overlayColumns)}
+          renderRow={overlayRenderRow}
+          isLoading={isLoading}
+          loaderMessage={<div style={{ width: "300px" }}>No results found</div>}
+          tableClassName={overlayTableClassName}
+        />
+        {paginationFor(filterType)}
+      </Col>
+    </Row>
+  )
+
+  return (
+    <>
+      <div id={`${fieldName}-popover`}>
+        <InputGroup>
+          <Popover
+            className="advanced-select-popover"
+            popoverClassName="bp3-popover-content-sizing"
+            content={advancedSearchPopoverContent}
+            isOpen={showOverlay}
+            captureDismiss
+            interactionKind={PopoverInteractionKind.CLICK}
+            onInteraction={handleInteraction}
+            usePortal={false}
+            position={Position.BOTTOM}
+            modifiers={{
+              preventOverflow: {
+                enabled: false
+              },
+              hide: {
+                enabled: false
+              },
+              flip: {
+                enabled: false
+              }
+            }}
+          >
+            <FormControl
+              name={fieldName}
+              value={searchTerms || ""}
+              placeholder={placeholder}
+              onChange={changeSearchTerms}
+              onFocus={handleInputFocus}
+              inputRef={ref => {
+                searchInput.current = ref
+              }}
+            />
+          </Popover>
+          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+          {addon && (
+            <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+          )}
+        </InputGroup>
+      </div>
+      <AdvancedSelectTarget overlayRef={overlayContainer} />
+      <Row>
+        <Col sm={12}>{renderSelectedWithDelete}</Col>
+      </Row>
+    </>
+  )
+
+  function handleInputFocus() {
+    if (!showOverlay) {
+      // When doing input focus while the overlay is closed, empty the search terms and show the overlay
+      setSearchTerms("")
+      setShowOverlay(true)
+      setDoFetchResults(true)
+    }
   }
 
-  fetchResultsDebounced = _debounce(this.fetchResults, 400)
+  function handleInteraction(showOverlay, event) {
+    // Make sure the overlay is being closed when clicking outside of it
+    const inputFocus = searchInput.current.contains(event && event.target)
+    return setShowOverlay(showOverlay || inputFocus)
+  }
 
-  paginationFor = filterType => {
-    const { results } = this.state
+  function handleHideOverlay() {
+    setFilterType(Object.keys(filterDefs)[0])
+    setResults({})
+    setShowOverlay(false)
+    setDoFetchResults(true)
+  }
+
+  function changeSearchTerms(event) {
+    setSearchTerms(event.target.value)
+    // Reset the results state when the search terms change
+    setResults({})
+    setDoDebounceFetchResults(true)
+  }
+
+  function handleOnChangeSelect(event) {
+    changeFilterType(event.target.value)
+  }
+
+  function changeFilterType(filterType) {
+    // When changing the filter type, only fetch the results if they were not fetched before
+    const filterResults = results[filterType]
+    const shouldFetchResults = _isEmpty(filterResults)
+    setDoFetchResults(shouldFetchResults)
+    setIsLoading(shouldFetchResults)
+    setFilterType(filterType)
+  }
+
+  function paginationFor(filterType) {
     const pageSize =
       results && results[filterType] ? results[filterType].pageSize : 6
     const pageNum =
@@ -413,14 +373,16 @@ export default class AdvancedSelect extends Component {
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
-        goToPage={this.goToPage}
+        goToPage={goToPage}
       />
     )
   }
 
-  goToPage = pageNum => {
-    this.fetchResults(pageNum)
+  function goToPage(pageNum) {
+    setPageNum(pageNum)
+    setDoFetchResults(true)
   }
 }
-
 AdvancedSelect.propTypes = propTypes
+
+export default AdvancedSelect
