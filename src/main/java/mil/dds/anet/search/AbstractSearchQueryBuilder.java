@@ -256,29 +256,28 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
       String[] foreignKeys, String withTableName, String recursiveTableName,
       String recursiveForeignKey, String paramName, List<String> fieldValues,
       boolean findChildren) {
-    createWithClause(outerQb, withTableName, recursiveTableName, recursiveForeignKey, findChildren);
+    createWithClause(outerQb, withTableName, recursiveTableName, recursiveForeignKey);
     final List<String> orClauses = new ArrayList<>();
     for (final String foreignKey : foreignKeys) {
-      orClauses.add(String.format("%1$s.%2$s = %3$s.uuid", tableName, foreignKey, withTableName));
+      orClauses.add(String.format("%1$s.%2$s = %3$s.%4$s", tableName, foreignKey, withTableName,
+          findChildren ? "uuid" : "parent_uuid"));
     }
-    addWhereClause(String.format("( (%1$s) AND %2$s.parent_uuid IN ( <%3$s> ) )",
-        Joiner.on(" OR ").join(orClauses), withTableName, paramName));
+    addWhereClause(
+        String.format("( (%1$s) AND %2$s.%3$s IN ( <%4$s> ) )", Joiner.on(" OR ").join(orClauses),
+            withTableName, findChildren ? "parent_uuid" : "uuid", paramName));
     addListArg(paramName, fieldValues);
   }
 
   private void createWithClause(AbstractSearchQueryBuilder<B, T> outerQb, String withTableName,
-      String recursiveTableName, String recursiveForeignKey, boolean findChildren) {
+      String recursiveTableName, String recursiveForeignKey) {
     if (outerQb == null) {
       outerQb = this;
     }
-    final String child = "pt.uuid";
-    final String parent = String.format("bt.%s", recursiveForeignKey);
     outerQb.addWithClause(String.format(
         "%1$s(uuid, parent_uuid) AS (SELECT uuid, uuid as parent_uuid FROM %2$s UNION ALL"
-            + " SELECT %3$s, %4$s FROM %2$s bt INNER JOIN"
+            + " SELECT pt.uuid, bt.%3$s FROM %2$s bt INNER JOIN"
             + " %1$s pt ON bt.uuid = pt.parent_uuid)",
-        withTableName, recursiveTableName, findChildren ? child : parent,
-        findChildren ? parent : child));
+        withTableName, recursiveTableName, recursiveForeignKey));
     addAdditionalFromClause(withTableName);
   }
 
