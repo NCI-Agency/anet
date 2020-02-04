@@ -165,7 +165,7 @@
     "lint-fix": "prettier --write --no-semi 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js' && eslint --fix 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-e2e",
-    "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava tests/e2e/*.js --serial --fail-fast --verbose",
+    "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava tests/e2e/*.js --serial --fail-fast --verbose --timeout=3m",
     "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js",
     "test-jest": "export ANET_CONFIG=../anet.yml ; jest --testPathPattern='tests/(actions|reducers)'",
     "storybook": "start-storybook -p 9001 -c .storybook",
