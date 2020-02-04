@@ -179,6 +179,8 @@ export default class AdvancedSelect extends Component {
       ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
       : null
     const items = results && results[filterType] ? results[filterType].list : []
+    const pageNum =
+      results && results[filterType] ? results[filterType].pageNum : 0
 
     const advancedSearchPopoverContent = (
       <Row className="border-between">
@@ -197,6 +199,7 @@ export default class AdvancedSelect extends Component {
           <this.props.overlayTable
             fieldName={fieldName}
             items={items}
+            pageNum={pageNum}
             selectedItems={value}
             handleAddItem={item => {
               handleAddItem(item)
