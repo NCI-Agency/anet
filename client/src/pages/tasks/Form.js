@@ -137,6 +137,8 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
         validateForm,
         submitForm
       }) => {
+        const isAdmin = currentUser && currentUser.isAdmin()
+        const disabled = !isAdmin
         const action = (
           <div>
             <Button
@@ -161,6 +163,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
                   component={FieldHelper.InputField}
+                  disabled={disabled}
                 />
 
                 <LongNameField
@@ -169,12 +172,20 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                   component={FieldHelper.InputField}
                 />
 
-                <FastField
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroup}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                />
+                {disabled ? (
+                  <FastField
+                    name="status"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={Position.humanNameOfStatus}
+                  />
+                ) : (
+                  <FastField
+                    name="status"
+                    component={FieldHelper.RadioButtonToggleGroup}
+                    buttons={statusButtons}
+                    onChange={value => setFieldValue("status", value)}
+                  />
+                )}
 
                 <TaskedOrganizationsMultiSelect
                   name="taskedOrganizations"
@@ -263,8 +274,10 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                         valueKey="shortName"
                         queryParams={{}}
                         addon={TASKS_ICON}
+                        showRemoveButton={!disabled}
                       />
                     }
+                    disabled={disabled}
                   />
                 )}
 
@@ -272,6 +285,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                   dictProps={Settings.fields.task.customField}
                   name="customField"
                   component={FieldHelper.InputField}
+                  disabled={disabled}
                 />
 
                 {Settings.fields.task.plannedCompletion && (
@@ -283,6 +297,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                       setFieldValue("plannedCompletion", value)}
                     onBlur={() => setFieldTouched("plannedCompletion")}
                     widget={<CustomDateInput id="plannedCompletion" />}
+                    disabled={disabled}
                   />
                 )}
 
@@ -295,6 +310,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                       setFieldValue("projectedCompletion", value)}
                     onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
+                    disabled={disabled}
                   />
                 )}
 
@@ -306,14 +322,18 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.RadioButtonToggleGroup}
+                      component={
+                        disabled
+                          ? FieldHelper.ReadonlyField
+                          : FieldHelper.RadioButtonToggleGroup
+                      }
                       buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
                         setFieldValue("customFieldEnum1", value)}
                     />
-                    {edit && (
+                    {edit && !disabled && (
                       <FastField
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
@@ -345,7 +365,11 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.RadioButtonToggleGroup}
+                    component={
+                      disabled
+                        ? FieldHelper.ReadonlyField
+                        : FieldHelper.RadioButtonToggleGroup
+                    }
                     buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}
@@ -354,22 +378,21 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 )}
               </Fieldset>
 
-              {currentUser.isAdmin() && // TODO: Only show task custom fields to admins until we implement visibility per role
-                Settings.fields.task.customFields && (
-                  <Fieldset
-                    title={`${Settings.fields.task.shortLabel} information`}
-                    id="custom-fields"
-                  >
-                    <CustomFieldsContainer
-                      fieldsConfig={Settings.fields.task.customFields}
-                      formikProps={{
-                        setFieldTouched,
-                        setFieldValue,
-                        values,
-                        validateForm
-                      }}
-                    />
-                  </Fieldset>
+              {Settings.fields.task.customFields && !disabled && (
+                <Fieldset
+                  title={`${Settings.fields.task.shortLabel} information`}
+                  id="custom-fields"
+                >
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.task.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
               )}
 
               <div className="submit-buttons">
