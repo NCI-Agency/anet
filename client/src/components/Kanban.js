@@ -125,13 +125,15 @@ const Card = ({ task }) => {
         />
         <br />
         {/* TODO make a single line when collapsed <div style={this.state.open ? {} : {textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}> */}
-        <div>
-          <small>
-            {open || task.longName.length < 100
-              ? task.longName
-              : task.longName.substring(0, 100) + "..."}
-          </small>
-        </div>
+        {task.longName && (
+          <div>
+            <small>
+              {open || task.longName.length < 100
+                ? task.longName
+                : task.longName.substring(0, 100) + "..."}
+            </small>
+          </div>
+        )}
       </div>
 
       {open && (

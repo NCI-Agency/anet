@@ -47,7 +47,7 @@ export default class Task extends Model {
         .label(Settings.fields.task.shortName.label),
       longName: yup
         .string()
-        .required()
+        .nullable()
         .default("")
         .label(Settings.fields.task.longName.label),
       category: yup
@@ -105,7 +105,12 @@ export default class Task extends Model {
     "uuid, shortName, longName, customFieldRef1 { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
 
   static autocompleteTemplate(task) {
-    return <span>{[task.shortName, task.longName].join(" - ")}</span>
+    const abrvLongName =
+      task.longName?.length > 40
+        ? task.longName.substring(0, 40) + "..."
+        : task.longName
+
+    return <span>{task.shortName + abrvLongName && ` - ${abrvLongName}`} </span>
   }
 
   static humanNameOfStatus(status) {
