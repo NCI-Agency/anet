@@ -92,7 +92,7 @@ const parsedEntityLinkTypeQuery = {
 }
 
 export function getEntityInfoFromUrl(url) {
-  const splittedUrl = url.split(/[\\//]/)
+  const splittedUrl = url.split(/[\\/]/)
 
   if (splittedUrl.length > 1) {
     const typeRaw = splittedUrl[splittedUrl.length - 2]
