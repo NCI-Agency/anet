@@ -362,7 +362,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               <Button onClick={toggleEmailModal}>Email report</Button>
             )}
             {canEdit && (
-              <LinkTo report={report} edit button="primary">
+              <LinkTo modelType="Report" model={report} edit button="primary">
                 Edit
               </LinkTo>
             )}
@@ -530,7 +530,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   name="location"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    report.location && <LinkTo anetLocation={report.location} />
+                    report.location && (
+                      <LinkTo modelType="Location" model={report.location} />
+                    )
                   }
                 />
 
@@ -575,21 +577,33 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 <Field
                   name="author"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={<LinkTo person={report.author} />}
+                  humanValue={
+                    <LinkTo modelType="Person" model={report.author} />
+                  }
                 />
 
                 <Field
                   name="advisorOrg"
                   label={Settings.fields.advisor.org.name}
                   component={FieldHelper.ReadonlyField}
-                  humanValue={<LinkTo organization={report.advisorOrg} />}
+                  humanValue={
+                    <LinkTo
+                      modelType="Organization"
+                      model={report.advisorOrg}
+                    />
+                  }
                 />
 
                 <Field
                   name="principalOrg"
                   label={Settings.fields.principal.org.name}
                   component={FieldHelper.ReadonlyField}
-                  humanValue={<LinkTo organization={report.principalOrg} />}
+                  humanValue={
+                    <LinkTo
+                      modelType="Organization"
+                      model={report.principalOrg}
+                    />
+                  }
                 />
               </Fieldset>
 
@@ -702,7 +716,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
-                      <LinkTo person={comment.author} />,
+                      <LinkTo modelType="Person" model={comment.author} />,
                       <span
                         title={createdAt.format(
                           Settings.dateFormats.forms.displayShort.withTime
@@ -852,7 +866,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
           cancelHandler
         )}
         <div className="right-button">
-          <LinkTo report={report} edit button>
+          <LinkTo modelType="Report" model={report} edit button>
             Edit {reportType}
           </LinkTo>
           {renderApproveButton(

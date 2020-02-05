@@ -133,7 +133,7 @@ const BaseOrganizationTable = ({
               return (
                 <tr key={org.uuid}>
                   <td>
-                    <LinkTo organization={org}>
+                    <LinkTo modelType="Organization" model={org}>
                       {nameComponents.join(" - ")}
                     </LinkTo>
                   </td>

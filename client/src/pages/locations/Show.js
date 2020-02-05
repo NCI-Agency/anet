@@ -90,7 +90,13 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
           })
         }
         const action = canEdit && (
-          <LinkTo anetLocation={location} edit button="primary" id="editButton">
+          <LinkTo
+            modelType="Location"
+            model={location}
+            edit
+            button="primary"
+            id="editButton"
+          >
             Edit
           </LinkTo>
         )

@@ -21,7 +21,8 @@ const ApprovalStepModalStatus = ({ action }) => {
     const cssClass = "label " + actionType.cssClass
     return (
       <span className={cssClass}>
-        {actionType.text} by <LinkTo person={action.person} isLink={false} /> on
+        {actionType.text} by{" "}
+        <LinkTo modelType="Person" model={action.person} isLink={false} /> on
         <small>
           {" "}
           {moment(action.createdAt).format(
@@ -74,8 +75,8 @@ class ApprovalStepModal extends Component {
             <ul>
               {step.approvers.map(position => (
                 <li key={position.uuid}>
-                  <LinkTo position={position} /> -{" "}
-                  <LinkTo person={position.person} />
+                  <LinkTo modelType="Position" model={position} /> -{" "}
+                  <LinkTo modelType="Person" model={position.person} />
                 </li>
               ))}
             </ul>
@@ -106,7 +107,7 @@ const ActionButton = ({ action }) => {
   ) : (
     <Button className={actionType.cssClass + " btn-sm"}>
       <span>
-        <LinkTo person={action.person} isLink={false} />
+        <LinkTo modelType="Person" model={action.person} isLink={false} />
       </span>
     </Button>
   )
@@ -120,7 +121,7 @@ const ActionDetails = ({ action }) => {
     return (
       <div>
         <span>
-          By <LinkTo person={action.person} />
+          By <LinkTo modelType="Person" model={action.person} />
         </span>
         <br />
         <small>

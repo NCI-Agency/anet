@@ -76,7 +76,8 @@ const BaseOrganizationTasks = ({
       action={
         isAdminUser && (
           <LinkTo
-            task={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
+            modelType="Task"
+            model={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
             button
           >
             Create {taskShortLabel}
@@ -104,7 +105,9 @@ const BaseOrganizationTasks = ({
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkTo task={task}>{task.shortName}</LinkTo>
+                  <LinkTo modelType="Task" model={task}>
+                    {task.shortName}
+                  </LinkTo>
                 </td>
                 <td>{task.longName}</td>
               </tr>

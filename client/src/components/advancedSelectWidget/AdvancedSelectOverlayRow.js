@@ -13,7 +13,7 @@ export const AuthorizationGroupOverlayRow = item => (
 export const LocationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo anetLocation={item} isLink={false} />
+      <LinkTo modelType="Location" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -48,7 +48,8 @@ export const TaskDetailedOverlayRow = item => (
     <td className="taskOrg">
       {item.taskedOrganizations.map(org => (
         <LinkTo
-          organization={org}
+          modelType="Organization"
+          model={org}
           isLink={false}
           key={`${item.uuid}-${org.uuid}`}
           style={{ paddingRight: 5 }}
@@ -61,14 +62,18 @@ export const TaskDetailedOverlayRow = item => (
 export const PositionOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo position={item} isLink={false} />
+      <LinkTo modelType="Position" model={item} isLink={false} />
       {item.code ? `, ${item.code}` : ""}
     </td>
     <td>
-      <LinkTo organization={item.organization} isLink={false} />
+      <LinkTo
+        modelType="Organization"
+        model={item.organization}
+        isLink={false}
+      />
     </td>
     <td>
-      <LinkTo person={item.person} isLink={false} />
+      <LinkTo modelType="Person" model={item.person} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -76,7 +81,7 @@ export const PositionOverlayRow = item => (
 export const PersonSimpleOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo person={item} isLink={false} />
+      <LinkTo modelType="Person" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -84,22 +89,27 @@ export const PersonSimpleOverlayRow = item => (
 export const PersonDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo person={item} isLink={false} />
+      <LinkTo modelType="Person" model={item} isLink={false} />
     </td>
     <td>
-      <LinkTo position={item.position} isLink={false} />
+      <LinkTo modelType="Position" model={item.position} isLink={false} />
       {item.position && item.position.code ? `, ${item.position.code}` : ""}
     </td>
     <td>
       <LinkTo
+        modelType="Location"
+        model={item.position && item.position.location}
         whenUnspecified=""
-        anetLocation={item.position && item.position.location}
         isLink={false}
       />
     </td>
     <td>
       {item.position && item.position.organization && (
-        <LinkTo organization={item.position.organization} isLink={false} />
+        <LinkTo
+          modelType="Organization"
+          model={item.position.organization}
+          isLink={false}
+        />
       )}
     </td>
   </React.Fragment>
@@ -108,7 +118,7 @@ export const PersonDetailedOverlayRow = item => (
 export const TagOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo tag={item} isLink={false} />
+      <LinkTo modelType="Tag" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -116,10 +126,10 @@ export const TagOverlayRow = item => (
 export const ApproverOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo person={item.person} isLink={false} />
+      <LinkTo modelType="Person" model={item.person} isLink={false} />
     </td>
     <td>
-      <LinkTo position={item} isLink={false} />
+      <LinkTo modelType="Position" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -127,7 +137,7 @@ export const ApproverOverlayRow = item => (
 export const ReportOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo report={item} isLink={false} />
+      <LinkTo modelType="Report" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -135,7 +145,7 @@ export const ReportOverlayRow = item => (
 export const ReportDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo report={item} isLink={false} />
+      <LinkTo modelType="Report" model={item} isLink={false} />
     </td>
     <td>
       <span>{item.author ? item.author.name : "Unknown"}</span>

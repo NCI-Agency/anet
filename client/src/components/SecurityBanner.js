@@ -35,7 +35,12 @@ class BaseSecurityBanner extends Component {
         style={{ ...css, background: appSettings[SETTING_KEY_COLOR] }}
       >
         {appSettings[SETTING_KEY_TEXT]} || {currentUser.name}{" "}
-        <LinkTo person={currentUser} style={aCss} showIcon={false}>
+        <LinkTo
+          modelType="Person"
+          model={currentUser}
+          style={aCss}
+          showIcon={false}
+        >
           (edit)
         </LinkTo>
       </div>

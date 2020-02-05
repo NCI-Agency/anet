@@ -61,10 +61,14 @@ const ApproverTable = ({ approvers, onDelete }) => {
         {approvers.map((approver, approverIndex) => (
           <tr key={approver.uuid}>
             <td>
-              <LinkTo person={approver.person} target="_blank" />
+              <LinkTo
+                modelType="Person"
+                model={approver.person}
+                target="_blank"
+              />
             </td>
             <td>
-              <LinkTo position={approver} target="_blank" />
+              <LinkTo modelType="Position" model={approver} target="_blank" />
             </td>
             <td onClick={() => onDelete(approver)}>
               <span style={{ cursor: "pointer" }}>
@@ -233,7 +237,10 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
-                          <LinkTo organization={values.parentOrg}>
+                          <LinkTo
+                            modelType="Organization"
+                            model={values.parentOrg}
+                          >
                             {values.parentOrg.shortName}{" "}
                             {values.parentOrg.longName}{" "}
                             {values.parentOrg.identificationCode}

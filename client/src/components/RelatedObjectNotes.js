@@ -362,7 +362,11 @@ class BaseRelatedObjectNotes extends Component {
                   }}
                 >
                   <i>{updatedAt}</i>{" "}
-                  <LinkTo style={{ color: "white" }} person={note.author} />
+                  <LinkTo
+                    modelType="Person"
+                    model={note.author}
+                    style={{ color: "white" }}
+                  />
                   {canEdit && (
                     <>
                       <Button

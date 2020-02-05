@@ -24,13 +24,16 @@ const AuthorizationGroupTable = props => {
         {authorizationGroups.map(authorizationGroup => (
           <tr key={authorizationGroup.uuid}>
             <td>
-              <LinkTo authorizationGroup={authorizationGroup} />
+              <LinkTo
+                modelType="AuthorizationGroup"
+                model={authorizationGroup}
+              />
             </td>
             <td>{authorizationGroup.description}</td>
             <td>
               {authorizationGroup.positions.map(position => (
                 <div key={position.uuid}>
-                  <LinkTo position={position} />
+                  <LinkTo modelType="Position" model={position} />
                 </div>
               ))}
             </td>

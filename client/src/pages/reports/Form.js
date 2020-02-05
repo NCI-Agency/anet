@@ -601,7 +601,7 @@ const BaseReportForm = ({
                         title="Recent Locations"
                         shortcuts={recents.locations}
                         fieldName="location"
-                        objectType={Location}
+                        objectType="Location"
                         curValue={values.location}
                         onChange={value => {
                           // validation will be done by setFieldValue
@@ -756,7 +756,7 @@ const BaseReportForm = ({
                         title="Recent attendees"
                         shortcuts={recents.persons}
                         fieldName="attendees"
-                        objectType={Person}
+                        objectType="Person"
                         curValue={values.attendees}
                         onChange={value => {
                           // validation will be done by setFieldValue
@@ -849,7 +849,7 @@ const BaseReportForm = ({
                         )}`}
                         shortcuts={recents.tasks}
                         fieldName="tasks"
-                        objectType={Task}
+                        objectType="Task"
                         curValue={values.tasks}
                         onChange={value => {
                           // validation will be done by setFieldValue
@@ -1036,7 +1036,7 @@ const BaseReportForm = ({
                               title="Recent Authorization Groups"
                               shortcuts={recents.authorizationGroups}
                               fieldName="authorizationGroups"
-                              objectType={AuthorizationGroup}
+                              objectType="AuthorizationGroup"
                               curValue={values.authorizationGroups}
                               onChange={value => {
                                 // validation will be done by setFieldValue

@@ -94,7 +94,8 @@ class BaseAssignPositionModal extends Component {
       <Modal show={this.props.showModal} onHide={this.close}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Set Position for <LinkTo person={person} isLink={false} />
+            Set Position for{" "}
+            <LinkTo modelType="Person" model={person} isLink={false} />
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -105,8 +106,13 @@ class BaseAssignPositionModal extends Component {
                 onClick={this.remove}
                 className="remove-person-from-position"
               >
-                Remove <LinkTo person={person} isLink={false} /> from{" "}
-                <LinkTo position={person.position} isLink={false} />
+                Remove{" "}
+                <LinkTo modelType="Person" model={person} isLink={false} /> from{" "}
+                <LinkTo
+                  modelType="Position"
+                  model={person.position}
+                  isLink={false}
+                />
               </Button>
               <hr className="assignModalSplit" />
             </div>
@@ -231,8 +237,8 @@ class BaseAssignPositionModal extends Component {
       const errorMessage = (
         <>
           This position is currently held by{" "}
-          <LinkTo person={this.state.position.person} />. By selecting this
-          position, they will be removed.
+          <LinkTo modelType="Person" model={this.state.position.person} />. By
+          selecting this position, they will be removed.
         </>
       )
       error = { message: errorMessage }

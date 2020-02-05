@@ -198,7 +198,8 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
           <div>
             {isAdmin && (
               <LinkTo
-                organization={Organization.pathForNew({
+                modelType="Organization"
+                model={Organization.pathForNew({
                   parentOrgUuid: organization.uuid
                 })}
                 button
@@ -209,7 +210,8 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
 
             {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
               <LinkTo
-                organization={organization}
+                modelType="Organization"
+                model={organization}
                 edit
                 button="primary"
                 id="editButton"
@@ -286,7 +288,10 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                     label={Settings.fields.organization.parentOrg}
                     humanValue={
                       organization.parentOrg && (
-                        <LinkTo organization={organization.parentOrg}>
+                        <LinkTo
+                          modelType="Organization"
+                          model={organization.parentOrg}
+                        >
                           {organization.parentOrg.shortName}{" "}
                           {organization.parentOrg.longName}{" "}
                           {organization.parentOrg.identificationCode}
@@ -306,10 +311,14 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                         {superUsers.map(position => (
                           <p key={position.uuid}>
                             {position.person ? (
-                              <LinkTo person={position.person} />
+                              <LinkTo
+                                modelType="Person"
+                                model={position.person}
+                              />
                             ) : (
                               <i>
-                                <LinkTo position={position} />- (Unfilled)
+                                <LinkTo modelType="Position" model={position} />
+                                - (Unfilled)
                               </i>
                             )}
                           </p>
@@ -334,7 +343,10 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                         <ListGroup>
                           {organization.childrenOrgs.map(organization => (
                             <ListGroupItem key={organization.uuid}>
-                              <LinkTo organization={organization}>
+                              <LinkTo
+                                modelType="Organization"
+                                model={organization}
+                              >
                                 {organization.shortName} {organization.longName}{" "}
                                 {organization.identificationCode}
                               </LinkTo>

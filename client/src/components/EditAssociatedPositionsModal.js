@@ -37,13 +37,17 @@ const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
         return (
           <tr key={relPos.uuid}>
             <td>
-              <LinkTo person={person} isLink={false} />
+              <LinkTo modelType="Person" model={person} isLink={false} />
             </td>
             <td>
-              <LinkTo person={relPos} isLink={false} />
+              <LinkTo modelType="Person" model={relPos} isLink={false} />
             </td>
             <td>
-              <LinkTo organization={relPos.organization} isLink={false} />
+              <LinkTo
+                modelType="Organization"
+                model={relPos.organization}
+                isLink={false}
+              />
             </td>
             <td>
               <RemoveButton

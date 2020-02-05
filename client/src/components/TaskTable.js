@@ -26,7 +26,7 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
               {Task.map(tasks, task => (
                 <tr key={task.uuid}>
                   <td className="taskName">
-                    <LinkTo task={task}>
+                    <LinkTo modelType="Task" model={task}>
                       {task.shortName} - {task.longName}
                     </LinkTo>
                   </td>
@@ -34,7 +34,8 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
                     <td className="taskOrg">
                       {task.taskedOrganizations.map(org => (
                         <LinkTo
-                          organization={org}
+                          modelType="Organization"
+                          model={org}
                           key={`${task.uuid}-${org.uuid}`}
                         />
                       ))}

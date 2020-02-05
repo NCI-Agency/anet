@@ -65,15 +65,15 @@ const GQL_GET_TASK = gql`
 `
 
 export const ENTITY_TYPES = {
-  REPORT: "report",
-  PERSON: "person",
-  ORGANIZATION: "organization",
-  POSITION: "position",
-  LOCATION: "anetLocation",
-  TASK: "task"
+  REPORT: "Report",
+  PERSON: "Person",
+  ORGANIZATION: "Organization",
+  POSITION: "Position",
+  LOCATION: "Location",
+  TASK: "Task"
 }
 
-export const parsedEntityLinkType = {
+const parsedEntityLinkType = {
   reports: ENTITY_TYPES.REPORT,
   people: ENTITY_TYPES.PERSON,
   organizations: ENTITY_TYPES.ORGANIZATION,

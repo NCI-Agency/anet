@@ -78,15 +78,22 @@ export default class AssignPersonModal extends Component {
       <Modal show={this.props.showModal} onHide={this.close}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Set Person for <LinkTo position={position} isLink={false} />
+            Set Person for{" "}
+            <LinkTo modelType="Position" model={position} isLink={false} />
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {position.person.uuid && (
             <div style={{ textAlign: "center" }}>
               <Button bsStyle="danger" onClick={this.remove}>
-                Remove <LinkTo person={position.person} isLink={false} /> from{" "}
-                <LinkTo position={position} isLink={false} />
+                Remove{" "}
+                <LinkTo
+                  modelType="Person"
+                  model={position.person}
+                  isLink={false}
+                />{" "}
+                from{" "}
+                <LinkTo modelType="Position" model={position} isLink={false} />
               </Button>
               <hr className="assignModalSplit" />
             </div>

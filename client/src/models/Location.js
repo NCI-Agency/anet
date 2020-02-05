@@ -7,7 +7,7 @@ export default class Location extends Model {
   static resourceName = "Location"
   static listName = "locationList"
   static getInstanceName = "location"
-  static getModelNameLinkTo = "anetLocation"
+  static getModelNameLinkTo = "location"
 
   static STATUS = {
     ACTIVE: "ACTIVE",
