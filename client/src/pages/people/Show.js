@@ -265,7 +265,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 <Field
                   name="biography"
                   className="biography"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={parseHtmlWithLinkTo(person.biography)}
                 />
               </Fieldset>
