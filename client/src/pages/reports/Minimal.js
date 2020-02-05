@@ -22,6 +22,7 @@ import { Alert } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import utils from "utils"
+import { parseHtmlWithLinkTo } from "utils_links"
 import AttendeesTable from "./AttendeesTable"
 
 const GQL_GET_REPORT = gql`
@@ -403,20 +404,16 @@ const ReportMinimal = ({ pageDispatchers }) => {
 
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
-                  <div
-                    dangerouslySetInnerHTML={{ __html: report.reportText }}
-                  />
+                  {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
 
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: report.reportSensitiveInformation.text
-                      }}
-                    />
+                    {parseHtmlWithLinkTo(
+                      report.reportSensitiveInformation.text
+                    )}
                   </Fieldset>
               )}
 

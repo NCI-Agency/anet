@@ -610,11 +610,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: report.reportSensitiveInformation.text
-                      }}
-                    />
+                    {parseHtmlWithLinkTo(
+                      report.reportSensitiveInformation.text
+                    )}
                     {(hasAuthorizationGroups && (
                       <div>
                         <h5>Authorized groups:</h5>
