@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -81,44 +80,36 @@ public class TaskResource {
       }
       // Update positions:
       if (t.getResponsiblePositions() != null) {
-        try {
-          final List<Position> existingResponsiblePositions =
-              dao.getResponsiblePositionsForTask(engine.getContext(), t.getUuid()).get();
-          for (final Position p : t.getResponsiblePositions()) {
-            Optional<Position> existingPosition = existingResponsiblePositions.stream()
-                .filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
-            if (existingPosition.isPresent()) {
-              existingResponsiblePositions.remove(existingPosition.get());
-            } else {
-              dao.addPositionToTask(p, t);
-            }
+        final List<Position> existingResponsiblePositions =
+            dao.getResponsiblePositionsForTask(engine.getContext(), t.getUuid()).join();
+        for (final Position p : t.getResponsiblePositions()) {
+          Optional<Position> existingPosition = existingResponsiblePositions.stream()
+              .filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
+          if (existingPosition.isPresent()) {
+            existingResponsiblePositions.remove(existingPosition.get());
+          } else {
+            dao.addPositionToTask(p, t);
           }
-          for (final Position p : existingResponsiblePositions) {
-            dao.removePositionFromTask(p, t);
-          }
-        } catch (InterruptedException | ExecutionException e) {
-          throw new WebApplicationException("failed to load responsible positions", e);
+        }
+        for (final Position p : existingResponsiblePositions) {
+          dao.removePositionFromTask(p, t);
         }
       }
       // Update tasked organizations:
       if (t.getTaskedOrganizations() != null) {
-        try {
-          final List<Organization> existingTaskedOrganizations =
-              dao.getTaskedOrganizationsForTask(engine.getContext(), t.getUuid()).get();
-          for (final Organization org : t.getTaskedOrganizations()) {
-            Optional<Organization> existingOrganization = existingTaskedOrganizations.stream()
-                .filter(el -> el.getUuid().equals(org.getUuid())).findFirst();
-            if (existingOrganization.isPresent()) {
-              existingTaskedOrganizations.remove(existingOrganization.get());
-            } else {
-              dao.addTaskedOrganizationsToTask(org, t);
-            }
+        final List<Organization> existingTaskedOrganizations =
+            dao.getTaskedOrganizationsForTask(engine.getContext(), t.getUuid()).join();
+        for (final Organization org : t.getTaskedOrganizations()) {
+          Optional<Organization> existingOrganization = existingTaskedOrganizations.stream()
+              .filter(el -> el.getUuid().equals(org.getUuid())).findFirst();
+          if (existingOrganization.isPresent()) {
+            existingTaskedOrganizations.remove(existingOrganization.get());
+          } else {
+            dao.addTaskedOrganizationsToTask(org, t);
           }
-          for (final Organization org : existingTaskedOrganizations) {
-            dao.removeTaskedOrganizationsFromTask(org, t.getUuid());
-          }
-        } catch (InterruptedException | ExecutionException e) {
-          throw new WebApplicationException("failed to load tasked organizations", e);
+        }
+        for (final Organization org : existingTaskedOrganizations) {
+          dao.removeTaskedOrganizationsFromTask(org, t.getUuid());
         }
       }
 
