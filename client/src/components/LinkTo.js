@@ -146,7 +146,7 @@ export default class LinkTo extends Component {
 
     const LinkToComponent = componentClass
     return (
-      <LinkToComponent to={to} {...componentProps}>
+      <LinkToComponent to={to} style={style} {...componentProps}>
         <>
           {iconComponent}
           {avatarComponent}
