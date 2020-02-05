@@ -16,7 +16,6 @@ export default class Report extends Model {
   static resourceName = "Report"
   static listName = "reportList"
   static getInstanceName = "report"
-  static getModelNameLinkTo = "report"
 
   static STATE = {
     DRAFT: "DRAFT",
