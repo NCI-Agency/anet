@@ -26,6 +26,7 @@ const CalendarIcon = inputRef => (
 export default class CustomDateInput extends Component {
   static propTypes = {
     id: PropTypes.string,
+    disabled: PropTypes.bool,
     showIcon: PropTypes.bool,
     withTime: PropTypes.bool,
     value: PropTypes.oneOfType([
@@ -38,6 +39,7 @@ export default class CustomDateInput extends Component {
   }
 
   static defaultProps = {
+    disabled: false,
     showIcon: true,
     withTime: false
   }
@@ -45,7 +47,15 @@ export default class CustomDateInput extends Component {
   inputRef = React.createRef()
 
   render() {
-    const { id, showIcon, withTime, value, onChange, onBlur } = this.props
+    const {
+      id,
+      disabled,
+      showIcon,
+      withTime,
+      value,
+      onChange,
+      onBlur
+    } = this.props
     const rightElement = showIcon && CalendarIcon(this.inputRef.current)
     const width = 8 + (showIcon ? 3 : 0) + (withTime ? 3 : 0)
     const style = { width: `${width}em`, fontSize: "1.1em" }
@@ -85,6 +95,7 @@ export default class CustomDateInput extends Component {
         closeOnSelection={!withTime}
         timePickerProps={timePickerProps}
         popoverProps={{ usePortal: false }}
+        disabled={disabled}
       />
     )
   }
