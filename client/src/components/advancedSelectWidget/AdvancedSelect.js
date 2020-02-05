@@ -314,11 +314,11 @@ export default class AdvancedSelect extends Component {
   refreshSearch = () => {
     // Reset the search filters, results and fetch new results based on the current (new) criteria
     this.setState(
-      {
-        filterType: Object.keys(this.props.filterDefs)[0],
+      (prevState, props) => ({
+        filterType: Object.keys(props.filterDefs)[0],
         isLoading: true,
         results: {}
-      },
+      }),
       () => this.fetchResultsDebounced()
     )
   }
