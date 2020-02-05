@@ -74,6 +74,7 @@ FilterAsDropdown.propTypes = {
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
   placeholder: PropTypes.string, // input field placeholder
+  disabled: PropTypes.bool,
   searchTerms: PropTypes.string,
   addon: PropTypes.oneOfType([
     PropTypes.string,
@@ -106,6 +107,7 @@ export const propTypes = {
 
 export default class AdvancedSelect extends Component {
   static defaultProps = {
+    disabled: false,
     filterDefs: {},
     closeOverlayOnAdd: false,
     searchTerms: ""
@@ -147,6 +149,7 @@ export default class AdvancedSelect extends Component {
       closeOverlayOnAdd,
       fieldName,
       placeholder,
+      disabled,
       value,
       renderSelected,
       onChange,
@@ -221,48 +224,56 @@ export default class AdvancedSelect extends Component {
 
     return (
       <>
-        <div id={`${fieldName}-popover`}>
-          <InputGroup>
-            <Popover
-              className="advanced-select-popover"
-              popoverClassName="bp3-popover-content-sizing"
-              content={advancedSearchPopoverContent}
-              isOpen={showOverlay}
-              captureDismiss
-              interactionKind={PopoverInteractionKind.CLICK}
-              onInteraction={this.handleInteraction}
-              usePortal={false}
-              position={Position.BOTTOM}
-              modifiers={{
-                preventOverflow: {
-                  enabled: false
-                },
-                hide: {
-                  enabled: false
-                },
-                flip: {
-                  enabled: false
-                }
-              }}
-            >
-              <FormControl
-                name={fieldName}
-                value={searchTerms || ""}
-                placeholder={placeholder}
-                onChange={this.changeSearchTerms}
-                onFocus={this.handleInputFocus}
-                inputRef={ref => {
-                  this.searchInput = ref
-                }}
-              />
-            </Popover>
-            {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-            {addon && (
-              <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-            )}
-          </InputGroup>
-        </div>
-        <AdvancedSelectTarget overlayRef={this.overlayContainer} />
+        {!(disabled && renderSelectedWithDelete) && (
+          <>
+            <div id={`${fieldName}-popover`}>
+              <InputGroup>
+                <Popover
+                  className="advanced-select-popover"
+                  popoverClassName="bp3-popover-content-sizing"
+                  content={advancedSearchPopoverContent}
+                  isOpen={showOverlay}
+                  captureDismiss
+                  disabled={disabled}
+                  interactionKind={PopoverInteractionKind.CLICK}
+                  onInteraction={this.handleInteraction}
+                  usePortal={false}
+                  position={Position.BOTTOM}
+                  modifiers={{
+                    preventOverflow: {
+                      enabled: false
+                    },
+                    hide: {
+                      enabled: false
+                    },
+                    flip: {
+                      enabled: false
+                    }
+                  }}
+                >
+                  <FormControl
+                    name={fieldName}
+                    value={searchTerms || ""}
+                    placeholder={placeholder}
+                    onChange={this.changeSearchTerms}
+                    onFocus={disabled ? undefined : this.handleInputFocus}
+                    inputRef={ref => {
+                      this.searchInput = ref
+                    }}
+                    disabled={disabled}
+                  />
+                </Popover>
+                {extraAddon && (
+                  <InputGroup.Addon>{extraAddon}</InputGroup.Addon>
+                )}
+                {addon && (
+                  <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+                )}
+              </InputGroup>
+            </div>
+            <AdvancedSelectTarget overlayRef={this.overlayContainer} />
+          </>
+        )}
         <Row>
           <Col sm={12}>{renderSelectedWithDelete}</Col>
         </Row>
