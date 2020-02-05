@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -63,8 +64,18 @@ public class TaskResource {
   @GraphQLMutation(name = "updateTask")
   public Integer updateTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task t) {
-    Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    final Person user = DaoUtils.getUserFromContext(context);
+    final List<Position> existingResponsiblePositions =
+        dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
+    // User has to be admin or responsible for the task
+    if (!AuthUtils.isAdmin(user)) {
+      final Position userPosition = user.loadPosition();
+      final boolean canUpdate = existingResponsiblePositions.stream()
+          .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
+      if (!canUpdate) {
+        throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+      }
+    }
 
     // Check for loops in the hierarchy
     final Map<String, Task> children =
@@ -80,8 +91,6 @@ public class TaskResource {
       }
       // Update positions:
       if (t.getResponsiblePositions() != null) {
-        final List<Position> existingResponsiblePositions =
-            dao.getResponsiblePositionsForTask(engine.getContext(), t.getUuid()).join();
         for (final Position p : t.getResponsiblePositions()) {
           Optional<Position> existingPosition = existingResponsiblePositions.stream()
               .filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
