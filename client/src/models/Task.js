@@ -1,6 +1,5 @@
 import { Settings } from "api"
 import Model, { createYupObjectShape, yupDate } from "components/Model"
-import React from "react"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -103,15 +102,6 @@ export default class Task extends Model {
 
   static autocompleteQuery =
     "uuid, shortName, longName, customFieldRef1 { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
-
-  static autocompleteTemplate(task) {
-    const abrvLongName =
-      task.longName?.length > 40
-        ? task.longName.substring(0, 40) + "..."
-        : task.longName
-
-    return <span>{task.shortName + abrvLongName && ` - ${abrvLongName}`} </span>
-  }
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
