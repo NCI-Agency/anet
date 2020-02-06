@@ -42,7 +42,7 @@
     "babel-preset-react-app": "^9.1.0",
     "chai": "^4.2.0",
     "chalk": "^3.0.0",
-    "chromedriver": "^79.0.2",
+    "chromedriver": "^80.0.0",
     "colors": "^1.4.0",
     "config": "^3.2.5",
     "copy-webpack-plugin": "^5.1.1",
