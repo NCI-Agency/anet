@@ -153,6 +153,7 @@
     "react-use-dimensions": "^1.2.1",
     "redux": "^4.0.5",
     "redux-persist": "^6.0.0",
+    "use-debounce": "^3.3.0",
     "yup": "^0.28.1"
   },
   "resolutions": {
