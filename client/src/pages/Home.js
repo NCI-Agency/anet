@@ -18,6 +18,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
@@ -240,7 +241,7 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
         "'s reports in the last 7 days",
       query: {
         orgUuid: currentUser.position.organization.uuid,
-        includeOrgChildren: false,
+        orgRecurseStrategy: RECURSE_STRATEGY.NONE,
         createdAtStart: LAST_WEEK,
         state: [
           Report.STATE.PUBLISHED,
@@ -260,7 +261,7 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
         currentUser.position.organization.shortName + "'s planned engagements",
       query: {
         orgUuid: currentUser.position.organization.uuid,
-        includeOrgChildren: false,
+        orgRecurseStrategy: RECURSE_STRATEGY.NONE,
         state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
         engagementStatus: Report.ENGAGEMENT_STATUS.FUTURE,
         sortOrder: "ASC"
