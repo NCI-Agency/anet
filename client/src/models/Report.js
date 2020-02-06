@@ -289,7 +289,7 @@ export default class Report extends Model {
   })
 
   static autocompleteQuery =
-    "uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason, atmosphere, author { uuid, name, rank, role }, tags { uuid, name, description }, updatedAt"
+    "intent, author { uuid, name, rank, role }"
 
   static autocompleteTemplate(report) {
     return (
