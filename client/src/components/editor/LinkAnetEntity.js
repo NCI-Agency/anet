@@ -10,6 +10,7 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
     getEntityByUuid(type, uuid).then(data => setEntity(data))
   }, [type, uuid])
 
+  // TODO: What if entity is null
   return (
     <LinkTo modelType={type} model={entity}>
       {children}

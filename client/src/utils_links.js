@@ -101,8 +101,6 @@ export function getEntityInfoFromUrl(url) {
 
     if (type && new RegExp(UUID_REGEX).test(uuid)) {
       return { type: type, uuid: uuid }
-    } else {
-      console.log(`Failed to parse entity type (${type}) or UUID (${uuid}).`)
     }
   }
 
@@ -120,11 +118,11 @@ export function parseHtmlWithLinkTo(html, report) {
   })
 }
 
+// If entity could not retrieved a null will be returned
 export function getEntityByUuid(type, uuid) {
   const entityQuery = parsedEntityLinkTypeQuery[type]
   if (!entityQuery) {
-    console.log(`Unsupported entity type: ${type}`)
-    return
+    return null
   }
 
   return API.query(entityQuery, {
