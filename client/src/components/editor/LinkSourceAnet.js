@@ -24,7 +24,7 @@ import {
 
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import { ENTITY_TYPES } from "utils_links"
-import pluralize from "pluralize"
+import { SEARCH_OBJECT_LABELS } from "actions"
 import createEntity from "./utils/createEntity"
 
 const entityFilters = {
@@ -110,12 +110,12 @@ const widgetPropsTask = {
 }
 
 const widgetTypeMapping = {
-  [ENTITY_TYPES.REPORT]: widgetPropsReport,
-  [ENTITY_TYPES.PERSON]: widgetPropsPeople,
-  [ENTITY_TYPES.ORGANIZATION]: widgetPropsOrganization,
-  [ENTITY_TYPES.POSITION]: widgetPropsPosition,
-  [ENTITY_TYPES.LOCATION]: widgetPropsLocation,
-  [ENTITY_TYPES.TASK]: widgetPropsTask
+  [ENTITY_TYPES.REPORTS]: widgetPropsReport,
+  [ENTITY_TYPES.PEOPLE]: widgetPropsPeople,
+  [ENTITY_TYPES.ORGANIZATIONS]: widgetPropsOrganization,
+  [ENTITY_TYPES.POSITIONS]: widgetPropsPosition,
+  [ENTITY_TYPES.LOCATIONS]: widgetPropsLocation,
+  [ENTITY_TYPES.TASKS]: widgetPropsTask
 }
 
 class LinkSourceAnet extends Component {
@@ -123,7 +123,7 @@ class LinkSourceAnet extends Component {
     super(props)
 
     this.state = {
-      objectType: ENTITY_TYPES.REPORT,
+      objectType: ENTITY_TYPES.REPORTS,
       advancedSelectProps: widgetPropsReport
     }
 
@@ -198,10 +198,12 @@ class LinkSourceAnet extends Component {
             value={this.state.objectType}
             onChange={this.changeObjectType}
           >
-            {Object.values(ENTITY_TYPES).map(entityType => {
+            {Object.entries(ENTITY_TYPES).map((key, value) => {
+              const entityName = key[1]
+              const entityLabel = SEARCH_OBJECT_LABELS[key[0]]
               return (
-                <Button key={entityType} value={entityType}>
-                  {pluralize(entityType)}
+                <Button key={entityName} value={entityName}>
+                  {entityLabel}
                 </Button>
               )
             })}
