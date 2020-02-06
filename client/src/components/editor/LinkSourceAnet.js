@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { useState, useRef } from "react"
 import PropTypes from "prop-types"
 
 import { Button, Modal } from "react-bootstrap"
@@ -118,23 +118,15 @@ const widgetTypeMapping = {
   [ENTITY_TYPES.TASKS]: widgetPropsTask
 }
 
-class LinkSourceAnet extends Component {
-  constructor(props) {
-    super(props)
+const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
+  const [objectType, setObjectType] = useState(ENTITY_TYPES.REPORTS)
+  const [advancedSelectProps, setAdvancedSelectProps] = useState(widgetTypeMapping[objectType])
 
-    this.state = {
-      objectType: ENTITY_TYPES.REPORTS,
-      advancedSelectProps: widgetPropsReport
-    }
+  const advancedSelectRef = useRef()
 
-    this.child = React.createRef()
-  }
-
-  onConfirm = value => {
-    const { editorState, entityType, onComplete } = this.props
-
+  function onConfirm(value) {
     // Retrieve entity URL and label
-    const ModelClass = Models[this.state.objectType]
+    const ModelClass = Models[objectType]
     const modelInstance = new ModelClass(value)
     const entityLabel = modelInstance.toString()
     const entityUrl = ModelClass.pathFor(modelInstance)
@@ -152,92 +144,66 @@ class LinkSourceAnet extends Component {
     onComplete(nextState)
   }
 
-  onRequestClose = () => {
-    const { onClose } = this.props
-    onClose()
-  }
-
-  onAfterOpen = () => {
-    const input = this.inputRef
-
-    if (input) {
-      input.focus()
-      input.select()
-    }
-  }
-
-  changeObjectType = objectType => {
-    if (this.state.objectType === objectType) {
-      // Skip unnecessary update
-      return
-    }
-
-    this.setState({
-      objectType: objectType,
-      advancedSelectProps: widgetTypeMapping[objectType]
-    })
+  function changeObjectType(newObjectType) {
+    setObjectType(newObjectType)
+    setAdvancedSelectProps(widgetTypeMapping[newObjectType])
 
     // Filter and type changed, need to update search results
-    this.child.current.refreshSearch()
+    advancedSelectRef.current.refreshSearch()
   }
 
-  render() {
-    return (
-      <Modal
-        show
-        aria-labelledby="Link chooser"
-        onHide={this.onRequestClose}
-        onEntered={this.onAfterOpen}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Link to ANET entity</Modal.Title>
-        </Modal.Header>
+  return (
+    <Modal
+      show
+      aria-labelledby="Link chooser"
+      onHide={onClose}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>Link to ANET entity</Modal.Title>
+      </Modal.Header>
 
-        <Modal.Body>
-          <ButtonToggleGroup
-            value={this.state.objectType}
-            onChange={this.changeObjectType}
-          >
-            {Object.entries(ENTITY_TYPES).map((key, value) => {
-              const entityName = key[1]
-              const entityLabel = SEARCH_OBJECT_LABELS[key[0]]
-              return (
-                <Button key={entityName} value={entityName}>
-                  {entityLabel}
-                </Button>
-              )
-            })}
-          </ButtonToggleGroup>
-        </Modal.Body>
+      <Modal.Body>
+        <ButtonToggleGroup value={objectType} onChange={changeObjectType}>
+          {Object.entries(ENTITY_TYPES).map((key, value) => {
+            const entityName = key[1]
+            const entityLabel = SEARCH_OBJECT_LABELS[key[0]]
+            return (
+              <Button key={entityName} value={entityName}>
+                {entityLabel}
+              </Button>
+            )
+          })}
+        </ButtonToggleGroup>
+      </Modal.Body>
 
-        <Modal.Footer>
-          <AdvancedSingleSelect
-            ref={this.child}
-            fieldName="entitySelect"
-            fieldLabel="Search in ANET:"
-            placeholder={"Search " + this.state.objectType.toLowerCase()}
-            value={{}}
-            showEmbedded
-            overlayColumns={this.state.advancedSelectProps.overlayColumns}
-            overlayRenderRow={this.state.advancedSelectProps.overlayRenderRow}
-            filterDefs={this.state.advancedSelectProps.filterDefs}
-            onChange={value => this.onConfirm(value)}
-            objectType={this.state.advancedSelectProps.objectType}
-            queryParams={this.state.advancedSelectProps.queryParams}
-            fields={this.state.advancedSelectProps.fields}
-            addon={this.state.advancedSelectProps.addon}
-          />
-        </Modal.Footer>
-      </Modal>
-    )
-  }
+      <Modal.Footer>
+        <AdvancedSingleSelect
+          ref={advancedSelectRef}
+          autofocus="true"
+          fieldName="entitySelect"
+          fieldLabel="Search in ANET:"
+          placeholder={"Find" + objectType.toLowerCase()}
+          value={{}}
+          showEmbedded
+          overlayColumns={advancedSelectProps.overlayColumns}
+          overlayRenderRow={advancedSelectProps.overlayRenderRow}
+          filterDefs={advancedSelectProps.filterDefs}
+          onChange={value => onConfirm(value)}
+          objectType={advancedSelectProps.objectType}
+          queryParams={advancedSelectProps.queryParams}
+          fields={advancedSelectProps.fields}
+          addon={advancedSelectProps.addon}
+        />
+      </Modal.Footer>
+    </Modal>
+  )
 }
 
 LinkSourceAnet.propTypes = {
-  editorState: PropTypes.object.isRequired,
-  onComplete: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
-  entityType: PropTypes.object.isRequired
+  editorState: PropTypes.object,
+  entityType: PropTypes.object,
+  onComplete: PropTypes.func,
+  onClose: PropTypes.func
 }
 
 export default LinkSourceAnet

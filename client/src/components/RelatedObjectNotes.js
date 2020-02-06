@@ -447,9 +447,10 @@ class BaseRelatedObjectNotes extends Component {
                     style={{
                       overflowWrap: "break-word",
                       /* IE: */ wordWrap: "break-word"
-                    }}>
-                     {parseHtmlWithLinkTo(noteText)}
-                   </div>
+                    }}
+                  >
+                    {parseHtmlWithLinkTo(noteText)}
+                  </div>
                 </Panel.Body>
               </Panel>
             )
