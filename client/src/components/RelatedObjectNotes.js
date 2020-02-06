@@ -16,7 +16,6 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import ReactDOM from "react-dom"
-import ReactDOMServer from "react-dom/server"
 import NotificationBadge from "react-notification-badge"
 import "./BlueprintOverrides.css"
 import { Button, Panel } from "react-bootstrap"
@@ -333,15 +332,6 @@ class BaseRelatedObjectNotes extends Component {
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
             const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
-            const noteTextDiv = ReactDOMServer.renderToString(
-              <div
-                style={{
-                  overflowWrap: "break-word",
-                  /* IE: */ wordWrap: "break-word"
-                }}
-                dangerouslySetInnerHTML={{ __html: noteText }}
-              />
-            )
             return (
               <Panel
                 key={note.uuid}
@@ -453,7 +443,13 @@ class BaseRelatedObjectNotes extends Component {
                       </>
                     )}
                   </div>
-                  {parseHtmlWithLinkTo(noteTextDiv)}
+                  <div
+                    style={{
+                      overflowWrap: "break-word",
+                      /* IE: */ wordWrap: "break-word"
+                    }}>
+                     {parseHtmlWithLinkTo(noteText)}
+                   </div>
                 </Panel.Body>
               </Panel>
             )
