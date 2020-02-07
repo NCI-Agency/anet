@@ -129,6 +129,10 @@ dependencies {
 	testCompile 'org.powermock:powermock-module-junit4-rule:2.0.5'
 }
 
+test {
+    useJUnitPlatform()
+}
+
 jacoco {
     toolVersion = "0.8.1"
 }
