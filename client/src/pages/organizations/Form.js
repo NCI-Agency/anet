@@ -2,12 +2,12 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
-  ApproverOverlayRow,
   OrganizationOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import ApprovalDefinition from "components/ApprovalDefinition"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -15,25 +15,18 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import TaskTable from "components/TaskTable"
-import { FastField, FieldArray, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Modal, Table } from "react-bootstrap"
+import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
-import REMOVE_ICON from "resources/delete.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
-const GQL_GET_APPROVAL_STEP_IN_USE = gql`
-  query($uuid: String!) {
-    approvalStepInUse(uuid: $uuid)
-  }
-`
 const GQL_CREATE_ORGANIZATION = gql`
   mutation($organization: OrganizationInput!) {
     createOrganization(organization: $organization) {
@@ -47,52 +40,9 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const ApproverTable = ({ approvers, onDelete }) => {
-  return (
-    <Table striped condensed hover responsive>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Position</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        {approvers.map((approver, approverIndex) => (
-          <tr key={approver.uuid}>
-            <td>
-              <LinkTo person={approver.person} target="_blank" />
-            </td>
-            <td>
-              <LinkTo position={approver} target="_blank" />
-            </td>
-            <td onClick={() => onDelete(approver)}>
-              <span style={{ cursor: "pointer" }}>
-                <img src={REMOVE_ICON} height={14} alt="Remove approver" />
-              </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  )
-}
-
-ApproverTable.propTypes = {
-  approvers: PropTypes.array,
-  onDelete: PropTypes.func
-}
-
 const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
-  const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] = useState(
-    false
-  )
-  const [
-    showRemoveApprovalStepAlert,
-    setShowRemoveApprovalStepAlert
-  ] = useState(false)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -128,10 +78,8 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
@@ -326,162 +274,29 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
 
               {isAdvisorOrg && (
                 <div>
-                  <Fieldset title="Engagement planning approval process">
-                    <FieldArray
-                      name="planningApprovalSteps"
-                      render={arrayHelpers => (
-                        <div>
-                          <Button
-                            className="pull-right"
-                            onClick={() =>
-                              addApprovalStep(
-                                arrayHelpers,
-                                values.planningApprovalSteps
-                              )}
-                            bsStyle="primary"
-                            id="addPlanningApprovalStepButton"
-                          >
-                            Add a Planning Approval Step
-                          </Button>
-                          <Modal
-                            show={showAddApprovalStepAlert}
-                            onHide={hideAddApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not added</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              Please complete all approval steps; there already
-                              is an approval step that is not completely filled
-                              in.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideAddApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-                          <Modal
-                            show={showRemoveApprovalStepAlert}
-                            onHide={hideRemoveApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not removed</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              You cannot remove this step; it is being used in a
-                              report.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideRemoveApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-
-                          {values.planningApprovalSteps.map((step, index) =>
-                            renderApprovalStep(
-                              "planningApprovalSteps",
-                              arrayHelpers,
-                              setFieldValue,
-                              setFieldTouched,
-                              step,
-                              index,
-                              approversFilters
-                            )
-                          )}
-                        </div>
-                      )}
-                    />
-                  </Fieldset>
+                  <ApprovalDefinition
+                    fieldName="planningApprovalSteps"
+                    values={values}
+                    title="Engagement planning approval process"
+                    addButtonLabel="Add a Planning Approval Step"
+                    setFieldTouched={setFieldTouched}
+                    setFieldValue={setFieldValue}
+                    approversFilters={approversFilters}
+                  />
                 </div>
               )}
+
               {isAdvisorOrg && (
                 <div>
-                  <Fieldset title="Report publication approval process">
-                    <FieldArray
-                      name="approvalSteps"
-                      render={arrayHelpers => (
-                        <div>
-                          <Button
-                            className="pull-right"
-                            onClick={() =>
-                              addApprovalStep(
-                                arrayHelpers,
-                                values.approvalSteps
-                              )}
-                            bsStyle="primary"
-                            id="addApprovalStepButton"
-                          >
-                            Add a Publication Approval Step
-                          </Button>
-                          <Modal
-                            show={showAddApprovalStepAlert}
-                            onHide={hideAddApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not added</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              Please complete all approval steps; there already
-                              is an approval step that is not completely filled
-                              in.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideAddApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-                          <Modal
-                            show={showRemoveApprovalStepAlert}
-                            onHide={hideRemoveApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not removed</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              You cannot remove this step; it is being used in a
-                              report.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideRemoveApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-
-                          {values.approvalSteps.map((step, index) =>
-                            renderApprovalStep(
-                              "approvalSteps",
-                              arrayHelpers,
-                              setFieldValue,
-                              setFieldTouched,
-                              step,
-                              index,
-                              approversFilters
-                            )
-                          )}
-                        </div>
-                      )}
-                    />
-                  </Fieldset>
+                  <ApprovalDefinition
+                    fieldName="approvalSteps"
+                    values={values}
+                    title="Report publication approval process"
+                    addButtonLabel="Add a Publication Approval Step"
+                    setFieldTouched={setFieldTouched}
+                    setFieldValue={setFieldValue}
+                    approversFilters={approversFilters}
+                  />
 
                   {Organization.isTaskEnabled(values.shortName) && (
                     <Fieldset
@@ -550,108 +365,6 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
       }}
     </Formik>
   )
-
-  function renderApprovalStep(
-    fieldName,
-    arrayHelpers,
-    setFieldValue,
-    setFieldTouched,
-    step,
-    index,
-    approversFilters
-  ) {
-    const approvers = step.approvers
-
-    return (
-      <Fieldset title={`Step ${index + 1}`} key={index}>
-        <Button
-          className="pull-right"
-          title="Remove this step"
-          onClick={() => removeApprovalStep(arrayHelpers, index, step)}
-        >
-          <img src={REMOVE_ICON} height={14} alt="Remove this step" />
-        </Button>
-
-        <FastField
-          name={`${fieldName}.${index}.name`}
-          component={FieldHelper.InputField}
-          label="Step name"
-        />
-        <FastField
-          name={`${fieldName}.${index}.approvers`}
-          label="Add an approver"
-          component={FieldHelper.SpecialField}
-          onChange={value => {
-            // validation will be done by setFieldValue
-            setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option
-            setFieldValue(`${fieldName}.${index}.approvers`, value)
-          }}
-          widget={
-            <AdvancedMultiSelect
-              fieldName={`${fieldName}.${index}.approvers`}
-              placeholder="Search for the approver's position..."
-              value={approvers}
-              renderSelected={<ApproverTable approvers={approvers} />}
-              overlayColumns={["Name", "Position"]}
-              overlayRenderRow={ApproverOverlayRow}
-              filterDefs={approversFilters}
-              objectType={Position}
-              queryParams={{
-                status: Position.STATUS.ACTIVE,
-                type: [
-                  Position.TYPE.ADVISOR,
-                  Position.TYPE.SUPER_USER,
-                  Position.TYPE.ADMINISTRATOR
-                ],
-                matchPersonName: true
-              }}
-              fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }"
-              addon={POSITIONS_ICON}
-            />
-          }
-        />
-      </Fieldset>
-    )
-  }
-
-  function hideAddApprovalStepAlert() {
-    setShowAddApprovalStepAlert(false)
-  }
-
-  function hideRemoveApprovalStepAlert() {
-    setShowRemoveApprovalStepAlert(false)
-  }
-
-  function addApprovalStep(arrayHelpers, values) {
-    const approvalSteps = values || []
-
-    for (let i = 0; i < approvalSteps.length; i++) {
-      const step = approvalSteps[i]
-      if (!step.name || !step.approvers || step.approvers.length === 0) {
-        setShowAddApprovalStepAlert(true)
-        return
-      }
-    }
-
-    arrayHelpers.push({ name: "", approvers: [] })
-  }
-
-  function removeApprovalStep(arrayHelpers, index, step) {
-    if (!step.uuid) {
-      // New, unsaved step
-      arrayHelpers.remove(index)
-      return
-    }
-    return API.query(GQL_GET_APPROVAL_STEP_IN_USE, { uuid: step.uuid }).then(
-      data => {
-        if (data.approvalStepInUse) {
-          setShowRemoveApprovalStepAlert(true)
-        } else {
-          arrayHelpers.remove(index)
-        }
-      }
-    )
-  }
 
   function onCancel() {
     history.goBack()
