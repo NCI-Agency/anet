@@ -3,7 +3,8 @@ package mil.dds.anet.integrationtest.db;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -28,13 +29,13 @@ import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.Utils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class FutureEngagementWorkerTest {
-  @ClassRule
-  public static final DropwizardAppRule<AnetConfiguration> app =
-      new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
+  public static final DropwizardAppExtension<AnetConfiguration> app =
+      new DropwizardAppExtension<AnetConfiguration>(AnetApplication.class, "anet.yml");
   private final static List<String> expectedIds = new ArrayList<>();
   private final static List<String> unexpectedIds = new ArrayList<>();
 

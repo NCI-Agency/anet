@@ -4,7 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.util.List;
 import mil.dds.anet.AnetApplication;
 import mil.dds.anet.config.AnetConfiguration;
@@ -15,19 +16,18 @@ import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * This class is only meant to show the basic capabilities of the fake SMTP server. It shows how to
  * query the email server and parse the response. Web-interface available at
  * http://[smtp_adress]:[stmp_port]
  */
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class EmailServerTest {
-
-  @ClassRule
-  public static final DropwizardAppRule<AnetConfiguration> RULE =
-      new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
+  public static final DropwizardAppExtension<AnetConfiguration> RULE =
+      new DropwizardAppExtension<AnetConfiguration>(AnetApplication.class, "anet.yml");
   private static SmtpConfiguration smtpConfig;
 
   private FakeSmtpServer emailServer;

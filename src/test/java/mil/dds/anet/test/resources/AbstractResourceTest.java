@@ -6,7 +6,8 @@ import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.util.Duration;
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
@@ -27,18 +28,18 @@ import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public abstract class AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  @ClassRule
-  public static final DropwizardAppRule<AnetConfiguration> RULE =
-      new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
+  public static final DropwizardAppExtension<AnetConfiguration> RULE =
+      new DropwizardAppExtension<AnetConfiguration>(AnetApplication.class, "anet.yml");
 
   private static JerseyClientConfiguration config = new JerseyClientConfiguration();
 
