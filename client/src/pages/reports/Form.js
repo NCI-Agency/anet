@@ -644,9 +644,9 @@ const BaseReportForm = ({
                     name="cancelledReason"
                     label="due to"
                     component={FieldHelper.SpecialField}
-                    onChange={value => {
+                    onChange={event => {
                       // validation will be done by setFieldValue
-                      setFieldValue("cancelledReason", value, true)
+                      setFieldValue("cancelledReason", event.target.value, true)
                     }}
                     widget={
                       <FastField

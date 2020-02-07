@@ -12,7 +12,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { FastField, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -83,7 +83,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
     }
   ])
 
-  const CodeFieldWithLabel = DictionaryField(FastField)
+  const CodeFieldWithLabel = DictionaryField(Field)
 
   // For advisor types of positions, add permissions property.
   // The permissions property allows selecting a

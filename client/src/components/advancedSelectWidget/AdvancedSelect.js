@@ -76,6 +76,7 @@ FilterAsDropdown.propTypes = {
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
   placeholder: PropTypes.string, // input field placeholder
+  disabled: PropTypes.bool,
   selectedValueAsString: PropTypes.string,
   addon: PropTypes.oneOfType([
     PropTypes.string,
@@ -109,6 +110,7 @@ export const propTypes = {
 const AdvancedSelect = ({
   fieldName,
   placeholder,
+  disabled,
   selectedValueAsString,
   addon,
   extraAddon,
@@ -317,48 +319,53 @@ const AdvancedSelect = ({
 
   return (
     <>
-      <div id={`${fieldName}-popover`}>
-        <InputGroup>
-          <Popover
-            className="advanced-select-popover"
-            popoverClassName="bp3-popover-content-sizing"
-            content={advancedSearchPopoverContent}
-            isOpen={showOverlay}
-            captureDismiss
-            interactionKind={PopoverInteractionKind.CLICK}
-            onInteraction={handleInteraction}
-            usePortal={false}
-            position={Position.BOTTOM}
-            modifiers={{
-              preventOverflow: {
-                enabled: false
-              },
-              hide: {
-                enabled: false
-              },
-              flip: {
-                enabled: false
-              }
-            }}
-          >
-            <FormControl
-              name={fieldName}
-              value={searchTerms || ""}
-              placeholder={placeholder}
-              onChange={changeSearchTerms}
-              onFocus={handleInputFocus}
-              inputRef={ref => {
-                searchInput.current = ref
-              }}
-            />
-          </Popover>
-          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-          {addon && (
-            <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-          )}
-        </InputGroup>
-      </div>
-      <AdvancedSelectTarget overlayRef={overlayContainer} />
+      {!(disabled && renderSelectedWithDelete) && (
+        <>
+          <div id={`${fieldName}-popover`}>
+            <InputGroup>
+              <Popover
+                className="advanced-select-popover"
+                popoverClassName="bp3-popover-content-sizing"
+                content={advancedSearchPopoverContent}
+                isOpen={showOverlay}
+                captureDismiss
+                interactionKind={PopoverInteractionKind.CLICK}
+                onInteraction={handleInteraction}
+                usePortal={false}
+                position={Position.BOTTOM}
+                modifiers={{
+                  preventOverflow: {
+                    enabled: false
+                  },
+                  hide: {
+                    enabled: false
+                  },
+                  flip: {
+                    enabled: false
+                  }
+                }}
+              >
+                <FormControl
+                  name={fieldName}
+                  value={searchTerms || ""}
+                  placeholder={placeholder}
+                  onChange={changeSearchTerms}
+                  onFocus={disabled ? undefined : handleInputFocus}
+                  inputRef={ref => {
+                    searchInput.current = ref
+                  }}
+                  disabled={disabled}
+                />
+              </Popover>
+              {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+              {addon && (
+                <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+              )}
+            </InputGroup>
+          </div>
+          <AdvancedSelectTarget overlayRef={overlayContainer} />
+        </>
+      )}
       <Row>
         <Col sm={12}>{renderSelectedWithDelete}</Col>
       </Row>
@@ -441,5 +448,11 @@ const AdvancedSelect = ({
   }
 }
 AdvancedSelect.propTypes = propTypes
+AdvancedSelect.defaultProps = {
+  disabled: false,
+  filterDefs: {},
+  closeOverlayOnAdd: false,
+  selectedValueAsString: ""
+}
 
 export default AdvancedSelect
