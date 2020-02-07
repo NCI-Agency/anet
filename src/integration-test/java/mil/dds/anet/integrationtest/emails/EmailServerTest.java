@@ -16,7 +16,7 @@ import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**

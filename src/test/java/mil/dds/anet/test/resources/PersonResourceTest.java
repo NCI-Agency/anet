@@ -39,7 +39,7 @@ import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
 

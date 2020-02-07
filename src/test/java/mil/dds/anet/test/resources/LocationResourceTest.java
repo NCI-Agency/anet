@@ -15,7 +15,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LocationResourceTest extends AbstractResourceTest {
 

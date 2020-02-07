@@ -18,7 +18,7 @@ import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PersonTest extends BeanTester<Person> {
 

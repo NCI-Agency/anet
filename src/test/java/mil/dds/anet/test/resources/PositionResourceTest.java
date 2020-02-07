@@ -36,7 +36,7 @@ import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
   private static final String ORGANIZATION_FIELDS = "uuid shortName";

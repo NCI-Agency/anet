@@ -10,7 +10,7 @@ import java.util.List;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.resources.ReportResource.RollupGraphComparator;
 import mil.dds.anet.test.TestData;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RollupGraphComparatorTest {
 

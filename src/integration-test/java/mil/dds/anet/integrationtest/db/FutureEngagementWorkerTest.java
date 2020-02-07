@@ -29,7 +29,7 @@ import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.Utils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(DropwizardExtensionsSupport.class)

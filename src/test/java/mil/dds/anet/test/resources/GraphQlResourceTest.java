@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
