@@ -7,7 +7,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import ApprovalDefinition from "components/ApprovalDefinition"
+import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -274,7 +274,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
 
               {isAdvisorOrg && (
                 <div>
-                  <ApprovalDefinition
+                  <ApprovalsDefinition
                     fieldName="planningApprovalSteps"
                     values={values}
                     title="Engagement planning approval process"
@@ -288,7 +288,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
 
               {isAdvisorOrg && (
                 <div>
-                  <ApprovalDefinition
+                  <ApprovalsDefinition
                     fieldName="approvalSteps"
                     values={values}
                     title="Report publication approval process"

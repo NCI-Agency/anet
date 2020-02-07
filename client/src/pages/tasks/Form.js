@@ -8,7 +8,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import ApprovalDefinition from "components/ApprovalDefinition"
+import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -419,7 +419,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 </Fieldset>
               )}
 
-              <ApprovalDefinition
+              <ApprovalsDefinition
                 fieldName="planningApprovalSteps"
                 values={values}
                 title="Engagement planning approval process"
@@ -429,7 +429,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 approversFilters={approversFilters}
               />
 
-              <ApprovalDefinition
+              <ApprovalsDefinition
                 fieldName="approvalSteps"
                 values={values}
                 title="Report publication approval process"

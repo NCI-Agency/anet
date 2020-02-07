@@ -54,7 +54,7 @@ ApproverTable.propTypes = {
   onDelete: PropTypes.func
 }
 
-const ApprovalDefinition = ({
+const ApprovalsDefinition = ({
   fieldName,
   values,
   title,
@@ -246,14 +246,14 @@ const ApprovalDefinition = ({
     )
   }
 }
-ApprovalDefinition.propTypes = {
+ApprovalsDefinition.propTypes = {
   fieldName: PropTypes.string.isRequired,
   title: PropTypes.string,
   addButtonLabel: PropTypes.string,
-  values: PropTypes.array,
+  values: PropTypes.object,
   approversFilters: PropTypes.object,
   setFieldTouched: PropTypes.func,
   setFieldValue: PropTypes.func
 }
 
-export default ApprovalDefinition
+export default ApprovalsDefinition
