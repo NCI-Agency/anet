@@ -8,6 +8,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import ApprovalDefinition from "components/ApprovalDefinition"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -115,6 +116,29 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
           Position.TYPE.ADMINISTRATOR
         ],
         matchPersonName: true
+      }
+    }
+  }
+
+  const approversFilters = {
+    allAdvisorPositions: {
+      label: "All advisor positions",
+      queryVars: {
+        type: [
+          Position.TYPE.ADVISOR,
+          Position.TYPE.SUPER_USER,
+          Position.TYPE.ADMINISTRATOR
+        ],
+        matchPersonName: true
+      }
+    }
+  }
+  if (currentUser.position) {
+    approversFilters.myColleagues = {
+      label: "My colleagues",
+      queryVars: {
+        matchPersonName: true,
+        organizationUuid: currentUser.position.organization.uuid
       }
     }
   }
@@ -394,6 +418,26 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                   />
                 </Fieldset>
               )}
+
+              <ApprovalDefinition
+                fieldName="planningApprovalSteps"
+                values={values}
+                title="Engagement planning approval process"
+                addButtonLabel="Add a Planning Approval Step"
+                setFieldTouched={setFieldTouched}
+                setFieldValue={setFieldValue}
+                approversFilters={approversFilters}
+              />
+
+              <ApprovalDefinition
+                fieldName="approvalSteps"
+                values={values}
+                title="Report publication approval process"
+                addButtonLabel="Add a Publication Approval Step"
+                setFieldTouched={setFieldTouched}
+                setFieldValue={setFieldValue}
+                approversFilters={approversFilters}
+              />
 
               <div className="submit-buttons">
                 <div>
