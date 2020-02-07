@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -19,7 +18,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -79,16 +77,16 @@ public class OrganizationResource {
     if (org.getPlanningApprovalSteps() != null) {
       // Create the planning approval steps
       for (ApprovalStep step : org.getPlanningApprovalSteps()) {
-        validateApprovalStep(step);
-        step.setAdvisorOrganizationUuid(created.getUuid());
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(created.getUuid());
         engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
     if (org.getApprovalSteps() != null) {
       // Create the approval steps
       for (ApprovalStep step : org.getApprovalSteps()) {
-        validateApprovalStep(step);
-        step.setAdvisorOrganizationUuid(created.getUuid());
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(created.getUuid());
         engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
@@ -96,28 +94,7 @@ public class OrganizationResource {
     return created;
   }
 
-  // Helper method that diffs the name/members of an approvalStep
-  private void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
-    newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing group
-    if (!newStep.getName().equals(oldStep.getName())) {
-      approvalStepDao.update(newStep);
-    } else if (!Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid())) {
-      approvalStepDao.update(newStep);
-    }
 
-    if (newStep.getApprovers() != null) {
-      try {
-        Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).get(),
-            newStep.getApprovers(),
-            newPosition -> approvalStepDao.addApprover(newStep, DaoUtils.getUuid(newPosition)),
-            oldPositionUuid -> approvalStepDao.removeApprover(newStep, oldPositionUuid));
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Approvers", e);
-      }
-    }
-  }
 
   @GraphQLMutation(name = "updateOrganization")
   public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
@@ -170,8 +147,8 @@ public class OrganizationResource {
     if (org.getPlanningApprovalSteps() != null) {
       logger.debug("Editing planning approval steps for {}", org);
       for (ApprovalStep step : org.getPlanningApprovalSteps()) {
-        validateApprovalStep(step);
-        step.setAdvisorOrganizationUuid(org.getUuid());
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(org.getUuid());
       }
       List<ApprovalStep> existingSteps =
           existing.loadPlanningApprovalSteps(engine.getContext()).join();
@@ -180,27 +157,13 @@ public class OrganizationResource {
           newStep -> engine.getApprovalStepDao().insert(newStep),
           oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
 
-      for (int i = 0; i < org.getPlanningApprovalSteps().size(); i++) {
-        ApprovalStep curr = org.getPlanningApprovalSteps().get(i);
-        ApprovalStep next = (i == (org.getPlanningApprovalSteps().size() - 1)) ? null
-            : org.getPlanningApprovalSteps().get(i + 1);
-        curr.setNextStepUuid(DaoUtils.getUuid(next));
-        ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
-        // If this step didn't exist before, we still need to set the nextStepUuid on it, but
-        // don't need to do a deep update.
-        if (existingStep == null) {
-          engine.getApprovalStepDao().update(curr);
-        } else {
-          // Check for updates to name, nextStepUuid and approvers.
-          updateStep(curr, existingStep);
-        }
-      }
+      Utils.updateSteps(org.getPlanningApprovalSteps(), existingSteps);
     }
     if (org.getApprovalSteps() != null) {
       logger.debug("Editing approval steps for {}", org);
       for (ApprovalStep step : org.getApprovalSteps()) {
-        validateApprovalStep(step);
-        step.setAdvisorOrganizationUuid(org.getUuid());
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(org.getUuid());
       }
       List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).join();
 
@@ -208,21 +171,7 @@ public class OrganizationResource {
           newStep -> engine.getApprovalStepDao().insert(newStep),
           oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
 
-      for (int i = 0; i < org.getApprovalSteps().size(); i++) {
-        ApprovalStep curr = org.getApprovalSteps().get(i);
-        ApprovalStep next =
-            (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
-        curr.setNextStepUuid(DaoUtils.getUuid(next));
-        ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
-        // If this step didn't exist before, we still need to set the nextStepUuid on it, but
-        // don't need to do a deep update.
-        if (existingStep == null) {
-          engine.getApprovalStepDao().update(curr);
-        } else {
-          // Check for updates to name, nextStepUuid and approvers.
-          updateStep(curr, existingStep);
-        }
-      }
+      Utils.updateSteps(org.getApprovalSteps(), existingSteps);
     }
   }
 
@@ -230,17 +179,6 @@ public class OrganizationResource {
   public AnetBeanList<Organization> search(
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     return dao.search(query);
-  }
-
-  private void validateApprovalStep(ApprovalStep step) {
-    if (Utils.isEmptyOrNull(step.getName())) {
-      throw new WebApplicationException("A name is required for every approval step",
-          Status.BAD_REQUEST);
-    }
-    if (Utils.isEmptyOrNull(step.getApprovers())) {
-      throw new WebApplicationException("An approver is required for every approval step",
-          Status.BAD_REQUEST);
-    }
   }
 
   @GraphQLQuery(name = "approvalStepInUse")

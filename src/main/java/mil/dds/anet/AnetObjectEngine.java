@@ -182,15 +182,15 @@ public class AnetObjectEngine {
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
-  public CompletableFuture<List<ApprovalStep>> getPlanningApprovalStepsForOrg(
+  public CompletableFuture<List<ApprovalStep>> getPlanningApprovalStepsForRelatedObject(
       Map<String, Object> context, String aoUuid) {
-    return asDao.getPlanningByAdvisorOrganizationUuid(context, aoUuid)
+    return asDao.getPlanningByRelatedObjectUuid(context, aoUuid)
         .thenApply(unordered -> orderSteps(unordered));
   }
 
-  public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context,
-      String aoUuid) {
-    return asDao.getByAdvisorOrganizationUuid(context, aoUuid)
+  public CompletableFuture<List<ApprovalStep>> getApprovalStepsForRelatedObject(
+      Map<String, Object> context, String aoUuid) {
+    return asDao.getByRelatedObjectUuid(context, aoUuid)
         .thenApply(unordered -> orderSteps(unordered));
   }
 

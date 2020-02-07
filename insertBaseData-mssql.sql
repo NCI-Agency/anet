@@ -283,7 +283,7 @@ UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE sh
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName='ANET Administrators') where name = 'ANET Administrator';
 
 -- Create the EF 1.1 approval process
-INSERT INTO approvalSteps (uuid, advisorOrganizationUuid, name, type)
+INSERT INTO approvalSteps (uuid, relatedObjectUuid, name, type)
 	VALUES (lower(newid()), (SELECT uuid from organizations where shortName='EF 1.1'), 'EF 1.1 Approvers', 1);
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 SuperUser'));
@@ -291,9 +291,9 @@ INSERT INTO approvers (approvalStepUuid, positionUuid)
 -- Create the EF 2.2 approval process
 DECLARE @approvalStepUuid varchar(36);
 SET @approvalStepUuid = lower(newid());
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, type)
+INSERT INTO approvalSteps (uuid, name, relatedObjectUuid, type)
 	VALUES (@approvalStepUuid, 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where shortName='EF 2.2'), 1);
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, nextStepUuid, type)
+INSERT INTO approvalSteps (uuid, name, relatedObjectUuid, nextStepUuid, type)
 	VALUES (lower(newid()), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where shortName='EF 2.2'), @approvalStepUuid, 1);
 
 INSERT INTO approvers (approvalStepUuid, positionUuid)
@@ -708,7 +708,7 @@ INSERT INTO reportTasks (taskUuid, reportUuid)
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;
 
 --Create the default Approval Step
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, type)
+INSERT INTO approvalSteps (uuid, name, relatedObjectUuid, type)
 	VALUES (lower(newid()), 'Default Approvers', (select uuid from organizations where shortName='ANET Administrators'), 1);
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps where name = 'Default Approvers'), (SELECT uuid from positions where name = 'ANET Administrator'));

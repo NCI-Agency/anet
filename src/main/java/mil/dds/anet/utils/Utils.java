@@ -15,13 +15,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
@@ -462,4 +468,58 @@ public class Utils {
     ImageIO.write(imageBytes, imageFormatName, os);
     return Base64.getEncoder().encodeToString(os.toByteArray());
   }
+
+  // Helper method that diffs the name/members of an approvalStep
+  public static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
+    newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing group
+    if (!newStep.getName().equals(oldStep.getName())) {
+      approvalStepDao.update(newStep);
+    } else if (!Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid())) {
+      approvalStepDao.update(newStep);
+    }
+
+    if (newStep.getApprovers() != null) {
+      try {
+        Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).get(),
+            newStep.getApprovers(),
+            newPosition -> approvalStepDao.addApprover(newStep, DaoUtils.getUuid(newPosition)),
+            oldPositionUuid -> approvalStepDao.removeApprover(newStep, oldPositionUuid));
+      } catch (InterruptedException | ExecutionException e) {
+        throw new WebApplicationException("failed to load Approvers", e);
+      }
+    }
+  }
+
+  // Helper method that updates a list of approval steps
+  public static void updateSteps(List<ApprovalStep> steps, List<ApprovalStep> existingSteps) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    for (int i = 0; i < steps.size(); i++) {
+      ApprovalStep curr = steps.get(i);
+      ApprovalStep next = (i == (steps.size() - 1)) ? null : steps.get(i + 1);
+      curr.setNextStepUuid(DaoUtils.getUuid(next));
+      ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
+      // If this step didn't exist before, we still need to set the nextStepUuid on it, but
+      // don't need to do a deep update.
+      if (existingStep == null) {
+        engine.getApprovalStepDao().update(curr);
+      } else {
+        // Check for updates to name, nextStepUuid and approvers.
+        Utils.updateStep(curr, existingStep);
+      }
+    }
+  }
+
+  public static void validateApprovalStep(ApprovalStep step) {
+    if (Utils.isEmptyOrNull(step.getName())) {
+      throw new WebApplicationException("A name is required for every approval step",
+          Status.BAD_REQUEST);
+    }
+    if (Utils.isEmptyOrNull(step.getApprovers())) {
+      throw new WebApplicationException("An approver is required for every approval step",
+          Status.BAD_REQUEST);
+    }
+  }
+
 }

@@ -200,7 +200,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final ApprovalStep approval = new ApprovalStep();
     approval.setName("Test Group for Approving");
     approval.setType(ApprovalStepType.REPORT_APPROVAL);
-    approval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
+    approval.setRelatedObjectUuid(advisorOrg.getUuid());
     approval.setApprovers(ImmutableList.of(approver1Pos));
     approvalSteps.add(approval);
 
@@ -208,7 +208,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final ApprovalStep releaseApproval = new ApprovalStep();
     releaseApproval.setName("Test Group of Releasers");
     releaseApproval.setType(ApprovalStepType.REPORT_APPROVAL);
-    releaseApproval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
+    releaseApproval.setRelatedObjectUuid(advisorOrg.getUuid());
     releaseApproval.setApprovers(ImmutableList.of(approver2Pos));
     approvalSteps.add(releaseApproval);
     advisorOrg.setApprovalSteps(approvalSteps);
@@ -218,8 +218,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
     // Pull the approval workflow for this AO
     final Organization orgWithSteps = graphQLHelper.getObjectById(admin, "organization",
-        "uuid approvalSteps { uuid name nextStepUuid advisorOrganizationUuid }",
-        advisorOrg.getUuid(), new TypeReference<GraphQlResponse<Organization>>() {});
+        "uuid approvalSteps { uuid name nextStepUuid relatedObjectUuid }", advisorOrg.getUuid(),
+        new TypeReference<GraphQlResponse<Organization>>() {});
     final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).get();
     assertThat(steps.size()).isEqualTo(2);
     assertThat(steps.get(0).getName()).isEqualTo(approval.getName());

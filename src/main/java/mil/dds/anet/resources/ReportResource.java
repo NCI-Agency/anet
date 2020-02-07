@@ -460,9 +460,9 @@ public class ReportResource {
     List<ApprovalStep> steps = null;
     try {
       if (r.isFutureEngagement()) {
-        steps = engine.getPlanningApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+        steps = engine.getPlanningApprovalStepsForRelatedObject(engine.getContext(), orgUuid).get();
       } else {
-        steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+        steps = engine.getApprovalStepsForRelatedObject(engine.getContext(), orgUuid).get();
         throwExceptionNoApprovalSteps(steps);
       }
     } catch (InterruptedException | ExecutionException e) {

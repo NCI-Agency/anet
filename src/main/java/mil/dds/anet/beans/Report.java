@@ -571,7 +571,7 @@ public class Report extends AbstractCustomizableAnetBean {
       return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
     }
 
-    return engine.getPlanningApprovalStepsForOrg(context, aoUuid);
+    return engine.getPlanningApprovalStepsForRelatedObject(context, aoUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context,
@@ -580,7 +580,7 @@ public class Report extends AbstractCustomizableAnetBean {
       return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
     }
 
-    return engine.getApprovalStepsForOrg(context, aoUuid);
+    return engine.getApprovalStepsForRelatedObject(context, aoUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getDefaultPlanningWorkflow(

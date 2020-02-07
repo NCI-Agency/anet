@@ -1,6 +1,6 @@
 {
 	"uuid" : "42",
-	"advisorOrganizationUuid" : "22",
+	"relatedObjectUuid" : "22",
 	"approvers" : [],
 	"nextStepUuid" : "9292",
 	"type": 1
