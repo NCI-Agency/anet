@@ -21,7 +21,7 @@ import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -44,7 +44,7 @@ public class AccountDeactivationWorkerTest {
 
   private static final int SCHEDULER_TIME_MS = 1 * 1000;
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception {
     config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
     personDao = PowerMockito.mock(PersonDao.class, Mockito.RETURNS_MOCKS);

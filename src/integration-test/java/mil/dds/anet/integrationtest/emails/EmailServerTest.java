@@ -13,8 +13,8 @@ import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +37,7 @@ public class EmailServerTest {
     smtpConfig = RULE.getConfiguration().getSmtp();
   }
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception {
     assumeTrue(Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
@@ -48,7 +48,7 @@ public class EmailServerTest {
     emailServer.clearEmailServer();
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     // Clear the email server after test
     emailServer.clearEmailServer();

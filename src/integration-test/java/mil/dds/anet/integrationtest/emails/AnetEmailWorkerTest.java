@@ -18,8 +18,8 @@ import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.integrationtest.utils.EmailResponse;
 import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -42,7 +42,7 @@ public class AnetEmailWorkerTest {
    * 
    * @throws Exception If the setup fails
    */
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     assumeTrue(Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
@@ -85,7 +85,7 @@ public class AnetEmailWorkerTest {
     emailServer.clearEmailServer();
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     // Clear the email server after test
     emailServer.clearEmailServer();
