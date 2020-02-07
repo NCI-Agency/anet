@@ -1,8 +1,8 @@
 package mil.dds.anet.integrationtest.emails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;

@@ -1,7 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,10 +38,10 @@ public class RollupGraphComparatorTest {
     Collections.sort(rollupGraphs,
         new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
-    assertEquals("incorrect name", "c name", rollupGraphs.get(0).getOrg().getShortName());
-    assertEquals("incorrect name", "b name", rollupGraphs.get(1).getOrg().getShortName());
-    assertEquals("incorrect name", "a name", rollupGraphs.get(2).getOrg().getShortName());
-    assertEquals("incorrect name", "d name", rollupGraphs.get(3).getOrg().getShortName());
+    assertEquals("c name", rollupGraphs.get(0).getOrg().getShortName(), "incorrect name");
+    assertEquals("b name", rollupGraphs.get(1).getOrg().getShortName(), "incorrect name");
+    assertEquals("a name", rollupGraphs.get(2).getOrg().getShortName(), "incorrect name");
+    assertEquals("d name", rollupGraphs.get(3).getOrg().getShortName(), "incorrect name");
 
   }
 
@@ -69,10 +69,10 @@ public class RollupGraphComparatorTest {
     Collections.sort(rollupGraphs,
         new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
-    assertEquals("incorrect name", "c name", rollupGraphs.get(0).getOrg().getShortName());
-    assertEquals("incorrect name", "a name", rollupGraphs.get(1).getOrg().getShortName());
-    assertNull("incorrect org", rollupGraphs.get(2).getOrg());
-    assertNull("incorrect org", rollupGraphs.get(3).getOrg());
+    assertEquals("c name", rollupGraphs.get(0).getOrg().getShortName(), "incorrect name");
+    assertEquals("a name", rollupGraphs.get(1).getOrg().getShortName(), "incorrect name");
+    assertNull(rollupGraphs.get(2).getOrg(), "incorrect org");
+    assertNull(rollupGraphs.get(3).getOrg(), "incorrect org");
 
   }
 
@@ -95,9 +95,9 @@ public class RollupGraphComparatorTest {
 
     Collections.sort(rollupGraphs, new RollupGraphComparator(new ArrayList<>()));
 
-    assertEquals("incorrect name", "a name", rollupGraphs.get(0).getOrg().getShortName());
-    assertEquals("incorrect name", "b name", rollupGraphs.get(1).getOrg().getShortName());
-    assertEquals("incorrect name", "c name", rollupGraphs.get(2).getOrg().getShortName());
+    assertEquals("a name", rollupGraphs.get(0).getOrg().getShortName(), "incorrect name");
+    assertEquals("b name", rollupGraphs.get(1).getOrg().getShortName(), "incorrect name");
+    assertEquals("c name", rollupGraphs.get(2).getOrg().getShortName(), "incorrect name");
 
   }
 }

@@ -1,9 +1,9 @@
 package mil.dds.anet.test.beans;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
