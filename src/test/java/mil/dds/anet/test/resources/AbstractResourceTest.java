@@ -26,8 +26,8 @@ import mil.dds.anet.test.resources.utils.GraphQlHelper;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public abstract class AbstractResourceTest {
           + " position { uuid name type status "
           + "   organization { uuid shortName parentOrg { uuid shortName } } }";
 
-  @BeforeClass
+  @BeforeAll
   public static void setUp() {
     if (DaoUtils.isPostgresql()) {
       // Update full-text index
@@ -88,7 +88,7 @@ public abstract class AbstractResourceTest {
     }
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDown() {
     client.close();
     batchingUtils.shutdown();

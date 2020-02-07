@@ -27,8 +27,8 @@ import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
 import mil.dds.anet.integrationtest.utils.TestBeans;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.Utils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -46,7 +46,7 @@ public class FutureEngagementWorkerTest {
   private static boolean executeEmailServerTests;
   private static String whitelistedEmail;
 
-  @BeforeClass
+  @BeforeAll
   @SuppressWarnings("unchecked")
   public static void setUpClass() throws Exception {
     executeEmailServerTests = Boolean.parseBoolean(
@@ -63,7 +63,7 @@ public class FutureEngagementWorkerTest {
     emailServer.clearEmailServer();
   }
 
-  @AfterClass
+  @AfterAll
   public static void finalCheckAndCleanup() throws Exception {
     // Test that all emails have been correctly sent
     testFutureEngagementWorkerEmail();
