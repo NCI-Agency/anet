@@ -6,7 +6,7 @@ const test = require("../util/test")
 var testReportURL = null
 
 test("Draft and submit a report", async t => {
-  t.plan(21)
+  t.plan(19)
 
   const {
     pageHelpers,
@@ -22,7 +22,11 @@ test("Draft and submit a report", async t => {
 
   await httpRequestSmtpServer("DELETE")
 
-  await pageHelpers.goHomeAndThenToReportsPage()
+  await t.context.get("/", "erin")
+
+  const $createButton = await t.context.$("#createButton")
+  await $createButton.click()
+
   await pageHelpers.writeInForm("#intent", "meeting goal")
 
   const $engagementDate = await $("#engagementDate")
@@ -127,7 +131,7 @@ test("Draft and submit a report", async t => {
 
   const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
-    "1.1"
+    "2.A"
   )
 
   const $tasksShortcutList = await $("#tasks-shortcut-list")
@@ -140,7 +144,7 @@ test("Draft and submit a report", async t => {
   )
 
   const $newTaskRow = await $("#tasks-tasks table tbody tr td")
-  await assertElementText(t, $newTaskRow, "1.1 - Budgeting in the MoD")
+  await assertElementText(t, $newTaskRow, "2.A")
 
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")
