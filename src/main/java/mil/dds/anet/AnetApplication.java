@@ -48,6 +48,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
+import mil.dds.anet.resources.ApprovalStepResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.GraphQlResource;
 import mil.dds.anet.resources.HomeResource;
@@ -264,6 +265,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final AuthorizationGroupResource authorizationGroupResource =
         new AuthorizationGroupResource(engine);
     final NoteResource noteResource = new NoteResource(engine);
+    final ApprovalStepResource approvalStepResource = new ApprovalStepResource(engine);
 
     // Register all of the HTTP Resources
     environment.jersey().register(loggingResource);
@@ -274,7 +276,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
         .register(new GraphQlResource(engine, configuration,
             ImmutableList.of(reportResource, personResource, positionResource, locationResource,
                 orgResource, taskResource, adminResource, savedSearchResource, tagResource,
-                authorizationGroupResource, noteResource),
+                authorizationGroupResource, noteResource, approvalStepResource),
             metricRegistry));
   }
 

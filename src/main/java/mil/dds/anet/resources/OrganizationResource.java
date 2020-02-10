@@ -181,8 +181,4 @@ public class OrganizationResource {
     return dao.search(query);
   }
 
-  @GraphQLQuery(name = "approvalStepInUse")
-  public boolean isApprovalStepInUse(@GraphQLArgument(name = "uuid") String uuid) {
-    return engine.getApprovalStepDao().isStepInUse(uuid);
-  }
 }
