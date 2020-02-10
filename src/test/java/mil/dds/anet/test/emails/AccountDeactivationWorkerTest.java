@@ -1,7 +1,7 @@
 package mil.dds.anet.test.emails;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -21,8 +21,8 @@ import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -44,7 +44,7 @@ public class AccountDeactivationWorkerTest {
 
   private static final int SCHEDULER_TIME_MS = 1 * 1000;
 
-  @BeforeEach
+  @Before
   public void setup() throws Exception {
     config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
     personDao = PowerMockito.mock(PersonDao.class, Mockito.RETURNS_MOCKS);
