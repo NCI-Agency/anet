@@ -120,7 +120,9 @@ const widgetTypeMapping = {
 
 const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
   const [objectType, setObjectType] = useState(ENTITY_TYPES.REPORTS)
-  const [advancedSelectProps, setAdvancedSelectProps] = useState(widgetTypeMapping[objectType])
+  const [advancedSelectProps, setAdvancedSelectProps] = useState(
+    widgetTypeMapping[objectType]
+  )
 
   const advancedSelectRef = useRef()
 
@@ -153,11 +155,7 @@ const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
   }
 
   return (
-    <Modal
-      show
-      aria-labelledby="Link chooser"
-      onHide={onClose}
-    >
+    <Modal show aria-labelledby="Link chooser" onHide={onClose}>
       <Modal.Header closeButton>
         <Modal.Title>Link to ANET entity</Modal.Title>
       </Modal.Header>
