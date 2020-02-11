@@ -66,6 +66,7 @@ import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
+import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.HttpsRedirectFilter;
@@ -224,6 +225,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
     ReportPublicationWorker reportPublicationWorker =
         new ReportPublicationWorker(engine.getReportDao(), configuration);
+    final ReportApprovalWorker reportApprovalWorker =
+        new ReportApprovalWorker(engine.getReportDao(), configuration);
 
     // Check for any reports that need to be published every 5 minutes.
     // And run once in 5 seconds from boot-up. (give the server time to boot up).
@@ -239,6 +242,11 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // And run once in 15 seconds from boot-up. (give the server time to boot up).
     scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
     scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
+
+    // Check for any reports that need to be approved every 5 minutes.
+    // And run once in 20 seconds from boot-up. (give the server time to boot up).
+    scheduler.scheduleAtFixedRate(reportApprovalWorker, 5, 5, TimeUnit.MINUTES);
+    scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
 
     runAccountDeactivationWorker(configuration, scheduler, engine);
 

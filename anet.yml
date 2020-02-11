@@ -195,6 +195,7 @@ dictionary:
 
   reportWorkflow:
     nbOfHoursQuarantineApproved: 24
+    nbOfHoursApprovalTimeout: 48
 
   maxTextFieldLength: 250
 

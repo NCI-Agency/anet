@@ -17,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,6 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.Role;
-import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
@@ -57,7 +55,6 @@ import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.DailyRollupEmail;
 import mil.dds.anet.emails.NewReportCommentEmail;
 import mil.dds.anet.emails.ReportEditedEmail;
@@ -403,8 +400,7 @@ public class ReportResource {
 
   @GraphQLMutation(name = "submitReport")
   public Report submitReport(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "uuid") String uuid)
-      throws InterruptedException, ExecutionException, Exception {
+      @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid, user);
     if (r == null) {
@@ -445,42 +441,20 @@ public class ReportResource {
       throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
     }
 
-    final String orgUuid;
-    try {
-      final Organization org =
-          engine.getOrganizationForPerson(engine.getContext(), r.getAuthorUuid()).get();
-      if (org == null) {
-        // Author missing Org, use the Default Approval Workflow
-        orgUuid = engine.getDefaultOrgUuid();
-      } else {
-        orgUuid = org.getUuid();
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load Organization for Author", e);
-    }
-    List<ApprovalStep> steps = null;
-    try {
-      if (r.isFutureEngagement()) {
-        steps = engine.getPlanningApprovalStepsForRelatedObject(engine.getContext(), orgUuid).get();
-      } else {
-        steps = engine.getApprovalStepsForRelatedObject(engine.getContext(), orgUuid).get();
-        throwExceptionNoApprovalSteps(steps);
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load Organization for Author", e);
-    }
+    // Get all the approval steps for this report
+    final List<ApprovalStep> steps = r.computeApprovalSteps(engine.getContext(), engine).join();
 
     // Write the submission action
-    ReportAction action = new ReportAction();
+    final ReportAction action = new ReportAction();
     action.setReportUuid(r.getUuid());
     action.setPersonUuid(user.getUuid());
     action.setType(ActionType.SUBMIT);
     engine.getReportActionDao().insert(action);
 
     if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
-      // Future engagements for orgs without planning approval chain will be approved directly
+      // Future engagements without planning approval chain will be approved directly
       // Write the approval action
-      ReportAction approval = new ReportAction();
+      final ReportAction approval = new ReportAction();
       approval.setReportUuid(r.getUuid());
       approval.setPersonUuid(user.getUuid());
       approval.setType(ActionType.APPROVE);
@@ -497,63 +471,14 @@ public class ReportResource {
     }
 
     if (!Utils.isEmptyOrNull(steps)) {
-      sendApprovalNeededEmail(r);
-      logger.info("Putting report {} into step {} because of org {} on author {}", r.getUuid(),
-          steps.get(0).getUuid(), orgUuid, r.getAuthorUuid());
+      dao.sendApprovalNeededEmail(r);
+      logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
     AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(),
         r.loadAuthor(engine.getContext()).join(), r.getAuthorUuid());
     // GraphQL mutations *have* to return something, we return the report
     return r;
-  }
-
-  /**
-   * Throws a WebApplicationException when the report does not have an approval chain belonging to
-   * the advisor organization.
-   */
-  private void throwExceptionNoApprovalSteps(List<ApprovalStep> steps) {
-    if (Utils.isEmptyOrNull(steps)) {
-      final String messageBody =
-          "Advisor organization is missing a report approval chain. In order to have an approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
-      throwException(messageBody);
-    }
-  }
-
-  private void throwException(String messageBody) {
-    final String supportEmailAddr = (String) this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
-    final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody
-        : String.format("%s at %s", messageBody, supportEmailAddr);
-    throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
-  }
-
-  private void sendApprovalNeededEmail(Report r) {
-    final ApprovalStep step;
-    try {
-      step = r.loadApprovalStep(engine.getContext()).get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load ApprovalStep", e);
-    }
-    final List<Position> approvers;
-    try {
-      approvers = step.loadApprovers(engine.getContext()).get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load Approvers", e);
-    }
-    AnetEmail approverEmail = new AnetEmail();
-    ApprovalNeededEmail action = new ApprovalNeededEmail();
-    action.setReport(r);
-    approverEmail.setAction(action);
-    approverEmail.setToAddresses(approvers.stream()
-        .filter(a -> (a.getPersonUuid() != null) && !a.getPersonUuid().equals(r.getAuthorUuid()))
-        .map(a -> {
-          try {
-            return a.loadPerson(engine.getContext()).get().getEmailAddress();
-          } catch (InterruptedException | ExecutionException e) {
-            throw new WebApplicationException("failed to load Person", e);
-          }
-        }).collect(Collectors.toList()));
-    AnetEmailWorker.sendEmailAsync(approverEmail);
   }
 
   static class ReportComment {
@@ -569,8 +494,7 @@ public class ReportResource {
   @GraphQLMutation(name = "approveReport")
   public Report approveReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid,
-      @GraphQLArgument(name = "comment") Comment comment)
-      throws InterruptedException, ExecutionException, Exception {
+      @GraphQLArgument(name = "comment") Comment comment) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, comment);
     final Report r = dao.getByUuid(reportComment.uuid, approver);
@@ -597,30 +521,7 @@ public class ReportResource {
       throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
     }
 
-    // Write the approval action
-    ReportAction approval = new ReportAction();
-    approval.setReportUuid(r.getUuid());
-    approval.setStepUuid(step.getUuid());
-    approval.setPersonUuid(approver.getUuid());
-    approval.setType(ActionType.APPROVE);
-    engine.getReportActionDao().insert(approval);
-
-    // Update the report
-    final String nextStepUuid = getNextStepUuid(r, step);
-    r.setApprovalStepUuid(nextStepUuid);
-    if (nextStepUuid == null) {
-      if (r.getCancelledReason() != null) {
-        // Done with cancel, move to CANCELLED and set releasedAt
-        r.setState(ReportState.CANCELLED);
-        r.setReleasedAt(Instant.now());
-      } else {
-        // Done with approvals, move to APPROVED
-        r.setState(ReportState.APPROVED);
-      }
-    } else {
-      sendApprovalNeededEmail(r);
-    }
-    final int numRows = dao.update(r, approver);
+    final int numRows = dao.approve(r, approver, step);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
     }
@@ -639,35 +540,10 @@ public class ReportResource {
     return r;
   }
 
-  private String getNextStepUuid(final Report report, final ApprovalStep step)
-      throws InterruptedException, ExecutionException {
-    final String currentStepUuid = step.getUuid();
-    String nextStepUuid = step.getNextStepUuid();
-    if (nextStepUuid == null) {
-      // Find out if there's a next approval chain
-      final List<ApprovalStep> reportApprovalSteps =
-          report.computeApprovalSteps(engine.getContext(), engine).get();
-      final Iterator<ApprovalStep> iterator = reportApprovalSteps.iterator();
-      while (iterator.hasNext()) {
-        final ApprovalStep reportApprovalStep = iterator.next();
-        if (Objects.equals(DaoUtils.getUuid(reportApprovalStep), currentStepUuid)) {
-          // Found the current step, update the next step
-          if (iterator.hasNext()) {
-            final ApprovalStep reportApprovalStepNext = iterator.next();
-            nextStepUuid = DaoUtils.getUuid(reportApprovalStepNext);
-          }
-          break;
-        }
-      }
-    }
-    return nextStepUuid;
-  }
-
   @GraphQLMutation(name = "rejectReport")
   public Report rejectReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid,
-      @GraphQLArgument(name = "comment") Comment reason)
-      throws InterruptedException, ExecutionException, Exception {
+      @GraphQLArgument(name = "comment") Comment reason) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, reason);
     final Report r = dao.getByUuid(reportComment.uuid, approver);
