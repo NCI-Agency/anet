@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -605,8 +606,9 @@ public class ReportResource {
     engine.getReportActionDao().insert(approval);
 
     // Update the report
-    r.setApprovalStepUuid(step.getNextStepUuid());
-    if (step.getNextStepUuid() == null) {
+    final String nextStepUuid = getNextStepUuid(r, step);
+    r.setApprovalStepUuid(nextStepUuid);
+    if (nextStepUuid == null) {
       if (r.getCancelledReason() != null) {
         // Done with cancel, move to CANCELLED and set releasedAt
         r.setState(ReportState.CANCELLED);
@@ -635,6 +637,30 @@ public class ReportResource {
         approver.getUuid());
     // GraphQL mutations *have* to return something
     return r;
+  }
+
+  private String getNextStepUuid(final Report report, final ApprovalStep step)
+      throws InterruptedException, ExecutionException {
+    final String currentStepUuid = step.getUuid();
+    String nextStepUuid = step.getNextStepUuid();
+    if (nextStepUuid == null) {
+      // Find out if there's a next approval chain
+      final List<ApprovalStep> reportApprovalSteps =
+          report.computeApprovalSteps(engine.getContext(), engine).get();
+      final Iterator<ApprovalStep> iterator = reportApprovalSteps.iterator();
+      while (iterator.hasNext()) {
+        final ApprovalStep reportApprovalStep = iterator.next();
+        if (Objects.equals(DaoUtils.getUuid(reportApprovalStep), currentStepUuid)) {
+          // Found the current step, update the next step
+          if (iterator.hasNext()) {
+            final ApprovalStep reportApprovalStepNext = iterator.next();
+            nextStepUuid = DaoUtils.getUuid(reportApprovalStepNext);
+          }
+          break;
+        }
+      }
+    }
+    return nextStepUuid;
   }
 
   @GraphQLMutation(name = "rejectReport")

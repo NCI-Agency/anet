@@ -744,7 +744,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     private static final String sql =
         "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
             + "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
-            + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid";
+            + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid ORDER BY uuid";
 
     public TasksBatcher() {
       super(sql, "foreignKeys", new TaskMapper(), "reportUuid");

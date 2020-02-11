@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -483,6 +484,32 @@ public class Report extends AbstractCustomizableAnetBean {
     return comments;
   }
 
+  public CompletableFuture<List<ApprovalStep>> computeApprovalSteps(Map<String, Object> context,
+      AnetObjectEngine engine) {
+    final String advisorOrgUuid = getAdvisorOrgUuid();
+    return getOrganizationWorkflow(context, engine, advisorOrgUuid).thenCompose(steps -> {
+      if (Utils.isEmptyOrNull(steps)) {
+        final String defaultOrgUuid = engine.getDefaultOrgUuid();
+        if (advisorOrgUuid == null || !Objects.equals(advisorOrgUuid, defaultOrgUuid)) {
+          return getDefaultOrganizationWorkflow(context, engine, defaultOrgUuid);
+        }
+      }
+      return CompletableFuture.completedFuture(steps);
+    }).thenCompose(steps -> {
+      return loadTasks(context).thenCompose(tasks -> {
+        if (Utils.isEmptyOrNull(tasks)) {
+          return CompletableFuture.completedFuture(steps);
+        } else {
+          return getTaskWorkflow(context, engine, tasks.iterator())
+              .thenCompose(taskApprovalSteps -> {
+                steps.addAll(taskApprovalSteps);
+                return CompletableFuture.completedFuture(steps);
+              });
+        }
+      });
+    });
+  }
+
   /*
    * Returns a list of report actions. It depends on the report status: - for APPROVED or PUBLISHED
    * reports, it returns all existing report actions - for reports in other steps it also creates
@@ -503,26 +530,7 @@ public class Report extends AbstractCustomizableAnetBean {
         workflow = actions;
         return CompletableFuture.completedFuture(workflow);
       } else {
-        CompletableFuture<List<ApprovalStep>> w;
-        if (isFutureEngagement()) {
-          w = getPlanningWorkflowForOrg(context, engine, getAdvisorOrgUuid());
-        } else {
-          w = getWorkflowForOrg(context, engine, getAdvisorOrgUuid());
-        }
-        return w.thenCompose(steps -> {
-          if (Utils.isEmptyOrNull(steps)) {
-            final String defaultOrgUuid = engine.getDefaultOrgUuid();
-            if (getAdvisorOrgUuid() == null
-                || !Objects.equals(getAdvisorOrgUuid(), defaultOrgUuid)) {
-              if (isFutureEngagement()) {
-                return getDefaultPlanningWorkflow(context, engine, defaultOrgUuid);
-              } else {
-                return getDefaultWorkflow(context, engine, defaultOrgUuid);
-              }
-            }
-          }
-          return CompletableFuture.completedFuture(steps);
-        }).thenCompose(steps -> {
+        return computeApprovalSteps(context, engine).thenCompose(steps -> {
           final List<ReportAction> newApprovalStepsActions =
               createApprovalStepsActions(actions, steps);
           actions.addAll(newApprovalStepsActions);
@@ -565,22 +573,35 @@ public class Report extends AbstractCustomizableAnetBean {
     return newActions;
   }
 
-  private CompletableFuture<List<ApprovalStep>> getPlanningWorkflowForOrg(
-      Map<String, Object> context, AnetObjectEngine engine, String aoUuid) {
-    if (aoUuid == null) {
-      return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
-    }
-
-    return engine.getPlanningApprovalStepsForRelatedObject(context, aoUuid);
+  private CompletableFuture<List<ApprovalStep>> getOrganizationWorkflow(Map<String, Object> context,
+      AnetObjectEngine engine, String advisorOrgUuid) {
+    return isFutureEngagement()
+        ? getPlanningWorkflowForRelatedObject(context, engine, advisorOrgUuid)
+        : getWorkflowForRelatedObject(context, engine, advisorOrgUuid);
   }
 
-  private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context,
-      AnetObjectEngine engine, String aoUuid) {
-    if (aoUuid == null) {
+  private CompletableFuture<List<ApprovalStep>> getPlanningWorkflowForRelatedObject(
+      Map<String, Object> context, AnetObjectEngine engine, String relatedObjectUuid) {
+    if (relatedObjectUuid == null) {
       return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
     }
 
-    return engine.getApprovalStepsForRelatedObject(context, aoUuid);
+    return engine.getPlanningApprovalStepsForRelatedObject(context, relatedObjectUuid);
+  }
+
+  private CompletableFuture<List<ApprovalStep>> getWorkflowForRelatedObject(
+      Map<String, Object> context, AnetObjectEngine engine, String relatedObjectUuid) {
+    if (relatedObjectUuid == null) {
+      return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
+    }
+
+    return engine.getApprovalStepsForRelatedObject(context, relatedObjectUuid);
+  }
+
+  private CompletableFuture<List<ApprovalStep>> getDefaultOrganizationWorkflow(
+      Map<String, Object> context, AnetObjectEngine engine, String defaultOrgUuid) {
+    return isFutureEngagement() ? getDefaultPlanningWorkflow(context, engine, defaultOrgUuid)
+        : getDefaultWorkflow(context, engine, defaultOrgUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getDefaultPlanningWorkflow(
@@ -588,7 +609,7 @@ public class Report extends AbstractCustomizableAnetBean {
     if (defaultOrgUuid == null) {
       throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
     }
-    return getPlanningWorkflowForOrg(context, engine, defaultOrgUuid);
+    return getPlanningWorkflowForRelatedObject(context, engine, defaultOrgUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getDefaultWorkflow(Map<String, Object> context,
@@ -596,7 +617,23 @@ public class Report extends AbstractCustomizableAnetBean {
     if (defaultOrgUuid == null) {
       throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
     }
-    return getWorkflowForOrg(context, engine, defaultOrgUuid);
+    return getWorkflowForRelatedObject(context, engine, defaultOrgUuid);
+  }
+
+  private CompletableFuture<List<ApprovalStep>> getTaskWorkflow(Map<String, Object> context,
+      AnetObjectEngine engine, Iterator<Task> taskIterator) {
+    if (!taskIterator.hasNext()) {
+      return CompletableFuture.completedFuture(new ArrayList<>());
+    } else {
+      final Task task = taskIterator.next();
+      return getWorkflowForRelatedObject(context, engine, DaoUtils.getUuid(task))
+          .thenCompose(taskSteps -> {
+            return getTaskWorkflow(context, engine, taskIterator).thenCompose(nextTaskSteps -> {
+              taskSteps.addAll(nextTaskSteps);
+              return CompletableFuture.completedFuture(taskSteps);
+            });
+          });
+    }
   }
 
   @GraphQLQuery(name = "tags")
