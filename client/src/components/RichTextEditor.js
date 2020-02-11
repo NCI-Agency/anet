@@ -116,9 +116,6 @@ const importerConfig = {
     return null
   },
   htmlToStyle: (nodeName, node, currentStyle) => {
-    if (nodeName === "mark") {
-      return currentStyle.add(INLINE_STYLE.MARK)
-    }
     return currentStyle
   }
 }
