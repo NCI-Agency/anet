@@ -7,10 +7,12 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
   const [entity, setEntity] = useState()
 
   useEffect(() => {
-    getEntityByUuid(type, uuid).then(data => setEntity(data))
+    const response = getEntityByUuid(type, uuid)
+    if (response) {
+      response.then(data => setEntity(data))
+    }
   }, [type, uuid])
 
-  // TODO: What if entity is null
   return (
     <LinkTo modelType={type} model={entity}>
       {children}
