@@ -531,14 +531,25 @@ public class Report extends AbstractCustomizableAnetBean {
         return CompletableFuture.completedFuture(workflow);
       } else {
         return computeApprovalSteps(context, engine).thenCompose(steps -> {
-          final List<ReportAction> newApprovalStepsActions =
-              createApprovalStepsActions(actions, steps);
-          actions.addAll(newApprovalStepsActions);
-          workflow = actions;
+          final List<ReportAction> actionTail = getActionTail(actions);
+          actionTail.addAll(createApprovalStepsActions(actionTail, steps));
+          workflow = actionTail;
           return CompletableFuture.completedFuture(workflow);
         });
       }
     });
+  }
+
+  private List<ReportAction> getActionTail(List<ReportAction> actions) {
+    final List<ReportAction> actionTail = new ArrayList<>();
+    for (int i = actions.size() - 1; i >= 0; i--) {
+      final ReportAction action = actions.get(i);
+      actionTail.add(0, action);
+      if (ReportAction.ActionType.SUBMIT.equals(action.getType())) {
+        break;
+      }
+    }
+    return actionTail;
   }
 
   public List<ReportAction> getWorkflow() {
