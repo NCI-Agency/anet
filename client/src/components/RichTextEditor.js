@@ -153,10 +153,6 @@ const exporterConfig = {
     if (style === INLINE_STYLE.STRIKETHROUGH) {
       return <strike />
     }
-
-    if (style === INLINE_STYLE.MARK) {
-      return <mark />
-    }
   }
 }
 
