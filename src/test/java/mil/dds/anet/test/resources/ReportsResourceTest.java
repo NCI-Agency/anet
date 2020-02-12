@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -95,7 +94,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
       COMMENT_FIELDS);
 
   @Test
-  public void createReport() throws ExecutionException, InterruptedException {
+  public void createReport() {
     // Create a report writer
     final Person author = getJackJackson();
 
@@ -105,7 +104,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     principal.setPrimary(true);
     Position principalPosition = principal.loadPosition();
     assertThat(principalPosition).isNotNull();
-    Organization principalOrg = principalPosition.loadOrganization(context).get();
+    final Organization principalOrg = principalPosition.loadOrganization(context).join();
     assertThat(principalOrg).isNotNull();
 
     // Create an Advising Organization for the report writer
@@ -220,7 +219,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Organization orgWithSteps = graphQLHelper.getObjectById(admin, "organization",
         "uuid approvalSteps { uuid name nextStepUuid relatedObjectUuid }", advisorOrg.getUuid(),
         new TypeReference<GraphQlResponse<Organization>>() {});
-    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).get();
+    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).join();
     assertThat(steps.size()).isEqualTo(2);
     assertThat(steps.get(0).getName()).isEqualTo(approval.getName());
     assertThat(steps.get(0).getNextStepUuid()).isEqualTo(steps.get(1).getUuid());
@@ -480,12 +479,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
         graphQLHelper.getObjectById(admin, "organization", ORGANIZATION_FIELDS,
             advisorOrg.getUuid(), new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(updatedOrg).isNotNull();
-    assertThat(updatedOrg.loadApprovalSteps(context).get()).isEmpty();
+    assertThat(updatedOrg.loadApprovalSteps(context).join()).isEmpty();
   }
 
   @Test
-  public void testDefaultApprovalFlow()
-      throws NumberFormatException, InterruptedException, ExecutionException {
+  public void testDefaultApprovalFlow() throws NumberFormatException {
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
     final Person bob = getBobBobtown();
@@ -543,7 +541,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Organization orgWithSteps = graphQLHelper.getObjectById(jack, "organization",
         "uuid approvalSteps { uuid nextStepUuid }", defaultOrgUuid,
         new TypeReference<GraphQlResponse<Organization>>() {});
-    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).get();
+    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).join();
     assertThat(steps).isNotNull();
     assertThat(steps).hasSize(1);
     // Primary advisor (jack) is in EF1 which has no approval chain, so it should fall back to the
@@ -626,7 +624,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void reportEditTest() throws ExecutionException, InterruptedException {
+  public void reportEditTest() {
     // Elizabeth writes a report about meeting with Roger
     final Person elizabeth = getElizabethElizawell();
     final Person roger = getRogerRogwell();
@@ -733,7 +731,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void searchTest() throws ExecutionException, InterruptedException {
+  public void searchTest() {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
     ReportSearchQuery query = new ReportSearchQuery();
@@ -1235,7 +1233,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void dailyRollupGraphNonReportingTest() throws ExecutionException, InterruptedException {
+  public void dailyRollupGraphNonReportingTest() {
     Person steve = getSteveSteveson();
 
     Report r = new Report();
@@ -1309,7 +1307,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
     final Position pos = admin.loadPosition();
-    final Organization org = pos.loadOrganization(context).get();
+    final Organization org = pos.loadOrganization(context).join();
     @SuppressWarnings("unchecked")
     final List<String> nro =
         (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
@@ -1327,7 +1325,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void dailyRollupGraphReportingTest() throws ExecutionException, InterruptedException {
+  public void dailyRollupGraphReportingTest() {
     final Person elizabeth = getElizabethElizawell();
     final Person bob = getBobBobtown();
     Person steve = getSteveSteveson();
@@ -1403,14 +1401,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
     final Position pos = elizabeth.loadPosition();
-    final Organization org = pos.loadOrganization(context).get();
+    final Organization org = pos.loadOrganization(context).join();
     @SuppressWarnings("unchecked")
     final List<String> nro =
         (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
     // Elizabeth's organization should have one more report PUBLISHED only if it is not in the
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-    final Organization po = org.loadParentOrg(context).get();
+    final Organization po = org.loadParentOrg(context).join();
     final String orgUuid = po.getUuid();
     Optional<RollupGraph> orgReportsStart = startGraph.stream()
         .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
@@ -1422,7 +1420,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testTagSearch() throws InterruptedException, ExecutionException {
+  public void testTagSearch() {
     final ReportSearchQuery tagQuery = new ReportSearchQuery();
     tagQuery.setText("bribery");
     final AnetBeanList<Report> taggedReportList =
@@ -1438,7 +1436,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testSensitiveInformationByAuthor() throws ExecutionException, InterruptedException {
+  public void testSensitiveInformationByAuthor() {
     final String rsiFields = FIELDS + " reportSensitiveInformation { uuid text }";
     final Person elizabeth = getElizabethElizawell();
     final Report r = new Report();
@@ -1486,8 +1484,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testSensitiveInformationByAuthorizationGroup()
-      throws ExecutionException, InterruptedException {
+  public void testSensitiveInformationByAuthorizationGroup() {
     final PersonSearchQuery erinQuery = new PersonSearchQuery();
     erinQuery.setText("erin");
     final AnetBeanList<Person> erinSearchResults = graphQLHelper.searchObjects(admin, "personList",
@@ -1659,19 +1656,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
       if (isSuperUser) {
         fail("Unexpected ForbiddenException");
       }
-    } catch (ExecutionException e) {
-      fail("Unexpected ExecutionException");
-    } catch (InterruptedException e) {
-      fail("Unexpected InterruptedException");
     }
   }
 
-  private void createTestReport() throws InterruptedException, ExecutionException {
+  private void createTestReport() {
     final Person author = getJackJackson();
     final ReportPerson attendee = PersonTest.personToReportPerson(author);
     attendee.setPrimary(true);
     final Position advisorPosition = attendee.loadPosition();
-    final Organization advisorOrganization = advisorPosition.loadOrganization(context).get();
+    final Organization advisorOrganization = advisorPosition.loadOrganization(context).join();
 
     final Report r = new Report();
     r.setAuthor(author);
@@ -1702,8 +1695,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testTaskApprovalFlow()
-      throws NumberFormatException, InterruptedException, ExecutionException {
+  public void testTaskApprovalFlow() throws NumberFormatException {
     // Fill a report
     final Person author = getJackJackson();
     final Report r = new Report();

@@ -4,7 +4,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -68,18 +67,13 @@ public class AuthUtils {
     }
 
     // As a last check, load the descendant orgs.
-    try {
-      final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-      Organization posOrg = position.loadOrganization(context).get();
-      final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
-      osQuery.setPageSize(0);
-      Optional<Organization> orgMatch = posOrg.loadDescendantOrgs(context, osQuery).get().stream()
-          .filter(o -> o.getUuid().equals(organizationUuid)).findFirst();
-      return orgMatch.isPresent();
-    } catch (InterruptedException | ExecutionException e) {
-      logger.error("failed to load Organization", e);
-      return false;
-    }
+    final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
+    final Organization posOrg = position.loadOrganization(context).join();
+    final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
+    osQuery.setPageSize(0);
+    final Optional<Organization> orgMatch = posOrg.loadDescendantOrgs(context, osQuery).join()
+        .stream().filter(o -> o.getUuid().equals(organizationUuid)).findFirst();
+    return orgMatch.isPresent();
   }
 
   public static void assertSuperUserForOrg(Person user, String organizationUuid,

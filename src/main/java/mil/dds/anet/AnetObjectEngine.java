@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -213,12 +212,7 @@ public class AnetObjectEngine {
   public boolean canUserApproveStep(Map<String, Object> context, String userUuid,
       String approvalStepUuid) {
     ApprovalStep as = asDao.getByUuid(approvalStepUuid);
-    final List<Position> approvers;
-    try {
-      approvers = as.loadApprovers(context).get();
-    } catch (InterruptedException | ExecutionException e) {
-      return false;
-    }
+    final List<Position> approvers = as.loadApprovers(context).join();
     for (Position approverPosition : approvers) {
       // approverPosition.getPerson() has the currentPersonUuid already loaded, so this is safe.
       if (Objects.equals(userUuid, approverPosition.getPersonUuid())) {

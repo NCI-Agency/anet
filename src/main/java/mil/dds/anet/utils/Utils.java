@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -515,14 +514,10 @@ public class Utils {
     }
 
     if (newStep.getApprovers() != null) {
-      try {
-        Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).get(),
-            newStep.getApprovers(),
-            newPosition -> approvalStepDao.addApprover(newStep, DaoUtils.getUuid(newPosition)),
-            oldPositionUuid -> approvalStepDao.removeApprover(newStep, oldPositionUuid));
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Approvers", e);
-      }
+      Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).join(),
+          newStep.getApprovers(),
+          newPosition -> approvalStepDao.addApprover(newStep, DaoUtils.getUuid(newPosition)),
+          oldPositionUuid -> approvalStepDao.removeApprover(newStep, oldPositionUuid));
     }
   }
 

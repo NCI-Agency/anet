@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -98,8 +97,7 @@ public class OrganizationResource {
 
   @GraphQLMutation(name = "updateOrganization")
   public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "organization") Organization org)
-      throws InterruptedException, ExecutionException, Exception {
+      @GraphQLArgument(name = "organization") Organization org) {
     final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
     AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);

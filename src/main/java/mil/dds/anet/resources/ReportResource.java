@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.WebApplicationException;
@@ -124,23 +123,15 @@ public class ReportResource {
 
     Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
     if (r.getAdvisorOrgUuid() == null && primaryAdvisor != null) {
-      try {
-        logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
-        r.setAdvisorOrg(
-            engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor.getUuid()).get());
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Organization for PrimaryAdvisor", e);
-      }
+      logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
+      r.setAdvisorOrg(
+          engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor.getUuid()).join());
     }
     Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
     if (r.getPrincipalOrgUuid() == null && primaryPrincipal != null) {
-      try {
-        logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
-        r.setPrincipalOrg(
-            engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal.getUuid()).get());
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Organization for PrimaryPrincipal", e);
-      }
+      logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
+      r.setPrincipalOrg(
+          engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal.getUuid()).join());
     }
 
     r.setReportText(
@@ -169,13 +160,9 @@ public class ReportResource {
         action.setReport(existing);
         action.setEditor(editor);
         email.setAction(action);
-        try {
-          email.setToAddresses(Collections
-              .singletonList(existing.loadAuthor(engine.getContext()).get().getEmailAddress()));
-          AnetEmailWorker.sendEmailAsync(email);
-        } catch (InterruptedException | ExecutionException e) {
-          throw new WebApplicationException("failed to load Author", e);
-        }
+        email.setToAddresses(Collections
+            .singletonList(existing.loadAuthor(engine.getContext()).join().getEmailAddress()));
+        AnetEmailWorker.sendEmailAsync(email);
       }
     }
 
@@ -221,35 +208,27 @@ public class ReportResource {
     }
 
     // If there is a change to the primary advisor, change the advisor Org.
-    Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
-    ReportPerson exstingPrimaryAdvisor;
-    try {
-      exstingPrimaryAdvisor = existing.loadPrimaryAdvisor(engine.getContext()).get();
-      if (Utils.uuidEqual(primaryAdvisor, exstingPrimaryAdvisor) == false
-          || existing.getAdvisorOrgUuid() == null) {
-        r.setAdvisorOrg(engine
-            .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryAdvisor)).get());
-      } else {
-        r.setAdvisorOrgUuid(existing.getAdvisorOrgUuid());
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load PrimaryAdvisor", e);
+    final Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
+    final ReportPerson existingPrimaryAdvisor =
+        existing.loadPrimaryAdvisor(engine.getContext()).join();
+    if (Utils.uuidEqual(primaryAdvisor, existingPrimaryAdvisor) == false
+        || existing.getAdvisorOrgUuid() == null) {
+      r.setAdvisorOrg(engine
+          .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryAdvisor)).join());
+    } else {
+      r.setAdvisorOrgUuid(existing.getAdvisorOrgUuid());
     }
 
-    Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
-    ReportPerson existingPrimaryPrincipal;
-    try {
-      existingPrimaryPrincipal = existing.loadPrimaryPrincipal(engine.getContext()).get();
-      if (Utils.uuidEqual(primaryPrincipal, existingPrimaryPrincipal) == false
-          || existing.getPrincipalOrgUuid() == null) {
-        r.setPrincipalOrg(
-            engine.getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryPrincipal))
-                .get());
-      } else {
-        r.setPrincipalOrgUuid(existing.getPrincipalOrgUuid());
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load PrimaryPrincipal", e);
+    final Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
+    final ReportPerson existingPrimaryPrincipal =
+        existing.loadPrimaryPrincipal(engine.getContext()).join();
+    if (Utils.uuidEqual(primaryPrincipal, existingPrimaryPrincipal) == false
+        || existing.getPrincipalOrgUuid() == null) {
+      r.setPrincipalOrg(
+          engine.getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryPrincipal))
+              .join());
+    } else {
+      r.setPrincipalOrgUuid(existing.getPrincipalOrgUuid());
     }
 
     r.setReportText(
@@ -263,72 +242,61 @@ public class ReportResource {
 
     // Update Attendees:
     if (r.getAttendees() != null) {
-      try {
-        // Fetch the people associated with this report
-        List<ReportPerson> existingPeople =
-            dao.getAttendeesForReport(engine.getContext(), r.getUuid()).get();
-        // Find any differences and fix them.
-        for (ReportPerson rp : r.getAttendees()) {
-          Optional<ReportPerson> existingPerson =
-              existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
-          if (existingPerson.isPresent()) {
-            if (existingPerson.get().isPrimary() != rp.isPrimary()) {
-              dao.updateAttendeeOnReport(rp, r);
-            }
-            existingPeople.remove(existingPerson.get());
-          } else {
-            dao.addAttendeeToReport(rp, r);
+      // Fetch the people associated with this report
+      final List<ReportPerson> existingPeople =
+          dao.getAttendeesForReport(engine.getContext(), r.getUuid()).join();
+      // Find any differences and fix them.
+      for (ReportPerson rp : r.getAttendees()) {
+        Optional<ReportPerson> existingPerson =
+            existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
+        if (existingPerson.isPresent()) {
+          if (existingPerson.get().isPrimary() != rp.isPrimary()) {
+            dao.updateAttendeeOnReport(rp, r);
           }
+          existingPeople.remove(existingPerson.get());
+        } else {
+          dao.addAttendeeToReport(rp, r);
         }
-        // Any attendees left in existingPeople needs to be removed.
-        for (ReportPerson rp : existingPeople) {
-          dao.removeAttendeeFromReport(rp, r);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Attendees", e);
+      }
+      // Any attendees left in existingPeople needs to be removed.
+      for (ReportPerson rp : existingPeople) {
+        dao.removeAttendeeFromReport(rp, r);
       }
     }
 
     // Update Tasks:
     if (r.getTasks() != null) {
-      try {
-        List<Task> existingTasks = dao.getTasksForReport(engine.getContext(), r.getUuid()).get();
-        List<String> existingTaskUuids =
-            existingTasks.stream().map(p -> p.getUuid()).collect(Collectors.toList());
-        for (Task p : r.getTasks()) {
-          int idx = existingTaskUuids.indexOf(p.getUuid());
-          if (idx == -1) {
-            dao.addTaskToReport(p, r);
-          } else {
-            existingTaskUuids.remove(idx);
-          }
+      final List<Task> existingTasks =
+          dao.getTasksForReport(engine.getContext(), r.getUuid()).join();
+      final List<String> existingTaskUuids =
+          existingTasks.stream().map(p -> p.getUuid()).collect(Collectors.toList());
+      for (Task p : r.getTasks()) {
+        int idx = existingTaskUuids.indexOf(p.getUuid());
+        if (idx == -1) {
+          dao.addTaskToReport(p, r);
+        } else {
+          existingTaskUuids.remove(idx);
         }
-        for (String uuid : existingTaskUuids) {
-          dao.removeTaskFromReport(uuid, r);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Tasks", e);
+      }
+      for (String uuid : existingTaskUuids) {
+        dao.removeTaskFromReport(uuid, r);
       }
     }
 
     // Update Tags:
     if (r.getTags() != null) {
-      try {
-        List<Tag> existingTags = dao.getTagsForReport(engine.getContext(), r.getUuid()).get();
-        for (final Tag t : r.getTags()) {
-          Optional<Tag> existingTag =
-              existingTags.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
-          if (existingTag.isPresent()) {
-            existingTags.remove(existingTag.get());
-          } else {
-            dao.addTagToReport(t, r);
-          }
+      final List<Tag> existingTags = dao.getTagsForReport(engine.getContext(), r.getUuid()).join();
+      for (final Tag t : r.getTags()) {
+        Optional<Tag> existingTag =
+            existingTags.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
+        if (existingTag.isPresent()) {
+          existingTags.remove(existingTag.get());
+        } else {
+          dao.addTagToReport(t, r);
         }
-        for (Tag t : existingTags) {
-          dao.removeTagFromReport(t, r);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Tags", e);
+      }
+      for (Tag t : existingTags) {
+        dao.removeTagFromReport(t, r);
       }
     }
 
@@ -352,12 +320,8 @@ public class ReportResource {
 
     // Clear and re-load sensitive information; needed in case of autoSave by the client form, or
     // when sensitive info is 'empty' HTML
-    try {
-      r.setReportSensitiveInformation(null);
-      r.loadReportSensitiveInformation(engine.getContext()).get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load ReportSensitiveInformation", e);
-    }
+    r.setReportSensitiveInformation(null);
+    r.loadReportSensitiveInformation(engine.getContext()).join();
 
     // Return the report in the response; used in autoSave by the client form
     return existing;
@@ -411,30 +375,20 @@ public class ReportResource {
 
     // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
     if (r.getAdvisorOrgUuid() == null) {
-      ReportPerson advisor;
-      try {
-        advisor = r.loadPrimaryAdvisor(engine.getContext()).get();
-        if (advisor == null) {
-          throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
-        }
-        r.setAdvisorOrg(
-            engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).get());
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load PrimaryAdvisor", e);
+      final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
+      if (advisor == null) {
+        throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
       }
+      r.setAdvisorOrg(
+          engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).join());
     }
     if (r.getPrincipalOrgUuid() == null) {
-      ReportPerson principal;
-      try {
-        principal = r.loadPrimaryPrincipal(engine.getContext()).get();
-        if (principal == null) {
-          throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
-        }
-        r.setPrincipalOrg(
-            engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).get());
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load PrimaryPrincipal", e);
+      final ReportPerson principal = r.loadPrimaryPrincipal(engine.getContext()).join();
+      if (principal == null) {
+        throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
       }
+      r.setPrincipalOrg(
+          engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).join());
     }
 
     if (r.getEngagementDate() == null) {
@@ -614,12 +568,8 @@ public class ReportResource {
     action.setComment(rejectionComment);
     AnetEmail email = new AnetEmail();
     email.setAction(action);
-    try {
-      email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
-      AnetEmailWorker.sendEmailAsync(email);
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load Author", e);
-    }
+    email.addToAddress(r.loadAuthor(engine.getContext()).join().getEmailAddress());
+    AnetEmailWorker.sendEmailAsync(email);
   }
 
   @GraphQLMutation(name = "publishReport")
@@ -675,12 +625,8 @@ public class ReportResource {
     action.setReport(r);
     action.setComment(comment);
     email.setAction(action);
-    try {
-      email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
-      AnetEmailWorker.sendEmailAsync(email);
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load Author", e);
-    }
+    email.addToAddress(r.loadAuthor(engine.getContext()).join().getEmailAddress());
+    AnetEmailWorker.sendEmailAsync(email);
   }
 
   @GraphQLMutation(name = "emailReport")
