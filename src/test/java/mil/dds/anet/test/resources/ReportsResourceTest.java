@@ -85,13 +85,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("%1$s customFieldRef1 { %1$s }", _TASK_FIELDS);
-  private static final String FIELDS = String.format(
-      "%1$s" + " advisorOrg { %2$s }" + " principalOrg { %2$s }" + " author { %3$s }"
-          + " attendees { %3$s primary }" + " tasks { %4$s }"
-          + " approvalStep { uuid relatedObjectUuid }" + " location { %5$s }"
-          + " tags { uuid name description }" + " comments { %6$s }"
-          + " authorizationGroups { uuid name }"
-          + " workflow { step { uuid } person { uuid } type createdAt }",
+  private static final String FIELDS = String.format("%1$s" + " advisorOrg { %2$s }"
+      + " principalOrg { %2$s }" + " author { %3$s }" + " attendees { %3$s primary }"
+      + " tasks { %4$s }" + " approvalStep { uuid relatedObjectUuid }" + " location { %5$s }"
+      + " tags { uuid name description }" + " comments { %6$s }"
+      + " authorizationGroups { uuid name }"
+      + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } } person { uuid } type createdAt }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
       COMMENT_FIELDS);
 
@@ -1700,6 +1699,89 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(results).isNotNull();
     assertThat(results.getList()).isNotEmpty();
     return results.getList().get(0);
+  }
+
+  @Test
+  public void testTaskApprovalFlow()
+      throws NumberFormatException, InterruptedException, ExecutionException {
+    // Fill a report
+    final Person author = getJackJackson();
+    final Report r = new Report();
+    r.setAuthor(author);
+    r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(getSteveSteveson()),
+        PersonTest.personToPrimaryReportPerson(getElizabethElizawell())));
+    r.setState(ReportState.DRAFT);
+    r.setAtmosphere(Atmosphere.POSITIVE);
+    r.setIntent("Testing the task approval flow");
+    r.setKeyOutcomes("Task approval flow works");
+    r.setNextSteps("Approve through the task flow");
+    r.setReportText("Trying to get this report approved");
+    r.setLocation(getLocation(author, "General Hospital"));
+    final Instant engagementDate =
+        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+    r.setEngagementDate(engagementDate);
+
+    // Reference task 1.1.A
+    final TaskSearchQuery query = new TaskSearchQuery();
+    query.setText("1.1.A");
+    final AnetBeanList<Task> searchObjects =
+        graphQLHelper.searchObjects(author, "taskList", "query", "TaskSearchQueryInput",
+            TASK_FIELDS, query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getList()).isNotEmpty();
+    final List<Task> searchResults = searchObjects.getList();
+    assertThat(searchResults).isNotEmpty();
+    final Task t11a =
+        searchResults.stream().filter(t -> t.getShortName().equals("1.1.A")).findFirst().get();
+    r.setTasks(ImmutableList.of(t11a));
+
+    // Create the report
+    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+        "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(createdUuid).isNotNull();
+    final Report created = graphQLHelper.getObjectById(author, "report", FIELDS, createdUuid,
+        new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
+
+    // Submit the report
+    final Report submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS,
+        "String", created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(submitted).isNotNull();
+    assertThat(submitted.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+
+    // Check that the approval workflow has a step for task 1.1.A
+    final Person andrew = getAndrewAnderson();
+    assertThat(submitted.getWorkflow()).isNotNull();
+    final List<ReportAction> t11aActions = submitted.getWorkflow().stream().filter(
+        ra -> ra.getStep() != null && t11a.getUuid().equals(ra.getStep().getRelatedObjectUuid()))
+        .collect(Collectors.toList());
+    assertThat(t11aActions.size()).isEqualTo(1);
+    final ReportAction t11aAction = t11aActions.get(0);
+    final ApprovalStep t11aStep = t11aAction.getStep();
+    assertThat(t11aStep).isNotNull();
+    final List<Position> t11aApprovers = t11aStep.getApprovers();
+    assertThat(t11aApprovers.size()).isGreaterThan(0);
+    assertThat(t11aApprovers.stream().anyMatch(a -> andrew.getUuid().equals(a.getPersonUuid())))
+        .isEqualTo(true);
+
+    // Have the report approved by the EF 1.1 approver
+    final Person bob = getBobBobtown();
+    final Report approvedStep1 = graphQLHelper.updateObject(bob, "approveReport", "uuid", FIELDS,
+        "String", submitted.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(approvedStep1).isNotNull();
+    assertThat(approvedStep1.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
+
+    // Check that the next step is the task approval
+    final ApprovalStep nextStep = approvedStep1.getApprovalStep();
+    assertThat(nextStep).isNotNull();
+    assertThat(nextStep.getRelatedObjectUuid()).isEqualTo(t11a.getUuid());
+
+    // Have the report approved by the 1.1.A approver
+    final Report approvedStep2 = graphQLHelper.updateObject(andrew, "approveReport", "uuid", FIELDS,
+        "String", submitted.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(approvedStep2).isNotNull();
+    assertThat(approvedStep2.getState()).isEqualTo(Report.ReportState.APPROVED);
   }
 
 }
