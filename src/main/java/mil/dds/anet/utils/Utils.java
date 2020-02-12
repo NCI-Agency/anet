@@ -469,8 +469,42 @@ public class Utils {
     return Base64.getEncoder().encodeToString(os.toByteArray());
   }
 
+  public static void updateApprovalSteps(AbstractAnetBean entity,
+      List<ApprovalStep> planningApprovalSteps, List<ApprovalStep> existingPlanningApprovalSteps,
+      List<ApprovalStep> approvalSteps, List<ApprovalStep> existingApprovalSteps) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+
+    if (planningApprovalSteps != null) {
+      logger.debug("Editing planning approval steps for {}", entity);
+      for (ApprovalStep step : planningApprovalSteps) {
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(entity.getUuid());
+      }
+
+      Utils.addRemoveElementsByUuid(existingPlanningApprovalSteps, planningApprovalSteps,
+          newStep -> engine.getApprovalStepDao().insert(newStep),
+          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
+
+      Utils.updateSteps(planningApprovalSteps, existingPlanningApprovalSteps);
+    }
+
+    if (approvalSteps != null) {
+      logger.debug("Editing approval steps for {}", entity);
+      for (ApprovalStep step : approvalSteps) {
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(entity.getUuid());
+      }
+
+      Utils.addRemoveElementsByUuid(existingApprovalSteps, approvalSteps,
+          newStep -> engine.getApprovalStepDao().insert(newStep),
+          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
+
+      Utils.updateSteps(approvalSteps, existingApprovalSteps);
+    }
+  }
+
   // Helper method that diffs the name/members of an approvalStep
-  public static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
+  private static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
     newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing group
@@ -493,8 +527,9 @@ public class Utils {
   }
 
   // Helper method that updates a list of approval steps
-  public static void updateSteps(List<ApprovalStep> steps, List<ApprovalStep> existingSteps) {
+  private static void updateSteps(List<ApprovalStep> steps, List<ApprovalStep> existingSteps) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
     for (int i = 0; i < steps.size(); i++) {
       ApprovalStep curr = steps.get(i);
       ApprovalStep next = (i == (steps.size() - 1)) ? null : steps.get(i + 1);
@@ -503,7 +538,7 @@ public class Utils {
       // If this step didn't exist before, we still need to set the nextStepUuid on it, but
       // don't need to do a deep update.
       if (existingStep == null) {
-        engine.getApprovalStepDao().update(curr);
+        approvalStepDao.update(curr);
       } else {
         // Check for updates to name, nextStepUuid and approvers.
         Utils.updateStep(curr, existingStep);

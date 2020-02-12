@@ -111,12 +111,12 @@ public class OrganizationResource {
       throw new WebApplicationException("Organization can not be its own (grand…)parent");
     }
 
-    // Load the existing org, so we can check for differences.
+    // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
     final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(org, existing) : 1;
     doSuperUserUpdates(org, existing);
-
     AnetAuditLogger.log("Organization {} updated by {}", org, user);
+
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
@@ -144,35 +144,12 @@ public class OrganizationResource {
   }
 
   private void doSuperUserUpdates(Organization org, Organization existing) {
-    if (org.getPlanningApprovalSteps() != null) {
-      logger.debug("Editing planning approval steps for {}", org);
-      for (ApprovalStep step : org.getPlanningApprovalSteps()) {
-        Utils.validateApprovalStep(step);
-        step.setRelatedObjectUuid(org.getUuid());
-      }
-      List<ApprovalStep> existingSteps =
-          existing.loadPlanningApprovalSteps(engine.getContext()).join();
-
-      Utils.addRemoveElementsByUuid(existingSteps, org.getPlanningApprovalSteps(),
-          newStep -> engine.getApprovalStepDao().insert(newStep),
-          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
-
-      Utils.updateSteps(org.getPlanningApprovalSteps(), existingSteps);
-    }
-    if (org.getApprovalSteps() != null) {
-      logger.debug("Editing approval steps for {}", org);
-      for (ApprovalStep step : org.getApprovalSteps()) {
-        Utils.validateApprovalStep(step);
-        step.setRelatedObjectUuid(org.getUuid());
-      }
-      List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).join();
-
-      Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
-          newStep -> engine.getApprovalStepDao().insert(newStep),
-          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
-
-      Utils.updateSteps(org.getApprovalSteps(), existingSteps);
-    }
+    final List<ApprovalStep> existingPlanningApprovalSteps =
+        existing.loadPlanningApprovalSteps(engine.getContext()).join();
+    final List<ApprovalStep> existingApprovalSteps =
+        existing.loadApprovalSteps(engine.getContext()).join();
+    Utils.updateApprovalSteps(org, org.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
+        org.getApprovalSteps(), existingApprovalSteps);
   }
 
   @GraphQLQuery(name = "organizationList")

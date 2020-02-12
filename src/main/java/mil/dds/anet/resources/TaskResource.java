@@ -4,7 +4,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,13 +26,8 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TaskResource {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AnetObjectEngine engine;
   private final TaskDao dao;
@@ -147,43 +141,16 @@ public class TaskResource {
         }
       }
 
-      // Load the existing org, so we can check for differences.
+      // Load the existing task, so we can check for differences.
       final Task existing = dao.getByUuid(t.getUuid());
-
-      // FIXME: code duplication with OrganizationResource
-      if (t.getPlanningApprovalSteps() != null) {
-        logger.debug("Editing planning approval steps for {}", t);
-        for (ApprovalStep step : t.getPlanningApprovalSteps()) {
-          Utils.validateApprovalStep(step);
-          step.setRelatedObjectUuid(t.getUuid());
-        }
-        List<ApprovalStep> existingSteps =
-            existing.loadPlanningApprovalSteps(engine.getContext()).join();
-
-        Utils.addRemoveElementsByUuid(existingSteps, t.getPlanningApprovalSteps(),
-            newStep -> engine.getApprovalStepDao().insert(newStep),
-            oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
-
-        Utils.updateSteps(t.getPlanningApprovalSteps(), existingSteps);
-      }
-
-      // FIXME: code duplication with OrganizationResource
-      if (t.getApprovalSteps() != null) {
-        logger.debug("Editing approval steps for {}", t);
-        for (ApprovalStep step : t.getApprovalSteps()) {
-          Utils.validateApprovalStep(step);
-          step.setRelatedObjectUuid(t.getUuid());
-        }
-        List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).join();
-
-        Utils.addRemoveElementsByUuid(existingSteps, t.getApprovalSteps(),
-            newStep -> engine.getApprovalStepDao().insert(newStep),
-            oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
-
-        Utils.updateSteps(t.getApprovalSteps(), existingSteps);
-      }
-
+      final List<ApprovalStep> existingPlanningApprovalSteps =
+          existing.loadPlanningApprovalSteps(engine.getContext()).join();
+      final List<ApprovalStep> existingApprovalSteps =
+          existing.loadApprovalSteps(engine.getContext()).join();
+      Utils.updateApprovalSteps(t, t.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
+          t.getApprovalSteps(), existingApprovalSteps);
       AnetAuditLogger.log("Task {} updatedby {}", t, user);
+
       // GraphQL mutations *have* to return something, so we return the number of updated rows
       return numRows;
     } catch (UnableToExecuteStatementException e) {
