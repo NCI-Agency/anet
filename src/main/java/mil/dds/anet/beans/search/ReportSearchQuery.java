@@ -79,7 +79,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   String orgUuid;
   @GraphQLQuery
   @GraphQLInputField
-  Boolean includeOrgChildren;
+  private RecurseStrategy orgRecurseStrategy;
 
   @GraphQLQuery
   @GraphQLInputField
@@ -267,12 +267,12 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     this.orgUuid = orgUuid;
   }
 
-  public boolean getIncludeOrgChildren() {
-    return Boolean.TRUE.equals(includeOrgChildren);
+  public RecurseStrategy getOrgRecurseStrategy() {
+    return orgRecurseStrategy;
   }
 
-  public void setIncludeOrgChildren(Boolean includeOrgChildren) {
-    this.includeOrgChildren = includeOrgChildren;
+  public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
+    this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
   public String getLocationUuid() {
@@ -389,7 +389,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         engagementDayOfWeek, includeEngagementDayOfWeek, createdAtStart, createdAtEnd,
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
-        orgUuid, includeOrgChildren, locationUuid, taskUuid, pendingApprovalOf, state,
+        orgUuid, orgRecurseStrategy, locationUuid, taskUuid, pendingApprovalOf, state,
         engagementStatus, cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid,
         authorizationGroupUuid, sensitiveInfo, user, systemSearch);
   }
@@ -418,7 +418,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getPrincipalOrgUuid(), other.getPrincipalOrgUuid())
         && Objects.equals(getIncludePrincipalOrgChildren(), other.getIncludePrincipalOrgChildren())
         && Objects.equals(getOrgUuid(), other.getOrgUuid())
-        && Objects.equals(getIncludeOrgChildren(), other.getIncludeOrgChildren())
+        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
         && Objects.equals(getTaskUuid(), other.getTaskUuid())
         && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())

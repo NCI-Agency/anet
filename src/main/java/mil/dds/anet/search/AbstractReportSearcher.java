@@ -18,6 +18,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
@@ -277,14 +278,16 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
   protected void addOrgUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
       ReportSearchQuery query) {
-    if (!query.getIncludeOrgChildren()) {
+    if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
+      qb.addRecursiveClause(outerQb, "reports",
+          new String[] {"\"advisorOrganizationUuid\"", "\"principalOrganizationUuid\""},
+          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
+          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+    } else {
       qb.addWhereClause(
           "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
       qb.addSqlArg("orgUuid", query.getOrgUuid());
-    } else {
-      qb.addRecursiveClause(outerQb, "reports",
-          new String[] {"\"advisorOrganizationUuid\"", "\"principalOrganizationUuid\""},
-          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(), true);
     }
   }
 
