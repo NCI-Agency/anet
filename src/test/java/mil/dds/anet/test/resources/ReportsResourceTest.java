@@ -87,8 +87,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
       String.format("%1$s customFieldRef1 { %1$s }", _TASK_FIELDS);
   private static final String FIELDS = String.format(
       "%1$s" + " advisorOrg { %2$s }" + " principalOrg { %2$s }" + " author { %3$s }"
-          + " attendees { %3$s primary }" + " tasks { %4$s }" + " approvalStep { uuid }"
-          + " location { %5$s }" + " tags { uuid name description }" + " comments { %6$s }"
+          + " attendees { %3$s primary }" + " tasks { %4$s }"
+          + " approvalStep { uuid relatedObjectUuid }" + " location { %5$s }"
+          + " tags { uuid name description }" + " comments { %6$s }"
           + " authorizationGroups { uuid name }"
           + " workflow { step { uuid } person { uuid } type createdAt }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
@@ -263,7 +264,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setTasks(Lists.newArrayList(action));
     r.setLocation(loc);
     r.setAtmosphere(Atmosphere.POSITIVE);
-    r.setAtmosphereDetails("Eerybody was super nice!");
+    r.setAtmosphereDetails("Everybody was super nice!");
     r.setIntent("A testing report to test that reporting reports");
     // set HTML of report text
     r.setReportText(UtilsTest.getCombinedTestCase().getInput());
@@ -293,7 +294,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Verify that author can still edit the report
-    returned.setAtmosphereDetails("Eerybody was super nice! Again!");
+    returned.setAtmosphereDetails("Everybody was super nice! Again!");
     final Report r2 = graphQLHelper.updateObject(author, "updateReport", "report", FIELDS,
         "ReportInput", returned, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
@@ -488,6 +489,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
       throws NumberFormatException, InterruptedException, ExecutionException {
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
+    final Person bob = getBobBobtown();
 
     // Create a Person who isn't in a Billet
     Person author = new Person();
@@ -545,11 +547,19 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).get();
     assertThat(steps).isNotNull();
     assertThat(steps).hasSize(1);
+    // Primary advisor (jack) is in EF1 which has no approval chain, so it should fall back to the
+    // default
     assertThat(returned.getApprovalStepUuid()).isEqualTo(steps.get(0).getUuid());
 
-    // Get the Person who is able to approve that report (nick@example.com)
-    Person nick = new Person();
-    nick.setDomainUsername("nick");
+    // The only default approver is admin; reject the report
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("uuid", returned.getUuid());
+    variables.put("comment", TestData.createComment("default approval chain test rejection"));
+    Report rejected = graphQLHelper.updateObject(admin,
+        "mutation ($uuid: String!, $comment: CommentInput!) { payload: rejectReport (uuid: $uuid, comment: $comment) { "
+            + FIELDS + " } }",
+        variables, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(rejected).isNotNull();
 
     // Create billet for Author
     Position billet = new Position();
@@ -557,25 +567,25 @@ public class ReportsResourceTest extends AbstractResourceTest {
     billet.setType(Position.PositionType.ADVISOR);
     billet.setStatus(PositionStatus.ACTIVE);
 
-    // Put billet in EF1
+    // Put billet in EF 1.1
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
     // FIXME: decide what the search should do in both cases
     queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
-    final AnetBeanList<Organization> results = graphQLHelper.searchObjects(nick, "organizationList",
-        "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
+    final AnetBeanList<Organization> results = graphQLHelper.searchObjects(admin,
+        "organizationList", "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
         new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(results.getList().size()).isGreaterThan(0);
-    Organization ef1 = null;
+    Organization ef11 = null;
     for (Organization org : results.getList()) {
       if (org.getShortName().trim().equalsIgnoreCase("ef 1.1")) {
         billet.setOrganization(createOrganizationWithUuid(org.getUuid()));
-        ef1 = org;
+        ef11 = org;
         break;
       }
     }
     assertThat(billet.getOrganization()).isNotNull();
-    assertThat(ef1).isNotNull();
+    assertThat(ef11).isNotNull();
 
     final String billetUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", billet, new TypeReference<GraphQlResponse<Position>>() {});
@@ -585,7 +595,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(billet).isNotNull();
 
     // Put Author in the billet
-    Map<String, Object> variables = new HashMap<>();
+    variables = new HashMap<>();
     variables.put("uuid", billet.getUuid());
     variables.put("person", author);
     Integer nrUpdated = graphQLHelper.updateObject(admin,
@@ -593,17 +603,27 @@ public class ReportsResourceTest extends AbstractResourceTest {
         variables);
     assertThat(nrUpdated).isEqualTo(1);
 
-    // Nick should kick the report
-    submitted = graphQLHelper.updateObject(nick, "submitReport", "uuid", FIELDS, "String",
+    // Change primary advisor of the report to someone in EF 1.1
+    returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+        PersonTest.personToReportPerson(jack), PersonTest.personToPrimaryReportPerson(bob)));
+    final Report updated = graphQLHelper.updateObject(author, "updateReport", "report", FIELDS,
+        "ReportInput", returned, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(updated).isNotNull();
+    assertThat(updated.getAdvisorOrgUuid()).isNotEqualTo(returned.getAdvisorOrgUuid());
+
+    // Re-submit the report
+    submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
         r.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(submitted).isNotNull();
 
-    // Report should now be up for review by EF1 approvers
+    // Report should now be up for review by primary advisor org's (EF 1.1) approvers
     Report returned2 = graphQLHelper.getObjectById(jack, "report", FIELDS, r.getUuid(),
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned2.getUuid()).isEqualTo(r.getUuid());
     assertThat(returned2.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
     assertThat(returned2.getApprovalStepUuid()).isNotEqualTo(returned.getApprovalStepUuid());
+    assertThat(returned2.getApprovalStep()).isNotNull();
+    assertThat(returned2.getApprovalStep().getRelatedObjectUuid()).isEqualTo(ef11.getUuid());
   }
 
   @Test
