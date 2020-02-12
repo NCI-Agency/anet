@@ -38,7 +38,7 @@ const commonConfig = {
       },
       {
         test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
+        include: paths.appSrc,
         use: {
           loader: "babel-loader",
           options: {
@@ -46,6 +46,20 @@ const commonConfig = {
           }
         }
       },
+      {
+        test: /\.js$/,
+        // Based on https://github.com/facebook/create-react-app/pull/3776
+        include: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            babelrc: false,
+            presets: [require.resolve("babel-preset-react-app/dependencies")],
+            cacheDirectory: true
+          }
+        }
+      },
+
       {
         test: /\.css$/,
         use: [

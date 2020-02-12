@@ -193,6 +193,7 @@
     ],
     "testEnvironment": "node"
   },
+  "browserslist": [ "> 1%", "IE 11" ],
   "babel": {
     "presets": [
       "react-app"
