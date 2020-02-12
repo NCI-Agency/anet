@@ -1,5 +1,5 @@
 import { Settings } from "api"
-import Model, { yupDate } from "components/Model"
+import Model, { createYupObjectShape, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position } from "models"
 import React from "react"
@@ -30,6 +30,11 @@ export default class Person extends Model {
   }
 
   static nameDelimiter = ","
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createYupObjectShape(
+    Settings.fields.person.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -113,6 +118,10 @@ export default class Person extends Model {
         .nullable()
         .default("")
         .label(Settings.fields.person.phoneNumber),
+      code: yup
+        .string()
+        .nullable()
+        .default(""),
       endOfTourDate: yupDate
         .nullable()
         .when(["role", "status"], (role, status, schema) => {
@@ -149,7 +158,9 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE)
+        .default(() => Person.STATUS.ACTIVE),
+      // not actually in the database, the database contains the JSON customFields
+      formCustomFields: Person.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 
@@ -274,9 +285,9 @@ export default class Person extends Model {
     if (!this.position || !this.position.organization) {
       return false
     }
-    let orgs = this.position.organization.descendantOrgs || []
+    const orgs = this.position.organization.descendantOrgs || []
     orgs.push(this.position.organization)
-    let orgUuids = orgs.map(o => o.uuid)
+    const orgUuids = orgs.map(o => o.uuid)
 
     return orgUuids.includes(org.uuid)
   }

@@ -1,4 +1,4 @@
-"$schema": http://json-schema.org/draft-06/schema#
+"$schema": "http://json-schema.org/draft-07/schema#"
 "$id": https://raw.githubusercontent.com/NCI-Agency/anet/master/src/main/resources/anet-schema.json
 
 #########################################################
@@ -64,6 +64,124 @@ definitions:
               WHITE:
                 label: White
       required: [enum]
+
+# definition for custom fields
+  customField:
+    type: object
+    additionalProperties: false
+    required: [type]
+    properties:
+      type:
+        title: value type field
+        type: string
+        enum: [text, number, date, datetime, enum, enumset, array_of_objects, special_field]
+      label:
+        type: string
+      helpText:
+        type: string
+      visibleWhen:
+        type: string
+      style:
+        type: object
+      placeholder:
+        type: string
+      componentClass:
+        type: string
+      validations:
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+            params:
+              type: array
+          required: [type]
+
+# TODO: The following properties should not be here as these are only dependency fields.
+# I can't figure out yet why the schema validation will not pass without them
+      choices:
+        type: object
+      addButtonLabel:
+        type: string
+      objectLabel:
+        type: string
+      objectFields:
+        type: object
+        additionalProperties:
+          "$ref": "#/definitions/customField"
+      widget:
+        type: string
+        enum: [likertScale, default]
+      levels:
+        type: array
+        uniqueItems: true
+        items:
+          type: object
+          title: likert scale range
+          properties:
+            color:
+              type: string
+            endValue:
+              type: number
+            label:
+              type: string
+
+    dependencies:
+      type:
+        oneOf:
+        - properties:
+            type:
+              enum: [text, number, date, datetime]
+        - properties:
+            type:
+              enum: [enum, enumset]
+            choices:
+              type: object
+          required: [choices]
+        - properties:
+            type:
+              enum: [array_of_objects]
+            addButtonLabel:
+              type: string
+            objectLabel:
+              type: string
+            objectFields:
+              type: object
+              additionalProperties:
+                "$ref": "#/definitions/customField"
+          required: [addButtonLabel,objectLabel,objectFields]
+        - properties:
+            type:
+              enum: [special_field]
+            widget:
+              title: custom widget for field
+              type: string
+              enum: [likertScale, default]
+          required: [widget]
+          dependencies:
+            widget:
+              oneOf:
+              - properties:
+                  widget:
+                    enum: [default]
+              - properties:
+                  widget:
+                    enum: [likertScale]
+                  levels:
+                    type: array
+                    uniqueItems: true
+                    items:
+                      type: object
+                      title: likert scale range
+                      properties:
+                        color:
+                          type: string
+                        endValue:
+                          type: number
+                        label:
+                          type: string
+                required: [levels]
 
 #########################################################
 ### schema root
@@ -194,7 +312,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, longLabel, longName, responsibleOrg, responsiblePositions]
+        required: [shortLabel, shortName, longLabel, longName, taskedOrganizations, responsiblePositions]
         properties:
           shortLabel:
             type: string
@@ -222,18 +340,19 @@ properties:
             "$ref": "#/definitions/choiceField"
           customFieldEnum2:
             "$ref": "#/definitions/choiceField"
-          responsibleOrg:
-            type: string
-            title: The label for a task's responsible organization
-            description: Used in the UI where a label for a task's responsible organization is shown.
-            examples: [Responsible organization]
+          taskedOrganizations:
+            "$ref": "#/definitions/inputField"
           responsiblePositions:
             "$ref": "#/definitions/inputField"
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/definitions/customField"
 
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,keyOutcomes,reportText]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
         properties:
           intent:
             type: string
@@ -267,6 +386,10 @@ properties:
             type: string
             title: The label for report's engagement details
             description: Used in the UI where report's engagement details are shown.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/definitions/customField"
 
       person:
         type: object
@@ -297,6 +420,10 @@ properties:
             type: string
             title: The label for a person's country
             description: Used in the UI where a person's country is shown.
+          code:
+            type: string
+            title: The label for a person's code
+            description: Used in the UI where a person's code is shown.
           rank:
             type: string
             title: The label for a person's rank
@@ -315,6 +442,10 @@ properties:
             type: string
             title: The label for a person's end of tour date
             description: Used in the UI where a person's end of tour date is shown.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/definitions/customField"
 
       position:
         type: object

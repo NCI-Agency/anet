@@ -33,10 +33,12 @@ export default class RelatedObjectNoteModal extends Component {
     onSuccess: PropTypes.func.isRequired,
     questions: PropTypes.array
   }
+
   yupSchema = yup.object().shape({
     type: yup.string().required(),
     text: yup.string().default("")
   })
+
   state = {
     error: null
   }
@@ -49,7 +51,6 @@ export default class RelatedObjectNoteModal extends Component {
           enableReinitialize
           onSubmit={this.onSubmit}
           validationSchema={this.yupSchema}
-          isInitialValid
           initialValues={note}
         >
           {({
@@ -64,7 +65,10 @@ export default class RelatedObjectNoteModal extends Component {
             const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
             const noteText = isJson ? jsonFields.text : note.text
             const typeName =
-              note.type === NOTE_TYPE.PARTNER_ASSESSMENT ? "assessment" : "note"
+              note.type === NOTE_TYPE.PARTNER_ASSESSMENT ||
+              note.type === NOTE_TYPE.ASSESSMENT
+                ? "assessment"
+                : "note"
             return (
               <Form>
                 <Modal.Header closeButton>
@@ -91,7 +95,7 @@ export default class RelatedObjectNoteModal extends Component {
                             <Field
                               name={question.id}
                               label=""
-                              component={FieldHelper.renderButtonToggleGroup}
+                              component={FieldHelper.RadioButtonToggleGroup}
                               buttons={question.choice}
                               onChange={value => {
                                 setFieldValue(question.id, value)
@@ -107,12 +111,15 @@ export default class RelatedObjectNoteModal extends Component {
                     <Field
                       name="text"
                       value={noteText}
-                      component={FieldHelper.renderSpecialField}
+                      component={FieldHelper.SpecialField}
                       onChange={value => setFieldValue("text", value)}
                       widget={
                         <RichTextEditor
                           className="textField"
-                          onHandleBlur={() => setFieldTouched("text", true)}
+                          onHandleBlur={() => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("text", true, false)
+                          }}
                         />
                       }
                       vertical

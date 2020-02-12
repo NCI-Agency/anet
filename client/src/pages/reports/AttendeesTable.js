@@ -10,8 +10,7 @@ const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
 )
 
-const RemoveButton = props => {
-  const { title, handleOnClick } = props
+const RemoveButton = ({ title, handleOnClick }) => {
   return (
     <Button bsStyle="link" title={title} onClick={handleOnClick}>
       <RemoveIcon />
@@ -31,8 +30,7 @@ const AttendeeDividerRow = () => (
   </tr>
 )
 
-const TableHeader = props => {
-  const { showDelete, hide } = props
+const TableHeader = ({ showDelete, hide }) => {
   return (
     <thead>
       <tr>
@@ -53,8 +51,7 @@ TableHeader.propTypes = {
   hide: PropTypes.bool
 }
 
-const TableBody = props => {
-  const { attendees, handleAttendeeRow, role, enableDivider } = props
+const TableBody = ({ attendees, handleAttendeeRow, role, enableDivider }) => {
   return (
     <tbody>
       {enableDivider && <AttendeeDividerRow />}
@@ -66,14 +63,16 @@ const TableBody = props => {
   )
 }
 TableBody.propTypes = {
-  attendees: PropTypes.array,
+  attendees: PropTypes.array.isRequired,
   handleAttendeeRow: PropTypes.func,
   role: PropTypes.string,
   enableDivider: PropTypes.bool
 }
+TableBody.defaultProps = {
+  attendees: []
+}
 
-const TableContainer = props => {
-  const { className, children } = props
+const TableContainer = ({ className, children }) => {
   return (
     <Table striped condensed hover responsive className={className}>
       {children}
@@ -85,8 +84,7 @@ TableContainer.propTypes = {
   children: PropTypes.node
 }
 
-const RadioButton = props => {
-  const { person, disabled, handleOnChange } = props
+const RadioButton = ({ person, disabled, handleOnChange }) => {
   return (
     <Radio
       name={`primaryAttendee${person.role}`}
@@ -105,9 +103,13 @@ RadioButton.propTypes = {
   handleOnChange: PropTypes.func
 }
 
-const AttendeesTable = props => {
-  const { attendees, disabled, onChange, showDelete, onDelete } = props
-
+const AttendeesTable = ({
+  attendees,
+  disabled,
+  onChange,
+  showDelete,
+  onDelete
+}) => {
   return (
     <div id="attendeesContainer">
       <TableContainer className="advisorAttendeesTable">

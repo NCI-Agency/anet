@@ -12,7 +12,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -36,8 +36,7 @@ const GQL_UPDATE_POSITION = gql`
   }
 `
 
-const BasePositionForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -104,9 +103,7 @@ const BasePositionForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Position.yupSchema}
-      isInitialValid
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -114,6 +111,7 @@ const BasePositionForm = props => {
         dirty,
         errors,
         setFieldValue,
+        setFieldTouched,
         values,
         submitForm
       }) => {
@@ -186,24 +184,24 @@ const BasePositionForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                {props.edit ? (
-                  <Field
+                {edit ? (
+                  <FastField
                     name="type"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Position.humanNameOfType}
                   />
                 ) : (
-                  <Field
+                  <FastField
                     name="type"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={typeButtons}
                     onChange={value => setFieldValue("type", value)}
                   />
                 )}
 
-                <Field
+                <FastField
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 >
@@ -216,41 +214,51 @@ const BasePositionForm = props => {
                       </span>
                     </HelpBlock>
                   )}
-                </Field>
+                </FastField>
 
-                <AdvancedSingleSelect
-                  fieldName="organization"
-                  fieldLabel="Organization"
-                  placeholder="Search the organization for this position..."
-                  value={values.organization}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={OrganizationOverlayRow}
-                  filterDefs={organizationFilters}
-                  onChange={value => setFieldValue("organization", value)}
-                  objectType={Organization}
-                  fields={Organization.autocompleteQuery}
-                  queryParams={orgSearchQuery}
-                  valueKey="shortName"
-                  addon={ORGANIZATIONS_ICON}
+                <FastField
+                  name="organization"
+                  label="Organization"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("organization", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="organization"
+                      placeholder="Search the organization for this position..."
+                      value={values.organization}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={orgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
                 />
 
                 <CodeFieldWithLabel
                   dictProps={positionSettings.code}
                   name="code"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
-                <Field
+                <FastField
                   name="name"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   label={Settings.fields.position.name}
                   placeholder="Name/Description of Position"
                 />
 
                 {!isPrincipal && (
-                  <Field
+                  <FastField
                     name="permissions"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={permissionsButtons}
                     onChange={value => setFieldValue("permissions", value)}
                   />
@@ -258,20 +266,30 @@ const BasePositionForm = props => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <AdvancedSingleSelect
-                  fieldName="location"
-                  fieldLabel="Location"
-                  placeholder="Search for the location where this Position will operate from..."
-                  value={values.location}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={LocationOverlayRow}
-                  filterDefs={locationFilters}
-                  onChange={value => setFieldValue("location", value)}
-                  objectType={Location}
-                  fields={Location.autocompleteQuery}
-                  queryParams={{ status: Location.STATUS.ACTIVE }}
-                  valueKey="name"
-                  addon={LOCATIONS_ICON}
+                <FastField
+                  name="location"
+                  label="Location"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("location", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="location"
+                      placeholder="Search for the location where this Position will operate from..."
+                      value={values.location}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={LocationOverlayRow}
+                      filterDefs={locationFilters}
+                      objectType={Location}
+                      fields={Location.autocompleteQuery}
+                      queryParams={{ status: Location.STATUS.ACTIVE }}
+                      valueKey="name"
+                      addon={LOCATIONS_ICON}
+                    />
+                  }
                 />
               </Fieldset>
 
@@ -313,12 +331,11 @@ const BasePositionForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updatePosition" : "createPosition"
     const position = new Position({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -343,10 +360,9 @@ const BasePositionForm = props => {
     position.organization = utils.getReference(position.organization)
     position.person = utils.getReference(position.person)
     position.code = position.code || null // Need to null out empty position codes
-    return API.mutation(
-      props.edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION,
-      { position }
-    )
+    return API.mutation(edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION, {
+      position
+    })
   }
 }
 

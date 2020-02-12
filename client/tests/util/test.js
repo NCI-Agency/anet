@@ -1,15 +1,15 @@
-let path = require("path")
-let { URL } = require("url")
-let test = require("ava")
-let webdriver = require("selenium-webdriver")
-let { By, until, Key } = webdriver
-let moment = require("moment")
-let _includes = require("lodash/includes")
-let _isRegExp = require("lodash/isRegExp")
-let chalk = require("chalk")
+const path = require("path")
+const { URL } = require("url")
+const test = require("ava")
+const webdriver = require("selenium-webdriver")
+const { By, until, Key } = webdriver
+const moment = require("moment")
+const _includes = require("lodash/includes")
+const _isRegExp = require("lodash/isRegExp")
+const chalk = require("chalk")
 
 let capabilities = {}
-let testEnv =
+const testEnv =
   (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   // This gives us access to send Chrome commands.
@@ -46,7 +46,7 @@ function debugLog(...args) {
 test.beforeEach(t => {
   let builder = new webdriver.Builder()
   if (testEnv === "local") {
-    let chrome = require("selenium-webdriver/chrome")
+    const chrome = require("selenium-webdriver/chrome")
     builder = builder
       .forBrowser("chrome")
       .setChromeOptions(new chrome.Options().headless())
@@ -58,9 +58,9 @@ test.beforeEach(t => {
   }
   t.context.driver = builder.build()
 
-  let shortWaitMs = moment.duration(1, "seconds").asMilliseconds()
-  let mediumWaitMs = moment.duration(3, "seconds").asMilliseconds()
-  let longWaitMs = moment.duration(9, "seconds").asMilliseconds()
+  const shortWaitMs = moment.duration(1, "seconds").asMilliseconds()
+  const mediumWaitMs = moment.duration(3, "seconds").asMilliseconds()
+  const longWaitMs = moment.duration(9, "seconds").asMilliseconds()
 
   t.context.By = By
   t.context.until = until
@@ -73,8 +73,8 @@ test.beforeEach(t => {
   // Passing the authentication through the querystring is a hack so we can
   // pass the information along via window.fetch.
   t.context.get = async(pathname, userPw) => {
-    let credentials = userPw || "erin"
-    let urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
+    const credentials = userPw || "erin"
+    const urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
     debugLog("Getting URL", urlToGet)
     await t.context.driver.get(urlToGet)
     await t.context.waitForLoadingFinished()
@@ -125,8 +125,8 @@ test.beforeEach(t => {
 
   t.context.$ = async(cssSelector, timeoutMs) => {
     debugLog(`Find element: $('${cssSelector}')`)
-    let waitTimeoutMs = timeoutMs || longWaitMs
-    let locator = By.css(cssSelector)
+    const waitTimeoutMs = timeoutMs || longWaitMs
+    const locator = By.css(cssSelector)
     await t.context.driver.wait(
       until.elementLocated(locator),
       waitTimeoutMs,
@@ -136,8 +136,8 @@ test.beforeEach(t => {
   }
   t.context.$$ = async(cssSelector, timeoutMs) => {
     debugLog(`Find elements: $$('${cssSelector}')`)
-    let waitTimeoutMs = timeoutMs || longWaitMs
-    let locator = By.css(cssSelector)
+    const waitTimeoutMs = timeoutMs || longWaitMs
+    const locator = By.css(cssSelector)
     await t.context.driver.wait(
       until.elementsLocated(locator),
       waitTimeoutMs,
@@ -149,7 +149,7 @@ test.beforeEach(t => {
   // A helper method to combine waiting for an element to have rendered and then asserting on its contents.
   t.context.assertElementText = async(t, $elem, expectedText, message) => {
     try {
-      let untilCondition = _isRegExp(expectedText)
+      const untilCondition = _isRegExp(expectedText)
         ? until.elementTextMatches($elem, expectedText)
         : until.elementTextIs($elem, expectedText)
 
@@ -161,7 +161,7 @@ test.beforeEach(t => {
         throw e
       }
     }
-    let actualText = (await $elem.getText()).trim()
+    const actualText = (await $elem.getText()).trim()
     if (_isRegExp(expectedText)) {
       t.regex(actualText, expectedText, actualText, message)
     } else {
@@ -178,7 +178,7 @@ test.beforeEach(t => {
     message,
     timeoutMs
   ) => {
-    let waitTimeoutMs = timeoutMs || longWaitMs
+    const waitTimeoutMs = timeoutMs || longWaitMs
     try {
       await t.context.driver.wait(
         async() => {
@@ -216,7 +216,7 @@ test.beforeEach(t => {
     message,
     timeoutMs
   ) => {
-    let waitTimeoutMs = timeoutMs || longWaitMs
+    const waitTimeoutMs = timeoutMs || longWaitMs
     try {
       var elem = await t.context.$(cssSelector, waitTimeoutMs)
     } catch (e) {
@@ -236,7 +236,7 @@ test.beforeEach(t => {
     message,
     timeoutMs
   ) => {
-    let waitTimeoutMs = timeoutMs || longWaitMs
+    const waitTimeoutMs = timeoutMs || longWaitMs
     try {
       var elem = await t.context.$(cssSelector, waitTimeoutMs)
     } catch (e) {
@@ -250,7 +250,7 @@ test.beforeEach(t => {
   }
 
   t.context.getCurrentPathname = async() => {
-    let currentUrl = await t.context.driver.getCurrentUrl()
+    const currentUrl = await t.context.driver.getCurrentUrl()
     return new URL(currentUrl).pathname
   }
 
@@ -258,40 +258,44 @@ test.beforeEach(t => {
     async goHomeAndThenToReportsPage() {
       await t.context.get("/")
 
-      let $createButton = await t.context.$("#createButton")
+      const $createButton = await t.context.$("#createButton")
       await $createButton.click()
     },
     async clickTodayButton() {
-      let $todayButton = await t.context.driver.findElement(
+      const $todayButton = await t.context.driver.findElement(
         By.xpath('//button/span[text()="Today"]')
       )
       await $todayButton.click()
     },
     async clickNextMonthDate() {
-      let $nextMonthButton = await t.context.driver.findElement(
+      const $nextMonthButton = await t.context.driver.findElement(
         By.xpath('//button/span[icon="chevron-right"]')
       )
       await $nextMonthButton.click()
-      let $nextMonthDate = await t.context.driver.findElement(
+      const $nextMonthDate = await t.context.driver.findElement(
         By.xpath('//div[class="DayPicker-Day--selected"]')
       )
       await $nextMonthDate.click()
     },
     async chooseAdvancedSelectOption(inputSelector, text) {
       const popoverSelector = `${inputSelector}-popover`
-      let $advancedSelectInput = await t.context.$(inputSelector)
+      const $advancedSelectInput = await t.context.$(inputSelector)
+      await $advancedSelectInput.click()
       await $advancedSelectInput.sendKeys(text)
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       t.context.waitForLoadingFinished()
-      let $advancedSelectSuggestion = await t.context.$(
+      const $advancedSelectSuggestion = await t.context.$(
         `${popoverSelector} tbody tr:first-child td input`
       )
       await $advancedSelectSuggestion.click()
       return $advancedSelectInput
     },
-    async writeInForm(inputSelector, text) {
-      let $meetingGoalInput = await t.context.$(inputSelector)
+    async writeInForm(inputSelector, text, delay) {
+      const $meetingGoalInput = await t.context.$(inputSelector)
       await $meetingGoalInput.sendKeys(text)
+      if (delay) {
+        await t.context.driver.sleep(delay) // wait e.g. for Draftail to save the editor contents
+      }
     },
     async assertReportShowStatusText(t, text) {
       await t.context.assertElementText(
@@ -301,33 +305,47 @@ test.beforeEach(t => {
       )
     },
     async clickMyOrgLink() {
-      let $myOrgLink = await t.context.$("#my-organization")
+      const $myOrgLink = await t.context.$("#my-organization")
       await t.context.driver.wait(t.context.until.elementIsVisible($myOrgLink))
       await $myOrgLink.click()
       await t.context.waitForLoadingFinished()
     },
     async clickFormBottomSubmit() {
-      let $formBottomSubmit = await t.context.$("#formBottomSubmit")
+      const $formBottomSubmit = await t.context.$("#formBottomSubmit")
       await t.context.driver.wait(
         t.context.until.elementIsVisible($formBottomSubmit)
       )
       await $formBottomSubmit.click()
     },
     async clickPersonNameFromSupportedPositionsFieldset(personName) {
-      let $supportedPositionsRows = await t.context.$$(
+      const $supportedPositionsRows = await t.context.$$(
         "#supportedPositions table tbody tr"
       )
-      for (let $row of $supportedPositionsRows) {
-        let [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
-        await t.context.driver.wait(until.elementIsVisible($billetCell))
+      for (const $row of $supportedPositionsRows) {
+        const [$billetCell, $advisorCell] = await $row.findElements(
+          By.css("td")
+        )
+        await t.context.driver.wait(
+          until.elementIsVisible($billetCell),
+          mediumWaitMs
+        )
         await $billetCell.getText()
-        await t.context.driver.wait(until.elementIsVisible($advisorCell))
-        let advisorText = await $advisorCell.getText()
+        await t.context.driver.wait(
+          until.elementIsVisible($advisorCell),
+          mediumWaitMs
+        )
+        const advisorText = await $advisorCell.getText()
         if (advisorText === personName) {
-          let $advisorLink = await $advisorCell.findElement(By.css("a"))
-          await t.context.driver.wait(until.elementIsVisible($advisorLink))
+          const $advisorLink = await $advisorCell.findElement(By.css("a"))
+          await t.context.driver.wait(
+            until.elementIsVisible($advisorLink),
+            mediumWaitMs
+          )
           await $advisorLink.click()
-          await t.context.driver.wait(until.stalenessOf($advisorLink))
+          await t.context.driver.wait(
+            until.stalenessOf($advisorLink),
+            mediumWaitMs
+          )
           return
         }
       }

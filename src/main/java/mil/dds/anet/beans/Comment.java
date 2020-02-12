@@ -1,7 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
@@ -14,12 +14,15 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Comment extends AbstractAnetBean {
 
+  @GraphQLQuery
+  @GraphQLInputField
   private String reportUuid;
-
+  // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   private String text;
 
-  @GraphQLQuery(name = "reportUuid")
   public String getReportUuid() {
     return reportUuid;
   }
@@ -41,27 +44,24 @@ public class Comment extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setAuthorUuid(String authorUuid) {
     this.author = new ForeignObjectHolder<>(authorUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getAuthorUuid() {
     return author.getForeignUuid();
   }
 
-  @GraphQLIgnore
   public Person getAuthor() {
     return author.getForeignObject();
   }
 
+  @GraphQLInputField(name = "author")
   public void setAuthor(Person author) {
     this.author = new ForeignObjectHolder<>(author);
   }
 
-  @GraphQLQuery(name = "text")
   public String getText() {
     return text;
   }

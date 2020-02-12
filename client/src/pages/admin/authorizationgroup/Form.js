@@ -29,8 +29,7 @@ const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const AuthorizationGroupForm = props => {
-  const { edit, title, ...myFormProps } = props
+const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -51,8 +50,7 @@ const AuthorizationGroupForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={AuthorizationGroup.yupSchema}
-      isInitialValid
-      {...myFormProps}
+      initialValues={initialValues}
     >
       {({
         handleSubmit,
@@ -60,6 +58,7 @@ const AuthorizationGroupForm = props => {
         dirty,
         errors,
         setFieldValue,
+        setFieldTouched,
         values,
         submitForm
       }) => {
@@ -97,11 +96,11 @@ const AuthorizationGroupForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field name="name" component={FieldHelper.renderInputField} />
+                <Field name="name" component={FieldHelper.InputField} />
 
                 <Field
                   name="description"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   maxLength={Settings.maxTextFieldLength}
                   onKeyUp={event =>
@@ -114,7 +113,7 @@ const AuthorizationGroupForm = props => {
                     <>
                       <span id="descriptionCharsLeft">
                         {Settings.maxTextFieldLength -
-                          props.initialValues.description.length}
+                          initialValues.description.length}
                       </span>{" "}
                       characters remaining
                     </>
@@ -123,30 +122,43 @@ const AuthorizationGroupForm = props => {
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroup}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <AdvancedMultiSelect
-                  fieldName="positions"
-                  fieldLabel="Positions"
-                  placeholder="Search for a position..."
-                  value={values.positions}
-                  renderSelected={
-                    <PositionTable positions={values.positions} showDelete />
+                <Field
+                  name="positions"
+                  label="Positions"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("positions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("positions", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="positions"
+                      placeholder="Search for a position..."
+                      value={values.positions}
+                      renderSelected={
+                        <PositionTable
+                          positions={values.positions}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={[
+                        "Position",
+                        "Organization",
+                        "Current Occupant"
+                      ]}
+                      overlayRenderRow={PositionOverlayRow}
+                      filterDefs={positionsFilters}
+                      objectType={Position}
+                      fields={Position.autocompleteQuery}
+                      addon={POSITIONS_ICON}
+                    />
                   }
-                  overlayColumns={[
-                    "Position",
-                    "Organization",
-                    "Current Occupant"
-                  ]}
-                  overlayRenderRow={PositionOverlayRow}
-                  filterDefs={positionsFilters}
-                  onChange={value => setFieldValue("positions", value)}
-                  objectType={Position}
-                  fields={Position.autocompleteQuery}
-                  addon={POSITIONS_ICON}
                 />
               </Fieldset>
 
@@ -194,14 +206,13 @@ const AuthorizationGroupForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit
       ? "updateAuthorizationGroup"
       : "createAuthorizationGroup"
     const authGroup = new AuthorizationGroup({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -220,9 +231,7 @@ const AuthorizationGroupForm = props => {
       "notes"
     )
     return API.mutation(
-      props.edit
-        ? GQL_UPDATE_AUTHORIZATION_GROUP
-        : GQL_CREATE_AUTHORIZATION_GROUP,
+      edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,
       { authorizationGroup }
     )
   }

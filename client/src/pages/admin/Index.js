@@ -6,9 +6,9 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import {
+  PageDispatchersPropType,
   jumpToTop,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
@@ -31,7 +31,7 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
   }
 `
 
-const BaseAdminIndex = props => {
+const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -42,13 +42,13 @@ const BaseAdminIndex = props => {
     error,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
 
-  let settings = {}
+  const settings = {}
   data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
 
   return (
@@ -76,7 +76,7 @@ const BaseAdminIndex = props => {
                   <Field
                     key={key}
                     name={key}
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                   />
                 ))}
               </Fieldset>
@@ -109,7 +109,7 @@ const BaseAdminIndex = props => {
     setSaveError()
     setSaveSuccess("Admin settings saved")
     jumpToTop()
-    props.loadAppData()
+    loadAppData()
     refetch()
   }
 
@@ -121,7 +121,7 @@ const BaseAdminIndex = props => {
 }
 
 BaseAdminIndex.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   loadAppData: PropTypes.func
 }
 
@@ -131,4 +131,4 @@ const AdminIndex = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(AdminIndex)
+export default connect(null, mapPageDispatchersToProps)(AdminIndex)

@@ -2,8 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -27,7 +27,7 @@ const GQL_GET_TASK = gql`
       customFieldEnum2
       plannedCompletion
       projectedCompletion
-      responsibleOrg {
+      taskedOrganizations {
         uuid
         shortName
         longName
@@ -56,12 +56,13 @@ const GQL_GET_TASK = gql`
           avatar(size: 32)
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
 
-const TaskEdit = props => {
+const TaskEdit = ({ pageDispatchers }) => {
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
     uuid
@@ -73,12 +74,14 @@ const TaskEdit = props => {
     uuid,
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
-
+  if (data) {
+    data.task.formCustomFields = JSON.parse(data.task.customFields)
+  }
   const task = new Task(data ? data.task : {})
 
   return (
@@ -102,7 +105,7 @@ const TaskEdit = props => {
 }
 
 TaskEdit.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(TaskEdit)
+export default connect(null, mapPageDispatchersToProps)(TaskEdit)

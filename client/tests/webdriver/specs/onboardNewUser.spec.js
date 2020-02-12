@@ -26,7 +26,7 @@ describe("Onboard new user login", () => {
     // select a date
     CreatePerson.endOfTourToday.click()
     CreatePerson.lastName.click()
-    let errorMessage = CreatePerson.endOfTourDate
+    const errorMessage = CreatePerson.endOfTourDate
       .$("..")
       .$("..")
       .$("..")

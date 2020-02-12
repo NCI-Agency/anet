@@ -47,6 +47,7 @@ export default class LinkTo extends Component {
 
     target: PropTypes.string,
     whenUnspecified: PropTypes.string,
+    style: PropTypes.object,
     ...modelPropTypes
   }
 
@@ -71,6 +72,7 @@ export default class LinkTo extends Component {
       isLink,
       whenUnspecified,
       className,
+      style,
       ...componentProps
     } = this.props
 
@@ -83,7 +85,7 @@ export default class LinkTo extends Component {
     } else {
       componentProps.className = className
     }
-    let modelName = Object.keys(componentProps).find(
+    const modelName = Object.keys(componentProps).find(
       key => MODEL_NAMES.indexOf(key) !== -1
     )
     if (!modelName) {
@@ -110,7 +112,7 @@ export default class LinkTo extends Component {
     // Avatar
     const avatarComponent = showAvatar &&
       !button &&
-      modelFields.hasOwnProperty("avatar") && (
+      Object.prototype.hasOwnProperty.call(modelFields, "avatar") && (
         <AvatarDisplayComponent
           avatar={modelInstance.avatar}
           height={32}
@@ -121,7 +123,7 @@ export default class LinkTo extends Component {
 
     if (!isLink) {
       return (
-        <span>
+        <span style={style}>
           {avatarComponent}
           {modelInstance.toString()}
         </span>
@@ -131,7 +133,7 @@ export default class LinkTo extends Component {
     let to = modelFields
     if (!isModel) {
       if (to.indexOf("?")) {
-        let components = to.split("?")
+        const components = to.split("?")
         to = { pathname: components[0], search: components[1] }
       }
     } else {
@@ -144,7 +146,7 @@ export default class LinkTo extends Component {
 
     const LinkToComponent = componentClass
     return (
-      <LinkToComponent to={to} {...componentProps}>
+      <LinkToComponent to={to} style={style} {...componentProps}>
         <>
           {iconComponent}
           {avatarComponent}

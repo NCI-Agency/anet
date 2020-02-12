@@ -62,8 +62,8 @@ export default class AuthorizationGroup extends Model {
       }
     }
 
-    let resourceName = utils.resourceize(this.resourceName)
-    let uuid = instance.uuid
+    const resourceName = utils.resourceize(this.resourceName)
+    const uuid = instance.uuid
     let url = ["", "admin", resourceName, uuid].join("/")
 
     if (query) {
@@ -74,7 +74,7 @@ export default class AuthorizationGroup extends Model {
   }
 
   static pathForNew(query) {
-    let resourceName = utils.resourceize(this.resourceName)
+    const resourceName = utils.resourceize(this.resourceName)
     let url = ["", "admin", resourceName, "new"].join("/")
 
     if (query) {

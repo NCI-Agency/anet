@@ -11,7 +11,7 @@ const SavedSearchTable = props => {
     return <em>No reports found</em>
   }
 
-  let query = JSON.parse(props.search.query)
+  const query = JSON.parse(props.search.query)
   // Add default sorting (if not specified/saved in the query); see SEARCH_CONFIG in pages/Search.js
   query.sortBy = query.sortBy || "ENGAGEMENT_DATE"
   query.sortOrder = query.sortOrder || "DESC"

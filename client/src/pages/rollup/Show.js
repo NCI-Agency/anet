@@ -14,9 +14,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import MosaicLayout from "components/MosaicLayout"
 import {
-  getSearchQuery,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import ReportCollection, {
@@ -25,6 +24,7 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
+import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
 import { Organization, Report } from "models"
 import moment from "moment"
@@ -98,14 +98,20 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
-const Chart = props => {
-  const { rollupStart, rollupEnd, focusedOrg, setFocusedOrg, orgType } = props
+const Chart = ({
+  pageDispatchers,
+  rollupStart,
+  rollupEnd,
+  focusedOrg,
+  setFocusedOrg,
+  orgType
+}) => {
   const variables = getVariables()
   const { loading, error, data } = API.useApiQuery(GQL_ROLLUP_GRAPH, variables)
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const graphData = useMemo(() => {
     if (!data) {
@@ -118,10 +124,10 @@ const Chart = props => {
         return d
       })
       .sort((a, b) => {
-        let aIndex = pinnedOrgs.indexOf(a.org.shortName)
-        let bIndex = pinnedOrgs.indexOf(b.org.shortName)
+        const aIndex = pinnedOrgs.indexOf(a.org.shortName)
+        const bIndex = pinnedOrgs.indexOf(b.org.shortName)
         if (aIndex < 0) {
-          let nameOrder = a.org.shortName.localeCompare(b.org.shortName)
+          const nameOrder = a.org.shortName.localeCompare(b.org.shortName)
           return bIndex < 0
             ? nameOrder === 0
               ? a.org.uuid - b.org.uuid
@@ -203,6 +209,7 @@ const Chart = props => {
 }
 
 Chart.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   rollupStart: PropTypes.object,
   rollupEnd: PropTypes.object,
   focusedOrg: PropTypes.object,
@@ -210,9 +217,7 @@ Chart.propTypes = {
   orgType: PropTypes.string
 }
 
-const Collection = props => {
-  const { queryParams } = props
-
+const Collection = ({ queryParams }) => {
   return (
     <div className="scrollable">
       <ReportCollection
@@ -228,9 +233,7 @@ Collection.propTypes = {
   queryParams: PropTypes.object
 }
 
-const Map = props => {
-  const { queryParams } = props
-
+const Map = ({ queryParams }) => {
   return (
     <div className="non-scrollable">
       <ContainerDimensions>
@@ -252,8 +255,7 @@ Map.propTypes = {
   queryParams: PropTypes.object
 }
 
-const BaseRollupShow = props => {
-  const { appSettings, searchQuery } = props
+const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
   const history = useHistory()
   const routerLocation = useLocation()
   const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
@@ -266,7 +268,7 @@ const BaseRollupShow = props => {
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   const VISUALIZATIONS = [
@@ -371,13 +373,18 @@ const BaseRollupShow = props => {
         action={
           <span>
             <Button
+              id="print-rollup"
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={printPreview}
             >
               Print
             </Button>
-            <Button onClick={toggleEmailModal} bsStyle="primary">
+            <Button
+              id="email-rollup"
+              onClick={toggleEmailModal}
+              bsStyle="primary"
+            >
               Email rollup
             </Button>
           </span>
@@ -404,6 +411,7 @@ const BaseRollupShow = props => {
   function renderChart(id) {
     return (
       <Chart
+        pageDispatchers={pageDispatchers}
         rollupStart={getRollupStart()}
         rollupEnd={getRollupEnd()}
         focusedOrg={focusedOrg}
@@ -512,7 +520,7 @@ const BaseRollupShow = props => {
             </h5>
             <Field
               name="to"
-              component={FieldHelper.renderInputField}
+              component={FieldHelper.InputField}
               validate={email => handleEmailValidation(email)}
               vertical
             >
@@ -527,13 +535,14 @@ const BaseRollupShow = props => {
             </Field>
             <Field
               name="comment"
-              component={FieldHelper.renderInputField}
+              component={FieldHelper.InputField}
               componentClass="textarea"
               vertical
             />
           </Modal.Body>
           <Modal.Footer>
             <Button
+              id="preview-rollup-email"
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={showPreview}
@@ -541,6 +550,7 @@ const BaseRollupShow = props => {
               Preview
             </Button>
             <Button
+              id="send-rollup-email"
               bsStyle="primary"
               type="button"
               onClick={submitForm}
@@ -583,8 +593,8 @@ const BaseRollupShow = props => {
       variables.orgType = orgType
     }
     return API.query(GQL_SHOW_ROLLUP_EMAIL, variables).then(data => {
-      let rollupWindow = window.open("", "rollup")
-      let doc = rollupWindow.document
+      const rollupWindow = window.open("", "rollup")
+      const doc = rollupWindow.document
       doc.clear()
       doc.open()
       doc.write(data.showRollupEmail)
@@ -643,7 +653,8 @@ const BaseRollupShow = props => {
 
 BaseRollupShow.propTypes = {
   appSettings: PropTypes.object,
-  ...pagePropTypes
+  searchQuery: SearchQueryPropType,
+  pageDispatchers: PageDispatchersPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -656,4 +667,4 @@ const RollupShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(RollupShow)
+export default connect(mapStateToProps, mapPageDispatchersToProps)(RollupShow)

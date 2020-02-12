@@ -33,7 +33,7 @@ export default class ReportTags extends Component {
 
   @autobind
   handleTagDelete(i) {
-    let tags = _clone(this.props.value)
+    const tags = _clone(this.props.value)
     tags.splice(i, 1)
     if (this.props.onChange) {
       this.props.onChange(tags)
@@ -44,7 +44,7 @@ export default class ReportTags extends Component {
   handleTagAddition(tag) {
     const newTag = this.props.suggestions.find(t => t.id === tag.id)
     if (newTag) {
-      let tags = _clone(this.props.value)
+      const tags = _clone(this.props.value)
       tags.push(newTag)
       if (this.props.onChange) {
         this.props.onChange(tags)

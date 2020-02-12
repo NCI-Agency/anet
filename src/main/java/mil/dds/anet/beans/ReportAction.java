@@ -2,6 +2,7 @@ package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
@@ -18,9 +19,14 @@ public class ReportAction extends AbstractAnetBean {
     APPROVE, REJECT, SUBMIT, PUBLISH
   }
 
+  // annotated below
   private ForeignObjectHolder<ApprovalStep> step = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<Report> report = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   ActionType type;
 
   @Override
@@ -28,6 +34,11 @@ public class ReportAction extends AbstractAnetBean {
   @GraphQLIgnore
   public String getUuid() {
     throw new WebApplicationException("no UUID field on ReportAction");
+  }
+
+  @Override
+  public void setUuid(String uuid) {
+    // just ignore
   }
 
   @GraphQLQuery(name = "step")
@@ -43,22 +54,20 @@ public class ReportAction extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setStepUuid(String stepUuid) {
     this.step = new ForeignObjectHolder<>(stepUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getStepUuid() {
     return step.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "step")
   public void setStep(ApprovalStep step) {
     this.step = new ForeignObjectHolder<>(step);
   }
 
-  @GraphQLIgnore
   public ApprovalStep getStep() {
     return step.getForeignObject();
   }
@@ -76,22 +85,20 @@ public class ReportAction extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setPersonUuid(String personUuid) {
     this.person = new ForeignObjectHolder<>(personUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getPersonUuid() {
     return person.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "person")
   public void setPerson(Person person) {
     this.person = new ForeignObjectHolder<>(person);
   }
 
-  @GraphQLIgnore
   public Person getPerson() {
     return person.getForeignObject();
   }
@@ -99,13 +106,11 @@ public class ReportAction extends AbstractAnetBean {
   // Note: there's *no* loader for report, it should not be necessary
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setReportUuid(String reportUuid) {
     this.report = new ForeignObjectHolder<>(reportUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getReportUuid() {
     return report.getForeignUuid();
   }
@@ -116,11 +121,11 @@ public class ReportAction extends AbstractAnetBean {
     return report.getForeignObject();
   }
 
+  @GraphQLInputField(name = "report")
   public void setReport(Report report) {
     this.report = new ForeignObjectHolder<>(report);
   }
 
-  @GraphQLQuery(name = "type")
   public ActionType getType() {
     return type;
   }

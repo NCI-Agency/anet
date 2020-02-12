@@ -2,8 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import AppContext from "components/AppContext"
 import GuidedTour from "components/GuidedTour"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Person, Report } from "models"
@@ -13,19 +13,20 @@ import React from "react"
 import { connect } from "react-redux"
 import ReportForm from "./Form"
 
-const BaseReportNew = props => {
+const BaseReportNew = ({ pageDispatchers, currentUser }) => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   const report = new Report()
-  if (props.currentUser && props.currentUser.uuid) {
-    let person = new Person(props.currentUser)
+  if (currentUser && currentUser.uuid) {
+    const person = new Person(currentUser)
     person.primary = true
     report.attendees.push(person)
   }
+  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
 
   return (
     <div className="report-new">
@@ -41,13 +42,16 @@ const BaseReportNew = props => {
         />
       </div>
 
-      <ReportForm initialValues={report} title="Create a new Report" />
+      <ReportForm
+        initialValues={reportInitialValues}
+        title="Create a new Report"
+      />
     </div>
   )
 }
 
 BaseReportNew.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -57,4 +61,4 @@ const ReportNew = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(ReportNew)
+export default connect(null, mapPageDispatchersToProps)(ReportNew)

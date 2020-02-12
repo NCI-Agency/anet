@@ -4,7 +4,6 @@ import _map from "lodash/map"
 import { Report } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 const STATE_LABELS = {
@@ -30,6 +29,7 @@ const CANCELLATION_REASON_LABELS = {
 
 export default class ReportStateSearch extends Component {
   static propTypes = {
+    queryKey: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.shape({
@@ -93,8 +93,18 @@ export default class ReportStateSearch extends Component {
     return !this.props.asFormField ? (
       stateDisplay
     ) : (
-      <FormGroup>
-        <select value={value.state} onChange={this.changeState} multiple>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row"
+        }}
+      >
+        <select
+          id={this.props.queryKey}
+          value={value.state}
+          onChange={this.changeState}
+          multiple
+        >
           {Object.keys(STATE_LABELS).map(key => (
             <option key={key} value={key}>
               {STATE_LABELS[key]}
@@ -102,9 +112,10 @@ export default class ReportStateSearch extends Component {
           ))}
         </select>
         {onlyCancelled && (
-          <span style={{ verticalAlign: "top", paddingLeft: "8px" }}>
+          <div style={{ verticalAlign: "top", paddingLeft: "8px" }}>
             due to{" "}
             <select
+              id={`${this.props.queryKey}CancelledReason`}
               value={value.cancelledReason}
               onChange={this.changeCancelledReason}
             >
@@ -115,15 +126,15 @@ export default class ReportStateSearch extends Component {
                 </option>
               ))}
             </select>
-          </span>
+          </div>
         )}
-      </FormGroup>
+      </div>
     )
   }
 
   @autobind
   changeState(event) {
-    let value = this.state.value
+    const value = this.state.value
     const selectedOptions =
       event.target.selectedOptions ||
       Array.from(event.target.options).filter(o => o.selected)
@@ -133,15 +144,15 @@ export default class ReportStateSearch extends Component {
 
   @autobind
   changeCancelledReason(event) {
-    let value = this.state.value
+    const value = this.state.value
     value.cancelledReason = event.target.value
     this.setState({ value }, this.updateFilter)
   }
 
   @autobind
   toQuery() {
-    let value = this.state.value
-    let query = { state: value.state }
+    const value = this.state.value
+    const query = { state: value.state }
     const onlyCancelled =
       value.state.length === 1 && value.state[0] === Report.STATE.CANCELLED
     if (onlyCancelled && value.cancelledReason) {
@@ -153,7 +164,7 @@ export default class ReportStateSearch extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

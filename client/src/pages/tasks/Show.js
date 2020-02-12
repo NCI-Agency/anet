@@ -2,13 +2,14 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -38,7 +39,7 @@ const GQL_GET_TASK = gql`
       customFieldEnum2
       plannedCompletion
       projectedCompletion
-      responsibleOrg {
+      taskedOrganizations {
         uuid
         shortName
         longName
@@ -67,12 +68,13 @@ const GQL_GET_TASK = gql`
           avatar(size: 32)
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
 
-const BaseTaskShow = props => {
+const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
@@ -85,12 +87,15 @@ const BaseTaskShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
 
+  if (data) {
+    data.task.formCustomFields = JSON.parse(data.task.customFields)
+  }
   const task = new Task(data ? data.task : {})
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
@@ -103,7 +108,6 @@ const BaseTaskShow = props => {
 
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
 
   // Admins can edit tasks or users in positions related to the task
   const canEdit =
@@ -116,7 +120,7 @@ const BaseTaskShow = props => {
       ))
 
   return (
-    <Formik enableReinitialize initialValues={task} {...myFormProps}>
+    <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo task={task} edit button="primary">
@@ -144,7 +148,7 @@ const BaseTaskShow = props => {
                 <ShortNameField
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {/* Override componentClass and style from dictProps */}
@@ -153,24 +157,26 @@ const BaseTaskShow = props => {
                   componentClass="div"
                   style={{}}
                   name="longName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Task.humanNameOfStatus}
                 />
 
                 <Field
-                  name="responsibleOrg"
-                  label={Settings.fields.task.responsibleOrg}
-                  component={FieldHelper.renderReadonlyField}
+                  name="taskedOrganizations"
+                  label={Settings.fields.task.taskedOrganizations.label}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
-                    task.responsibleOrg && (
-                      <LinkTo organization={task.responsibleOrg}>
-                        {task.responsibleOrg.shortName}
-                      </LinkTo>
+                    task.taskedOrganizations && (
+                      <>
+                        {task.taskedOrganizations.map(org => (
+                          <LinkTo organization={org} key={`${org.uuid}`} />
+                        ))}
+                      </>
                     )
                   }
                 />
@@ -179,7 +185,7 @@ const BaseTaskShow = props => {
                   <TaskCustomFieldRef1
                     dictProps={Settings.fields.task.customFieldRef1}
                     name="customFieldRef1"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.customFieldRef1 && (
                         <LinkTo task={task.customFieldRef1}>
@@ -194,14 +200,14 @@ const BaseTaskShow = props => {
                 <TaskCustomField
                   dictProps={Settings.fields.task.customField}
                   name="customField"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
                     dictProps={Settings.fields.task.plannedCompletion}
                     name="plannedCompletion"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.plannedCompletion &&
                       moment(task.plannedCompletion).format(
@@ -215,7 +221,7 @@ const BaseTaskShow = props => {
                   <ProjectedCompletionField
                     dictProps={Settings.fields.task.projectedCompletion}
                     name="projectedCompletion"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.projectedCompletion &&
                       moment(task.projectedCompletion).format(
@@ -232,7 +238,7 @@ const BaseTaskShow = props => {
                       "enum"
                     )}
                     name="customFieldEnum1"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
@@ -243,10 +249,24 @@ const BaseTaskShow = props => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
               </Fieldset>
+
+              {Settings.fields.task.customFields && (
+                <Fieldset
+                  title={`${Settings.fields.task.shortLabel} information`}
+                  id="custom-fields"
+                >
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.task.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             <Fieldset title="Responsible positions">
@@ -272,7 +292,7 @@ const BaseTaskShow = props => {
 }
 
 BaseTaskShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -282,4 +302,4 @@ const TaskShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(TaskShow)
+export default connect(null, mapPageDispatchersToProps)(TaskShow)

@@ -266,14 +266,14 @@ var config = {
   // onReload: function(oldSessionId, newSessionId) {
   // }
 }
-let testEnv =
+const testEnv =
   (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   config.services = ["chromedriver"]
   config.port = 9515
   config.path = "/"
 } else {
-  let capabilities = require("./browserstack.config.js")
+  const capabilities = require("./browserstack.config.js")
   config.services = ["browserstack"]
   config.capabilities = [capabilities]
   config.maxInstances = 1

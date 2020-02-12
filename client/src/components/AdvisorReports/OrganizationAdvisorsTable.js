@@ -20,15 +20,15 @@ class OrganizationAdvisorsTable extends Component {
   }
 
   handleSelectRow(index) {
-    let data = this.state.data.slice()
+    const data = this.state.data.slice()
     data[index].selected = this.toggleRowSelection(index)
     this.setState({ data: data })
     this.handleSelectRowData(this.state.data)
   }
 
   handleSelectAllRows() {
-    let toggleSelect = !this.state.selectedAll
-    let rows = this.toggleSelectAllRows(toggleSelect)
+    const toggleSelect = !this.state.selectedAll
+    const rows = this.toggleSelectAllRows(toggleSelect)
     this.setState({
       data: rows,
       selectedAll: toggleSelect
@@ -37,19 +37,19 @@ class OrganizationAdvisorsTable extends Component {
   }
 
   handleSelectRowData() {
-    let selectedData = this.state.data.filter(row => {
+    const selectedData = this.state.data.filter(row => {
       return row.selected
     })
     this.props.onRowSelection(selectedData)
   }
 
   toggleRowSelection(index) {
-    let isRowSelected = this.state.data[index].selected
+    const isRowSelected = this.state.data[index].selected
     return !isRowSelected
   }
 
   toggleSelectAllRows(selected) {
-    let rows = this.state.data.slice()
+    const rows = this.state.data.slice()
     rows.forEach(item => {
       item.selected = selected
     })
@@ -57,14 +57,14 @@ class OrganizationAdvisorsTable extends Component {
   }
 
   search(rows, filterText) {
-    let nothingFound = (
+    const nothingFound = (
       <tr className="nothing-found">
         <td colSpan="8">No organizations found...</td>
       </tr>
     )
-    let search = rows.filter(element => {
-      let props = element.props.row
-      let orgName = props.name.toLowerCase()
+    const search = rows.filter(element => {
+      const props = element.props.row
+      const orgName = props.name.toLowerCase()
       return orgName.indexOf(filterText.toLowerCase()) !== -1
     })
     return search.length > 0 ? search : nothingFound
@@ -72,9 +72,9 @@ class OrganizationAdvisorsTable extends Component {
 
   createAdvisorReportsRows(data) {
     return data.map((organization, index) => {
-      let checked =
+      const checked =
         organization.selected === undefined ? false : organization.selected
-      let modalLink = (
+      const modalLink = (
         <AdvisorReportsModal
           name={organization.name}
           uuid={organization.uuid}
@@ -97,8 +97,8 @@ class OrganizationAdvisorsTable extends Component {
   }
 
   render() {
-    let rows = this.createAdvisorReportsRows(this.state.data)
-    let showRows = this.props.filterText
+    const rows = this.createAdvisorReportsRows(this.state.data)
+    const showRows = this.props.filterText
       ? this.search(rows, this.props.filterText)
       : rows
     return (

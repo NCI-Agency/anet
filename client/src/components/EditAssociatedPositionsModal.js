@@ -3,15 +3,17 @@ import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
+import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import RemoveButton from "components/RemoveButton"
-import { Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import RECURSE_STRATEGY from "components/SearchFilters"
 
 const GQL_UPDATE_ASSOCIATED_POSITION = gql`
   mutation($position: PositionInput!) {
@@ -97,7 +99,7 @@ class BaseEditAssociatedPositionsModal extends Component {
         // Super Users can only assign a position in their organization!
         positionSearchQuery.organizationUuid =
           currentUser.position.organization.uuid
-        positionSearchQuery.includeChildrenOrgs = true
+        positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
       }
     } else {
       positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
@@ -127,29 +129,37 @@ class BaseEditAssociatedPositionsModal extends Component {
                   <Grid fluid>
                     <Row>
                       <Col md={12}>
-                        <AdvancedMultiSelect
-                          fieldName="associatedPositions"
-                          fieldLabel={null}
-                          placeholder={`Search for a ${assignedRole} position...`}
-                          value={values.associatedPositions}
-                          renderSelected={
-                            <AssociatedPositionsTable
-                              associatedPositions={values.associatedPositions}
-                            />
-                          }
-                          overlayColumns={[
-                            "Position",
-                            "Organization",
-                            "Current Occupant"
-                          ]}
-                          overlayRenderRow={PositionOverlayRow}
-                          filterDefs={positionsFilters}
+                        <FastField
+                          name="associatedPositions"
+                          label="Associated positions"
+                          component={FieldHelper.SpecialField}
                           onChange={value =>
                             setFieldValue("associatedPositions", value)}
-                          objectType={Position}
-                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
-                          addon={POSITIONS_ICON}
                           vertical
+                          widget={
+                            <AdvancedMultiSelect
+                              fieldName="associatedPositions"
+                              placeholder={`Search for a ${assignedRole} position...`}
+                              value={values.associatedPositions}
+                              renderSelected={
+                                <AssociatedPositionsTable
+                                  associatedPositions={
+                                    values.associatedPositions
+                                  }
+                                />
+                              }
+                              overlayColumns={[
+                                "Position",
+                                "Organization",
+                                "Current Occupant"
+                              ]}
+                              overlayRenderRow={PositionOverlayRow}
+                              filterDefs={positionsFilters}
+                              objectType={Position}
+                              fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
+                              addon={POSITIONS_ICON}
+                            />
+                          }
                         />
                       </Col>
                     </Row>

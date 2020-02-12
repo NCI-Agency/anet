@@ -15,7 +15,7 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import TaskTable from "components/TaskTable"
-import { Field, FieldArray, Form, Formik } from "formik"
+import { FastField, FieldArray, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -47,8 +47,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const ApproverTable = props => {
-  const { approvers, onDelete } = props
+const ApproverTable = ({ approvers, onDelete }) => {
   return (
     <Table striped condensed hover responsive>
       <thead>
@@ -84,8 +83,7 @@ ApproverTable.propTypes = {
   onDelete: PropTypes.func
 }
 
-const BaseOrganizationForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] = useState(
@@ -119,17 +117,15 @@ const BaseOrganizationForm = props => {
       label: Settings.fields.principal.org.name
     }
   ]
-  const IdentificationCodeFieldWithLabel = DictionaryField(Field)
-  const LongNameWithLabel = DictionaryField(Field)
+  const IdentificationCodeFieldWithLabel = DictionaryField(FastField)
+  const LongNameWithLabel = DictionaryField(FastField)
 
   return (
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Organization.yupSchema}
-      isInitialValid
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -178,11 +174,11 @@ const BaseOrganizationForm = props => {
             queryVars: {}
           }
         }
-        if (props.currentUser.position) {
+        if (currentUser.position) {
           tasksFilters.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: props.currentUser.position.organization.uuid
+              taskedOrgUuid: currentUser.position.organization.uuid
             }
           }
         }
@@ -207,12 +203,12 @@ const BaseOrganizationForm = props => {
             }
           }
         }
-        if (props.currentUser.position) {
+        if (currentUser.position) {
           approversFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
               matchPersonName: true,
-              organizationUuid: props.currentUser.position.organization.uuid
+              organizationUuid: currentUser.position.organization.uuid
             }
           }
         }
@@ -226,14 +222,14 @@ const BaseOrganizationForm = props => {
               <Fieldset>
                 {!isAdmin ? (
                   <>
-                    <Field
+                    <FastField
                       name="type"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfType}
                     />
-                    <Field
+                    <FastField
                       name="parentOrg"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
@@ -245,53 +241,63 @@ const BaseOrganizationForm = props => {
                         )
                       }
                     />
-                    <Field
+                    <FastField
                       name="shortName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.shortName}
                     />
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
-                    <Field
+                    <FastField
                       name="status"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfStatus}
                     />
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
                   </>
                 ) : (
                   <>
-                    <Field
+                    <FastField
                       name="type"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroup}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
-                    <AdvancedSingleSelect
-                      fieldName="parentOrg"
-                      fieldLabel={Settings.fields.organization.parentOrg}
-                      placeholder="Search for a higher level organization..."
-                      value={values.parentOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      onChange={value => setFieldValue("parentOrg", value)}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      queryParams={orgSearchQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
+                    <FastField
+                      name="parentOrg"
+                      label={Settings.fields.organization.parentOrg}
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("parentOrg", value)
+                      }}
+                      widget={
+                        <AdvancedSingleSelect
+                          fieldName="parentOrg"
+                          placeholder="Search for a higher level organization..."
+                          value={values.parentOrg}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={OrganizationOverlayRow}
+                          filterDefs={organizationFilters}
+                          objectType={Organization}
+                          fields={Organization.autocompleteQuery}
+                          queryParams={orgSearchQuery}
+                          valueKey="shortName"
+                          addon={ORGANIZATIONS_ICON}
+                        />
+                      }
                     />
-                    <Field
+                    <FastField
                       name="shortName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       label={Settings.fields.organization.shortName}
                       placeholder="e.g. EF1.1"
                       disabled={!isAdmin}
@@ -299,12 +305,12 @@ const BaseOrganizationForm = props => {
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       disabled={!isAdmin}
                     />
-                    <Field
+                    <FastField
                       name="status"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroup}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                       disabled={!isAdmin}
@@ -312,7 +318,7 @@ const BaseOrganizationForm = props => {
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                     />
                   </>
                 )}
@@ -333,7 +339,7 @@ const BaseOrganizationForm = props => {
                                 values.planningApprovalSteps
                               )}
                             bsStyle="primary"
-                            id="addApprovalStepButton"
+                            id="addPlanningApprovalStepButton"
                           >
                             Add a Planning Approval Step
                           </Button>
@@ -386,6 +392,7 @@ const BaseOrganizationForm = props => {
                               "planningApprovalSteps",
                               arrayHelpers,
                               setFieldValue,
+                              setFieldTouched,
                               step,
                               index,
                               approversFilters
@@ -465,6 +472,7 @@ const BaseOrganizationForm = props => {
                               "approvalSteps",
                               arrayHelpers,
                               setFieldValue,
+                              setFieldTouched,
                               step,
                               index,
                               approversFilters
@@ -483,24 +491,34 @@ const BaseOrganizationForm = props => {
                       {!isAdmin ? (
                         <TaskTable tasks={values.tasks} />
                       ) : (
-                        <AdvancedMultiSelect
-                          fieldName="tasks"
-                          fieldLabel={Settings.fields.task.shortLabel}
-                          placeholder={`Search for ${pluralize(
-                            Settings.fields.task.shortLabel
-                          )}...`}
-                          value={values.tasks}
-                          renderSelected={
-                            <TaskTable tasks={values.tasks} showDelete />
+                        <FastField
+                          name="tasks"
+                          label={Settings.fields.task.shortLabel}
+                          component={FieldHelper.SpecialField}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("tasks", value)
+                          }}
+                          widget={
+                            <AdvancedMultiSelect
+                              fieldName="tasks"
+                              placeholder={`Search for ${pluralize(
+                                Settings.fields.task.shortLabel
+                              )}...`}
+                              value={values.tasks}
+                              renderSelected={
+                                <TaskTable tasks={values.tasks} showDelete />
+                              }
+                              overlayColumns={["Name"]}
+                              overlayRenderRow={TaskSimpleOverlayRow}
+                              filterDefs={tasksFilters}
+                              objectType={Task}
+                              queryParams={{ status: Task.STATUS.ACTIVE }}
+                              fields={Task.autocompleteQuery}
+                              addon={TASKS_ICON}
+                            />
                           }
-                          overlayColumns={["Name"]}
-                          overlayRenderRow={TaskSimpleOverlayRow}
-                          filterDefs={tasksFilters}
-                          onChange={value => setFieldValue("tasks", value)}
-                          objectType={Task}
-                          queryParams={{ status: Task.STATUS.ACTIVE }}
-                          fields={Task.autocompleteQuery}
-                          addon={TASKS_ICON}
                         />
                       )}
                     </Fieldset>
@@ -537,6 +555,7 @@ const BaseOrganizationForm = props => {
     fieldName,
     arrayHelpers,
     setFieldValue,
+    setFieldTouched,
     step,
     index,
     approversFilters
@@ -553,34 +572,43 @@ const BaseOrganizationForm = props => {
           <img src={REMOVE_ICON} height={14} alt="Remove this step" />
         </Button>
 
-        <Field
+        <FastField
           name={`${fieldName}.${index}.name`}
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           label="Step name"
         />
-        <AdvancedMultiSelect
-          fieldName={`${fieldName}.${index}.approvers`}
-          fieldLabel="Add an approver"
-          placeholder="Search for the approver's position..."
-          value={approvers}
-          renderSelected={<ApproverTable approvers={approvers} />}
-          overlayColumns={["Name", "Position"]}
-          overlayRenderRow={ApproverOverlayRow}
-          filterDefs={approversFilters}
-          onChange={value =>
-            setFieldValue(`${fieldName}.${index}.approvers`, value)}
-          objectType={Position}
-          queryParams={{
-            status: Position.STATUS.ACTIVE,
-            type: [
-              Position.TYPE.ADVISOR,
-              Position.TYPE.SUPER_USER,
-              Position.TYPE.ADMINISTRATOR
-            ],
-            matchPersonName: true
+        <FastField
+          name={`${fieldName}.${index}.approvers`}
+          label="Add an approver"
+          component={FieldHelper.SpecialField}
+          onChange={value => {
+            // validation will be done by setFieldValue
+            setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option
+            setFieldValue(`${fieldName}.${index}.approvers`, value)
           }}
-          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }"
-          addon={POSITIONS_ICON}
+          widget={
+            <AdvancedMultiSelect
+              fieldName={`${fieldName}.${index}.approvers`}
+              placeholder="Search for the approver's position..."
+              value={approvers}
+              renderSelected={<ApproverTable approvers={approvers} />}
+              overlayColumns={["Name", "Position"]}
+              overlayRenderRow={ApproverOverlayRow}
+              filterDefs={approversFilters}
+              objectType={Position}
+              queryParams={{
+                status: Position.STATUS.ACTIVE,
+                type: [
+                  Position.TYPE.ADVISOR,
+                  Position.TYPE.SUPER_USER,
+                  Position.TYPE.ADMINISTRATOR
+                ],
+                matchPersonName: true
+              }}
+              fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }"
+              addon={POSITIONS_ICON}
+            />
+          }
         />
       </Fieldset>
     )
@@ -640,7 +668,6 @@ const BaseOrganizationForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateOrganization" : "createOrganization"
     const organization = new Organization({
       uuid: response[operation].uuid
@@ -663,13 +690,16 @@ const BaseOrganizationForm = props => {
       new Organization(values),
       "notes",
       "childrenOrgs",
-      "positions"
+      "positions",
+      "tasks"
     )
+    // strip tasks fields not in data model
+    organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
     return API.mutation(
-      props.edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
+      edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
-    )
+    ).then()
   }
 }
 

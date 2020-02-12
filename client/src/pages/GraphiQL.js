@@ -2,8 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import GraphiQL from "graphiql"
@@ -11,11 +11,11 @@ import "graphiql/graphiql.css"
 import React from "react"
 import { connect } from "react-redux"
 
-const GraphiQLContainer = props => {
+const GraphiQLContainer = ({ pageDispatchers }) => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   // TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
@@ -34,6 +34,8 @@ const GraphiQLContainer = props => {
   }
 }
 
-GraphiQLContainer.propTypes = { ...pagePropTypes }
+GraphiQLContainer.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
 
-export default connect(null, mapDispatchToProps)(GraphiQLContainer)
+export default connect(null, mapPageDispatchersToProps)(GraphiQLContainer)

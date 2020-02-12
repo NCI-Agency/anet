@@ -42,13 +42,14 @@ public final class BatchingUtils {
   private final DataLoaderOptions dataLoaderOptions;
 
   public BatchingUtils(AnetObjectEngine engine, boolean batchingEnabled, boolean cachingEnabled) {
+    final int maxBatchSize = DaoUtils.isMsSql() ? 1000 : 25000;
     // Give each registry its own thread pool
     dispatcherService = Executors.newFixedThreadPool(3);
     dataLoaderRegistry = new DataLoaderRegistry();
     dataLoaderOptions =
         DataLoaderOptions.newOptions().setStatisticsCollector(() -> new SimpleStatisticsCollector())
             .setBatchingEnabled(batchingEnabled).setCachingEnabled(cachingEnabled)
-            .setMaxBatchSize(1000);
+            .setMaxBatchSize(maxBatchSize);
     registerDataLoaders(engine);
   }
 
@@ -331,6 +332,14 @@ public final class BatchingUtils {
           public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(
                 () -> engine.getTaskDao().getResponsiblePositions(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.TASK_TASKED_ORGANIZATIONS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<Organization>>() {
+          @Override
+          public CompletionStage<List<List<Organization>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getTaskDao().getTaskedOrganizations(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
   }

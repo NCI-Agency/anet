@@ -1,50 +1,27 @@
 import SVGCanvas from "components/graphs/SVGCanvas"
 import * as d3 from "d3"
 import PropTypes from "prop-types"
+import React, { useEffect, useRef } from "react"
 
-export default class Pie extends SVGCanvas {
-  static propTypes = {
-    label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    segmentFill: PropTypes.func.isRequired,
-    segmentLabel: PropTypes.func.isRequired,
-    data: PropTypes.object.isRequired
-  }
+const Pie = ({ label, segmentFill, segmentLabel, data, width, height }) => {
+  const canvasRef = useRef(null)
+  const pie = useRef(d3.pie())
 
-  componentDidMount() {
-    this.canvas = this.svg
-      .append("g")
-      .attr(
-        "transform",
-        `translate(${this.props.size.width / 2}, ${this.props.size.height / 2})`
-      )
-    this.pie = d3.pie()
-    this.pie.value(function(d) {
+  useEffect(() => {
+    pie.current.value(function(d) {
       return d.value
     })
+  }, [])
 
-    this.canvas
-      .append("text")
-      .attr("y", "6px")
-      .style("text-anchor", "middle")
-      .style("font-weight", "bold")
-      .style("font-size", "17px")
-
-    this.update()
-  }
-
-  componentDidUpdate() {
-    this.update()
-  }
-
-  update() {
-    const radius =
-      Math.min(this.props.size.width, this.props.size.height) / 2 - 2
-    const arcs = this.pie(d3.entries(this.props.data))
+  useEffect(() => {
+    const canvas = d3.select(canvasRef.current)
+    const radius = Math.min(width, height) / 2 - 2
+    const arcs = pie.current(d3.entries(data))
     const arcForLabels = d3
       .arc()
       .innerRadius(radius * 0.7)
       .outerRadius(radius * 0.7)
-    const selected = this.canvas.selectAll("path").data(arcs, d => d)
+    const selected = canvas.selectAll("path").data(arcs, d => d)
 
     selected
       .enter()
@@ -56,13 +33,13 @@ export default class Pie extends SVGCanvas {
           .innerRadius(radius / 2)
           .outerRadius(radius)
       )
-      .attr("fill", this.props.segmentFill)
+      .attr("fill", segmentFill)
       .attr("stroke", "grey")
       .style("stroke-width", "1px")
 
     selected.exit().remove()
 
-    const labels = this.canvas
+    const labels = canvas
       .selectAll("text")
       .data(arcs, d => d)
       .enter()
@@ -72,10 +49,32 @@ export default class Pie extends SVGCanvas {
       .attr("y", "0.35em")
       .style("font-weight", "bold")
       .style("font-size", "12px")
-      .text(this.props.segmentLabel)
+      .text(segmentLabel)
 
     labels.exit().remove()
 
-    this.canvas.select("text").text(this.props.label)
-  }
+    canvas.select("text").text(label)
+  }, [width, height, data, segmentFill, segmentLabel, label])
+
+  return (
+    <SVGCanvas width={width} height={height}>
+      <g transform={`translate(${width / 2}, ${height / 2} )`} ref={canvasRef}>
+        <text
+          y="6px"
+          style={{ textAnchor: "middle", fontWeight: "bold", fontSize: "17px" }}
+        />
+      </g>
+    </SVGCanvas>
+  )
 }
+
+Pie.propTypes = {
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  segmentFill: PropTypes.func.isRequired,
+  segmentLabel: PropTypes.func.isRequired,
+  data: PropTypes.object.isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired
+}
+
+export default Pie

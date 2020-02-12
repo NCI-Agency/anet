@@ -4,6 +4,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -34,6 +35,8 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.Note;
+import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -51,6 +54,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.DailyRollupEmail;
@@ -144,8 +148,6 @@ public class ReportResource {
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
-    // Needed for sensitive information, e.g. when autoSaving a new report
-    r.setUser(author);
     r = dao.insert(r, author);
     AnetAuditLogger.log("Report {} created by author {} ", r, author);
     return r;
@@ -352,7 +354,6 @@ public class ReportResource {
 
     // Clear and re-load sensitive information; needed in case of autoSave by the client form, or
     // when sensitive info is 'empty' HTML
-    r.setUser(editor);
     try {
       r.setReportSensitiveInformation(null);
       r.loadReportSensitiveInformation(engine.getContext()).get();
@@ -832,9 +833,10 @@ public class ReportResource {
 
   @GraphQLQuery(name = "reportList")
   public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLEnvironment Set<String> subFields,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(query);
+    return dao.search(subFields, query);
   }
 
   /**
@@ -1079,6 +1081,41 @@ public class ReportResource {
       }
 
       return result;
+    }
+  }
+
+  @GraphQLMutation(name = "updateReportAssessments")
+  public int updateReportAssessments(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "report") Report r,
+      @GraphQLArgument(name = "assessments") List<Note> assessments) {
+    final Person user = DaoUtils.getUserFromContext(context);
+
+    for (int i = 0; i < assessments.size(); i++) {
+      final Note n = assessments.get(i);
+      n.setAuthorUuid(DaoUtils.getUuid(user));
+    }
+    final List<Note> existingNotes = r.loadNotes(engine.getContext()).join();
+    final List<Note> existingAssessments = existingNotes.stream()
+        .filter(n -> n.getType().equals(NoteType.ASSESSMENT)).collect(Collectors.toList());
+    Utils.addRemoveElementsByUuid(existingAssessments, assessments,
+        newAssessment -> engine.getNoteDao().insert(newAssessment),
+        oldAssessmentUuid -> engine.getNoteDao().delete(oldAssessmentUuid));
+    for (int i = 0; i < assessments.size(); i++) {
+      final Note curr = assessments.get(i);
+      final Note existingAssessment = Utils.getByUuid(existingAssessments, curr.getUuid());
+      if (existingAssessment != null) {
+        // Check for updates to assessment
+        updateAssessment(curr, existingAssessment);
+      }
+    }
+    return assessments.size();
+  }
+
+  private void updateAssessment(Note newAssessment, Note oldAssessment) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final NoteDao noteDao = engine.getNoteDao();
+    if (!newAssessment.getText().equals(oldAssessment.getText())) {
+      noteDao.update(newAssessment);
     }
   }
 }

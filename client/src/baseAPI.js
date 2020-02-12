@@ -56,7 +56,7 @@ const BaseAPI = {
   },
 
   _handleError(response) {
-    let result = {}
+    const result = {}
     let error
     // When the result returns a list of errors we only show the first one
     if (!_isEmpty(response.graphQLErrors)) {
@@ -155,7 +155,7 @@ const BaseAPI = {
       credentials: "same-origin"
     },
     request: operation => {
-      let headers = {
+      const headers = {
         Accept: "application/json"
       }
       const authHeader = BaseAPI._getAuthHeader()

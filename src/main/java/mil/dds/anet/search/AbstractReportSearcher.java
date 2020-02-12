@@ -1,9 +1,13 @@
 package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Location;
@@ -14,6 +18,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
@@ -28,33 +33,43 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
 
+  private static final Set<String> ALL_FIELDS = Sets.newHashSet(ReportDao.allFields);
+  private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(ReportDao.minimalFields);
+  private static final Map<String, String> FIELD_MAPPING = ImmutableMap.<String, String>builder()
+      .put("reportText", "text").put("location", "locationUuid")
+      .put("approvalStep", "approvalStepUuid").put("advisorOrg", "advisorOrganizationUuid")
+      .put("principalOrg", "principalOrganizationUuid").put("author", "authorUuid").build();
+
   public AbstractReportSearcher(AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
     super(qb);
   }
 
   @InTransaction
   public AnetBeanList<Report> runSearch(
-      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
-    buildQuery(query);
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, Set<String> subFields,
+      ReportSearchQuery query) {
+    buildQuery(subFields, query);
     outerQb.addSelectClause("*");
     outerQb.addTotalCount();
     outerQb.addFromClause("( " + qb.build() + " ) l");
     outerQb.addSqlArgs(qb.getSqlArgs());
     outerQb.addListArgs(qb.getListArgs());
     addOrderByClauses(outerQb, query);
-    final AnetBeanList<Report> result =
-        outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
-    for (final Report report : result.getList()) {
-      report.setUser(query.getUser());
-    }
-    return result;
+    return outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
   }
 
+  @Override
   protected void buildQuery(ReportSearchQuery query) {
-    qb.addSelectClause("DISTINCT " + ReportDao.REPORT_FIELDS);
-    qb.addFromClause("reports");
-    qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
-    qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
+    throw new UnsupportedOperationException();
+  }
+
+  protected String getTableFields(Set<String> subFields) {
+    return getTableFields(ReportDao.TABLE_NAME, ALL_FIELDS, MINIMAL_FIELDS, FIELD_MAPPING,
+        subFields);
+  }
+
+  protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
+    // Base select and from clauses are added by child classes
 
     if (query.isTextPresent()) {
       addTextQuery(query);
@@ -263,14 +278,16 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
   protected void addOrgUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
       ReportSearchQuery query) {
-    if (!query.getIncludeOrgChildren()) {
+    if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
+      qb.addRecursiveClause(outerQb, "reports",
+          new String[] {"\"advisorOrganizationUuid\"", "\"principalOrganizationUuid\""},
+          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
+          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+    } else {
       qb.addWhereClause(
           "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
       qb.addSqlArg("orgUuid", query.getOrgUuid());
-    } else {
-      qb.addRecursiveClause(outerQb, "reports",
-          new String[] {"\"advisorOrganizationUuid\"", "\"principalOrganizationUuid\""},
-          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid());
     }
   }
 
@@ -286,7 +303,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"advisorOrganizationUuid\"",
           "advisor_parent_orgs", "organizations", "\"parentOrgUuid\"", "advisorOrganizationUuid",
-          query.getAdvisorOrgUuid());
+          query.getAdvisorOrgUuid(), true);
     }
   }
 
@@ -302,7 +319,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"principalOrganizationUuid\"",
           "principal_parent_orgs", "organizations", "\"parentOrgUuid\"",
-          "principalOrganizationUuid", query.getPrincipalOrgUuid());
+          "principalOrganizationUuid", query.getPrincipalOrgUuid(), true);
     }
   }
 

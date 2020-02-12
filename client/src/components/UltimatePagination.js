@@ -54,16 +54,15 @@ const WrappedPagination = createUltimatePagination({
   }
 })
 
-const UltimatePagination = props => {
-  const {
-    Component,
-    componentClassName,
-    className,
-    pageNum,
-    pageSize,
-    totalCount,
-    goToPage
-  } = props
+const UltimatePagination = ({
+  Component,
+  componentClassName,
+  className,
+  pageNum,
+  pageSize,
+  totalCount,
+  goToPage
+}) => {
   const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
   if (numPages < 2) {
     return null

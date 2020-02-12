@@ -9,6 +9,10 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -16,8 +20,9 @@ import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
+import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
-import { Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -45,8 +50,7 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const BaseTaskForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -62,15 +66,16 @@ const BaseTaskForm = props => {
     }
   ]
 
-  const ShortNameField = DictionaryField(Field)
-  const LongNameField = DictionaryField(Field)
-  const TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
-  const TaskCustomField = DictionaryField(Field)
-  const PlannedCompletionField = DictionaryField(Field)
-  const ProjectedCompletionField = DictionaryField(Field)
-  const TaskCustomFieldEnum1 = DictionaryField(Field)
-  const TaskCustomFieldEnum2 = DictionaryField(Field)
-  const ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
+  const ShortNameField = DictionaryField(FastField)
+  const LongNameField = DictionaryField(FastField)
+  const TaskCustomFieldRef1 = DictionaryField(FastField)
+  const TaskCustomField = DictionaryField(FastField)
+  const PlannedCompletionField = DictionaryField(FastField)
+  const ProjectedCompletionField = DictionaryField(FastField)
+  const TaskCustomFieldEnum1 = DictionaryField(FastField)
+  const TaskCustomFieldEnum2 = DictionaryField(FastField)
+  const TaskedOrganizationsMultiSelect = DictionaryField(FastField)
+  const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
 
   initialValues.assessment_customFieldEnum1 = ""
 
@@ -86,7 +91,7 @@ const BaseTaskForm = props => {
     })
   }
 
-  const responsibleOrgFilters = {
+  const taskedOrganizationsFilters = {
     allOrganizations: {
       label: "All organizations",
       queryVars: {}
@@ -119,9 +124,7 @@ const BaseTaskForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Task.yupSchema}
-      isInitialValid
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -131,8 +134,11 @@ const BaseTaskForm = props => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateForm,
         submitForm
       }) => {
+        const isAdmin = currentUser && currentUser.isAdmin()
+        const disabled = !isAdmin
         const action = (
           <div>
             <Button
@@ -156,99 +162,142 @@ const BaseTaskForm = props => {
                 <ShortNameField
                   dictProps={Settings.fields.task.shortName}
                   name="shortName"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
+                  disabled={disabled}
                 />
 
                 <LongNameField
                   dictProps={Settings.fields.task.longName}
                   name="longName"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
 
-                <Field
-                  name="status"
-                  component={FieldHelper.renderButtonToggleGroup}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                />
+                {disabled ? (
+                  <FastField
+                    name="status"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={Position.humanNameOfStatus}
+                  />
+                ) : (
+                  <FastField
+                    name="status"
+                    component={FieldHelper.RadioButtonToggleGroup}
+                    buttons={statusButtons}
+                    onChange={value => setFieldValue("status", value)}
+                  />
+                )}
 
-                <AdvancedSingleSelect
-                  fieldName="responsibleOrg"
-                  fieldLabel={Settings.fields.task.responsibleOrg}
-                  placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
-                  value={values.responsibleOrg}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={OrganizationOverlayRow}
-                  filterDefs={responsibleOrgFilters}
-                  onChange={value => setFieldValue("responsibleOrg", value)}
-                  objectType={Organization}
-                  fields={Organization.autocompleteQuery}
-                  valueKey="shortName"
-                  queryParams={orgSearchQuery}
-                  addon={ORGANIZATIONS_ICON}
-                />
-
-                <ResponsiblePositonsMultiSelect
-                  fieldName="responsiblePositions"
-                  dictProps={Settings.fields.task.responsiblePositions}
-                  fieldLabel={Settings.fields.task.responsiblePositions.label}
-                  value={values.responsiblePositions}
-                  renderSelected={
-                    <PositionTable
-                      positions={values.responsiblePositions}
-                      showDelete
+                <TaskedOrganizationsMultiSelect
+                  name="taskedOrganizations"
+                  component={FieldHelper.SpecialField}
+                  dictProps={Settings.fields.task.taskedOrganizations}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("taskedOrganizations", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("taskedOrganizations", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="taskedOrganizations"
+                      value={values.taskedOrganizations}
+                      renderSelected={
+                        <OrganizationTable
+                          organizations={values.taskedOrganizations}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={taskedOrganizationsFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      addon={ORGANIZATIONS_ICON}
                     />
                   }
-                  overlayColumns={[
-                    "Position",
-                    "Organization",
-                    "Current Occupant"
-                  ]}
-                  overlayRenderRow={PositionOverlayRow}
-                  filterDefs={positionsFilters}
-                  onChange={value =>
-                    setFieldValue("responsiblePositions", value)}
-                  objectType={Position}
-                  fields={Position.autocompleteQuery}
-                  addon={POSITIONS_ICON}
+                />
+
+                <ResponsiblePositionsMultiSelect
+                  name="responsiblePositions"
+                  component={FieldHelper.SpecialField}
+                  dictProps={Settings.fields.task.responsiblePositions}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("responsiblePositions", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="responsiblePositions"
+                      value={values.responsiblePositions}
+                      renderSelected={
+                        <PositionTable
+                          positions={values.responsiblePositions}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={[
+                        "Position",
+                        "Organization",
+                        "Current Occupant"
+                      ]}
+                      overlayRenderRow={PositionOverlayRow}
+                      filterDefs={positionsFilters}
+                      objectType={Position}
+                      fields={Position.autocompleteQuery}
+                      addon={POSITIONS_ICON}
+                    />
+                  }
                 />
 
                 {Settings.fields.task.customFieldRef1 && (
                   <TaskCustomFieldRef1
+                    name="customFieldRef1"
+                    component={FieldHelper.SpecialField}
                     dictProps={Settings.fields.task.customFieldRef1}
-                    fieldName="customFieldRef1"
-                    fieldLabel={Settings.fields.task.customFieldRef1.label}
-                    placeholder={
-                      Settings.fields.task.customFieldRef1.placeholder
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("customFieldRef1", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("customFieldRef1", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="customFieldRef1"
+                        placeholder={
+                          Settings.fields.task.customFieldRef1.placeholder
+                        }
+                        value={values.customFieldRef1}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={TaskSimpleOverlayRow}
+                        filterDefs={tasksFilters}
+                        objectType={Task}
+                        fields={Task.autocompleteQuery}
+                        valueKey="shortName"
+                        queryParams={{}}
+                        addon={TASKS_ICON}
+                        showRemoveButton={!disabled}
+                      />
                     }
-                    value={values.customFieldRef1}
-                    overlayColumns={["Name"]}
-                    overlayRenderRow={TaskSimpleOverlayRow}
-                    filterDefs={tasksFilters}
-                    onChange={value => setFieldValue("customFieldRef1", value)}
-                    objectType={Task}
-                    fields={Task.autocompleteQuery}
-                    valueKey="shortName"
-                    queryParams={{}}
-                    addon={TASKS_ICON}
+                    disabled={disabled}
                   />
                 )}
 
                 <TaskCustomField
                   dictProps={Settings.fields.task.customField}
                   name="customField"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
+                  disabled={disabled}
                 />
 
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
                     dictProps={Settings.fields.task.plannedCompletion}
                     name="plannedCompletion"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value =>
                       setFieldValue("plannedCompletion", value)}
-                    onBlur={() => setFieldTouched("plannedCompletion", true)}
+                    onBlur={() => setFieldTouched("plannedCompletion")}
                     widget={<CustomDateInput id="plannedCompletion" />}
+                    disabled={disabled}
                   />
                 )}
 
@@ -256,11 +305,12 @@ const BaseTaskForm = props => {
                   <ProjectedCompletionField
                     dictProps={Settings.fields.task.projectedCompletion}
                     name="projectedCompletion"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     onChange={value =>
                       setFieldValue("projectedCompletion", value)}
-                    onBlur={() => setFieldTouched("projectedCompletion", true)}
+                    onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
+                    disabled={disabled}
                   />
                 )}
 
@@ -272,28 +322,35 @@ const BaseTaskForm = props => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.renderButtonToggleGroup}
-                      buttons={customEnumButtons(
+                      component={
+                        disabled
+                          ? FieldHelper.ReadonlyField
+                          : FieldHelper.RadioButtonToggleGroup
+                      }
+                      buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
                         setFieldValue("customFieldEnum1", value)}
                     />
-                    {edit && (
-                      <Field
+                    {edit && !disabled && (
+                      <FastField
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         onChange={value =>
                           setFieldValue("assessment_customFieldEnum1", value)}
                         widget={
                           <RichTextEditor
                             className="textField"
-                            onHandleBlur={() =>
+                            onHandleBlur={() => {
+                              // validation will be done by setFieldValue
                               setFieldTouched(
                                 "assessment_customFieldEnum1",
-                                true
-                              )}
+                                true,
+                                false
+                              )
+                            }}
                           />
                         }
                       />
@@ -308,14 +365,35 @@ const BaseTaskForm = props => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={FieldHelper.renderButtonToggleGroup}
-                    buttons={customEnumButtons(
+                    component={
+                      disabled
+                        ? FieldHelper.ReadonlyField
+                        : FieldHelper.RadioButtonToggleGroup
+                    }
+                    buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}
                     onChange={value => setFieldValue("customFieldEnum2", value)}
                   />
                 )}
               </Fieldset>
+
+              {Settings.fields.task.customFields && !disabled && (
+                <Fieldset
+                  title={`${Settings.fields.task.shortLabel} information`}
+                  id="custom-fields"
+                >
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.task.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
 
               <div className="submit-buttons">
                 <div>
@@ -340,21 +418,6 @@ const BaseTaskForm = props => {
     </Formik>
   )
 
-  function customEnumButtons(list) {
-    const buttons = []
-    for (const key in list) {
-      if (list.hasOwnProperty(key)) {
-        buttons.push({
-          id: key,
-          value: key,
-          label: list[key].label,
-          color: list[key].color
-        })
-      }
-    }
-    return buttons
-  }
-
   function onCancel() {
     history.goBack()
   }
@@ -370,12 +433,11 @@ const BaseTaskForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateTask" : "createTask"
     const task = new Task({
       uuid: response[operation].uuid
         ? response[operation].uuid
-        : props.initialValues.uuid
+        : initialValues.uuid
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -393,15 +455,21 @@ const BaseTaskForm = props => {
     const task = Object.without(
       new Task(values),
       "notes",
-      "assessment_customFieldEnum1"
+      "assessment_customFieldEnum1",
+      "customFields", // initial JSON from the db
+      "formCustomFields"
     )
-    task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
-    const { edit } = props
+    task.customFields = customFieldsJSONString(values)
     const variables = { task: task }
+
+    variables.task.taskedOrganizations = variables.task.taskedOrganizations.map(
+      a => utils.getReference(a)
+    )
+
     if (
       edit &&
-      (props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
+      (initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
         !utils.isEmptyHtml(values.assessment_customFieldEnum1))
     ) {
       // Add an additional mutation to create a change record
@@ -410,13 +478,13 @@ const BaseTaskForm = props => {
         noteRelatedObjects: [
           {
             relatedObjectType: "tasks",
-            relatedObjectUuid: props.initialValues.uuid
+            relatedObjectUuid: initialValues.uuid
           }
         ],
         text: JSON.stringify({
           text: values.assessment_customFieldEnum1,
           changedField: "customFieldEnum1",
-          oldValue: props.initialValues.customFieldEnum1,
+          oldValue: initialValues.customFieldEnum1,
           newValue: values.customFieldEnum1
         })
       }

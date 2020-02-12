@@ -2,7 +2,7 @@ package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
@@ -16,42 +16,56 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Task extends AbstractAnetBean {
+public class Task extends AbstractCustomizableAnetBean {
 
   /** Pseudo uuid to represent 'no task'. */
-  @GraphQLIgnore
   public static final String DUMMY_TASK_UUID = "-1";
 
   public enum TaskStatus {
     ACTIVE, INACTIVE
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant plannedCompletion;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant projectedCompletion;
-
+  @GraphQLQuery
+  @GraphQLInputField
   private String shortName;
+  @GraphQLQuery
+  @GraphQLInputField
   private String longName;
+  @GraphQLQuery
+  @GraphQLInputField
   private String category;
+  @GraphQLQuery
+  @GraphQLInputField
   private String customField;
+  @GraphQLQuery
+  @GraphQLInputField
   private String customFieldEnum1;
+  @GraphQLQuery
+  @GraphQLInputField
   private String customFieldEnum2;
-
+  // annotated below
   private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
-
+  @GraphQLQuery
+  @GraphQLInputField
   TaskStatus status;
-
-  private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
-
+  // annotated below
   private List<Position> responsiblePositions;
+  // annotated below
+  private List<Organization> taskedOrganizations;
 
   public void setPlannedCompletion(Instant plannedCompletion) {
     this.plannedCompletion = plannedCompletion;
   }
 
-  @GraphQLQuery(name = "plannedCompletion")
   public Instant getPlannedCompletion() {
     return plannedCompletion;
   }
@@ -60,12 +74,10 @@ public class Task extends AbstractAnetBean {
     this.projectedCompletion = projectedCompletion;
   }
 
-  @GraphQLQuery(name = "projectedCompletion")
   public Instant getProjectedCompletion() {
     return projectedCompletion;
   }
 
-  @GraphQLQuery(name = "shortName")
   public String getShortName() {
     return shortName;
   }
@@ -74,7 +86,6 @@ public class Task extends AbstractAnetBean {
     this.shortName = Utils.trimStringReturnNull(shortName);
   }
 
-  @GraphQLQuery(name = "longName")
   public String getLongName() {
     return longName;
   }
@@ -83,7 +94,6 @@ public class Task extends AbstractAnetBean {
     this.longName = Utils.trimStringReturnNull(longName);
   }
 
-  @GraphQLQuery(name = "customField")
   public String getCustomField() {
     return customField;
   }
@@ -92,7 +102,6 @@ public class Task extends AbstractAnetBean {
     this.customField = Utils.trimStringReturnNull(customField);
   }
 
-  @GraphQLQuery(name = "customFieldEnum1")
   public String getCustomFieldEnum1() {
     return customFieldEnum1;
   }
@@ -101,7 +110,6 @@ public class Task extends AbstractAnetBean {
     this.customFieldEnum1 = Utils.trimStringReturnNull(customFieldEnum1);
   }
 
-  @GraphQLQuery(name = "customFieldEnum2")
   public String getCustomFieldEnum2() {
     return customFieldEnum2;
   }
@@ -110,7 +118,6 @@ public class Task extends AbstractAnetBean {
     this.customFieldEnum2 = Utils.trimStringReturnNull(customFieldEnum2);
   }
 
-  @GraphQLQuery(name = "category")
   public String getCategory() {
     return category;
   }
@@ -133,68 +140,30 @@ public class Task extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
     this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1Uuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getCustomFieldRef1Uuid() {
     return customFieldRef1.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "customFieldRef1")
   public void setCustomFieldRef1(Task customFieldRef1) {
     this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1);
   }
 
-  @GraphQLIgnore
   public Task getCustomFieldRef1() {
     return customFieldRef1.getForeignObject();
   }
 
-  @GraphQLQuery(name = "status")
   public TaskStatus getStatus() {
     return status;
   }
 
   public void setStatus(TaskStatus status) {
     this.status = status;
-  }
-
-  @GraphQLQuery(name = "responsibleOrg")
-  public CompletableFuture<Organization> loadResponsibleOrg(
-      @GraphQLRootContext Map<String, Object> context) {
-    if (responsibleOrg.hasForeignObject()) {
-      return CompletableFuture.completedFuture(responsibleOrg.getForeignObject());
-    }
-    return new UuidFetcher<Organization>()
-        .load(context, IdDataLoaderKey.ORGANIZATIONS, responsibleOrg.getForeignUuid())
-        .thenApply(o -> {
-          responsibleOrg.setForeignObject(o);
-          return o;
-        });
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
-  public void setResponsibleOrgUuid(String responsibleOrgUuid) {
-    this.responsibleOrg = new ForeignObjectHolder<>(responsibleOrgUuid);
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
-  public String getResponsibleOrgUuid() {
-    return responsibleOrg.getForeignUuid();
-  }
-
-  public void setResponsibleOrg(Organization org) {
-    this.responsibleOrg = new ForeignObjectHolder<>(org);
-  }
-
-  @GraphQLIgnore
-  public Organization getResponsibleOrg() {
-    return responsibleOrg.getForeignObject();
   }
 
   @GraphQLQuery(name = "reports")
@@ -223,13 +192,35 @@ public class Task extends AbstractAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<Position> getResponsiblePositions() {
     return responsiblePositions;
   }
 
+  @GraphQLInputField(name = "responsiblePositions")
   public void setResponsiblePositions(List<Position> positions) {
     this.responsiblePositions = positions;
+  }
+
+  @GraphQLQuery(name = "taskedOrganizations")
+  public CompletableFuture<List<Organization>> loadTaskedOrganizations(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (taskedOrganizations != null) {
+      return CompletableFuture.completedFuture(taskedOrganizations);
+    }
+    return AnetObjectEngine.getInstance().getTaskDao().getTaskedOrganizationsForTask(context, uuid)
+        .thenApply(o -> {
+          taskedOrganizations = o;
+          return o;
+        });
+  }
+
+  public List<Organization> getTaskedOrganizations() {
+    return taskedOrganizations;
+  }
+
+  @GraphQLInputField(name = "taskedOrganizations")
+  public void setTaskedOrganizations(List<Organization> organizations) {
+    this.taskedOrganizations = organizations;
   }
 
   @Override
@@ -242,12 +233,12 @@ public class Task extends AbstractAnetBean {
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
-        && Objects.equals(other.getResponsiblePositions(), responsiblePositions);
+        && Objects.equals(other.getCustomFields(), customFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, responsiblePositions);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
   }
 
   @Override

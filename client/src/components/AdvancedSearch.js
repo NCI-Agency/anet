@@ -1,8 +1,17 @@
+import {
+  Classes,
+  Menu,
+  MenuItem,
+  Popover,
+  PopoverInteractionKind,
+  Position as PopoverPosition
+} from "@blueprintjs/core"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import searchFilters, {
   POSTITION_ORGANIZATION_FILTER_KEY,
-  POSTITION_POSITION_TYPE_FILTER_KEY
+  POSTITION_POSITION_TYPE_FILTER_KEY,
+  SearchQueryPropType
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -13,11 +22,8 @@ import {
   Button,
   Col,
   ControlLabel,
-  DropdownButton,
   FormControl,
-  FormGroup,
-  MenuItem,
-  Row
+  FormGroup
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -39,12 +45,20 @@ function updateOrganizationFilterState(organizationFilter, positionType) {
   }
 }
 
-const AdvancedSearch = props => {
-  const { query, text } = props
+const AdvancedSearch = ({
+  onSearch,
+  onCancel,
+  setSearchQuery,
+  resetPagination,
+  searchQuery,
+  onSearchGoToSearchPage,
+  searchObjectTypes,
+  text
+}) => {
   const history = useHistory()
-  const [objectType, setObjectType] = useState(query.objectType)
+  const [objectType, setObjectType] = useState(searchQuery.objectType)
   const [filters, setFilters] = useState(
-    query.filters ? query.filters.slice() : []
+    searchQuery.filters ? searchQuery.filters.slice() : []
   )
   const [positionTypeFilter, setPositionTypeFilter] = useState(null)
   const [organizationFilter, setOrganizationFilter] = useState(null)
@@ -53,96 +67,150 @@ const AdvancedSearch = props => {
     changePositionTypeFilter,
     changeOrganizationFilter
   )
-  // console.log("RENDER AdvancedSearch", objectType, text, filters)
+
   const filterDefs = objectType ? ALL_FILTERS[objectType].filters : {}
   const existingKeys = filters.map(f => f.key)
   const moreFiltersAvailable =
     existingKeys.length < Object.keys(filterDefs).length
+
+  const advancedSearchMenuContent = (
+    <Menu
+      className={Classes.POPOVER_DISMISS}
+      style={{ maxHeight: "400px", overflowY: "auto" }}
+    >
+      {Object.keys(filterDefs).map(filterKey => (
+        <MenuItem
+          disabled={existingKeys.includes(filterKey)}
+          key={filterKey}
+          onClick={() => addFilter(filterKey)}
+          text={filterKey}
+          shouldDismissPopover={false}
+        />
+      ))}
+    </Menu>
+  )
+
+  const possibleFilterTypes = Object.keys(ALL_FILTERS).filter(type =>
+    searchObjectTypes.includes(type)
+  )
+
   return (
     <Formik>
       {() => (
         <div className="advanced-search form-horizontal">
           <Form onSubmit={onSubmit}>
             <FormGroup>
-              <Col xs={11} style={{ textAlign: "center" }}>
+              <Col xs={11}>
                 <ButtonToggleGroup
                   value={objectType}
                   onChange={changeObjectType}
                 >
-                  {Object.keys(ALL_FILTERS).map(
-                    type =>
-                      props.searchObjectTypes.indexOf(type) !== -1 && (
-                        <Button key={type} value={type}>
-                          {SEARCH_OBJECT_LABELS[type]}
-                        </Button>
-                      )
-                  )}
+                  {possibleFilterTypes.map(type => (
+                    <Button
+                      key={type}
+                      value={type}
+                      disabled={possibleFilterTypes.length < 2}
+                    >
+                      {SEARCH_OBJECT_LABELS[type]}
+                    </Button>
+                  ))}
                 </ButtonToggleGroup>
               </Col>
               <Col xs={1}>
-                <Button bsStyle="link" onClick={clearObjectType}>
-                  <img src={REMOVE_ICON} height={14} alt="Clear type" />
-                </Button>
+                {possibleFilterTypes.length > 1 && objectType && (
+                  <Button bsStyle="link" onClick={clearObjectType}>
+                    <img src={REMOVE_ICON} height={14} alt="Clear type" />
+                  </Button>
+                )}
               </Col>
             </FormGroup>
 
             <FormControl defaultValue={text} className="hidden" />
 
-            {filters.map(
-              filter =>
-                filterDefs[filter.key] && (
-                  <SearchFilter
-                    key={filter.key}
-                    filter={filter}
-                    onRemove={removeFilter}
-                    element={filterDefs[filter.key]}
-                    organizationFilter={organizationFilter}
-                  />
-                )
-            )}
+            <div className="advanced-search-content">
+              {filters.map(
+                filter =>
+                  filterDefs[filter.key] && (
+                    <SearchFilter
+                      key={filter.key}
+                      filter={filter}
+                      onRemove={removeFilter}
+                      element={filterDefs[filter.key]}
+                      organizationFilter={organizationFilter}
+                    />
+                  )
+              )}
+            </div>
 
-            <Row>
-              <Col xs={6} xsOffset={3}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                borderTop: "1px solid #ddd",
+                paddingTop: "15px"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexGrow: 1
+                }}
+              >
                 {!objectType ? (
                   "To add filters, first pick a type above"
                 ) : !moreFiltersAvailable ? (
                   "No additional filters available"
                 ) : (
-                  <DropdownButton
-                    bsStyle="link"
-                    title="+ Add another filter"
-                    onSelect={addFilter}
-                    id="addFilterDropdown"
+                  <Popover
+                    content={advancedSearchMenuContent}
+                    captureDismiss
+                    interactionKind={PopoverInteractionKind.CLICK}
+                    usePortal={false}
+                    position={PopoverPosition.RIGHT}
+                    modifiers={{
+                      preventOverflow: {
+                        boundariesElement: "viewport"
+                      },
+                      flip: {
+                        enabled: false
+                      }
+                    }}
                   >
-                    {Object.keys(filterDefs).map(filterKey => (
-                      <MenuItem
-                        disabled={existingKeys.indexOf(filterKey) > -1}
-                        eventKey={filterKey}
-                        key={filterKey}
-                      >
-                        {filterKey}
-                      </MenuItem>
-                    ))}
-                  </DropdownButton>
+                    <Button bsStyle="link" id="addFilterDropdown">
+                      + Add {filters.length > 0 && "another"} filter
+                    </Button>
+                  </Popover>
                 )}
-              </Col>
-            </Row>
-
-            <Row>
-              <div className="pull-right">
-                <Button onClick={props.onCancel} style={{ marginRight: 20 }}>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "flex-end"
+                }}
+              >
+                <Button
+                  className={Classes.POPOVER_DISMISS}
+                  intent="danger"
+                  onClick={onCancel}
+                  style={{ marginLeft: 20 }}
+                >
                   Cancel
                 </Button>
                 <Button
                   bsStyle="primary"
+                  className={Classes.POPOVER_DISMISS}
                   type="submit"
+                  intent="success"
                   onClick={onSubmit}
-                  style={{ marginRight: 20 }}
+                  style={{ marginLeft: 20 }}
                 >
                   Search
                 </Button>
               </div>
-            </Row>
+            </div>
           </Form>
         </div>
       )}
@@ -196,29 +264,27 @@ const AdvancedSearch = props => {
   }
 
   function onSubmit(event) {
-    if (typeof props.onSearch === "function") {
-      props.onSearch()
+    if (typeof onSearch === "function") {
+      onSearch()
     }
     // We only update the Redux state on submit
-    props.resetPagination()
-    props.setSearchQuery({
+    resetPagination()
+    setSearchQuery({
       objectType,
       filters,
       text
     })
-    if (props.onSearchGoToSearchPage) {
+    if (onSearchGoToSearchPage) {
       history.push({
         pathname: "/search"
       })
     }
-    event.preventDefault()
-    event.stopPropagation()
   }
 }
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    query: _cloneDeep(state.searchQuery),
+    searchQuery: _cloneDeep(state.searchQuery),
     onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
     searchObjectTypes: state.searchProps.searchObjectTypes
   }
@@ -229,11 +295,7 @@ AdvancedSearch.propTypes = {
   onCancel: PropTypes.func,
   setSearchQuery: PropTypes.func.isRequired,
   resetPagination: PropTypes.func.isRequired,
-  query: PropTypes.shape({
-    text: PropTypes.string,
-    filters: PropTypes.any,
-    objectType: PropTypes.string
-  }),
+  searchQuery: SearchQueryPropType,
   onSearchGoToSearchPage: PropTypes.bool,
   searchObjectTypes: PropTypes.array,
   text: PropTypes.string
@@ -247,24 +309,26 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch)
 
-const SearchFilter = props => {
-  const { onRemove, filter, element } = props
+const SearchFilter = ({ onRemove, filter, organizationFilter, element }) => {
   const label = filter.key
   const ChildComponent = element.component
+  const { queryKey } = element.props || undefined
 
   return (
-    <FormGroup>
-      <Col xs={3}>
-        <ControlLabel>{label}</ControlLabel>
+    <FormGroup controlId={queryKey}>
+      <Col sm={3} lg={2} componentClass={ControlLabel}>
+        {label}
       </Col>
-      <Col xs={8}>
-        <ChildComponent
-          value={filter.value || ""}
-          onChange={onChange}
-          {...element.props}
-        />
+      <Col sm={8} lg={9}>
+        <div>
+          <ChildComponent
+            value={filter.value || ""}
+            onChange={onChange}
+            {...element.props}
+          />
+        </div>
       </Col>
-      <Col xs={1}>
+      <Col sm={1} lg={1}>
         <Button bsStyle="link" onClick={() => onRemove(filter)}>
           <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
         </Button>
@@ -277,7 +341,7 @@ const SearchFilter = props => {
 
     if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
       updateOrganizationFilterState(
-        props.organizationFilter,
+        organizationFilter,
         filter.value.value || ""
       )
     }

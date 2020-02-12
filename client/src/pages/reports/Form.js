@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
@@ -11,16 +13,28 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import { createYupObjectShape, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  jumpToTop,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _debounce from "lodash/debounce"
+import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
@@ -28,12 +42,14 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
+import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
+import * as yup from "yup"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
@@ -75,10 +91,11 @@ const GQL_GET_RECENTS = gql`
         uuid
         shortName
         longName
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }
+        customFields
       }
     }
     authorizationGroupRecents(maxResults: 6) {
@@ -136,15 +153,26 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
+const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
+  mutation($report: ReportInput!, $notes: [NoteInput]) {
+    updateReportAssessments(report: $report, assessments: $notes)
+  }
+`
 
-const BaseReportForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseReportForm = ({
+  pageDispatchers,
+  currentUser,
+  edit,
+  title,
+  initialValues,
+  showSensitiveInfo: ssi
+}) => {
   const history = useHistory()
-  const [showSensitiveInfo, setShowSensitiveInfo] = useState(
-    props.showSensitiveInfo
-  )
+  const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  // We need the report tasks in order to be able to dynamically update the yup schema for the selected task assessments
+  const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
   const autoSaveSettings = {
@@ -162,7 +190,7 @@ const BaseReportForm = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -241,14 +269,36 @@ const BaseReportForm = props => {
     }))
   }
 
+  // Update the task assessments schema according to the selected report tasks
+  const taskAssessmentsSchemaShape = {}
+  reportTasks
+    .filter(t => t.customFields)
+    .forEach(t => {
+      taskAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
+        JSON.parse(JSON.parse(t.customFields).assessmentDefinition),
+        `taskAssessments.${t.uuid}`
+      )
+    })
+  const reportSchema = _isEmpty(taskAssessmentsSchemaShape)
+    ? Report.yupSchema
+    : Report.yupSchema.concat(
+      yup.object().shape({
+        taskAssessments: yup
+          .object()
+          .shape(taskAssessmentsSchemaShape)
+          .nullable()
+          .default(null)
+      })
+    )
+  let validateFieldDebounced
+
   return (
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
-      validationSchema={Report.yupSchema}
-      isInitialValid
+      validateOnChange={false}
+      validationSchema={reportSchema}
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -258,11 +308,16 @@ const BaseReportForm = props => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateField,
+        validateForm,
         touched,
         submitForm,
         resetForm,
         setSubmitting
       }) => {
+        if (!validateFieldDebounced) {
+          validateFieldDebounced = _debounce(validateField, 400)
+        }
         const currentOrgUuid =
           currentUser.position && currentUser.position.organization
             ? currentUser.position.organization.uuid
@@ -316,17 +371,40 @@ const BaseReportForm = props => {
           }
         }
 
-        const tasksFilters = {
+        const tasksFiltersLevel1 = {
           allTasks: {
-            label: "All tasks",
-            queryVars: {}
+            label: "All objectives",
+            queryVars: { hasCustomFieldRef1: false }
+          }
+        }
+        const tasksFiltersLevel2 = {
+          forSelectedObjectives: {
+            label: "For selected objectives",
+            queryVars: {
+              customFieldRef1Uuid:
+                values.tasksLevel1 && values.tasksLevel1.length
+                  ? values.tasksLevel1.map(t => t.uuid)
+                  : [""]
+            }
+          },
+          allTasks: {
+            label: "All efforts",
+            queryVars: { hasCustomFieldRef1: true }
           }
         }
         if (currentOrgUuid) {
-          tasksFilters.assignedToMyOrg = {
+          tasksFiltersLevel1.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: currentOrgUuid
+              taskedOrgUuid: currentOrgUuid,
+              hasCustomFieldRef1: false
+            }
+          }
+          tasksFiltersLevel2.assignedToMyOrg = {
+            label: "Assigned to my organization",
+            queryVars: {
+              taskedOrgUuid: currentOrgUuid,
+              hasCustomFieldRef1: true
             }
           }
         }
@@ -341,14 +419,21 @@ const BaseReportForm = props => {
           primaryAdvisor.position &&
           primaryAdvisor.position.organization
         ) {
-          tasksFilters.assignedToReportOrg = {
+          tasksFiltersLevel1.assignedToReportOrg = {
             label: "Assigned to organization of report",
             queryVars: {
-              responsibleOrgUuid: primaryAdvisor.position.organization.uuid
+              taskedOrgUuid: primaryAdvisor.position.organization.uuid,
+              hasCustomFieldRef1: false
+            }
+          }
+          tasksFiltersLevel2.assignedToReportOrg = {
+            label: "Assigned to organization of report",
+            queryVars: {
+              taskedOrgUuid: primaryAdvisor.position.organization.uuid,
+              hasCustomFieldRef1: true
             }
           }
         }
-
         const authorizationGroupsFilters = {
           allAuthorizationGroups: {
             label: "All authorization groups",
@@ -421,13 +506,18 @@ const BaseReportForm = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field
+                <FastField
                   name="intent"
                   label={Settings.fields.report.intent}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
+                  onChange={event => {
+                    setFieldTouched("intent", true, false)
+                    setFieldValue("intent", event.target.value, false)
+                    validateFieldDebounced("intent")
+                  }}
                   onKeyUp={event =>
                     countCharsLeft(
                       "intentCharsLeft",
@@ -446,11 +536,14 @@ const BaseReportForm = props => {
                   className="meeting-goal"
                 />
 
-                <Field
+                <FastField
                   name="engagementDate"
-                  component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("engagementDate", value)}
-                  onBlur={() => setFieldTouched("engagementDate", true)}
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
+                    setFieldValue("engagementDate", value, true)
+                  }}
+                  onBlur={() => setFieldTouched("engagementDate")}
                   widget={
                     <CustomDateInput
                       id="engagementDate"
@@ -465,38 +558,66 @@ const BaseReportForm = props => {
                       </span>
                     </HelpBlock>
                   )}
-                </Field>
+                </FastField>
 
                 {Settings.engagementsIncludeTimeAndDuration && (
-                  <Field
+                  <FastField
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldTouched("duration", true, false)
+                      setFieldValue("duration", event.target.value, false)
+                      validateFieldDebounced("duration")
+                    }}
                   />
                 )}
 
-                <AdvancedSingleSelect
-                  fieldName="location"
-                  fieldLabel="Location"
-                  placeholder="Search for the engagement location..."
-                  value={values.location}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={LocationOverlayRow}
-                  filterDefs={locationFilters}
-                  onChange={value => setFieldValue("location", value)}
-                  objectType={Location}
-                  fields={Location.autocompleteQuery}
-                  valueKey="name"
-                  addon={LOCATIONS_ICON}
-                  shortcutsTitle="Recent Locations"
-                  shortcuts={recents.locations}
-                  renderExtraCol
+                <FastField
+                  name="location"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("location", value, true)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="location"
+                      placeholder="Search for the engagement location..."
+                      value={values.location}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={LocationOverlayRow}
+                      filterDefs={locationFilters}
+                      objectType={Location}
+                      fields={Location.autocompleteQuery}
+                      valueKey="name"
+                      addon={LOCATIONS_ICON}
+                    />
+                  }
+                  extraColElem={
+                    <>
+                      <FieldHelper.FieldShortcuts
+                        title="Recent Locations"
+                        shortcuts={recents.locations}
+                        fieldName="location"
+                        objectType={Location}
+                        curValue={values.location}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("location", value, true)
+                        }}
+                        handleAddItem={FieldHelper.handleSingleSelectAddItem}
+                      />
+                    </>
+                  }
                 />
 
                 {!isFutureEngagement && (
-                  <Field
+                  <FastField
                     name="cancelled"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
                       <Checkbox
@@ -509,7 +630,8 @@ const BaseReportForm = props => {
                           // set a default reason when cancelled has been checked and no reason has been selected
                           setFieldValue(
                             "cancelledReason",
-                            cancelledReasonOptions[0].value
+                            cancelledReasonOptions[0].value,
+                            true
                           )}
                       >
                         This engagement was cancelled
@@ -518,12 +640,16 @@ const BaseReportForm = props => {
                   />
                 )}
                 {!isFutureEngagement && values.cancelled && (
-                  <Field
+                  <FastField
                     name="cancelledReason"
                     label="due to"
-                    component={FieldHelper.renderSpecialField}
+                    component={FieldHelper.SpecialField}
+                    onChange={event => {
+                      // validation will be done by setFieldValue
+                      setFieldValue("cancelledReason", event.target.value, true)
+                    }}
                     widget={
-                      <Field
+                      <FastField
                         component="select"
                         className="cancelled-reason-form-group form-control"
                       >
@@ -532,41 +658,48 @@ const BaseReportForm = props => {
                             {reason.label}
                           </option>
                         ))}
-                      </Field>
+                      </FastField>
                     }
                   />
                 )}
 
                 {!isFutureEngagement && !values.cancelled && (
-                  <Field
+                  <FastField
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={atmosphereButtons}
-                    onChange={value => setFieldValue("atmosphere", value)}
+                    onChange={value => setFieldValue("atmosphere", value, true)}
                     className="atmosphere-form-group"
                   />
                 )}
-                {!isFutureEngagement &&
-                  !values.cancelled &&
-                  values.atmosphere && (
-                    <Field
-                      name="atmosphereDetails"
-                      label={Settings.fields.report.atmosphereDetails}
-                      component={FieldHelper.renderInputField}
-                      placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                        values.atmosphere === "POSITIVE" ? "(optional)" : ""
-                      }`}
-                      className="atmosphere-details"
-                    />
+                {!isFutureEngagement && !values.cancelled && values.atmosphere && (
+                  <Field
+                    name="atmosphereDetails"
+                    label={Settings.fields.report.atmosphereDetails}
+                    component={FieldHelper.InputField}
+                    onChange={event => {
+                      setFieldTouched("atmosphereDetails", true, false)
+                      setFieldValue(
+                        "atmosphereDetails",
+                        event.target.value,
+                        false
+                      )
+                      validateFieldDebounced("atmosphereDetails")
+                    }}
+                    placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
+                      values.atmosphere === "POSITIVE" ? "(optional)" : ""
+                    }`}
+                    className="atmosphere-details"
+                  />
                 )}
 
                 {Settings.fields.report.reportTags && (
-                  <Field
+                  <FastField
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
+                    component={FieldHelper.SpecialField}
+                    onChange={value => setFieldValue("reportTags", value, true)}
                     widget={<ReportTags suggestions={tagSuggestions} />}
                   />
                 )}
@@ -580,37 +713,60 @@ const BaseReportForm = props => {
                 }
                 id="attendance-fieldset"
               >
-                <AdvancedMultiSelect
-                  fieldName="attendees"
-                  fieldLabel="Attendees"
-                  placeholder="Search for the meeting attendees..."
-                  value={values.attendees}
-                  renderSelected={
-                    <AttendeesTable
-                      attendees={values.attendees}
-                      onChange={value => setFieldValue("attendees", value)}
-                      showDelete
+                <Field
+                  name="attendees"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
+                    updateAttendees(setFieldValue, "attendees", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="attendees"
+                      placeholder="Search for the meeting attendees..."
+                      value={values.attendees}
+                      renderSelected={
+                        <AttendeesTable
+                          attendees={values.attendees}
+                          onChange={value =>
+                            setFieldValue("attendees", value, true)}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={[
+                        "Name",
+                        "Position",
+                        "Location",
+                        "Organization"
+                      ]}
+                      overlayRenderRow={PersonDetailedOverlayRow}
+                      filterDefs={attendeesFilters}
+                      objectType={Person}
+                      queryParams={{
+                        status: [Person.STATUS.ACTIVE]
+                      }}
+                      fields={Person.autocompleteQuery}
+                      addon={PEOPLE_ICON}
                     />
                   }
-                  overlayColumns={[
-                    "Name",
-                    "Position",
-                    "Location",
-                    "Organization"
-                  ]}
-                  overlayRenderRow={PersonDetailedOverlayRow}
-                  filterDefs={attendeesFilters}
-                  onChange={value =>
-                    updateAttendees(setFieldValue, "attendees", value)}
-                  objectType={Person}
-                  queryParams={{
-                    status: [Person.STATUS.ACTIVE]
-                  }}
-                  fields={Person.autocompleteQuery}
-                  addon={PEOPLE_ICON}
-                  shortcutsTitle="Recent Attendees"
-                  shortcuts={recents.persons}
-                  renderExtraCol
+                  extraColElem={
+                    <>
+                      <FieldHelper.FieldShortcuts
+                        title="Recent attendees"
+                        shortcuts={recents.persons}
+                        fieldName="attendees"
+                        objectType={Person}
+                        curValue={values.attendees}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
+                          updateAttendees(setFieldValue, "attendees", value)
+                        }}
+                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                      />
+                    </>
+                  }
                 />
               </Fieldset>
 
@@ -618,38 +774,108 @@ const BaseReportForm = props => {
                 title={Settings.fields.task.longLabel}
                 className="tasks-selector"
               >
-                <AdvancedMultiSelect
-                  fieldName="tasks"
-                  fieldLabel={Settings.fields.task.shortLabel}
-                  placeholder={`Search for ${pluralize(
-                    Settings.fields.task.shortLabel
-                  )}...`}
-                  value={values.tasks}
-                  renderSelected={
-                    <TaskTable
-                      tasks={values.tasks}
-                      showDelete
-                      showOrganization
+                <FastField
+                  name="tasksLevel1"
+                  label="Objectives"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("tasksLevel1", value, true)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="tasksLevel1"
+                      placeholder="Search for objectives"
+                      value={values.tasksLevel1}
+                      renderSelected={
+                        <TaskTable
+                          id="tasks-objectives"
+                          tasks={values.tasksLevel1}
+                          showDelete
+                          showOrganization
+                        />
+                      }
+                      overlayColumns={["Name", "Tasked organizations"]}
+                      overlayRenderRow={TaskDetailedOverlayRow}
+                      filterDefs={tasksFiltersLevel1}
+                      objectType={Task}
+                      queryParams={{ status: Task.STATUS.ACTIVE }}
+                      fields={Task.autocompleteQuery}
+                      addon={TASKS_ICON}
                     />
                   }
-                  overlayColumns={["Name", "Organization"]}
-                  overlayRenderRow={TaskDetailedOverlayRow}
-                  filterDefs={tasksFilters}
+                />
+
+                <Field
+                  name="tasks"
+                  label={Settings.fields.task.shortLabel}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
-                    setFieldValue("tasks", value)
-                    setFieldTouched("tasks", true)
+                    // validation will be done by setFieldValue
+                    setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("tasks", value, true)
+                    setReportTasks(value)
                   }}
-                  objectType={Task}
-                  queryParams={{ status: Task.STATUS.ACTIVE }}
-                  fields={Task.autocompleteQuery}
-                  addon={TASKS_ICON}
-                  shortcutsTitle={`Recent ${pluralize(
-                    Settings.fields.task.shortLabel
-                  )}`}
-                  shortcuts={recents.tasks}
-                  renderExtraCol
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="tasks"
+                      placeholder={`Search for ${pluralize(
+                        Settings.fields.task.shortLabel
+                      )}...`}
+                      value={values.tasks}
+                      renderSelected={
+                        <TaskTable
+                          id="tasks-tasks"
+                          tasks={values.tasks}
+                          showDelete
+                          showOrganization
+                        />
+                      }
+                      overlayColumns={["Name", "Tasked organizations"]}
+                      overlayRenderRow={TaskDetailedOverlayRow}
+                      filterDefs={tasksFiltersLevel2}
+                      objectType={Task}
+                      queryParams={{ status: Task.STATUS.ACTIVE }}
+                      fields={Task.autocompleteQuery}
+                      addon={TASKS_ICON}
+                    />
+                  }
+                  extraColElem={
+                    <>
+                      <FieldHelper.FieldShortcuts
+                        title={`Recent ${pluralize(
+                          Settings.fields.task.shortLabel
+                        )}`}
+                        shortcuts={recents.tasks}
+                        fieldName="tasks"
+                        objectType={Task}
+                        curValue={values.tasks}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("tasks", value, true)
+                        }}
+                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                      />
+                    </>
+                  }
                 />
               </Fieldset>
+
+              {Settings.fields.report.customFields && (
+                <Fieldset title="Engagement information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.report.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
 
               <Fieldset
                 title={
@@ -659,37 +885,49 @@ const BaseReportForm = props => {
                 }
                 id="meeting-details"
               >
-                {!isFutureEngagement && !values.cancelled && (
-                  <Field
-                    name="keyOutcomes"
-                    label={Settings.fields.report.keyOutcomes}
-                    component={FieldHelper.renderInputField}
-                    componentClass="textarea"
-                    maxLength={Settings.maxTextFieldLength}
-                    onKeyUp={event =>
-                      countCharsLeft(
-                        "keyOutcomesCharsLeft",
-                        Settings.maxTextFieldLength,
-                        event
-                      )}
-                    extraColElem={
-                      <>
-                        <span id="keyOutcomesCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            initialValues.keyOutcomes.length}
-                        </span>{" "}
-                        characters remaining
-                      </>
-                    }
-                  />
+                {Settings.fields.report.keyOutcomes &&
+                  !isFutureEngagement &&
+                  !values.cancelled && (
+                    <FastField
+                      name="keyOutcomes"
+                      label={Settings.fields.report.keyOutcomes}
+                      component={FieldHelper.InputField}
+                      onChange={event => {
+                        setFieldTouched("keyOutcomes", true, false)
+                        setFieldValue("keyOutcomes", event.target.value, false)
+                        validateFieldDebounced("keyOutcomes")
+                      }}
+                      componentClass="textarea"
+                      maxLength={Settings.maxTextFieldLength}
+                      onKeyUp={event =>
+                        countCharsLeft(
+                          "keyOutcomesCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )}
+                      extraColElem={
+                        <>
+                          <span id="keyOutcomesCharsLeft">
+                            {Settings.maxTextFieldLength -
+                              initialValues.keyOutcomes.length}
+                          </span>{" "}
+                          characters remaining
+                        </>
+                      }
+                    />
                 )}
 
                 {!isFutureEngagement && (
-                  <Field
+                  <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps}
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     componentClass="textarea"
+                    onChange={event => {
+                      setFieldTouched("nextSteps", true, false)
+                      setFieldValue("nextSteps", event.target.value, false)
+                      validateFieldDebounced("nextSteps")
+                    }}
                     maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
                       countCharsLeft(
@@ -709,15 +947,18 @@ const BaseReportForm = props => {
                   />
                 )}
 
-                <Field
+                <FastField
                   name="reportText"
                   label={Settings.fields.report.reportText}
-                  component={FieldHelper.renderSpecialField}
-                  onChange={value => setFieldValue("reportText", value)}
+                  component={FieldHelper.SpecialField}
+                  onChange={value => setFieldValue("reportText", value, true)}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
-                      onHandleBlur={() => setFieldTouched("reportText", true)}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("reportText", true, false)
+                      }}
                     />
                   }
                 />
@@ -732,56 +973,125 @@ const BaseReportForm = props => {
                 </Button>
 
                 <Collapse in={showSensitiveInfo}>
-                  {(values.reportSensitiveInformation || !props.edit) && (
+                  {(values.reportSensitiveInformation || !edit) && (
                     <div>
-                      <Field
+                      <FastField
                         name="reportSensitiveInformation.text"
-                        component={FieldHelper.renderSpecialField}
+                        component={FieldHelper.SpecialField}
                         label="Report sensitive information text"
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value
+                            value,
+                            true
                           )}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
-                            onHandleBlur={() =>
+                            onHandleBlur={() => {
+                              // validation will be done by setFieldValue
                               setFieldTouched(
                                 "reportSensitiveInformation.text",
-                                true
-                              )}
+                                true,
+                                false
+                              )
+                            }}
                           />
                         }
                       />
-                      <AdvancedMultiSelect
-                        fieldName="authorizationGroups"
-                        fieldLabel="Authorization Groups"
-                        placeholder="Search for authorization groups..."
-                        value={values.authorizationGroups}
-                        renderSelected={
-                          <AuthorizationGroupTable
-                            authorizationGroups={values.authorizationGroups}
-                            showDelete
+                      <FastField
+                        name="authorizationGroups"
+                        label="Authorization Groups"
+                        component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("authorizationGroups", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("authorizationGroups", value, true)
+                        }}
+                        widget={
+                          <AdvancedMultiSelect
+                            fieldName="authorizationGroups"
+                            placeholder="Search for authorization groups..."
+                            value={values.authorizationGroups}
+                            renderSelected={
+                              <AuthorizationGroupTable
+                                authorizationGroups={values.authorizationGroups}
+                                showDelete
+                              />
+                            }
+                            overlayColumns={["Name", "Description"]}
+                            overlayRenderRow={AuthorizationGroupOverlayRow}
+                            filterDefs={authorizationGroupsFilters}
+                            objectType={AuthorizationGroup}
+                            queryParams={{
+                              status: AuthorizationGroup.STATUS.ACTIVE
+                            }}
+                            fields={AuthorizationGroup.autocompleteQuery}
+                            addon={<Icon icon={IconNames.LOCK} />}
                           />
                         }
-                        overlayColumns={["Name", "Description"]}
-                        overlayRenderRow={AuthorizationGroupOverlayRow}
-                        filterDefs={authorizationGroupsFilters}
-                        onChange={value =>
-                          setFieldValue("authorizationGroups", value)}
-                        objectType={AuthorizationGroup}
-                        queryParams={{
-                          status: AuthorizationGroup.STATUS.ACTIVE
-                        }}
-                        fields={AuthorizationGroup.autocompleteQuery}
-                        shortcutsTitle="Recent Authorization Groups"
-                        shortcuts={recents.authorizationGroups}
-                        renderExtraCol
+                        extraColElem={
+                          <>
+                            <FieldHelper.FieldShortcuts
+                              title="Recent Authorization Groups"
+                              shortcuts={recents.authorizationGroups}
+                              fieldName="authorizationGroups"
+                              objectType={AuthorizationGroup}
+                              curValue={values.authorizationGroups}
+                              onChange={value => {
+                                // validation will be done by setFieldValue
+                                setFieldTouched(
+                                  "authorizationGroups",
+                                  true,
+                                  false
+                                ) // onBlur doesn't work when selecting an option
+                                setFieldValue(
+                                  "authorizationGroups",
+                                  value,
+                                  true
+                                )
+                              }}
+                              handleAddItem={
+                                FieldHelper.handleMultiSelectAddItem
+                              }
+                            />
+                          </>
+                        }
                       />
                     </div>
                   )}
                 </Collapse>
+              </Fieldset>
+
+              <Fieldset
+                title="Engagement assessments"
+                id="engagement-assessments"
+              >
+                {values.tasks.map(task => {
+                  if (!task.customFields) {
+                    return null
+                  }
+                  const taskCustomFields = JSON.parse(task.customFields)
+                  if (!taskCustomFields.assessmentDefinition) {
+                    return null
+                  }
+                  const taskAssessmentDefinition = JSON.parse(
+                    taskCustomFields.assessmentDefinition
+                  )
+                  return (
+                    <CustomFieldsContainer
+                      key={`assessment-${values.uuid}-${task.uuid}`}
+                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      fieldsConfig={taskAssessmentDefinition}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  )
+                })}
               </Fieldset>
 
               <div className="submit-buttons">
@@ -812,7 +1122,7 @@ const BaseReportForm = props => {
                     id="formBottomSubmit"
                     bsStyle="primary"
                     type="button"
-                    onClick={() => onSubmit(values, { resetForm: resetForm })}
+                    onClick={() => onSubmit(values, { resetForm })}
                     disabled={isSubmitting}
                   >
                     {submitText}
@@ -845,7 +1155,7 @@ const BaseReportForm = props => {
         attendee.primary = attendee.primary || false
       }
     })
-    setFieldValue(field, attendees)
+    setFieldValue(field, attendees, true)
   }
 
   function countCharsLeft(elemId, maxChars, event) {
@@ -873,19 +1183,17 @@ const BaseReportForm = props => {
         autoSaveSettings.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      const edit = isEditMode(autoSaveSettings.values)
-      const operation = edit ? "updateReport" : "createReport"
       save(autoSaveSettings.values, false)
         .then(response => {
           const newValues = _cloneDeep(autoSaveSettings.values)
-          Object.assign(newValues, response[operation])
+          Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
             newValues.reportSensitiveInformation = {} // object must exist for Collapse children
           }
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
           const touched = _cloneDeep(autoSaveSettings.touched) // save previous touched
-          form.resetForm(newValues)
+          form.resetForm({ values: newValues })
           Object.entries(touched).forEach(([field, value]) =>
             // re-set touched so we keep messages
             form.setFieldTouched(field, value)
@@ -949,14 +1257,8 @@ const BaseReportForm = props => {
       })
   }
 
-  function onSubmitSuccess(response, values, resetForm) {
+  function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
-    const operation = edit ? "updateReport" : "createReport"
-    const report = new Report({
-      uuid: response[operation].uuid
-        ? response[operation].uuid
-        : initialValues.uuid
-    })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     resetForm()
@@ -968,6 +1270,46 @@ const BaseReportForm = props => {
     })
   }
 
+  function isEmptyTaskAssessment(assessment) {
+    return (
+      (Object.keys(assessment).length === 1 &&
+        Object.keys(assessment)[0] === "invisibleCustomFields") ||
+      _isEmpty(assessment)
+    )
+  }
+
+  function createTaskAssessmentsNotes(values, reportUuid) {
+    const selectedTasksUuids = values.tasks.map(t => t.uuid)
+    return Object.keys(values.taskAssessments)
+      .filter(
+        key =>
+          selectedTasksUuids.includes(key) &&
+          !isEmptyTaskAssessment(values.taskAssessments[key])
+      )
+      .map(key => {
+        const taskAssessment = _cloneDeep(values.taskAssessments[key])
+        delete taskAssessment.invisibleCustomFields
+        const noteObj = {
+          type: NOTE_TYPE.ASSESSMENT,
+          noteRelatedObjects: [
+            {
+              relatedObjectType: "tasks",
+              relatedObjectUuid: key
+            },
+            {
+              relatedObjectType: "reports",
+              relatedObjectUuid: reportUuid
+            }
+          ],
+          text: JSON.stringify(taskAssessment)
+        }
+        const initialAssessmentUuid = values.taskToAssessmentUuid[key]
+        if (initialAssessmentUuid) {
+          noteObj.uuid = initialAssessmentUuid
+        }
+        return noteObj
+      })
+  }
   function save(values, sendEmail) {
     const report = Object.without(
       new Report(values),
@@ -975,7 +1317,13 @@ const BaseReportForm = props => {
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
-      "attendees"
+      "attendees",
+      "tasks",
+      "customFields", // initial JSON from the db
+      "formCustomFields",
+      "tasksLevel1",
+      "taskAssessments",
+      "taskToAssessmentUuid"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -999,19 +1347,49 @@ const BaseReportForm = props => {
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
     report.attendees = values.attendees.map(a =>
-      Object.without(a, "firstName", "lastName", "position")
+      Object.without(
+        a,
+        "firstName",
+        "lastName",
+        "position",
+        "customFields",
+        "formCustomFields"
+      )
     )
+    // strip tasks fields not in data model
+    report.tasks = values.tasks.map(t => utils.getReference(t))
     report.location = utils.getReference(report.location)
+    report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
+    const operation = edit ? "updateReport" : "createReport"
     const variables = { report }
+    return _saveReport(edit, variables, sendEmail).then(response => {
+      const report = response[operation]
+      const updateNotesVariables = { report }
+      updateNotesVariables.notes = createTaskAssessmentsNotes(
+        values,
+        report.uuid
+      )
+      return API.mutation(
+        GQL_UPDATE_REPORT_ASSESSMENTS,
+        updateNotesVariables
+      ).then(() => report)
+    })
+  }
+
+  function _saveReport(edit, variables, sendEmail) {
     if (edit) {
       variables.sendEditEmail = sendEmail
+      // Add an additional mutation to create notes for the taskAssessments
+      return API.mutation(GQL_UPDATE_REPORT, variables)
+    } else {
+      return API.mutation(GQL_CREATE_REPORT, variables)
     }
-    return API.mutation(edit ? GQL_UPDATE_REPORT : GQL_CREATE_REPORT, variables)
   }
 }
 
 BaseReportForm.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
@@ -1031,4 +1409,4 @@ const ReportForm = props => (
   </AppContext.Consumer>
 )
 
-export default ReportForm
+export default connect(null, mapPageDispatchersToProps)(ReportForm)

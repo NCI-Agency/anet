@@ -3,8 +3,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Person } from "models"
@@ -30,6 +30,7 @@ const GQL_GET_PERSON = gql`
       endOfTourDate
       domainUsername
       avatar(size: 256)
+      code
       position {
         uuid
         name
@@ -39,8 +40,7 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const BaseOnboardingEdit = props => {
-  const uuid = props.currentUser.uuid
+const BaseOnboardingEdit = ({ pageDispatchers, currentUser: { uuid } }) => {
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
@@ -51,7 +51,7 @@ const BaseOnboardingEdit = props => {
     uuid,
     pageProps: PAGE_PROPS_MIN_HEAD,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -79,7 +79,7 @@ const BaseOnboardingEdit = props => {
 }
 
 BaseOnboardingEdit.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -91,4 +91,4 @@ const OnboardingEdit = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(OnboardingEdit)
+export default connect(null, mapPageDispatchersToProps)(OnboardingEdit)

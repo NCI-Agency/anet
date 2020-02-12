@@ -60,11 +60,14 @@ AdvancedSelectOverlayTable.propTypes = {
   tableClassName: PropTypes.string
 }
 AdvancedSelectOverlayTable.defaultProps = {
+  selectedItems: [],
   tableClassName: ""
 }
 
-const AdvancedSingleSelectOverlayTableBase = props => {
-  const { selectedItems, ...otherProps } = props
+const AdvancedSingleSelectOverlayTableBase = ({
+  selectedItems,
+  ...otherProps
+}) => {
   return (
     <AdvancedSelectOverlayTable
       {...otherProps}

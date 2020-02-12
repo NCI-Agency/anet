@@ -1,5 +1,6 @@
 import encodeQuery from "querystring/encode"
 import _forEach from "lodash/forEach"
+import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
 import utils from "utils"
@@ -31,7 +32,8 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 export const NOTE_TYPE = {
   FREE_TEXT: "FREE_TEXT",
   CHANGE_RECORD: "CHANGE_RECORD",
-  PARTNER_ASSESSMENT: "PARTNER_ASSESSMENT"
+  PARTNER_ASSESSMENT: "PARTNER_ASSESSMENT",
+  ASSESSMENT: "ASSESSMENT"
 }
 export const yupDate = yup.date().transform(function(value, originalValue) {
   if (this.isType(value)) {
@@ -40,6 +42,100 @@ export const yupDate = yup.date().transform(function(value, originalValue) {
   const newValue = moment(originalValue)
   return newValue.isValid() ? newValue.toDate() : value
 })
+
+export const CUSTOM_FIELD_TYPE = {
+  TEXT: "text",
+  NUMBER: "number",
+  DATE: "date",
+  DATETIME: "datetime",
+  ENUM: "enum",
+  ENUMSET: "enumset",
+  ARRAY_OF_OBJECTS: "array_of_objects",
+  SPECIAL_FIELD: "special_field"
+}
+
+const CUSTOM_FIELD_TYPE_SCHEMA = {
+  [CUSTOM_FIELD_TYPE.TEXT]: yup
+    .string()
+    .nullable()
+    .default(""),
+  [CUSTOM_FIELD_TYPE.NUMBER]: yup
+    .number()
+    .nullable()
+    .default(null),
+  [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.ENUM]: yup
+    .string()
+    .nullable()
+    .default(""),
+  [CUSTOM_FIELD_TYPE.ENUMSET]: yup
+    .array()
+    .nullable()
+    .default([]),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup
+    .array()
+    .nullable()
+    .default([]),
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup
+    .mixed()
+    .nullable()
+    .default(null)
+}
+
+const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
+  const { label, validations, objectFields } = fieldConfig
+  let fieldTypeYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
+  if (!_isEmpty(objectFields)) {
+    const objSchema = createYupObjectShape(objectFields, fieldPrefix)
+    fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)
+  }
+  if (!_isEmpty(validations)) {
+    validations.forEach(validation => {
+      const { params, type } = validation
+      if (!fieldTypeYupSchema[type]) {
+        return
+      }
+      fieldTypeYupSchema = !_isEmpty(params)
+        ? fieldTypeYupSchema[type](...params)
+        : fieldTypeYupSchema[type]()
+    })
+  }
+
+  let fieldYupSchema = yup
+    .mixed()
+    .nullable()
+    .default(null)
+  if (!_isEmpty(label)) {
+    fieldYupSchema = fieldYupSchema.label(label)
+  }
+  // Only use the field type specific schema when the field is visible, no validation needed when the field is invisible
+  fieldYupSchema = fieldYupSchema.when(
+    "invisibleCustomFields",
+    (invisibleCustomFields, schema) =>
+      invisibleCustomFields &&
+      invisibleCustomFields.includes(`${fieldPrefix}.${fieldKey}`)
+        ? schema
+        : schema.concat(fieldTypeYupSchema)
+  )
+  return fieldYupSchema
+}
+
+export const createYupObjectShape = (config, prefix = "formCustomFields") => {
+  let objShape = {}
+  if (config) {
+    objShape = Object.fromEntries(
+      Object.entries(config)
+        .map(([k, v]) => [k, createFieldYupSchema(k, config[k], prefix)])
+        .filter(([k, v]) => v !== null)
+    )
+    objShape.invisibleCustomFields = yup
+      .array()
+      .nullable()
+      .default([])
+  }
+  return yup.object().shape(objShape)
+}
 
 export default class Model {
   static schema = {
@@ -58,7 +154,7 @@ export default class Model {
       const obj = yupSchema.cast(props)
       _forEach(yupSchema.fields, (value, key) => {
         if (
-          !obj.hasOwnProperty(key) ||
+          !Object.prototype.hasOwnProperty.call(obj, key) ||
           obj[key] === null ||
           obj[key] === undefined
         ) {
@@ -95,6 +191,7 @@ export default class Model {
   static displayName(appSettings) {
     return null
   }
+
   static listName = null
 
   static fromArray(array) {
@@ -128,8 +225,8 @@ export default class Model {
       }
     }
 
-    let resourceName = utils.resourceize(this.resourceName)
-    let uuid = instance.uuid
+    const resourceName = utils.resourceize(this.resourceName)
+    const uuid = instance.uuid
     let url = ["", resourceName, uuid].join("/")
 
     if (query) {
@@ -140,7 +237,7 @@ export default class Model {
   }
 
   static pathForNew(query) {
-    let resourceName = utils.resourceize(this.resourceName)
+    const resourceName = utils.resourceize(this.resourceName)
     let url = ["", resourceName, "new"].join("/")
 
     if (query) {
