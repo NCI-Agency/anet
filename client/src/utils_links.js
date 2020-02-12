@@ -9,7 +9,7 @@ const UUID_REGEX =
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
-    report(uuid: $uuid) {
+    entity: report(uuid: $uuid) {
       uuid
       intent
     }
@@ -18,7 +18,7 @@ const GQL_GET_REPORT = gql`
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
-    person(uuid: $uuid) {
+    entity: person(uuid: $uuid) {
       uuid
       name
       role
@@ -29,7 +29,7 @@ const GQL_GET_PERSON = gql`
 
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {
-    organization(uuid: $uuid) {
+    entity: organization(uuid: $uuid) {
       uuid
       shortName
     }
@@ -38,7 +38,7 @@ const GQL_GET_ORGANIZATION = gql`
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
-    position(uuid: $uuid) {
+    entity: position(uuid: $uuid) {
       uuid
       name
     }
@@ -47,7 +47,7 @@ const GQL_GET_POSITION = gql`
 
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
-    location(uuid: $uuid) {
+    entity: location(uuid: $uuid) {
       uuid
       name
     }
@@ -56,7 +56,7 @@ const GQL_GET_LOCATION = gql`
 
 const GQL_GET_TASK = gql`
   query($uuid: String!) {
-    task(uuid: $uuid) {
+    entity: task(uuid: $uuid) {
       uuid
       shortName
       longName
@@ -127,16 +127,5 @@ export function getEntityByUuid(type, uuid) {
 
   return API.query(entityQuery, {
     uuid: uuid
-  }).then(data => {
-    const entity =
-      data.report ||
-      data.person ||
-      data.organization ||
-      data.position ||
-      data.location ||
-      data.task
-    if (entity) {
-      return entity
-    }
-  })
+  }).then(data => data.entity)
 }
