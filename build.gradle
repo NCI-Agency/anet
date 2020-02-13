@@ -114,7 +114,7 @@ dependencies {
 	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
 
 	// For parsing HTML to check for 'empty' input
-	compile 'org.jsoup:jsoup:1.12.1'
+	compile 'org.jsoup:jsoup:1.12.2'
 
 	// For fast and simple image scaling
 	compile group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
