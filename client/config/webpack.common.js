@@ -49,6 +49,7 @@ const commonConfig = {
             loader: "babel-loader",
             options: {
               babelrc: false,
+              compact: false,
               presets: [require.resolve("babel-preset-react-app/dependencies")]
             }
           }
