@@ -3,6 +3,7 @@ import { gql } from "apollo-boost"
 import parse from "html-react-parser"
 import API from "api"
 import LinkAnet from "components/editor/LinkAnet"
+import { PAGE_URLS } from "pages/util"
 
 const UUID_REGEX =
   "^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$"
@@ -64,6 +65,7 @@ const GQL_GET_TASK = gql`
   }
 `
 
+// Entity type --> entity name
 export const ENTITY_TYPES = {
   REPORTS: "Report",
   PEOPLE: "Person",
@@ -73,16 +75,18 @@ export const ENTITY_TYPES = {
   TASKS: "Task"
 }
 
-const parsedEntityLinkType = {
-  reports: ENTITY_TYPES.REPORTS,
-  people: ENTITY_TYPES.PEOPLE,
-  organizations: ENTITY_TYPES.ORGANIZATIONS,
-  positions: ENTITY_TYPES.POSITIONS,
-  locations: ENTITY_TYPES.LOCATIONS,
-  tasks: ENTITY_TYPES.TASKS
+// Entity URL --> Entity type
+const ENTITY_URL_TYPES = {
+  [PAGE_URLS.REPORTS]: ENTITY_TYPES.REPORTS,
+  [PAGE_URLS.PEOPLE]: ENTITY_TYPES.PEOPLE,
+  [PAGE_URLS.ORGANIZATIONS]: ENTITY_TYPES.ORGANIZATIONS,
+  [PAGE_URLS.POSITIONS]: ENTITY_TYPES.POSITIONS,
+  [PAGE_URLS.LOCATIONS]: ENTITY_TYPES.LOCATIONS,
+  [PAGE_URLS.TASKS]: ENTITY_TYPES.TASKS
 }
 
-const parsedEntityLinkTypeQuery = {
+// Entity type --> GQL query
+const ENTITY_GQL_QUERIES = {
   [ENTITY_TYPES.REPORTS]: GQL_GET_REPORT,
   [ENTITY_TYPES.PEOPLE]: GQL_GET_PERSON,
   [ENTITY_TYPES.ORGANIZATIONS]: GQL_GET_ORGANIZATION,
@@ -95,9 +99,9 @@ export function getEntityInfoFromUrl(url) {
   const splittedUrl = url.split(/[\\/]/)
 
   if (splittedUrl.length > 1) {
-    const typeRaw = splittedUrl[splittedUrl.length - 2]
+    const typeRaw = "/" + splittedUrl[splittedUrl.length - 2]
     const uuid = splittedUrl[splittedUrl.length - 1]
-    const type = parsedEntityLinkType[typeRaw]
+    const type = ENTITY_URL_TYPES[typeRaw]
 
     if (type && new RegExp(UUID_REGEX).test(uuid)) {
       return { type: type, uuid: uuid }
@@ -120,7 +124,7 @@ export function parseHtmlWithLinkTo(html, report) {
 
 // If entity could not retrieved a null will be returned
 export function getEntityByUuid(type, uuid) {
-  const entityQuery = parsedEntityLinkTypeQuery[type]
+  const entityQuery = ENTITY_GQL_QUERIES[type]
   if (!entityQuery) {
     return null
   }

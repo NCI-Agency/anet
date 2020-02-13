@@ -40,17 +40,18 @@ import TaskShow from "pages/tasks/Show"
 import PropTypes from "prop-types"
 import React from "react"
 import { Redirect, Route, Switch } from "react-router-dom"
+import { PAGE_URLS } from "pages/util"
 
 const BaseRouting = ({ currentUser }) => {
   return (
     <Switch>
-      <Route exact path="/" component={Home} />
-      <Route path="/search" component={Search} />
-      <Route path="/rollup" component={RollupShow} />
-      <Route path="/graphiql" component={GraphiQL} />
-      <Route path="/help" component={Help} />
+      <Route exact path={PAGE_URLS.HOME} component={Home} />
+      <Route path={PAGE_URLS.SEARCH} component={Search} />
+      <Route path={PAGE_URLS.ROLLUP} component={RollupShow} />
+      <Route path={PAGE_URLS.GRAPHIQL} component={GraphiQL} />
+      <Route path={PAGE_URLS.HELP} component={Help} />
       <Route
-        path="/reports"
+        path={PAGE_URLS.REPORTS}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={ReportNew} />
@@ -62,7 +63,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/people"
+        path={PAGE_URLS.PEOPLE}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={PersonNew} />
@@ -72,7 +73,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/organizations"
+        path={PAGE_URLS.ORGANIZATIONS}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={OrganizationNew} />
@@ -85,7 +86,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/locations"
+        path={PAGE_URLS.LOCATIONS}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={LocationNew} />
@@ -95,7 +96,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/positions"
+        path={PAGE_URLS.POSITIONS}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={PositionNew} />
@@ -105,7 +106,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/tasks"
+        path={PAGE_URLS.TASKS}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={TaskNew} />
@@ -115,7 +116,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/admin"
+        path={PAGE_URLS.ADMIN}
         render={({ match: { url } }) => (
           <Switch>
             <Route exact path={`${url}/`} component={AdminIndex} />
@@ -141,7 +142,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/insights"
+        path={PAGE_URLS.INSIGHTS}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/:insight`} component={InsightsShow} />
@@ -149,7 +150,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/dashboards/kanban"
+        path={PAGE_URLS.KANBAN}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/:dashboard`} component={KanbanDashboard} />
@@ -157,7 +158,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/dashboards/decisives"
+        path={PAGE_URLS.DECISIVES}
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/:dashboard`} component={DecisivesDashboard} />
@@ -165,7 +166,7 @@ const BaseRouting = ({ currentUser }) => {
         )}
       />
       <Route
-        path="/onboarding"
+        path={PAGE_URLS.ONBOARDING}
         render={({ match: { url } }) =>
           currentUser.isNewUser() ? (
             <Switch>
@@ -174,10 +175,10 @@ const BaseRouting = ({ currentUser }) => {
             </Switch>
           ) : (
             // Redirect to home if user account exists already. Some users bookmark the onboarding - the very first page they hit
-            <Redirect to="/" />
+            <Redirect to={PAGE_URLS.HOME} />
           )}
       />
-      <Route path="*" component={PageMissing} />
+      <Route path={PAGE_URLS.MISSING} component={PageMissing} />
     </Switch>
   )
 }
