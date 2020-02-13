@@ -61,6 +61,11 @@ public class Task extends AbstractCustomizableAnetBean {
   private List<Position> responsiblePositions;
   // annotated below
   private List<Organization> taskedOrganizations;
+  /* The following are all Lazy Loaded */
+  // annotated below
+  List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Task */
+  // annotated below
+  List<ApprovalStep> approvalSteps; /* Approval process for this Task */
 
   public void setPlannedCompletion(Instant plannedCompletion) {
     this.plannedCompletion = plannedCompletion;
@@ -221,6 +226,50 @@ public class Task extends AbstractCustomizableAnetBean {
   @GraphQLInputField(name = "taskedOrganizations")
   public void setTaskedOrganizations(List<Organization> organizations) {
     this.taskedOrganizations = organizations;
+  }
+
+  @GraphQLQuery(name = "planningApprovalSteps")
+  public CompletableFuture<List<ApprovalStep>> loadPlanningApprovalSteps(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (planningApprovalSteps != null) {
+      return CompletableFuture.completedFuture(planningApprovalSteps);
+    }
+    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
+          planningApprovalSteps = o;
+          return o;
+        });
+  }
+
+  public List<ApprovalStep> getPlanningApprovalSteps() {
+    return planningApprovalSteps;
+  }
+
+  @GraphQLInputField(name = "planningApprovalSteps")
+  public void setPlanningApprovalSteps(List<ApprovalStep> steps) {
+    this.planningApprovalSteps = steps;
+  }
+
+  @GraphQLQuery(name = "approvalSteps")
+  public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (approvalSteps != null) {
+      return CompletableFuture.completedFuture(approvalSteps);
+    }
+    return AnetObjectEngine.getInstance().getApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
+          approvalSteps = o;
+          return o;
+        });
+  }
+
+  public List<ApprovalStep> getApprovalSteps() {
+    return approvalSteps;
+  }
+
+  @GraphQLInputField(name = "approvalSteps")
+  public void setApprovalSteps(List<ApprovalStep> steps) {
+    this.approvalSteps = steps;
   }
 
   @Override

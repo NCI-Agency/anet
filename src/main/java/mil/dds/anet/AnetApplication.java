@@ -48,6 +48,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
+import mil.dds.anet.resources.ApprovalStepResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.GraphQlResource;
 import mil.dds.anet.resources.HomeResource;
@@ -65,6 +66,7 @@ import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
+import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.HttpsRedirectFilter;
@@ -223,6 +225,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
     ReportPublicationWorker reportPublicationWorker =
         new ReportPublicationWorker(engine.getReportDao(), configuration);
+    final ReportApprovalWorker reportApprovalWorker =
+        new ReportApprovalWorker(engine.getReportDao(), configuration);
 
     // Check for any reports that need to be published every 5 minutes.
     // And run once in 5 seconds from boot-up. (give the server time to boot up).
@@ -238,6 +242,11 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // And run once in 15 seconds from boot-up. (give the server time to boot up).
     scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
     scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
+
+    // Check for any reports that need to be approved every 5 minutes.
+    // And run once in 20 seconds from boot-up. (give the server time to boot up).
+    scheduler.scheduleAtFixedRate(reportApprovalWorker, 5, 5, TimeUnit.MINUTES);
+    scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
 
     runAccountDeactivationWorker(configuration, scheduler, engine);
 
@@ -264,6 +273,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final AuthorizationGroupResource authorizationGroupResource =
         new AuthorizationGroupResource(engine);
     final NoteResource noteResource = new NoteResource(engine);
+    final ApprovalStepResource approvalStepResource = new ApprovalStepResource(engine);
 
     // Register all of the HTTP Resources
     environment.jersey().register(loggingResource);
@@ -274,7 +284,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
         .register(new GraphQlResource(engine, configuration,
             ImmutableList.of(reportResource, personResource, positionResource, locationResource,
                 orgResource, taskResource, adminResource, savedSearchResource, tagResource,
-                authorizationGroupResource, noteResource),
+                authorizationGroupResource, noteResource, approvalStepResource),
             metricRegistry));
   }
 

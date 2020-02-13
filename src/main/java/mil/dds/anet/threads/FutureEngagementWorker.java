@@ -3,7 +3,6 @@ package mil.dds.anet.threads;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Report;
@@ -55,13 +54,9 @@ public class FutureEngagementWorker implements Runnable {
         FutureEngagementUpdated action = new FutureEngagementUpdated();
         action.setReport(r);
         email.setAction(action);
-        try {
-          email.addToAddress(r.loadAuthor(context).get().getEmailAddress());
-          AnetEmailWorker.sendEmailAsync(email);
-          dao.updateToDraftState(r);
-        } catch (InterruptedException | ExecutionException e) {
-          logger.error("failed to load Author", e);
-        }
+        email.addToAddress(r.loadAuthor(context).join().getEmailAddress());
+        AnetEmailWorker.sendEmailAsync(email);
+        dao.updateToDraftState(r);
       } catch (Exception e) {
         logger.error("Exception when updating", e);
       }

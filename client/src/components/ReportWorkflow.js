@@ -21,7 +21,13 @@ const ApprovalStepModalStatus = ({ action }) => {
     const cssClass = "label " + actionType.cssClass
     return (
       <span className={cssClass}>
-        {actionType.text} by <LinkTo person={action.person} isLink={false} /> on
+        {actionType.text} by{" "}
+        <LinkTo
+          person={action.person}
+          whenUnspecified="system"
+          isLink={false}
+        />{" "}
+        on
         <small>
           {" "}
           {moment(action.createdAt).format(
@@ -120,7 +126,7 @@ const ActionDetails = ({ action }) => {
     return (
       <div>
         <span>
-          By <LinkTo person={action.person} />
+          By <LinkTo person={action.person} whenUnspecified="system" />
         </span>
         <br />
         <small>
