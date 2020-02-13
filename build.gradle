@@ -104,7 +104,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.networknt:json-schema-validator:1.0.29'
+	compile 'com.networknt:json-schema-validator:1.0.30'
 
 	// TODO: remove dependency once no longer needed by tests
 	compile 'org.json:json:20190722'
