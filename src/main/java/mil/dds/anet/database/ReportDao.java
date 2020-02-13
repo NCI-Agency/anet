@@ -420,7 +420,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       throw new WebApplicationException(
           "Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     }
-    Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
+    long maxReportAge = Long.parseLong(maxReportAgeStr);
     return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
   }
 
@@ -652,7 +652,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         // Skip non-reporting organizations
         continue;
       }
-      final Integer count = ((Number) result.get("count")).intValue();
+      final int count = ((Number) result.get("count")).intValue();
       final ReportState state = ReportState.values()[(Integer) result.get("state")];
 
       final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
