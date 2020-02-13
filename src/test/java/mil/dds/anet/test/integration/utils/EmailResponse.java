@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationtest.utils;
+package mil.dds.anet.test.integration.utils;
 
 import java.time.Instant;
 import java.util.ArrayList;

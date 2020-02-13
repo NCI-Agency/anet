@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationtest.db;
+package mil.dds.anet.test.integration.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,10 +21,10 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
-import mil.dds.anet.integrationtest.utils.EmailResponse;
-import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
-import mil.dds.anet.integrationtest.utils.TestBeans;
+import mil.dds.anet.test.integration.config.AnetTestConfiguration;
+import mil.dds.anet.test.integration.utils.EmailResponse;
+import mil.dds.anet.test.integration.utils.FakeSmtpServer;
+import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.AfterAll;

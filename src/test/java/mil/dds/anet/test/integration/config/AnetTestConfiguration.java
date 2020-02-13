@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationtest.config;
+package mil.dds.anet.test.integration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -13,7 +13,7 @@ public class AnetTestConfiguration {
   private static final HashMap<String, Object> config;
   private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
   private static final File configFile =
-      new File("src/integration-test/resources/anet-integrationtest.yml");
+      new File("src/test/java/mil/dds/anet/test/integration/resources/anet-integrationtest.yml");
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

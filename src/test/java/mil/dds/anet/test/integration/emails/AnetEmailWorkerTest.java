@@ -1,7 +1,7 @@
-package mil.dds.anet.integrationtest.emails;
+package mil.dds.anet.test.integration.emails;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -14,13 +14,13 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.EmailDao;
-import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
-import mil.dds.anet.integrationtest.utils.EmailResponse;
-import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
+import mil.dds.anet.test.integration.config.AnetTestConfiguration;
+import mil.dds.anet.test.integration.utils.EmailResponse;
+import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -42,7 +42,7 @@ public class AnetEmailWorkerTest {
    * 
    * @throws Exception If the setup fails
    */
-  @BeforeEach
+  @Before
   public void setUp() throws Exception {
     assumeTrue(Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
@@ -85,7 +85,7 @@ public class AnetEmailWorkerTest {
     emailServer.clearEmailServer();
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception {
     // Clear the email server after test
     emailServer.clearEmailServer();

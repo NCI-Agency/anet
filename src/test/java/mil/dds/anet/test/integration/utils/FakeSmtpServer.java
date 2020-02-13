@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationtest.utils;
+package mil.dds.anet.test.integration.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +20,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
-import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
+import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -53,6 +53,11 @@ public class FakeSmtpServer {
 
     // Not in config
     httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
+
+    // We need the variable whcih depends on whether it is the test environment or not
+    if (httpPort == null) {
+      throw new Exception("'ANET_SMTP_HTTP_PORT' variable not found in system environment.");
+    }
 
     // Read from test config
     waitBeforeActionMs = Integer
