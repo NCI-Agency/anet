@@ -280,6 +280,7 @@ dictionary:
               label: "No"
         numberTrained:
           type: number
+          typeError: Number trained must be a number
           label: Number trained
           placeholder: Number of trainees
           validations:
@@ -349,6 +350,7 @@ dictionary:
               placeholder: Enter description of the asset
             quantity:
               type: number
+              typeError: Qty must be a number
               label: Qty
           visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
 
@@ -468,6 +470,7 @@ dictionary:
           visibleWhen: $[?(@.colourOptions === 'GREEN')]
         numberFieldName:
           type: number
+          typeError: Number field must be a number
           label: Number field
           placeholder: Placeholder text for number field
           helpText: Help text for number field

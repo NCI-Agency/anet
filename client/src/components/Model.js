@@ -84,8 +84,11 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
-  const { label, validations, objectFields } = fieldConfig
+  const { label, validations, objectFields, typeError } = fieldConfig
   let fieldTypeYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
+  if (typeError) {
+    fieldTypeYupSchema = fieldTypeYupSchema.typeError(typeError)
+  }
   if (!_isEmpty(objectFields)) {
     const objSchema = createYupObjectShape(objectFields, fieldPrefix)
     fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)

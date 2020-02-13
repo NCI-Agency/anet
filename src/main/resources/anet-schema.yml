@@ -75,6 +75,9 @@ definitions:
         title: value type field
         type: string
         enum: [text, number, date, datetime, enum, enumset, array_of_objects, special_field]
+      typeError:
+        title: custom value for type error
+        type: string
       label:
         type: string
       helpText:

@@ -382,6 +382,7 @@ const CustomField = ({
 }) => {
   const {
     type,
+    typeError,
     helpText,
     validations,
     visibleWhen,
@@ -534,6 +535,7 @@ export const ReadonlyCustomFields = ({
         const fieldConfig = fieldsConfig[key]
         const {
           type,
+          typeError,
           placeholder,
           helpText,
           validations,
