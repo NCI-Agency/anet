@@ -3,7 +3,7 @@ const merge = require("webpack-merge")
 const TerserPlugin = require("terser-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const webpack = require("webpack")
-const WebpackCleanupPlugin = require("webpack-cleanup-plugin")
+const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const paths = require("./paths")
 const common = require("./webpack.common.js")
 
@@ -24,7 +24,7 @@ const clientConfig = merge(common.clientConfig, {
       new TerserPlugin({
         cache: true,
         parallel: true,
-        sourceMap: true
+        sourceMap: false // TODO: disabled until SourceMapDevToolPlugin supports caching in webpack 5
       })
     ],
     splitChunks: {
@@ -38,7 +38,7 @@ const clientConfig = merge(common.clientConfig, {
     }
   },
   plugins: [
-    new WebpackCleanupPlugin(),
+    new CleanWebpackPlugin(),
     new webpack.HashedModuleIdsPlugin(),
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify("production")
