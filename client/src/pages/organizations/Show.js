@@ -1,6 +1,7 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -33,7 +34,6 @@ import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import DictionaryField from "../../HOC/DictionaryField"
-import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
 
@@ -347,9 +347,7 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
               </Fieldset>
 
               <OrganizationLaydown organization={organization} />
-              {!isPrincipalOrg && (
-                <OrganizationApprovals organization={organization} />
-              )}
+              {!isPrincipalOrg && <Approvals relatedObject={organization} />}
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
                   organization={organization}

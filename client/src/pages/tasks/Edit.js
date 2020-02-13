@@ -56,6 +56,36 @@ const GQL_GET_TASK = gql`
           avatar(size: 32)
         }
       }
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      approvalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
     }

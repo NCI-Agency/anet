@@ -157,7 +157,7 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.ORGANIZATION_PLANNING_APPROVAL_STEPS.toString(),
+    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_PLANNING_APPROVAL_STEPS.toString(),
         new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
           @Override
           public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {
@@ -166,7 +166,7 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.ORGANIZATION_APPROVAL_STEPS.toString(),
+    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
         new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
           @Override
           public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {

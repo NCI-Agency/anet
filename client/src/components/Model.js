@@ -84,8 +84,11 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
-  const { label, validations, objectFields } = fieldConfig
+  const { label, validations, objectFields, typeError } = fieldConfig
   let fieldTypeYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
+  if (typeError) {
+    fieldTypeYupSchema = fieldTypeYupSchema.typeError(typeError)
+  }
   if (!_isEmpty(objectFields)) {
     const objSchema = createYupObjectShape(objectFields, fieldPrefix)
     fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)
@@ -109,14 +112,20 @@ const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }
-  // Only use the field type specific schema when the field is visible, no validation needed when the field is invisible
+  // Field type specific validation not needed when the field is invisible or
+  // when invisibleCustomFields hasn't even been filled (like when the report
+  // has been created via sevrer side tests, or later maybe imported from an
+  // external system (and never went through the edit/create form which normally
+  // fills the invisibleCustomFields)
   fieldYupSchema = fieldYupSchema.when(
     "invisibleCustomFields",
-    (invisibleCustomFields, schema) =>
-      invisibleCustomFields &&
-      invisibleCustomFields.includes(`${fieldPrefix}.${fieldKey}`)
+    (invisibleCustomFields, schema) => {
+      return invisibleCustomFields === null ||
+        (invisibleCustomFields &&
+          invisibleCustomFields.includes(`${fieldPrefix}.${fieldKey}`))
         ? schema
         : schema.concat(fieldTypeYupSchema)
+    }
   )
   return fieldYupSchema
 }
@@ -130,9 +139,9 @@ export const createYupObjectShape = (config, prefix = "formCustomFields") => {
         .filter(([k, v]) => v !== null)
     )
     objShape.invisibleCustomFields = yup
-      .array()
+      .mixed()
       .nullable()
-      .default([])
+      .default(null)
   }
   return yup.object().shape(objShape)
 }
