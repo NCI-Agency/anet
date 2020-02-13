@@ -27,13 +27,13 @@ const capabilities = {
   // but that is so prone to unexpected failures as to be unusable.
   // So test with latest stable Chrome instead.
   browserName: "Chrome",
-  browser_version: "79.0",
+  browser_version: "80.0",
   "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: ["--start-maximized"]
   },
   os: "Windows",
-  os_version: "7",
+  os_version: "10",
   resolution: "2048x1536",
   project: "ANET",
   build: require("git-describe").gitDescribeSync(".", { match: "[0-9]*" })
