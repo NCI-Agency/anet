@@ -5,51 +5,47 @@ import { AdvancedSingleSelectOverlayTable } from "components/advancedSelectWidge
 import * as FieldHelper from "components/FieldHelper"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React from "react"
 import REMOVE_ICON from "resources/delete.png"
 
-export default class AdvancedSingleSelect extends Component {
-  static propTypes = {
-    ...advancedSelectPropTypes,
-    value: PropTypes.object
+const AdvancedSingleSelect = props => {
+  return (
+    <AdvancedSelect
+      {...props}
+      handleAddItem={handleAddItem}
+      handleRemoveItem={handleRemoveItem}
+      closeOverlayOnAdd
+      selectedValueAsString={
+        !_isEmpty(props.value) ? props.value[props.valueKey] : ""
+      }
+      extraAddon={
+        props.showRemoveButton && !_isEmpty(props.value) ? (
+          <img
+            src={REMOVE_ICON}
+            height={16}
+            alt=""
+            onClick={handleRemoveItem}
+          />
+        ) : null
+      }
+    />
+  )
+
+  function handleAddItem(newItem) {
+    FieldHelper.handleSingleSelectAddItem(newItem, props.onChange)
   }
 
-  static defaultProps = {
-    overlayTable: AdvancedSingleSelectOverlayTable,
-    showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
-  }
-
-  render() {
-    return (
-      <AdvancedSelect
-        {...this.props}
-        handleAddItem={this.handleAddItem}
-        handleRemoveItem={this.handleRemoveItem}
-        closeOverlayOnAdd
-        selectedValueAsString={
-          !_isEmpty(this.props.value)
-            ? this.props.value[this.props.valueKey]
-            : ""
-        }
-        extraAddon={
-          this.props.showRemoveButton && !_isEmpty(this.props.value) ? (
-            <img
-              src={REMOVE_ICON}
-              height={16}
-              alt=""
-              onClick={this.handleRemoveItem}
-            />
-          ) : null
-        }
-      />
-    )
-  }
-
-  handleAddItem = newItem => {
-    FieldHelper.handleSingleSelectAddItem(newItem, this.props.onChange)
-  }
-
-  handleRemoveItem = oldItem => {
-    FieldHelper.handleSingleSelectRemoveItem(oldItem, this.props.onChange)
+  function handleRemoveItem(oldItem) {
+    FieldHelper.handleSingleSelectRemoveItem(oldItem, props.onChange)
   }
 }
+AdvancedSingleSelect.propTypes = {
+  ...advancedSelectPropTypes,
+  value: PropTypes.object
+}
+AdvancedSingleSelect.defaultProps = {
+  overlayTable: AdvancedSingleSelectOverlayTable,
+  showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
+}
+
+export default AdvancedSingleSelect

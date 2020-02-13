@@ -4,42 +4,36 @@ import AdvancedSelect, {
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import * as FieldHelper from "components/FieldHelper"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React from "react"
 
-export default class AdvancedMultiSelect extends Component {
-  static propTypes = {
-    ...advancedSelectPropTypes,
-    value: PropTypes.array.isRequired
+const AdvancedMultiSelect = props => {
+  return (
+    <AdvancedSelect
+      {...props}
+      handleAddItem={handleAddItem}
+      handleRemoveItem={handleRemoveItem}
+    />
+  )
+
+  function handleAddItem(newItem) {
+    FieldHelper.handleMultiSelectAddItem(newItem, props.onChange, props.value)
   }
 
-  static defaultProps = {
-    value: [],
-    overlayTable: AdvancedMultiSelectOverlayTable
-  }
-
-  render() {
-    return (
-      <AdvancedSelect
-        {...this.props}
-        handleAddItem={this.handleAddItem}
-        handleRemoveItem={this.handleRemoveItem}
-      />
-    )
-  }
-
-  handleAddItem = newItem => {
-    FieldHelper.handleMultiSelectAddItem(
-      newItem,
-      this.props.onChange,
-      this.props.value
-    )
-  }
-
-  handleRemoveItem = oldItem => {
+  function handleRemoveItem(oldItem) {
     FieldHelper.handleMultiSelectRemoveItem(
       oldItem,
-      this.props.onChange,
-      this.props.value
+      props.onChange,
+      props.value
     )
   }
 }
+AdvancedMultiSelect.propTypes = {
+  ...advancedSelectPropTypes,
+  value: PropTypes.array.isRequired
+}
+AdvancedMultiSelect.defaultProps = {
+  value: [],
+  overlayTable: AdvancedMultiSelectOverlayTable
+}
+
+export default AdvancedMultiSelect
