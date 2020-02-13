@@ -180,7 +180,7 @@ const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
           autofocus="true"
           fieldName="entitySelect"
           fieldLabel="Search in ANET:"
-          placeholder={"Find" + objectType.toLowerCase()}
+          placeholder={"Find " + objectType.toLowerCase()}
           value={{}}
           showEmbedded
           overlayColumns={advancedSelectProps.overlayColumns}

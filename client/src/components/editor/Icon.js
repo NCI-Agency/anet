@@ -24,13 +24,13 @@ const Icon = ({ icon, title, className, width, height, viewBox }) => {
 
   return (
     <svg
-      width={width || "16"}
-      height={height || "16"}
-      viewBox={viewBox || "0 0 1024 1024"}
+      width={width}
+      height={height}
+      viewBox={viewBox}
       className={`Draftail-Icon ${className || ""}`}
       aria-hidden={title ? null : true}
       role={title ? "img" : null}
-      aria-label={title || null}
+      aria-label={title}
     >
       {children}
     </svg>
@@ -56,7 +56,10 @@ Icon.propTypes = {
 
 Icon.defaultProps = {
   title: null,
-  className: null
+  className: null,
+  width: "16"
+  height: "16"
+  viewBox: "0 0 1024 1024"
 }
 
 export default Icon
