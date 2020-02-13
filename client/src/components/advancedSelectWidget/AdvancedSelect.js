@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
 import API from "api"
 import { gql } from "apollo-boost"
@@ -273,7 +272,7 @@ const AdvancedSelect = ({
     if (doFetchResultsDebounced) {
       fetchResultsDebounced(searchTerms)
     }
-  }, [doFetchResultsDebounced, fetchResults, searchTerms])
+  }, [doFetchResultsDebounced, fetchResultsDebounced, searchTerms])
 
   useEffect(() => {
     if (doFetchResults) {
