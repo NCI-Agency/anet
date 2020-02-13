@@ -47,7 +47,7 @@ public class TestBeans {
 
   public static ApprovalStep getTestApprovalStep(Organization organization) {
     ApprovalStep as = new ApprovalStep();
-    as.setAdvisorOrganizationUuid(organization.getUuid());
+    as.setRelatedObjectUuid(organization.getUuid());
     as.setApprovers(ImmutableList.of());
     as.setType(ApprovalStepType.REPORT_APPROVAL);
     return as;

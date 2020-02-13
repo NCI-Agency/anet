@@ -27,7 +27,7 @@ public class ApprovalStep extends AbstractAnetBean {
   String nextStepUuid;
   @GraphQLQuery
   @GraphQLInputField
-  String advisorOrganizationUuid;
+  String relatedObjectUuid;
   @GraphQLQuery
   @GraphQLInputField
   String name;
@@ -62,12 +62,12 @@ public class ApprovalStep extends AbstractAnetBean {
     this.nextStepUuid = nextStepUuid;
   }
 
-  public String getAdvisorOrganizationUuid() {
-    return advisorOrganizationUuid;
+  public String getRelatedObjectUuid() {
+    return relatedObjectUuid;
   }
 
-  public void setAdvisorOrganizationUuid(String advisorOrganizationUuid) {
-    this.advisorOrganizationUuid = advisorOrganizationUuid;
+  public void setRelatedObjectUuid(String relatedObjectUuid) {
+    this.relatedObjectUuid = relatedObjectUuid;
   }
 
   public String getName() {
@@ -94,17 +94,17 @@ public class ApprovalStep extends AbstractAnetBean {
     ApprovalStep as = (ApprovalStep) o;
     return Objects.equals(uuid, as.getUuid()) && Objects.equals(name, as.getName())
         && Objects.equals(nextStepUuid, as.getNextStepUuid()) && Objects.equals(type, as.getType())
-        && Objects.equals(advisorOrganizationUuid, as.getAdvisorOrganizationUuid());
+        && Objects.equals(relatedObjectUuid, as.getRelatedObjectUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, approvers, name, nextStepUuid, advisorOrganizationUuid, type);
+    return Objects.hash(uuid, approvers, name, nextStepUuid, relatedObjectUuid, type);
   }
 
   @Override
   public String toString() {
-    return String.format("%s - %s, aoid: %s, nsid: %s", uuid, name, advisorOrganizationUuid,
+    return String.format("%s - %s, aoid: %s, nsid: %s", uuid, name, relatedObjectUuid,
         nextStepUuid);
   }
 

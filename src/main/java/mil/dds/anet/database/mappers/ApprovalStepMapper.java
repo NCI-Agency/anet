@@ -14,7 +14,7 @@ public class ApprovalStepMapper implements RowMapper<ApprovalStep> {
     ApprovalStep step = new ApprovalStep();
     MapperUtils.setCommonBeanFields(step, r, null);
     step.setNextStepUuid(r.getString("nextStepUuid"));
-    step.setAdvisorOrganizationUuid(r.getString("advisorOrganizationUuid"));
+    step.setRelatedObjectUuid(r.getString("relatedObjectUuid"));
     step.setName(r.getString("name"));
     step.setType(MapperUtils.getEnumIdx(r, "type", ApprovalStepType.class));
 

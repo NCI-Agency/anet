@@ -69,30 +69,6 @@ const GQL_GET_REPORT_LIST = gql`
           name
           description
         }
-        workflow {
-          type
-          createdAt
-          step {
-            uuid
-            name
-            approvers {
-              uuid
-              name
-              person {
-                uuid
-                name
-                rank
-                role
-              }
-            }
-          }
-          person {
-            uuid
-            name
-            rank
-            role
-          }
-        }
         updatedAt
       }
     }

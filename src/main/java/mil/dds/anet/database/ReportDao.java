@@ -5,18 +5,20 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
@@ -41,6 +43,7 @@ import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
@@ -744,7 +747,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     private static final String sql =
         "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
             + "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
-            + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid";
+            + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid ORDER BY uuid";
 
     public TasksBatcher() {
       super(sql, "foreignKeys", new TaskMapper(), "reportUuid");
@@ -776,35 +779,98 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
-  private void sendReportPublishedEmail(Report r) {
-    AnetEmail email = new AnetEmail();
-    ReportPublishedEmail action = new ReportPublishedEmail();
+  public void sendApprovalNeededEmail(Report r) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
+    final List<Position> approvers = step.loadApprovers(engine.getContext()).join();
+    final AnetEmail approverEmail = new AnetEmail();
+    final ApprovalNeededEmail action = new ApprovalNeededEmail();
+    action.setReport(r);
+    approverEmail.setAction(action);
+    approverEmail.setToAddresses(approvers.stream()
+        .filter(a -> (a.getPersonUuid() != null) && !a.getPersonUuid().equals(r.getAuthorUuid()))
+        .map(a -> a.loadPerson(engine.getContext()).join().getEmailAddress())
+        .collect(Collectors.toList()));
+    AnetEmailWorker.sendEmailAsync(approverEmail);
+  }
+
+  public void sendReportPublishedEmail(Report r) {
+    final AnetEmail email = new AnetEmail();
+    final ReportPublishedEmail action = new ReportPublishedEmail();
     action.setReport(r);
     email.setAction(action);
-    try {
-      email.addToAddress(
-          r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
-      AnetEmailWorker.sendEmailAsync(email);
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load Author", e);
+    email.addToAddress(
+        r.loadAuthor(AnetObjectEngine.getInstance().getContext()).join().getEmailAddress());
+    AnetEmailWorker.sendEmailAsync(email);
+  }
+
+  public int approve(Report r, Person user, ApprovalStep step) {
+    // Write the approval action
+    final ReportAction action = new ReportAction();
+    action.setReportUuid(r.getUuid());
+    action.setStepUuid(step.getUuid());
+    // User could be null when the publication action is being done automatically by a worker
+    action.setPersonUuid(DaoUtils.getUuid(user));
+    action.setType(ActionType.APPROVE);
+    AnetObjectEngine.getInstance().getReportActionDao().insert(action);
+
+    // Update the report
+    final String nextStepUuid = getNextStepUuid(r, step);
+    r.setApprovalStepUuid(nextStepUuid);
+    if (nextStepUuid == null) {
+      if (r.getCancelledReason() != null) {
+        // Done with cancel, move to CANCELLED and set releasedAt
+        r.setState(ReportState.CANCELLED);
+        r.setReleasedAt(Instant.now());
+      } else {
+        // Done with approvals, move to APPROVED
+        r.setState(ReportState.APPROVED);
+      }
     }
+    final int numRows = update(r, r.getAuthor());
+    if (numRows != 0 && nextStepUuid != null) {
+      sendApprovalNeededEmail(r);
+    }
+    return numRows;
+  }
+
+  private String getNextStepUuid(Report report, ApprovalStep step) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final String currentStepUuid = step.getUuid();
+    String nextStepUuid = step.getNextStepUuid();
+    if (nextStepUuid == null) {
+      // Find out if there's a next approval chain
+      final List<ApprovalStep> reportApprovalSteps =
+          report.computeApprovalSteps(engine.getContext(), engine).join();
+      final Iterator<ApprovalStep> iterator = reportApprovalSteps.iterator();
+      while (iterator.hasNext()) {
+        final ApprovalStep reportApprovalStep = iterator.next();
+        if (Objects.equals(DaoUtils.getUuid(reportApprovalStep), currentStepUuid)) {
+          // Found the current step, update the next step
+          if (iterator.hasNext()) {
+            final ApprovalStep reportApprovalStepNext = iterator.next();
+            nextStepUuid = DaoUtils.getUuid(reportApprovalStepNext);
+          }
+          break;
+        }
+      }
+    }
+    return nextStepUuid;
   }
 
   public int publish(Report r, Person user) {
     // Write the publication action
-    ReportAction action = new ReportAction();
+    final ReportAction action = new ReportAction();
     action.setReportUuid(r.getUuid());
-    if (user != null) {
-      // User is null when the publication action is being done automatically by a worker
-      action.setPersonUuid(user.getUuid());
-    }
+    // User could be null when the publication action is being done automatically by a worker
+    action.setPersonUuid(DaoUtils.getUuid(user));
     action.setType(ActionType.PUBLISH);
     AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
     // Move the report to PUBLISHED state
     r.setState(ReportState.PUBLISHED);
     r.setReleasedAt(Instant.now());
-    final int numRows = this.update(r, r.getAuthor());
+    final int numRows = update(r, r.getAuthor());
     if (numRows != 0) {
       sendReportPublishedEmail(r);
     }

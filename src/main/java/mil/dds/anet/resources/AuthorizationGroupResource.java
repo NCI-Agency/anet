@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -73,23 +72,19 @@ public class AuthorizationGroupResource {
     }
     // Update positions:
     if (t.getPositions() != null) {
-      try {
-        final List<Position> existingPositions =
-            dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getUuid()).get();
-        for (final Position p : t.getPositions()) {
-          Optional<Position> existingPosition =
-              existingPositions.stream().filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
-          if (existingPosition.isPresent()) {
-            existingPositions.remove(existingPosition.get());
-          } else {
-            dao.addPositionToAuthorizationGroup(p, t);
-          }
+      final List<Position> existingPositions =
+          dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getUuid()).join();
+      for (final Position p : t.getPositions()) {
+        Optional<Position> existingPosition =
+            existingPositions.stream().filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
+        if (existingPosition.isPresent()) {
+          existingPositions.remove(existingPosition.get());
+        } else {
+          dao.addPositionToAuthorizationGroup(p, t);
         }
-        for (final Position p : existingPositions) {
-          dao.removePositionFromAuthorizationGroup(p, t);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Positions", e);
+      }
+      for (final Position p : existingPositions) {
+        dao.removePositionFromAuthorizationGroup(p, t);
       }
     }
     AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);

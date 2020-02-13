@@ -31,21 +31,31 @@ const commonConfig = {
         enforce: "pre",
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "eslint-loader",
-        options: {
-          cache: true
-        }
+        use: ["cache-loader", "eslint-loader"]
       },
       {
         test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            cacheDirectory: true
-          }
-        }
+        include: paths.appSrc,
+        use: ["cache-loader", "thread-loader", "babel-loader"]
       },
+      {
+        test: /\.js$/,
+        // Based on https://github.com/facebook/create-react-app/pull/3776
+        include: /node_modules/,
+        use: [
+          "cache-loader",
+          "thread-loader",
+          {
+            loader: "babel-loader",
+            options: {
+              babelrc: false,
+              compact: false,
+              presets: [require.resolve("babel-preset-react-app/dependencies")]
+            }
+          }
+        ]
+      },
+
       {
         test: /\.css$/,
         use: [

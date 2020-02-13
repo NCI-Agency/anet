@@ -12,7 +12,6 @@ import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.GenericType;
@@ -30,7 +29,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Test
-  public void test() throws ExecutionException, InterruptedException {
+  public void test() {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
     File testDir = new File("src/test/resources/graphQLTests/");

@@ -1,13 +1,13 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { Organization } from "models"
+import { Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-const OrganizationApprovals = ({ organization }) => {
-  const approvalSteps = organization.approvalSteps
-  const planningApprovalSteps = organization.planningApprovalSteps
+const Approvals = ({ relatedObject }) => {
+  const approvalSteps = relatedObject.approvalSteps
+  const planningApprovalSteps = relatedObject.planningApprovalSteps
 
   return (
     <div>
@@ -50,8 +50,7 @@ const OrganizationApprovals = ({ organization }) => {
 
         {planningApprovalSteps.length === 0 && (
           <em>
-            This organization doesn't have any engagement planning approval
-            steps
+            This object doesn't have any engagement planning approval steps
           </em>
         )}
       </Fieldset>
@@ -91,7 +90,7 @@ const OrganizationApprovals = ({ organization }) => {
 
         {approvalSteps.length === 0 && (
           <em>
-            This organization doesn't have any report publication approval steps
+            This object doesn't have any report publication approval steps
           </em>
         )}
       </Fieldset>
@@ -99,8 +98,11 @@ const OrganizationApprovals = ({ organization }) => {
   )
 }
 
-OrganizationApprovals.propTypes = {
-  organization: PropTypes.instanceOf(Organization).isRequired
+Approvals.propTypes = {
+  relatedObject: PropTypes.oneOfType([
+    PropTypes.instanceOf(Organization),
+    PropTypes.instanceOf(Task)
+  ]).isRequired
 }
 
-export default OrganizationApprovals
+export default Approvals
