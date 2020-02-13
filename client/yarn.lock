@@ -4630,7 +4630,7 @@ babel-preset-react-app@^9.1.1:
     babel-plugin-macros "2.8.0"
     babel-plugin-transform-react-remove-prop-types "0.4.24"
 
-babel-runtime@^6.11.6, babel-runtime@^6.25.0, babel-runtime@^6.26.0:
+babel-runtime@^6.25.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   integrity sha1-llxwWGaOgrVde/4E/yM3vItWR/4=
@@ -11411,7 +11411,7 @@ jws@^3.2.2:
     jwa "^1.4.1"
     safe-buffer "^5.0.1"
 
-keycode@^2.1.2, keycode@^2.2.0:
+keycode@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/keycode/-/keycode-2.2.0.tgz#3d0af56dc7b8b8e5cba8d0a97f107204eec22b04"
   integrity sha1-PQr1bce4uOXLqNCpfxByBO7CKwQ=
@@ -14249,23 +14249,7 @@ react-avatar-edit@^0.8.3:
   dependencies:
     konva "2.5.1"
 
-react-bootstrap@^0.31.5:
-  version "0.31.5"
-  resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-0.31.5.tgz#57040fa8b1274e1e074803c21a1b895fdabea05a"
-  integrity sha512-xgDihgX4QvYHmHzL87faDBMDnGfYyqcrqV0TEbWY+JizePOG1vfb8M3xJN+6MJ3kUYqDtQSZ7v/Q6Y5YDrkMdA==
-  dependencies:
-    babel-runtime "^6.11.6"
-    classnames "^2.2.5"
-    dom-helpers "^3.2.0"
-    invariant "^2.2.1"
-    keycode "^2.1.2"
-    prop-types "^15.5.10"
-    prop-types-extra "^1.0.1"
-    react-overlays "^0.7.4"
-    uncontrollable "^4.1.0"
-    warning "^3.0.0"
-
-react-bootstrap@^0.33.0:
+react-bootstrap@^0.33.0, react-bootstrap@^0.33.1:
   version "0.33.1"
   resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-0.33.1.tgz#e072592aa143b9792526281272eca754bc9a4940"
   integrity sha512-qWTRravSds87P8WC82tETy2yIso8qDqlIm0czsrduCaYAFtHuyLu0XDbUlfLXeRzqgwm5sRk2wRaTNoiVkk/YQ==
@@ -14290,13 +14274,13 @@ react-clientside-effect@^1.2.2:
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-react-confirm-bootstrap@^5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/react-confirm-bootstrap/-/react-confirm-bootstrap-5.3.0.tgz#ff93805954191fb5b43fb8d424526d36fc95f308"
-  integrity sha512-qBfZPMY5kh6lpRoZY9DeME3wLwMLi/OWxeg0EcvToZNmez1O4gKSyl7kbY+nT6UHErZ8GB1jUDV/WRzYygbyew==
+react-confirm-bootstrap@^5.3.1:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/react-confirm-bootstrap/-/react-confirm-bootstrap-5.3.1.tgz#7c42f32a91874ca93d22e94a0b675a4806c90f6b"
+  integrity sha512-2tj1Md4CkZntRkuW4YDnUlIr6d3KBFrzL0he2ujiQjgayTbMlxfau2/iIQb5XC+gFC+4XOeNcxFtbrTw1LDMzg==
   dependencies:
     prop-types "^15.6.1"
-    react-bootstrap "^0.31.5"
+    react-bootstrap "^0.33.1"
 
 react-container-dimensions@^1.4.1:
   version "1.4.1"
@@ -14520,17 +14504,6 @@ react-notification-badge@^1.5.1:
   integrity sha512-4/kFrQcJ7eMfYh9SdXXgBaaEDCIV7UsLX5bgSS1aj+OnX2OpIFTatY3Dclo8qLpkX+Ue6x0Aiib+U9dkDKrSwQ==
   dependencies:
     core-js "3"
-
-react-overlays@^0.7.4:
-  version "0.7.4"
-  resolved "https://registry.yarnpkg.com/react-overlays/-/react-overlays-0.7.4.tgz#ef2ec652c3444ab8aa014262b18f662068e56d5c"
-  integrity sha512-7vsooMx3siLAuEfTs8FYeP/lAORWWFXTO8PON3KgX0Htq1Oa+po6ioSjGyO0/GO5CVSMNhpWt6V2opeexHgBuQ==
-  dependencies:
-    classnames "^2.2.5"
-    dom-helpers "^3.2.1"
-    prop-types "^15.5.10"
-    prop-types-extra "^1.0.1"
-    warning "^3.0.0"
 
 react-overlays@^0.9.0:
   version "0.9.1"
@@ -17107,13 +17080,6 @@ ultimate-pagination@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/ultimate-pagination/-/ultimate-pagination-1.0.0.tgz#1f9f5465678d7410159d5a172c2013465e9bd85f"
   integrity sha1-H59UZWeNdBAVnVoXLCATRl6b2F8=
-
-uncontrollable@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/uncontrollable/-/uncontrollable-4.1.0.tgz#e0358291252e1865222d90939b19f2f49f81c1a9"
-  integrity sha1-4DWCkSUuGGUiLZCTmxny9J+Bwak=
-  dependencies:
-    invariant "^2.1.0"
 
 uncontrollable@^7.0.2:
   version "7.1.1"
