@@ -9,7 +9,7 @@ import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
-import { useDebounce } from "use-debounce"
+import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 import "./AdvancedSelect.css"
 
@@ -136,6 +136,7 @@ const AdvancedSelect = ({
   const latestFilterDefs = useRef(filterDefs)
   const overlayContainer = useRef()
   const searchInput = useRef()
+  const latestRequest = useRef()
 
   const [searchTerms, setSearchTerms] = useState(selectedValueAsString || "")
   const [filterType, setFilterType] = useState(firstFilter) // per default use the first filter
@@ -179,7 +180,6 @@ const AdvancedSelect = ({
     }
   }, [filterDefs])
 
-  const resetSearchTerms = !showOverlay && selectedValueAsString !== searchTerms
   useEffect(() => {
     const selectedValueAsStringUnchanged = _isEqualWith(
       latestSelectedValueAsString.current,
@@ -188,14 +188,11 @@ const AdvancedSelect = ({
     )
     if (!selectedValueAsStringUnchanged) {
       latestSelectedValueAsString.current = selectedValueAsString
-    }
-    // When the overlay is being closed, we reset the searchTerms to the selected value
-    if (!selectedValueAsStringUnchanged || resetSearchTerms) {
       setSearchTerms(selectedValueAsString)
       setDoFetchResults(false)
       setDoFetchResultsDebounced(false)
     }
-  }, [resetSearchTerms, selectedValueAsString])
+  }, [selectedValueAsString])
 
   useEffect(() => {
     // No need to fetch the data, it is already provided in the filter definition
@@ -230,7 +227,7 @@ const AdvancedSelect = ({
         if (searchTerms) {
           Object.assign(queryVars, { text: searchTerms + "*" })
         }
-        API.query(
+        const thisRequest = (latestRequest.current = API.query(
           gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
@@ -245,13 +242,17 @@ const AdvancedSelect = ({
         `,
           { query: queryVars }
         ).then(data => {
+          // If this is true there's a newer request happening, stop everything
+          if (thisRequest !== latestRequest.current) {
+            return
+          }
           const isLoading = data[listName].totalCount !== 0
           setIsLoading(isLoading)
           setResults(oldResults => ({
             ...oldResults,
             [filterType]: data[listName]
           }))
-        })
+        }))
       }
     },
     [
@@ -266,13 +267,13 @@ const AdvancedSelect = ({
     ]
   )
 
-  const [searchTermsDebounced] = useDebounce(searchTerms, 400)
+  const [fetchResultsDebounced] = useDebouncedCallback(fetchResults, 400)
 
   useEffect(() => {
     if (doFetchResultsDebounced) {
-      fetchResults(searchTermsDebounced)
+      fetchResultsDebounced(searchTerms)
     }
-  }, [doFetchResultsDebounced, fetchResults, searchTermsDebounced])
+  }, [doFetchResultsDebounced, fetchResults, searchTerms])
 
   useEffect(() => {
     if (doFetchResults) {
@@ -301,7 +302,7 @@ const AdvancedSelect = ({
           handleAddItem={item => {
             handleAddItem(item)
             if (closeOverlayOnAdd) {
-              handleHideOverlay()
+              handleCloseOverlayOnAdd()
             }
           }}
           handleRemoveItem={handleRemoveItem}
@@ -312,7 +313,7 @@ const AdvancedSelect = ({
           loaderMessage={<div style={{ width: "300px" }}>No results found</div>}
           tableClassName={overlayTableClassName}
         />
-        {paginationFor(filterType)}
+        {pagination()}
       </Col>
     </Row>
   )
@@ -350,7 +351,6 @@ const AdvancedSelect = ({
                   value={searchTerms || ""}
                   placeholder={placeholder}
                   onChange={changeSearchTerms}
-                  onFocus={disabled ? undefined : handleInputFocus}
                   inputRef={ref => {
                     searchInput.current = ref
                   }}
@@ -372,30 +372,40 @@ const AdvancedSelect = ({
     </>
   )
 
-  function handleInputFocus() {
-    if (!showOverlay) {
-      // When doing input focus while the overlay is closed, empty the search terms and show the overlay
-      setSearchTerms("")
-      setShowOverlay(true)
-      setIsLoading(true)
-      setDoFetchResults(true)
+  function resetSelections() {
+    setIsLoading(false)
+    setShowOverlay(false)
+    setFilterType(firstFilter)
+    setSearchTerms(selectedValueAsString)
+    setResults({})
+    setPageNum(0)
+    setDoFetchResults(false)
+    setDoFetchResultsDebounced(false)
+  }
+
+  function handleInteraction(nextShowOverlay, event) {
+    // Make sure the overlay is being closed when clicking outside of it,
+    // but keep it open when clicking on the input field.
+    const inputFocus = searchInput.current.contains(event && event.target)
+    const openOverlay = nextShowOverlay || inputFocus
+    if (openOverlay !== showOverlay) {
+      setShowOverlay(openOverlay)
+      if (openOverlay) {
+        // overlay is being opened
+        setSearchTerms("")
+        setIsLoading(true)
+        setDoFetchResults(true)
+        setDoFetchResultsDebounced(false)
+      } else {
+        // overlay is being closed
+        resetSelections()
+      }
     }
   }
 
-  function handleInteraction(showOverlay, event) {
-    // Make sure the overlay is being closed when clicking outside of it
-    const inputFocus = searchInput.current.contains(event && event.target)
-    setShowOverlay(showOverlay || inputFocus)
-  }
-
-  function handleHideOverlay() {
-    setFilterType(firstFilter)
-    setSearchTerms("")
-    setResults({})
-    setPageNum(0)
-    setIsLoading(false)
-    setShowOverlay(false)
-    setDoFetchResults(false)
+  function handleCloseOverlayOnAdd() {
+    // Close the overlay
+    resetSelections()
   }
 
   function changeSearchTerms(event) {
@@ -411,21 +421,20 @@ const AdvancedSelect = ({
     changeFilterType(event.target.value)
   }
 
-  function changeFilterType(filterType) {
+  function changeFilterType(newFilterType) {
     // When changing the filter type, only fetch the results if they were not fetched before
-    const filterResults = results[filterType]
+    const filterResults = results[newFilterType]
     const shouldFetchResults = _isEmpty(filterResults)
+    setFilterType(newFilterType)
+    setPageNum(results && filterResults ? filterResults.pageNum : 0)
+    setIsLoading(shouldFetchResults)
     setDoFetchResults(shouldFetchResults)
     setDoFetchResultsDebounced(false)
-    setIsLoading(shouldFetchResults)
-    setFilterType(filterType)
   }
 
-  function paginationFor(filterType) {
+  function pagination() {
     const pageSize =
       results && results[filterType] ? results[filterType].pageSize : 6
-    const pageNum =
-      results && results[filterType] ? results[filterType].pageNum : 0
     const totalCount =
       results && results[filterType] ? results[filterType].totalCount : 0
     return (
