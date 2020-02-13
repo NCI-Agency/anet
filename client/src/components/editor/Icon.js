@@ -57,8 +57,8 @@ Icon.propTypes = {
 Icon.defaultProps = {
   title: null,
   className: null,
-  width: "16"
-  height: "16"
+  width: "16",
+  height: "16",
   viewBox: "0 0 1024 1024"
 }
 
