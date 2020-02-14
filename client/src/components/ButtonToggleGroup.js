@@ -1,43 +1,38 @@
-import autobind from "autobind-decorator"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React from "react"
 import { Button, ButtonGroup } from "react-bootstrap"
 
-export default class ButtonToggleGroup extends Component {
-  static propTypes = {
-    value: PropTypes.string,
-    onChange: PropTypes.func,
-    children: PropTypes.node
-  }
+const ButtonToggleGroup = ({ value, onChange, children, ...otherProps }) => {
+  return (
+    <ButtonGroup value={value} onChange={onChange} {...otherProps}>
+      {children.map((child, index) => {
+        if (!child) {
+          return null
+        }
 
-  render() {
-    const { children, ...props } = this.props
+        return (
+          <Button
+            key={child.props.value}
+            {...child.props}
+            active={value === child.props.value}
+            onClick={onClick}
+            value={child.props.value}
+          >
+            {child.props.children}
+          </Button>
+        )
+      })}
+    </ButtonGroup>
+  )
 
-    return (
-      <ButtonGroup {...props}>
-        {children.map((child, index) => {
-          if (!child) {
-            return null
-          }
-
-          return (
-            <Button
-              key={child.props.value}
-              {...child.props}
-              active={this.props.value === child.props.value}
-              onClick={this.onClick}
-              value={child.props.value}
-            >
-              {child.props.children}
-            </Button>
-          )
-        })}
-      </ButtonGroup>
-    )
-  }
-
-  @autobind
-  onClick(event) {
-    this.props.onChange(event.currentTarget.value)
+  function onClick(event) {
+    onChange(event.currentTarget.value)
   }
 }
+ButtonToggleGroup.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  children: PropTypes.node
+}
+
+export default ButtonToggleGroup
