@@ -105,7 +105,7 @@ const EnumField = fieldProps => {
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroup}
+      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
@@ -136,7 +136,9 @@ const EnumSetField = fieldProps => {
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroup}
+      component={
+        RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroupField
+      }
       {...otherFieldProps}
     />
   )

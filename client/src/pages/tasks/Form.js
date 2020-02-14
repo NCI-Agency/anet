@@ -205,7 +205,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 ) : (
                   <FastField
                     name="status"
-                    component={FieldHelper.RadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={statusButtons}
                     onChange={value => setFieldValue("status", value)}
                   />
@@ -349,7 +349,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                       component={
                         disabled
                           ? FieldHelper.ReadonlyField
-                          : FieldHelper.RadioButtonToggleGroup
+                          : FieldHelper.RadioButtonToggleGroupField
                       }
                       buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
@@ -392,7 +392,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                     component={
                       disabled
                         ? FieldHelper.ReadonlyField
-                        : FieldHelper.RadioButtonToggleGroup
+                        : FieldHelper.RadioButtonToggleGroupField
                     }
                     buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum

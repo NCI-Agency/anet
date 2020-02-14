@@ -667,7 +667,7 @@ const BaseReportForm = ({
                   <FastField
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.RadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={atmosphereButtons}
                     onChange={value => setFieldValue("atmosphere", value, true)}
                     className="atmosphere-form-group"

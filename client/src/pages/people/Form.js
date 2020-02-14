@@ -325,7 +325,7 @@ const BasePersonForm = ({
                 ) : (
                   <FastField
                     name="role"
-                    component={FieldHelper.RadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={roleButtons}
                     onChange={value => {
                       const roleCountries = getCountries(value)
@@ -365,7 +365,7 @@ const BasePersonForm = ({
                 ) : (
                   <Field
                     name="status"
-                    component={FieldHelper.RadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={statusButtons}
                     onChange={value => setFieldValue("status", value)}
                   >

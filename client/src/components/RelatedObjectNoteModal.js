@@ -88,7 +88,7 @@ const RelatedObjectNoteModal = ({
                           <Field
                             name={question.id}
                             label=""
-                            component={FieldHelper.RadioButtonToggleGroup}
+                            component={FieldHelper.RadioButtonToggleGroupField}
                             buttons={question.choice}
                             onChange={value => {
                               setFieldValue(question.id, value)
