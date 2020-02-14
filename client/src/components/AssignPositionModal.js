@@ -136,7 +136,7 @@ const BaseAssignPositionModal = props => {
               />
             </Col>
           </Row>
-          {newPosition && newPosition.uuid && (
+          {newPosition.uuid && (
             <Table striped condensed hover responsive>
               <thead>
                 <tr>

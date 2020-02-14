@@ -1,13 +1,11 @@
 package mil.dds.anet.emails;
 
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
@@ -19,13 +17,8 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.utils.DaoUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DailyRollupEmail implements AnetEmailAction {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static String SHOW_REPORT_TEXT_FLAG = "showReportText";
 
@@ -59,7 +52,7 @@ public class DailyRollupEmail implements AnetEmailAction {
   public Map<String, Object> buildContext(Map<String, Object> context) {
     String maxReportAgeStr = AnetObjectEngine.getInstance()
         .getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
-    Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
+    long maxReportAge = Long.parseLong(maxReportAgeStr);
     Instant engagementDateStart =
         startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
     ReportSearchQuery query = new ReportSearchQuery();
@@ -160,16 +153,11 @@ public class DailyRollupEmail implements AnetEmailAction {
       final Map<String, ReportGrouping> orgUuidToReports = new HashMap<>();
       for (Report r : reports) {
         final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-        Organization reportOrg;
-        try {
-          reportOrg = (orgType == OrganizationType.ADVISOR_ORG) ? r.loadAdvisorOrg(context).get()
-              : r.loadPrincipalOrg(context).get();
-        } catch (InterruptedException | ExecutionException e) {
-          logger.error("failed to load AdvisorOrg/PrincipalOrg", e);
-          return null;
-        }
-        String topOrgUuid;
-        String topOrgName;
+        final Organization reportOrg =
+            (orgType == OrganizationType.ADVISOR_ORG) ? r.loadAdvisorOrg(context).join()
+                : r.loadPrincipalOrg(context).join();
+        final String topOrgUuid;
+        final String topOrgName;
         if (reportOrg == null) {
           topOrgUuid = Organization.DUMMY_ORG_UUID;
           topOrgName = "Other";

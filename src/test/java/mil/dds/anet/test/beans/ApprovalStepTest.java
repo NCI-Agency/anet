@@ -12,7 +12,7 @@ public class ApprovalStepTest extends BeanTester<ApprovalStep> {
   private static ApprovalStep getTestApprovalStep() {
     ApprovalStep as = new ApprovalStep();
     as.setUuid("42");
-    as.setAdvisorOrganizationUuid("22");
+    as.setRelatedObjectUuid("22");
     as.setApprovers(ImmutableList.of());
     as.setNextStepUuid("9292");
     as.setType(ApprovalStepType.REPORT_APPROVAL);

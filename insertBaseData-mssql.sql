@@ -8,6 +8,8 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE reportTags;
 --DROP TABLE peoplePositions;
 --DROP TABLE savedSearches;
+--DROP TABLE taskTaskedOrganizations;
+--DROP TABLE taskResponsiblePositions;
 --DROP TABLE positions;
 --DROP TABLE tasks;
 --DROP TABLE comments;
@@ -40,6 +42,8 @@ TRUNCATE TABLE reportsSensitiveInformation;
 TRUNCATE TABLE authorizationGroupPositions;
 TRUNCATE TABLE reportAuthorizationGroups;
 TRUNCATE TABLE noteRelatedObjects;
+TRUNCATE TABLE taskTaskedOrganizations;
+TRUNCATE TABLE taskResponsiblePositions;
 DELETE FROM positions;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NOT NULL;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NULL;
@@ -145,7 +149,7 @@ INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, u
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 2.2 Final Reviewer', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 4.1 Advisor E', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (lower(newid()), 'EF 4.1 Advisor A', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 4.1 Advisor for Coffee', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
@@ -283,7 +287,7 @@ UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE sh
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName='ANET Administrators') where name = 'ANET Administrator';
 
 -- Create the EF 1.1 approval process
-INSERT INTO approvalSteps (uuid, advisorOrganizationUuid, name, type)
+INSERT INTO approvalSteps (uuid, relatedObjectUuid, name, type)
 	VALUES (lower(newid()), (SELECT uuid from organizations where shortName='EF 1.1'), 'EF 1.1 Approvers', 1);
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 SuperUser'));
@@ -291,9 +295,9 @@ INSERT INTO approvers (approvalStepUuid, positionUuid)
 -- Create the EF 2.2 approval process
 DECLARE @approvalStepUuid varchar(36);
 SET @approvalStepUuid = lower(newid());
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, type)
+INSERT INTO approvalSteps (uuid, name, relatedObjectUuid, type)
 	VALUES (@approvalStepUuid, 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where shortName='EF 2.2'), 1);
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, nextStepUuid, type)
+INSERT INTO approvalSteps (uuid, name, relatedObjectUuid, nextStepUuid, type)
 	VALUES (lower(newid()), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where shortName='EF 2.2'), @approvalStepUuid, 1);
 
 INSERT INTO approvers (approvalStepUuid, positionUuid)
@@ -384,6 +388,38 @@ INSERT INTO taskTaskedOrganizations (taskUuid, organizationUuid)
 		((SELECT uuid from tasks where shortName = '4.b.5'), (SELECT uuid from organizations where shortName='EF 4')),
 		((SELECT uuid from tasks where shortName = '4.c'), (SELECT uuid from organizations where shortName='EF 4'));
 
+-- Create a task approval process for some tasks
+INSERT INTO taskResponsiblePositions (taskUuid, positionUuid)
+	VALUES
+		((SELECT uuid FROM tasks WHERE shortName = '1.1'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 SuperUser')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.1.A'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.1.A'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor A')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.1.B'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor B')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.1.B'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Interagency Advising')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor C')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Mining')),
+		((SELECT uuid FROM tasks WHERE shortName = '2.A'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 SuperUser')),
+		((SELECT uuid FROM tasks WHERE shortName = '2.B'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor B')),
+		((SELECT uuid FROM tasks WHERE shortName = '2.C'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Accounting')),
+		((SELECT uuid FROM tasks WHERE shortName = '2.D'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Kites')),
+		((SELECT uuid FROM tasks WHERE shortName = '4.a'), (SELECT uuid FROM positions WHERE name = 'EF 4.1 Advisor A')),
+		((SELECT uuid FROM tasks WHERE shortName = '4.b'), (SELECT uuid FROM positions WHERE name = 'EF 4.1 Advisor for Coffee')),
+		((SELECT uuid FROM tasks WHERE shortName = '4.c'), (SELECT uuid FROM positions WHERE name = 'EF 4.1 Advisor on Software Engineering'));
+
+INSERT INTO approvalSteps (uuid, relatedObjectUuid, name, type)
+	SELECT lower(newid()), tasks.uuid, 'Task Owner approval', 1
+	FROM tasks
+	WHERE status = 0
+	AND customFieldRef1Uuid IS NOT NULL;
+
+INSERT INTO approvers (approvalStepUuid, positionUuid)
+	SELECT approvalSteps.uuid, taskResponsiblePositions.positionUuid
+	FROM taskResponsiblePositions
+	JOIN approvalSteps ON relatedObjectUuid = taskUuid
+	WHERE approvalSteps.name = 'Task Owner approval'
+	AND approvalSteps.type = 1;
+
+-- Create locations
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
 	VALUES (N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
@@ -708,7 +744,7 @@ INSERT INTO reportTasks (taskUuid, reportUuid)
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;
 
 --Create the default Approval Step
-INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, type)
+INSERT INTO approvalSteps (uuid, name, relatedObjectUuid, type)
 	VALUES (lower(newid()), 'Default Approvers', (select uuid from organizations where shortName='ANET Administrators'), 1);
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps where name = 'Default Approvers'), (SELECT uuid from positions where name = 'ANET Administrator'));
