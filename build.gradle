@@ -88,9 +88,9 @@ dependencies {
 	compile 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '7.4.1.jre8'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.9' // If using postgresql
-	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.5' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
+	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.0.jre8'
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.10' // If using postgresql
+	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.6' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
 	compile 'ch.qos.logback:logback-classic:1.2.3'
@@ -104,7 +104,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.networknt:json-schema-validator:1.0.29'
+	compile 'com.networknt:json-schema-validator:1.0.30'
 
 	// TODO: remove dependency once no longer needed by tests
 	compile 'org.json:json:20190722'
@@ -114,7 +114,7 @@ dependencies {
 	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
 
 	// For parsing HTML to check for 'empty' input
-	compile 'org.jsoup:jsoup:1.12.1'
+	compile 'org.jsoup:jsoup:1.12.2'
 
 	// For fast and simple image scaling
 	compile group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
