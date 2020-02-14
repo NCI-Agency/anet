@@ -145,6 +145,7 @@ const AdvancedSelect = ({
   const [isLoading, setIsLoading] = useState(false)
   const [doFetchResults, setDoFetchResults] = useState(false)
   const [doFetchResultsDebounced, setDoFetchResultsDebounced] = useState(false)
+  const [doReset, setDoReset] = useState(false)
 
   const selectedFilterList = latestFilterDefs.current[filterType].list
   const selectedFilterListName = latestFilterDefs.current[filterType].listName
@@ -155,62 +156,6 @@ const AdvancedSelect = ({
     : null
   const items = results && results[filterType] ? results[filterType].list : []
 
-  useEffect(() => {
-    if (
-      !_isEqualWith(
-        latestQueryParams.current,
-        queryParams,
-        utils.treatFunctionsAsEqual
-      )
-    ) {
-      latestQueryParams.current = queryParams
-    }
-  }, [queryParams])
-
-  useEffect(() => {
-    if (
-      !_isEqualWith(
-        latestFilterDefs.current,
-        filterDefs,
-        utils.treatFunctionsAsEqual
-      )
-    ) {
-      latestFilterDefs.current = filterDefs
-    }
-  }, [filterDefs])
-
-  useEffect(() => {
-    const selectedValueAsStringUnchanged = _isEqualWith(
-      latestSelectedValueAsString.current,
-      selectedValueAsString,
-      utils.treatFunctionsAsEqual
-    )
-    if (!selectedValueAsStringUnchanged) {
-      latestSelectedValueAsString.current = selectedValueAsString
-      setSearchTerms(selectedValueAsString)
-      setDoFetchResults(false)
-      setDoFetchResultsDebounced(false)
-    }
-  }, [selectedValueAsString])
-
-  useEffect(() => {
-    // No need to fetch the data, it is already provided in the filter definition
-    if (selectedFilterList) {
-      setIsLoading(!_isEmpty(selectedFilterList))
-      setResults(oldResults => ({
-        ...oldResults,
-        [filterType]: {
-          list: selectedFilterList,
-          pageNum: pageNum,
-          pageSize: 6,
-          totalCount: selectedFilterList.length
-        }
-      }))
-    }
-  }, [filterType, pageNum, selectedFilterList])
-
-  // FIXME: If there's a newer request happening, stop everything (otherwise, we might get the results of
-  // a search on "art", after having searched on "arthur" because the search on art gives back the results as latest)
   const fetchResults = useCallback(
     searchTerms => {
       if (!selectedFilterList) {
@@ -269,6 +214,60 @@ const AdvancedSelect = ({
   const [fetchResultsDebounced] = useDebouncedCallback(fetchResults, 400)
 
   useEffect(() => {
+    if (
+      !_isEqualWith(
+        latestQueryParams.current,
+        queryParams,
+        utils.treatFunctionsAsEqual
+      )
+    ) {
+      latestQueryParams.current = queryParams
+    }
+  }, [queryParams])
+
+  useEffect(() => {
+    if (
+      !_isEqualWith(
+        latestFilterDefs.current,
+        filterDefs,
+        utils.treatFunctionsAsEqual
+      )
+    ) {
+      latestFilterDefs.current = filterDefs
+    }
+  }, [filterDefs])
+
+  useEffect(() => {
+    const selectedValueAsStringUnchanged = _isEqualWith(
+      latestSelectedValueAsString.current,
+      selectedValueAsString,
+      utils.treatFunctionsAsEqual
+    )
+    if (!selectedValueAsStringUnchanged) {
+      latestSelectedValueAsString.current = selectedValueAsString
+      setSearchTerms(selectedValueAsString)
+      setDoFetchResults(false)
+      setDoFetchResultsDebounced(false)
+    }
+  }, [selectedValueAsString])
+
+  useEffect(() => {
+    // No need to fetch the data, it is already provided in the filter definition
+    if (selectedFilterList) {
+      setIsLoading(!_isEmpty(selectedFilterList))
+      setResults(oldResults => ({
+        ...oldResults,
+        [filterType]: {
+          list: selectedFilterList,
+          pageNum: pageNum,
+          pageSize: 6,
+          totalCount: selectedFilterList.length
+        }
+      }))
+    }
+  }, [filterType, pageNum, selectedFilterList])
+
+  useEffect(() => {
     if (doFetchResultsDebounced) {
       fetchResultsDebounced(searchTerms)
     }
@@ -279,6 +278,20 @@ const AdvancedSelect = ({
       fetchResults(searchTerms)
     }
   }, [doFetchResults, fetchResults, searchTerms])
+
+  useEffect(() => {
+    if (doReset) {
+      setIsLoading(false)
+      setShowOverlay(false)
+      setFilterType(firstFilter)
+      setSearchTerms(selectedValueAsString)
+      setResults({})
+      setPageNum(0)
+      setDoFetchResults(false)
+      setDoFetchResultsDebounced(false)
+      setDoReset(false)
+    }
+  }, [doReset, firstFilter, selectedValueAsString])
 
   const advancedSearchPopoverContent = (
     <Row className="border-between">
@@ -371,40 +384,35 @@ const AdvancedSelect = ({
     </>
   )
 
-  function resetSelections() {
-    setIsLoading(false)
-    setShowOverlay(false)
-    setFilterType(firstFilter)
-    setSearchTerms(selectedValueAsString)
-    setResults({})
-    setPageNum(0)
-    setDoFetchResults(false)
-    setDoFetchResultsDebounced(false)
-  }
-
   function handleInteraction(nextShowOverlay, event) {
+    // Note: these state updates are not being batched, order is therefore important
     // Make sure the overlay is being closed when clicking outside of it,
     // but keep it open when clicking on the input field.
     const inputFocus = searchInput.current.contains(event && event.target)
     const openOverlay = nextShowOverlay || inputFocus
     if (openOverlay !== showOverlay) {
-      setShowOverlay(openOverlay)
       if (openOverlay) {
         // overlay is being opened
+        // Note: state updates are being batched here
+        setShowOverlay(openOverlay)
         setSearchTerms("")
         setIsLoading(true)
         setDoFetchResults(true)
         setDoFetchResultsDebounced(false)
       } else {
         // overlay is being closed
-        resetSelections()
+        // Note: state updates WOULD NOT be batched here
+        // When closing the overlay the state updates were not being batched, we
+        // therefore moved them to an effect, to prevent several too many renders
+        // and also to make sure the state updates are being batched in there
+        setDoReset(true)
       }
     }
   }
 
   function handleCloseOverlayOnAdd() {
     // Close the overlay
-    resetSelections()
+    setDoReset(true)
   }
 
   function changeSearchTerms(event) {
@@ -412,6 +420,7 @@ const AdvancedSelect = ({
     // Reset the results state when the search terms change
     setResults({})
     setPageNum(0)
+    // Make sure we don't do a fetch for each character being typed
     setDoFetchResultsDebounced(true)
     setDoFetchResults(false)
   }
