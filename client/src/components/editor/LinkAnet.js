@@ -1,7 +1,6 @@
 import PropTypes from "prop-types"
 import React from "react"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
-import LinkExternalEntity from "components/editor/LinkExternalEntity"
 import { getEntityInfoFromUrl } from "utils_links"
 
 const LinkAnet = ({
@@ -23,9 +22,8 @@ const LinkAnet = ({
         {children}
       </LinkAnetEntity>
     )
-  } else {
-    // Non-ANET entity link
-    return <LinkExternalEntity url={urlLink}>{children}</LinkExternalEntity>
+  } else { // Non ANET entity link
+    return <>{urlLink}</>
   }
 }
 

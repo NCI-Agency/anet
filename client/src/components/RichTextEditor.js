@@ -7,7 +7,6 @@ import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
 
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
-import linkifyPlugin from "components/editor/plugins/linkifyPlugin"
 
 import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
@@ -28,7 +27,6 @@ import {
   BlockquoteButton
 } from "draft-js-buttons"
 
-const linkify = linkifyPlugin()
 const newlinePlugin = createNewlinePlugin()
 
 const BLOCK_TYPES = [
@@ -88,7 +86,11 @@ const ENTITY_CONTROL = {
     // Attribute - regex mapping, to whitelist entities based on their data on paste.
     // For example, { url: '^https:' } will only preserve links that point to HTTPS URLs.
     whitelist: {
-      href: "^(?![#/])"
+      // Regex to onnly match ANET entity URLs (not foolproof):
+      // Start at the beginning of the string and use a look-ahead to try to match:
+      // A '/', followed by a word (entity name), followed by a '/' and then the entity's UUID format (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx), followed by an eventual '/'
+      // href: "^(?=.*(/[a-zA-Z]+/[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12})/?$)"
+      href: "."
     }
   }
 }
@@ -196,7 +198,7 @@ class RichTextEditor extends Component {
           }}
           onBlur={onHandleBlur}
           stateSaveInterval={100}
-          plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
+          plugins={[sideToolbarPlugin, newlinePlugin]}
           rawContentState={value ? fromHTML(value) : null}
           showUndoControl
           showRedoControl
