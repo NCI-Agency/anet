@@ -3077,4 +3077,29 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="drop-FK_approvalSteps_organization" author="gjvoosten" dbms="mssql,postgresql">
+		<dropForeignKeyConstraint
+			baseTableName="approvalSteps" constraintName="FK_approvalSteps_organization" />
+	</changeSet>
+
+	<changeSet id="drop-IDX_approvalSteps_advisorOrganizationUuid" author="gjvoosten">
+		<dropIndex
+			tableName="approvalSteps" indexName="IDX_approvalSteps_advisorOrganizationUuid" />
+	</changeSet>
+
+	<changeSet id="rename-approvalSteps-advisorOrganizationUuid" author="gjvoosten">
+		 <renameColumn
+			 tableName="approvalSteps"
+			 oldColumnName="advisorOrganizationUuid"
+			 newColumnName="relatedObjectUuid"
+			 columnDataType="${uuid_type}" />
+	 </changeSet>
+
+	<changeSet id="add-IDX_approvalSteps_relatedObjectUuid" author="gjvoosten">
+		<createIndex
+			tableName="approvalSteps" indexName="IDX_approvalSteps_relatedObjectUuid">
+			<column name="relatedObjectUuid" />
+		</createIndex>
+	</changeSet>
+
 </databaseChangeLog>

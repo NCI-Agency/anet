@@ -107,7 +107,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     ApprovalStep defaultStep = new ApprovalStep();
     defaultStep.setName("Default Approver");
     defaultStep.setType(ApprovalStepType.REPORT_APPROVAL);
-    defaultStep.setAdvisorOrganizationUuid(adminOrg.getUuid());
+    defaultStep.setRelatedObjectUuid(adminOrg.getUuid());
     defaultStep.setApprovers(ImmutableList.of(adminPos));
     engine.getApprovalStepDao().insert(defaultStep);
     System.out.println("DONE!");

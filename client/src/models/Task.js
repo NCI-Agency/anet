@@ -31,6 +31,11 @@ export default class Task extends Model {
     INACTIVE: "INACTIVE"
   }
 
+  static APPROVAL_STEP_TYPE = {
+    PLANNING_APPROVAL: "PLANNING_APPROVAL",
+    REPORT_APPROVAL: "REPORT_APPROVAL"
+  }
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createYupObjectShape(
     Settings.fields.task.customFields
@@ -95,6 +100,47 @@ export default class Task extends Model {
         .nullable()
         .default([])
         .label(responsiblePositions && responsiblePositions.label),
+      // FIXME: resolve code duplication in yup schema for approval steps
+      planningApprovalSteps: yup
+        .array()
+        .of(
+          yup.object().shape({
+            name: yup
+              .string()
+              .required("You must provide the step name")
+              .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Task.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
+            approvers: yup
+              .array()
+              .required("You must select at least one approver")
+              .default([])
+          })
+        )
+        .nullable()
+        .default([]),
+      approvalSteps: yup
+        .array()
+        .of(
+          yup.object().shape({
+            name: yup
+              .string()
+              .required("You must provide the step name")
+              .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Task.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
+            approvers: yup
+              .array()
+              .required("You must select at least one approver")
+              .default([])
+          })
+        )
+        .nullable()
+        .default([]),
       // not actually in the database, the database contains the JSON customFields
       formCustomFields: Task.customFieldsSchema.nullable()
     })

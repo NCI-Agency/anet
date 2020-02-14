@@ -152,7 +152,7 @@ public class Organization extends AbstractAnetBean {
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForOrg(context, uuid)
+    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForRelatedObject(context, uuid)
         .thenApply(o -> {
           planningApprovalSteps = o;
           return o;
@@ -174,10 +174,11 @@ public class Organization extends AbstractAnetBean {
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return AnetObjectEngine.getInstance().getApprovalStepsForOrg(context, uuid).thenApply(o -> {
-      approvalSteps = o;
-      return o;
-    });
+    return AnetObjectEngine.getInstance().getApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
+          approvalSteps = o;
+          return o;
+        });
   }
 
   public List<ApprovalStep> getApprovalSteps() {
