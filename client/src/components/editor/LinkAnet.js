@@ -22,7 +22,8 @@ const LinkAnet = ({
         {children}
       </LinkAnetEntity>
     )
-  } else { // Non ANET entity link
+  } else {
+    // Non ANET entity link
     return <>{urlLink}</>
   }
 }

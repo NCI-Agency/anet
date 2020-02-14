@@ -86,10 +86,6 @@ const ENTITY_CONTROL = {
     // Attribute - regex mapping, to whitelist entities based on their data on paste.
     // For example, { url: '^https:' } will only preserve links that point to HTTPS URLs.
     whitelist: {
-      // Regex to onnly match ANET entity URLs (not foolproof):
-      // Start at the beginning of the string and use a look-ahead to try to match:
-      // A '/', followed by a word (entity name), followed by a '/' and then the entity's UUID format (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx), followed by an eventual '/'
-      // href: "^(?=.*(/[a-zA-Z]+/[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12})/?$)"
       href: "."
     }
   }
