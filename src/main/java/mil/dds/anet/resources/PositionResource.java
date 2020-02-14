@@ -151,9 +151,6 @@ public class PositionResource {
       }
     }
 
-    if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
-    }
     AnetAuditLogger.log("Position {} updated by {}", pos, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

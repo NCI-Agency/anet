@@ -173,6 +173,10 @@ public abstract class AbstractResourceTest {
     return findOrPutPersonInDb(PersonTest.getBobBobtown());
   }
 
+  public Person getAndrewAnderson() {
+    return findOrPutPersonInDb(PersonTest.getAndrewAnderson());
+  }
+
   public Organization createOrganizationWithUuid(String uuid) {
     final Organization ao = new Organization();
     ao.setUuid(uuid);

@@ -52,8 +52,11 @@ test("Draft and submit a report", async t => {
     "#attendees",
     "topferness, christopf"
   )
-  const $attendeesShortcutList = await $("#attendees-shortcut-list")
-  await $attendeesShortcutList.click()
+
+  const $attendeesTitle = await t.context.driver.findElement(
+    By.xpath('//h2/span[text()="Meeting attendance"]')
+  )
+  await $attendeesTitle.click()
 
   t.is(
     await $attendeesAdvancedSelect1.getAttribute("value"),
@@ -89,7 +92,7 @@ test("Draft and submit a report", async t => {
     "#attendees",
     "steveson, steve"
   )
-  await $attendeesShortcutList.click()
+  await $attendeesTitle.click()
 
   t.is(
     await $attendeesAdvancedSelect2.getAttribute("value"),
@@ -149,8 +152,7 @@ test("Draft and submit a report", async t => {
     "1.1"
   )
 
-  const $tasksShortcutList = await $("#tasks-shortcut-list")
-  await $tasksShortcutList.click()
+  await $tasksTitle.click()
 
   t.is(
     await $tasksAdvancedSelect.getAttribute("value"),
@@ -252,7 +254,7 @@ test("Draft and submit a report", async t => {
 })
 
 test("Publish report chain", async t => {
-  t.plan(6)
+  t.plan(7)
 
   const {
     pageHelpers,
@@ -297,102 +299,11 @@ test("Publish report chain", async t => {
     "Erin should not be allowed to approve her own reports"
   )
 
-  // First Jacob needs to approve the report, then rebecca can approve the report
-  await t.context.get("/", "jacob")
-  const $homeTileJacob = await $$(".home-tile")
-  const [
-    /* eslint-disable no-unused-vars */ $draftReportsJacob /* eslint-enable no-unused-vars */,
-    $reportsPendingJacob,
-    /* eslint-disable no-unused-vars */
-    $orgReportsJacob,
-    $plannedEngagementsJacob
-    /* eslint-enable no-unused-vars */
-  ] = $homeTileJacob
-  await t.context.driver.wait(
-    until.elementIsVisible($reportsPendingJacob),
-    mediumWaitMs
-  )
-  await $reportsPendingJacob.click()
-  await t.context.driver.wait(
-    until.stalenessOf($reportsPendingJacob),
-    mediumWaitMs
-  )
-
-  const $reportsPendingJacobSummaryTab = await $(
-    ".report-collection button[value='summary']"
-  )
-  await t.context.driver.wait(
-    until.elementIsEnabled($reportsPendingJacobSummaryTab)
-  )
-  await $reportsPendingJacobSummaryTab.click()
-
-  const $readReportButtonJacob = await $(
-    ".read-report-button[href='" + testReportURL + "']"
-  )
-  await t.context.driver.wait(
-    until.elementIsEnabled($readReportButtonJacob),
-    mediumWaitMs
-  )
-  await $readReportButtonJacob.click()
-  await pageHelpers.assertReportShowStatusText(
-    t,
-    "This report is PENDING approvals."
-  )
-  const $jacobApproveButton = await $(".approve-button")
-  await t.context.driver.wait(
-    until.elementIsEnabled($jacobApproveButton),
-    mediumWaitMs
-  )
-  await $jacobApproveButton.click()
-  await t.context.driver.wait(
-    until.stalenessOf($jacobApproveButton),
-    mediumWaitMs
-  )
-
-  await t.context.get("/", "rebecca")
-  const $homeTile = await $$(".home-tile")
-  const [
-    /* eslint-disable no-unused-vars */ $draftReports /* eslint-enable no-unused-vars */,
-    $reportsPending,
-    /* eslint-disable no-unused-vars */
-    $orgReports,
-    $plannedEngagements
-    /* eslint-enable no-unused-vars */
-  ] = $homeTile
-  await t.context.driver.wait(
-    until.elementIsVisible($reportsPending),
-    mediumWaitMs
-  )
-  await $reportsPending.click()
-  await t.context.driver.wait(until.stalenessOf($reportsPending), mediumWaitMs)
-
-  const $reportsPendingRebeccaSummaryTab = await $(
-    ".report-collection button[value='summary']"
-  )
-  await t.context.driver.wait(
-    until.elementIsEnabled($reportsPendingRebeccaSummaryTab)
-  )
-  await $reportsPendingRebeccaSummaryTab.click()
-
-  const $readReportButtonRebecca = await $(
-    ".read-report-button[href='" + testReportURL + "']"
-  )
-  await t.context.driver.wait(
-    until.elementIsEnabled($readReportButtonRebecca),
-    mediumWaitMs
-  )
-  await $readReportButtonRebecca.click()
-
-  await pageHelpers.assertReportShowStatusText(
-    t,
-    "This report is PENDING approvals."
-  )
-  const $rebeccaApproveButton = await $(".approve-button")
-  await $rebeccaApproveButton.click()
-  await t.context.driver.wait(
-    until.stalenessOf($rebeccaApproveButton),
-    mediumWaitMs
-  )
+  // First Jacob needs to approve the report, then Rebecca can approve the report
+  await approveReport(t, "jacob")
+  await approveReport(t, "rebecca")
+  // Then the task owner can approve the report
+  await approveReport(t, "bob")
 
   // Admin user needs to publish the report
   await t.context.get("/", "arthur")
@@ -494,6 +405,52 @@ test("Publish report chain", async t => {
   await assert.strictEqual(jsonResponse.length, 0) // Domains not in active users
 })
 
+async function approveReport(t, user) {
+  const { pageHelpers, $, $$, until, mediumWaitMs } = t.context
+
+  await t.context.get("/", user)
+  const $homeTile = await $$(".home-tile")
+  const [
+    /* eslint-disable no-unused-vars */ $draftReports /* eslint-enable no-unused-vars */,
+    $reportsPending,
+    /* eslint-disable no-unused-vars */
+    $orgReports,
+    $plannedEngagements
+    /* eslint-enable no-unused-vars */
+  ] = $homeTile
+  await t.context.driver.wait(
+    until.elementIsVisible($reportsPending),
+    mediumWaitMs
+  )
+  await $reportsPending.click()
+  await t.context.driver.wait(until.stalenessOf($reportsPending), mediumWaitMs)
+
+  const $reportsPendingSummaryTab = await $(
+    ".report-collection button[value='summary']"
+  )
+  await t.context.driver.wait(until.elementIsEnabled($reportsPendingSummaryTab))
+  await $reportsPendingSummaryTab.click()
+
+  const $readReportButton = await $(
+    ".read-report-button[href='" + testReportURL + "']"
+  )
+  await t.context.driver.wait(
+    until.elementIsEnabled($readReportButton),
+    mediumWaitMs
+  )
+  await $readReportButton.click()
+  await pageHelpers.assertReportShowStatusText(
+    t,
+    "This report is PENDING approvals."
+  )
+  const $ApproveButton = await $(".approve-button")
+  await t.context.driver.wait(
+    until.elementIsEnabled($ApproveButton),
+    mediumWaitMs
+  )
+  await $ApproveButton.click()
+  await t.context.driver.wait(until.stalenessOf($ApproveButton), mediumWaitMs)
+}
 test("Verify that validation and other reports/new interactions work", async t => {
   t.plan(29)
 

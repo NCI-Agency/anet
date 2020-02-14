@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -48,7 +47,7 @@ public class PositionResourceTest extends AbstractResourceTest {
       " previousPeople { startTime endTime position { uuid } person { uuid name rank role } }";
 
   @Test
-  public void positionTest() throws ExecutionException, InterruptedException {
+  public void positionTest() {
     final Person jack = getJackJackson();
     assertThat(jack.getUuid()).isNotNull();
     assertThat(jack.getPosition()).isNotNull();
@@ -473,7 +472,7 @@ public class PositionResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void createPositionTest() throws ExecutionException, InterruptedException {
+  public void createPositionTest() {
     // Create a new position and designate the person upfront
     Person newb = new Person();
     newb.setName("PositionTest Person");
@@ -618,34 +617,26 @@ public class PositionResourceTest extends AbstractResourceTest {
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
 
     // try to update a position from the user's org
+    final List<Position> userOrgPositions =
+        position.getOrganization().loadPositions(context, null).join();
+    assertThat(userOrgPositions).isNotNull();
+    assertThat(userOrgPositions).isNotEmpty();
+    final Position p1 = userOrgPositions.get(0);
+    p1.loadOrganization(context).join();
     try {
-      List<Position> userOrgPositions =
-          position.getOrganization().loadPositions(context, null).get();
-      assertThat(userOrgPositions).isNotNull();
-      assertThat(userOrgPositions).isNotEmpty();
-      final Position p1 = userOrgPositions.get(0);
-      p1.loadOrganization(context).get();
-      try {
-        final Integer nrUpdated =
-            graphQLHelper.updateObject(user, "updatePosition", "position", "PositionInput", p1);
-        if (isAdmin) {
-          assertThat(nrUpdated).isEqualTo(1);
-        } else if (isSuperUser) {
-          assertThat(nrUpdated).isEqualTo(1);
-        } else {
-          fail("Expected ForbiddenException");
-        }
-      } catch (ForbiddenException expectedException) {
-        if (isAdmin || isSuperUser) {
-          fail("Unexpected ForbiddenException");
-        }
+      final Integer nrUpdated =
+          graphQLHelper.updateObject(user, "updatePosition", "position", "PositionInput", p1);
+      if (isAdmin) {
+        assertThat(nrUpdated).isEqualTo(1);
+      } else if (isSuperUser) {
+        assertThat(nrUpdated).isEqualTo(1);
+      } else {
+        fail("Expected ForbiddenException");
       }
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (ExecutionException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    } catch (ForbiddenException expectedException) {
+      if (isAdmin || isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
     }
 
     // create a regular position not related to the user's organization

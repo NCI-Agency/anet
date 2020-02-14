@@ -99,14 +99,12 @@ class BaseTopBar extends Component {
   }
 
   bannerOptions() {
-    return (
-      {
-        level: this.props.appSettings[GENERAL_BANNER_LEVEL],
-        message: this.props.appSettings[GENERAL_BANNER_TEXT],
-        title: GENERAL_BANNER_TITLE,
-        visible: this.state.bannerVisibility
-      } || {}
-    )
+    return {
+      level: this.props.appSettings[GENERAL_BANNER_LEVEL],
+      message: this.props.appSettings[GENERAL_BANNER_TEXT],
+      title: GENERAL_BANNER_TITLE,
+      visible: this.state.bannerVisibility
+    }
   }
 
   render() {

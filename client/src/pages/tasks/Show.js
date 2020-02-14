@@ -1,6 +1,7 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
@@ -66,6 +67,36 @@ const GQL_GET_TASK = gql`
           rank
           role
           avatar(size: 32)
+        }
+      }
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      approvalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
         }
       }
       customFields
@@ -272,6 +303,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
             <Fieldset title="Responsible positions">
               <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
+
+            <Approvals relatedObject={task} />
 
             <Fieldset
               title={`Reports for this ${Settings.fields.task.shortLabel}`}
