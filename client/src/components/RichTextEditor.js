@@ -1,31 +1,27 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
-import _isEqual from "lodash/isEqual"
-import { convertFromHTML, convertToHTML } from "draft-convert"
-import { convertToRaw, convertFromRaw } from "draft-js"
-import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
-
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
-
-import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
-
-import "draft-js/dist/Draft.css"
-import "draftail/dist/draftail.css"
-import "draft-js-side-toolbar-plugin/lib/plugin.css"
 import "components/RichTextEditor.css"
-
+import { convertFromHTML, convertToHTML } from "draft-convert"
+import { convertFromRaw, convertToRaw } from "draft-js"
 import {
-  ItalicButton,
+  BlockquoteButton,
   BoldButton,
-  UnderlineButton,
   HeadlineOneButton,
   HeadlineTwoButton,
-  UnorderedListButton,
+  ItalicButton,
   OrderedListButton,
-  BlockquoteButton
+  UnderlineButton,
+  UnorderedListButton
 } from "draft-js-buttons"
+import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
+import "draft-js-side-toolbar-plugin/lib/plugin.css"
+import "draft-js/dist/Draft.css"
+import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+import "draftail/dist/draftail.css"
+import _isEqual from "lodash/isEqual"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
 
 const newlinePlugin = createNewlinePlugin()
 

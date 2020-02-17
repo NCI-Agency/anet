@@ -1,9 +1,9 @@
-import React from "react"
-import { gql } from "apollo-boost"
-import parse from "html-react-parser"
 import API from "api"
+import { gql } from "apollo-boost"
 import LinkAnet from "components/editor/LinkAnet"
+import parse from "html-react-parser"
 import { PAGE_URLS } from "pages/util"
+import React from "react"
 
 const UUID_REGEX =
   "^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$"

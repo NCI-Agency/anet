@@ -1,6 +1,6 @@
+import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import PropTypes from "prop-types"
 import React from "react"
-import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import { getEntityInfoFromUrl } from "utils_links"
 
 const LinkAnet = ({

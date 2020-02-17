@@ -1,9 +1,9 @@
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Link } from "react-router-dom"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 export default class LinkTo extends Component {
   static propTypes = {

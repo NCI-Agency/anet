@@ -1,5 +1,5 @@
-import encodeQuery from "querystring/encode"
 import Model from "components/Model"
+import encodeQuery from "querystring/encode"
 import React from "react"
 import utils from "utils"
 import * as yup from "yup"

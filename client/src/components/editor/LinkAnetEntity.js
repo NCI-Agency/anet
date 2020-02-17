@@ -1,6 +1,6 @@
-import PropTypes from "prop-types"
-import React, { useState, useEffect } from "react"
 import LinkTo from "components/LinkTo"
+import PropTypes from "prop-types"
+import React, { useEffect, useState } from "react"
 import { getEntityByUuid } from "utils_links"
 
 const LinkAnetEntity = ({ type, uuid, children }) => {

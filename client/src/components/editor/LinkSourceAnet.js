@@ -1,30 +1,26 @@
-import React, { useState, useRef } from "react"
-import PropTypes from "prop-types"
-
-import { Button, Modal } from "react-bootstrap"
-
-import "./LinkSource.css"
-
-import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import REPORTS_ICON from "resources/reports.png"
-import TASKS_ICON from "resources/tasks.png"
-import PEOPLE_ICON from "resources/people.png"
-import ORGANIZATIONS_ICON from "resources/organizations.png"
-import LOCATIONS_ICON from "resources/locations.png"
-import POSITIONS_ICON from "resources/positions.png"
-import * as Models from "models"
+import { SEARCH_OBJECT_LABELS } from "actions"
 import {
-  ReportDetailedOverlayRow,
+  LocationOverlayRow,
   OrganizationOverlayRow,
-  TaskSimpleOverlayRow,
   PersonDetailedOverlayRow,
   PositionOverlayRow,
-  LocationOverlayRow
+  ReportDetailedOverlayRow,
+  TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
-
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import * as Models from "models"
+import PropTypes from "prop-types"
+import React, { useRef, useState } from "react"
+import { Button, Modal } from "react-bootstrap"
+import LOCATIONS_ICON from "resources/locations.png"
+import ORGANIZATIONS_ICON from "resources/organizations.png"
+import PEOPLE_ICON from "resources/people.png"
+import POSITIONS_ICON from "resources/positions.png"
+import REPORTS_ICON from "resources/reports.png"
+import TASKS_ICON from "resources/tasks.png"
 import { ENTITY_TYPES } from "utils_links"
-import { SEARCH_OBJECT_LABELS } from "actions"
+import "./LinkSource.css"
 import createEntity from "./utils/createEntity"
 
 const entityFilters = {
