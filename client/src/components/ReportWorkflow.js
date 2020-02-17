@@ -3,7 +3,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 import "./ReportWorkflow.css"
 
@@ -43,56 +43,48 @@ ApprovalStepModalStatus.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-class ApprovalStepModal extends Component {
-  static propTypes = {
-    action: PropTypes.object.isRequired
+const ApprovalStepModal = ({ action }) => {
+  const [showModal, setShowModal] = useState(false)
+
+  const step = action.step
+  const actionTypeCss = ACTION_TYPE_DETAILS[action.type].cssClass
+
+  return step ? (
+    <>
+      <Button className={actionTypeCss + " btn-sm"} onClick={openModal}>
+        <span>{step.name}</span>
+      </Button>
+      <Modal show={showModal} onHide={closeModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Approvers for {step.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ul>
+            {step.approvers.map(position => (
+              <li key={position.uuid}>
+                <LinkTo position={position} /> -{" "}
+                <LinkTo person={position.person} />
+              </li>
+            ))}
+          </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <ApprovalStepModalStatus action={action} />
+        </Modal.Footer>
+      </Modal>
+    </>
+  ) : null
+
+  function closeModal() {
+    setShowModal(false)
   }
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      showModal: false
-    }
+  function openModal() {
+    setShowModal(true)
   }
-
-  closeModal = () => {
-    this.setState({ showModal: false })
-  }
-
-  openModal = () => {
-    this.setState({ showModal: true })
-  }
-
-  render() {
-    const { action } = this.props
-    const step = action.step
-    const actionTypeCss = ACTION_TYPE_DETAILS[action.type].cssClass
-    return step ? (
-      <>
-        <Button className={actionTypeCss + " btn-sm"} onClick={this.openModal}>
-          <span>{step.name}</span>
-        </Button>
-        <Modal show={this.state.showModal} onHide={this.closeModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Approvers for {step.name}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <ul>
-              {step.approvers.map(position => (
-                <li key={position.uuid}>
-                  <LinkTo position={position} /> -{" "}
-                  <LinkTo person={position.person} />
-                </li>
-              ))}
-            </ul>
-          </Modal.Body>
-          <Modal.Footer>
-            <ApprovalStepModalStatus action={action} />
-          </Modal.Footer>
-        </Modal>
-      </>
-    ) : null
-  }
+}
+ApprovalStepModal.propTypes = {
+  action: PropTypes.object.isRequired
 }
 
 const ActionStatus = ({ action }) => {
