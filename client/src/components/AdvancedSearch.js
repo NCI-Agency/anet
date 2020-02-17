@@ -93,6 +93,8 @@ const AdvancedSearch = ({
   const possibleFilterTypes = Object.keys(ALL_FILTERS).filter(type =>
     searchObjectTypes.includes(type)
   )
+  const hasObjectType = possibleFilterTypes.length > 1 && objectType
+  const colWidth = hasObjectType ? 11 : 12
 
   return (
     <Formik>
@@ -100,7 +102,7 @@ const AdvancedSearch = ({
         <div className="advanced-search form-horizontal">
           <Form onSubmit={onSubmit}>
             <FormGroup>
-              <Col xs={11}>
+              <Col xs={colWidth}>
                 <ButtonToggleGroup
                   value={objectType}
                   onChange={changeObjectType}
@@ -116,13 +118,13 @@ const AdvancedSearch = ({
                   ))}
                 </ButtonToggleGroup>
               </Col>
-              <Col xs={1}>
-                {possibleFilterTypes.length > 1 && objectType && (
+              {hasObjectType && (
+                <Col xs={1}>
                   <Button bsStyle="link" onClick={clearObjectType}>
                     <img src={REMOVE_ICON} height={14} alt="Clear type" />
                   </Button>
-                )}
-              </Col>
+                </Col>
+              )}
             </FormGroup>
 
             <FormControl defaultValue={text} className="hidden" />
