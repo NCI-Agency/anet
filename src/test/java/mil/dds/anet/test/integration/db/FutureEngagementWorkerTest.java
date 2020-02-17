@@ -54,6 +54,8 @@ public class FutureEngagementWorkerTest {
     whitelistedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
+    app.getConfiguration().getSmtp().setDisabled(false);
+
     engine = new AnetObjectEngine(app.getConfiguration().getDataSourceFactory().getUrl(),
         app.getApplication());
     futureEngagementWorker = new FutureEngagementWorker(engine.getReportDao());
