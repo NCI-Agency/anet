@@ -1,9 +1,6 @@
 package mil.dds.anet.test.beans;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -70,14 +67,14 @@ public class PersonTest extends BeanTester<Person> {
   public void testAvatarResizingNoAvatar() {
     Person person = new Person();
     person.setAvatar(null);
-    assertNull(person.getAvatar(32));
+    assertThat(person.getAvatar(32)).isNull();
   }
 
   @Test
   public void testAvatarResizingMalformedData() {
     Person person = new Person();
     person.setAvatar("malformedImageData");
-    assertNull(person.getAvatar(32));
+    assertThat(person.getAvatar(32)).isNull();
   }
 
   @Test
@@ -88,16 +85,16 @@ public class PersonTest extends BeanTester<Person> {
     person.setAvatar(defaultAvatarData);
 
     BufferedImage imageBinary = Utils.convert(person.getAvatar());
-    assertNotSame(32, imageBinary.getWidth());
-    assertNotSame(32, imageBinary.getHeight());
+    assertThat(imageBinary.getWidth()).isNotEqualTo(32);
+    assertThat(imageBinary.getHeight()).isNotEqualTo(32);
 
     String resizedAvatar = person.getAvatar(32);
 
-    assertNotNull(resizedAvatar);
+    assertThat(resizedAvatar).isNotNull();
     imageBinary = Utils.convert(resizedAvatar);
 
-    assertEquals(32, imageBinary.getWidth());
-    assertEquals(32, imageBinary.getHeight());
+    assertThat(imageBinary.getWidth()).isEqualTo(32);
+    assertThat(imageBinary.getHeight()).isEqualTo(32);
   }
 
   public static Person getRogerRogwell() {

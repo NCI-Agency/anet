@@ -1,8 +1,6 @@
 package mil.dds.anet.test.integration.emails;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -39,8 +37,8 @@ public class EmailServerTest {
 
   @BeforeEach
   public void setup() throws Exception {
-    assumeTrue(Boolean.parseBoolean(
-        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+    assertThat(Boolean.parseBoolean(
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString())).isTrue();
 
     emailServer = new FakeSmtpServer(smtpConfig);
 
@@ -65,15 +63,15 @@ public class EmailServerTest {
         "Hello there!", null);
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
 
-    assertEquals(1, emails.size());
+    assertThat(emails.size()).isEqualTo(1);
 
     // Test first email
     final EmailResponse email1 = emails.get(0);
-    assertEquals("from@example.com", email1.from.text);
-    assertEquals("to@example.com", email1.to.text);
-    assertNull(email1.cc);
-    assertNull(email1.replyTo);
-    assertEquals("Test subject", email1.subject);
-    assertEquals("Hello there!\n", email1.text); // <--Automatically inserts a new line!
+    assertThat(email1.from.text).isEqualTo("from@example.com");
+    assertThat(email1.to.text).isEqualTo("to@example.com");
+    assertThat(email1.cc).isNull();
+    assertThat(email1.replyTo).isNull();
+    assertThat(email1.subject).isEqualTo("Test subject");
+    assertThat(email1.text).isEqualTo("Hello there!\n"); // <--Automatically inserts a new line!
   }
 }

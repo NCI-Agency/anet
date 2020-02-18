@@ -1,6 +1,6 @@
 package mil.dds.anet.test.integration.emails;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.when;
 
@@ -109,7 +109,7 @@ public class AnetEmailWorkerTest {
 
     // Verify
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
-    assertEquals(1, emails.size());
+    assertThat(emails.size()).isEqualTo(1);
   }
 
   private AnetEmail createTestEmail(int id, List<String> toAddresses, String comment) {
