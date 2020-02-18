@@ -121,16 +121,18 @@ public class UtilsTest {
     final List<String> ignoredDomainNames =
         Arrays.asList("ignored_domain", "*.ignored", "ignored.domain");
 
-      assertThat(Utils.isDomainUserNameIgnored("user@ignored_domain", ignoredDomainNames)).isTrue();
-      assertThat(Utils.isDomainUserNameIgnored("ignored_domain\\user", ignoredDomainNames)).isTrue();
-      assertThat(Utils.isDomainUserNameIgnored("user@test.ignored", ignoredDomainNames)).isTrue();
-      assertThat(Utils.isDomainUserNameIgnored("test.ignored\\user", ignoredDomainNames)).isTrue();
-      assertThat(Utils.isDomainUserNameIgnored("user@test.ignored.not", ignoredDomainNames)).isFalse();
-      assertThat(Utils.isDomainUserNameIgnored("not_ignored_domain\\user", ignoredDomainNames)).isFalse();
-      assertThat(Utils.isDomainUserNameIgnored("ignored_domain", ignoredDomainNames)).isFalse();
-      assertThat(Utils.isDomainUserNameIgnored("user@ignored.domain", ignoredDomainNames)).isTrue();
-      assertThat(Utils.isDomainUserNameIgnored("ignored_domain@user", ignoredDomainNames)).isFalse();
-      assertThat(Utils.isDomainUserNameIgnored("user\\ignored_domain", ignoredDomainNames)).isFalse();
+    assertThat(Utils.isDomainUserNameIgnored("user@ignored_domain", ignoredDomainNames)).isTrue();
+    assertThat(Utils.isDomainUserNameIgnored("ignored_domain\\user", ignoredDomainNames)).isTrue();
+    assertThat(Utils.isDomainUserNameIgnored("user@test.ignored", ignoredDomainNames)).isTrue();
+    assertThat(Utils.isDomainUserNameIgnored("test.ignored\\user", ignoredDomainNames)).isTrue();
+    assertThat(Utils.isDomainUserNameIgnored("user@test.ignored.not", ignoredDomainNames))
+        .isFalse();
+    assertThat(Utils.isDomainUserNameIgnored("not_ignored_domain\\user", ignoredDomainNames))
+        .isFalse();
+    assertThat(Utils.isDomainUserNameIgnored("ignored_domain", ignoredDomainNames)).isFalse();
+    assertThat(Utils.isDomainUserNameIgnored("user@ignored.domain", ignoredDomainNames)).isTrue();
+    assertThat(Utils.isDomainUserNameIgnored("ignored_domain@user", ignoredDomainNames)).isFalse();
+    assertThat(Utils.isDomainUserNameIgnored("user\\ignored_domain", ignoredDomainNames)).isFalse();
   }
 
   @Test

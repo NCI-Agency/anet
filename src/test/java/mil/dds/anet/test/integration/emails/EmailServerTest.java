@@ -38,7 +38,8 @@ public class EmailServerTest {
   @BeforeEach
   public void setup() throws Exception {
     assertThat(Boolean.parseBoolean(
-        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString())).isTrue();
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()))
+            .isTrue();
 
     emailServer = new FakeSmtpServer(smtpConfig);
 

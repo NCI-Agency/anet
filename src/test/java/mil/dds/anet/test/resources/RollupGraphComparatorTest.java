@@ -37,10 +37,14 @@ public class RollupGraphComparatorTest {
     Collections.sort(rollupGraphs,
         new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
-    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("c name");
-    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("b name");
-    assertThat(rollupGraphs.get(2).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("a name");
-    assertThat(rollupGraphs.get(3).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("d name");
+    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("c name");
+    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("b name");
+    assertThat(rollupGraphs.get(2).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("a name");
+    assertThat(rollupGraphs.get(3).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("d name");
   }
 
   @Test
@@ -67,8 +71,10 @@ public class RollupGraphComparatorTest {
     Collections.sort(rollupGraphs,
         new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
-    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("c name");
-    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("a name");
+    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("c name");
+    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("a name");
     assertThat(rollupGraphs.get(2).getOrg()).withFailMessage("incorrect org").isNull();
     assertThat(rollupGraphs.get(3).getOrg()).withFailMessage("incorrect org").isNull();
   }
@@ -92,8 +98,11 @@ public class RollupGraphComparatorTest {
 
     Collections.sort(rollupGraphs, new RollupGraphComparator(new ArrayList<>()));
 
-    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("a name");
-    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("b name");
-    assertThat(rollupGraphs.get(2).getOrg().getShortName()).withFailMessage("incorrect name").isEqualTo("c name");
+    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("a name");
+    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("b name");
+    assertThat(rollupGraphs.get(2).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("c name");
   }
 }
