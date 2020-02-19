@@ -73,6 +73,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     }
   }
 
+  @Override
   public Position getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

@@ -17,6 +17,7 @@ public class PostgresqlTaskSearcher extends AbstractTaskSearcher {
     addFullTextSearch("tasks", query.getText(), query.isSortByPresent());
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

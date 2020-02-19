@@ -18,6 +18,7 @@ public class PostgresqlOrganizationSearcher extends AbstractOrganizationSearcher
     addFullTextSearch("organizations", query.getText(), query.isSortByPresent());
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
       OrganizationSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {

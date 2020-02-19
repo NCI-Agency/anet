@@ -94,7 +94,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         query.getReleasedAtEnd());
 
     if (query.getIncludeEngagementDayOfWeek()) {
-      addIncludeEngagementDayOfWeekQuery(query);
+      addIncludeEngagementDayOfWeekSelect();
     }
 
     if (query.getEngagementDayOfWeek() != null) {
@@ -270,7 +270,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         outerQb);
   }
 
-  protected abstract void addIncludeEngagementDayOfWeekQuery(ReportSearchQuery query);
+  protected abstract void addIncludeEngagementDayOfWeekSelect();
 
   protected abstract void addEngagementDayOfWeekQuery(ReportSearchQuery query);
 
