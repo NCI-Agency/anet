@@ -1,5 +1,7 @@
 package mil.dds.anet.test.integration.utils;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -54,9 +56,9 @@ public class FakeSmtpServer {
     // Not in config
     httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
 
-    // We need the variable whcih depends on whether it is the test environment or not
+    // A system variable is required to run this test
     if (httpPort == null) {
-      throw new Exception("'ANET_SMTP_HTTP_PORT' variable not found in system environment.");
+      fail("'ANET_SMTP_HTTP_PORT' system environment variable not found.");
     }
 
     // Read from test config

@@ -1,6 +1,8 @@
 package mil.dds.anet.test.integration.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
@@ -49,12 +51,15 @@ public class FutureEngagementWorkerTest {
   @BeforeAll
   @SuppressWarnings("unchecked")
   public static void setUpClass() throws Exception {
+    if (app.getConfiguration().getSmtp().isDisabled()) {
+      fail("'ANET_SMTP_DISABLE' system environment variable must have value 'true' to run test.");
+    }
+
     executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
+
     whitelistedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
-
-    app.getConfiguration().getSmtp().setDisabled(false);
 
     engine = new AnetObjectEngine(app.getConfiguration().getDataSourceFactory().getUrl(),
         app.getApplication());
@@ -201,9 +206,7 @@ public class FutureEngagementWorkerTest {
 
   // Email integration
   private static void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
-    if (!executeEmailServerTests) {
-      return;
-    }
+    assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     // We wait until all messages have been (asynchronously) sent
     Thread.sleep(10000);

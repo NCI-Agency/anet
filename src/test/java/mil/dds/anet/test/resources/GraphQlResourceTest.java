@@ -32,7 +32,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
   public void test() {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
-    File testDir = new File("src/test/resources/graphQLTests/");
+    final File testDir = new File(GraphQlResourceTest.class.getResource("/graphQLTests").getFile());
     assertThat(testDir.getAbsolutePath()).isNotNull();
     assertThat(testDir.isDirectory()).isTrue();
 

@@ -43,8 +43,10 @@ public class AnetEmailWorkerTest {
    */
   @BeforeAll
   public static void setUp() throws Exception {
-    assumeTrue(Boolean.parseBoolean(
-        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()));
+    final boolean executeEmailServerTests = Boolean.parseBoolean(
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
+
+    assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     emailDao = mock(EmailDao.class, Mockito.RETURNS_DEEP_STUBS);
 
@@ -95,7 +97,7 @@ public class AnetEmailWorkerTest {
   }
 
   private AnetEmail createTestEmail(int id, List<String> toAddresses, String comment) {
-    final AnetEmail email = mock(AnetEmail.class, Mockito.RETURNS_DEEP_STUBS);
+    final AnetEmail email = mock(AnetEmail.class, Mockito.RETURNS_MOCKS);
     when(email.getId()).thenReturn(id);
     when(email.getToAddresses()).thenReturn(toAddresses);
     when(email.getCreatedAt()).thenReturn(Instant.now());

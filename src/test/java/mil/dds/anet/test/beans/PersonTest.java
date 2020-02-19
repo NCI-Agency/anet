@@ -20,7 +20,8 @@ import org.junit.jupiter.api.Test;
 public class PersonTest extends BeanTester<Person> {
 
   // 200 x 200 avatar
-  private static final String DEFAULT_AVATAR_PATH = "src/test/resources/assets/default_avatar.png";
+  final File DEFAULT_AVATAR =
+      new File(PersonTest.class.getResource("/assets/default_avatar.png").getFile());
 
   public static Person getJackJacksonStub() {
     final Person person = new Person();
@@ -80,7 +81,7 @@ public class PersonTest extends BeanTester<Person> {
   @Test
   public void testAvatarResizing() throws IOException {
     Person person = new Person();
-    byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
+    byte[] fileContent = Files.readAllBytes(DEFAULT_AVATAR.toPath());
     String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
     person.setAvatar(defaultAvatarData);
 

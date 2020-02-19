@@ -1,6 +1,7 @@
 package mil.dds.anet.test.integration.emails;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -37,9 +38,10 @@ public class EmailServerTest {
 
   @BeforeEach
   public void setup() throws Exception {
-    assertThat(Boolean.parseBoolean(
-        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString()))
-            .isTrue();
+    final boolean executeEmailServerTests = Boolean.parseBoolean(
+        AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
+
+    assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     emailServer = new FakeSmtpServer(smtpConfig);
 
