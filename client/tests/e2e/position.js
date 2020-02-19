@@ -1,9 +1,9 @@
-let test = require("../util/test")
+const test = require("../util/test")
 
 test("Move someone in and out of a position", async t => {
   t.plan(11)
 
-  let {
+  const {
     $,
     $$,
     assertElementText,
@@ -17,10 +17,10 @@ test("Move someone in and out of a position", async t => {
 
   await t.context.pageHelpers.clickMyOrgLink()
 
-  let positionName = "EF 2.2 Advisor D"
-  let person = "ERINSON, Erin"
-  let rank = "CIV"
-  let personName = rank + " " + person
+  const positionName = "EF 2.2 Advisor D"
+  const person = "ERINSON, Erin"
+  const rank = "CIV"
+  const personName = rank + " " + person
 
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
     personName,
@@ -28,21 +28,32 @@ test("Move someone in and out of a position", async t => {
   )
   await t.context.driver.sleep(mediumWaitMs) // wait for transition
 
-  let $changeAssignedPositionButton = await $("button.change-assigned-position")
+  const $changeAssignedPositionButton = await $(
+    "button.change-assigned-position"
+  )
   await t.context.driver.wait(
     until.elementIsVisible($changeAssignedPositionButton)
   )
   await $changeAssignedPositionButton.click()
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
-  let $removePersonButton = await $("button.remove-person-from-position")
-  await t.context.driver.wait(until.elementIsVisible($removePersonButton))
+  const $removePersonButton = await $("button.remove-person-from-position")
+  await t.context.driver.wait(
+    until.elementIsVisible($removePersonButton),
+    mediumWaitMs
+  )
   await $removePersonButton.click()
-  await t.context.driver.wait(until.stalenessOf($removePersonButton))
+  await t.context.driver.wait(
+    until.stalenessOf($removePersonButton),
+    mediumWaitMs
+  )
   await t.context.driver.sleep(mediumWaitMs) // wait (a bit longer) for dialog to disappear
 
-  let $notAssignedMsg = await $("p.not-assigned-to-position-message")
-  await t.context.driver.wait(until.elementIsVisible($notAssignedMsg))
+  const $notAssignedMsg = await $("p.not-assigned-to-position-message")
+  await t.context.driver.wait(
+    until.elementIsVisible($notAssignedMsg),
+    mediumWaitMs
+  )
   await assertElementText(
     t,
     $notAssignedMsg,
@@ -51,12 +62,12 @@ test("Move someone in and out of a position", async t => {
 
   await t.context.pageHelpers.clickMyOrgLink()
 
-  let $vacantPositionRows = await $$("#vacantPositions table tbody tr")
+  const $vacantPositionRows = await $$("#vacantPositions table tbody tr")
   let $positionToFillCell
-  for (let $row of $vacantPositionRows) {
-    let [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
-    let billetText = await $billetCell.getText()
-    let advisorText = await $advisorCell.getText()
+  for (const $row of $vacantPositionRows) {
+    const [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
+    const billetText = await $billetCell.getText()
+    const advisorText = await $advisorCell.getText()
 
     if (billetText === positionName && advisorText === "Unfilled") {
       $positionToFillCell = $billetCell
@@ -68,8 +79,11 @@ test("Move someone in and out of a position", async t => {
     t.fail(`Could not find ${positionName} in the vacant positions table.`)
   }
 
-  await t.context.driver.wait(until.elementIsVisible($positionToFillCell))
-  let $positionToFillLink = await $positionToFillCell.findElement(By.css("a"))
+  await t.context.driver.wait(
+    until.elementIsVisible($positionToFillCell),
+    mediumWaitMs
+  )
+  const $positionToFillLink = await $positionToFillCell.findElement(By.css("a"))
   await $positionToFillLink.click()
   let currentPathname = await t.context.getCurrentPathname()
   t.regex(
@@ -89,11 +103,11 @@ test("Move someone in and out of a position", async t => {
     `${positionName} is currently empty.`
   )
 
-  let $changeAssignedPersonButton = await $("button.change-assigned-person")
+  const $changeAssignedPersonButton = await $("button.change-assigned-person")
   await $changeAssignedPersonButton.click()
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
-  let $assignedPerson = await t.context.pageHelpers.chooseAdvancedSelectOption(
+  const $assignedPerson = await t.context.pageHelpers.chooseAdvancedSelectOption(
     "#person",
     person
   )
@@ -102,14 +116,14 @@ test("Move someone in and out of a position", async t => {
     person,
     "Clicking a person advanced single select widget suggestion populates the input field."
   )
-  let $saveButton = await $("button.save-button")
+  const $saveButton = await $("button.save-button")
   await $saveButton.click()
-  await t.context.driver.wait(until.stalenessOf($saveButton))
+  await t.context.driver.wait(until.stalenessOf($saveButton), mediumWaitMs)
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to disappear
 
   await assertElementText(t, await $("h4.assigned-person-name"), personName)
 
-  let $personLink = await $("h4.assigned-person-name a")
+  const $personLink = await $("h4.assigned-person-name a")
   await $personLink.click()
   await t.context.driver.sleep(mediumWaitMs) // wait for transition
   currentPathname = await t.context.getCurrentPathname()
@@ -122,20 +136,20 @@ test("Move someone in and out of a position", async t => {
   await assertElementText(t, await $(".position-name"), positionName)
 
   // The change in position is also visible in the Previous positions
-  let $previousPositionsRows = await $$("#previous-positions table tbody tr")
-  let $lastRow = $previousPositionsRows.pop()
-  let [
+  const $previousPositionsRows = await $$("#previous-positions table tbody tr")
+  const $lastRow = $previousPositionsRows.pop()
+  const [
     /* eslint-disable no-unused-vars */ $positionCell1 /* eslint-enable no-unused-vars */,
     $datesCell1
   ] = await $lastRow.findElements(By.css("td"))
-  let datesCell1Text = await $datesCell1.getText()
+  const datesCell1Text = await $datesCell1.getText()
   t.regex(datesCell1Text, /[0-9a-f\s]+-[\s]?/i, "Last cell has no end date")
-  let $beforeLastRow = $previousPositionsRows.pop()
-  let [
+  const $beforeLastRow = $previousPositionsRows.pop()
+  const [
     /* eslint-disable no-unused-vars */ $positionCell2 /* eslint-enable no-unused-vars */,
     $datesCell2
   ] = await $beforeLastRow.findElements(By.css("td"))
-  let datesCell2Text = await $datesCell2.getText()
+  const datesCell2Text = await $datesCell2.getText()
   t.regex(
     datesCell2Text,
     /[0-9a-f\s]+-[0-9a-f\s]+/i,
@@ -144,12 +158,12 @@ test("Move someone in and out of a position", async t => {
 
   await t.context.pageHelpers.clickMyOrgLink()
 
-  let $supportedPositionsRows = await $$("#supportedPositions table tbody tr")
+  const $supportedPositionsRows = await $$("#supportedPositions table tbody tr")
   let foundCorrectRow = false
-  for (let $row of $supportedPositionsRows) {
-    let [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
-    let billetText = await $billetCell.getText()
-    let advisorText = await $advisorCell.getText()
+  for (const $row of $supportedPositionsRows) {
+    const [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
+    const billetText = await $billetCell.getText()
+    const advisorText = await $advisorCell.getText()
 
     if (billetText === positionName && advisorText === personName) {
       foundCorrectRow = true

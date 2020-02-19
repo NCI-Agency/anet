@@ -1,12 +1,12 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { setPageProps, setPagination, setSearchProps } from "actions"
+import { setPageProps, setSearchProps } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import NotFound from "components/NotFound"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef } from "react"
+import React, { useEffect } from "react"
 import { OverlayTrigger, Tooltip } from "react-bootstrap"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
@@ -24,40 +24,27 @@ const GQL_DELETE_OBJECT_SUBSCRIPTION = gql`
   }
 `
 
-export const mapDispatchToProps = (dispatch, ownProps) => ({
-  showLoading: () => dispatch(showLoading()),
-  hideLoading: () => dispatch(hideLoading()),
-  setPageProps: pageProps => dispatch(setPageProps(pageProps)),
-  setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
-  setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum))
+export const mapPageDispatchersToProps = (dispatch, ownProps) => ({
+  pageDispatchers: {
+    showLoading: () => dispatch(showLoading()),
+    hideLoading: () => dispatch(hideLoading()),
+    setPageProps: pageProps => dispatch(setPageProps(pageProps)),
+    setSearchProps: searchProps => dispatch(setSearchProps(searchProps))
+  }
 })
 
-export const propTypes = {
+export const PageDispatchersPropType = PropTypes.shape({
   showLoading: PropTypes.func.isRequired,
   hideLoading: PropTypes.func.isRequired,
   setPageProps: PropTypes.func.isRequired,
-  setSearchProps: PropTypes.func.isRequired,
-  searchQuery: PropTypes.shape({
-    text: PropTypes.string,
-    filters: PropTypes.any,
-    objectType: PropTypes.string
-  })
-}
+  setSearchProps: PropTypes.func.isRequired
+}).isRequired
 
-export const AnchorLink = function(props) {
-  const { to, children, ...remainingProps } = props
-  return (
-    <Link
-      to={to}
-      smooth
-      duration={500}
-      containerId="main-viewport"
-      {...remainingProps}
-    >
-      {props.children}
-    </Link>
-  )
-}
+export const AnchorLink = ({ to, children }) => (
+  <Link to={to} smooth duration={500} containerId="main-viewport">
+    {children}
+  </Link>
+)
 
 AnchorLink.propTypes = {
   to: PropTypes.string,
@@ -73,37 +60,45 @@ export function jumpToTop() {
   })
 }
 
-export const useBoilerplate = props => {
+export const useBoilerplate = ({
+  loading,
+  pageProps,
+  searchProps,
+  error,
+  modelName,
+  uuid,
+  pageDispatchers: { showLoading, hideLoading, setPageProps, setSearchProps }
+}) => {
   useEffect(
     () => {
-      applyPageProps(props.setPageProps, props.pageProps)
-      applySearchProps(props.setSearchProps, props.searchProps)
+      applyPageProps(setPageProps, pageProps)
+      applySearchProps(setSearchProps, searchProps)
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
   )
   useEffect(
     () => {
-      toggleLoading(props.loading, props.showLoading, props.hideLoading)
+      toggleLoading(loading, showLoading, hideLoading)
       return function cleanup() {
         // Make sure loading indicator is hidden when 'unmounting'
-        toggleLoading(false, props.showLoading, props.hideLoading)
+        toggleLoading(false, showLoading, hideLoading)
       }
     },
-    [props.loading] // eslint-disable-line react-hooks/exhaustive-deps
+    [loading] // eslint-disable-line react-hooks/exhaustive-deps
   )
-  if (props.loading) {
+  if (loading) {
     return { done: true, result: <div className="loader" /> }
   }
-  if (props.error) {
+  if (error) {
     return {
       done: true,
-      result: renderError(props.error, props.modelName, props.uuid)
+      result: renderError(error, modelName, uuid)
     }
   }
   return { done: false }
 }
 
-export const renderError = (error, modelName, uuid) => {
+const renderError = (error, modelName, uuid) => {
   if (error.status === 404) {
     const text = modelName ? `${modelName} #${uuid}` : "Page"
     return <NotFound text={`${text} not found.`} />
@@ -116,32 +111,28 @@ export const renderError = (error, modelName, uuid) => {
   return `${error.message}`
 }
 
-export const toggleLoading = (loading, showLoading, hideLoading) => {
+const toggleLoading = (loading, showLoading, hideLoading) => {
   if (loading) {
-    if (typeof showLoading === "function") {
-      showLoading()
-    }
+    showLoading()
   } else {
-    if (typeof hideLoading === "function") {
-      hideLoading()
-    }
+    hideLoading()
   }
 }
 
-export const applyPageProps = (setPageProps, pageProps) => {
-  if (pageProps && typeof setPageProps === "function") {
+const applyPageProps = (setPageProps, pageProps) => {
+  if (pageProps) {
     setPageProps(Object.assign({}, pageProps))
   }
 }
 
-export const applySearchProps = (setSearchProps, searchProps) => {
-  if (searchProps && typeof setSearchProps === "function") {
+const applySearchProps = (setSearchProps, searchProps) => {
+  if (searchProps) {
     setSearchProps(Object.assign({}, searchProps))
   }
 }
 
 export const getSearchQuery = searchQuery => {
-  let query = {}
+  const query = {}
   if (!_isEmpty(searchQuery.text)) {
     query.text = searchQuery.text
   }
@@ -203,12 +194,4 @@ export const toggleSubscription = (
     isSubscribed ? GQL_DELETE_OBJECT_SUBSCRIPTION : GQL_CREATE_SUBSCRIPTION,
     variables
   ).then(data => refetch())
-}
-
-export const usePrevious = value => {
-  const ref = useRef()
-  useEffect(() => {
-    ref.current = value
-  })
-  return ref.current
 }

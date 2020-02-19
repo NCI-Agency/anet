@@ -1,7 +1,7 @@
 package mil.dds.anet.views;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
@@ -13,8 +13,14 @@ import mil.dds.anet.beans.Note;
 
 public abstract class AbstractAnetBean {
 
+  @GraphQLQuery
+  @GraphQLInputField
   protected String uuid;
+  @GraphQLQuery
+  @GraphQLInputField
   protected Instant createdAt;
+  @GraphQLQuery
+  @GraphQLInputField
   protected Instant updatedAt;
   private List<Note> notes;
   private String batchUuid;
@@ -24,7 +30,6 @@ public abstract class AbstractAnetBean {
     uuid = null;
   }
 
-  @GraphQLQuery(name = "uuid")
   public String getUuid() {
     return uuid;
   }
@@ -33,7 +38,6 @@ public abstract class AbstractAnetBean {
     this.uuid = uuid;
   }
 
-  @GraphQLQuery(name = "createdAt")
   public Instant getCreatedAt() {
     return createdAt;
   }
@@ -42,7 +46,6 @@ public abstract class AbstractAnetBean {
     this.createdAt = createdAt;
   }
 
-  @GraphQLQuery(name = "updatedAt")
   public Instant getUpdatedAt() {
     return updatedAt;
   }
@@ -63,23 +66,21 @@ public abstract class AbstractAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<Note> getNotes() {
     return notes;
   }
 
+  @GraphQLInputField(name = "notes")
   public void setNotes(List<Note> notes) {
     this.notes = notes;
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getBatchUuid() {
     return batchUuid;
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setBatchUuid(String batchUuid) {
     this.batchUuid = batchUuid;
   }

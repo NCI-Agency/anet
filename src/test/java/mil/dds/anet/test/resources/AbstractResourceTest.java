@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.dropwizard.client.JerseyClientBuilder;
@@ -18,10 +19,12 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.test.resources.utils.GraphQlHelper;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.BatchingUtils;
+import mil.dds.anet.utils.DaoUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -58,12 +61,30 @@ public abstract class AbstractResourceTest {
 
   @BeforeClass
   public static void setUp() {
+    if (DaoUtils.isPostgresql()) {
+      // Update full-text index
+      refreshMaterializedViews();
+    }
     client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
     graphQLHelper = new GraphQlHelper(client, RULE.getLocalPort());
     admin = findOrPutPersonInDb(PersonTest.getArthurDmin());
     context = new HashMap<>();
     batchingUtils = new BatchingUtils(AnetObjectEngine.getInstance(), false, false);
     context.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
+  }
+
+  private static void refreshMaterializedViews() {
+    final String[] materializedViews =
+        {"mv_fts_authorizationGroups", "mv_fts_locations", "mv_fts_organizations", "mv_fts_people",
+            "mv_fts_positions", "mv_fts_reports", "mv_fts_tags", "mv_fts_tasks"};
+    final AdminDao adminDao = AnetObjectEngine.getInstance().getAdminDao();
+    for (final String materializedView : materializedViews) {
+      try {
+        adminDao.updateMaterializedView(materializedView);
+      } catch (Throwable e) {
+        fail("Exception in refreshMaterializedViews()", e);
+      }
+    }
   }
 
   @AfterClass
@@ -149,6 +170,10 @@ public abstract class AbstractResourceTest {
 
   public Person getBobBobtown() {
     return findOrPutPersonInDb(PersonTest.getBobBobtown());
+  }
+
+  public Person getAndrewAnderson() {
+    return findOrPutPersonInDb(PersonTest.getAndrewAnderson());
   }
 
   public Organization createOrganizationWithUuid(String uuid) {

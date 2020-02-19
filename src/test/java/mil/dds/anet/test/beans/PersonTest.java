@@ -165,6 +165,23 @@ public class PersonTest extends BeanTester<Person> {
     return p;
   }
 
+  public static Person getAndrewAnderson() {
+    Person p = new Person();
+    p.setName("ANDERSON, Andrew");
+    p.setEmailAddress("hunter+andrew@dds.mil");
+    p.setPhoneNumber("+1-412-7324");
+    p.setRank("CIV");
+    p.setStatus(PersonStatus.ACTIVE);
+    p.setRole(Role.ADVISOR);
+    p.setBiography("Andrew is the EF1 Manager");
+    p.setDomainUsername("andrew");
+    p.setGender("Male");
+    p.setCountry("United States of America");
+    p.setEndOfTourDate(
+        ZonedDateTime.of(2017, 2, 12, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+    return p;
+  }
+
   public static ReportPerson personToPrimaryReportPerson(Person p) {
     ReportPerson rp = personToReportPerson(p);
     rp.setPrimary(true);
@@ -174,7 +191,6 @@ public class PersonTest extends BeanTester<Person> {
   public static ReportPerson personToReportPerson(Person p) {
     ReportPerson rp = new ReportPerson();
     rp.setName(p.getName());
-    rp.setUuid(p.getUuid());
     rp.setUuid(p.getUuid());
     rp.setPhoneNumber(p.getPhoneNumber());
     rp.setEmailAddress(p.getEmailAddress());

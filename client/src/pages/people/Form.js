@@ -2,6 +2,10 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -12,7 +16,7 @@ import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import AvatarEditModal from "components/AvatarEditModal"
-import { Field, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import pluralize from "pluralize"
@@ -43,15 +47,14 @@ const GQL_UPDATE_PERSON = gql`
   }
 `
 
-const BasePersonForm = props => {
-  const {
-    currentUser,
-    edit,
-    title,
-    saveText,
-    initialValues,
-    ...myFormProps
-  } = props
+const BasePersonForm = ({
+  loadAppData,
+  currentUser,
+  edit,
+  title,
+  saveText,
+  initialValues
+}) => {
   const history = useHistory()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -110,9 +113,7 @@ const BasePersonForm = props => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Person.yupSchema}
-      isInitialValid
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
         handleSubmit,
@@ -122,6 +123,7 @@ const BasePersonForm = props => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateForm,
         submitForm
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
@@ -199,9 +201,9 @@ const BasePersonForm = props => {
                   </Col>
                   <Col sm={7}>
                     <Col sm={5}>
-                      <Field
+                      <FastField
                         name="lastName"
-                        component={FieldHelper.renderInputFieldNoLabel}
+                        component={FieldHelper.InputFieldNoLabel}
                         display="inline"
                         placeholder="LAST NAME"
                         disabled={!canEditName}
@@ -212,9 +214,9 @@ const BasePersonForm = props => {
                       ,
                     </Col>
                     <Col sm={6}>
-                      <Field
+                      <FastField
                         name="firstName"
-                        component={FieldHelper.renderInputFieldNoLabel}
+                        component={FieldHelper.InputFieldNoLabel}
                         display="inline"
                         placeholder="First name(s) - Lower-case except for the first letter of each name"
                         disabled={!canEditName}
@@ -302,9 +304,9 @@ const BasePersonForm = props => {
                 </FormGroup>
 
                 {isAdmin && (
-                  <Field
+                  <FastField
                     name="domainUsername"
-                    component={FieldHelper.renderInputField}
+                    component={FieldHelper.InputField}
                     extraColElem={
                       <span className="text-danger">
                         Be careful when changing this field; you might lock
@@ -315,15 +317,15 @@ const BasePersonForm = props => {
                 )}
 
                 {edit ? (
-                  <Field
+                  <FastField
                     name="role"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfRole(values.role)}
                   />
                 ) : (
-                  <Field
+                  <FastField
                     name="role"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={roleButtons}
                     onChange={value => {
                       const roleCountries = getCountries(value)
@@ -345,25 +347,25 @@ const BasePersonForm = props => {
                         contact an ANET administrator.
                       </Alert>
                     )}
-                  </Field>
+                  </FastField>
                 )}
 
                 {disableStatusChange ? (
-                  <Field
+                  <FastField
                     name="status"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
                 ) : isNewUser ? (
-                  <Field
+                  <FastField
                     name="status"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
                 ) : (
                   <Field
                     name="status"
-                    component={FieldHelper.renderButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroup}
                     buttons={statusButtons}
                     onChange={value => setFieldValue("status", value)}
                   >
@@ -392,23 +394,23 @@ const BasePersonForm = props => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <Field
+                <FastField
                   name="emailAddress"
                   label={Settings.fields.person.emailAddress}
                   type="email"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
-                <Field
+                <FastField
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                 />
-                <Field
+                <FastField
                   name="rank"
                   label={Settings.fields.person.rank}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
-                    <Field component="select" className="form-control">
+                    <FastField component="select" className="form-control">
                       <option />
                       {ranks.map(rank => (
                         <option key={rank.value} value={rank.value}>
@@ -416,43 +418,49 @@ const BasePersonForm = props => {
                           {rank.description && ` - ( ${rank.description} )`}
                         </option>
                       ))}
-                    </Field>
+                    </FastField>
                   }
                 />
-                <Field
+                <FastField
                   name="gender"
                   label={Settings.fields.person.gender}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
-                    <Field component="select" className="form-control">
+                    <FastField component="select" className="form-control">
                       <option />
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
-                    </Field>
+                    </FastField>
                   }
                 />
-                <Field
+                <FastField
                   name="country"
                   label={Settings.fields.person.country}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
-                    <Field component="select" className="form-control">
+                    <FastField component="select" className="form-control">
                       <option />
                       {countries.map(country => (
                         <option key={country} value={country}>
                           {country}
                         </option>
                       ))}
-                    </Field>
+                    </FastField>
                   }
                 />
-                <Field
+                <FastField
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.InputField}
+                  disabled={!isAdmin}
+                />
+                <FastField
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   value={values.endOfTourDate}
                   onChange={value => setFieldValue("endOfTourDate", value)}
-                  onBlur={() => setFieldTouched("endOfTourDate", true)}
+                  onBlur={() => setFieldTouched("endOfTourDate")}
                   widget={<CustomDateInput id="endOfTourDate" />}
                 >
                   {isAdvisor && endOfTourDateInPast && (
@@ -460,19 +468,37 @@ const BasePersonForm = props => {
                       Be aware that the end of tour date is in the past.
                     </Alert>
                   )}
-                </Field>
-                <Field
+                </FastField>
+                <FastField
                   name="biography"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   onChange={value => setFieldValue("biography", value)}
                   widget={
                     <RichTextEditor
                       className="biography"
-                      onHandleBlur={() => setFieldTouched("biography", true)}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("biography", true, false)
+                      }}
                     />
                   }
                 />
               </Fieldset>
+
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.person.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
+
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -534,19 +560,15 @@ const BasePersonForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
+    // After successful submit, reset the form in order to make sure the dirty
+    // prop is also reset (otherwise we would get a blocking navigation warning)
+    form.resetForm()
     if (onSaveRedirectToHome) {
-      // After successful submit, reset the form in order to make sure the dirty
-      // prop is also reset (otherwise we would get a blocking navigation warning)
-      form.resetForm()
       localStorage.clear()
       localStorage.newUser = "true"
-      props.loadAppData()
+      loadAppData()
       history.push("/")
     } else {
-      // After successful submit, reset the form in order to make sure the dirty
-      // prop is also reset (otherwise we would get a blocking navigation warning)
-      form.resetForm()
-      const { edit } = props
       const operation = edit ? "updatePerson" : "createPerson"
       const person = new Person({
         uuid: response[operation].uuid
@@ -554,7 +576,7 @@ const BasePersonForm = props => {
           : initialValues.uuid
       })
       if (Person.isEqual(currentUser, values)) {
-        props.loadAppData()
+        loadAppData()
       }
       if (!edit) {
         history.replace(Person.pathForEdit(person))
@@ -571,7 +593,9 @@ const BasePersonForm = props => {
       new Person(values),
       "notes",
       "firstName",
-      "lastName"
+      "lastName",
+      "customFields", // initial JSON from the db
+      "formCustomFields"
     )
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
@@ -580,7 +604,8 @@ const BasePersonForm = props => {
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
-    return API.mutation(props.edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
+    person.customFields = customFieldsJSONString(values)
+    return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person
     })
   }

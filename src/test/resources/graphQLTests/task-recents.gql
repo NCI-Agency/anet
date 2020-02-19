@@ -3,7 +3,7 @@ taskRecents {
     uuid
     shortName
     longName
-    responsibleOrg {
+    taskedOrganizations {
       uuid
       shortName
     }

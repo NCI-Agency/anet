@@ -2,6 +2,7 @@ import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Person, Position } from "models"
 import { fuzzy, identity, populate, runGQL, specialUser } from "../simutils"
+import { getRandomObject } from "./NoteStories"
 
 /**
  * Gets all informative attributes for of a position given its uuid
@@ -155,28 +156,65 @@ function randomPositionTemplate(organizations) {
   }
 }
 
+function getPersonRole(organizationType) {
+  return organizationType === Organization.TYPE.ADVISOR_ORG
+    ? Person.ROLE.ADVISOR
+    : Person.ROLE.PRINCIPAL
+}
+
+function getPositionType(organizationType) {
+  if (organizationType === Organization.TYPE.ADVISOR_ORG) {
+    const rand = Math.random()
+    if (rand < 0.9) {
+      return Position.TYPE.ADVISOR
+    } else if (rand < 0.99) {
+      return Position.TYPE.SUPER_USER
+    } else {
+      return Position.TYPE.ADMINISTRATOR
+    }
+  } else {
+    return Position.TYPE.PRINCIPAL
+  }
+}
+
 /**
  * Create a new position for some random (sub)organization
  *
  * @param {*} user The user that creates the position
  */
 const _createPosition = async function(user) {
-  const organizations = await listOrganizations(user)
   const position = new Position()
-
-  populate(position, randomPositionTemplate(organizations))
-    .name.always()
-    .status.always()
-    .type.always()
-    .organization.always()
-    .code.sometimes()
-
-  if (!position.organization) {
-    console.debug(
-      `Generated position ${position.name.green} without organization: cannot create`
-    )
-    return "(nop)"
+  const organization = await getRandomObject(
+    user,
+    "organizations",
+    {},
+    "uuid type"
+  )
+  const person = await getRandomObject(user, "people", {
+    role: getPersonRole(organization.type)
+  })
+  const location = await getRandomObject(user, "locations")
+  const template = {
+    name: () => faker.name.jobTitle(),
+    code: () => faker.lorem.slug(),
+    type: () => getPositionType(organization.type),
+    status: () =>
+      fuzzy.withProbability(0.9)
+        ? Position.STATUS.ACTIVE
+        : Position.STATUS.INACTIVE,
+    organization,
+    person,
+    location
   }
+
+  populate(position, template)
+    .name.always()
+    .code.sometimes()
+    .type.always()
+    .status.always()
+    .person.always()
+    .organization.always()
+    .location.always()
 
   console.debug(`Creating position ${position.name.green}`)
   return (

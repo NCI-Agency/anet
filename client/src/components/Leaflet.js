@@ -1,6 +1,8 @@
 import { Settings } from "api"
 import autobind from "autobind-decorator"
 import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
+import "leaflet-defaulticon-compatibility"
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
 import {
   EsriProvider,
   GeoSearchControl,
@@ -153,16 +155,16 @@ export default class Leaflet extends Component {
 
   @autobind
   updateMarkerLayer(markersToAdd, markersToRemove) {
-    let markers = markersToAdd || []
+    const markers = markersToAdd || []
     markersToRemove = markersToRemove || []
 
-    let newMarkers = []
-    let markerLayer = this.state.markerLayer
+    const newMarkers = []
+    const markerLayer = this.state.markerLayer
     markers.forEach(m => {
-      let latLng = Location.hasCoordinates(m)
+      const latLng = Location.hasCoordinates(m)
         ? [m.lat, m.lng]
         : this.state.map.getCenter()
-      let marker = new Marker(latLng, {
+      const marker = new Marker(latLng, {
         icon: this.icon,
         draggable: m.draggable || false,
         autoPan: m.autoPan || false,

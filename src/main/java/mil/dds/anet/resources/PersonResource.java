@@ -1,11 +1,13 @@
 package mil.dds.anet.resources;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -188,9 +190,10 @@ public class PersonResource {
 
   @GraphQLQuery(name = "personList")
   public AnetBeanList<Person> search(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLEnvironment Set<String> subFields,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(query);
+    return dao.search(subFields, query);
   }
 
   /**

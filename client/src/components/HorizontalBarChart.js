@@ -8,12 +8,21 @@ import "./BarChart.css"
 /*
  * A bar chart component displaying horizontal bars, grouped per category
  */
-const HorizontalBarChart = props => {
+const HorizontalBarChart = ({
+  width,
+  height,
+  chartId,
+  data,
+  onBarClick,
+  tooltip,
+  selectedBarClass,
+  selectedBar
+}) => {
   /*
    * Example for the data property structure when displaying number of
    * engagements per location, grouped by day:
    *
-   *  props.data = {
+   *  data = {
    *    categoryLabels: {
    *      1540677600000: "28 Oct 2018",
    *      1540767600000: "29 Oct 2018",
@@ -63,16 +72,6 @@ const HorizontalBarChart = props => {
    *    ]
    *  }
    */
-  const {
-    width,
-    height,
-    chartId,
-    data,
-    onBarClick,
-    tooltip,
-    selectedBarClass,
-    selectedBar
-  } = props
   const node = useRef(null)
   useEffect(() => {
     if (!node.current) {
@@ -86,32 +85,32 @@ const HorizontalBarChart = props => {
       left: 0,
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
-    let chartBox = node.current.getBoundingClientRect()
-    let chartWidth = isNumeric(width) ? width : chartBox.width
-    let chartData = data.data
-    let categoryLabels = data.categoryLabels
-    let leavesLabels = data.leavesLabels
+    const chartBox = node.current.getBoundingClientRect()
+    const chartWidth = isNumeric(width) ? width : chartBox.width
+    const chartData = data.data
+    const categoryLabels = data.categoryLabels
+    const leavesLabels = data.leavesLabels
     let chart = d3.select(node.current)
-    let xLabels = [].concat.apply(
+    const xLabels = [].concat.apply(
       [],
       chartData.map(d => d.values.map(d => d.value))
     )
-    let yLabels = Object.values(categoryLabels)
+    const yLabels = Object.values(categoryLabels)
 
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
-    let tmpSVG = d3
+    const tmpSVG = d3
       .select("#tmp_svg")
       .data([1])
       .enter()
       .append("svg")
-    let xLabelWidth = function() {
+    const xLabelWidth = function() {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
       }
     }
-    let yLabelWidth = function(d) {
+    const yLabelWidth = function(d) {
       if (this.getBBox().width > maxYLabelWidth) {
         maxYLabelWidth = this.getBBox().width
       }
@@ -137,12 +136,12 @@ const HorizontalBarChart = props => {
     tmpSVG.remove()
 
     // The left margin depends on the width of the y-axis labels.
-    let marginLeft = maxYLabelWidth + MARGIN.left
+    const marginLeft = maxYLabelWidth + MARGIN.left
     // The bottom margin depends on the width of the x-axis labels.
-    let marginBottom = maxXLabelWidth + MARGIN.bottom
-    let xWidth = chartWidth - marginLeft - MARGIN.right
+    const marginBottom = maxXLabelWidth + MARGIN.bottom
+    const xWidth = chartWidth - marginLeft - MARGIN.right
 
-    let categoryDomain = []
+    const categoryDomain = []
     let cumulative = 0
     chartData.forEach(function(val, i) {
       // per category, how many elements, including the elements of the previous categories
@@ -156,35 +155,35 @@ const HorizontalBarChart = props => {
 
     // We use a dynamic yHeight, depending on how much data we have to display,
     // in order to make sure the chart is readable for lots of data
-    let yHeight = (BAR_HEIGHT + BAR_PADDING) * categoryDomain.length
-    let chartHeight = yHeight + MARGIN.top + marginBottom
+    const yHeight = (BAR_HEIGHT + BAR_PADDING) * categoryDomain.length
+    const chartHeight = yHeight + MARGIN.top + marginBottom
 
-    let yCategoryScale = d3.scaleLinear().range([yHeight, 0])
-    let yScale = d3
+    const yCategoryScale = d3.scaleLinear().range([yHeight, 0])
+    const yScale = d3
       .scaleBand()
       .domain(categoryDomain)
       .rangeRound([yHeight, 0])
       .padding(0.1)
-    let yCategoryDomain = yScale.bandwidth() * categoryDomain.length
+    const yCategoryDomain = yScale.bandwidth() * categoryDomain.length
     yCategoryScale.domain([yCategoryDomain, 0])
 
-    let xMax = d3.max(xLabels)
-    let xScale = d3
+    const xMax = d3.max(xLabels)
+    const xScale = d3
       .scaleLinear()
       .range([0, xWidth])
       .domain([0, xMax])
 
-    let xTicks = Math.min(xMax, 10)
-    let xAxisTop = d3
+    const xTicks = Math.min(xMax, 10)
+    const xAxisTop = d3
       .axisTop()
       .scale(xScale)
       .ticks(xTicks, "d")
-    let xAxis = d3
+    const xAxis = d3
       .axisBottom()
       .scale(xScale)
       .ticks(xTicks, "d")
 
-    let yAxis = d3.axisLeft().scale(yCategoryScale)
+    const yAxis = d3.axisLeft().scale(yCategoryScale)
 
     chart.selectAll("*").remove()
     chart = chart
@@ -209,7 +208,7 @@ const HorizontalBarChart = props => {
       .attr("class", "y axis")
       .call(yAxis)
 
-    let categoryGroup = chart
+    const categoryGroup = chart
       .selectAll(".category")
       .data(chartData)
       .enter()
@@ -232,8 +231,8 @@ const HorizontalBarChart = props => {
       .append("text")
       .attr("class", "category-label")
       .attr("transform", function(d) {
-        let x = -2
-        let y = yCategoryScale(
+        const x = -2
+        const y = yCategoryScale(
           (d.values.length * yScale.bandwidth()) / 2 + BAR_PADDING
         )
         return `translate(${x}, ${y})`
@@ -241,7 +240,7 @@ const HorizontalBarChart = props => {
       .text(d => categoryLabels[d.key])
       .attr("text-anchor", "end")
 
-    let barsGroup = categoryGroup
+    const barsGroup = categoryGroup
       .selectAll(".category-bars-group")
       .data(d => d.values)
       .enter()
@@ -283,8 +282,8 @@ const HorizontalBarChart = props => {
       .append("text")
       .attr("class", "bar-label")
       .attr("transform", function(d) {
-        let x = 3
-        let y = yCategoryScale(yScale.bandwidth() / 2 + BAR_PADDING)
+        const x = 3
+        const y = yCategoryScale(yScale.bandwidth() / 2 + BAR_PADDING)
         return `translate(${x}, ${y})`
       })
       .text(d => leavesLabels[d.key])

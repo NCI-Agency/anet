@@ -1,6 +1,6 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
@@ -17,10 +17,19 @@ public class ApprovalStep extends AbstractAnetBean {
     PLANNING_APPROVAL, REPORT_APPROVAL
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   ApprovalStepType type;
+  // annotated below
   List<Position> approvers;
+  @GraphQLQuery
+  @GraphQLInputField
   String nextStepUuid;
-  String advisorOrganizationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  String relatedObjectUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   String name;
 
   @GraphQLQuery(name = "approvers")
@@ -36,16 +45,15 @@ public class ApprovalStep extends AbstractAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<Position> getApprovers() {
     return approvers;
   }
 
+  @GraphQLInputField(name = "approvers")
   public void setApprovers(List<Position> approvers) {
     this.approvers = approvers;
   }
 
-  @GraphQLQuery(name = "nextStepUuid")
   public String getNextStepUuid() {
     return nextStepUuid;
   }
@@ -54,16 +62,14 @@ public class ApprovalStep extends AbstractAnetBean {
     this.nextStepUuid = nextStepUuid;
   }
 
-  @GraphQLQuery(name = "advisorOrganizationUuid")
-  public String getAdvisorOrganizationUuid() {
-    return advisorOrganizationUuid;
+  public String getRelatedObjectUuid() {
+    return relatedObjectUuid;
   }
 
-  public void setAdvisorOrganizationUuid(String advisorOrganizationUuid) {
-    this.advisorOrganizationUuid = advisorOrganizationUuid;
+  public void setRelatedObjectUuid(String relatedObjectUuid) {
+    this.relatedObjectUuid = relatedObjectUuid;
   }
 
-  @GraphQLQuery(name = "name")
   public String getName() {
     return name;
   }
@@ -72,7 +78,6 @@ public class ApprovalStep extends AbstractAnetBean {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  @GraphQLQuery(name = "type")
   public ApprovalStepType getType() {
     return type;
   }
@@ -89,17 +94,17 @@ public class ApprovalStep extends AbstractAnetBean {
     ApprovalStep as = (ApprovalStep) o;
     return Objects.equals(uuid, as.getUuid()) && Objects.equals(name, as.getName())
         && Objects.equals(nextStepUuid, as.getNextStepUuid()) && Objects.equals(type, as.getType())
-        && Objects.equals(advisorOrganizationUuid, as.getAdvisorOrganizationUuid());
+        && Objects.equals(relatedObjectUuid, as.getRelatedObjectUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, approvers, name, nextStepUuid, advisorOrganizationUuid, type);
+    return Objects.hash(uuid, approvers, name, nextStepUuid, relatedObjectUuid, type);
   }
 
   @Override
   public String toString() {
-    return String.format("%s - %s, aoid: %s, nsid: %s", uuid, name, advisorOrganizationUuid,
+    return String.format("%s - %s, aoid: %s, nsid: %s", uuid, name, relatedObjectUuid,
         nextStepUuid);
   }
 

@@ -1,5 +1,7 @@
 package mil.dds.anet.beans.search;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -7,14 +9,22 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 public class OrganizationSearchQuery
     extends SubscribableObjectSearchQuery<OrganizationSearchSortBy> {
 
+  @GraphQLQuery
+  @GraphQLInputField
   private OrganizationStatus status;
+  @GraphQLQuery
+  @GraphQLInputField
   private OrganizationType type;
 
   // Search for organizations with a specific parent Org.
+  @GraphQLQuery
+  @GraphQLInputField
   private String parentOrgUuid;
   // Include descendants recursively from the specified parent.
   // If true will include all orgs in the tree of the parentOrg
   // Including the parent Org.
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean parentOrgRecursively;
 
   public OrganizationSearchQuery() {

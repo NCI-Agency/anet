@@ -1,7 +1,7 @@
 import autobind from "autobind-decorator"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { Checkbox, FormGroup } from "react-bootstrap"
+import { Checkbox } from "react-bootstrap"
 
 export default class CheckboxSearchFilter extends Component {
   static propTypes = {
@@ -34,11 +34,15 @@ export default class CheckboxSearchFilter extends Component {
     return !this.props.asFormField ? (
       <>{this.props.msg}</>
     ) : (
-      <FormGroup>
-        <Checkbox readOnly checked={this.state.value.value}>
+      <div>
+        <Checkbox
+          id={this.props.queryKey}
+          readOnly
+          checked={this.state.value.value}
+        >
           {this.props.msg}
         </Checkbox>
-      </FormGroup>
+      </div>
     )
   }
 
@@ -50,7 +54,7 @@ export default class CheckboxSearchFilter extends Component {
   @autobind
   updateFilter() {
     if (this.props.asFormField) {
-      let { value } = this.state
+      const { value } = this.state
       value.toQuery = this.toQuery
       this.props.onChange(value)
     }

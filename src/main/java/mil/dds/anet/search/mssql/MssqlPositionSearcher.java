@@ -20,6 +20,7 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
       // Note that summing up independent ranks is not ideal, but it's the best we can do now. See
       // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
       qb.addSelectClause("ISNULL(c_positions.rank, 0)"
+          + " + CASE WHEN positions.code LIKE :likeQuery THEN 1000 ELSE 0 END"
           + (query.getMatchPersonName() ? " + ISNULL(c_people.rank, 0)" : "") + " AS search_rank");
     }
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (positions, (name), :containsQuery) c_positions"
@@ -34,7 +35,7 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     whereRank.append(")");
     qb.addWhereClause(whereRank.toString());
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 

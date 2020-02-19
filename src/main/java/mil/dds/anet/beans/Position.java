@@ -1,7 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
@@ -24,19 +24,32 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
     ACTIVE, INACTIVE
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   String name;
+  @GraphQLQuery
+  @GraphQLInputField
   String code;
+  @GraphQLQuery
+  @GraphQLInputField
   PositionType type;
+  @GraphQLQuery
+  @GraphQLInputField
   PositionStatus status;
   // Lazy Loaded
+  // annotated below
   private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
+  // annotated below
   private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>(); // The Current person.
+  // annotated below
   List<Position> associatedPositions;
+  // annotated below
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
+  // annotated below
   List<PersonPositionHistory> previousPeople;
+  // annotated below
   Boolean isApprover;
 
-  @GraphQLQuery(name = "name")
   public String getName() {
     return name;
   }
@@ -45,7 +58,6 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  @GraphQLQuery(name = "code")
   public String getCode() {
     return code;
   }
@@ -54,7 +66,6 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
     this.code = Utils.trimStringReturnNull(code);
   }
 
-  @GraphQLQuery(name = "type")
   public PositionType getType() {
     return type;
   }
@@ -63,7 +74,6 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
     this.type = type;
   }
 
-  @GraphQLQuery(name = "status")
   public PositionStatus getStatus() {
     return status;
   }
@@ -87,22 +97,20 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setOrganizationUuid(String organizationUuid) {
     this.organization = new ForeignObjectHolder<>(organizationUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getOrganizationUuid() {
     return organization.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "organization")
   public void setOrganization(Organization ao) {
     this.organization = new ForeignObjectHolder<>(ao);
   }
 
-  @GraphQLIgnore
   public Organization getOrganization() {
     return organization.getForeignObject();
   }
@@ -120,22 +128,20 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setPersonUuid(String personUuid) {
     this.person = new ForeignObjectHolder<>(personUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getPersonUuid() {
     return person.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "person")
   public void setPerson(Person p) {
     this.person = new ForeignObjectHolder<>(p);
   }
 
-  @GraphQLIgnore
   public Person getPerson() {
     return person.getForeignObject();
   }
@@ -153,11 +159,11 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
         });
   }
 
-  @GraphQLIgnore
   public List<Position> getAssociatedPositions() {
     return associatedPositions;
   }
 
+  @GraphQLInputField(name = "associatedPositions")
   public void setAssociatedPositions(List<Position> associatedPositions) {
     this.associatedPositions = associatedPositions;
   }
@@ -175,22 +181,20 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setLocationUuid(String locationUuid) {
     this.location = new ForeignObjectHolder<>(locationUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getLocationUuid() {
     return location.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "location")
   public void setLocation(Location location) {
     this.location = new ForeignObjectHolder<>(location);
   }
 
-  @GraphQLIgnore
   public Location getLocation() {
     return location.getForeignObject();
   }
@@ -208,11 +212,11 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
         });
   }
 
-  @GraphQLIgnore
   public List<PersonPositionHistory> getPreviousPeople() {
     return previousPeople;
   }
 
+  @GraphQLInputField(name = "previousPeople")
   public void setPreviousPeople(List<PersonPositionHistory> previousPeople) {
     this.previousPeople = previousPeople;
   }

@@ -8,16 +8,17 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
   AnchorLink,
+  PageDispatchersPropType,
   getSubscriptionIcon,
   jumpToTop,
-  mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   toggleSubscription,
   useBoilerplate
 } from "components/Page"
@@ -132,10 +133,11 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }
+        customFields
       }
       comments {
         uuid
@@ -212,6 +214,7 @@ const GQL_GET_REPORT = gql`
         name
         description
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -262,7 +265,7 @@ const GQL_APPROVE_REPORT = gql`
   }
 `
 
-const BaseReportShow = props => {
+const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const history = useHistory()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -278,7 +281,7 @@ const BaseReportShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -294,6 +297,7 @@ const BaseReportShow = props => {
       text: tag.name
     }))
     data.report.to = ""
+    data.report.formCustomFields = JSON.parse(data.report.customFields)
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })
@@ -309,7 +313,6 @@ const BaseReportShow = props => {
 
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
-  const { currentUser } = props
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAuthor = Person.isEqual(currentUser, report.author)
 
@@ -344,11 +347,15 @@ const BaseReportShow = props => {
   const canEmail = !report.isDraft()
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
+
+  // Get initial task assessments values
+  report = Object.assign(report, report.getTaskAssessments())
+
   return (
     <Formik
       enableReinitialize
       validationSchema={Report.yupSchema}
-      isInitialValid={() => Report.yupSchema.isValidSync(report)}
+      validateOnMount
       initialValues={report}
     >
       {({ isSubmitting, setSubmitting, isValid, setFieldValue, values }) => {
@@ -495,7 +502,7 @@ const BaseReportShow = props => {
                 <Field
                   name="intent"
                   label="Summary"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <div id="intent" className="form-control-static">
                       <p>
@@ -522,7 +529,7 @@ const BaseReportShow = props => {
 
                 <Field
                   name="engagementDate"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.engagementDate &&
                     moment(report.engagementDate).format(
@@ -535,13 +542,13 @@ const BaseReportShow = props => {
                   <Field
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && <LinkTo anetLocation={report.location} />
                   }
@@ -551,7 +558,7 @@ const BaseReportShow = props => {
                   <Field
                     name="cancelledReason"
                     label="Cancelled Reason"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={utils.sentenceCase(report.cancelledReason)}
                   />
                 )}
@@ -560,7 +567,7 @@ const BaseReportShow = props => {
                   <Field
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       <>
                         {utils.sentenceCase(report.atmosphere)}
@@ -575,7 +582,7 @@ const BaseReportShow = props => {
                   <Field
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       report.tags &&
                       report.tags.map((tag, i) => (
@@ -587,21 +594,21 @@ const BaseReportShow = props => {
 
                 <Field
                   name="author"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo person={report.author} />}
                 />
 
                 <Field
                   name="advisorOrg"
                   label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.advisorOrg} />}
                 />
 
                 <Field
                   name="principalOrg"
                   label={Settings.fields.principal.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.principalOrg} />}
                 />
               </Fieldset>
@@ -641,6 +648,45 @@ const BaseReportShow = props => {
                   </Fieldset>
               )}
 
+              {Settings.fields.report.customFields && (
+                <Fieldset title="Engagement information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.report.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
+
+              <Fieldset
+                title="Engagement assessments"
+                id="engagement-assessments"
+              >
+                {values.tasks.map(task => {
+                  if (!task.customFields) {
+                    return null
+                  }
+                  const taskCustomFields = JSON.parse(task.customFields)
+                  if (!taskCustomFields.assessmentDefinition) {
+                    return null
+                  }
+                  const taskAssessmentDefinition = JSON.parse(
+                    taskCustomFields.assessmentDefinition
+                  )
+                  return (
+                    <ReadonlyCustomFields
+                      key={`assessment-${values.uuid}-${task.uuid}`}
+                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      fieldsConfig={taskAssessmentDefinition}
+                      formikProps={{
+                        values
+                      }}
+                    />
+                  )
+                })}
+              </Fieldset>
+
               {report.showWorkflow() && (
                 <ReportFullWorkflow workflow={report.workflow} />
               )}
@@ -677,7 +723,7 @@ const BaseReportShow = props => {
 
               <Fieldset className="report-sub-form" title="Comments">
                 {report.comments.map(comment => {
-                  let createdAt = moment(comment.createdAt)
+                  const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
                       <LinkTo person={comment.author} />,
@@ -699,7 +745,7 @@ const BaseReportShow = props => {
                 <Field
                   name="newComment"
                   label="Add a comment"
-                  component={FieldHelper.renderInputField}
+                  component={FieldHelper.InputField}
                   componentClass="textarea"
                   placeholder="Type a comment here"
                   className="add-new-comment"
@@ -754,7 +800,6 @@ const BaseReportShow = props => {
   )
 
   function renderNoPositionAssignedText() {
-    const { currentUser } = props
     const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
     const supportEmail = Settings.SUPPORT_EMAIL_ADDR
     const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
@@ -819,7 +864,7 @@ const BaseReportShow = props => {
         <Field
           name="approvalComment"
           label="Approval comment"
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           componentClass="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
@@ -857,7 +902,7 @@ const BaseReportShow = props => {
         <Field
           name="requestChangesComment"
           label="Request changes comment"
-          component={FieldHelper.renderInputField}
+          component={FieldHelper.InputField}
           componentClass="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
@@ -882,7 +927,7 @@ const BaseReportShow = props => {
         <Modal.Body>
           <Field
             name="to"
-            component={FieldHelper.renderInputField}
+            component={FieldHelper.InputField}
             validate={email => handleEmailValidation(email)}
             vertical
           >
@@ -898,7 +943,7 @@ const BaseReportShow = props => {
 
           <Field
             name="comment"
-            component={FieldHelper.renderInputField}
+            component={FieldHelper.InputField}
             componentClass="textarea"
             vertical
           />
@@ -1031,7 +1076,7 @@ const BaseReportShow = props => {
 
   function deserializeCallback(message, objectType, filters, text) {
     // We update the Redux state
-    props.setSearchQuery({
+    setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
@@ -1267,16 +1312,16 @@ const BaseReportShow = props => {
 }
 
 BaseReportShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   setSearchQuery: PropTypes.func.isRequired,
   currentUser: PropTypes.instanceOf(Person)
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
   return {
     setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
-    ...pageDispatchToProps
+    ...pageDispatchers
   }
 }
 

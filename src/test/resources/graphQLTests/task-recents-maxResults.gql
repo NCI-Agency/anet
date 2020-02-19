@@ -3,7 +3,7 @@ taskRecents(maxResults:${maxResults}) {
     uuid
     shortName
     longName
-    responsibleOrg {
+    taskedOrganizations {
       uuid
       shortName
     }

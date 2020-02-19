@@ -6,29 +6,37 @@ class CreateAuthorizationGroup extends Page {
   get form() {
     return browser.$("form")
   }
+
   get alertSuccess() {
     return browser.$(".alert-success")
   }
+
   get name() {
     return browser.$("#name")
   }
+
   get description() {
     return browser.$("#description")
   }
+
   get statusActiveButton() {
     return browser.$("#statusActiveButton")
   }
+
   get statusInactiveButton() {
     return browser.$("#statusInactiveButton")
   }
+
   get positionsInput() {
     return browser.$("#positions")
   }
+
   get positionsAdvancedSelectFirstItem() {
     return browser.$(
       "#positions-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
+
   get submitButton() {
     return browser.$("#formBottomSubmit")
   }

@@ -1,11 +1,13 @@
 package mil.dds.anet.database;
 
+import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
@@ -27,12 +29,17 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
 
-  private static String[] fields = {"uuid", "name", "status", "role", "emailAddress", "phoneNumber",
-      "rank", "biography", "country", "gender", "endOfTourDate", "domainUsername",
-      "pendingVerification", "createdAt", "updatedAt", "avatar"};
+  // Must always retrieve these e.g. for ORDER BY
+  public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
+  public static String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
+      "biography", "country", "gender", "endOfTourDate", "domainUsername", "pendingVerification",
+      "avatar", "code", "updatedAt", "customFields"};
+  public static final String[] allFields =
+      ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static String TABLE_NAME = "people";
-  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
-  public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
+  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
+  public static String PERSON_FIELDS_NOAS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -78,16 +85,16 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     StringBuilder sql = new StringBuilder();
     sql.append("/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-        + "gender, country, avatar, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
+        + "gender, country, avatar, code, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
-        + ":gender, :country, :avatar, ");
+        + ":gender, :country, :avatar, :code, ");
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("CAST(:endOfTourDate AS datetime2), ");
     } else {
       sql.append(":endOfTourDate, ");
     }
-    sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
+    sql.append(":biography, :domainUsername, :createdAt, :updatedAt, :customFields);");
     getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -103,10 +110,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, "
         + "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
-        + "\"avatar\" = :avatar,"
+        + "\"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
-        + "\"updatedAt\" = :updatedAt, ");
+        + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, ");
 
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
@@ -126,7 +133,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   @Override
   public AnetBeanList<Person> search(PersonSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(query);
+    return search(null, query);
+  }
+
+  public AnetBeanList<Person> search(Set<String> subFields, PersonSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(subFields,
+        query);
   }
 
   @InTransaction

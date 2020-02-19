@@ -236,7 +236,9 @@ dictionary:
             label: Custom value 1
           CUSTOMVALUE2:
             label: Custom value 2
-      responsibleOrg: Responsible organization
+      taskedOrganizations:
+        label: Tasked organizations
+        placeholder: Search for an organization...
       responsiblePositions:
         label: Responsible positions
         placeholder: Search for a position...

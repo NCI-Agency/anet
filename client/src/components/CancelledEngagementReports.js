@@ -3,7 +3,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { useBoilerplate } from "components/Page"
+import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
@@ -42,14 +42,14 @@ const GQL_GET_REPORT_LIST_BY_REASON = gql`
   }
 `
 
-const ChartByOrg = props => {
-  const {
-    chartId,
-    queryParams,
-    focusedSelection,
-    goToSelection,
-    selectedBarClass
-  } = props
+const ChartByOrg = ({
+  pageDispatchers,
+  chartId,
+  queryParams,
+  focusedSelection,
+  goToSelection,
+  selectedBarClass
+}) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST_BY_ORG, {
     reportQuery
@@ -57,7 +57,7 @@ const ChartByOrg = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const graphData = useMemo(() => {
     if (!data) {
@@ -90,8 +90,8 @@ const ChartByOrg = props => {
         return d
       })
       .sort((a, b) => {
-        let aIndex = pinnedOrgs.indexOf(a.advisorOrg.shortName)
-        let bIndex = pinnedOrgs.indexOf(b.advisorOrg.shortName)
+        const aIndex = pinnedOrgs.indexOf(a.advisorOrg.shortName)
+        const bIndex = pinnedOrgs.indexOf(b.advisorOrg.shortName)
         if (aIndex < 0) {
           return bIndex < 0
             ? a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName)
@@ -134,6 +134,7 @@ const ChartByOrg = props => {
 }
 
 ChartByOrg.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   chartId: PropTypes.string,
   queryParams: PropTypes.object,
   focusedSelection: PropTypes.object,
@@ -141,14 +142,14 @@ ChartByOrg.propTypes = {
   selectedBarClass: PropTypes.string
 }
 
-const ChartByReason = props => {
-  const {
-    chartId,
-    queryParams,
-    focusedSelection,
-    goToSelection,
-    selectedBarClass
-  } = props
+const ChartByReason = ({
+  pageDispatchers,
+  chartId,
+  queryParams,
+  focusedSelection,
+  goToSelection,
+  selectedBarClass
+}) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_REPORT_LIST_BY_REASON,
@@ -159,7 +160,7 @@ const ChartByReason = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const graphData = useMemo(() => {
     if (!data) {
@@ -241,6 +242,7 @@ const ChartByReason = props => {
 }
 
 ChartByReason.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   chartId: PropTypes.string,
   queryParams: PropTypes.object,
   focusedSelection: PropTypes.object,
@@ -248,9 +250,7 @@ ChartByReason.propTypes = {
   selectedBarClass: PropTypes.string
 }
 
-const Collection = props => {
-  const { id, queryParams } = props
-
+const Collection = ({ id, queryParams }) => {
   return (
     <div className="scrollable">
       <ReportCollection
@@ -267,9 +267,7 @@ Collection.propTypes = {
   queryParams: PropTypes.object
 }
 
-const Map = props => {
-  const { queryParams } = props
-
+const Map = ({ queryParams }) => {
   return (
     <div className="non-scrollable">
       <ContainerDimensions>
@@ -295,8 +293,11 @@ Map.propTypes = {
  * Component displaying a chart with reports cancelled since
  * the given date.
  */
-const CancelledEngagementReports = props => {
-  const { queryParams, style } = props
+const CancelledEngagementReports = ({
+  pageDispatchers,
+  queryParams,
+  style
+}) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
 
   const advisorOrgLabel = Settings.fields.advisor.org.name
@@ -358,6 +359,7 @@ const CancelledEngagementReports = props => {
   function renderChartByOrg(id) {
     return (
       <ChartByOrg
+        pageDispatchers={pageDispatchers}
         chartId={chartIdByOrg}
         queryParams={queryParams}
         focusedSelection={focusedSelection}
@@ -370,6 +372,7 @@ const CancelledEngagementReports = props => {
   function renderChartByReason(id) {
     return (
       <ChartByReason
+        pageDispatchers={pageDispatchers}
         chartId={chartIdByReason}
         queryParams={queryParams}
         focusedSelection={focusedSelection}
@@ -445,6 +448,7 @@ const CancelledEngagementReports = props => {
 }
 
 CancelledEngagementReports.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   style: PropTypes.object
 }

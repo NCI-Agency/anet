@@ -32,7 +32,7 @@ public class TestBeans {
     p.setGender("Male");
     p.setCountry("United States of America");
     p.setEndOfTourDate(
-        ZonedDateTime.of(2017, 8, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2036, 8, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
     return p;
   }
 
@@ -47,7 +47,7 @@ public class TestBeans {
 
   public static ApprovalStep getTestApprovalStep(Organization organization) {
     ApprovalStep as = new ApprovalStep();
-    as.setAdvisorOrganizationUuid(organization.getUuid());
+    as.setRelatedObjectUuid(organization.getUuid());
     as.setApprovers(ImmutableList.of());
     as.setType(ApprovalStepType.REPORT_APPROVAL);
     return as;

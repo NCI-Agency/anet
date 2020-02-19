@@ -1,7 +1,7 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import Tag from "components/Tag"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -14,7 +14,6 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Col, Grid, Label, Row } from "react-bootstrap"
-import { connect } from "react-redux"
 import utils from "utils"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -107,14 +106,14 @@ const GQL_GET_REPORT_LIST = gql`
 
 const DEFAULT_PAGESIZE = 10
 
-const ReportSummary = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    paginationKey,
-    pagination,
-    setPagination
-  } = props
+const ReportSummary = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
@@ -140,7 +139,7 @@ const ReportSummary = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     if (setTotalCount) {
@@ -184,6 +183,7 @@ const ReportSummary = props => {
 }
 
 ReportSummary.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
@@ -191,8 +191,8 @@ ReportSummary.propTypes = {
   pagination: PropTypes.object.isRequired
 }
 
-const ReportSummaryRow = props => {
-  const report = new Report(props.report)
+const ReportSummaryRow = ({ report }) => {
+  report = new Report(report)
 
   return (
     <Grid fluid className="report-summary">
@@ -365,8 +365,4 @@ ReportSummaryRow.propTypes = {
   report: PropTypes.object.isRequired
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  pagination: state.pagination
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(ReportSummary)
+export default ReportSummary

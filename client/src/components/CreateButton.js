@@ -15,8 +15,7 @@ const ADMIN_ACTIONS = [
   Models.AuthorizationGroup
 ]
 
-const BaseCreateButton = props => {
-  const { currentUser } = props
+const BaseCreateButton = ({ currentUser }) => {
   const history = useHistory()
 
   const modelClasses = DEFAULT_ACTIONS.concat(
@@ -41,7 +40,7 @@ const BaseCreateButton = props => {
       </DropdownButton>
     )
   } else if (modelClasses.length) {
-    let modelClass = modelClasses[0]
+    const modelClass = modelClasses[0]
     return (
       <Button
         bsStyle="primary"

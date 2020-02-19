@@ -1,5 +1,5 @@
 import { Settings } from "api"
-import Model, { yupDate } from "components/Model"
+import Model, { createYupObjectShape, yupDate } from "components/Model"
 import React from "react"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
@@ -13,7 +13,8 @@ export const {
   customFieldEnum1,
   customFieldEnum2,
   plannedCompletion,
-  projectedCompletion
+  projectedCompletion,
+  responsiblePositions
 } = Settings.fields.task
 
 export default class Task extends Model {
@@ -30,6 +31,16 @@ export default class Task extends Model {
     ACTIVE: "ACTIVE",
     INACTIVE: "INACTIVE"
   }
+
+  static APPROVAL_STEP_TYPE = {
+    PLANNING_APPROVAL: "PLANNING_APPROVAL",
+    REPORT_APPROVAL: "REPORT_APPROVAL"
+  }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createYupObjectShape(
+    Settings.fields.task.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -48,11 +59,11 @@ export default class Task extends Model {
         .string()
         .nullable()
         .default(""),
-      responsibleOrg: yup
-        .object()
+      taskedOrganizations: yup
+        .array()
         .nullable()
-        .default({})
-        .label(Settings.fields.task.responsibleOrg),
+        .default([])
+        .label(Settings.fields.task.taskedOrganizations.label),
       customFieldRef1: yup
         .object()
         .nullable()
@@ -72,7 +83,7 @@ export default class Task extends Model {
         .string()
         .nullable()
         .default("")
-        .label(customField.label),
+        .label(customField && customField.label),
       projectedCompletion: yupDate
         .nullable()
         .default(null)
@@ -89,12 +100,55 @@ export default class Task extends Model {
         .array()
         .nullable()
         .default([])
-        .label(Settings.fields.task.responsiblePositions.label)
+        .label(responsiblePositions && responsiblePositions.label),
+      // FIXME: resolve code duplication in yup schema for approval steps
+      planningApprovalSteps: yup
+        .array()
+        .of(
+          yup.object().shape({
+            name: yup
+              .string()
+              .required("You must provide the step name")
+              .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Task.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
+            approvers: yup
+              .array()
+              .required("You must select at least one approver")
+              .default([])
+          })
+        )
+        .nullable()
+        .default([]),
+      approvalSteps: yup
+        .array()
+        .of(
+          yup.object().shape({
+            name: yup
+              .string()
+              .required("You must provide the step name")
+              .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Task.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
+            approvers: yup
+              .array()
+              .required("You must select at least one approver")
+              .default([])
+          })
+        )
+        .nullable()
+        .default([]),
+      // not actually in the database, the database contains the JSON customFields
+      formCustomFields: Task.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, shortName, longName, responsibleOrg { uuid, shortName }"
+    "uuid, shortName, longName, taskedOrganizations { uuid, shortName }, customFields"
 
   static autocompleteTemplate(task) {
     return <span>{[task.shortName, task.longName].join(" - ")}</span>

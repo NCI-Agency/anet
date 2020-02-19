@@ -1,47 +1,79 @@
 package mil.dds.anet.beans.search;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Task.TaskStatus;
 
 public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSortBy> {
 
-  private String responsibleOrgUuid;
-  private Boolean includeChildrenOrgs;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String taskedOrgUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private RecurseStrategy orgRecurseStrategy;
+  @GraphQLQuery
+  @GraphQLInputField
   private String category;
+  @GraphQLQuery
+  @GraphQLInputField
   private TaskStatus status;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant plannedCompletionEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant plannedCompletionStart;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant projectedCompletionEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant projectedCompletionStart;
+  @GraphQLQuery
+  @GraphQLInputField
   private String projectStatus;
+  @GraphQLQuery
+  @GraphQLInputField
   private String customField;
 
-  // Search for tasks with a specific parent Task.
-  private String customFieldRef1Uuid;
-  // Include descendants recursively from the specified parent.
-  // If true will include all tasks in the tree of the parent Task
-  // Including the parent Task.
+  // Find tasks who (don't) have the customFieldRef1 filled in
+  @GraphQLQuery
+  @GraphQLInputField
+  Boolean hasCustomFieldRef1;
+
+  // Search for tasks with one of the given parent Task(s)
+  @GraphQLQuery
+  @GraphQLInputField
+  private List<String> customFieldRef1Uuid;
+  // Include descendants recursively from the specified parent(s).
+  // If true will include all tasks in the tree of the parent Task(s)
+  // Including the parent Task(s).
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean customFieldRef1Recursively;
 
   public TaskSearchQuery() {
     super(TaskSearchSortBy.NAME);
   }
 
-  public String getResponsibleOrgUuid() {
-    return responsibleOrgUuid;
+  public String getTaskedOrgUuid() {
+    return taskedOrgUuid;
   }
 
-  public void setResponsibleOrgUuid(String responsibleOrgUuid) {
-    this.responsibleOrgUuid = responsibleOrgUuid;
+  public void setTaskedOrgUuid(String taskedOrgUuid) {
+    this.taskedOrgUuid = taskedOrgUuid;
   }
 
-  public boolean getIncludeChildrenOrgs() {
-    return Boolean.TRUE.equals(includeChildrenOrgs);
+  public RecurseStrategy getOrgRecurseStrategy() {
+    return orgRecurseStrategy;
   }
 
-  public void setIncludeChildrenOrgs(Boolean includeChildrenOrgs) {
-    this.includeChildrenOrgs = includeChildrenOrgs;
+  public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
+    this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
   public String getCategory() {
@@ -108,11 +140,19 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.customField = customField;
   }
 
-  public String getCustomFieldRef1Uuid() {
+  public Boolean getHasCustomFieldRef1() {
+    return hasCustomFieldRef1;
+  }
+
+  public void setHasCustomFieldRef1(Boolean hasCustomFieldRef1) {
+    this.hasCustomFieldRef1 = hasCustomFieldRef1;
+  }
+
+  public List<String> getCustomFieldRef1Uuid() {
     return customFieldRef1Uuid;
   }
 
-  public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
+  public void setCustomFieldRef1Uuid(List<String> customFieldRef1Uuid) {
     this.customFieldRef1Uuid = customFieldRef1Uuid;
   }
 
@@ -126,7 +166,7 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), responsibleOrgUuid, includeChildrenOrgs, category, status,
+    return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category, status,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
         customFieldRef1Recursively);
@@ -138,9 +178,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
       return false;
     }
     final TaskSearchQuery other = (TaskSearchQuery) obj;
-    return super.equals(obj)
-        && Objects.equals(getResponsibleOrgUuid(), other.getResponsibleOrgUuid())
-        && Objects.equals(getIncludeChildrenOrgs(), other.getIncludeChildrenOrgs())
+    return super.equals(obj) && Objects.equals(getTaskedOrgUuid(), other.getTaskedOrgUuid())
+        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getCategory(), other.getCategory())
         && Objects.equals(getStatus(), other.getStatus())
         && Objects.equals(getPlannedCompletionEnd(), other.getPlannedCompletionEnd())

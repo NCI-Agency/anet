@@ -29,6 +29,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -44,7 +45,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
   private static final String POSITION_FIELDS = "uuid name code type status";
   private static final String PERSON_FIELDS =
-      "uuid name status role emailAddress phoneNumber rank biography country avatar"
+      "uuid name status role emailAddress phoneNumber rank biography country avatar code"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
   private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
   private static final String DEFAULT_AVATAR_PATH = "src/test/resources/assets/default_avatar.png";
@@ -66,6 +67,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
     newPerson.setGender("Female");
     newPerson.setCountry("Canada");
+    newPerson.setCode("123456");
     newPerson.setEndOfTourDate(
         ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
     String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
@@ -80,6 +82,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     newPerson.setName("testCreatePerson updated name");
     newPerson.setCountry("The Commonwealth of Canada");
+    newPerson.setCode("A123456");
 
     // update avatar
     byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
@@ -96,6 +99,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, newPerson.getUuid(),
         new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
+    assertThat(retPerson.getCode()).isEqualTo(newPerson.getCode());
     assertThat(retPerson.getAvatar()).isNotNull();
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
@@ -208,7 +212,8 @@ public class PersonResourceTest extends AbstractResourceTest {
         .findFirst()).isNotEmpty();
 
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF 1");
+    // FIXME: decide what the search should do in both cases
+    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", "uuid shortName", queryOrgs,
@@ -243,26 +248,20 @@ public class PersonResourceTest extends AbstractResourceTest {
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
 
-    query.setIncludeChildOrgs(true);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList()).containsAll(parentOnlyResults.getList());
 
-    query.setIncludeChildOrgs(true);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
-    query.setText("advisor"); // Search against biographies
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
-    assertThat(searchResults.getList().size()).isGreaterThan(1);
-
     query.setText(null);
     query.setRole(Role.ADVISOR);
     searchResults =

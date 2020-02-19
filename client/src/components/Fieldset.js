@@ -12,7 +12,7 @@ export default class Fieldset extends Component {
   }
 
   render() {
-    let { id, title, action, ...props } = this.props
+    const { id, title, action, ...props } = this.props
 
     return (
       <Element

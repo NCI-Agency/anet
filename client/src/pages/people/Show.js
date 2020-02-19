@@ -4,6 +4,7 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -12,9 +13,9 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import MySubscriptions from "components/MySubscriptions"
 import {
+  PageDispatchersPropType,
   getSubscriptionIcon,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   toggleSubscription,
   useBoilerplate
 } from "components/Page"
@@ -56,6 +57,7 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       avatar(size: 256)
+      code
       position {
         uuid
         name
@@ -90,12 +92,13 @@ const GQL_GET_PERSON = gql`
           name
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
 
-const BasePersonShow = props => {
+const BasePersonShow = ({ pageDispatchers, currentUser }) => {
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
@@ -113,16 +116,17 @@ const BasePersonShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
-
+  if (data) {
+    data.person.formCustomFields = JSON.parse(data.person.customFields)
+  }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
   // The position for this person's counterparts
   const position = person.position
   const assignedRole =
@@ -148,7 +152,7 @@ const BasePersonShow = props => {
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 
   return (
-    <Formik enableReinitialize initialValues={person} {...myFormProps}>
+    <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
         const action = (
           <div>
@@ -220,49 +224,54 @@ const BasePersonShow = props => {
                 <Field
                   name="rank"
                   label={Settings.fields.person.rank}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="role"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Person.humanNameOfRole(values.role)}
                 />
                 {isAdmin && (
                   <Field
                     name="domainUsername"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Person.humanNameOfStatus(values.status)}
                 />
                 <Field
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="emailAddress"
                   label={Settings.fields.person.emailAddress}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={emailHumanValue}
                 />
                 <Field
                   name="country"
                   label={Settings.fields.person.country}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="gender"
                   label={Settings.fields.person.gender}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
                 <Field
                   name="endOfTourDate"
                   label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     person.endOfTourDate &&
                     moment(person.endOfTourDate).format(
@@ -273,7 +282,7 @@ const BasePersonShow = props => {
                 <Field
                   name="biography"
                   className="biography"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <div
                       dangerouslySetInnerHTML={{ __html: person.biography }}
@@ -413,6 +422,17 @@ const BasePersonShow = props => {
                   </Table>
                 )}
               </Fieldset>
+
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.person.customFields}
+                    formikProps={{
+                      values
+                    }}
+                  />
+                </Fieldset>
+              )}
             </Form>
           </div>
         )
@@ -432,7 +452,7 @@ const BasePersonShow = props => {
   }
 
   function renderCounterparts(position) {
-    let assocTitle =
+    const assocTitle =
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
@@ -473,9 +493,8 @@ const BasePersonShow = props => {
   }
 
   function renderPositionBlankSlate(person) {
-    const { currentUser } = props
     // when the person is not in a position, any super user can assign them.
-    let canChangePosition = currentUser.isSuperUser()
+    const canChangePosition = currentUser.isSuperUser()
 
     if (Person.isEqual(currentUser, person)) {
       return (
@@ -518,7 +537,7 @@ const BasePersonShow = props => {
 }
 
 BasePersonShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -528,4 +547,4 @@ const PersonShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(PersonShow)
+export default connect(null, mapPageDispatchersToProps)(PersonShow)

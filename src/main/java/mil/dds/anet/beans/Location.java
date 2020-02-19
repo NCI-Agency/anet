@@ -1,6 +1,6 @@
 package mil.dds.anet.beans;
 
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.utils.Utils;
@@ -9,19 +9,25 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class Location extends AbstractAnetBean implements SubscribableObject {
 
   /** Pseudo uuid to represent 'no location'. */
-  @GraphQLIgnore
   public static final String DUMMY_LOCATION_UUID = "-1";
 
   public static enum LocationStatus {
     ACTIVE, INACTIVE
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   private String name;
+  @GraphQLQuery
+  @GraphQLInputField
   private LocationStatus status;
+  @GraphQLQuery
+  @GraphQLInputField
   private Double lat;
+  @GraphQLQuery
+  @GraphQLInputField
   private Double lng;
 
-  @GraphQLQuery(name = "name")
   public String getName() {
     return name;
   }
@@ -30,7 +36,6 @@ public class Location extends AbstractAnetBean implements SubscribableObject {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  @GraphQLQuery(name = "status")
   public LocationStatus getStatus() {
     return status;
   }
@@ -39,7 +44,6 @@ public class Location extends AbstractAnetBean implements SubscribableObject {
     this.status = status;
   }
 
-  @GraphQLQuery(name = "lat")
   public Double getLat() {
     return lat;
   }
@@ -48,7 +52,6 @@ public class Location extends AbstractAnetBean implements SubscribableObject {
     this.lat = lat;
   }
 
-  @GraphQLQuery(name = "lng")
   public Double getLng() {
     return lng;
   }

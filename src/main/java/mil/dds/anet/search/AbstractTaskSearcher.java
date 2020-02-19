@@ -4,6 +4,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -24,6 +25,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     return qb.buildAndRun(getDbHandle(), query, new TaskMapper());
   }
 
+  @Override
   protected void buildQuery(TaskSearchQuery query) {
     qb.addSelectClause("tasks.*");
     qb.addTotalCount();
@@ -42,8 +44,8 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
     }
 
-    if (query.getResponsibleOrgUuid() != null) {
-      addResponsibleOrgUuidQuery(query);
+    if (query.getTaskedOrgUuid() != null) {
+      addTaskedOrgUuidQuery(query);
     }
 
     qb.addEqualsClause("category", "tasks.category", query.getCategory());
@@ -56,6 +58,14 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         Comparison.AFTER, query.getProjectedCompletionStart(), "projectedCompletionEnd",
         "tasks.\"projectedCompletion\"", Comparison.BEFORE, query.getProjectedCompletionEnd());
     qb.addLikeClause("customField", "tasks.\"customField\"", query.getCustomField());
+
+    if (query.getHasCustomFieldRef1() != null) {
+      if (query.getHasCustomFieldRef1()) {
+        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NOT NULL");
+      } else {
+        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NULL");
+      }
+    }
 
     if (query.getCustomFieldRef1Uuid() != null) {
       addCustomFieldRef1UuidQuery(query);
@@ -71,22 +81,28 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     qb.addBatchClause((AbstractBatchParams<Task, TaskSearchQuery>) query.getBatchParams());
   }
 
-  protected void addResponsibleOrgUuidQuery(TaskSearchQuery query) {
-    if (query.getIncludeChildrenOrgs()) {
-      qb.addRecursiveClause(null, "tasks", "\"organizationUuid\"", "parent_orgs", "organizations",
-          "\"parentOrgUuid\"", "orgUuid", query.getResponsibleOrgUuid());
+  protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
+
+    qb.addFromClause(
+        "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
+
+    if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
+      qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
+          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
+          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
     } else {
-      qb.addEqualsClause("orgUuid", "tasks.\"organizationUuid\"", query.getResponsibleOrgUuid());
+      qb.addEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
+          query.getTaskedOrgUuid());
     }
   }
 
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
     if (query.getCustomFieldRef1Recursively()) {
-      qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks",
-          "organizations", "\"parentOrgUuid\"", "customFieldRef1Uuid",
-          query.getCustomFieldRef1Uuid());
+      qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks", "tasks",
+          "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid(), true);
     } else {
-      qb.addEqualsClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
+      qb.addInListClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
           query.getCustomFieldRef1Uuid());
     }
   }

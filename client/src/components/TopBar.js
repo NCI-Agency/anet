@@ -67,7 +67,7 @@ class BaseTopBar extends Component {
   }
 
   updateBannerVisibility() {
-    let visibilitySetting = parseInt(
+    const visibilitySetting = parseInt(
       this.props.appSettings[GENERAL_BANNER_VISIBILITY],
       10
     )
@@ -99,21 +99,19 @@ class BaseTopBar extends Component {
   }
 
   bannerOptions() {
-    return (
-      {
-        level: this.props.appSettings[GENERAL_BANNER_LEVEL],
-        message: this.props.appSettings[GENERAL_BANNER_TEXT],
-        title: GENERAL_BANNER_TITLE,
-        visible: this.state.bannerVisibility
-      } || {}
-    )
+    return {
+      level: this.props.appSettings[GENERAL_BANNER_LEVEL],
+      message: this.props.appSettings[GENERAL_BANNER_TEXT],
+      title: GENERAL_BANNER_TITLE,
+      visible: this.state.bannerVisibility
+    }
   }
 
   render() {
     const { currentUser, minimalHeader, toggleMenuAction } = this.props
 
     return (
-      <div style={{ flex: "0 0 auto", zIndex: 100 }} ref={this.topbarDiv}>
+      <div style={{ flex: "0 0 auto", zIndex: 1100 }} ref={this.topbarDiv}>
         <div id="topbar">
           <GeneralBanner options={this.bannerOptions()} />
           <SecurityBanner />

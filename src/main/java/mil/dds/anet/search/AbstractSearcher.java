@@ -1,15 +1,23 @@
 package mil.dds.anet.search;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 
 public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>> {
+
+  private static final int MIN_UUID_PREFIX = 4;
 
   @Inject
   private Provider<Handle> handle;
@@ -25,6 +33,52 @@ public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends Abs
   }
 
   protected abstract void buildQuery(T query);
+
+  protected String getTableFields(String tableName, Set<String> allFields,
+      Set<String> minimalFields, Map<String, String> fieldMapping, Set<String> subFields) {
+    final String[] fieldsArray;
+    if (subFields == null) {
+      fieldsArray = Iterables.toArray(allFields, String.class);
+    } else {
+      final Set<String> fields = subFields.stream().map(f -> f.replaceFirst("^list/", ""))
+          .map(f -> fieldMapping.getOrDefault(f, f)).filter(f -> !f.contains("/"))
+          .collect(Collectors.toSet());
+      fields.retainAll(allFields);
+      fields.addAll(minimalFields);
+      fieldsArray = Iterables.toArray(fields, String.class);
+    }
+    return DaoUtils.buildFieldAliases(tableName, fieldsArray, true);
+  }
+
+  protected void addFullTextSearch(String tableName, String text, boolean isSortByPresent) {
+    final List<String> whereClauses = new ArrayList<>();
+    final List<String> selectClauses = new ArrayList<>();
+
+    if (text.trim().length() >= MIN_UUID_PREFIX) {
+      whereClauses
+          .add(String.format("SELECT uuid FROM \"%1$s\" WHERE uuid ILIKE :likeQuery", tableName));
+      selectClauses.add(
+          String.format("CASE WHEN \"%1$s\".uuid ILIKE :likeQuery THEN 1 ELSE 0 END", tableName));
+      qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
+    }
+
+    final String materializedView = String.format("\"mv_fts_%1$s\"", tableName);
+    final String fullTextColumn = String.format("%1$s.full_text", materializedView);
+    final String tsQuery = "websearch_to_tsquery('anet', :fullTextQuery)";
+    whereClauses.add(String.format("SELECT uuid FROM %1$s WHERE %2$s @@ %3$s", materializedView,
+        fullTextColumn, tsQuery));
+    qb.addWhereClause(String.format("\"%1$s\".uuid IN (%2$s)", tableName,
+        Joiner.on(" UNION ").join(whereClauses)));
+    qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));
+
+    if (!isSortByPresent) {
+      selectClauses.add(String.format("ts_rank(%1$s, %2$s)", fullTextColumn, tsQuery));
+      qb.addFromClause(String.format("LEFT JOIN %1$s ON %1$s.uuid = \"%2$s\".uuid",
+          materializedView, tableName));
+      qb.addSelectClause(
+          String.format("(%1$s) AS search_rank", Joiner.on(" + ").join(selectClauses)));
+    }
+  }
 
   protected List<String> getOrderBy(SortOrder sortOrder, String table, String... columns) {
     final List<String> clauses = new ArrayList<>();

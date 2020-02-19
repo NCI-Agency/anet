@@ -6,8 +6,8 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
   AnchorLink,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
@@ -109,7 +109,7 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
-        responsibleOrg {
+        taskedOrganizations {
           uuid
           shortName
         }
@@ -188,7 +188,7 @@ const GQL_GET_REPORT = gql`
   }
 `
 
-const ReportMinimal = props => {
+const ReportMinimal = ({ pageDispatchers }) => {
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -200,7 +200,7 @@ const ReportMinimal = props => {
     uuid,
     pageProps: PAGE_PROPS_MIN_HEAD,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -282,7 +282,7 @@ const ReportMinimal = props => {
                 <Field
                   name="intent"
                   label="Summary"
-                  component={FieldHelper.renderSpecialField}
+                  component={FieldHelper.SpecialField}
                   widget={
                     <div id="intent" className="form-control-static">
                       <p>
@@ -309,7 +309,7 @@ const ReportMinimal = props => {
 
                 <Field
                   name="engagementDate"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.engagementDate &&
                     moment(report.engagementDate).format(
@@ -322,13 +322,13 @@ const ReportMinimal = props => {
                   <Field
                     name="duration"
                     label="Duration (minutes)"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                   />
                 )}
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && <LinkTo anetLocation={report.location} />
                   }
@@ -338,7 +338,7 @@ const ReportMinimal = props => {
                   <Field
                     name="cancelledReason"
                     label="Cancelled Reason"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={utils.sentenceCase(report.cancelledReason)}
                   />
                 )}
@@ -347,7 +347,7 @@ const ReportMinimal = props => {
                   <Field
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       <>
                         {utils.sentenceCase(report.atmosphere)}
@@ -362,7 +362,7 @@ const ReportMinimal = props => {
                   <Field
                     name="reportTags"
                     label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       report.tags &&
                       report.tags.map((tag, i) => (
@@ -374,21 +374,21 @@ const ReportMinimal = props => {
 
                 <Field
                   name="author"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo person={report.author} />}
                 />
 
                 <Field
                   name="advisorOrg"
                   label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.advisorOrg} />}
                 />
 
                 <Field
                   name="principalOrg"
                   label={Settings.fields.principal.org.name}
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={<LinkTo organization={report.principalOrg} />}
                 />
               </Fieldset>
@@ -426,7 +426,7 @@ const ReportMinimal = props => {
 
               <Fieldset className="report-sub-form" title="Comments">
                 {report.comments.map(comment => {
-                  let createdAt = moment(comment.createdAt)
+                  const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
                       <LinkTo person={comment.author} />,
@@ -501,7 +501,7 @@ const ReportMinimal = props => {
 }
 
 ReportMinimal.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(ReportMinimal)
+export default connect(null, mapPageDispatchersToProps)(ReportMinimal)

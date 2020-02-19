@@ -83,7 +83,7 @@ report(uuid:"${reportUuid}") {
     uuid
     shortName
     longName
-    responsibleOrg {
+    taskedOrganizations {
       uuid
       shortName
     }

@@ -23,7 +23,7 @@ class AvatarEditModal extends Component {
   }
 
   save = () => {
-    let updatedAvatar = this.state.currentPreview.substring(
+    const updatedAvatar = this.state.currentPreview.substring(
       "data:image/jpeg;base64,".length - 1
     )
     this.props.onAvatarUpdate(updatedAvatar)
