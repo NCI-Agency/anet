@@ -100,10 +100,22 @@ const AdvancedSearch = ({
         <div className="advanced-search form-horizontal">
           <Form onSubmit={onSubmit}>
             <FormGroup>
-              <Col xs={11}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  padding: "10px"
+                }}
+              >
                 <ButtonToggleGroup
                   value={objectType}
                   onChange={changeObjectType}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flexWrap: "nowrap"
+                  }}
                 >
                   {possibleFilterTypes.map(type => (
                     <Button
@@ -115,20 +127,20 @@ const AdvancedSearch = ({
                     </Button>
                   ))}
                 </ButtonToggleGroup>
-              </Col>
-              <Col xs={1}>
+
                 <Button
                   bsStyle="link"
                   onClick={clearObjectType}
-                  style={
-                    possibleFilterTypes.length > 1 && objectType
-                      ? {}
-                      : { visibility: "hidden" }
-                  }
+                  style={{
+                    visibility:
+                      possibleFilterTypes.length > 1 && objectType
+                        ? "visible"
+                        : "hidden"
+                  }}
                 >
                   <img src={REMOVE_ICON} height={14} alt="Clear type" />
                 </Button>
-              </Col>
+              </div>
             </FormGroup>
 
             <FormControl defaultValue={text} className="hidden" />
