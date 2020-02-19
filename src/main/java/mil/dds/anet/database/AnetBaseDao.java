@@ -18,22 +18,26 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
   private Provider<Handle> handle;
 
   @InTransaction
+  @Override
   public T insert(T obj) {
     DaoUtils.setInsertFields(obj);
     return insertInternal(obj);
   }
 
   @InTransaction
+  @Override
   public int update(T obj) {
     DaoUtils.setUpdateFields(obj);
     return updateInternal(obj);
   }
 
   @InTransaction
+  @Override
   public int delete(String uuid) {
     return deleteInternal(uuid);
   }
 
+  @Override
   public int deleteInternal(String uuid) {
     throw new UnsupportedOperationException();
   }

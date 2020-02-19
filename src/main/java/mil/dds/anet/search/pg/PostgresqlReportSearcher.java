@@ -26,6 +26,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
     return qb.buildAndRun(getDbHandle(), query, new ReportMapper());
   }
 
+  @Override
   protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
     qb.addSelectClause(getTableFields(subFields));
     qb.addTotalCount();
@@ -44,7 +45,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
-  protected void addIncludeEngagementDayOfWeekQuery(ReportSearchQuery query) {
+  protected void addIncludeEngagementDayOfWeekSelect() {
     qb.addSelectClause(String.format(this.isoDowFormat, "reports.\"engagementDate\"")
         + " AS \"engagementDayOfWeek\"");
   }

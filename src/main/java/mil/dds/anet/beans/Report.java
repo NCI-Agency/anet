@@ -568,6 +568,7 @@ public class Report extends AbstractCustomizableAnetBean {
       final Optional<ReportAction> existing =
           actions.stream().filter(a -> Objects.equals(DaoUtils.getUuid(step), a.getStepUuid()))
               .max(new Comparator<ReportAction>() {
+                @Override
                 public int compare(ReportAction a, ReportAction b) {
                   return a.getCreatedAt().compareTo(b.getCreatedAt());
                 }

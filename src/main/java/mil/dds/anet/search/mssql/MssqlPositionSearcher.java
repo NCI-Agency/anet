@@ -39,6 +39,7 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
