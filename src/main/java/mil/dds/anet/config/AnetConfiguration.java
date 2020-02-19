@@ -130,7 +130,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   }
 
   public Map<String, Object> getDictionary() {
-    return dictionary;
+    return new HashMap<>(dictionary);
   }
 
   public void setDictionary(Map<String, Object> dictionary) {
