@@ -7,10 +7,10 @@ import Model, {
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
+import React from "react"
 import REPORTS_ICON from "resources/reports.png"
 import utils from "utils"
 import * as yup from "yup"
-import React from "react"
 
 export default class Report extends Model {
   static resourceName = "Report"

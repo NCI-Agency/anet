@@ -4,18 +4,18 @@ import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
+import _get from "lodash/get"
 import { Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import _get from "lodash/get"
 
 const GQL_GET_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {

@@ -6,6 +6,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -21,7 +22,6 @@ import {
   Table
 } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
   mutation($uuid: String!) {

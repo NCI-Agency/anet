@@ -7,13 +7,13 @@ import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import RemoveButton from "components/RemoveButton"
+import RECURSE_STRATEGY from "components/SearchFilters"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
-import RECURSE_STRATEGY from "components/SearchFilters"
 
 const GQL_UPDATE_ASSOCIATED_POSITION = gql`
   mutation($position: PositionInput!) {
