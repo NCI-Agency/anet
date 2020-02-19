@@ -111,7 +111,7 @@ public class OrganizationResource {
 
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
-    final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(context, org, existing) : 1;
+    final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(org, existing) : 1;
     doSuperUserUpdates(org, existing);
     AnetAuditLogger.log("Organization {} updated by {}", org, user);
 
@@ -119,7 +119,7 @@ public class OrganizationResource {
     return numRows;
   }
 
-  private int doAdminUpdates(Map<String, Object> context, Organization org, Organization existing) {
+  private int doAdminUpdates(Organization org, Organization existing) {
     final int numRows;
     try {
       numRows = dao.update(org);

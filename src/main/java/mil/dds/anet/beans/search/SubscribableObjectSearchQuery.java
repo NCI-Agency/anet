@@ -1,13 +1,16 @@
 package mil.dds.anet.beans.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.beans.Person;
 
 public abstract class SubscribableObjectSearchQuery<T extends ISortBy>
     extends AbstractSearchQuery<T> {
 
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean subscribed;
   // internal search parameter:
   private Person user;
@@ -25,13 +28,11 @@ public abstract class SubscribableObjectSearchQuery<T extends ISortBy>
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public Person getUser() {
     return user;
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setUser(Person user) {
     this.user = user;
   }

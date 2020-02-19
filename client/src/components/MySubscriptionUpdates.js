@@ -3,8 +3,9 @@ import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
+  PageDispatchersPropType,
   getSubscriptionIcon,
-  mapDispatchToProps,
+  mapPageDispatchersToProps,
   toggleSubscription,
   useBoilerplate
 } from "components/Page"
@@ -87,7 +88,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
   }
 `
 
-const BaseMySubscriptionUpdates = props => {
+const BaseMySubscriptionUpdates = ({ pageDispatchers }) => {
   const [pageNum, setPageNum] = useState(0)
   const subscriptionUpdatesQuery = {
     pageNum: pageNum,
@@ -102,7 +103,7 @@ const BaseMySubscriptionUpdates = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -234,7 +235,11 @@ const BaseMySubscriptionUpdates = props => {
   )
 }
 
+BaseMySubscriptionUpdates.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
+
 export default connect(
   null,
-  mapDispatchToProps
+  mapPageDispatchersToProps
 )(BaseMySubscriptionUpdates)

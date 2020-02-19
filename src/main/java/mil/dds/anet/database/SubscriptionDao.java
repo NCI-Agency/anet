@@ -30,6 +30,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
 
   public static final String TABLE_NAME = "subscriptions";
 
+  @Override
   public Subscription getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

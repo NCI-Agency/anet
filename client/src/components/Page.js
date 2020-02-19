@@ -4,7 +4,6 @@ import { setPageProps, setSearchProps } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import NotFound from "components/NotFound"
-import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect } from "react"
 import { OverlayTrigger, Tooltip } from "react-bootstrap"
@@ -129,29 +128,6 @@ const applySearchProps = (setSearchProps, searchProps) => {
   if (searchProps) {
     setSearchProps(Object.assign({}, searchProps))
   }
-}
-
-export const getSearchQuery = searchQuery => {
-  const query = {}
-  if (!_isEmpty(searchQuery.text)) {
-    query.text = searchQuery.text
-  }
-  if (searchQuery.filters) {
-    searchQuery.filters.forEach(filter => {
-      if (filter.value) {
-        if (filter.value.toQuery) {
-          const toQuery =
-            typeof filter.value.toQuery === "function"
-              ? filter.value.toQuery()
-              : filter.value.toQuery
-          Object.assign(query, toQuery)
-        } else {
-          query[filter.key] = filter.value
-        }
-      }
-    })
-  }
-  return query
 }
 
 export const getSubscriptionIcon = (isSubscribed, onClick) => {

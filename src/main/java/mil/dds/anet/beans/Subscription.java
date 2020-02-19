@@ -1,7 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
@@ -13,9 +13,15 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Subscription extends AbstractAnetBean {
 
+  // annotated below
   private ForeignObjectHolder<Position> subscriber = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   private String subscribedObjectType;
+  @GraphQLQuery
+  @GraphQLInputField
   private String subscribedObjectUuid;
+  // annotated below
   private SubscribableObject subscribedObject;
 
   @GraphQLQuery(name = "subscriber")
@@ -32,22 +38,20 @@ public class Subscription extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setSubscriberUuid(String subscriberUuid) {
     this.subscriber = new ForeignObjectHolder<>(subscriberUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getSubscriberUuid() {
     return subscriber.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "subscriber")
   public void setSubscriber(Position subscriber) {
     this.subscriber = new ForeignObjectHolder<>(subscriber);
   }
 
-  @GraphQLIgnore
   public Position getSubscriber() {
     return subscriber.getForeignObject();
   }

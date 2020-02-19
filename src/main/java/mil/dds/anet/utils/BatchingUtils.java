@@ -286,7 +286,7 @@ public final class BatchingUtils {
                 .getReportSensitiveInformation(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register("subscriptions",
+    dataLoaderRegistry.register(IdDataLoaderKey.SUBSCRIPTIONS.toString(),
         new DataLoader<>(new BatchLoader<String, Subscription>() {
           @Override
           public CompletionStage<List<Subscription>> load(List<String> keys) {
