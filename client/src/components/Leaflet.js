@@ -1,6 +1,8 @@
 import { Settings } from "api"
 import autobind from "autobind-decorator"
 import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
+import "leaflet-defaulticon-compatibility"
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
 import {
   EsriProvider,
   GeoSearchControl,
