@@ -44,6 +44,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  @Override
   public Person getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

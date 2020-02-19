@@ -62,18 +62,22 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
 
         final Person user = person;
         ctx.setSecurityContext(new SecurityContext() {
+          @Override
           public Principal getUserPrincipal() {
             return user;
           }
 
+          @Override
           public boolean isUserInRole(String role) {
             return authorize(user, role);
           }
 
+          @Override
           public boolean isSecure() {
             return secContext.isSecure();
           }
 
+          @Override
           public String getAuthenticationScheme() {
             return secContext.getAuthenticationScheme();
           }
