@@ -30,6 +30,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   public static final String TABLE_NAME = "tasks";
 
+  @Override
   public Task getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
@@ -150,11 +151,6 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
         .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
-  }
-
-  @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
   }
 
   @InTransaction

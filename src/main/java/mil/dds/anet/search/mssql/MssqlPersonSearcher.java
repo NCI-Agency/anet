@@ -48,6 +48,7 @@ public class MssqlPersonSearcher extends AbstractPersonSearcher {
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

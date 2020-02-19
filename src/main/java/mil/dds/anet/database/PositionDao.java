@@ -73,6 +73,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
   }
 
+  @Override
   public Position getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

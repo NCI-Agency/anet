@@ -25,6 +25,7 @@ public abstract class AbstractOrganizationSearcher extends
     return qb.buildAndRun(getDbHandle(), query, new OrganizationMapper());
   }
 
+  @Override
   protected void buildQuery(OrganizationSearchQuery query) {
     qb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
     qb.addTotalCount();

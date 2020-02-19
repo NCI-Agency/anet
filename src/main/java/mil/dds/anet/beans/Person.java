@@ -77,6 +77,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, S
     this.pendingVerification = false; // Defaults
   }
 
+  @Override
   public String getName() {
     return name;
   }

@@ -15,6 +15,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
 
   public static final String TABLE_NAME = "locations";
 
+  @Override
   public Location getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
@@ -52,11 +53,6 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
         + "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
         .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
-  }
-
-  @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
   }
 
   @InTransaction

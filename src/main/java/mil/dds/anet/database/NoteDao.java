@@ -22,6 +22,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "notes";
 
+  @Override
   public Note getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

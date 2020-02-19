@@ -179,13 +179,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     void insertReportTags(@Bind("reportUuid") String reportUuid, @BindBean List<Tag> tags);
   }
 
-  public Report getByUuid(String uuid) {
-    // Return the report without sensitive information
-    return getByUuid(uuid, null);
-  }
-
   @InTransaction
-  public Report getByUuid(String uuid, Person user) {
+  @Override
+  public Report getByUuid(String uuid) {
     /* Check whether uuid is purely numerical, and if so, query on legacyId */
     final String queryDescriptor;
     final String keyField;
