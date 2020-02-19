@@ -17,6 +17,7 @@ public class PostgresqlTagSearcher extends AbstractTagSearcher {
     addFullTextSearch("tags", query.getText(), query.isSortByPresent());
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TagSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
