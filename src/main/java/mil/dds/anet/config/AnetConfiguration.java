@@ -130,11 +130,11 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   }
 
   public Map<String, Object> getDictionary() {
-    return new HashMap<>(dictionary);
+    return dictionary;
   }
 
   public void setDictionary(Map<String, Object> dictionary) {
-    this.dictionary = dictionary;
+    this.dictionary = Collections.unmodifiableMap(dictionary);
   }
 
   @SuppressWarnings("unchecked")
