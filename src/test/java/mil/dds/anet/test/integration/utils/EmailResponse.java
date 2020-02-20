@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationtest.utils;
+package mil.dds.anet.test.integration.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;

@@ -1,7 +1,6 @@
 package mil.dds.anet.test.emails;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -102,17 +101,17 @@ public class AccountDeactivationWorkerTest {
         captor.capture());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(3, emails.size());
+    assertThat(emails.size()).isEqualTo(3);
 
-    assertTrue(
+    assertThat(
         emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-            && e.getToAddresses().contains("test15@test.com")));
-    assertTrue(
+            && e.getToAddresses().contains("test15@test.com"))).isTrue();
+    assertThat(
         emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-            && e.getToAddresses().contains("test30@test.com")));
-    assertTrue(
+            && e.getToAddresses().contains("test30@test.com"))).isTrue();
+    assertThat(
         emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-            && e.getToAddresses().contains("test45@test.com")));
+            && e.getToAddresses().contains("test45@test.com"))).isTrue();
   }
 
   @Test
@@ -139,10 +138,10 @@ public class AccountDeactivationWorkerTest {
         captor.capture());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertEquals(1, emails.size());
+    assertThat(emails.size()).isEqualTo(1);
 
-    assertTrue(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
-        && e.getToAddresses().contains("test1_eot_acive@test.com")));
+    assertThat(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
+        && e.getToAddresses().contains("test1_eot_acive@test.com"))).isTrue();
   }
 
   private Person createDummyPerson(final Instant endOfTour, final String email,

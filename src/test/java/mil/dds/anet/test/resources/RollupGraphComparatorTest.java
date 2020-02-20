@@ -1,7 +1,6 @@
 package mil.dds.anet.test.resources;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +9,7 @@ import java.util.List;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.resources.ReportResource.RollupGraphComparator;
 import mil.dds.anet.test.TestData;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RollupGraphComparatorTest {
 
@@ -38,11 +37,14 @@ public class RollupGraphComparatorTest {
     Collections.sort(rollupGraphs,
         new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
-    assertEquals("incorrect name", "c name", rollupGraphs.get(0).getOrg().getShortName());
-    assertEquals("incorrect name", "b name", rollupGraphs.get(1).getOrg().getShortName());
-    assertEquals("incorrect name", "a name", rollupGraphs.get(2).getOrg().getShortName());
-    assertEquals("incorrect name", "d name", rollupGraphs.get(3).getOrg().getShortName());
-
+    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("c name");
+    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("b name");
+    assertThat(rollupGraphs.get(2).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("a name");
+    assertThat(rollupGraphs.get(3).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("d name");
   }
 
   @Test
@@ -69,11 +71,12 @@ public class RollupGraphComparatorTest {
     Collections.sort(rollupGraphs,
         new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
-    assertEquals("incorrect name", "c name", rollupGraphs.get(0).getOrg().getShortName());
-    assertEquals("incorrect name", "a name", rollupGraphs.get(1).getOrg().getShortName());
-    assertNull("incorrect org", rollupGraphs.get(2).getOrg());
-    assertNull("incorrect org", rollupGraphs.get(3).getOrg());
-
+    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("c name");
+    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("a name");
+    assertThat(rollupGraphs.get(2).getOrg()).withFailMessage("incorrect org").isNull();
+    assertThat(rollupGraphs.get(3).getOrg()).withFailMessage("incorrect org").isNull();
   }
 
   @Test
@@ -95,9 +98,11 @@ public class RollupGraphComparatorTest {
 
     Collections.sort(rollupGraphs, new RollupGraphComparator(new ArrayList<>()));
 
-    assertEquals("incorrect name", "a name", rollupGraphs.get(0).getOrg().getShortName());
-    assertEquals("incorrect name", "b name", rollupGraphs.get(1).getOrg().getShortName());
-    assertEquals("incorrect name", "c name", rollupGraphs.get(2).getOrg().getShortName());
-
+    assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("a name");
+    assertThat(rollupGraphs.get(1).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("b name");
+    assertThat(rollupGraphs.get(2).getOrg().getShortName()).withFailMessage("incorrect name")
+        .isEqualTo("c name");
   }
 }

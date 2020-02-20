@@ -16,6 +16,7 @@ public class CommentDao extends AnetBaseDao<Comment, AbstractSearchQuery<?>> {
   public static String TABLE_NAME = "comments";
   public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
+  @Override
   public Comment getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

@@ -1,4 +1,6 @@
-package mil.dds.anet.integrationtest.utils;
+package mil.dds.anet.test.integration.utils;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -24,7 +26,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
-import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
+import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 
@@ -60,6 +62,10 @@ public class FakeSmtpServer {
     httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
 
     serverQuery = String.format("http://%s:%s/api/emails", httpIP, httpPort);
+    // A system variable is required to run this test
+    if (httpPort == null) {
+      fail("'ANET_SMTP_HTTP_PORT' system environment variable not found.");
+    }
 
     // Read from test config
     waitBeforeActionMs = Integer
@@ -106,7 +112,7 @@ public class FakeSmtpServer {
    * @throws Exception If the request or wait timer fails
    */
   public void clearEmailServer() throws Exception {
-    TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);    
+    TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
 
     sendServerRequest(serverQuery, "DELETE");
 

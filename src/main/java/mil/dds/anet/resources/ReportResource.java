@@ -101,9 +101,8 @@ public class ReportResource {
   }
 
   @GraphQLQuery(name = "report")
-  public Report getByUuid(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "uuid") String uuid) {
-    final Report r = dao.getByUuid(uuid, DaoUtils.getUserFromContext(context));
+  public Report getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
+    final Report r = dao.getByUuid(uuid);
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -189,7 +188,7 @@ public class ReportResource {
   private Report executeReportUpdates(Person editor, Report r) {
     // Verify this person has access to edit this report
     // Either they are the author, or an approver for the current step.
-    final Report existing = dao.getByUuid(r.getUuid(), editor);
+    final Report existing = dao.getByUuid(r.getUuid());
     if (existing == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -366,7 +365,7 @@ public class ReportResource {
   public Report submitReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = dao.getByUuid(uuid, user);
+    final Report r = dao.getByUuid(uuid);
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -451,7 +450,7 @@ public class ReportResource {
       @GraphQLArgument(name = "comment") Comment comment) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, comment);
-    final Report r = dao.getByUuid(reportComment.uuid, approver);
+    final Report r = dao.getByUuid(reportComment.uuid);
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -500,7 +499,7 @@ public class ReportResource {
       @GraphQLArgument(name = "comment") Comment reason) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, reason);
-    final Report r = dao.getByUuid(reportComment.uuid, approver);
+    final Report r = dao.getByUuid(reportComment.uuid);
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -576,7 +575,7 @@ public class ReportResource {
   public Report publishReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = dao.getByUuid(uuid, user);
+    final Report r = dao.getByUuid(uuid);
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -610,7 +609,7 @@ public class ReportResource {
     if (comment == null) {
       throw new WebApplicationException("Couldn't process adding new comment");
     }
-    final Report r = dao.getByUuid(reportUuid, author);
+    final Report r = dao.getByUuid(reportUuid);
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -634,7 +633,7 @@ public class ReportResource {
       @GraphQLArgument(name = "uuid") String reportUuid,
       @GraphQLArgument(name = "email") AnetEmail email) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = dao.getByUuid(reportUuid, user);
+    final Report r = dao.getByUuid(reportUuid);
     if (r == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -653,7 +652,7 @@ public class ReportResource {
   public Integer deleteReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String reportUuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report report = dao.getByUuid(reportUuid, user);
+    final Report report = dao.getByUuid(reportUuid);
     if (report == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
@@ -735,8 +734,8 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "emailRollup")
-  public Integer emailRollup(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "startDate") Long start, @GraphQLArgument(name = "endDate") Long end,
+  public Integer emailRollup(@GraphQLArgument(name = "startDate") Long start,
+      @GraphQLArgument(name = "endDate") Long end,
       @GraphQLArgument(name = "orgType") OrganizationType orgType,
       @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
       @GraphQLArgument(name = "principalOrganizationUuid") String principalOrgUuid,

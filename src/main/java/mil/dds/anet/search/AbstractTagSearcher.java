@@ -21,6 +21,7 @@ public abstract class AbstractTagSearcher extends AbstractSearcher<Tag, TagSearc
     return qb.buildAndRun(getDbHandle(), query, new TagMapper());
   }
 
+  @Override
   protected void buildQuery(TagSearchQuery query) {
     qb.addSelectClause("tags.*");
     qb.addTotalCount();

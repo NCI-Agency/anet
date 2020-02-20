@@ -199,6 +199,7 @@ public class PositionResource {
   @GraphQLMutation(name = "deletePosition")
   public Integer deletePosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String positionUuid) {
+    final Person user = DaoUtils.getUserFromContext(context);
     final Position position = dao.getByUuid(positionUuid);
     if (position == null) {
       throw new WebApplicationException("Position not found", Status.NOT_FOUND);
@@ -214,6 +215,9 @@ public class PositionResource {
     if (PositionStatus.ACTIVE.equals(position.getStatus())) {
       throw new WebApplicationException("Cannot delete an active position", Status.BAD_REQUEST);
     }
+
+    AnetAuditLogger.log("Position {} deleted by {} (uuid: {})", positionUuid, user.getName(),
+        user.getUuid());
 
     // if this position has any history, we'll just delete it
     // if this position is in an approval chain, we just delete it
