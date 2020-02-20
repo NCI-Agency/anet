@@ -26,6 +26,7 @@ public class AuthorizationGroupDao
 
   public static final String TABLE_NAME = "authorizationGroups";
 
+  @Override
   public AuthorizationGroup getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
@@ -94,11 +95,6 @@ public class AuthorizationGroupDao
             + "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
         .bindBean(a).bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(a.getStatus())).execute();
-  }
-
-  @Override
-  public int deleteInternal(String uuid) {
-    throw new UnsupportedOperationException();
   }
 
   @InTransaction

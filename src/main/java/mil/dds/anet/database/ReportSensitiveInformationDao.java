@@ -29,6 +29,7 @@ public class ReportSensitiveInformationDao
   public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
+  @Override
   public ReportSensitiveInformation getByUuid(String uuid) {
     throw new UnsupportedOperationException();
   }

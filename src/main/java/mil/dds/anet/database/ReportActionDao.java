@@ -38,6 +38,7 @@ public class ReportActionDao extends AnetBaseDao<ReportAction, AbstractSearchQue
         FkDataLoaderKey.REPORT_REPORT_ACTIONS, reportUuid);
   }
 
+  @Override
   public ReportAction getByUuid(String uuid) {
     throw new UnsupportedOperationException();
   }
