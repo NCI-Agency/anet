@@ -8,7 +8,7 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import utils from "utils"
@@ -36,6 +36,28 @@ const AssignPersonModal = props => {
 
   const [error, setError] = useState(null)
   const [person, setPerson] = useState(position && position.person)
+  const [doSave, setDoSave] = useState(false)
+
+  const save = useCallback(() => {
+    let graphql, variables
+    if (person === null) {
+      graphql = GQL_DELETE_PERSON_FROM_POSITION
+      variables = {
+        uuid: position.uuid
+      }
+    } else {
+      graphql = GQL_PUT_PERSON_IN_POSITION
+      variables = {
+        uuid: position.uuid,
+        person: { uuid: person.uuid }
+      }
+    }
+    API.mutation(graphql, variables)
+      .then(data => onSuccess())
+      .catch(error => {
+        setError(error)
+      })
+  }, [position, person, onSuccess])
 
   useEffect(() => {
     if (!positionPropUnchanged) {
@@ -43,6 +65,13 @@ const AssignPersonModal = props => {
       setPerson(position && position.person)
     }
   }, [positionPropUnchanged, position])
+
+  useEffect(() => {
+    if (doSave) {
+      setDoSave(false)
+      save()
+    }
+  }, [doSave, save])
 
   useEffect(() => {
     let newError = null
@@ -86,7 +115,13 @@ const AssignPersonModal = props => {
       <Modal.Body>
         {position.person.uuid && (
           <div style={{ textAlign: "center" }}>
-            <Button bsStyle="danger" onClick={() => setPerson(null)}>
+            <Button
+              bsStyle="danger"
+              onClick={() => {
+                setPerson(null)
+                setDoSave(true)
+              }}
+            >
               Remove <LinkTo person={position.person} isLink={false} /> from{" "}
               <LinkTo position={position} isLink={false} />
             </Button>
@@ -152,27 +187,6 @@ const AssignPersonModal = props => {
       </Modal.Footer>
     </Modal>
   )
-
-  function save() {
-    let graphql, variables
-    if (person === null) {
-      graphql = GQL_DELETE_PERSON_FROM_POSITION
-      variables = {
-        uuid: position.uuid
-      }
-    } else {
-      graphql = GQL_PUT_PERSON_IN_POSITION
-      variables = {
-        uuid: position.uuid,
-        person: { uuid: person.uuid }
-      }
-    }
-    API.mutation(graphql, variables)
-      .then(data => onSuccess())
-      .catch(error => {
-        setError(error)
-      })
-  }
 
   function closeModal() {
     // Reset state before closing (cancel)
