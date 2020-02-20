@@ -92,7 +92,7 @@ dependencies {
 
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.1.1'
-	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
+	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
 
 	// For parsing HTML to check for 'empty' input
 	compile 'org.jsoup:jsoup:1.12.2'
