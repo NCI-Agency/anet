@@ -31,7 +31,7 @@ public class EmailResponse {
    * 
    * @param responseData The JSON object received from the server
    */
-  public EmailResponse(JsonNode responseData) {
+  public EmailResponse(final JsonNode responseData) {
     final JsonNode fromNode = responseData.get("from");
     this.from = fromNode == null ? null : new ToFromData(fromNode);
     final JsonNode toNode = responseData.get("to");
