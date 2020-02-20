@@ -9,7 +9,15 @@ import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  FormGroup,
+  Grid,
+  Modal,
+  Row,
+  Table
+} from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import utils from "utils"
 
@@ -131,21 +139,23 @@ const AssignPersonModal = props => {
         <Grid fluid>
           <Row>
             <Col md={12}>
-              <AdvancedSingleSelect
-                fieldName="person"
-                fieldLabel="Select a person"
-                placeholder="Select a person for this position"
-                value={person}
-                overlayColumns={["Name"]}
-                overlayRenderRow={PersonSimpleOverlayRow}
-                filterDefs={personFilters}
-                onChange={value => setPerson(value)}
-                objectType={Person}
-                valueKey="name"
-                fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
-                addon={PEOPLE_ICON}
-                vertical
-              />
+              <FormGroup controlId="person">
+                <AdvancedSingleSelect
+                  fieldName="person"
+                  fieldLabel="Select a person"
+                  placeholder="Select a person for this position"
+                  value={person}
+                  overlayColumns={["Name"]}
+                  overlayRenderRow={PersonSimpleOverlayRow}
+                  filterDefs={personFilters}
+                  onChange={value => setPerson(value)}
+                  objectType={Person}
+                  valueKey="name"
+                  fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
+                  addon={PEOPLE_ICON}
+                  vertical
+                />
+              </FormGroup>
             </Col>
           </Row>
           {person && person.uuid && (

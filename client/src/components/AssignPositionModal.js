@@ -10,7 +10,15 @@ import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  FormGroup,
+  Grid,
+  Modal,
+  Row,
+  Table
+} from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
 import utils from "utils"
@@ -147,25 +155,27 @@ const BaseAssignPositionModal = props => {
         <Grid fluid>
           <Row>
             <Col md={12}>
-              <AdvancedSingleSelect
-                fieldName="position"
-                fieldLabel="Select a position"
-                placeholder="Select a position for this person"
-                value={position}
-                overlayColumns={[
-                  "Position",
-                  "Organization",
-                  "Current Occupant"
-                ]}
-                overlayRenderRow={PositionOverlayRow}
-                filterDefs={positionsFilters}
-                onChange={value => setPosition(value)}
-                objectType={Position}
-                valueKey="name"
-                fields="uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
-                addon={POSITIONS_ICON}
-                vertical
-              />
+              <FormGroup controlId="position">
+                <AdvancedSingleSelect
+                  fieldName="position"
+                  fieldLabel="Select a position"
+                  placeholder="Select a position for this person"
+                  value={position}
+                  overlayColumns={[
+                    "Position",
+                    "Organization",
+                    "Current Occupant"
+                  ]}
+                  overlayRenderRow={PositionOverlayRow}
+                  filterDefs={positionsFilters}
+                  onChange={value => setPosition(value)}
+                  objectType={Position}
+                  valueKey="name"
+                  fields="uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
+                  addon={POSITIONS_ICON}
+                  vertical
+                />
+              </FormGroup>
             </Col>
           </Row>
           {newPosition.uuid && (
