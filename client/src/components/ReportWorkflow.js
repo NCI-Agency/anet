@@ -51,10 +51,13 @@ const ApprovalStepModal = ({ action }) => {
 
   return step ? (
     <>
-      <Button className={actionTypeCss + " btn-sm"} onClick={openModal}>
+      <Button
+        className={actionTypeCss + " btn-sm"}
+        onClick={() => setShowModal(true)}
+      >
         <span>{step.name}</span>
       </Button>
-      <Modal show={showModal} onHide={closeModal}>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Approvers for {step.name}</Modal.Title>
         </Modal.Header>
@@ -74,14 +77,6 @@ const ApprovalStepModal = ({ action }) => {
       </Modal>
     </>
   ) : null
-
-  function closeModal() {
-    setShowModal(false)
-  }
-
-  function openModal() {
-    setShowModal(true)
-  }
 }
 ApprovalStepModal.propTypes = {
   action: PropTypes.object.isRequired
