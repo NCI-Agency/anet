@@ -1,10 +1,10 @@
 package mil.dds.anet.integrationtest.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * This class provides a wrapper for the email data (from the fake SMTP server response) Warning:
@@ -20,42 +20,36 @@ public class EmailResponse {
   public final String text;
   public final String textAsHtml;
   public final Instant date;
-  public final JSONArray attachments;
+  public final ArrayNode attachments;
   public final String messageId;
   public final boolean isHtml;
-  public final JSONObject header;
-  public final JSONArray headerLines;
+  public final JsonNode header;
+  public final ArrayNode headerLines;
 
   /**
    * Parse a response from the SMTP server.
    * 
    * @param responseData The JSON object received from the server
    */
-  public EmailResponse(JSONObject responseData) {
-    this.from =
-        responseData.keySet().contains("from") ? new ToFromData(responseData.getJSONObject("from"))
-            : null;
-    this.to =
-        responseData.keySet().contains("to") ? new ToFromData(responseData.getJSONObject("to"))
-            : null;
-    this.cc =
-        responseData.keySet().contains("cc") ? new ToFromData(responseData.getJSONObject("cc"))
-            : null;
-    this.replyTo = responseData.keySet().contains("replyTo")
-        ? new ToFromData(responseData.getJSONObject("replyTo"))
-        : null;
+  public EmailResponse(JsonNode responseData) {
+    final JsonNode fromNode = responseData.get("from");
+    this.from = fromNode == null ? null : new ToFromData(fromNode);
+    final JsonNode toNode = responseData.get("to");
+    this.to = toNode == null ? null : new ToFromData(toNode);
+    final JsonNode ccNode = responseData.get("cc");
+    this.cc = ccNode == null ? null : new ToFromData(ccNode);
+    final JsonNode replyToNode = responseData.get("replyTo");
+    this.replyTo = replyToNode == null ? null : new ToFromData(replyToNode);
 
-    this.subject = responseData.optString("subject");
-    this.text = responseData.optString("text");
-    this.textAsHtml = responseData.optString("textAsHtml");
-    this.date =
-        responseData.keySet().contains("date") ? Instant.parse(responseData.getString("date"))
-            : null;
-    this.attachments = responseData.optJSONArray("attachments");
-    this.messageId = responseData.optString("messageId");
-    this.isHtml = responseData.optBoolean("html");
-    this.header = responseData.optJSONObject("headers");
-    this.headerLines = responseData.optJSONArray("headerLines");
+    this.subject = responseData.get("subject").asText();
+    this.text = responseData.get("text").asText();
+    this.textAsHtml = responseData.get("textAsHtml").asText();
+    this.date = Instant.parse(responseData.get("date").asText());
+    this.attachments = (ArrayNode) responseData.get("attachments");
+    this.messageId = responseData.get("messageId").asText();
+    this.isHtml = responseData.get("html").asBoolean();
+    this.header = responseData.get("headers");
+    this.headerLines = (ArrayNode) responseData.get("headerLines");
   }
 
   /**
@@ -66,14 +60,14 @@ public class EmailResponse {
     public final String html;
     public final String text;
 
-    public ToFromData(JSONObject responseData) {
+    public ToFromData(final JsonNode node) {
+      final ArrayNode valueArray = (ArrayNode) node.get("value");
       this.values = new ArrayList<ValueData>();
-      final JSONArray valueArray = responseData.optJSONArray("value");
-      for (int i = 0; valueArray != null && i < valueArray.length(); i++) {
-        this.values.add(new ValueData(valueArray.getJSONObject(i)));
+      for (int i = 0; valueArray != null && i < valueArray.size(); i++) {
+        this.values.add(new ValueData(valueArray.get(i)));
       }
-      this.html = responseData.optString("html");
-      this.text = responseData.optString("text");
+      this.html = node.get("html").asText();
+      this.text = node.get("text").asText();
     }
 
     /**
@@ -83,9 +77,9 @@ public class EmailResponse {
       public final String address;
       public final String name;
 
-      public ValueData(JSONObject responseData) {
-        this.address = responseData.optString("address");
-        this.name = responseData.optString("name");
+      public ValueData(final JsonNode node) {
+        this.address = node.get("address").asText();
+        this.name = node.get("name").asText();
       }
     }
   }

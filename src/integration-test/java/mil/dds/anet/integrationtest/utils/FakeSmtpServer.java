@@ -1,5 +1,9 @@
 package mil.dds.anet.integrationtest.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -23,7 +27,6 @@ import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
 
 /**
  * This class provides a wrapper for the fake SMTP server's API.
@@ -115,14 +118,12 @@ public class FakeSmtpServer {
     }
   }
 
-  private static List<EmailResponse> parseServeResponse(String serverResponse) {
-    final JSONArray response = new JSONArray(serverResponse);
+  private static List<EmailResponse> parseServeResponse(String serverResponse)
+      throws JsonMappingException, JsonProcessingException {
+    final ObjectMapper mapper = new ObjectMapper();
+    JsonNode response = mapper.readTree(serverResponse);
     final List<EmailResponse> emails = new ArrayList<EmailResponse>();
-
-    for (int i = 0; i < response.length(); i++) {
-      emails.add(new EmailResponse(response.getJSONObject(i)));
-    }
-
+    response.forEach(node -> emails.add(new EmailResponse(node)));
     return emails;
   }
 
