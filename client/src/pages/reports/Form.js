@@ -55,7 +55,7 @@ import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 const GQL_GET_RECENTS = gql`
-  query {
+  query($taskQuery: TaskSearchQueryInput) {
     locationList(
       query: {
         pageSize: 6
@@ -103,15 +103,7 @@ const GQL_GET_RECENTS = gql`
         }
       }
     }
-    taskList(
-      query: {
-        pageSize: 6
-        status: ACTIVE
-        inMyReports: true
-        sortBy: RECENT
-        sortOrder: DESC
-      }
-    ) {
+    taskList(query: $taskQuery) {
       list {
         uuid
         shortName
@@ -223,7 +215,36 @@ const BaseReportForm = ({
       window.clearTimeout(autoSaveSettings.timeoutId)
     }
   })
-  const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS)
+
+  const recentTasksVarCommon = {
+    pageSize: 6,
+    status: Task.STATUS.ACTIVE,
+    hasCustomFieldRef1: true,
+    sortBy: "RECENT",
+    sortOrder: "DESC"
+  }
+
+  let recentTasksVarUser
+  if (currentUser.isAdmin()) {
+    recentTasksVarUser = recentTasksVarCommon
+  } else if (currentUser.position?.organization) {
+    recentTasksVarUser = {
+      ...recentTasksVarCommon,
+      inMyReports: true,
+      taskedOrgUuid: currentUser.position?.organization?.uuid,
+      orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
+    }
+  } else {
+    recentTasksVarUser = {
+      pageSize: 1,
+      status: Task.STATUS.ACTIVE,
+      text: "__should_not_match_anything__" // TODO: Do this more gracefully
+    }
+  }
+
+  const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS, {
+    taskQuery: recentTasksVarUser
+  })
   const { done, result } = useBoilerplate({
     loading,
     error,
