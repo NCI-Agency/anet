@@ -1,25 +1,27 @@
-package mil.dds.anet.integrationtest.config;
+package mil.dds.anet.test.integration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.net.URL;
 import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AnetTestConfiguration {
   private static final HashMap<String, Object> config;
-  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-  private static final File configFile =
-      new File("src/integration-test/resources/anet-integrationtest.yml");
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   static {
-    config = loadConfiguration();
+    final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    final URL configUrl =
+        AnetTestConfiguration.class.getResource("/integration/anet-integrationtest.yml");
+    final File configFile = new File(configUrl.getFile());
+    config = loadConfiguration(yamlMapper, configFile);
   }
 
   public static HashMap<String, Object> getConfiguration() throws Exception {
@@ -32,10 +34,11 @@ public class AnetTestConfiguration {
   }
 
   @SuppressWarnings("unchecked")
-  private static HashMap<String, Object> loadConfiguration() {
+  private static HashMap<String, Object> loadConfiguration(final ObjectMapper yamlMapper,
+      final File configFile) {
     try {
       return yamlMapper.readValue(configFile, HashMap.class);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       logger.error("Failed to read integration test configuration. Reason: " + e.getMessage());
       return null;
     }

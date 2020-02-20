@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
-import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
@@ -123,37 +121,6 @@ public class AuthorizationGroupDao
   public AnetBeanList<AuthorizationGroup> search(AuthorizationGroupSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getAuthorizationGroupSearcher()
         .runSearch(query);
-  }
-
-  @InTransaction
-  public List<AuthorizationGroup> getRecentAuthorizationGroups(Person author, int maxResults) {
-    final String sql;
-    if (DaoUtils.isMsSql()) {
-      sql =
-          "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".uuid IN ("
-              + "SELECT TOP(:maxResults) \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
-              + "FROM reports "
-              + "JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\" "
-              + "JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid = \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
-              + "WHERE reports.\"authorUuid\" = :authorUuid "
-              + "AND \"authorizationGroups\".status = :activeStatus "
-              + "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC)";
-    } else {
-      sql =
-          "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".uuid IN ("
-              + "SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" FROM reports "
-              + "JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\" "
-              + "JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid = \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
-              + "WHERE reports.\"authorUuid\" = :authorUuid "
-              + "AND \"authorizationGroups\".status = :activeStatus "
-              + "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC LIMIT :maxResults)";
-    }
-    return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
-        .bind("maxResults", maxResults)
-        .bind("activeStatus", DaoUtils.getEnumId(AuthorizationGroupStatus.ACTIVE))
-        .map(new AuthorizationGroupMapper()).list();
   }
 
 }

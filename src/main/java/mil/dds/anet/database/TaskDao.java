@@ -6,10 +6,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
@@ -208,29 +206,6 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   @Override
   public AnetBeanList<Task> search(TaskSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);
-  }
-
-  @InTransaction
-  public List<Task> getRecentTasks(Person author, int maxResults) {
-    String sql;
-    if (DaoUtils.isMsSql()) {
-      sql =
-          "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
-              + "SELECT TOP(:maxResults) \"reportTasks\".\"taskUuid\" "
-              + "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
-              + "WHERE \"authorUuid\" = :authorUuid GROUP BY \"taskUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC)";
-    } else {
-      sql =
-          "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
-              + "SELECT \"reportTasks\".\"taskUuid\" "
-              + "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
-              + "WHERE \"authorUuid\" = :authorUuid GROUP BY \"taskUuid\" "
-              + "ORDER BY MAX(reports.\"createdAt\") DESC LIMIT :maxResults)";
-    }
-    return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
-        .bind("maxResults", maxResults).bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
-        .map(new TaskMapper()).list();
   }
 
 }

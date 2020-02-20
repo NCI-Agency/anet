@@ -5,6 +5,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
+import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractLocationSearcher
@@ -31,6 +32,14 @@ public abstract class AbstractLocationSearcher
       addTextQuery(query);
     }
 
+    if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addFromClause("JOIN ("
+          + "  SELECT reports.\"locationUuid\" AS uuid, MAX(reports.\"createdAt\") AS max FROM reports"
+          + "  WHERE reports.\"authorUuid\" = :userUuid GROUP BY reports.\"locationUuid\""
+          + ") \"inMyReports\" ON locations.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+    }
+
     addOrderByClauses(qb, query);
   }
 
@@ -40,6 +49,12 @@ public abstract class AbstractLocationSearcher
     switch (query.getSortBy()) {
       case CREATED_AT:
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "locations", "\"createdAt\""));
+        break;
+      case RECENT:
+        if (Boolean.TRUE.equals(query.isInMyReports())) {
+          // Otherwise the JOIN won't exist
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+        }
         break;
       case NAME:
       default:

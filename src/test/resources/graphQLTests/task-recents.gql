@@ -1,4 +1,4 @@
-taskRecents {
+taskList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
     shortName
@@ -7,5 +7,6 @@ taskRecents {
       uuid
       shortName
     }
+    customFields
   }
 }
