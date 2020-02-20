@@ -156,28 +156,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   }
 
   @InTransaction
-  public List<Person> getRecentPeople(Person author, int maxResults) {
-    String sql;
-    if (DaoUtils.isMsSql()) {
-      sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
-          + "FROM people WHERE people.uuid IN ( "
-          + "SELECT top(:maxResults) \"reportPeople\".\"personUuid\" "
-          + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC)";
-    } else {
-      sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
-          + "FROM people WHERE people.uuid IN ( SELECT \"reportPeople\".\"personUuid\" "
-          + "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
-          + "WHERE \"authorUuid\" = :authorUuid AND \"personUuid\" != :authorUuid "
-          + "GROUP BY \"personUuid\" ORDER BY MAX(reports.\"createdAt\") DESC "
-          + "LIMIT :maxResults)";
-    }
-    return getDbHandle().createQuery(sql).bind("authorUuid", author.getUuid())
-        .bind("maxResults", maxResults).map(new PersonMapper()).list();
-  }
-
-  @InTransaction
   public int mergePeople(Person winner, Person loser) {
     // delete duplicates where other is primary, or where neither is primary
     getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
