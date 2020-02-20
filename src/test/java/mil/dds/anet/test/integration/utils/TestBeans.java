@@ -1,4 +1,4 @@
-package mil.dds.anet.integrationtest.utils;
+package mil.dds.anet.test.integration.utils;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;

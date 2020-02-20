@@ -1,9 +1,12 @@
-package mil.dds.anet.integrationtest.db;
+package mil.dds.anet.test.integration.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -20,21 +23,21 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
-import mil.dds.anet.integrationtest.utils.EmailResponse;
-import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
-import mil.dds.anet.integrationtest.utils.TestBeans;
+import mil.dds.anet.test.integration.config.AnetTestConfiguration;
+import mil.dds.anet.test.integration.utils.EmailResponse;
+import mil.dds.anet.test.integration.utils.FakeSmtpServer;
+import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.Utils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class FutureEngagementWorkerTest {
-  @ClassRule
-  public static final DropwizardAppRule<AnetConfiguration> app =
-      new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
+  public static final DropwizardAppExtension<AnetConfiguration> app =
+      new DropwizardAppExtension<AnetConfiguration>(AnetApplication.class, "anet.yml");
   private final static List<String> expectedIds = new ArrayList<>();
   private final static List<String> unexpectedIds = new ArrayList<>();
 
@@ -45,11 +48,16 @@ public class FutureEngagementWorkerTest {
   private static boolean executeEmailServerTests;
   private static String whitelistedEmail;
 
-  @BeforeClass
+  @BeforeAll
   @SuppressWarnings("unchecked")
   public static void setUpClass() throws Exception {
+    if (app.getConfiguration().getSmtp().isDisabled()) {
+      fail("'ANET_SMTP_DISABLE' system environment variable must have value 'true' to run test.");
+    }
+
     executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
+
     whitelistedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
@@ -62,7 +70,7 @@ public class FutureEngagementWorkerTest {
     emailServer.clearEmailServer();
   }
 
-  @AfterClass
+  @AfterAll
   public static void finalCheckAndCleanup() throws Exception {
     // Test that all emails have been correctly sent
     testFutureEngagementWorkerEmail();
@@ -198,9 +206,7 @@ public class FutureEngagementWorkerTest {
 
   // Email integration
   private static void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
-    if (!executeEmailServerTests) {
-      return;
-    }
+    assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     // We wait until all messages have been (asynchronously) sent
     Thread.sleep(10000);

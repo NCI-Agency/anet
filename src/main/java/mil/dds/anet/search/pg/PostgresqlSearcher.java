@@ -10,15 +10,7 @@ import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ITagSearcher;
 import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.search.Searcher;
-import mil.dds.anet.search.pg.PostgresqlAuthorizationGroupSearcher;
-import mil.dds.anet.search.pg.PostgresqlLocationSearcher;
-import mil.dds.anet.search.pg.PostgresqlOrganizationSearcher;
-import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
-import mil.dds.anet.search.pg.PostgresqlPositionSearcher;
-import mil.dds.anet.search.pg.PostgresqlReportSearcher;
 import mil.dds.anet.search.pg.PostgresqlSearcher;
-import mil.dds.anet.search.pg.PostgresqlTagSearcher;
-import mil.dds.anet.search.pg.PostgresqlTaskSearcher;
 
 public class PostgresqlSearcher extends Searcher {
 

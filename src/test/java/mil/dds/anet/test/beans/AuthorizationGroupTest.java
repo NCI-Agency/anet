@@ -3,7 +3,7 @@ package mil.dds.anet.test.beans;
 import java.util.LinkedList;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Position;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AuthorizationGroupTest extends BeanTester<AuthorizationGroup> {
 
