@@ -108,6 +108,7 @@ public class AnetEmailWorker implements Runnable {
     if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) {
       props.put("mail.smtp.auth", "true");
       auth = new javax.mail.Authenticator() {
+        @Override
         protected PasswordAuthentication getPasswordAuthentication() {
           return new PasswordAuthentication(smtpConfig.getUsername(), smtpConfig.getPassword());
         }

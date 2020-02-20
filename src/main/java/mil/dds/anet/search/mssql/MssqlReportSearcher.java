@@ -63,7 +63,7 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
-  protected void addIncludeEngagementDayOfWeekQuery(ReportSearchQuery query) {
+  protected void addIncludeEngagementDayOfWeekSelect() {
     qb.addSelectClause("DATEPART(dw, reports.engagementDate) AS engagementDayOfWeek");
   }
 

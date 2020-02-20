@@ -52,7 +52,7 @@ public class DailyRollupEmail implements AnetEmailAction {
   public Map<String, Object> buildContext(Map<String, Object> context) {
     String maxReportAgeStr = AnetObjectEngine.getInstance()
         .getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
-    Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
+    long maxReportAge = Long.parseLong(maxReportAgeStr);
     Instant engagementDateStart =
         startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
     ReportSearchQuery query = new ReportSearchQuery();

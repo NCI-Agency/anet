@@ -21,6 +21,7 @@ public abstract class AbstractLocationSearcher
     return qb.buildAndRun(getDbHandle(), query, new LocationMapper());
   }
 
+  @Override
   protected void buildQuery(LocationSearchQuery query) {
     qb.addSelectClause("locations.*");
     qb.addTotalCount();

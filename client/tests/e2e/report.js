@@ -137,6 +137,9 @@ test("Draft and submit a report", async t => {
     "2.A"
   )
 
+  const $tasksTitle = await t.context.driver.findElement(
+    By.xpath('//h2/span[text()="Efforts"]')
+  )
   await $tasksTitle.click()
 
   t.is(
@@ -288,7 +291,7 @@ test("Publish report chain", async t => {
   await approveReport(t, "jacob")
   await approveReport(t, "rebecca")
   // Then the task owner can approve the report
-  await approveReport(t, "bob")
+  await approveReport(t, "henry")
 
   // Admin user needs to publish the report
   await t.context.get("/", "arthur")

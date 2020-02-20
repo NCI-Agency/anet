@@ -14,6 +14,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
 
   public static final String TABLE_NAME = "savedSearches";
 
+  @Override
   public SavedSearch getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

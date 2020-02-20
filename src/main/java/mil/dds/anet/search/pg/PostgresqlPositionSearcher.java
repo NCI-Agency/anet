@@ -18,6 +18,7 @@ public class PostgresqlPositionSearcher extends AbstractPositionSearcher {
     addFullTextSearch("positions", query.getText(), query.isSortByPresent());
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
