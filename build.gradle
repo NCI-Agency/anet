@@ -101,7 +101,7 @@ dependencies {
 	compile group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
 
 	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '2.0.1'
-	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '2.0.1'
+	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '2.0.2'
 	testCompile 'org.apache.commons:commons-io:1.3.2'
 	
 	testCompile 'org.powermock:powermock-api-mockito2:2.0.5'
