@@ -2,7 +2,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Button } from "react-bootstrap"
 
-const Toolbar = props => {
+const Toolbar = ({ onFilterTextInput, onExportButtonClick }) => {
   return (
     <form className="advisor-reports-form">
       <div className="row">
@@ -15,23 +15,15 @@ const Toolbar = props => {
             id="advisorSearch"
             type="text"
             placeholder="Search organizations..."
-            onChange={handleFilterTextInputChange}
+            onChange={e => onFilterTextInput(e.target.value)}
           />
         </div>
         <div className="col-sm-2">
-          <Button onClick={handleExportButtonClick}>Export to CSV</Button>
+          <Button onClick={onExportButtonClick}>Export to CSV</Button>
         </div>
       </div>
     </form>
   )
-
-  function handleFilterTextInputChange(e) {
-    props.onFilterTextInput(e.target.value)
-  }
-
-  function handleExportButtonClick() {
-    props.onExportButtonClick()
-  }
 }
 Toolbar.propTypes = {
   onFilterTextInput: PropTypes.func.isRequired,
