@@ -32,9 +32,7 @@ const GQL_PUT_PERSON_IN_POSITION = gql`
   }
 `
 
-const AssignPersonModal = props => {
-  const { position, showModal, onCancel, onSuccess } = props
-
+const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   const latestPositionProp = useRef(position)
   const positionPropUnchanged = _isEqualWith(
     latestPositionProp.current,

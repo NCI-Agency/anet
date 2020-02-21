@@ -15,7 +15,7 @@ const ButtonToggleGroup = ({ value, onChange, children, ...otherProps }) => {
             key={child.props.value}
             {...child.props}
             active={value === child.props.value}
-            onClick={onClick}
+            onClick={e => onChange(e.currentTarget.value)}
             value={child.props.value}
           >
             {child.props.children}
@@ -24,10 +24,6 @@ const ButtonToggleGroup = ({ value, onChange, children, ...otherProps }) => {
       })}
     </ButtonGroup>
   )
-
-  function onClick(event) {
-    onChange(event.currentTarget.value)
-  }
 }
 ButtonToggleGroup.propTypes = {
   value: PropTypes.string,

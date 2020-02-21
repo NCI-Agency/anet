@@ -22,7 +22,14 @@ const OptionListModal = ({
       <Modal.Body>
         <Grid fluid>
           <Messages error={error} />
-          <FormGroup onChange={handleChange}>{children}</FormGroup>
+          <FormGroup
+            onChange={e => {
+              setValue(e.target.value)
+              setError(null)
+            }}
+          >
+            {children}
+          </FormGroup>
         </Grid>
       </Modal.Body>
 
@@ -36,11 +43,6 @@ const OptionListModal = ({
       </Modal.Footer>
     </Modal>
   )
-
-  function handleChange(e) {
-    setValue(e.target.value)
-    setError(null)
-  }
 
   function save() {
     if (!value) {

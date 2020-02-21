@@ -56,6 +56,8 @@ const BaseRelatedObjectNotes = ({
   const [noteType, setNoteType] = useState(null)
   const [notes, setNotes] = useState(notesProp)
 
+  const notesElem = document.getElementById(notesElemId)
+
   useEffect(() => {
     if (!notesPropUnchanged) {
       latestNotesProp.current = notesProp
@@ -63,51 +65,6 @@ const BaseRelatedObjectNotes = ({
       setNotes(notesProp)
     }
   }, [notesPropUnchanged, notesProp])
-
-  const toggleHidden = () => {
-    setHidden(!hidden)
-  }
-
-  const showRelatedObjectNoteModal = (key, type) => {
-    setError(null)
-    setShowRelatedObjectNoteModalKey(key)
-    setNoteType(type)
-  }
-
-  const cancelRelatedObjectNoteModal = () => {
-    setError(null)
-    setShowRelatedObjectNoteModalKey(null)
-    setNoteType(null)
-  }
-
-  const hideNewRelatedObjectNoteModal = note => {
-    notes.unshift(note) // add new note at the front
-    setError(null)
-    setShowRelatedObjectNoteModalKey(null)
-    setNoteType(null)
-    setNotes(notes)
-  }
-
-  const hideEditRelatedObjectNoteModal = note => {
-    const newNotes = notes.filter(item => item.uuid !== note.uuid) // remove old note
-    newNotes.unshift(note) // add updated note at the front
-    setError(null)
-    setShowRelatedObjectNoteModalKey(null)
-    setNoteType(null)
-    setNotes(newNotes)
-  }
-
-  const deleteNote = uuid => {
-    const newNotes = notes.filter(item => item.uuid !== uuid) // remove note
-    API.mutation(GQL_DELETE_NOTE, { uuid })
-      .then(data => {
-        setError(null)
-        setNotes(newNotes) // remove note
-      })
-      .catch(error => {
-        setError(error)
-      })
-  }
 
   const renderPortal = () => {
     const noNotes = _isEmpty(notes)
@@ -414,8 +371,52 @@ const BaseRelatedObjectNotes = ({
     )
   }
 
-  const notesElem = document.getElementById(notesElemId)
   return notesElem && ReactDOM.createPortal(renderPortal(), notesElem)
+
+  function toggleHidden() {
+    setHidden(!hidden)
+  }
+
+  function showRelatedObjectNoteModal(key, type) {
+    setError(null)
+    setShowRelatedObjectNoteModalKey(key)
+    setNoteType(type)
+  }
+
+  function cancelRelatedObjectNoteModal() {
+    setError(null)
+    setShowRelatedObjectNoteModalKey(null)
+    setNoteType(null)
+  }
+
+  function hideNewRelatedObjectNoteModal(note) {
+    notes.unshift(note) // add new note at the front
+    setError(null)
+    setShowRelatedObjectNoteModalKey(null)
+    setNoteType(null)
+    setNotes(notes)
+  }
+
+  function hideEditRelatedObjectNoteModal(note) {
+    const newNotes = notes.filter(item => item.uuid !== note.uuid) // remove old note
+    newNotes.unshift(note) // add updated note at the front
+    setError(null)
+    setShowRelatedObjectNoteModalKey(null)
+    setNoteType(null)
+    setNotes(newNotes)
+  }
+
+  function deleteNote(uuid) {
+    const newNotes = notes.filter(item => item.uuid !== uuid) // remove note
+    API.mutation(GQL_DELETE_NOTE, { uuid })
+      .then(data => {
+        setError(null)
+        setNotes(newNotes) // remove note
+      })
+      .catch(error => {
+        setError(error)
+      })
+  }
 }
 BaseRelatedObjectNotes.propTypes = {
   currentUser: PropTypes.instanceOf(Person),
