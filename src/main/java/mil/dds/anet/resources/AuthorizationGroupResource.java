@@ -40,8 +40,9 @@ public class AuthorizationGroupResource {
   }
 
   @GraphQLQuery(name = "authorizationGroupList")
-  public AnetBeanList<AuthorizationGroup> search(
+  public AnetBeanList<AuthorizationGroup> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") AuthorizationGroupSearchQuery query) {
+    query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
 
@@ -90,18 +91,6 @@ public class AuthorizationGroupResource {
     AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
-  }
-
-  /**
-   * Returns the most recent authorization groups that this user used in reports.
-   * 
-   * @param maxResults maximum number of results to return, defaults to 3
-   */
-  @GraphQLQuery(name = "authorizationGroupRecents")
-  public AnetBeanList<AuthorizationGroup> recents(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "maxResults", defaultValue = "3") int maxResults) {
-    return new AnetBeanList<AuthorizationGroup>(
-        dao.getRecentAuthorizationGroups(DaoUtils.getUserFromContext(context), maxResults));
   }
 
 }

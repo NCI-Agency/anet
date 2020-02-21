@@ -18,6 +18,7 @@ public class PostgresqlLocationSearcher extends AbstractLocationSearcher {
     addFullTextSearch("locations", query.getText(), query.isSortByPresent());
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

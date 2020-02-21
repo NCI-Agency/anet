@@ -189,21 +189,11 @@ public class PersonResource {
   }
 
   @GraphQLQuery(name = "personList")
-  public AnetBeanList<Person> search(@GraphQLEnvironment Set<String> subFields,
+  public AnetBeanList<Person> search(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLEnvironment Set<String> subFields,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
+    query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(subFields, query);
-  }
-
-  /**
-   * Returns the most recent people that this user listed as attendees in reports.
-   * 
-   * @param maxResults maximum number of results to return, defaults to 3
-   */
-  @GraphQLQuery(name = "personRecents")
-  public AnetBeanList<Person> recents(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "maxResults", defaultValue = "3") int maxResults) {
-    return new AnetBeanList<Person>(
-        dao.getRecentPeople(DaoUtils.getUserFromContext(context), maxResults));
   }
 
   /**

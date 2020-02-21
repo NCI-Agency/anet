@@ -14,7 +14,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AdminResourceTest extends AbstractResourceTest {
 

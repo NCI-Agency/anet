@@ -55,13 +55,29 @@ import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 const GQL_GET_RECENTS = gql`
   query {
-    locationRecents(maxResults: 6) {
+    locationList(
+      query: {
+        pageSize: 6
+        status: ACTIVE
+        inMyReports: true
+        sortBy: RECENT
+        sortOrder: DESC
+      }
+    ) {
       list {
         uuid
         name
       }
     }
-    personRecents(maxResults: 6) {
+    personList(
+      query: {
+        pageSize: 6
+        status: ACTIVE
+        inMyReports: true
+        sortBy: RECENT
+        sortOrder: DESC
+      }
+    ) {
       list {
         uuid
         name
@@ -86,7 +102,15 @@ const GQL_GET_RECENTS = gql`
         }
       }
     }
-    taskRecents(maxResults: 6) {
+    taskList(
+      query: {
+        pageSize: 6
+        status: ACTIVE
+        inMyReports: true
+        sortBy: RECENT
+        sortOrder: DESC
+      }
+    ) {
       list {
         uuid
         shortName
@@ -98,7 +122,15 @@ const GQL_GET_RECENTS = gql`
         customFields
       }
     }
-    authorizationGroupRecents(maxResults: 6) {
+    authorizationGroupList(
+      query: {
+        pageSize: 6
+        status: ACTIVE
+        inMyReports: true
+        sortBy: RECENT
+        sortOrder: DESC
+      }
+    ) {
       list {
         uuid
         name
@@ -257,10 +289,10 @@ const BaseReportForm = ({
   let tagSuggestions = []
   if (data) {
     recents = {
-      locations: data.locationRecents.list,
-      persons: data.personRecents.list,
-      tasks: data.taskRecents.list,
-      authorizationGroups: data.authorizationGroupRecents.list
+      locations: data.locationList.list,
+      persons: data.personList.list,
+      tasks: data.taskList.list,
+      authorizationGroups: data.authorizationGroupList.list
     }
     // ReactTags expects id and text properties
     tagSuggestions = data.tagList.list.map(tag => ({

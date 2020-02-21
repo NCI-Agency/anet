@@ -17,6 +17,7 @@ public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
     addFullTextSearch("people", query.getText(), query.isSortByPresent());
   }
 
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

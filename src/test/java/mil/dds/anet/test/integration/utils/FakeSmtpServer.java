@@ -1,4 +1,6 @@
-package mil.dds.anet.integrationtest.utils;
+package mil.dds.anet.test.integration.utils;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +22,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
-import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
+import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -53,6 +55,11 @@ public class FakeSmtpServer {
 
     // Not in config
     httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
+
+    // A system variable is required to run this test
+    if (httpPort == null) {
+      fail("'ANET_SMTP_HTTP_PORT' system environment variable not found.");
+    }
 
     // Read from test config
     waitBeforeActionMs = Integer

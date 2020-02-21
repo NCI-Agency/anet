@@ -13,6 +13,7 @@ public class TagDao extends AnetBaseDao<Tag, TagSearchQuery> {
 
   public static final String TABLE_NAME = "tags";
 
+  @Override
   public Tag getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }

@@ -4,7 +4,7 @@ import persistReducer from "../reducers/persistReducer"
 /**
  * configureStore function which encapsulates the store creation logic,
  * middlewares and enhancers can be added here to the redux store
- * @param {Object} initialState
+ * @param {Object} initialState the initial state for the store
  */
 export default function configureStore(initialState) {
   const enhancer =

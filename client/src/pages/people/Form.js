@@ -339,7 +339,7 @@ const BasePersonForm = ({
                       setFieldValue("role", value)
                     }}
                   >
-                    {!edit && isAdvisor && (
+                    {isAdvisor && (
                       <Alert bsStyle="warning">
                         Creating a {Settings.fields.advisor.person.name} in ANET
                         could result in duplicate accounts if this person logs
