@@ -96,7 +96,7 @@ const OrganizationAdvisorsTable = props => {
           row={organization}
           columnGroups={props.columnGroups}
           checked={checked}
-          handleOrganizationClick
+          withOrganizationLink
           onSelectRow={() => handleSelectRow(index)}
           key={index}
         />
