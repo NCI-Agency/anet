@@ -39,7 +39,7 @@ import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
@@ -48,7 +48,10 @@ public class PersonResourceTest extends AbstractResourceTest {
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
   private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
-  private static final String DEFAULT_AVATAR_PATH = "src/test/resources/assets/default_avatar.png";
+
+  // 200 x 200 avatar
+  final File DEFAULT_AVATAR =
+      new File(PersonResourceTest.class.getResource("/assets/default_avatar.png").getFile());
 
   @Test
   public void testCreatePerson() throws IOException {
@@ -85,7 +88,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setCode("A123456");
 
     // update avatar
-    byte[] fileContent = Files.readAllBytes(new File(DEFAULT_AVATAR_PATH).toPath());
+    byte[] fileContent = Files.readAllBytes(DEFAULT_AVATAR.toPath());
     String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
     newPerson.setAvatar(defaultAvatarData);
 

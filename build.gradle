@@ -21,25 +21,6 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localTestSettings.gradle'
 }
 
-// Configures the classpath and the source and resource directories of the integrationTest task.
-sourceSets {
-	// Declaring this source set creates compile time and runtime configurations for it.
-	integrationTest {
-		java {
-			compileClasspath += main.output + test.output
-			runtimeClasspath += main.output + test.output
-			srcDir file('src/integration-test/java')
-		}
-		resources { 'src/integration-test/resources' }
-	}	
-}
-
-// Configures the compile and runtime configurations for our integration tests and includes the dependencies of the test task.
-configurations {
-	integrationTestCompile.extendsFrom testCompile
-	integrationTestRuntime.extendsFrom testRuntime
-}
-
 // Defaults for development variables
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "sqlserver")
 boolean isMssql = run.environment["DB_DRIVER"] == "sqlserver"
@@ -123,10 +104,16 @@ dependencies {
 	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '2.0.1'
 	testCompile 'org.apache.commons:commons-io:1.3.2'
 	
-	testCompile 'junit:junit:4.13'
 	testCompile 'org.powermock:powermock-api-mockito2:2.0.5'
 	testCompile 'org.powermock:powermock-module-junit4:2.0.5'
 	testCompile 'org.powermock:powermock-module-junit4-rule:2.0.5'
+
+	testCompile 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 jacoco {
@@ -412,15 +399,6 @@ task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container
 	group = "fake-smtp-server container"
 	description = "Removes " + fakeSmtpContainerName + " container."
 	targetContainerId { fakeSmtpContainerName }
-}
-
-// Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
-task integrationTest(type: Test) {
-	description = "Runs the integration tests."
-	testClassesDirs = sourceSets.integrationTest.output.classesDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
-	outputs.upToDateWhen { false }
-	environment(run.environment)
 }
 
 // Create the task that runs the maintenance command. Run e.g. with:

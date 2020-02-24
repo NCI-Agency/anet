@@ -17,7 +17,7 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.test.TestData;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ReportTest extends BeanTester<Report> {
 

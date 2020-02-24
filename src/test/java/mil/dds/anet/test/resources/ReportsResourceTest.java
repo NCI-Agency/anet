@@ -28,6 +28,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -50,18 +51,21 @@ import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
+import mil.dds.anet.beans.search.LocationSearchSortBy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.beans.search.PersonSearchSortBy;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchSortBy;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -457,16 +461,34 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
     // there.
-    AnetBeanList<Person> recentPeople = graphQLHelper.getAllObjects(author, "personRecents",
-        PERSON_FIELDS, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    final PersonSearchQuery queryPeople = new PersonSearchQuery();
+    queryPeople.setStatus(Collections.singletonList(PersonStatus.ACTIVE));
+    queryPeople.setInMyReports(true);
+    queryPeople.setSortBy(PersonSearchSortBy.RECENT);
+    queryPeople.setSortOrder(SortOrder.DESC);
+    final AnetBeanList<Person> recentPeople = graphQLHelper.searchObjects(author, "personList",
+        "query", "PersonSearchQueryInput", PERSON_FIELDS, queryPeople,
+        new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(recentPeople.getList()).contains(principalPerson);
 
-    AnetBeanList<Task> recentTasks = graphQLHelper.getAllObjects(author, "taskRecents", TASK_FIELDS,
-        new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    final TaskSearchQuery queryTasks = new TaskSearchQuery();
+    queryTasks.setStatus(TaskStatus.ACTIVE);
+    queryTasks.setInMyReports(true);
+    queryTasks.setSortBy(TaskSearchSortBy.RECENT);
+    queryTasks.setSortOrder(SortOrder.DESC);
+    final AnetBeanList<Task> recentTasks =
+        graphQLHelper.searchObjects(author, "taskList", "query", "TaskSearchQueryInput",
+            TASK_FIELDS, queryTasks, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
     assertThat(recentTasks.getList()).contains(action);
 
-    AnetBeanList<Location> recentLocations = graphQLHelper.getAllObjects(author, "locationRecents",
-        LOCATION_FIELDS, new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
+    final LocationSearchQuery queryLocations = new LocationSearchQuery();
+    queryLocations.setStatus(LocationStatus.ACTIVE);
+    queryLocations.setInMyReports(true);
+    queryLocations.setSortBy(LocationSearchSortBy.RECENT);
+    queryLocations.setSortOrder(SortOrder.DESC);
+    final AnetBeanList<Location> recentLocations = graphQLHelper.searchObjects(author,
+        "locationList", "query", "LocationSearchQueryInput", LOCATION_FIELDS, queryLocations,
+        new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});;
     assertThat(recentLocations.getList()).contains(loc);
 
     // Go and delete the entire approval chain!

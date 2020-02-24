@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
@@ -569,6 +568,7 @@ public class Report extends AbstractCustomizableAnetBean {
       final Optional<ReportAction> existing =
           actions.stream().filter(a -> Objects.equals(DaoUtils.getUuid(step), a.getStepUuid()))
               .max(new Comparator<ReportAction>() {
+                @Override
                 public int compare(ReportAction a, ReportAction b) {
                   return a.getCreatedAt().compareTo(b.getCreatedAt());
                 }
