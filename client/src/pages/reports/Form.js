@@ -327,23 +327,19 @@ const BaseReportForm = ({
   return (
     <Formik
       enableReinitialize
-      onSubmit={onSubmit}
       validateOnChange={false}
       validationSchema={reportSchema}
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
         validateField,
         validateForm,
         touched,
-        submitForm,
         resetForm,
         setSubmitting
       }) => {
@@ -1154,7 +1150,8 @@ const BaseReportForm = ({
                     id="formBottomSubmit"
                     bsStyle="primary"
                     type="button"
-                    onClick={() => onSubmit(values, { resetForm })}
+                    onClick={() =>
+                      onSubmit(values, { resetForm, setSubmitting })}
                     disabled={isSubmitting}
                   >
                     {submitText}
