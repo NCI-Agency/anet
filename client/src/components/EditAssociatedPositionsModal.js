@@ -104,7 +104,7 @@ const BaseEditAssociatedPositionsModal = ({
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
       {({ setFieldValue, values, submitForm }) => {
         return (
-          <Modal show={showModal} onHide={close}>
+          <Modal show={showModal} onHide={() => close(setFieldValue)}>
             <Modal.Header closeButton>
               <Modal.Title>Modify assigned {assignedRole}</Modal.Title>
             </Modal.Header>
@@ -150,7 +150,10 @@ const BaseEditAssociatedPositionsModal = ({
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              <Button className="pull-left" onClick={close}>
+              <Button
+                className="pull-left"
+                onClick={() => close(setFieldValue)}
+              >
                 Cancel
               </Button>
               <Button onClick={submitForm} bsStyle="primary">
@@ -163,9 +166,10 @@ const BaseEditAssociatedPositionsModal = ({
     </Formik>
   )
 
-  function close() {
+  function close(setFieldValue) {
     // Reset state before closing (cancel)
     setError(null)
+    setFieldValue("associatedPositions", position.associatedPositions)
     onCancel()
   }
 
