@@ -26,7 +26,7 @@ const Icon = ({ icon, title, className, width, height, viewBox }) => {
       width={width}
       height={height}
       viewBox={viewBox}
-      className={`Draftail-Icon ${className || ""}`}
+      className={`Draftail-Icon ${className}`}
       aria-hidden={title ? null : true}
       role={title ? "img" : null}
       aria-label={title}
@@ -55,7 +55,7 @@ Icon.propTypes = {
 
 Icon.defaultProps = {
   title: null,
-  className: null,
+  className: "",
   width: "16",
   height: "16",
   viewBox: "0 0 1024 1024"
