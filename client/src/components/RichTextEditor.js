@@ -1,7 +1,6 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
-import "components/RichTextEditor.css"
 import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertFromRaw, convertToRaw } from "draft-js"
 import {
@@ -15,13 +14,15 @@ import {
   UnorderedListButton
 } from "draft-js-buttons"
 import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
-import "draft-js-side-toolbar-plugin/lib/plugin.css"
-import "draft-js/dist/Draft.css"
 import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
-import "draftail/dist/draftail.css"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
+
+import "draft-js/dist/Draft.css"
+import "draftail/dist/draftail.css"
+import "draft-js-side-toolbar-plugin/lib/plugin.css"
+import "components/RichTextEditor.css"
 
 const newlinePlugin = createNewlinePlugin()
 
