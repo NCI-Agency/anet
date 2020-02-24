@@ -2,28 +2,21 @@ import React from "react"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import PropTypes from "prop-types"
 
-export default class AvatarDisplayComponent extends React.Component {
-  static propTypes = {
-    avatar: PropTypes.string,
-    height: PropTypes.number,
-    width: PropTypes.number,
-    style: PropTypes.object
-  }
+const AvatarDisplayComponent = ({ avatar, height, width, style }) => {
+  const image =
+    avatar === null || avatar === ""
+      ? DEFAULT_AVATAR
+      : "data:image/jpeg;base64," + avatar
 
-  render() {
-    const image =
-      this.props.avatar === null || this.props.avatar === ""
-        ? DEFAULT_AVATAR
-        : "data:image/jpeg;base64," + this.props.avatar
-
-    return (
-      <img
-        src={image}
-        height={this.props.height}
-        width={this.props.width}
-        alt="Avatar"
-        style={this.props.style}
-      />
-    )
-  }
+  return (
+    <img src={image} height={height} width={width} alt="Avatar" style={style} />
+  )
 }
+AvatarDisplayComponent.propTypes = {
+  avatar: PropTypes.string,
+  height: PropTypes.number,
+  width: PropTypes.number,
+  style: PropTypes.object
+}
+
+export default AvatarDisplayComponent
