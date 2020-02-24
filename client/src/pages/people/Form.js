@@ -192,7 +192,6 @@ const BasePersonForm = ({
                 />
                 <AvatarEditModal
                   title="Edit avatar"
-                  src={currentAvatar}
                   onAvatarUpdate={onAvatarUpdate}
                 />
                 <FormGroup>

@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
-const AvatarEditModal = ({ title, onAvatarUpdate, size }) => {
+const AvatarEditModal = ({ title, onAvatarUpdate }) => {
   const [showModal, setShowModal] = useState(false)
   const [currentPreview, setCurrentPreview] = useState(null)
 
@@ -11,12 +11,12 @@ const AvatarEditModal = ({ title, onAvatarUpdate, size }) => {
     <div>
       <button onClick={open}>{title}</button>
 
-      <Modal bsSize={size} show={showModal} onHide={close}>
+      <Modal show={showModal} onHide={close}>
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <AvatarComponent onChangePreview={updateAvatarPreview} />
+          <AvatarComponent onChangePreview={setCurrentPreview} />
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={save}>Save</Button>
@@ -24,6 +24,11 @@ const AvatarEditModal = ({ title, onAvatarUpdate, size }) => {
       </Modal>
     </div>
   )
+
+  function open(e) {
+    e.preventDefault()
+    setShowModal(true)
+  }
 
   function close() {
     setShowModal(false)
@@ -36,20 +41,10 @@ const AvatarEditModal = ({ title, onAvatarUpdate, size }) => {
     onAvatarUpdate(updatedAvatar)
     close()
   }
-
-  function open(e) {
-    e.preventDefault()
-    setShowModal(true)
-  }
-
-  function updateAvatarPreview(preview) {
-    setCurrentPreview(preview)
-  }
 }
 AvatarEditModal.propTypes = {
   title: PropTypes.string.isRequired,
-  onAvatarUpdate: PropTypes.func.isRequired,
-  size: PropTypes.string
+  onAvatarUpdate: PropTypes.func.isRequired
 }
 
 export default AvatarEditModal
