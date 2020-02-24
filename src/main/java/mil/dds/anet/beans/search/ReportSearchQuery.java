@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
@@ -114,8 +113,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   @GraphQLQuery
   @GraphQLInputField
   private Boolean sensitiveInfo;
-  // internal search parameters:
-  private Person user;
+  // internal search parameter:
   private boolean systemSearch;
 
   public ReportSearchQuery() {
@@ -364,16 +362,6 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   }
 
   @JsonIgnore
-  public Person getUser() {
-    return user;
-  }
-
-  @JsonIgnore
-  public void setUser(Person user) {
-    this.user = user;
-  }
-
-  @JsonIgnore
   public boolean isSystemSearch() {
     return systemSearch;
   }
@@ -391,7 +379,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
         orgUuid, orgRecurseStrategy, locationUuid, taskUuid, pendingApprovalOf, state,
         engagementStatus, cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid,
-        authorizationGroupUuid, sensitiveInfo, user, systemSearch);
+        authorizationGroupUuid, sensitiveInfo, systemSearch);
   }
 
   @Override
