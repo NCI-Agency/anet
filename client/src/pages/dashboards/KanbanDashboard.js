@@ -28,6 +28,9 @@ const GQL_GET_TASK_LIST = gql`
           uuid
           shortName
         }
+        customFieldRef1 {
+          uuid
+        }
         allReports: reports {
           uuid
         }
@@ -97,7 +100,7 @@ const KanbanDashboardImpl = ({ pageDispatchers, dashboardData }) => {
   const tasks = data ? data.taskList.list : []
 
   return !dashboardData.title ? null : (
-    <Kanban tasks={tasks} {...dashboardData} />
+    <Kanban allTasks={tasks} {...dashboardData} />
   )
 }
 

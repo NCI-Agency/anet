@@ -1,6 +1,5 @@
 import encodeQuery from "querystring/encode"
 import Model from "components/Model"
-import React from "react"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -43,9 +42,6 @@ export default class AuthorizationGroup extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery = "uuid, name, description"
-  static autocompleteTemplate(group) {
-    return <span>{[group.name, group.description].join(" - ")}</span>
-  }
 
   static pathFor(instance, query) {
     if (!instance) {
