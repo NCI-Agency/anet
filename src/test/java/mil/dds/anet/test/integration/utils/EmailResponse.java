@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class provides a wrapper for the email data (from the fake SMTP server response) Warning:
@@ -32,24 +33,29 @@ public class EmailResponse {
    * @param responseData The JSON object received from the server
    */
   public EmailResponse(final JsonNode responseData) {
-    final JsonNode fromNode = responseData.get("from");
-    this.from = fromNode == null ? null : new ToFromData(fromNode);
-    final JsonNode toNode = responseData.get("to");
-    this.to = toNode == null ? null : new ToFromData(toNode);
-    final JsonNode ccNode = responseData.get("cc");
-    this.cc = ccNode == null ? null : new ToFromData(ccNode);
-    final JsonNode replyToNode = responseData.get("replyTo");
-    this.replyTo = replyToNode == null ? null : new ToFromData(replyToNode);
+    this.from =
+        Optional.ofNullable(responseData.get("from")).map(x -> new ToFromData(x)).orElse(null);
+    this.to = Optional.ofNullable(responseData.get("to")).map(x -> new ToFromData(x)).orElse(null);
+    this.cc = Optional.ofNullable(responseData.get("cc")).map(x -> new ToFromData(x)).orElse(null);
+    this.replyTo =
+        Optional.ofNullable(responseData.get("replyTo")).map(x -> new ToFromData(x)).orElse(null);
 
-    this.subject = responseData.get("subject").asText();
-    this.text = responseData.get("text").asText();
-    this.textAsHtml = responseData.get("textAsHtml").asText();
-    this.date = Instant.parse(responseData.get("date").asText());
-    this.attachments = (ArrayNode) responseData.get("attachments");
-    this.messageId = responseData.get("messageId").asText();
-    this.isHtml = responseData.get("html").asBoolean();
+    this.subject =
+        Optional.ofNullable(responseData.get("subject")).map(x -> x.asText()).orElse(null);
+    this.text = Optional.ofNullable(responseData.get("text")).map(x -> x.asText()).orElse(null);
+    this.textAsHtml =
+        Optional.ofNullable(responseData.get("textAsHtml")).map(x -> x.asText()).orElse(null);
+    this.date = Optional.ofNullable(responseData.get("date")).map(x -> Instant.parse(x.asText()))
+        .orElse(null);
+    this.attachments =
+        Optional.ofNullable(responseData.get("attachments")).map(x -> (ArrayNode) x).orElse(null);
+    this.messageId =
+        Optional.ofNullable(responseData.get("messageId")).map(x -> x.asText()).orElse(null);
+    this.isHtml =
+        Optional.ofNullable(responseData.get("html")).map(x -> x.asBoolean()).orElse(null);
     this.header = responseData.get("headers");
-    this.headerLines = (ArrayNode) responseData.get("headerLines");
+    this.headerLines =
+        Optional.ofNullable(responseData.get("headerLines")).map(x -> (ArrayNode) x).orElse(null);
   }
 
   /**

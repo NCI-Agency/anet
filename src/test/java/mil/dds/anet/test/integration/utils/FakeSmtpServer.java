@@ -61,11 +61,12 @@ public class FakeSmtpServer {
     // Not in config
     httpPort = System.getenv("ANET_SMTP_HTTP_PORT");
 
-    serverQuery = String.format("http://%s:%s/api/emails", httpIP, httpPort);
     // A system variable is required to run this test
     if (httpPort == null) {
       fail("'ANET_SMTP_HTTP_PORT' system environment variable not found.");
     }
+
+    serverQuery = String.format("http://%s:%s/api/emails", httpIP, httpPort);
 
     // Read from test config
     waitBeforeActionMs = Integer
