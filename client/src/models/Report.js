@@ -216,6 +216,7 @@ export default class Report extends Model {
         .label(Settings.fields.report.reportText),
       nextSteps: yup
         .string()
+        .nullable()
         .when(["engagementDate"], (engagementDate, schema) =>
           !Report.isFuture(engagementDate)
             ? schema.required(
