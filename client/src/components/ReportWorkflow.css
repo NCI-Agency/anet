@@ -46,10 +46,10 @@ fieldset.workflow-fieldset .workflow-action .btn[disabled] {
 
 fieldset.workflow-fieldset .workflow-action button::after {
 	position: relative;
-    font-family: 'Glyphicons Halflings';
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 	content: "\e092";
 	color: #777;
@@ -87,7 +87,7 @@ fieldset.workflow-fieldset.compact{
 	background-color: #c23030;
 }
 
-.action-status{
+.action-status {
 	text-transform: uppercase;
 	font-weight: bold;
 }
