@@ -47,7 +47,8 @@ const BaseRelatedObjectNotes = ({
   )
 
   // TODO: display somewhere the error state
-  const [error, setError] = useState(null) // eslint-disable-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars
+  const [error, setError] = useState(null) // lgtm[js/unused-local-variable]
   const [hidden, setHidden] = useState(true)
   const [
     showRelatedObjectNoteModalKey,
