@@ -80,29 +80,20 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
 
   initialValues.assessment_customFieldEnum1 = ""
 
-  const orgSearchQuery = {
-    status: Organization.STATUS.ACTIVE,
-    type: Organization.TYPE.ADVISOR_ORG
-  }
-
-  if (currentUser && currentUser.isSuperUser() && !currentUser.isAdmin()) {
-    Object.assign(orgSearchQuery, {
-      parentOrgUuid: currentUser.position.organization.uuid,
-      parentOrgRecursively: true
-    })
-  }
-
   const taskedOrganizationsFilters = {
-    allOrganizations: {
-      label: "All organizations",
-      queryVars: {}
+    allAdvisorOrganizations: {
+      label: "All advisor organizations",
+      queryVars: {
+        status: Organization.STATUS.ACTIVE,
+        type: Organization.TYPE.ADVISOR_ORG
+      }
     }
   }
 
   const tasksFilters = {
-    allTasks: {
-      label: "All tasks",
-      queryVars: {}
+    allObjectives: {
+      label: "All objectives", // TODO: Implement conditional labels, until then, we need to be explicit here
+      queryVars: { hasCustomFieldRef1: false }
     }
   }
   const positionsFilters = {

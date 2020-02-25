@@ -32,11 +32,18 @@ const BaseCreateButton = ({ currentUser }) => {
         id="createButton"
         onSelect={onSelect}
       >
-        {modelClasses.map((modelClass, i) => (
-          <MenuItem key={modelClass.resourceName} eventKey={modelClass}>
-            New {modelClass.displayName() || modelClass.resourceName}
-          </MenuItem>
-        ))}
+        {modelClasses.map((modelClass, i) => {
+          const name = modelClass.displayName() || modelClass.resourceName
+          return (
+            <MenuItem
+              key={modelClass.resourceName}
+              eventKey={modelClass}
+              id={`new-${name.toLowerCase()}`}
+            >
+              New {name}
+            </MenuItem>
+          )
+        })}
       </DropdownButton>
     )
   } else if (modelClasses.length) {

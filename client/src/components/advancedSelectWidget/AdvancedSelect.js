@@ -31,8 +31,8 @@ AdvancedSelectTarget.propTypes = {
 
 const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
-    <Col md={4} xsHidden smHidden>
-      <ul className="advanced-select-filters">
+    <Col md={2} xsHidden smHidden>
+      <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.keys(items).map(filterType => (
           <li
             key={filterType}
@@ -306,10 +306,11 @@ const AdvancedSelect = ({
         handleOnChange={handleOnChangeSelect}
       />
 
-      <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
+      <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
         <OverlayTable
           fieldName={fieldName}
           items={items}
+          pageNum={pageNum}
           selectedItems={value}
           handleAddItem={item => {
             handleAddItem(item)
@@ -342,6 +343,7 @@ const AdvancedSelect = ({
                 content={advancedSearchPopoverContent}
                 isOpen={showOverlay}
                 captureDismiss
+                dsabled={disabled}
                 interactionKind={PopoverInteractionKind.CLICK}
                 onInteraction={handleInteraction}
                 usePortal={false}
@@ -388,24 +390,26 @@ const AdvancedSelect = ({
     // Note: these state updates are not being batched, order is therefore important
     // Make sure the overlay is being closed when clicking outside of it,
     // but keep it open when clicking on the input field.
-    const inputFocus = searchInput.current.contains(event && event.target)
-    const openOverlay = nextShowOverlay || inputFocus
-    if (openOverlay !== showOverlay) {
-      if (openOverlay) {
-        // overlay is being opened
-        // Note: state updates are being batched here
-        setShowOverlay(openOverlay)
-        setSearchTerms("")
-        setIsLoading(true)
-        setDoFetchResults(true)
-        setDoFetchResultsDebounced(false)
-      } else {
-        // overlay is being closed
-        // Note: state updates WOULD NOT be batched here
-        // When closing the overlay the state updates were not being batched, we
-        // therefore moved them to an effect, to prevent several too many renders
-        // and also to make sure the state updates are being batched in there
-        setDoReset(true)
+    if (!disabled) {
+      const inputFocus = searchInput.current.contains(event && event.target)
+      const openOverlay = nextShowOverlay || inputFocus
+      if (openOverlay !== showOverlay) {
+        if (openOverlay) {
+          // overlay is being opened
+          // Note: state updates are being batched here
+          setShowOverlay(openOverlay)
+          setSearchTerms("")
+          setIsLoading(true)
+          setDoFetchResults(true)
+          setDoFetchResultsDebounced(false)
+        } else {
+          // overlay is being closed
+          // Note: state updates WOULD NOT be batched here
+          // When closing the overlay the state updates were not being batched, we
+          // therefore moved them to an effect, to prevent several too many renders
+          // and also to make sure the state updates are being batched in there
+          setDoReset(true)
+        }
       }
     }
   }

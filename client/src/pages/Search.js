@@ -508,7 +508,7 @@ const Tasks = ({
   const totalCount = data && data.taskList && data.taskList.totalCount
   setTotalCount(totalCount)
   if (_get(tasks, "length", 0) === 0) {
-    return <em>No tasks found</em>
+    return <em>No {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]} found</em>
   }
 
   return (
