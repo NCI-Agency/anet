@@ -7,7 +7,15 @@ import React from "react"
 import { Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
-const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
+const TaskTable = ({
+  id,
+  tasks,
+  showParent,
+  showOrganization,
+  showDelete,
+  showDescription,
+  onDelete
+}) => {
   const tasksExist = _get(tasks, "length", 0) > 0
 
   return (
@@ -18,7 +26,10 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
             <thead>
               <tr>
                 <th>Name</th>
+                {/* TODO: Implement conditional labels, until then, we need to be explicit here */}
+                {showParent && <th>Objective</th>}
                 {showOrganization && <th>Tasked organizations</th>}
+                {showDescription && <th>Description</th>}
                 <th />
               </tr>
             </thead>
@@ -30,6 +41,15 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
                       {task.shortName} - {task.longName}
                     </LinkTo>
                   </td>
+                  {showParent && (
+                    <td className="parentTaskName">
+                      {task.customFieldRef1 && (
+                        <LinkTo task={task.customFieldRef1}>
+                          {task.customFieldRef1.shortName}
+                        </LinkTo>
+                      )}
+                    </td>
+                  )}
                   {showOrganization && (
                     <td className="taskOrg">
                       {task.taskedOrganizations.map(org => (
@@ -39,6 +59,11 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
                           key={`${task.uuid}-${org.uuid}`}
                         />
                       ))}
+                    </td>
+                  )}
+                  {showDescription && (
+                    <td className="taskLongName">
+                      <span>{task.longName}</span>
                     </td>
                   )}
                   {showDelete && (
@@ -67,7 +92,7 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
           )}
         </div>
       ) : (
-        <em>No tasks found</em>
+        <em>No effort found</em>
       )}
     </div>
   )
@@ -76,9 +101,11 @@ const TaskTable = ({ id, tasks, showOrganization, showDelete, onDelete }) => {
 TaskTable.propTypes = {
   id: PropTypes.string,
   tasks: PropTypes.array,
+  showParent: PropTypes.bool,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
-  showOrganization: PropTypes.bool
+  showOrganization: PropTypes.bool,
+  showDescription: PropTypes.bool
 }
 
 TaskTable.defaultProps = {

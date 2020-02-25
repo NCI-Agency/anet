@@ -6,7 +6,7 @@ const test = require("../util/test")
 var testReportURL = null
 
 test("Draft and submit a report", async t => {
-  t.plan(21)
+  t.plan(19)
 
   const {
     pageHelpers,
@@ -22,7 +22,11 @@ test("Draft and submit a report", async t => {
 
   await httpRequestSmtpServer("DELETE")
 
-  await pageHelpers.goHomeAndThenToReportsPage()
+  await t.context.get("/", "erin")
+
+  const $createButton = await t.context.$("#createButton")
+  await $createButton.click()
+
   await pageHelpers.writeInForm("#intent", "meeting goal")
 
   const $engagementDate = await $("#engagementDate")
@@ -128,30 +132,14 @@ test("Draft and submit a report", async t => {
     "First principal primary attendee checkbox should no longer be checked"
   )
 
-  const $objectivesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
-    "#tasksLevel1",
-    "budget and planning"
+  const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
+    "#tasks",
+    "2.A"
   )
 
   const $tasksTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Objectives and Efforts"]')
+    By.xpath('//h2/span[text()="Efforts"]')
   )
-  await $tasksTitle.click()
-
-  t.is(
-    await $objectivesAdvancedSelect.getAttribute("value"),
-    "",
-    "Closing the objectives advanced multi select overlay empties the input field."
-  )
-
-  const $newObjectivesRow = await $("#tasks-objectives table tbody tr td")
-  await assertElementText(t, $newObjectivesRow, "EF 1 - Budget and Planning")
-
-  const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
-    "#tasks",
-    "1.1"
-  )
-
   await $tasksTitle.click()
 
   t.is(
@@ -161,7 +149,7 @@ test("Draft and submit a report", async t => {
   )
 
   const $newTaskRow = await $("#tasks-tasks table tbody tr td")
-  await assertElementText(t, $newTaskRow, "1.1 - Budgeting in the MoD")
+  await assertElementText(t, $newTaskRow, "2.A")
 
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")
@@ -303,7 +291,7 @@ test("Publish report chain", async t => {
   await approveReport(t, "jacob")
   await approveReport(t, "rebecca")
   // Then the task owner can approve the report
-  await approveReport(t, "bob")
+  await approveReport(t, "henry")
 
   // Admin user needs to publish the report
   await t.context.get("/", "arthur")

@@ -7,7 +7,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Glyphicon, Panel } from "react-bootstrap"
 
-const Kanban = ({ columns, tasks }) => (
+const Kanban = ({ columns, allTasks }) => (
   <div
     style={{
       display: "flex",
@@ -15,26 +15,34 @@ const Kanban = ({ columns, tasks }) => (
     }}
   >
     {columns.map(column => {
-      return (
-        <Column
-          name={column.name}
-          taskUuids={column.tasks}
-          key={column.name}
-          tasks={tasks}
-        />
-      )
+      const name =
+        column.name || allTasks.find(task => task.uuid === column)?.shortName
+      const tasks =
+        (column.tasks &&
+          allTasks.filter(task => column.tasks.includes(task.uuid))) ||
+        allTasks.filter(task => task.customFieldRef1?.uuid === column)
+
+      return <Column name={name} tasks={tasks} key={name} />
     })}
   </div>
 )
 
 Kanban.propTypes = {
-  tasks: PropTypes.array.isRequired,
-  columns: PropTypes.array.isRequired
+  allTasks: PropTypes.array.isRequired,
+  // a column is either a UUID of a task with children or a {name, tasks[]} object
+  columns: PropTypes.arrayOf(
+    PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        tasks: PropTypes.arrayOf(PropTypes.string).isRequired
+      })
+    ])
+  ).isRequired
 }
 
-const Column = ({ name, tasks, taskUuids }) => {
+const Column = ({ name, tasks }) => {
   const [open, setOpen] = useState(false)
-  tasks = tasks.filter(task => taskUuids.includes(task.uuid))
   const counters = tasks.reduce((counter, task) => {
     counter[task.customFieldEnum1] = ++counter[task.customFieldEnum1] || 1
     return counter
@@ -95,8 +103,7 @@ const Column = ({ name, tasks, taskUuids }) => {
 
 Column.propTypes = {
   name: PropTypes.string.isRequired,
-  tasks: PropTypes.array.isRequired,
-  taskUuids: PropTypes.array.isRequired
+  tasks: PropTypes.array.isRequired
 }
 
 const Card = ({ task }) => {
@@ -125,13 +132,15 @@ const Card = ({ task }) => {
         />
         <br />
         {/* TODO make a single line when collapsed <div style={this.state.open ? {} : {textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}> */}
-        <div>
-          <small>
-            {open || task.longName.length < 100
-              ? task.longName
-              : task.longName.substring(0, 100) + "..."}
-          </small>
-        </div>
+        {task.longName && (
+          <div>
+            <small>
+              {open || task.longName.length < 100
+                ? task.longName
+                : task.longName.substring(0, 100) + "..."}
+            </small>
+          </div>
+        )}
       </div>
 
       {open && (

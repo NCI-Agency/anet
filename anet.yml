@@ -202,9 +202,9 @@ dictionary:
   fields:
 
     task:
-      shortLabel: Effort / Task
+      shortLabel: Objective / Effort
       shortName:
-        label: Effort number
+        label: Objective / Effort number
         placeholder: Enter an effort name, example....
 
       longLabel: Objectives and Efforts
@@ -659,9 +659,6 @@ dictionary:
   dashboards:
     - label: dashboard0
       data: /data/dashboards/dashboard0.json
-      type: kanban
-    - label: dashboard1
-      data: /data/dashboards/dashboard1.json
       type: kanban
     - label: decisives
       data: /data/dashboards/decisives.json

@@ -30,8 +30,8 @@ AdvancedSelectTarget.propTypes = {
 
 const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
-    <Col md={4} xsHidden smHidden>
-      <ul className="advanced-select-filters">
+    <Col md={2} xsHidden smHidden>
+      <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.keys(items).map(filterType => (
           <li
             key={filterType}
@@ -182,6 +182,8 @@ export default class AdvancedSelect extends Component {
       ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
       : null
     const items = results && results[filterType] ? results[filterType].list : []
+    const pageNum =
+      results && results[filterType] ? results[filterType].pageNum : 0
 
     const advancedSearchPopoverContent = (
       <Row className="border-between">
@@ -196,10 +198,11 @@ export default class AdvancedSelect extends Component {
           handleOnChange={this.handleOnChangeSelect}
         />
 
-        <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
+        <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
           <this.props.overlayTable
             fieldName={fieldName}
             items={items}
+            pageNum={pageNum}
             selectedItems={value}
             handleAddItem={item => {
               handleAddItem(item)

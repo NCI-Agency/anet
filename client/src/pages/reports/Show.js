@@ -130,6 +130,10 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
+        customFieldRef1 {
+          uuid
+          shortName
+        }
         taskedOrganizations {
           uuid
           shortName
@@ -493,7 +497,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                         <p>
                           <span>
                             <strong>
-                              {Settings.fields.report.keyOutcomes}:
+                              {Settings.fields.report.keyOutcomes ||
+                                "Key outcomes"}
+                              :
                             </strong>{" "}
                             {report.keyOutcomes}&nbsp;
                           </span>
@@ -606,21 +612,18 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   }
                 />
               </Fieldset>
-
               <Fieldset title="Meeting attendees">
                 <AttendeesTable attendees={report.attendees} disabled />
               </Fieldset>
-
-              <Fieldset title={Settings.fields.task.longLabel}>
-                <TaskTable tasks={report.tasks} showOrganization />
+              {/* TODO: Implement conditional labels, until then, we need to be explicit here */}
+              <Fieldset title="Efforts">
+                <TaskTable tasks={report.tasks} showParent />
               </Fieldset>
-
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
                   {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
-
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
@@ -637,7 +640,6 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                     )) || <h5>No groups are authorized!</h5>}
                   </Fieldset>
               )}
-
               {Settings.fields.report.customFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
                   <ReadonlyCustomFields
@@ -648,7 +650,6 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   />
                 </Fieldset>
               )}
-
               <Fieldset
                 title="Engagement assessments"
                 id="engagement-assessments"
@@ -676,11 +677,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   )
                 })}
               </Fieldset>
-
               {report.showWorkflow() && (
                 <ReportFullWorkflow workflow={report.workflow} />
               )}
-
               {canSubmit && (
                 <Fieldset>
                   <Col md={9}>
@@ -710,7 +709,6 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   </Col>
                 </Fieldset>
               )}
-
               <Fieldset className="report-sub-form" title="Comments">
                 {report.comments.map(comment => {
                   const createdAt = moment(comment.createdAt)
@@ -751,7 +749,6 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   </Button>
                 </div>
               </Fieldset>
-
               {canApprove &&
                 renderApprovalForm(
                   values,

@@ -1,6 +1,5 @@
 import { Settings } from "api"
 import Model from "components/Model"
-import React from "react"
 import AFG_ICON from "resources/afg_small.png"
 import POSITIONS_ICON from "resources/positions.png"
 import RS_ICON from "resources/rs_small.png"
@@ -80,20 +79,6 @@ export default class Position extends Model {
 
   static autocompleteQuery =
     "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
-
-  static autocompleteTemplate(position) {
-    return (
-      <span>
-        <img
-          src={new Position(position).iconUrl()}
-          alt={position.type}
-          height={20}
-          className="position-icon"
-        />
-        {position.name}
-      </span>
-    )
-  }
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

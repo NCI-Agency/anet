@@ -42,9 +42,6 @@ export default class AuthorizationGroup extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery = "uuid, name, description"
-  static autocompleteTemplate(group) {
-    return <span>{[group.name, group.description].join(" - ")}</span>
-  }
 
   static pathFor(instance, query) {
     if (!instance) {

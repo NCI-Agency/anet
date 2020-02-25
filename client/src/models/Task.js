@@ -1,6 +1,5 @@
 import { Settings } from "api"
 import Model, { createYupObjectShape, yupDate } from "components/Model"
-import React from "react"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -51,7 +50,7 @@ export default class Task extends Model {
         .label(Settings.fields.task.shortName.label),
       longName: yup
         .string()
-        .required()
+        .nullable()
         .default("")
         .label(Settings.fields.task.longName.label),
       category: yup
@@ -147,11 +146,7 @@ export default class Task extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, shortName, longName, taskedOrganizations { uuid, shortName }, customFields"
-
-  static autocompleteTemplate(task) {
-    return <span>{[task.shortName, task.longName].join(" - ")}</span>
-  }
+    "uuid, shortName, longName, customFieldRef1 { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
@@ -166,8 +161,6 @@ export default class Task extends Model {
   }
 
   toString() {
-    return `${this.shortName} ${this.longName.substr(0, 80)}${
-      this.longName.length > 80 ? "..." : ""
-    }`
+    return `${this.shortName}`
   }
 }
