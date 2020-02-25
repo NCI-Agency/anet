@@ -40,6 +40,10 @@ fieldset.workflow-fieldset .workflow-action .btn {
 	border-radius: 30px;
 }
 
+fieldset.workflow-fieldset .workflow-action .btn[disabled] {
+  opacity: 1;
+}
+
 fieldset.workflow-fieldset .workflow-action button::after {
 	position: relative;
     font-family: 'Glyphicons Halflings';
