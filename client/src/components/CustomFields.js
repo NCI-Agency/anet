@@ -425,11 +425,7 @@ const CustomField = ({
       {...fieldProps}
       {...extraProps}
     >
-      {helpText && (
-        <HelpBlock>
-          <span className="text-success">{helpText}</span>
-        </HelpBlock>
-      )}
+      {helpText && <HelpBlock>{helpText}</HelpBlock>}
     </FieldComponent>
   )
 }
