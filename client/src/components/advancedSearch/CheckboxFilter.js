@@ -10,7 +10,7 @@ const CheckboxFilter = props => {
   const toQuery = val => {
     return { [queryKey]: val.value }
   }
-  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery) // eslint-disable-line no-unused-vars
+  const value = useSearchFilter(props, defaultValue, toQuery)[0]
 
   const msg = "Authorized for me"
   return !asFormField ? (
