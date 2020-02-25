@@ -10,7 +10,6 @@ import Model, {
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
-import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import _set from "lodash/set"
@@ -20,6 +19,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
+import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 
 const WIDGETS = {
@@ -391,7 +391,7 @@ const CustomField = ({
     ...fieldProps
   } = fieldConfig
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
-  const validateFormDebounced = _debounce(validateForm, 400) // with validateField it somehow doesn't work
+  const [validateFormDebounced] = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate: true) => {
       const val =
