@@ -582,7 +582,7 @@ const BaseReportForm = ({
                   {isFutureEngagement && (
                     <HelpBlock>
                       <span className="text-success">
-                        This will create an planned engagement
+                        This will create a planned engagement
                       </span>
                     </HelpBlock>
                   )}
