@@ -2,6 +2,10 @@ package mil.dds.anet.test.integration.utils;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -25,7 +29,6 @@ import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
 
 /**
  * This class provides a wrapper for the fake SMTP server's API.
@@ -44,7 +47,9 @@ public class FakeSmtpServer {
   private final int waitBeforeActionMs;
   private final int maxRetriesClear;
 
-  public FakeSmtpServer(SmtpConfiguration smtpConfig) throws Exception {
+  private final String serverQuery;
+
+  public FakeSmtpServer(final SmtpConfiguration smtpConfig) throws Exception {
     smtpIP = smtpConfig.getHostname();
     smtpPort = Integer.toString(smtpConfig.getPort());
     smtpUsername = smtpConfig.getUsername();
@@ -60,6 +65,8 @@ public class FakeSmtpServer {
     if (httpPort == null) {
       fail("'ANET_SMTP_HTTP_PORT' system environment variable not found.");
     }
+
+    serverQuery = String.format("http://%s:%s/api/emails", httpIP, httpPort);
 
     // Read from test config
     waitBeforeActionMs = Integer
@@ -91,13 +98,12 @@ public class FakeSmtpServer {
    * @throws IOException If the request fails
    * @throws InterruptedException If the wait timer fails
    */
-  public List<EmailResponse> requestEmailsFromServer(QueryFilter queryFilter)
+  public List<EmailResponse> requestEmailsFromServer(final QueryFilter queryFilter)
       throws IOException, InterruptedException {
     TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
 
-    final String request = queryFilter.createFilteredServerQuery(httpIP, httpPort);
+    final String request = queryFilter.createFilteredServerQuery();
     final String response = sendServerRequest(request, "GET");
-    System.out.println(response);
     return parseServeResponse(response);
   }
 
@@ -109,9 +115,7 @@ public class FakeSmtpServer {
   public void clearEmailServer() throws Exception {
     TimeUnit.MILLISECONDS.sleep(waitBeforeActionMs);
 
-    final String request = String.format("http://%s:%s/api/emails", httpIP, httpPort);
-
-    sendServerRequest(request, "DELETE");
+    sendServerRequest(serverQuery, "DELETE");
 
     for (int i = 0; i < maxRetriesClear; i++) {
       if (i == maxRetriesClear) {
@@ -122,18 +126,17 @@ public class FakeSmtpServer {
     }
   }
 
-  private static List<EmailResponse> parseServeResponse(String serverResponse) {
-    final JSONArray response = new JSONArray(serverResponse);
+  private static List<EmailResponse> parseServeResponse(final String serverResponse)
+      throws JsonMappingException, JsonProcessingException {
+    final ObjectMapper mapper = new ObjectMapper();
+    final JsonNode response = mapper.readTree(serverResponse);
     final List<EmailResponse> emails = new ArrayList<EmailResponse>();
-
-    for (int i = 0; i < response.length(); i++) {
-      emails.add(new EmailResponse(response.getJSONObject(i)));
-    }
-
+    response.forEach(node -> emails.add(new EmailResponse(node)));
     return emails;
   }
 
-  private String sendServerRequest(String request, String requestType) throws IOException {
+  private String sendServerRequest(final String request, final String requestType)
+      throws IOException {
     final URL url = new URL(request);
     final HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 
@@ -165,8 +168,8 @@ public class FakeSmtpServer {
    * @param date (Optional) Email's date
    * @throws MessagingException If formatting/sending the email fails
    */
-  public void sendEmail(String to, String from, String replyTo, String cc, String subject,
-      String msg, Date date) throws MessagingException {
+  public void sendEmail(final String to, final String from, final String replyTo, final String cc,
+      final String subject, final String msg, final Date date) throws MessagingException {
     final Properties properties = System.getProperties();
 
     properties.setProperty("mail.smtp.host", smtpIP);
@@ -212,29 +215,28 @@ public class FakeSmtpServer {
     public String since = "";
     public String until = "";
 
-    public QueryFilter withFrom(String value) {
+    public QueryFilter withFrom(final String value) {
       this.from = "?from=" + value;
       return this;
     }
 
-    public QueryFilter withTo(String value) {
+    public QueryFilter withTo(final String value) {
       this.to = "?to=" + value;
       return this;
     }
 
-    public QueryFilter withSince(String value) {
+    public QueryFilter withSince(final String value) {
       this.since = "?since=" + value;
       return this;
     }
 
-    public QueryFilter withUntil(String value) {
+    public QueryFilter withUntil(final String value) {
       this.until = "?until=" + value;
       return this;
     }
 
-    public String createFilteredServerQuery(String serverHost, String serverPort) {
-      return String.format("http://%s:%s/api/emails%s%s%s%s", serverHost, serverPort, this.from,
-          this.to, this.since, this.until);
+    public String createFilteredServerQuery() {
+      return String.format(serverQuery + "%s%s%s%s", this.from, this.to, this.since, this.until);
     }
   }
 

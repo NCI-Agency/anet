@@ -87,9 +87,6 @@ dependencies {
 	// For JSON schema validation
 	compile 'com.networknt:json-schema-validator:1.0.30'
 
-	// TODO: remove dependency once no longer needed by tests
-	compile 'org.json:json:20190722'
-
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.1.1'
 	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
