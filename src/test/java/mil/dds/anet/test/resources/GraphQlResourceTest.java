@@ -18,6 +18,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.test.integration.utils.TestApp;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -138,7 +139,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
   private Builder httpQuery(String path, Person authUser) {
     final String authString =
         Base64.getEncoder().encodeToString((authUser.getDomainUsername() + ":").getBytes());
-    return client.target(String.format("http://localhost:%d%s", RULE.getLocalPort(), path))
+    return client.target(String.format("http://localhost:%d%s", TestApp.app.getLocalPort(), path))
         .request().header("Authorization", "Basic " + authString)
         .header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
   }
