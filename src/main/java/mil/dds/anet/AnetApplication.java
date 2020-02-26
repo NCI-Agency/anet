@@ -218,43 +218,48 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey().register(RolesAllowedDynamicFeature.class);
     environment.jersey().register(new WebExceptionMapper());
 
-    // Schedule any tasks that need to run on an ongoing basis.
-    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration);
-    FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
-    ReportPublicationWorker reportPublicationWorker =
-        new ReportPublicationWorker(engine.getReportDao(), configuration);
-    final ReportApprovalWorker reportApprovalWorker =
-        new ReportApprovalWorker(engine.getReportDao(), configuration);
+    if (configuration.isTestMode()) {
+      logger.info("AnetApplication is in testMode, skipping scheduled workers");
+    } else {
+      logger.info("AnetApplication is starting scheduled workers");
+      // Schedule any tasks that need to run on an ongoing basis.
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+      AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration);
+      FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
+      ReportPublicationWorker reportPublicationWorker =
+          new ReportPublicationWorker(engine.getReportDao(), configuration);
+      final ReportApprovalWorker reportApprovalWorker =
+          new ReportApprovalWorker(engine.getReportDao(), configuration);
 
-    // Check for any reports that need to be published every 5 minutes.
-    // And run once in 5 seconds from boot-up. (give the server time to boot up).
-    scheduler.scheduleAtFixedRate(reportPublicationWorker, 5, 5, TimeUnit.MINUTES);
-    scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
+      // Check for any reports that need to be published every 5 minutes.
+      // And run once in 5 seconds from boot-up. (give the server time to boot up).
+      scheduler.scheduleAtFixedRate(reportPublicationWorker, 5, 5, TimeUnit.MINUTES);
+      scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
 
-    // Check for any emails that need to be sent every 5 minutes.
-    // And run once in 10 seconds from boot-up. (give the server time to boot up).
-    scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
-    scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
+      // Check for any emails that need to be sent every 5 minutes.
+      // And run once in 10 seconds from boot-up. (give the server time to boot up).
+      scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
+      scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
 
-    // Check for any future engagements every 3 hours.
-    // And run once in 15 seconds from boot-up. (give the server time to boot up).
-    scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
-    scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
+      // Check for any future engagements every 3 hours.
+      // And run once in 15 seconds from boot-up. (give the server time to boot up).
+      scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
+      scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
-    // Check for any reports that need to be approved every 5 minutes.
-    // And run once in 20 seconds from boot-up. (give the server time to boot up).
-    scheduler.scheduleAtFixedRate(reportApprovalWorker, 5, 5, TimeUnit.MINUTES);
-    scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
+      // Check for any reports that need to be approved every 5 minutes.
+      // And run once in 20 seconds from boot-up. (give the server time to boot up).
+      scheduler.scheduleAtFixedRate(reportApprovalWorker, 5, 5, TimeUnit.MINUTES);
+      scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
 
-    runAccountDeactivationWorker(configuration, scheduler, engine);
+      runAccountDeactivationWorker(configuration, scheduler, engine);
 
-    if (DaoUtils.isPostgresql()) {
-      // Wait 60 seconds between updates of PostgreSQL materialized views,
-      // starting 30 seconds after boot-up.
-      final MaterializedViewRefreshWorker materializedViewRefreshWorker =
-          new MaterializedViewRefreshWorker(engine.getAdminDao());
-      scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
+      if (DaoUtils.isPostgresql()) {
+        // Wait 60 seconds between updates of PostgreSQL materialized views,
+        // starting 30 seconds after boot-up.
+        final MaterializedViewRefreshWorker materializedViewRefreshWorker =
+            new MaterializedViewRefreshWorker(engine.getAdminDao());
+        scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
+      }
     }
 
     // Create all of the HTTP Resources.
