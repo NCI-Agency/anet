@@ -38,7 +38,7 @@ const TaskTable = ({
                 <tr key={task.uuid}>
                   <td className="taskName">
                     <LinkTo modelType="Task" model={task}>
-                      {task.shortName} - {task.longName}
+                      {task.shortName}
                     </LinkTo>
                   </td>
                   {showParent && (
