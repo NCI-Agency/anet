@@ -164,16 +164,4 @@ public class TaskResource {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
-
-  /**
-   * Returns the most recent Tasks that this user listed in reports.
-   * 
-   * @param maxResults maximum number of results to return, defaults to 3
-   */
-  @GraphQLQuery(name = "taskRecents")
-  public AnetBeanList<Task> recents(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "maxResults", defaultValue = "3") int maxResults) {
-    return new AnetBeanList<Task>(
-        dao.getRecentTasks(DaoUtils.getUserFromContext(context), maxResults));
-  }
 }

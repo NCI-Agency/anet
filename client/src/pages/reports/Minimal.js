@@ -293,7 +293,9 @@ const ReportMinimal = ({ pageDispatchers }) => {
                         <p>
                           <span>
                             <strong>
-                              {Settings.fields.report.keyOutcomes}:
+                              {Settings.fields.report.keyOutcomes ||
+                                "Key outcomes"}
+                              :
                             </strong>{" "}
                             {report.keyOutcomes}&nbsp;
                           </span>
@@ -398,7 +400,7 @@ const ReportMinimal = ({ pageDispatchers }) => {
               </Fieldset>
 
               <Fieldset title={Settings.fields.task.longLabel}>
-                <TaskTable tasks={report.tasks} showOrganization />
+                <TaskTable tasks={report.tasks} showParent />
               </Fieldset>
 
               {report.reportText && (

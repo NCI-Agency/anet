@@ -68,16 +68,4 @@ public class LocationResource {
     return numRows;
   }
 
-  /**
-   * Returns the most recent locations that this user listed in reports.
-   * 
-   * @param maxResults maximum number of results to return, defaults to 3
-   */
-  @GraphQLQuery(name = "locationRecents")
-  public AnetBeanList<Location> recents(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "maxResults", defaultValue = "3") int maxResults) {
-    return new AnetBeanList<Location>(
-        dao.getRecentLocations(DaoUtils.getUserFromContext(context), maxResults));
-  }
-
 }

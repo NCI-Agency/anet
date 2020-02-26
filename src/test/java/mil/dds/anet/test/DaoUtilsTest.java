@@ -3,7 +3,7 @@ package mil.dds.anet.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import mil.dds.anet.utils.DaoUtils.DbType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for unit-testable methods of DaoUtils.

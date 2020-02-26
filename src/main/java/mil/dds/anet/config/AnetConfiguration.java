@@ -15,6 +15,7 @@ import mil.dds.anet.utils.Utils;
 
 public class AnetConfiguration extends Configuration implements AssetsBundleConfiguration {
 
+  private boolean testMode;
   private boolean developmentMode;
   private boolean redirectToHttps = false;
 
@@ -57,6 +58,14 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   @JsonProperty("database")
   public DataSourceFactory getDataSourceFactory() {
     return database;
+  }
+
+  public boolean isTestMode() {
+    return testMode;
+  }
+
+  public void setTestMode(boolean testMode) {
+    this.testMode = testMode;
   }
 
   public boolean isDevelopmentMode() {
@@ -134,7 +143,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   }
 
   public void setDictionary(Map<String, Object> dictionary) {
-    this.dictionary = dictionary;
+    this.dictionary = Collections.unmodifiableMap(dictionary);
   }
 
   @SuppressWarnings("unchecked")

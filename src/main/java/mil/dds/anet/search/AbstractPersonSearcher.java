@@ -13,6 +13,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
+import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, PersonSearchQuery>
@@ -93,6 +94,17 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       }
     }
 
+    if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addFromClause("JOIN ("
+          + "  SELECT \"reportPeople\".\"personUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
+          + "  FROM reports"
+          + "  JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\""
+          + "  WHERE reports.\"authorUuid\" = :userUuid AND \"reportPeople\".\"personUuid\" != :userUuid"
+          + "  GROUP BY \"reportPeople\".\"personUuid\""
+          + ") \"inMyReports\" ON people.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+    }
+
     addOrderByClauses(qb, query);
   }
 
@@ -105,6 +117,12 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
         break;
       case RANK:
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people", "rank"));
+        break;
+      case RECENT:
+        if (Boolean.TRUE.equals(query.isInMyReports())) {
+          // Otherwise the JOIN won't exist
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+        }
         break;
       case NAME:
       default:

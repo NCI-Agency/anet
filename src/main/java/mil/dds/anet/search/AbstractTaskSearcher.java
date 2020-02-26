@@ -9,6 +9,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
+import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSearchQuery>
@@ -71,6 +72,16 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addCustomFieldRef1UuidQuery(query);
     }
 
+    if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addFromClause("JOIN ("
+          + "  SELECT \"reportTasks\".\"taskUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
+          + "  FROM reports"
+          + "  JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\""
+          + "  WHERE reports.\"authorUuid\" = :userUuid GROUP BY \"reportTasks\".\"taskUuid\""
+          + ") \"inMyReports\" ON tasks.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+    }
+
     addOrderByClauses(qb, query);
   }
 
@@ -82,7 +93,6 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
-
     qb.addFromClause(
         "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
 
@@ -114,6 +124,12 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         break;
       case CATEGORY:
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "category"));
+        break;
+      case RECENT:
+        if (Boolean.TRUE.equals(query.isInMyReports())) {
+          // Otherwise the JOIN won't exist
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+        }
         break;
       case NAME:
       default:

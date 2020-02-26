@@ -178,13 +178,17 @@ const reportTour = (currentUser, history) => {
         target: "#tasks",
         placement: "right"
       },
-      {
-        title: Settings.fields.report.keyOutcomes,
-        content:
-          "Use this section to tell readers what the main information or results from your engagement were. This will be displayed in your report's summary, so include information that you think would be valuable for leadership and other organizations to know.",
-        target: "#keyOutcomes",
-        placement: "right"
-      },
+      ...(Settings.fields.report.keyOutcomes
+        ? [
+          {
+            title: Settings.fields.report.keyOutcomes,
+            content:
+                "Use this section to tell readers what the main information or results from your engagement were. This will be displayed in your report's summary, so include information that you think would be valuable for leadership and other organizations to know.",
+            target: "#keyOutcomes",
+            placement: "right"
+          }
+        ]
+        : []),
       {
         title: Settings.fields.report.nextSteps,
         content:

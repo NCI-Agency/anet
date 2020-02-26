@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+import mil.dds.anet.beans.Person;
 
 @JsonIgnoreProperties({"user", "pass"})
 public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQuery<T>, Cloneable {
@@ -29,6 +30,11 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   private Optional<T> sortBy = Optional.empty();
   // internal search parameter:
   private Optional<AbstractBatchParams<?, ?>> batchParams = Optional.empty();
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean inMyReports;
+  // internal search parameter:
+  private Person user;
 
   public AbstractSearchQuery(T defaultSortBy) {
     this.defaultSortBy = defaultSortBy;
@@ -133,9 +139,17 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
     this.batchParams = Optional.ofNullable(batchParams);
   }
 
+  public Boolean isInMyReports() {
+    return inMyReports;
+  }
+
+  public void setInMyReports(Boolean inMyReports) {
+    this.inMyReports = inMyReports;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(text, pageNum, pageSize, sortOrder, sortBy, batchParams);
+    return Objects.hash(text, pageNum, pageSize, sortOrder, sortBy, inMyReports, batchParams, user);
   }
 
   @Override
@@ -150,7 +164,9 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
         && Objects.equals(getPageSize(), other.getPageSize())
         && Objects.equals(getSortOrder(), other.getSortOrder())
         && Objects.equals(getSortBy(), other.getSortBy())
-        && Objects.equals(getBatchParams(), other.getBatchParams());
+        && Objects.equals(isInMyReports(), other.isInMyReports())
+        && Objects.equals(getBatchParams(), other.getBatchParams())
+        && Objects.equals(getUser(), other.getUser());
   }
 
   @Override
@@ -161,6 +177,16 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
       clone.setBatchParams((AbstractBatchParams<?, ?>) getBatchParams().clone());
     }
     return clone;
+  }
+
+  @JsonIgnore
+  public Person getUser() {
+    return user;
+  }
+
+  @JsonIgnore
+  public void setUser(Person user) {
+    this.user = user;
   }
 
 }

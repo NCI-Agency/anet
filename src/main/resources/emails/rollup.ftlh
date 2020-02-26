@@ -171,7 +171,9 @@ a {
         <div class="col-md-8">
             <p><strong>${fields.report.intent}:</strong> ${(report.intent)!}</p>
             <#if report.keyOutcomes??>
-                <p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
+				<#if fields.report.keyOutcomes??>
+                	<p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
+            	</#if>
             </#if>
             <#if report.nextSteps??>
                 <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>

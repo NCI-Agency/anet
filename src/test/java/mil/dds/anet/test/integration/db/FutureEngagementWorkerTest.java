@@ -1,15 +1,16 @@
-package mil.dds.anet.integrationtest.db;
+package mil.dds.anet.test.integration.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import mil.dds.anet.AnetApplication;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
@@ -20,41 +21,47 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.integrationtest.config.AnetTestConfiguration;
-import mil.dds.anet.integrationtest.utils.EmailResponse;
-import mil.dds.anet.integrationtest.utils.FakeSmtpServer;
-import mil.dds.anet.integrationtest.utils.TestBeans;
+import mil.dds.anet.test.integration.config.AnetTestConfiguration;
+import mil.dds.anet.test.integration.utils.EmailResponse;
+import mil.dds.anet.test.integration.utils.FakeSmtpServer;
+import mil.dds.anet.test.integration.utils.TestApp;
+import mil.dds.anet.test.integration.utils.TestBeans;
+import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.Utils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(TestApp.class)
 public class FutureEngagementWorkerTest {
-  @ClassRule
-  public static final DropwizardAppRule<AnetConfiguration> app =
-      new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
   private final static List<String> expectedIds = new ArrayList<>();
   private final static List<String> unexpectedIds = new ArrayList<>();
 
-  private static AnetObjectEngine engine;
   private static FutureEngagementWorker futureEngagementWorker;
   private static FakeSmtpServer emailServer;
+  private static AnetEmailWorker emailWorker;
 
   private static boolean executeEmailServerTests;
   private static String whitelistedEmail;
 
-  @BeforeClass
+  @BeforeAll
   @SuppressWarnings("unchecked")
   public static void setUpClass() throws Exception {
+    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
+    if (app.getConfiguration().getSmtp().isDisabled()) {
+      fail("'ANET_SMTP_DISABLE' system environment variable must have value 'true' to run test.");
+    }
+
     executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
+
     whitelistedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
-    engine = new AnetObjectEngine(app.getConfiguration().getDataSourceFactory().getUrl(),
-        app.getApplication());
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    emailWorker = new AnetEmailWorker(engine.getEmailDao(), app.getConfiguration());
     futureEngagementWorker = new FutureEngagementWorker(engine.getReportDao());
     emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
 
@@ -62,13 +69,16 @@ public class FutureEngagementWorkerTest {
     emailServer.clearEmailServer();
   }
 
-  @AfterClass
-  public static void finalCheckAndCleanup() throws Exception {
+  @AfterAll
+  public static void tearDownClass() throws Exception {
     // Test that all emails have been correctly sent
     testFutureEngagementWorkerEmail();
 
     // Clear the email server after testing
     emailServer.clearEmailServer();
+
+    emailWorker = null;
+    AnetEmailWorker.setInstance(null);
   }
 
   @Test
@@ -78,6 +88,7 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void reportsOK() {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("reportsOK_1");
     engine.getReportDao().update(report);
     final Report report2 = createTestReport("reportsOK_2");
@@ -94,6 +105,7 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void testReportDueInFuture() {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueInFuture_1");
     report.setEngagementDate(Instant.now().plus(Duration.ofDays(2L)));
     engine.getReportDao().update(report);
@@ -105,6 +117,7 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void testReportDueEndToday() {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueEndToday_1");
     report.setEngagementDate(Utils.endOfToday());
     engine.getReportDao().update(report);
@@ -129,6 +142,7 @@ public class FutureEngagementWorkerTest {
       unexpectedIds.add(fullId);
     }
 
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport(fullId);
     final ApprovalStep as = report.getApprovalStep();
     as.setType(type);
@@ -158,6 +172,7 @@ public class FutureEngagementWorkerTest {
       unexpectedIds.add(fullId);
     }
 
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport(fullId);
     report.setState(state);
     engine.getReportDao().update(report);
@@ -167,6 +182,7 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void testApprovalStepReport() {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testApprovalStepReport_1");
     final ApprovalStep step = report.getApprovalStep();
     step.setType(ApprovalStepType.REPORT_APPROVAL);
@@ -191,6 +207,7 @@ public class FutureEngagementWorkerTest {
 
   // DB integration
   private void testFutureEngagementWorker(final int expectedCount) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final int emailSize = engine.getEmailDao().getAll().size();
     futureEngagementWorker.run();
     assertThat(engine.getEmailDao().getAll().size()).isEqualTo(emailSize + expectedCount);
@@ -198,20 +215,19 @@ public class FutureEngagementWorkerTest {
 
   // Email integration
   private static void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
-    if (!executeEmailServerTests) {
-      return;
-    }
+    assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
-    // We wait until all messages have been (asynchronously) sent
-    Thread.sleep(10000);
+    // Make sure all messages have been (asynchronously) sent
+    emailWorker.run();
 
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
     assertThat(emails.size()).isEqualTo(expectedIds.size());
-    emails.forEach(e -> assertThat(expectedIds.contains(e.to.text.split("@")[0])));
-    emails.forEach(e -> assertThat(unexpectedIds.contains(e.to.text.split("@")[0])));
+    emails.forEach(e -> assertThat(expectedIds).contains(e.to.text.split("@")[0]));
+    emails.forEach(e -> assertThat(unexpectedIds).doesNotContain(e.to.text.split("@")[0]));
   }
 
   private static Report createTestReport(final String toAdressId) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Person author = TestBeans.getTestPerson();
     author.setEmailAddress(toAdressId + whitelistedEmail);
     engine.getPersonDao().insert(author);

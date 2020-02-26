@@ -16,7 +16,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.beans.search.SavedSearch.SearchObjectType;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SavedSearchResourceTest extends AbstractResourceTest {
 

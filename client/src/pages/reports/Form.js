@@ -23,13 +23,14 @@ import Messages from "components/Messages"
 import { createYupObjectShape, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -54,14 +55,30 @@ import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 const GQL_GET_RECENTS = gql`
-  query {
-    locationRecents(maxResults: 6) {
+  query($taskQuery: TaskSearchQueryInput) {
+    locationList(
+      query: {
+        pageSize: 6
+        status: ACTIVE
+        inMyReports: true
+        sortBy: RECENT
+        sortOrder: DESC
+      }
+    ) {
       list {
         uuid
         name
       }
     }
-    personRecents(maxResults: 6) {
+    personList(
+      query: {
+        pageSize: 6
+        status: ACTIVE
+        inMyReports: true
+        sortBy: RECENT
+        sortOrder: DESC
+      }
+    ) {
       list {
         uuid
         name
@@ -86,11 +103,15 @@ const GQL_GET_RECENTS = gql`
         }
       }
     }
-    taskRecents(maxResults: 6) {
+    taskList(query: $taskQuery) {
       list {
         uuid
         shortName
         longName
+        customFieldRef1 {
+          uuid
+          shortName
+        }
         taskedOrganizations {
           uuid
           shortName
@@ -98,7 +119,15 @@ const GQL_GET_RECENTS = gql`
         customFields
       }
     }
-    authorizationGroupRecents(maxResults: 6) {
+    authorizationGroupList(
+      query: {
+        pageSize: 6
+        status: ACTIVE
+        inMyReports: true
+        sortBy: RECENT
+        sortOrder: DESC
+      }
+    ) {
       list {
         uuid
         name
@@ -186,7 +215,36 @@ const BaseReportForm = ({
       window.clearTimeout(autoSaveSettings.timeoutId)
     }
   })
-  const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS)
+
+  const recentTasksVarCommon = {
+    pageSize: 6,
+    status: Task.STATUS.ACTIVE,
+    hasCustomFieldRef1: true,
+    sortBy: "RECENT",
+    sortOrder: "DESC"
+  }
+
+  let recentTasksVarUser
+  if (currentUser.isAdmin()) {
+    recentTasksVarUser = recentTasksVarCommon
+  } else if (currentUser.position?.organization) {
+    recentTasksVarUser = {
+      ...recentTasksVarCommon,
+      inMyReports: true,
+      taskedOrgUuid: currentUser.position?.organization?.uuid,
+      orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
+    }
+  } else {
+    recentTasksVarUser = {
+      pageSize: 1,
+      status: Task.STATUS.ACTIVE,
+      text: "__should_not_match_anything__" // TODO: Do this more gracefully
+    }
+  }
+
+  const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS, {
+    taskQuery: recentTasksVarUser
+  })
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -257,10 +315,10 @@ const BaseReportForm = ({
   let tagSuggestions = []
   if (data) {
     recents = {
-      locations: data.locationRecents.list,
-      persons: data.personRecents.list,
-      tasks: data.taskRecents.list,
-      authorizationGroups: data.authorizationGroupRecents.list
+      locations: data.locationList.list,
+      persons: data.personList.list,
+      tasks: data.taskList.list,
+      authorizationGroups: data.authorizationGroupList.list
     }
     // ReactTags expects id and text properties
     tagSuggestions = data.tagList.list.map(tag => ({
@@ -318,10 +376,8 @@ const BaseReportForm = ({
         if (!validateFieldDebounced) {
           validateFieldDebounced = _debounce(validateField, 400)
         }
-        const currentOrgUuid =
+        const currentOrg =
           currentUser.position && currentUser.position.organization
-            ? currentUser.position.organization.uuid
-            : undefined
         const locationFilters = {
           activeLocations: {
             label: "Active locations",
@@ -343,13 +399,13 @@ const BaseReportForm = ({
             queryVars: { role: Person.ROLE.PRINCIPAL }
           }
         }
-        if (currentOrgUuid) {
+        if (currentOrg) {
           attendeesFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
               role: Person.ROLE.ADVISOR,
               matchPositionName: true,
-              orgUuid: currentOrgUuid
+              orgUuid: currentOrg.uuid
             }
           }
           attendeesFilters.myCounterparts = {
@@ -371,40 +427,15 @@ const BaseReportForm = ({
           }
         }
 
-        const tasksFiltersLevel1 = {
-          allTasks: {
-            label: "All objectives",
-            queryVars: { hasCustomFieldRef1: false }
-          }
-        }
-        const tasksFiltersLevel2 = {
-          forSelectedObjectives: {
-            label: "For selected objectives",
+        const tasksFiltersLevel = {}
+
+        if (currentOrg) {
+          tasksFiltersLevel.assignedToMyOrg = {
+            label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
-              customFieldRef1Uuid:
-                values.tasksLevel1 && values.tasksLevel1.length
-                  ? values.tasksLevel1.map(t => t.uuid)
-                  : [""]
-            }
-          },
-          allTasks: {
-            label: "All efforts",
-            queryVars: { hasCustomFieldRef1: true }
-          }
-        }
-        if (currentOrgUuid) {
-          tasksFiltersLevel1.assignedToMyOrg = {
-            label: "Assigned to my organization",
-            queryVars: {
-              taskedOrgUuid: currentOrgUuid,
-              hasCustomFieldRef1: false
-            }
-          }
-          tasksFiltersLevel2.assignedToMyOrg = {
-            label: "Assigned to my organization",
-            queryVars: {
-              taskedOrgUuid: currentOrgUuid,
-              hasCustomFieldRef1: true
+              taskedOrgUuid: currentOrg.uuid,
+              hasCustomFieldRef1: true,
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
@@ -415,25 +446,26 @@ const BaseReportForm = ({
           ? primaryAdvisors[0]
           : null
         if (
-          primaryAdvisor &&
-          primaryAdvisor.position &&
-          primaryAdvisor.position.organization
+          primaryAdvisor?.position?.organization &&
+          primaryAdvisor.position.organization.uuid !== currentOrg?.uuid
         ) {
-          tasksFiltersLevel1.assignedToReportOrg = {
-            label: "Assigned to organization of report",
+          tasksFiltersLevel.assignedToReportOrg = {
+            label: `Assigned to ${primaryAdvisor.position.organization}`,
             queryVars: {
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
-              hasCustomFieldRef1: false
-            }
-          }
-          tasksFiltersLevel2.assignedToReportOrg = {
-            label: "Assigned to organization of report",
-            queryVars: {
-              taskedOrgUuid: primaryAdvisor.position.organization.uuid,
-              hasCustomFieldRef1: true
+              hasCustomFieldRef1: true,
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
         }
+
+        if (currentUser.isAdmin()) {
+          tasksFiltersLevel.allTasks = {
+            label: "All efforts", // TODO: Implement conditional labels, until then, we need to be explicit here
+            queryVars: { hasCustomFieldRef1: true }
+          }
+        }
+
         const authorizationGroupsFilters = {
           allAuthorizationGroups: {
             label: "All authorization groups",
@@ -771,45 +803,12 @@ const BaseReportForm = ({
               </Fieldset>
 
               <Fieldset
-                title={Settings.fields.task.longLabel}
+                title="Efforts" // TODO: Implement conditional labels, until then, we need to be explicit here
                 className="tasks-selector"
               >
-                <FastField
-                  name="tasksLevel1"
-                  label="Objectives"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("tasksLevel1", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasksLevel1", value, true)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="tasksLevel1"
-                      placeholder="Search for objectives"
-                      value={values.tasksLevel1}
-                      renderSelected={
-                        <TaskTable
-                          id="tasks-objectives"
-                          tasks={values.tasksLevel1}
-                          showDelete
-                          showOrganization
-                        />
-                      }
-                      overlayColumns={["Name", "Tasked organizations"]}
-                      overlayRenderRow={TaskDetailedOverlayRow}
-                      filterDefs={tasksFiltersLevel1}
-                      objectType={Task}
-                      queryParams={{ status: Task.STATUS.ACTIVE }}
-                      fields={Task.autocompleteQuery}
-                      addon={TASKS_ICON}
-                    />
-                  }
-                />
-
                 <Field
                   name="tasks"
-                  label={Settings.fields.task.shortLabel}
+                  label="Efforts" // TODO: Implement conditional labels, until then, we need to be explicit here
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -828,13 +827,17 @@ const BaseReportForm = ({
                         <TaskTable
                           id="tasks-tasks"
                           tasks={values.tasks}
+                          showParent
                           showDelete
-                          showOrganization
+                          showDescription
                         />
                       }
-                      overlayColumns={["Name", "Tasked organizations"]}
+                      overlayColumns={[
+                        "Effort", // TODO: Implement conditional labels, until then, we need to be explicit here
+                        "Objective"
+                      ]}
                       overlayRenderRow={TaskDetailedOverlayRow}
-                      filterDefs={tasksFiltersLevel2}
+                      filterDefs={tasksFiltersLevel}
                       objectType={Task}
                       queryParams={{ status: Task.STATUS.ACTIVE }}
                       fields={Task.autocompleteQuery}
@@ -1321,7 +1324,6 @@ const BaseReportForm = ({
       "tasks",
       "customFields", // initial JSON from the db
       "formCustomFields",
-      "tasksLevel1",
       "taskAssessments",
       "taskToAssessmentUuid"
     )

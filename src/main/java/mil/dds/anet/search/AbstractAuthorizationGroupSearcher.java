@@ -5,6 +5,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
+import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractAuthorizationGroupSearcher
@@ -43,6 +44,17 @@ public abstract class AbstractAuthorizationGroupSearcher
       qb.addSqlArg("positionUuid", query.getPositionUuid());
     }
 
+    if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addFromClause("JOIN ("
+          + "  SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
+          + "  FROM reports"
+          + "  JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\""
+          + "  WHERE reports.\"authorUuid\" = :userUuid"
+          + "  GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\""
+          + ") \"inMyReports\" ON \"authorizationGroups\".uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
+    }
+
     addOrderByClauses(qb, query);
   }
 
@@ -54,6 +66,12 @@ public abstract class AbstractAuthorizationGroupSearcher
       case CREATED_AT:
         qb.addAllOrderByClauses(
             getOrderBy(query.getSortOrder(), "\"authorizationGroups\"", "\"createdAt\""));
+        break;
+      case RECENT:
+        if (Boolean.TRUE.equals(query.isInMyReports())) {
+          // Otherwise the JOIN won't exist
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+        }
         break;
       case NAME:
       default:
