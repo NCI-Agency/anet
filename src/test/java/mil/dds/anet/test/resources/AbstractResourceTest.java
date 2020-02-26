@@ -7,13 +7,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
-import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.util.Duration;
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.client.Client;
-import mil.dds.anet.AnetApplication;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -22,6 +20,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.resources.utils.GraphQlHelper;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.BatchingUtils;
@@ -32,14 +31,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(TestApp.class)
 public abstract class AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-  public static final DropwizardAppExtension<AnetConfiguration> RULE =
-      new DropwizardAppExtension<AnetConfiguration>(AnetApplication.class, "anet.yml");
 
   private static JerseyClientConfiguration config = new JerseyClientConfiguration();
 
@@ -66,8 +62,9 @@ public abstract class AbstractResourceTest {
       // Update full-text index
       refreshMaterializedViews();
     }
-    client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
-    graphQLHelper = new GraphQlHelper(client, RULE.getLocalPort());
+    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
+    client = new JerseyClientBuilder(app.getEnvironment()).using(config).build("test client");
+    graphQLHelper = new GraphQlHelper(client, app.getLocalPort());
     admin = findOrPutPersonInDb(PersonTest.getArthurDmin());
     context = new HashMap<>();
     batchingUtils = new BatchingUtils(AnetObjectEngine.getInstance(), false, false);

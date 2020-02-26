@@ -9,6 +9,7 @@ const AdvancedSelectOverlayTable = ({
   fieldName,
   objectType,
   items,
+  pageNum,
   selectedItems,
   handleAddItem,
   handleRemoveItem,
@@ -28,7 +29,7 @@ const AdvancedSelectOverlayTable = ({
         </tr>
       </thead>
       <tbody>
-        {objectType.map(items, item => {
+        {objectType.map(items, (item, i) => {
           const isSelected = selectedItemsUuids.includes(item.uuid)
           const handleClick = () =>
             isSelected ? handleRemoveItem(item) : handleAddItem(item)
@@ -37,7 +38,7 @@ const AdvancedSelectOverlayTable = ({
             { name: fieldName, checked: isSelected, onChange: handleClick }
           )
           return (
-            <tr key={item.uuid} onClick={handleClick}>
+            <tr key={`${item.uuid}-${pageNum}-${i}`} onClick={handleClick}>
               <td style={{ textAlign: "center" }}>{renderSelectComponent}</td>
               {renderRow(item)}
             </tr>
@@ -51,6 +52,7 @@ AdvancedSelectOverlayTable.propTypes = {
   fieldName: PropTypes.string.isRequired,
   objectType: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
+  pageNum: PropTypes.number,
   selectedItems: PropTypes.array.isRequired,
   handleAddItem: PropTypes.func,
   handleRemoveItem: PropTypes.func,
