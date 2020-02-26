@@ -220,8 +220,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
     // Schedule any tasks that need to run on an ongoing basis.
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    AnetEmailWorker emailWorker =
-        new AnetEmailWorker(engine.getEmailDao(), configuration, scheduler);
+    AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration);
     FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
     ReportPublicationWorker reportPublicationWorker =
         new ReportPublicationWorker(engine.getReportDao(), configuration);

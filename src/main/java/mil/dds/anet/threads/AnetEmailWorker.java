@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -59,7 +57,6 @@ public class AnetEmailWorker implements Runnable {
   private String serverUrl;
   private final Map<String, Object> fields;
   private Configuration freemarkerConfig;
-  private ScheduledExecutorService scheduler;
   private final String supportEmailAddr;
   private final DateTimeFormatter dtf;
   private final DateTimeFormatter dttf;
@@ -70,10 +67,8 @@ public class AnetEmailWorker implements Runnable {
   private final List<String> activeDomainNames;
 
   @SuppressWarnings("unchecked")
-  public AnetEmailWorker(EmailDao dao, AnetConfiguration config,
-      ScheduledExecutorService scheduler) {
+  public AnetEmailWorker(EmailDao dao, AnetConfiguration config) {
     this.dao = dao;
-    this.scheduler = scheduler;
     this.mapper = MapperUtils.getDefaultMapper();
     this.fromAddr = config.getEmailFromAddr();
     this.serverUrl = config.getServerUrl();
@@ -236,7 +231,11 @@ public class AnetEmailWorker implements Runnable {
   }
 
   public static void sendEmailAsync(AnetEmail email) {
-    instance.internal_sendEmailAsync(email);
+    if (instance != null) {
+      instance.internal_sendEmailAsync(email);
+    } else {
+      logger.warn("No AnetEmailWorker has been created, so no email will be sent");
+    }
   }
 
   private synchronized void internal_sendEmailAsync(AnetEmail email) {
@@ -244,11 +243,9 @@ public class AnetEmailWorker implements Runnable {
     try {
       String jobSpec = mapper.writeValueAsString(email);
       dao.createPendingEmail(jobSpec);
+      // the worker thread will pick this up eventually.
     } catch (JsonProcessingException jsonError) {
       throw new WebApplicationException(jsonError);
     }
-
-    // poke the worker thread so it wakes up.
-    scheduler.schedule(this, 1, TimeUnit.SECONDS);
   }
 }

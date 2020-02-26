@@ -11,7 +11,6 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import mil.dds.anet.AnetApplication;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
@@ -52,13 +51,10 @@ public class AnetEmailWorkerTest {
 
     emailDao = mock(EmailDao.class, Mockito.RETURNS_DEEP_STUBS);
 
-    final ScheduledExecutorService scheduler =
-        mock(ScheduledExecutorService.class, Mockito.RETURNS_DEEP_STUBS);
-
     app.getConfiguration().setEmailFromAddr("test_from_address@anet.com");
 
     emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
-    emailWorker = new AnetEmailWorker(emailDao, app.getConfiguration(), scheduler);
+    emailWorker = new AnetEmailWorker(emailDao, app.getConfiguration());
 
     // Clear the email server before starting test
     emailServer.clearEmailServer();
