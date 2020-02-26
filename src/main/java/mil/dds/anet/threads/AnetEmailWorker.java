@@ -89,7 +89,7 @@ public class AnetEmailWorker implements Runnable {
     this.activeDomainNames = ((List<String>) config.getDictionaryEntry("activeDomainNames"))
         .stream().map(String::toLowerCase).collect(Collectors.toList());
 
-    instance = this;
+    setInstance(this);
 
     SmtpConfiguration smtpConfig = config.getSmtp();
     props = new Properties();
@@ -121,6 +121,10 @@ public class AnetEmailWorker implements Runnable {
     freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
     freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
     freemarkerConfig.setAPIBuiltinEnabled(true);
+  }
+
+  public static void setInstance(AnetEmailWorker instance) {
+    AnetEmailWorker.instance = instance;
   }
 
   @Override
