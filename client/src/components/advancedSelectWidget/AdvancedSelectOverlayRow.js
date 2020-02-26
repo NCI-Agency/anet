@@ -41,20 +41,16 @@ export const TaskSimpleOverlayRow = item => (
 export const TaskDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="taskName">
-      <span>
-        {item.shortName} - {item.longName}
-      </span>
+      <LinkTo modelType="Task" model={item} isLink={false}>
+        {item.shortName}
+      </LinkTo>
     </td>
-    <td className="taskOrg">
-      {item.taskedOrganizations.map(org => (
-        <LinkTo
-          modelType="Organization"
-          model={org}
-          isLink={false}
-          key={`${item.uuid}-${org.uuid}`}
-          style={{ paddingRight: 5 }}
-        />
-      ))}
+    <td className="parentTaskName">
+      {item.customFieldRef1 && (
+        <LinkTo modelType="Task" model={item.customFieldRef1} isLink={false}>
+          {item.customFieldRef1.shortName}
+        </LinkTo>
+      )}
     </td>
   </React.Fragment>
 )
@@ -130,14 +126,6 @@ export const ApproverOverlayRow = item => (
     </td>
     <td>
       <LinkTo modelType="Position" model={item} isLink={false} />
-    </td>
-  </React.Fragment>
-)
-
-export const ReportOverlayRow = item => (
-  <React.Fragment key={item.uuid}>
-    <td>
-      <LinkTo modelType="Report" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
