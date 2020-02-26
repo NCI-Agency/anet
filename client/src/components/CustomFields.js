@@ -574,11 +574,13 @@ ReadonlyCustomFields.defaultProps = {
 
 // customFields should contain the JSON of all the visible custom fields
 export const customFieldsJSONString = values => {
-  const clonedValues = _cloneDeep(values)
-  if (values.formCustomFields.invisibleCustomFields) {
-    clonedValues.formCustomFields.invisibleCustomFields.forEach(f => {
-      _set(clonedValues, f.split("."), undefined)
-    })
+  if (values.formCustomFields) {
+    const clonedValues = _cloneDeep(values)
+    if (values.formCustomFields.invisibleCustomFields) {
+      clonedValues.formCustomFields.invisibleCustomFields.forEach(f =>
+        _set(clonedValues, f.split("."), undefined)
+      )
+    }
+    return JSON.stringify(clonedValues.formCustomFields)
   }
-  return JSON.stringify(clonedValues.formCustomFields)
 }
