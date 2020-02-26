@@ -62,6 +62,7 @@ import mil.dds.anet.beans.search.TaskSearchSortBy;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
@@ -1332,7 +1333,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Organization org = pos.loadOrganization(context).join();
     @SuppressWarnings("unchecked")
     final List<String> nro =
-        (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
+        (List<String>) TestApp.app.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
     // Admin's organization should have one more report PUBLISHED only if it is not in the
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
@@ -1426,7 +1427,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Organization org = pos.loadOrganization(context).join();
     @SuppressWarnings("unchecked")
     final List<String> nro =
-        (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
+        (List<String>) TestApp.app.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
     // Elizabeth's organization should have one more report PUBLISHED only if it is not in the
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
