@@ -1,95 +1,58 @@
-import autobind from "autobind-decorator"
-import _isEqualWith from "lodash/isEqualWith"
+import useSearchFilter from "components/advancedSearch/hooks"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
-import { FormControl } from "react-bootstrap"
-import utils from "utils"
+import React from "react"
+import { FormControl, FormGroup } from "react-bootstrap"
+import { deserializeSearchFilter } from "searchUtils"
 
-export default class TextInputFilter extends Component {
-  static propTypes = {
-    queryKey: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.shape({
-        value: PropTypes.string,
-        toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
-      })
-    ]),
-    onChange: PropTypes.func,
-    // Passed by the SearchFilterDisplay row
-    asFormField: PropTypes.bool
+const TextInputFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange
+}) => {
+  const defaultValue = inputValue || { value: "" }
+  const toQuery = val => {
+    return { [queryKey]: val.value }
   }
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
 
-  static defaultProps = {
-    asFormField: true
-  }
+  return !asFormField ? (
+    <>{value.value}</>
+  ) : (
+    <FormGroup>
+      <FormControl value={value.value} onChange={handleChange} />
+    </FormGroup>
+  )
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      value: props.value || { value: "" }
-    }
-  }
-
-  componentDidMount() {
-    this.updateFilter()
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      !_isEqualWith(
-        prevProps.value,
-        this.props.value,
-        utils.treatFunctionsAsEqual
-      )
-    ) {
-      this.setState({ value: this.props.value }, this.updateFilter)
-    }
-  }
-
-  render() {
-    return !this.props.asFormField ? (
-      <>{this.state.value.value}</>
-    ) : (
-      <div>
-        <FormControl value={this.state.value.value} onChange={this.onChange} />
-      </div>
-    )
-  }
-
-  @autobind
-  onChange(event) {
-    const { value } = this.state
-    value.value = event.target.value
-    this.setState({ value }, this.updateFilter)
-  }
-
-  @autobind
-  toQuery() {
-    return { [this.props.queryKey]: this.state.value.value }
-  }
-
-  @autobind
-  updateFilter() {
-    if (this.props.asFormField) {
-      const { value } = this.state
-      value.toQuery = this.toQuery
-      this.props.onChange(value)
-    }
-  }
-
-  @autobind
-  deserialize(query, key) {
-    if (query[this.props.queryKey]) {
-      const toQueryValue = { [this.props.queryKey]: query[this.props.queryKey] }
-      return {
-        key: key,
-        value: {
-          value: query[this.props.queryKey],
-          toQuery: () => toQueryValue
-        }
-      }
-    }
-    return null
+  function handleChange(event) {
+    setValue({ value: event.target.value })
   }
 }
+TextInputFilter.propTypes = {
+  queryKey: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({
+      value: PropTypes.string,
+      toQuery: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
+    })
+  ]),
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
+  // Passed by the SearchFilterDisplay row
+  asFormField: PropTypes.bool
+}
+TextInputFilter.defaultProps = {
+  asFormField: true
+}
+
+export const deserialize = ({ queryKey }, query, key) => {
+  return deserializeSearchFilter(queryKey, query, key)
+}
+
+export default TextInputFilter

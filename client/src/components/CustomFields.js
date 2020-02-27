@@ -10,7 +10,6 @@ import Model, {
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
-import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import _set from "lodash/set"
@@ -20,6 +19,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
+import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 
 const WIDGETS = {
@@ -105,7 +105,7 @@ const EnumField = fieldProps => {
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroup}
+      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
@@ -136,7 +136,9 @@ const EnumSetField = fieldProps => {
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroup}
+      component={
+        RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroupField
+      }
       {...otherFieldProps}
     />
   )
@@ -389,7 +391,7 @@ const CustomField = ({
     ...fieldProps
   } = fieldConfig
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
-  const validateFormDebounced = _debounce(validateForm, 400) // with validateField it somehow doesn't work
+  const [validateFormDebounced] = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate: true) => {
       const val =
@@ -423,11 +425,7 @@ const CustomField = ({
       {...fieldProps}
       {...extraProps}
     >
-      {helpText && (
-        <HelpBlock>
-          <span className="text-success">{helpText}</span>
-        </HelpBlock>
-      )}
+      {helpText && <HelpBlock>{helpText}</HelpBlock>}
     </FieldComponent>
   )
 }
@@ -528,41 +526,39 @@ export const ReadonlyCustomFields = ({
   fieldsConfig,
   formikProps,
   fieldNamePrefix
-}) => {
-  return (
-    <>
-      {Object.keys(fieldsConfig).map(key => {
-        const fieldConfig = fieldsConfig[key]
-        const {
-          type,
-          typeError,
-          placeholder,
-          helpText,
-          validations,
-          visibleWhen,
-          objectFields,
-          ...fieldProps
-        } = fieldConfig
-        let extraProps = {}
-        if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
-          extraProps = {
-            fieldConfig,
-            formikProps
-          }
+}) => (
+  <>
+    {Object.keys(fieldsConfig).map(key => {
+      const fieldConfig = fieldsConfig[key]
+      const {
+        type,
+        typeError,
+        placeholder,
+        helpText,
+        validations,
+        visibleWhen,
+        objectFields,
+        ...fieldProps
+      } = fieldConfig
+      let extraProps = {}
+      if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+        extraProps = {
+          fieldConfig,
+          formikProps
         }
-        const FieldComponent = READONLY_FIELD_COMPONENTS[type]
-        return (
-          <FieldComponent
-            key={key}
-            name={`${fieldNamePrefix}.${key}`}
-            {...fieldProps}
-            {...extraProps}
-          />
-        )
-      })}
-    </>
-  )
-}
+      }
+      const FieldComponent = READONLY_FIELD_COMPONENTS[type]
+      return (
+        <FieldComponent
+          key={key}
+          name={`${fieldNamePrefix}.${key}`}
+          {...fieldProps}
+          {...extraProps}
+        />
+      )
+    })}
+  </>
+)
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,

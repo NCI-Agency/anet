@@ -328,11 +328,10 @@ const ReportSummaryRow = ({ report }) => {
           {report.tasks.length > 0 && (
             <span>
               <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
-              {report.tasks.map((task, i) => {
-                return (
+              {report.tasks.map(
+                (task, i) =>
                   task.shortName + (i < report.tasks.length - 1 ? ", " : "")
-                )
-              })}
+              )}
             </span>
           )}
         </Col>

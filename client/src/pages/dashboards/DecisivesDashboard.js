@@ -354,40 +354,44 @@ const DecisivesDashboardImpl = connect(
   mapDispatchToProps
 )(BaseDecisivesDashboardImpl)
 
-const StatsTable = props => {
-  return (
-    <Table responsive>
-      <thead>
-        <tr>
-          <th>{props.label}</th>
-          {props.data.map(item => (
-            <th key={item.uuid}>{props.itemLabel(item)}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td />
-          {props.data.map(item => {
-            const previous = props.prevContentData[item.uuid] || 0
-            const current = props.contentData[item.uuid] || 0
-            const color =
-              current > 1.3 * previous
-                ? "green"
-                : current < 0.7 * previous
-                  ? "red"
-                  : "white"
-            return (
-              <td bgcolor={color} key={item.uuid}>
-                {current}/{previous}
-              </td>
-            )
-          })}
-        </tr>
-      </tbody>
-    </Table>
-  )
-}
+const StatsTable = ({
+  data,
+  itemLabel,
+  label,
+  contentData,
+  prevContentData
+}) => (
+  <Table responsive>
+    <thead>
+      <tr>
+        <th>{label}</th>
+        {data.map(item => (
+          <th key={item.uuid}>{itemLabel(item)}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td />
+        {data.map(item => {
+          const previous = prevContentData[item.uuid] || 0
+          const current = contentData[item.uuid] || 0
+          const color =
+            current > 1.3 * previous
+              ? "green"
+              : current < 0.7 * previous
+                ? "red"
+                : "white"
+          return (
+            <td bgcolor={color} key={item.uuid}>
+              {current}/{previous}
+            </td>
+          )
+        })}
+      </tr>
+    </tbody>
+  </Table>
+)
 
 StatsTable.propTypes = {
   data: PropTypes.array.isRequired,

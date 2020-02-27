@@ -1,6 +1,11 @@
 import searchFilters from "components/SearchFilters"
 
-export function deserializeQueryParams(objType, queryParams, callbackFunction) {
+export const deserializeQueryParams = (
+  objType,
+  queryParams,
+  callbackFunction
+) => {
+  // From query params to search filters
   var text = queryParams.text || ""
   var usedFilters = []
   var promises = []
@@ -16,10 +21,12 @@ export function deserializeQueryParams(objType, queryParams, callbackFunction) {
     const ALL_FILTERS = searchFilters.searchFilters()
     const filterDefs = ALL_FILTERS[objType].filters
     Object.keys(filterDefs).map(filterKey => {
-      const fd = filterDefs[filterKey]
-      const FilterComponent = fd.component
-      const inst = new FilterComponent(fd.props || {})
-      const deser = inst.deserialize(queryParams, filterKey)
+      const filterDef = filterDefs[filterKey]
+      const deser = filterDef.deserializer(
+        filterDef.props,
+        queryParams,
+        filterKey
+      )
       if (deser && deser.then instanceof Function) {
         // deserialize returns a Promise
         promises.push(deser)
@@ -37,4 +44,19 @@ export function deserializeQueryParams(objType, queryParams, callbackFunction) {
     })
     callbackFunction(objType, usedFilters, text)
   })
+}
+
+export const deserializeSearchFilter = (queryKey, query, key) => {
+  // general deserialization from query to a search filter
+  if (query[queryKey]) {
+    const toQueryValue = { [queryKey]: query[queryKey] }
+    return {
+      key: key,
+      value: {
+        value: query[queryKey],
+        toQuery: toQueryValue
+      }
+    }
+  }
+  return null
 }

@@ -46,15 +46,13 @@ const AdvisorReportsTable = ({ pageDispatchers, columnGroups, orgUuid }) => {
   }
 
   const advisors = data.advisorReportInsights
-  const rows = advisors.map(advisor => {
-    return (
-      <AdvisorReportsRow
-        row={advisor}
-        columnGroups={columnGroups}
-        key={_uniqueId(`${advisor.uuid}_`)}
-      />
-    )
-  })
+  const rows = advisors.map(advisor => (
+    <AdvisorReportsRow
+      row={advisor}
+      columnGroups={columnGroups}
+      key={_uniqueId(`${advisor.uuid}_`)}
+    />
+  ))
 
   return (
     <Table striped bordered condensed hover responsive>

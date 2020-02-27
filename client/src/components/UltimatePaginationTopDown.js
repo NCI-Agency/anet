@@ -10,31 +10,29 @@ const UltimatePaginationTopDown = ({
   totalCount,
   goToPage,
   children
-}) => {
-  return (
-    <>
-      <UltimatePagination
-        Component="header"
-        componentClassName={componentClassName}
-        className={className}
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={goToPage}
-      />
-      {children}
-      <UltimatePagination
-        Component="footer"
-        componentClassName={componentClassName}
-        className={className}
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={goToPage}
-      />
-    </>
-  )
-}
+}) => (
+  <>
+    <UltimatePagination
+      Component="header"
+      componentClassName={componentClassName}
+      className={className}
+      pageNum={pageNum}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      goToPage={goToPage}
+    />
+    {children}
+    <UltimatePagination
+      Component="footer"
+      componentClassName={componentClassName}
+      className={className}
+      pageNum={pageNum}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      goToPage={goToPage}
+    />
+  </>
+)
 
 UltimatePaginationTopDown.propTypes = {
   componentClassName: PropTypes.string,

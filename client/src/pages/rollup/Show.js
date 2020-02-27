@@ -217,39 +217,35 @@ Chart.propTypes = {
   orgType: PropTypes.string
 }
 
-const Collection = ({ queryParams }) => {
-  return (
-    <div className="scrollable">
-      <ReportCollection
-        paginationKey="r_rollup"
-        queryParams={queryParams}
-        viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
-      />
-    </div>
-  )
-}
+const Collection = ({ queryParams }) => (
+  <div className="scrollable">
+    <ReportCollection
+      paginationKey="r_rollup"
+      queryParams={queryParams}
+      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+    />
+  </div>
+)
 
 Collection.propTypes = {
   queryParams: PropTypes.object
 }
 
-const Map = ({ queryParams }) => {
-  return (
-    <div className="non-scrollable">
-      <ContainerDimensions>
-        {({ width, height }) => (
-          <ReportCollection
-            queryParams={queryParams}
-            width={width}
-            height={height}
-            marginBottom={0}
-            viewFormats={[FORMAT_MAP]}
-          />
-        )}
-      </ContainerDimensions>
-    </div>
-  )
-}
+const Map = ({ queryParams }) => (
+  <div className="non-scrollable">
+    <ContainerDimensions>
+      {({ width, height }) => (
+        <ReportCollection
+          queryParams={queryParams}
+          width={width}
+          height={height}
+          marginBottom={0}
+          viewFormats={[FORMAT_MAP]}
+        />
+      )}
+    </ContainerDimensions>
+  </div>
+)
 
 Map.propTypes = {
   queryParams: PropTypes.object

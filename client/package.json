@@ -33,7 +33,6 @@
     "@wdio/spec-reporter": "^5.18.7",
     "@wdio/sync": "^5.18.7",
     "aigle": "^1.14.1",
-    "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.7.4",
     "ava": "^3.3.0",
     "babel-eslint": "^10.1.0",
@@ -156,10 +155,8 @@
     "react-use-dimensions": "^1.2.1",
     "redux": "^4.0.5",
     "redux-persist": "^6.0.0",
+    "use-debounce": "^3.3.0",
     "yup": "^0.28.1"
-  },
-  "resolutions": {
-    "autobind-decorator": "2.4.0"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production --config config/webpack.client.prod.js",

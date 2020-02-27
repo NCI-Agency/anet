@@ -89,7 +89,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
     >
       <div style={anetContainer} className="anet">
         <TopBar
-          topbarHeight={handleTopbarHeight}
+          handleTopbarHeight={handleTopbarHeight}
           minimalHeader={pageProps.minimalHeader}
           toggleMenuAction={() => {
             showFloatingMenu(!floatingMenu)
