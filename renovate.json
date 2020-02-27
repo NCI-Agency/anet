@@ -5,6 +5,7 @@
     "group:linters"
   ],
   "lockFileMaintenance": { "enabled": true },
+  "labels": ["dependencies"],
   "packageRules": [
     {
       "packagePatterns": ["*"],
