@@ -1718,7 +1718,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testTaskApprovalFlow() throws NumberFormatException {
+  public void testApprovalFlow() throws NumberFormatException {
     // Fill a report
     final Person author = getJackJackson();
     final Report r = new Report();
@@ -1727,11 +1727,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
         PersonTest.personToPrimaryReportPerson(getElizabethElizawell())));
     r.setState(ReportState.DRAFT);
     r.setAtmosphere(Atmosphere.POSITIVE);
-    r.setIntent("Testing the task approval flow");
-    r.setKeyOutcomes("Task approval flow works");
-    r.setNextSteps("Approve through the task flow");
+    r.setIntent("Testing the report approval flow");
+    r.setKeyOutcomes("Report approval flow works");
+    r.setNextSteps("Approve through the organization, task and location flow");
     r.setReportText("Trying to get this report approved");
-    r.setLocation(getLocation(author, "General Hospital"));
+    final Location loc = getLocation(author, "Portugal Cove Ferry Terminal");
+    r.setLocation(loc);
     final Instant engagementDate =
         Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
     r.setEngagementDate(engagementDate);
@@ -1780,6 +1781,20 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(t11aApprovers.stream().anyMatch(a -> andrew.getUuid().equals(a.getPersonUuid())))
         .isEqualTo(true);
 
+    // Check that the approval workflow has a step for location Portugal Cove Ferry Terminal
+    final List<ReportAction> locActions = submitted.getWorkflow().stream()
+        .filter(
+            ra -> ra.getStep() != null && loc.getUuid().equals(ra.getStep().getRelatedObjectUuid()))
+        .collect(Collectors.toList());
+    assertThat(locActions.size()).isEqualTo(1);
+    final ReportAction locAction = locActions.get(0);
+    final ApprovalStep locStep = locAction.getStep();
+    assertThat(locStep).isNotNull();
+    final List<Position> locApprovers = locStep.getApprovers();
+    assertThat(locApprovers.size()).isGreaterThan(0);
+    assertThat(locApprovers.stream().anyMatch(a -> admin.getUuid().equals(a.getPersonUuid())))
+        .isEqualTo(true);
+
     // Have the report approved by the EF 1.1 approver
     final Person bob = getBobBobtown();
     final Report approvedStep1 = graphQLHelper.updateObject(bob, "approveReport", "uuid", FIELDS,
@@ -1788,15 +1803,26 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(approvedStep1.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
 
     // Check that the next step is the task approval
-    final ApprovalStep nextStep = approvedStep1.getApprovalStep();
-    assertThat(nextStep).isNotNull();
-    assertThat(nextStep.getRelatedObjectUuid()).isEqualTo(t11a.getUuid());
+    final ApprovalStep step2 = approvedStep1.getApprovalStep();
+    assertThat(step2).isNotNull();
+    assertThat(step2.getRelatedObjectUuid()).isEqualTo(t11a.getUuid());
 
     // Have the report approved by the 1.1.A approver
     final Report approvedStep2 = graphQLHelper.updateObject(andrew, "approveReport", "uuid", FIELDS,
         "String", submitted.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(approvedStep2).isNotNull();
-    assertThat(approvedStep2.getState()).isEqualTo(Report.ReportState.APPROVED);
+    assertThat(approvedStep1.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
+
+    // Check that the next step is the location approval
+    final ApprovalStep step3 = approvedStep2.getApprovalStep();
+    assertThat(step3).isNotNull();
+    assertThat(step3.getRelatedObjectUuid()).isEqualTo(loc.getUuid());
+
+    // Have the report approved by the location Portugal Cove Ferry Terminal approver
+    final Report approvedStep3 = graphQLHelper.updateObject(admin, "approveReport", "uuid", FIELDS,
+        "String", submitted.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(approvedStep3).isNotNull();
+    assertThat(approvedStep3.getState()).isEqualTo(Report.ReportState.APPROVED);
   }
 
 }
