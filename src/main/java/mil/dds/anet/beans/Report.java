@@ -506,6 +506,17 @@ public class Report extends AbstractCustomizableAnetBean {
               });
         }
       });
+    }).thenCompose(steps -> {
+      return loadLocation(context).thenCompose(location -> {
+        if (!(location instanceof Location)) {
+          return CompletableFuture.completedFuture(steps);
+        } else {
+          return getLocationWorkflow(context, engine, location.getUuid())
+              .thenCompose(locationSteps -> {
+                return CompletableFuture.completedFuture(locationSteps);
+              });
+        }
+      });
     });
   }
 
@@ -646,6 +657,12 @@ public class Report extends AbstractCustomizableAnetBean {
           });
     }
   }
+
+  private CompletableFuture<List<ApprovalStep>> getLocationWorkflow(Map<String, Object> context,
+      AnetObjectEngine engine, String locationUuid) {
+    return isFutureEngagement() ? getPlanningWorkflowForRelatedObject(context, engine, locationUuid)
+        : getWorkflowForRelatedObject(context, engine, locationUuid);
+  };
 
   @GraphQLQuery(name = "tags")
   public CompletableFuture<List<Tag>> loadTags(@GraphQLRootContext Map<String, Object> context) {
