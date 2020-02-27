@@ -7,7 +7,6 @@ import Model, {
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
-import React from "react"
 import REPORTS_ICON from "resources/reports.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -284,14 +283,6 @@ export default class Report extends Model {
   })
 
   static autocompleteQuery = "uuid, intent, author { uuid, name, rank, role }"
-
-  static autocompleteTemplate(report) {
-    return (
-      <span>
-        {report.intent} - {report.author}
-      </span>
-    )
-  }
 
   constructor(props) {
     super(Model.fillObject(props, Report.yupSchema))
