@@ -513,7 +513,8 @@ public class Report extends AbstractCustomizableAnetBean {
         } else {
           return getLocationWorkflow(context, engine, location.getUuid())
               .thenCompose(locationSteps -> {
-                return CompletableFuture.completedFuture(locationSteps);
+                steps.addAll(locationSteps);
+                return CompletableFuture.completedFuture(steps);
               });
         }
       });
