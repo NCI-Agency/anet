@@ -1,10 +1,11 @@
 package mil.dds.anet.test.integration.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.Optional;
 
 /**
  * This class provides a wrapper for the email data (from the fake SMTP server response) Warning:
@@ -20,42 +21,41 @@ public class EmailResponse {
   public final String text;
   public final String textAsHtml;
   public final Instant date;
-  public final JSONArray attachments;
+  public final ArrayNode attachments;
   public final String messageId;
   public final boolean isHtml;
-  public final JSONObject header;
-  public final JSONArray headerLines;
+  public final JsonNode header;
+  public final ArrayNode headerLines;
 
   /**
    * Parse a response from the SMTP server.
    * 
    * @param responseData The JSON object received from the server
    */
-  public EmailResponse(JSONObject responseData) {
+  public EmailResponse(final JsonNode responseData) {
     this.from =
-        responseData.keySet().contains("from") ? new ToFromData(responseData.getJSONObject("from"))
-            : null;
-    this.to =
-        responseData.keySet().contains("to") ? new ToFromData(responseData.getJSONObject("to"))
-            : null;
-    this.cc =
-        responseData.keySet().contains("cc") ? new ToFromData(responseData.getJSONObject("cc"))
-            : null;
-    this.replyTo = responseData.keySet().contains("replyTo")
-        ? new ToFromData(responseData.getJSONObject("replyTo"))
-        : null;
+        Optional.ofNullable(responseData.get("from")).map(x -> new ToFromData(x)).orElse(null);
+    this.to = Optional.ofNullable(responseData.get("to")).map(x -> new ToFromData(x)).orElse(null);
+    this.cc = Optional.ofNullable(responseData.get("cc")).map(x -> new ToFromData(x)).orElse(null);
+    this.replyTo =
+        Optional.ofNullable(responseData.get("replyTo")).map(x -> new ToFromData(x)).orElse(null);
 
-    this.subject = responseData.optString("subject");
-    this.text = responseData.optString("text");
-    this.textAsHtml = responseData.optString("textAsHtml");
-    this.date =
-        responseData.keySet().contains("date") ? Instant.parse(responseData.getString("date"))
-            : null;
-    this.attachments = responseData.optJSONArray("attachments");
-    this.messageId = responseData.optString("messageId");
-    this.isHtml = responseData.optBoolean("html");
-    this.header = responseData.optJSONObject("headers");
-    this.headerLines = responseData.optJSONArray("headerLines");
+    this.subject =
+        Optional.ofNullable(responseData.get("subject")).map(x -> x.asText()).orElse(null);
+    this.text = Optional.ofNullable(responseData.get("text")).map(x -> x.asText()).orElse(null);
+    this.textAsHtml =
+        Optional.ofNullable(responseData.get("textAsHtml")).map(x -> x.asText()).orElse(null);
+    this.date = Optional.ofNullable(responseData.get("date")).map(x -> Instant.parse(x.asText()))
+        .orElse(null);
+    this.attachments =
+        Optional.ofNullable(responseData.get("attachments")).map(x -> (ArrayNode) x).orElse(null);
+    this.messageId =
+        Optional.ofNullable(responseData.get("messageId")).map(x -> x.asText()).orElse(null);
+    this.isHtml =
+        Optional.ofNullable(responseData.get("html")).map(x -> x.asBoolean()).orElse(null);
+    this.header = responseData.get("headers");
+    this.headerLines =
+        Optional.ofNullable(responseData.get("headerLines")).map(x -> (ArrayNode) x).orElse(null);
   }
 
   /**
@@ -66,14 +66,14 @@ public class EmailResponse {
     public final String html;
     public final String text;
 
-    public ToFromData(JSONObject responseData) {
+    public ToFromData(final JsonNode node) {
+      final ArrayNode valueArray = (ArrayNode) node.get("value");
       this.values = new ArrayList<ValueData>();
-      final JSONArray valueArray = responseData.optJSONArray("value");
-      for (int i = 0; valueArray != null && i < valueArray.length(); i++) {
-        this.values.add(new ValueData(valueArray.getJSONObject(i)));
+      for (int i = 0; valueArray != null && i < valueArray.size(); i++) {
+        this.values.add(new ValueData(valueArray.get(i)));
       }
-      this.html = responseData.optString("html");
-      this.text = responseData.optString("text");
+      this.html = node.get("html").asText();
+      this.text = node.get("text").asText();
     }
 
     /**
@@ -83,9 +83,9 @@ public class EmailResponse {
       public final String address;
       public final String name;
 
-      public ValueData(JSONObject responseData) {
-        this.address = responseData.optString("address");
-        this.name = responseData.optString("name");
+      public ValueData(final JsonNode node) {
+        this.address = node.get("address").asText();
+        this.name = node.get("name").asText();
       }
     }
   }
