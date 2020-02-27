@@ -14,23 +14,21 @@ const TriggerableConfirm = ({
   buttonLabel,
   buttonRef,
   ...otherProps
-}) => {
-  return (
-    <Confirm
-      onConfirm={onConfirm}
-      title={title}
-      body={body}
-      confirmText={confirmText}
-      cancelText={cancelText}
-      dialogClassName="react-confirm-bootstrap-modal"
-      confirmBSStyle="primary"
-    >
-      <Button bsStyle={bsStyle} {...otherProps} ref={buttonRef}>
-        {buttonLabel}
-      </Button>
-    </Confirm>
-  )
-}
+}) => (
+  <Confirm
+    onConfirm={onConfirm}
+    title={title}
+    body={body}
+    confirmText={confirmText}
+    cancelText={cancelText}
+    dialogClassName="react-confirm-bootstrap-modal"
+    confirmBSStyle="primary"
+  >
+    <Button bsStyle={bsStyle} {...otherProps} ref={buttonRef}>
+      {buttonLabel}
+    </Button>
+  </Confirm>
+)
 TriggerableConfirm.propTypes = {
   onConfirm: PropTypes.func,
   title: PropTypes.string,

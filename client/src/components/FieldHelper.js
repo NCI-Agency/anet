@@ -482,32 +482,29 @@ export const FieldShortcuts = ({
   onChange,
   handleAddItem,
   title
-}) => {
-  return (
-    shortcuts &&
-    shortcuts.length > 0 && (
-      <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
-        <h5>{title}</h5>
-        {shortcuts.map(shortcut => {
-          const shortcutLinkProps = {
-            [objectType.getModelNameLinkTo]: shortcut,
-            isLink: false,
-            forShortcut: true
-          }
-          return (
-            <Button
-              key={shortcut.uuid}
-              bsStyle="link"
-              onClick={() => handleAddItem(shortcut, onChange, curValue)}
-            >
-              Add <LinkTo {...shortcutLinkProps} />
-            </Button>
-          )
-        })}
-      </div>
-    )
+}) =>
+  shortcuts &&
+  shortcuts.length > 0 && (
+    <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
+      <h5>{title}</h5>
+      {shortcuts.map(shortcut => {
+        const shortcutLinkProps = {
+          [objectType.getModelNameLinkTo]: shortcut,
+          isLink: false,
+          forShortcut: true
+        }
+        return (
+          <Button
+            key={shortcut.uuid}
+            bsStyle="link"
+            onClick={() => handleAddItem(shortcut, onChange, curValue)}
+          >
+            Add <LinkTo {...shortcutLinkProps} />
+          </Button>
+        )
+      })}
+    </div>
   )
-}
 
 FieldShortcuts.propTypes = {
   shortcuts: PropTypes.arrayOf(PropTypes.shape({ uuid: PropTypes.string })),

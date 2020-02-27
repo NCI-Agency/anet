@@ -16,19 +16,17 @@ const aCss = {
   fontSize: "0.7em"
 }
 
-const BaseSecurityBanner = ({ currentUser, appSettings }) => {
-  return (
-    <div
-      className="banner"
-      style={{ ...css, background: appSettings[SETTING_KEY_COLOR] }}
-    >
-      {appSettings[SETTING_KEY_TEXT]} || {currentUser.name}{" "}
-      <LinkTo person={currentUser} style={aCss} showIcon={false}>
-        (edit)
-      </LinkTo>
-    </div>
-  )
-}
+const BaseSecurityBanner = ({ currentUser, appSettings }) => (
+  <div
+    className="banner"
+    style={{ ...css, background: appSettings[SETTING_KEY_COLOR] }}
+  >
+    {appSettings[SETTING_KEY_TEXT]} || {currentUser.name}{" "}
+    <LinkTo person={currentUser} style={aCss} showIcon={false}>
+      (edit)
+    </LinkTo>
+  </div>
+)
 BaseSecurityBanner.propTypes = {
   currentUser: PropTypes.instanceOf(Person),
   appSettings: PropTypes.object

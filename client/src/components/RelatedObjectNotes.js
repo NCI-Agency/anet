@@ -190,49 +190,41 @@ const BaseRelatedObjectNotes = ({
               {relatedObjectValue.rank} {relatedObjectValue.name}
             </Panel.Heading>
             <Panel.Body>
-              {questions.map(question => {
-                return (
-                  <React.Fragment key={question.id}>
-                    {question.label}
-                    <br />
-                    <Pie
-                      width={70}
-                      height={70}
-                      data={partnerAssessmentsSummary[question.id]}
-                      label={Object.values(
-                        partnerAssessmentsSummary[question.id]
-                      ).reduce((acc, cur) => acc + cur, 0)}
-                      segmentFill={entity => {
-                        const matching = question.choice.filter(
-                          choice => choice.value === entity.data.key
-                        )
-                        return matching.length > 0
-                          ? matching[0].color
-                          : "#bbbbbb"
-                      }}
-                      segmentLabel={d => d.data.value}
-                    />
+              {questions.map(question => (
+                <React.Fragment key={question.id}>
+                  {question.label}
+                  <br />
+                  <Pie
+                    width={70}
+                    height={70}
+                    data={partnerAssessmentsSummary[question.id]}
+                    label={Object.values(
+                      partnerAssessmentsSummary[question.id]
+                    ).reduce((acc, cur) => acc + cur, 0)}
+                    segmentFill={entity => {
+                      const matching = question.choice.filter(
+                        choice => choice.value === entity.data.key
+                      )
+                      return matching.length > 0 ? matching[0].color : "#bbbbbb"
+                    }}
+                    segmentLabel={d => d.data.value}
+                  />
 
-                    <br />
-                    {question.choice.map(choice => (
-                      <React.Fragment key={choice.value}>
-                        <span style={{ backgroundColor: choice.color }}>
-                          {choice.label} :
-                          <b>
-                            {
-                              partnerAssessmentsSummary[question.id][
-                                choice.value
-                              ]
-                            }
-                          </b>{" "}
-                        </span>
-                      </React.Fragment>
-                    ))}
-                    <br />
-                    <br />
-                  </React.Fragment>
-                )
-              })}
+                  <br />
+                  {question.choice.map(choice => (
+                    <React.Fragment key={choice.value}>
+                      <span style={{ backgroundColor: choice.color }}>
+                        {choice.label} :
+                        <b>
+                          {partnerAssessmentsSummary[question.id][choice.value]}
+                        </b>{" "}
+                      </span>
+                    </React.Fragment>
+                  ))}
+                  <br />
+                  <br />
+                </React.Fragment>
+              ))}
             </Panel.Body>
           </Panel>
         )}

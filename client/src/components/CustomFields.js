@@ -526,41 +526,39 @@ export const ReadonlyCustomFields = ({
   fieldsConfig,
   formikProps,
   fieldNamePrefix
-}) => {
-  return (
-    <>
-      {Object.keys(fieldsConfig).map(key => {
-        const fieldConfig = fieldsConfig[key]
-        const {
-          type,
-          typeError,
-          placeholder,
-          helpText,
-          validations,
-          visibleWhen,
-          objectFields,
-          ...fieldProps
-        } = fieldConfig
-        let extraProps = {}
-        if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
-          extraProps = {
-            fieldConfig,
-            formikProps
-          }
+}) => (
+  <>
+    {Object.keys(fieldsConfig).map(key => {
+      const fieldConfig = fieldsConfig[key]
+      const {
+        type,
+        typeError,
+        placeholder,
+        helpText,
+        validations,
+        visibleWhen,
+        objectFields,
+        ...fieldProps
+      } = fieldConfig
+      let extraProps = {}
+      if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+        extraProps = {
+          fieldConfig,
+          formikProps
         }
-        const FieldComponent = READONLY_FIELD_COMPONENTS[type]
-        return (
-          <FieldComponent
-            key={key}
-            name={`${fieldNamePrefix}.${key}`}
-            {...fieldProps}
-            {...extraProps}
-          />
-        )
-      })}
-    </>
-  )
-}
+      }
+      const FieldComponent = READONLY_FIELD_COMPONENTS[type]
+      return (
+        <FieldComponent
+          key={key}
+          name={`${fieldNamePrefix}.${key}`}
+          {...fieldProps}
+          {...extraProps}
+        />
+      )
+    })}
+  </>
+)
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,

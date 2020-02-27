@@ -102,67 +102,62 @@ const BaseEditAssociatedPositionsModal = ({
 
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
-      {({ setFieldValue, values, submitForm }) => {
-        return (
-          <Modal show={showModal} onHide={() => close(setFieldValue)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Modify assigned {assignedRole}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Messages error={error} />
-              <Form className="form-horizontal" method="post">
-                <Grid fluid>
-                  <Row>
-                    <Col md={12}>
-                      <FastField
-                        name="associatedPositions"
-                        label="Associated positions"
-                        component={FieldHelper.SpecialField}
-                        onChange={value =>
-                          setFieldValue("associatedPositions", value)}
-                        vertical
-                        widget={
-                          <AdvancedMultiSelect
-                            fieldName="associatedPositions"
-                            placeholder={`Search for a ${assignedRole} position...`}
-                            value={values.associatedPositions}
-                            renderSelected={
-                              <AssociatedPositionsTable
-                                associatedPositions={values.associatedPositions}
-                              />
-                            }
-                            overlayColumns={[
-                              "Position",
-                              "Organization",
-                              "Current Occupant"
-                            ]}
-                            overlayRenderRow={PositionOverlayRow}
-                            filterDefs={positionsFilters}
-                            objectType={Position}
-                            fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
-                            addon={POSITIONS_ICON}
-                          />
-                        }
-                      />
-                    </Col>
-                  </Row>
-                </Grid>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button
-                className="pull-left"
-                onClick={() => close(setFieldValue)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={submitForm} bsStyle="primary">
-                Save
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        )
-      }}
+      {({ setFieldValue, values, submitForm }) => (
+        <Modal show={showModal} onHide={() => close(setFieldValue)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Modify assigned {assignedRole}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Messages error={error} />
+            <Form className="form-horizontal" method="post">
+              <Grid fluid>
+                <Row>
+                  <Col md={12}>
+                    <FastField
+                      name="associatedPositions"
+                      label="Associated positions"
+                      component={FieldHelper.SpecialField}
+                      onChange={value =>
+                        setFieldValue("associatedPositions", value)}
+                      vertical
+                      widget={
+                        <AdvancedMultiSelect
+                          fieldName="associatedPositions"
+                          placeholder={`Search for a ${assignedRole} position...`}
+                          value={values.associatedPositions}
+                          renderSelected={
+                            <AssociatedPositionsTable
+                              associatedPositions={values.associatedPositions}
+                            />
+                          }
+                          overlayColumns={[
+                            "Position",
+                            "Organization",
+                            "Current Occupant"
+                          ]}
+                          overlayRenderRow={PositionOverlayRow}
+                          filterDefs={positionsFilters}
+                          objectType={Position}
+                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
+                          addon={POSITIONS_ICON}
+                        />
+                      }
+                    />
+                  </Col>
+                </Row>
+              </Grid>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button className="pull-left" onClick={() => close(setFieldValue)}>
+              Cancel
+            </Button>
+            <Button onClick={submitForm} bsStyle="primary">
+              Save
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </Formik>
   )
 

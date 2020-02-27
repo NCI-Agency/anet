@@ -66,24 +66,20 @@ AdvancedSelectOverlayTable.defaultProps = {
 const AdvancedSingleSelectOverlayTableBase = ({
   selectedItems,
   ...otherProps
-}) => {
-  return (
-    <AdvancedSelectOverlayTable
-      {...otherProps}
-      selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
-      selectItemComponent={<Radio />}
-    />
-  )
-}
+}) => (
+  <AdvancedSelectOverlayTable
+    {...otherProps}
+    selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
+    selectItemComponent={<Radio />}
+  />
+)
 AdvancedSingleSelectOverlayTableBase.propTypes = {
   selectedItems: PropTypes.oneOfType([PropTypes.object, PropTypes.array])
 }
 
-const AdvancedMultiSelectOverlayTableBase = props => {
-  return (
-    <AdvancedSelectOverlayTable {...props} selectItemComponent={<Checkbox />} />
-  )
-}
+const AdvancedMultiSelectOverlayTableBase = props => (
+  <AdvancedSelectOverlayTable {...props} selectItemComponent={<Checkbox />} />
+)
 
 export const AdvancedSingleSelectOverlayTable = LoaderHOC("isLoading")("items")(
   AdvancedSingleSelectOverlayTableBase

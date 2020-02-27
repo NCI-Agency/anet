@@ -82,11 +82,9 @@ ApprovalStepModal.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-const ActionStatus = ({ action }) => {
-  return (
-    <div className="action-status">{ACTION_TYPE_DETAILS[action.type].text}</div>
-  )
-}
+const ActionStatus = ({ action }) => (
+  <div className="action-status">{ACTION_TYPE_DETAILS[action.type].text}</div>
+)
 ActionStatus.propTypes = {
   action: PropTypes.object.isRequired
 }
@@ -131,58 +129,50 @@ ActionDetails.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-const ReportAction = ({ action }) => {
-  return (
-    <div className="workflow-action">
-      <ActionStatus action={action} />
-      <ActionButton action={action} />
-      <ActionDetails action={action} />
-    </div>
-  )
-}
+const ReportAction = ({ action }) => (
+  <div className="workflow-action">
+    <ActionStatus action={action} />
+    <ActionButton action={action} />
+    <ActionDetails action={action} />
+  </div>
+)
 ReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-const CompactReportAction = ({ action }) => {
-  return (
-    <div className="workflow-action">
-      <ActionButton action={action} />
-    </div>
-  )
-}
+const CompactReportAction = ({ action }) => (
+  <div className="workflow-action">
+    <ActionButton action={action} />
+  </div>
+)
 CompactReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-export const ReportFullWorkflow = ({ workflow }) => {
-  return (
-    <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
-      {workflow.map(action => {
-        const key = action.step
-          ? `${action.createdAt}-${action.step.uuid}`
-          : action.createdAt
-        return <ReportAction action={action} key={key} />
-      })}
-    </Fieldset>
-  )
-}
+export const ReportFullWorkflow = ({ workflow }) => (
+  <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
+    {workflow.map(action => {
+      const key = action.step
+        ? `${action.createdAt}-${action.step.uuid}`
+        : action.createdAt
+      return <ReportAction action={action} key={key} />
+    })}
+  </Fieldset>
+)
 ReportFullWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired
 }
 
-export const ReportCompactWorkflow = ({ workflow }) => {
-  return (
-    <Fieldset className="workflow-fieldset compact" title="Workflow">
-      {workflow.map(action => {
-        const key = action.step
-          ? `${action.createdAt}-${action.step.uuid}`
-          : action.createdAt
-        return <CompactReportAction action={action} key={key} />
-      })}
-    </Fieldset>
-  )
-}
+export const ReportCompactWorkflow = ({ workflow }) => (
+  <Fieldset className="workflow-fieldset compact" title="Workflow">
+    {workflow.map(action => {
+      const key = action.step
+        ? `${action.createdAt}-${action.step.uuid}`
+        : action.createdAt
+      return <CompactReportAction action={action} key={key} />
+    })}
+  </Fieldset>
+)
 ReportCompactWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired
 }
