@@ -19,16 +19,18 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const OrganizationFilter = props => {
-  const {
-    asFormField,
-    queryKey,
-    queryOrgRecurseStrategyKey,
-    orgFilterQueryParams
-  } = props
+const OrganizationFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange,
+  queryOrgRecurseStrategyKey,
+  orgFilterQueryParams,
+  ...advancedSelectProps
+}) => {
   const defaultValue = {
-    value: props.value.value || {},
-    orgRecurseStrategy: props.value.orgRecurseStrategy || RECURSE_STRATEGY.NONE
+    value: inputValue.value || {},
+    orgRecurseStrategy: inputValue.orgRecurseStrategy || RECURSE_STRATEGY.NONE
   }
   const toQuery = val => {
     return {
@@ -36,7 +38,13 @@ const OrganizationFilter = props => {
       [queryOrgRecurseStrategyKey]: val.orgRecurseStrategy
     }
   }
-  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
 
   let msg = value.value.shortName
   if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN) {
@@ -45,14 +53,6 @@ const OrganizationFilter = props => {
     msg += ", including parent organizations"
   }
 
-  const advancedSelectProps = Object.without(
-    props,
-    "value",
-    "queryKey",
-    "queryOrgRecurseStrategyKey",
-    "orgFilterQueryParams",
-    "asFormField"
-  )
   const advancedSelectFilters = {
     all: {
       label: "All",
@@ -125,8 +125,11 @@ OrganizationFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeOrganizationFilter = (props, query, key) => {
-  const { queryKey, queryOrgRecurseStrategyKey } = props
+export const deserialize = (
+  { queryKey, queryOrgRecurseStrategyKey },
+  query,
+  key
+) => {
   if (query[queryKey]) {
     return API.query(GQL_GET_ORGANIZATION, {
       uuid: query[queryKey]

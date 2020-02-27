@@ -4,13 +4,18 @@ import React from "react"
 import { Checkbox, FormGroup } from "react-bootstrap"
 import { deserializeSearchFilter } from "searchUtils"
 
-const CheckboxFilter = props => {
-  const { asFormField, queryKey } = props
+const CheckboxFilter = ({ asFormField, queryKey, onChange }) => {
   const defaultValue = { value: true }
   const toQuery = val => {
     return { [queryKey]: val.value }
   }
-  const value = useSearchFilter(props, defaultValue, toQuery)[0]
+  const value = useSearchFilter(
+    asFormField,
+    onChange,
+    undefined,
+    defaultValue,
+    toQuery
+  )[0]
 
   const msg = "Authorized for me"
   return !asFormField ? (
@@ -32,8 +37,8 @@ CheckboxFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeCheckboxFilter = (props, query, key) => {
-  return deserializeSearchFilter(props, query, key)
+export const deserialize = ({ queryKey }, query, key) => {
+  return deserializeSearchFilter(queryKey, query, key)
 }
 
 export default CheckboxFilter

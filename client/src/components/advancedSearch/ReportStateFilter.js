@@ -26,15 +26,18 @@ const CANCELLATION_REASON_LABELS = {
     "Availability of Interpreter(s)"
 }
 
-const ReportStateFilter = props => {
-  const { asFormField, queryKey } = props
+const ReportStateFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange
+}) => {
   const isOnlyCancelled = val => {
     return val.state.length === 1 && val.state[0] === Report.STATE.CANCELLED
   }
-
   const defaultValue = {
-    state: props.value.state || [Report.STATE.DRAFT],
-    cancelledReason: props.value.cancelledReason || ""
+    state: inputValue.state || [Report.STATE.DRAFT],
+    cancelledReason: inputValue.cancelledReason || ""
   }
   const toQuery = val => {
     const onlyCancelled = isOnlyCancelled(val)
@@ -44,7 +47,13 @@ const ReportStateFilter = props => {
     }
     return query
   }
-  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
 
   const labels = value.state.map(s => STATE_LABELS[s])
   const onlyCancelled = isOnlyCancelled(value)
@@ -134,7 +143,7 @@ ReportStateFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeReportStateFilter = (props, query, key) => {
+export const deserialize = (props, query, key) => {
   if (query.state) {
     const value = { state: query.state }
     if (query.cancelledReason) {

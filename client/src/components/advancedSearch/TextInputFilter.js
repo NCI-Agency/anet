@@ -4,13 +4,23 @@ import React from "react"
 import { FormControl, FormGroup } from "react-bootstrap"
 import { deserializeSearchFilter } from "searchUtils"
 
-const TextInputFilter = props => {
-  const { asFormField, queryKey } = props
-  const defaultValue = props.value || { value: "" }
+const TextInputFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange
+}) => {
+  const defaultValue = inputValue || { value: "" }
   const toQuery = val => {
     return { [queryKey]: val.value }
   }
-  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery) // eslint-disable-line no-unused-vars
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
 
   return !asFormField ? (
     <>{value.value}</>
@@ -41,8 +51,8 @@ TextInputFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeTextInputFilter = (props, query, key) => {
-  return deserializeSearchFilter(props, query, key)
+export const deserialize = ({ queryKey }, query, key) => {
+  return deserializeSearchFilter(queryKey, query, key)
 }
 
 export default TextInputFilter

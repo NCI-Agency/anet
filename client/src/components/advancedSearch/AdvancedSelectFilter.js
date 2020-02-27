@@ -5,21 +5,26 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import PropTypes from "prop-types"
 import React from "react"
 
-const AdvancedSelectFilter = props => {
-  const { asFormField, queryKey, valueKey } = props
-  const defaultValue = props.value || {}
+const AdvancedSelectFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange,
+  valueKey,
+  ...advancedSelectProps
+}) => {
+  const defaultValue = inputValue || {}
   const toQuery = val => {
     return { [queryKey]: val && val.uuid }
   }
-  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
-
-  const advancedSelectProps = Object.without(
-    props,
-    "value",
-    "queryKey",
-    "asFormField",
-    "onChange"
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
   )
+
   return !asFormField ? (
     <>{value[valueKey]}</>
   ) : (
@@ -31,6 +36,7 @@ const AdvancedSelectFilter = props => {
       showRemoveButton={false}
       onChange={handleChange}
       value={value}
+      valueKey={valueKey}
       smallOverlay
     />
   )
@@ -59,8 +65,7 @@ AdvancedSelectFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeAdvancedSelectFilter = (props, query, key) => {
-  const { queryKey, objectType, fields } = props
+export const deserialize = ({ queryKey, objectType, fields }, query, key) => {
   if (query[queryKey]) {
     const getInstanceName = objectType.getInstanceName
     return API.query(

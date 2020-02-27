@@ -1,25 +1,25 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import { Settings } from "api"
 import AdvancedSelectFilter, {
-  deserializeAdvancedSelectFilter
+  deserialize as deserializeAdvancedSelectFilter
 } from "components/advancedSearch/AdvancedSelectFilter"
 import CheckboxFilter, {
-  deserializeCheckboxFilter
+  deserialize as deserializeCheckboxFilter
 } from "components/advancedSearch/CheckboxFilter"
 import DateRangeFilter, {
-  deserializeDateRangeFilter
+  deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
 import OrganizationFilter, {
-  deserializeOrganizationFilter
+  deserialize as deserializeOrganizationFilter
 } from "components/advancedSearch/OrganizationFilter"
 import ReportStateFilter, {
-  deserializeReportStateFilter
+  deserialize as deserializeReportStateFilter
 } from "components/advancedSearch/ReportStateFilter"
 import SelectFilter, {
-  deserializeSelectFilter
+  deserialize as deserializeSelectFilter
 } from "components/advancedSearch/SelectFilter"
 import TextInputFilter, {
-  deserializeTextInputFilter
+  deserialize as deserializeTextInputFilter
 } from "components/advancedSearch/TextInputFilter"
 import {
   LocationOverlayRow,

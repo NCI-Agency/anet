@@ -12,10 +12,17 @@ const advisorSearchPositionTypes = [
   Position.TYPE.ADMINISTRATOR
 ]
 
-const SelectFilter = props => {
-  const { asFormField, isPositionTypeFilter, queryKey, options, labels } = props
+const SelectFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange,
+  isPositionTypeFilter,
+  options,
+  labels
+}) => {
   const defaultValue = {
-    value: props.value.value || options[0] || ""
+    value: inputValue.value || options[0] || ""
   }
   const toQuery = val => {
     // Searching for advisors implies searching for super users and admins as well
@@ -25,7 +32,13 @@ const SelectFilter = props => {
         : val.value
     return { [queryKey]: valueForQuery }
   }
-  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
 
   const optionsLabels = labels || options.map(v => utils.sentenceCase(v))
   return !asFormField ? (
@@ -65,8 +78,8 @@ SelectFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeSelectFilter = (props, query, key) => {
-  return deserializeSearchFilter(props, query, key)
+export const deserialize = ({ queryKey }, query, key) => {
+  return deserializeSearchFilter(queryKey, query, key)
 }
 
 export default SelectFilter

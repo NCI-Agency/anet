@@ -2,12 +2,17 @@ import _isEqualWith from "lodash/isEqualWith"
 import { useState, useEffect, useRef } from "react"
 import utils from "utils"
 
-const useSearchFilter = (props, defaultValue, toQuery) => {
-  const { asFormField, onChange } = props
-  const latestValueProp = useRef(props.value)
+const useSearchFilter = (
+  asFormField,
+  onChange,
+  inputValue,
+  defaultValue,
+  toQuery
+) => {
+  const latestValueProp = useRef(inputValue)
   const valuePropUnchanged = _isEqualWith(
     latestValueProp.current,
-    props.value,
+    inputValue,
     utils.treatFunctionsAsEqual
   )
   const [value, setValue] = useState(defaultValue)
@@ -15,10 +20,10 @@ const useSearchFilter = (props, defaultValue, toQuery) => {
 
   useEffect(() => {
     if (!valuePropUnchanged) {
-      latestValueProp.current = props.value
-      setValue(props.value)
+      latestValueProp.current = inputValue
+      setValue(inputValue)
     }
-  }, [props.value, valuePropUnchanged])
+  }, [inputValue, valuePropUnchanged])
 
   useEffect(() => {
     if (asFormField) {

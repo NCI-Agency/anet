@@ -35,9 +35,14 @@ const dateRangeValue = PropTypes.shape({
   ])
 })
 
-const DateRangeFilter = props => {
-  const { asFormField, queryKey, onlyBetween } = props
-  const defaultValue = props.value || {
+const DateRangeFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange,
+  onlyBetween
+}) => {
+  const defaultValue = inputValue || {
     relative: BETWEEN,
     start: null,
     end: null
@@ -45,7 +50,13 @@ const DateRangeFilter = props => {
   const toQuery = val => {
     return dateToQuery(queryKey, val)
   }
-  const [value, setValue] = useSearchFilter(props, defaultValue, toQuery)
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
 
   const selectMenu = onlyBetween => {
     const betweenOption = (
@@ -175,8 +186,7 @@ DateRangeFilter.defaultProps = {
   asFormField: true
 }
 
-export const deserializeDateRangeFilter = (props, query, key) => {
-  const { queryKey } = props
+export const deserialize = ({ queryKey }, query, key) => {
   const startKey = dateRangeStartKey(queryKey)
   const endKey = dateRangeEndKey(queryKey)
   const toQueryValue = {}

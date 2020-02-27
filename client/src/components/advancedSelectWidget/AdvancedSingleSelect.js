@@ -41,7 +41,8 @@ const AdvancedSingleSelect = props => {
 }
 AdvancedSingleSelect.propTypes = {
   ...advancedSelectPropTypes,
-  value: PropTypes.object
+  value: PropTypes.object,
+  valueKey: PropTypes.string
 }
 AdvancedSingleSelect.defaultProps = {
   overlayTable: AdvancedSingleSelectOverlayTable,

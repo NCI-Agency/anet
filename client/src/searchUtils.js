@@ -46,9 +46,8 @@ export const deserializeQueryParams = (
   })
 }
 
-export const deserializeSearchFilter = (props, query, key) => {
+export const deserializeSearchFilter = (queryKey, query, key) => {
   // general deserialization from query to a search filter
-  const { queryKey } = props
   if (query[queryKey]) {
     const toQueryValue = { [queryKey]: query[queryKey] }
     return {
