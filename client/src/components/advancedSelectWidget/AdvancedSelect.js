@@ -72,9 +72,16 @@ FilterAsDropdown.propTypes = {
   handleOnChange: PropTypes.func
 }
 
+const FETCH_TYPE = {
+  NONE: "NONE",
+  NORMAL: "NORMAL",
+  DEBOUNCED: "DEBOUNCED"
+}
+
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
   placeholder: PropTypes.string, // input field placeholder
+  pageSize: PropTypes.number,
   disabled: PropTypes.bool,
   selectedValueAsString: PropTypes.string,
   addon: PropTypes.oneOfType([
@@ -85,7 +92,6 @@ export const propTypes = {
   extraAddon: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
-  overlayTableClassName: PropTypes.string,
   overlayTable: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -109,13 +115,13 @@ export const propTypes = {
 const AdvancedSelect = ({
   fieldName,
   placeholder,
+  pageSize,
   disabled,
   selectedValueAsString,
   addon,
   extraAddon,
   value,
   renderSelected,
-  overlayTableClassName,
   overlayTable: OverlayTable,
   overlayColumns,
   overlayRenderRow,
@@ -137,36 +143,37 @@ const AdvancedSelect = ({
   const searchInput = useRef()
   const latestRequest = useRef()
 
-  const [searchTerms, setSearchTerms] = useState(selectedValueAsString || "")
-  const [filterType, setFilterType] = useState(firstFilter) // per default use the first filter
+  const [searchTerms, setSearchTerms] = useState(
+    latestSelectedValueAsString.current
+  )
+  const [filterType, setFilterType] = useState(firstFilter) // by default use the first filter
   const [pageNum, setPageNum] = useState(0)
   const [results, setResults] = useState({})
   const [showOverlay, setShowOverlay] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [doFetchResults, setDoFetchResults] = useState(false)
-  const [doFetchResultsDebounced, setDoFetchResultsDebounced] = useState(false)
+  const [fetchType, setFetchType] = useState(FETCH_TYPE.NONE)
   const [doReset, setDoReset] = useState(false)
 
-  const selectedFilterList = latestFilterDefs.current[filterType].list
-  const selectedFilterListName = latestFilterDefs.current[filterType].listName
-  const selectedFilterQueryVars = latestFilterDefs.current[filterType].queryVars
-
+  const selectedFilter = latestFilterDefs.current[filterType]
   const renderSelectedWithDelete = renderSelected
     ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
     : null
-  const items = results && results[filterType] ? results[filterType].list : []
+  const [items, totalCount] =
+    results && results[filterType]
+      ? [results[filterType].list, results[filterType].totalCount]
+      : [[], 0]
 
   const fetchResults = useCallback(
     searchTerms => {
-      if (!selectedFilterList) {
+      if (!selectedFilter.list) {
         const resourceName = objectType.resourceName
-        const listName = selectedFilterListName || objectType.listName
-        const queryVars = { pageNum: pageNum, pageSize: 6 }
+        const listName = selectedFilter.listName || objectType.listName
+        const queryVars = { pageNum, pageSize }
         if (latestQueryParams.current) {
           Object.assign(queryVars, latestQueryParams.current)
         }
-        if (selectedFilterQueryVars) {
-          Object.assign(queryVars, selectedFilterQueryVars)
+        if (selectedFilter.queryVars) {
+          Object.assign(queryVars, selectedFilter.queryVars)
         }
         if (searchTerms) {
           Object.assign(queryVars, { text: searchTerms + "*" })
@@ -190,8 +197,7 @@ const AdvancedSelect = ({
           if (thisRequest !== latestRequest.current) {
             return
           }
-          const isLoading = data[listName].totalCount !== 0
-          setIsLoading(isLoading)
+          setIsLoading(data[listName].totalCount !== 0)
           setResults(oldResults => ({
             ...oldResults,
             [filterType]: data[listName]
@@ -205,9 +211,10 @@ const AdvancedSelect = ({
       objectType.listName,
       objectType.resourceName,
       pageNum,
-      selectedFilterList,
-      selectedFilterListName,
-      selectedFilterQueryVars
+      pageSize,
+      selectedFilter.list,
+      selectedFilter.listName,
+      selectedFilter.queryVars
     ]
   )
 
@@ -238,46 +245,36 @@ const AdvancedSelect = ({
   }, [filterDefs])
 
   useEffect(() => {
-    const selectedValueAsStringUnchanged = _isEqualWith(
-      latestSelectedValueAsString.current,
-      selectedValueAsString,
-      utils.treatFunctionsAsEqual
-    )
-    if (!selectedValueAsStringUnchanged) {
+    if (latestSelectedValueAsString.current !== selectedValueAsString) {
       latestSelectedValueAsString.current = selectedValueAsString
       setSearchTerms(selectedValueAsString)
-      setDoFetchResults(false)
-      setDoFetchResultsDebounced(false)
+      setFetchType(FETCH_TYPE.NONE)
     }
   }, [selectedValueAsString])
 
   useEffect(() => {
     // No need to fetch the data, it is already provided in the filter definition
-    if (selectedFilterList) {
-      setIsLoading(!_isEmpty(selectedFilterList))
+    if (selectedFilter.list) {
+      setIsLoading(!_isEmpty(selectedFilter.list))
       setResults(oldResults => ({
         ...oldResults,
         [filterType]: {
-          list: selectedFilterList,
-          pageNum: pageNum,
-          pageSize: 6,
-          totalCount: selectedFilterList.length
+          list: selectedFilter.list,
+          pageNum,
+          pageSize,
+          totalCount: selectedFilter.list.length
         }
       }))
     }
-  }, [filterType, pageNum, selectedFilterList])
+  }, [filterType, pageNum, pageSize, selectedFilter.list])
 
   useEffect(() => {
-    if (doFetchResultsDebounced) {
+    if (fetchType === FETCH_TYPE.NORMAL) {
+      fetchResults(searchTerms)
+    } else if (fetchType === FETCH_TYPE.DEBOUNCED) {
       fetchResultsDebounced(searchTerms)
     }
-  }, [doFetchResultsDebounced, fetchResultsDebounced, searchTerms])
-
-  useEffect(() => {
-    if (doFetchResults) {
-      fetchResults(searchTerms)
-    }
-  }, [doFetchResults, fetchResults, searchTerms])
+  }, [fetchType, fetchResults, fetchResultsDebounced, searchTerms])
 
   useEffect(() => {
     if (doReset) {
@@ -287,49 +284,10 @@ const AdvancedSelect = ({
       setSearchTerms(selectedValueAsString)
       setResults({})
       setPageNum(0)
-      setDoFetchResults(false)
-      setDoFetchResultsDebounced(false)
+      setFetchType(FETCH_TYPE.NONE)
       setDoReset(false)
     }
   }, [doReset, firstFilter, selectedValueAsString])
-
-  const advancedSearchPopoverContent = (
-    <Row className="border-between">
-      <FilterAsNav
-        items={filterDefs}
-        currentFilter={filterType}
-        handleOnClick={changeFilterType}
-      />
-
-      <FilterAsDropdown
-        items={filterDefs}
-        handleOnChange={handleOnChangeSelect}
-      />
-
-      <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
-        <OverlayTable
-          fieldName={fieldName}
-          items={items}
-          pageNum={pageNum}
-          selectedItems={value}
-          handleAddItem={item => {
-            handleAddItem(item)
-            if (closeOverlayOnAdd) {
-              handleCloseOverlayOnAdd()
-            }
-          }}
-          handleRemoveItem={handleRemoveItem}
-          objectType={objectType}
-          columns={[""].concat(overlayColumns)}
-          renderRow={overlayRenderRow}
-          isLoading={isLoading}
-          loaderMessage={<div style={{ width: "300px" }}>No results found</div>}
-          tableClassName={overlayTableClassName}
-        />
-        {pagination()}
-      </Col>
-    </Row>
-  )
 
   return (
     <>
@@ -340,7 +298,52 @@ const AdvancedSelect = ({
               <Popover
                 className="advanced-select-popover"
                 popoverClassName="bp3-popover-content-sizing"
-                content={advancedSearchPopoverContent}
+                content={
+                  <Row className="border-between">
+                    <FilterAsNav
+                      items={filterDefs}
+                      currentFilter={filterType}
+                      handleOnClick={changeFilterType}
+                    />
+
+                    <FilterAsDropdown
+                      items={filterDefs}
+                      handleOnChange={handleOnChangeSelect}
+                    />
+
+                    <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
+                      <OverlayTable
+                        fieldName={fieldName}
+                        items={items}
+                        pageNum={pageNum}
+                        selectedItems={value}
+                        handleAddItem={item => {
+                          handleAddItem(item)
+                          if (closeOverlayOnAdd) {
+                            setDoReset(true)
+                          }
+                        }}
+                        handleRemoveItem={handleRemoveItem}
+                        objectType={objectType}
+                        columns={[""].concat(overlayColumns)}
+                        renderRow={overlayRenderRow}
+                        isLoading={isLoading}
+                        loaderMessage={
+                          <div style={{ width: "300px" }}>No results found</div>
+                        }
+                      />
+                      <UltimatePagination
+                        Component="footer"
+                        componentClassName="searchPagination"
+                        className="pull-right"
+                        pageNum={pageNum}
+                        pageSize={pageSize}
+                        totalCount={totalCount}
+                        goToPage={goToPage}
+                      />
+                    </Col>
+                  </Row>
+                }
                 isOpen={showOverlay}
                 captureDismiss
                 dsabled={disabled}
@@ -400,8 +403,7 @@ const AdvancedSelect = ({
           setShowOverlay(openOverlay)
           setSearchTerms("")
           setIsLoading(true)
-          setDoFetchResults(true)
-          setDoFetchResultsDebounced(false)
+          setFetchType(FETCH_TYPE.NORMAL)
         } else {
           // overlay is being closed
           // Note: state updates WOULD NOT be batched here
@@ -414,19 +416,13 @@ const AdvancedSelect = ({
     }
   }
 
-  function handleCloseOverlayOnAdd() {
-    // Close the overlay
-    setDoReset(true)
-  }
-
   function changeSearchTerms(event) {
     setSearchTerms(event.target.value)
     // Reset the results state when the search terms change
     setResults({})
     setPageNum(0)
     // Make sure we don't do a fetch for each character being typed
-    setDoFetchResultsDebounced(true)
-    setDoFetchResults(false)
+    setFetchType(FETCH_TYPE.DEBOUNCED)
   }
 
   function handleOnChangeSelect(event) {
@@ -440,36 +436,17 @@ const AdvancedSelect = ({
     setFilterType(newFilterType)
     setPageNum(results && filterResults ? filterResults.pageNum : 0)
     setIsLoading(shouldFetchResults)
-    setDoFetchResults(shouldFetchResults)
-    setDoFetchResultsDebounced(false)
-  }
-
-  function pagination() {
-    const pageSize =
-      results && results[filterType] ? results[filterType].pageSize : 6
-    const totalCount =
-      results && results[filterType] ? results[filterType].totalCount : 0
-    return (
-      <UltimatePagination
-        Component="footer"
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={goToPage}
-      />
-    )
+    setFetchType(shouldFetchResults ? FETCH_TYPE.NORMAL : FETCH_TYPE.NONE)
   }
 
   function goToPage(pageNum) {
     setPageNum(pageNum)
-    setDoFetchResults(true)
-    setDoFetchResultsDebounced(false)
+    setFetchType(FETCH_TYPE.NORMAL)
   }
 }
 AdvancedSelect.propTypes = propTypes
 AdvancedSelect.defaultProps = {
+  pageSize: 6,
   disabled: false,
   filterDefs: {},
   closeOverlayOnAdd: false,

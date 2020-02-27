@@ -15,12 +15,11 @@ const AdvancedSelectOverlayTable = ({
   handleRemoveItem,
   columns,
   renderRow,
-  selectItemComponent,
-  tableClassName
+  selectItemComponent
 }) => {
   const selectedItemsUuids = selectedItems.map(a => a.uuid)
   return (
-    <Table responsive hover striped className={tableClassName}>
+    <Table responsive hover striped>
       <thead>
         <tr>
           {columns.map(col => (
@@ -58,12 +57,10 @@ AdvancedSelectOverlayTable.propTypes = {
   handleRemoveItem: PropTypes.func,
   columns: PropTypes.array.isRequired,
   renderRow: PropTypes.func.isRequired,
-  selectItemComponent: PropTypes.element.isRequired,
-  tableClassName: PropTypes.string
+  selectItemComponent: PropTypes.element.isRequired
 }
 AdvancedSelectOverlayTable.defaultProps = {
-  selectedItems: [],
-  tableClassName: ""
+  selectedItems: []
 }
 
 const AdvancedSingleSelectOverlayTableBase = ({
