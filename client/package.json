@@ -106,7 +106,7 @@
     "@fullcalendar/react": "4.4.0",
     "@fullcalendar/timegrid": "4.4.0",
     "apollo-boost": "0.4.7",
-    "bootstrap": "3.4.1",
+    "bootstrap": "4.4.1",
     "change-case": "4.1.1",
     "classnames": "2.2.6",
     "core-js": "3.6.4",
