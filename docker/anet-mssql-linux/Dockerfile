@@ -2,7 +2,7 @@
 # Maintainers: NCI Agency (VassilIordanov on GitHub)
 # GitRepo: https://github.com/NCI-Agency/anet
 
-FROM ubuntu:16.04
+FROM ubuntu:16.10
 
 RUN export DEBIAN_FRONTEND=noninteractive ACCEPT_EULA=Y && \
     apt-get update && \
