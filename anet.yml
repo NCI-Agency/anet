@@ -663,3 +663,5 @@ dictionary:
     - label: decisives
       data: /data/dashboards/decisives.json
       type: decisives
+    - label: process board
+      type: board
