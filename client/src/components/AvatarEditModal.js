@@ -1,67 +1,50 @@
-import React, { Component } from "react"
-import { Button, Modal } from "react-bootstrap"
 import AvatarComponent from "components/AvatarComponent"
 import PropTypes from "prop-types"
+import React, { useState } from "react"
+import { Button, Modal } from "react-bootstrap"
 
-class AvatarEditModal extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      showModal: false,
-      currentPreview: null
-    }
+const AvatarEditModal = ({ title, onAvatarUpdate }) => {
+  const [showModal, setShowModal] = useState(false)
+  const [currentPreview, setCurrentPreview] = useState(null)
+
+  return (
+    <div>
+      <button onClick={open}>{title}</button>
+
+      <Modal show={showModal} onHide={close}>
+        <Modal.Header closeButton>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <AvatarComponent onChangePreview={setCurrentPreview} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={save}>Save</Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  )
+
+  function open(e) {
+    e.preventDefault()
+    setShowModal(true)
   }
 
-  static propTypes = {
-    title: PropTypes.string.isRequired,
-    onAvatarUpdate: PropTypes.func.isRequired,
-    size: PropTypes.string
+  function close() {
+    setShowModal(false)
   }
 
-  close = () => {
-    this.setState({ showModal: false })
-  }
-
-  save = () => {
-    const updatedAvatar = this.state.currentPreview.substring(
+  function save() {
+    const updatedAvatar = currentPreview.substring(
       "data:image/jpeg;base64,".length - 1
     )
-    this.props.onAvatarUpdate(updatedAvatar)
-    this.close()
+    onAvatarUpdate(updatedAvatar)
+    close()
   }
-
-  open = e => {
-    e.preventDefault()
-    this.setState({ showModal: true })
-  }
-
-  updateAvatarPreview = preview => {
-    this.setState({ currentPreview: preview })
-  }
-
-  render() {
-    return (
-      <div>
-        <button onClick={this.open}>{this.props.title}</button>
-
-        <Modal
-          bsSize={this.props.size}
-          show={this.state.showModal}
-          onHide={this.close}
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>{this.props.title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <AvatarComponent onChangePreview={this.updateAvatarPreview} />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={this.save}>Save</Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    )
-  }
+}
+AvatarEditModal.propTypes = {
+  title: PropTypes.string.isRequired,
+  onAvatarUpdate: PropTypes.func.isRequired
 }
 
 export default AvatarEditModal

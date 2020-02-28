@@ -28,9 +28,7 @@ const AdvisorReportsRow = props => {
       <Checkbox checked={props.checked} onChange={props.onSelectRow} />
     </td>
   ) : null
-  const description = props.handleOrganizationClick
-    ? props.link
-    : props.row.name
+  const description = props.withOrganizationLink ? props.link : props.row.name
   return (
     <tr>
       {checkbox}
@@ -43,7 +41,7 @@ const AdvisorReportsRow = props => {
 AdvisorReportsRow.propTypes = {
   checked: PropTypes.bool,
   columnGroups: PropTypes.array,
-  handleOrganizationClick: PropTypes.func,
+  withOrganizationLink: PropTypes.bool,
   link: PropTypes.object,
   onSelectRow: PropTypes.func,
   row: PropTypes.object

@@ -131,40 +131,36 @@ Chart.propTypes = {
   selectedBarClass: PropTypes.string
 }
 
-const Collection = ({ id, queryParams }) => {
-  return (
-    <div className="scrollable">
-      <ReportCollection
-        paginationKey={`r_${id}`}
-        queryParams={queryParams}
-        viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
-      />
-    </div>
-  )
-}
+const Collection = ({ id, queryParams }) => (
+  <div className="scrollable">
+    <ReportCollection
+      paginationKey={`r_${id}`}
+      queryParams={queryParams}
+      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+    />
+  </div>
+)
 
 Collection.propTypes = {
   id: PropTypes.string,
   queryParams: PropTypes.object
 }
 
-const Map = ({ queryParams }) => {
-  return (
-    <div className="non-scrollable">
-      <ContainerDimensions>
-        {({ width, height }) => (
-          <ReportCollection
-            queryParams={queryParams}
-            width={width}
-            height={height}
-            marginBottom={0}
-            viewFormats={[FORMAT_MAP]}
-          />
-        )}
-      </ContainerDimensions>
-    </div>
-  )
-}
+const Map = ({ queryParams }) => (
+  <div className="non-scrollable">
+    <ContainerDimensions>
+      {({ width, height }) => (
+        <ReportCollection
+          queryParams={queryParams}
+          width={width}
+          height={height}
+          marginBottom={0}
+          viewFormats={[FORMAT_MAP]}
+        />
+      )}
+    </ContainerDimensions>
+  </div>
+)
 
 Map.propTypes = {
   queryParams: PropTypes.object
