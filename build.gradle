@@ -69,7 +69,7 @@ dependencies {
 	compile 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.1.jre8'
+	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.1.jre13'
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.10' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.7' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
