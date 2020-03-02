@@ -1,6 +1,6 @@
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React from "react"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -8,36 +8,32 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
   hideLoading: () => dispatch(hideLoading())
 })
 
-const LoaderHOC = isLoading => dataPropName => WrappedComponent => {
-  return class LoaderHOC extends Component {
-    static propTypes = {
-      loaderMessage: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
-    }
+const LoaderHOC = isLoadingPropName => dataPropName => WrappedComponent => ({
+  loaderMessage,
+  ...otherProps
+}) => {
+  const dataIsEmpty = _isEmpty(otherProps[dataPropName])
+  const showLoader = dataIsEmpty && isLoadingData(otherProps[isLoadingPropName])
+  const defaultMessage = (
+    <div>
+      <em>No data</em>
+    </div>
+  )
 
-    isLoadingData(prop) {
-      return prop || prop === undefined
-    }
-
-    render() {
-      const dataIsEmpty = _isEmpty(this.props[dataPropName])
-      const showLoader =
-        dataIsEmpty && this.isLoadingData(this.props[isLoading])
-      const loaderMessage = this.props.loaderMessage
-      const defaultMessage = (
-        <div>
-          <em>No data</em>
-        </div>
-      )
-
-      if (showLoader) {
-        return <div className="loader" />
-      } else if (dataIsEmpty) {
-        return _isEmpty(loaderMessage) ? defaultMessage : loaderMessage
-      } else {
-        return <WrappedComponent {...this.props} />
-      }
-    }
+  if (showLoader) {
+    return <div className="loader" />
+  } else if (dataIsEmpty) {
+    return _isEmpty(loaderMessage) ? defaultMessage : loaderMessage
+  } else {
+    return <WrappedComponent {...otherProps} />
   }
+
+  function isLoadingData(prop) {
+    return prop || prop === undefined
+  }
+}
+LoaderHOC.propTypes = {
+  loaderMessage: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
 export default LoaderHOC

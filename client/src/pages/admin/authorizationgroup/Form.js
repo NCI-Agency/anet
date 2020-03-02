@@ -122,7 +122,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
 
                 <Field
                   name="status"
-                  component={FieldHelper.RadioButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />

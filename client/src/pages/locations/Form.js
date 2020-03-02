@@ -104,7 +104,7 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
 
                 <FastField
                   name="status"
-                  component={FieldHelper.RadioButtonToggleGroup}
+                  component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />

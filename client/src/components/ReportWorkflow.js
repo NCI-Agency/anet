@@ -3,7 +3,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 import "./ReportWorkflow.css"
 
@@ -43,63 +43,48 @@ ApprovalStepModalStatus.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-class ApprovalStepModal extends Component {
-  static propTypes = {
-    action: PropTypes.object.isRequired
-  }
+const ApprovalStepModal = ({ action }) => {
+  const [showModal, setShowModal] = useState(false)
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      showModal: false
-    }
-  }
+  const step = action.step
+  const actionTypeCss = ACTION_TYPE_DETAILS[action.type].cssClass
 
-  closeModal = () => {
-    this.setState({ showModal: false })
-  }
-
-  openModal = () => {
-    this.setState({ showModal: true })
-  }
-
-  render() {
-    const { action } = this.props
-    const step = action.step
-    const actionTypeCss = ACTION_TYPE_DETAILS[action.type].cssClass
-    return step ? (
-      <>
-        <Button className={actionTypeCss + " btn-sm"} onClick={this.openModal}>
-          <span>{step.name}</span>
-        </Button>
-        <Modal show={this.state.showModal} onHide={this.closeModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Approvers for {step.name}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <ul>
-              {step.approvers.map(position => (
-                <li key={position.uuid}>
-                  <LinkTo position={position} /> -{" "}
-                  <LinkTo person={position.person} />
-                </li>
-              ))}
-            </ul>
-          </Modal.Body>
-          <Modal.Footer>
-            <ApprovalStepModalStatus action={action} />
-          </Modal.Footer>
-        </Modal>
-      </>
-    ) : null
-  }
+  return step ? (
+    <>
+      <Button
+        className={actionTypeCss + " btn-sm"}
+        onClick={() => setShowModal(true)}
+      >
+        <span>{step.name}</span>
+      </Button>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Approvers for {step.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ul>
+            {step.approvers.map(position => (
+              <li key={position.uuid}>
+                <LinkTo position={position} /> -{" "}
+                <LinkTo person={position.person} />
+              </li>
+            ))}
+          </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <ApprovalStepModalStatus action={action} />
+        </Modal.Footer>
+      </Modal>
+    </>
+  ) : null
+}
+ApprovalStepModal.propTypes = {
+  action: PropTypes.object.isRequired
 }
 
-const ActionStatus = ({ action }) => {
-  return (
-    <div className="action-status">{ACTION_TYPE_DETAILS[action.type].text}</div>
-  )
-}
+const ActionStatus = ({ action }) => (
+  <div className="action-status">{ACTION_TYPE_DETAILS[action.type].text}</div>
+)
 ActionStatus.propTypes = {
   action: PropTypes.object.isRequired
 }
@@ -144,58 +129,50 @@ ActionDetails.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-const ReportAction = ({ action }) => {
-  return (
-    <div className="workflow-action">
-      <ActionStatus action={action} />
-      <ActionButton action={action} />
-      <ActionDetails action={action} />
-    </div>
-  )
-}
+const ReportAction = ({ action }) => (
+  <div className="workflow-action">
+    <ActionStatus action={action} />
+    <ActionButton action={action} />
+    <ActionDetails action={action} />
+  </div>
+)
 ReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-const CompactReportAction = ({ action }) => {
-  return (
-    <div className="workflow-action">
-      <ActionButton action={action} />
-    </div>
-  )
-}
+const CompactReportAction = ({ action }) => (
+  <div className="workflow-action">
+    <ActionButton action={action} />
+  </div>
+)
 CompactReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-export const ReportFullWorkflow = ({ workflow }) => {
-  return (
-    <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
-      {workflow.map(action => {
-        const key = action.step
-          ? `${action.createdAt}-${action.step.uuid}`
-          : action.createdAt
-        return <ReportAction action={action} key={key} />
-      })}
-    </Fieldset>
-  )
-}
+export const ReportFullWorkflow = ({ workflow }) => (
+  <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
+    {workflow.map(action => {
+      const key = action.step
+        ? `${action.createdAt}-${action.step.uuid}`
+        : action.createdAt
+      return <ReportAction action={action} key={key} />
+    })}
+  </Fieldset>
+)
 ReportFullWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired
 }
 
-export const ReportCompactWorkflow = ({ workflow }) => {
-  return (
-    <Fieldset className="workflow-fieldset compact" title="Workflow">
-      {workflow.map(action => {
-        const key = action.step
-          ? `${action.createdAt}-${action.step.uuid}`
-          : action.createdAt
-        return <CompactReportAction action={action} key={key} />
-      })}
-    </Fieldset>
-  )
-}
+export const ReportCompactWorkflow = ({ workflow }) => (
+  <Fieldset className="workflow-fieldset compact" title="Workflow">
+    {workflow.map(action => {
+      const key = action.step
+        ? `${action.createdAt}-${action.step.uuid}`
+        : action.createdAt
+      return <CompactReportAction action={action} key={key} />
+    })}
+  </Fieldset>
+)
 ReportCompactWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired
 }

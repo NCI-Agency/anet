@@ -19,36 +19,34 @@ const GQL_GET_APPROVAL_STEP_IN_USE = gql`
   }
 `
 
-const ApproverTable = ({ approvers, onDelete }) => {
-  return (
-    <Table striped condensed hover responsive>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Position</th>
-          <th />
+const ApproverTable = ({ approvers, onDelete }) => (
+  <Table striped condensed hover responsive>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      {approvers.map((approver, approverIndex) => (
+        <tr key={approver.uuid}>
+          <td>
+            <LinkTo person={approver.person} target="_blank" />
+          </td>
+          <td>
+            <LinkTo position={approver} target="_blank" />
+          </td>
+          <td onClick={() => onDelete(approver)}>
+            <span style={{ cursor: "pointer" }}>
+              <img src={REMOVE_ICON} height={14} alt="Remove approver" />
+            </span>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {approvers.map((approver, approverIndex) => (
-          <tr key={approver.uuid}>
-            <td>
-              <LinkTo person={approver.person} target="_blank" />
-            </td>
-            <td>
-              <LinkTo position={approver} target="_blank" />
-            </td>
-            <td onClick={() => onDelete(approver)}>
-              <span style={{ cursor: "pointer" }}>
-                <img src={REMOVE_ICON} height={14} alt="Remove approver" />
-              </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  )
-}
+      ))}
+    </tbody>
+  </Table>
+)
 ApproverTable.propTypes = {
   approvers: PropTypes.array,
   onDelete: PropTypes.func

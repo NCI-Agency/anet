@@ -49,13 +49,11 @@ AnchorNavItem.propTypes = {
   children: PropTypes.node
 }
 
-const SidebarLink = ({ linkTo, children, handleOnClick, id }) => {
-  return (
-    <Link to={linkTo} onClick={handleOnClick}>
-      <NavItem id={id}>{children}</NavItem>
-    </Link>
-  )
-}
+const SidebarLink = ({ linkTo, children, handleOnClick, id }) => (
+  <Link to={linkTo} onClick={handleOnClick}>
+    <NavItem id={id}>{children}</NavItem>
+  </Link>
+)
 SidebarLink.propTypes = {
   linkTo: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   children: PropTypes.node,
