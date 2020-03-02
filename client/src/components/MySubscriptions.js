@@ -11,6 +11,7 @@ import {
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
+import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useState } from "react"
@@ -117,30 +118,31 @@ const BaseMySubscriptions = ({ pageDispatchers }) => {
             <tbody>
               {subscriptions.map(subscription => {
                 const createdAt = moment(subscription.createdAt).fromNow()
-                let objectType = pluralize.singular(
-                  subscription.subscribedObjectType
+                const objectType = _upperFirst(
+                  pluralize.singular(subscription.subscribedObjectType)
                 )
-                if (objectType === "location") {
-                  objectType = "anetLocation"
-                }
                 let linkTo
                 if (subscription.subscribedObject) {
-                  const linkToProps = {
-                    [objectType]: {
-                      uuid: subscription.subscribedObjectUuid,
-                      ...subscription.subscribedObject
-                    }
-                  }
-                  linkTo = <LinkTo {...linkToProps} />
-                } else {
-                  const linkToProps = {
-                    componentClass: "span",
-                    [objectType]: {
-                      uuid: subscription.subscribedObjectUuid
-                    }
-                  }
                   linkTo = (
-                    <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
+                    <LinkTo
+                      modelType={objectType}
+                      model={{
+                        uuid: subscription.subscribedObjectUuid,
+                        ...subscription.subscribedObject
+                      }}
+                    />
+                  )
+                } else {
+                  linkTo = (
+                    <LinkTo
+                      componentClass="span"
+                      modelType={objectType}
+                      model={{
+                        uuid: subscription.subscribedObjectUuid
+                      }}
+                    >
+                      [object was deleted]
+                    </LinkTo>
                   )
                 }
                 return (

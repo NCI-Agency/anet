@@ -11,6 +11,7 @@ import {
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
+import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import pluralize from "pluralize"
 import React, { useState } from "react"
@@ -148,61 +149,63 @@ const BaseMySubscriptionUpdates = ({ pageDispatchers }) => {
             <tbody>
               {subscriptionUpdates.map(subscriptionUpdate => {
                 const subscription = subscriptionUpdate.subscription
-                let subscribedObjectType = pluralize.singular(
-                  subscription.subscribedObjectType
+                const subscribedObjectType = _upperFirst(
+                  pluralize.singular(subscription.subscribedObjectType)
                 )
-                if (subscribedObjectType === "location") {
-                  subscribedObjectType = "anetLocation"
-                }
                 let linkToSubscription
                 if (subscription.subscribedObject) {
-                  const linkToProps = {
-                    [subscribedObjectType]: {
-                      uuid: subscription.subscribedObjectUuid,
-                      ...subscription.subscribedObject
-                    }
-                  }
-                  linkToSubscription = <LinkTo {...linkToProps} />
-                } else {
-                  const linkToProps = {
-                    componentClass: "span",
-                    [subscribedObjectType]: {
-                      uuid: subscription.subscribedObjectUuid
-                    }
-                  }
                   linkToSubscription = (
-                    <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
+                    <LinkTo
+                      modelType={subscribedObjectType}
+                      model={{
+                        uuid: subscription.subscribedObjectUuid,
+                        ...subscription.subscribedObject
+                      }}
+                    />
+                  )
+                } else {
+                  linkToSubscription = (
+                    <LinkTo
+                      componentClass="span"
+                      modelType={subscribedObjectType}
+                      model={{
+                        uuid: subscription.subscribedObjectUuid
+                      }}
+                    >
+                      [object was deleted]
+                    </LinkTo>
                   )
                 }
-                let updatedObjectType = pluralize.singular(
-                  subscriptionUpdate.updatedObjectType
+                const updatedObjectType = _upperFirst(
+                  pluralize.singular(subscriptionUpdate.updatedObjectType)
                 )
-                if (updatedObjectType === "location") {
-                  updatedObjectType = "anetLocation"
-                }
                 let linkToUpdatedObject
                 if (subscriptionUpdate.updatedObject) {
-                  const linkToProps = {
-                    [updatedObjectType]: {
-                      uuid: subscriptionUpdate.updatedObjectUuid,
-                      ...subscriptionUpdate.updatedObject
-                    }
-                  }
-                  linkToUpdatedObject = <LinkTo {...linkToProps} />
-                  if (subscriptionUpdate.isNote) {
-                    linkToUpdatedObject = (
-                      <span>Note on {linkToUpdatedObject}</span>
-                    )
-                  }
-                } else {
-                  const linkToProps = {
-                    componentClass: "span",
-                    [updatedObjectType]: {
-                      uuid: subscriptionUpdate.updatedObjectUuid
-                    }
-                  }
                   linkToUpdatedObject = (
-                    <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
+                    <LinkTo
+                      modelType={updatedObjectType}
+                      model={{
+                        uuid: subscriptionUpdate.updatedObjectUuid,
+                        ...subscriptionUpdate.updatedObject
+                      }}
+                    />
+                  )
+                } else {
+                  linkToUpdatedObject = (
+                    <LinkTo
+                      componentClass="span"
+                      modelType={updatedObjectType}
+                      model={{
+                        uuid: subscriptionUpdate.updatedObjectUuid
+                      }}
+                    >
+                      [object was deleted]
+                    </LinkTo>
+                  )
+                }
+                if (subscriptionUpdate.isNote) {
+                  linkToUpdatedObject = (
+                    <span>Note on {linkToUpdatedObject}</span>
                   )
                 }
                 const key = `${subscriptionUpdate.createdAt}:${subscriptionUpdate.updatedObjectType}:${subscriptionUpdate.updatedObjectUuid}`
