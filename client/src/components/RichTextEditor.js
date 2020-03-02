@@ -1,34 +1,29 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
-import _isEqual from "lodash/isEqual"
-import { convertFromHTML, convertToHTML } from "draft-convert"
-import { convertToRaw, convertFromRaw } from "draft-js"
-import { DraftailEditor, BLOCK_TYPE, ENTITY_TYPE, INLINE_STYLE } from "draftail"
-
-import Link from "components/editor/Link"
-import LinkSource from "components/editor/LinkSource"
-import linkifyPlugin from "components/editor/plugins/linkifyPlugin"
-
-import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
+import LinkAnet from "components/editor/LinkAnet"
+import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
+import { convertFromHTML, convertToHTML } from "draft-convert"
+import { convertFromRaw, convertToRaw } from "draft-js"
+import {
+  BlockquoteButton,
+  BoldButton,
+  HeadlineOneButton,
+  HeadlineTwoButton,
+  ItalicButton,
+  OrderedListButton,
+  UnderlineButton,
+  UnorderedListButton
+} from "draft-js-buttons"
+import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
+import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+import _isEqual from "lodash/isEqual"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
 
 import "draft-js/dist/Draft.css"
 import "draftail/dist/draftail.css"
 import "draft-js-side-toolbar-plugin/lib/plugin.css"
 import "components/RichTextEditor.css"
 
-import {
-  ItalicButton,
-  BoldButton,
-  UnderlineButton,
-  HeadlineOneButton,
-  HeadlineTwoButton,
-  UnorderedListButton,
-  OrderedListButton,
-  BlockquoteButton
-} from "draft-js-buttons"
-
-const linkify = linkifyPlugin()
 const newlinePlugin = createNewlinePlugin()
 
 const BLOCK_TYPES = [
@@ -59,32 +54,46 @@ const INLINE_STYLES = [
       "m -110.45248,-36.817494 h 28.503379 v 25.631677 h -28.503379 z",
       "m 529.75865,840.37772 c 158.31765,0 286.98061,-119.02958 286.98061,-265.4935 V 220.89293 H 697.16399 v 353.99129 c 0,85.4004 -75.09325,154.8712 -167.40534,154.8712 -92.3121,0 -167.40535,-69.4708 -167.40535,-154.8712 V 220.89293 H 242.77804 v 353.99129 c 0,146.46392 128.66297,265.4935 286.98061,265.4935 z m -334.81072,88.49784 v 88.49774 h 669.62145 v -88.49774 z"
     ]
-  }
+  },
+  { type: INLINE_STYLE.STRIKETHROUGH },
+  { type: INLINE_STYLE.MARK }
 ]
 
 const ENTITY_CONTROL = {
   LINK: {
+    // Unique type shared between entity instances.
     type: ENTITY_TYPE.LINK,
-    description: "Link",
-    label: "Add link",
+    // Describes the entity in the editor UI, concisely.
+    description: "Add a link to an ANET entity",
+    // Describes the entity in the editor UI.
+    label: "ANET entity",
+    // Represents the entity in the editor UI.
     icon: [
       "M440.236 635.766c-13.31 0-26.616-5.076-36.77-15.23-95.134-95.136-95.134-249.934 0-345.070l192-192c46.088-46.086 107.36-71.466 172.534-71.466s126.448 25.38 172.536 71.464c95.132 95.136 95.132 249.934 0 345.070l-87.766 87.766c-20.308 20.308-53.23 20.308-73.54 0-20.306-20.306-20.306-53.232 0-73.54l87.766-87.766c54.584-54.586 54.584-143.404 0-197.99-26.442-26.442-61.6-41.004-98.996-41.004s-72.552 14.562-98.996 41.006l-192 191.998c-54.586 54.586-54.586 143.406 0 197.992 20.308 20.306 20.306 53.232 0 73.54-10.15 10.152-23.462 15.23-36.768 15.23z",
       "M256 1012c-65.176 0-126.45-25.38-172.534-71.464-95.134-95.136-95.134-249.934 0-345.070l87.764-87.764c20.308-20.306 53.234-20.306 73.54 0 20.308 20.306 20.308 53.232 0 73.54l-87.764 87.764c-54.586 54.586-54.586 143.406 0 197.992 26.44 26.44 61.598 41.002 98.994 41.002s72.552-14.562 98.998-41.006l192-191.998c54.584-54.586 54.584-143.406 0-197.992-20.308-20.308-20.306-53.232 0-73.54 20.306-20.306 53.232-20.306 73.54 0.002 95.132 95.134 95.132 249.932 0.002 345.068l-192.002 192c-46.090 46.088-107.364 71.466-172.538 71.466z"
     ],
-    source: LinkSource,
-    decorator: Link,
-    attributes: ["url"],
+    // React component providing the UI to manage entities of this type.
+    source: LinkSourceAnet,
+    // React component to display inline entities.
+    decorator: LinkAnet,
+    // React component to display block-level entities.
+    block: PropTypes.func,
+    // Array of attributes the entity uses, to preserve when filtering entities on paste. If undefined, all entity data is preserved.
+    attributes: null,
+    // Attribute - regex mapping, to whitelist entities based on their data on paste.
+    // For example, { url: '^https:' } will only preserve links that point to HTTPS URLs.
     whitelist: {
-      href: "^(?![#/])"
+      href: "."
     }
   }
 }
 
 const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
-    // a tags will become LINK entities, marked as mutable, with only the URL as data.
     if (nodeName === "a") {
-      return createEntity(ENTITY_TYPE.LINK, "MUTABLE", { url: node.href })
+      return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", {
+        url: node.href
+      })
     }
 
     if (nodeName === "hr") {
@@ -100,6 +109,9 @@ const importerConfig = {
     }
 
     return null
+  },
+  htmlToStyle: (nodeName, node, currentStyle) => {
+    return currentStyle
   }
 }
 
@@ -130,6 +142,12 @@ const exporterConfig = {
     }
 
     return originalText
+  },
+
+  styleToHTML: style => {
+    if (style === INLINE_STYLE.STRIKETHROUGH) {
+      return <strike />
+    }
   }
 }
 
@@ -173,7 +191,7 @@ class RichTextEditor extends Component {
           }}
           onBlur={onHandleBlur}
           stateSaveInterval={100}
-          plugins={[sideToolbarPlugin, linkify, newlinePlugin]}
+          plugins={[sideToolbarPlugin, newlinePlugin]}
           rawContentState={value ? fromHTML(value) : null}
           showUndoControl
           showRedoControl

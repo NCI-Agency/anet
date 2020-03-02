@@ -271,7 +271,11 @@ const BaseDecisivesDashboardImpl = ({
               data={decisive.positions}
               contentData={reportStats.positionStats}
               prevContentData={prevReportStats.positionStats}
-              itemLabel={item => <LinkTo position={item}>{item.name}</LinkTo>}
+              itemLabel={item => (
+                <LinkTo modelType="Position" model={item}>
+                  {item.name}
+                </LinkTo>
+              )}
             />
           ))}
         </Panel.Body>
@@ -289,7 +293,9 @@ const BaseDecisivesDashboardImpl = ({
               contentData={reportStats.locationStats}
               prevContentData={prevReportStats.locationStats}
               itemLabel={item => (
-                <LinkTo anetLocation={item}>{item.name}</LinkTo>
+                <LinkTo modelType="Location" model={item}>
+                  {item.name}
+                </LinkTo>
               )}
             />
           ))}

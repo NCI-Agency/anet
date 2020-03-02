@@ -203,7 +203,7 @@ public class Utils {
       // These elements are allowed.
       .allowElements("a", "p", "div", "i", "b", "u", "em", "blockquote", "tt", "strong", "br", "ul",
           "ol", "li", "table", "tr", "td", "thead", "tbody", "th", "span", "h1", "h2", "h3", "h4",
-          "h5", "h6", "hr", "img")
+          "h5", "h6", "hr", "img", "strike", "mark")
       .toFactory();
 
   public static String sanitizeHtml(String input) {

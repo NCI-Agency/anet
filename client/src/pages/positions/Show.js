@@ -157,7 +157,8 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
       {({ values }) => {
         const action = canEdit && (
           <LinkTo
-            position={position}
+            modelType="Position"
+            model={position}
             edit
             button="primary"
             className="edit-position"
@@ -238,7 +239,10 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       position.organization && (
-                        <LinkTo organization={position.organization}>
+                        <LinkTo
+                          modelType="Organization"
+                          model={position.organization}
+                        >
                           {position.organization.shortName}{" "}
                           {position.organization.longName}{" "}
                           {position.organization.identificationCode}
@@ -253,7 +257,7 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
-                      <LinkTo anetLocation={position.location} />
+                      <LinkTo modelType="Location" model={position.location} />
                     )
                   }
                 />
@@ -281,7 +285,7 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
                 {position.person && position.person.uuid ? (
                   <div>
                     <h4 className="assigned-person-name">
-                      <LinkTo person={position.person} />
+                      <LinkTo modelType="Person" model={position.person} />
                     </h4>
                     <p />
                   </div>
@@ -365,7 +369,7 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
                     {position.previousPeople.map((pp, idx) => (
                       <tr key={idx} id={`previousPerson_${idx}`}>
                         <td>
-                          <LinkTo person={pp.person} />
+                          <LinkTo modelType="Person" model={pp.person} />
                         </td>
                         <td>
                           {moment(pp.startTime).format(
@@ -409,13 +413,13 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
     if (!pos.person) {
       personName = "Unfilled"
     } else {
-      personName = <LinkTo person={pos.person} />
+      personName = <LinkTo modelType="Person" model={pos.person} />
     }
     return (
       <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
         <td>{personName}</td>
         <td>
-          <LinkTo position={pos} />
+          <LinkTo modelType="Position" model={pos} />
         </td>
       </tr>
     )

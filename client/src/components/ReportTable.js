@@ -158,14 +158,18 @@ const ReportTable = ({
               <tr key={report.uuid}>
                 {showAuthors && (
                   <td>
-                    <LinkTo person={report.author} />
+                    <LinkTo modelType="Person" model={report.author} />
                   </td>
                 )}
                 <td>
-                  <LinkTo organization={report.advisorOrg} />
+                  <LinkTo modelType="Organization" model={report.advisorOrg} />
                 </td>
                 <td>
-                  <LinkTo report={report} className="read-report-button" />
+                  <LinkTo
+                    modelType="Report"
+                    model={report}
+                    className="read-report-button"
+                  />
                 </td>
                 {showStatus && <td>{report.state}</td>}
                 <td>

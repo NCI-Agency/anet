@@ -33,13 +33,13 @@ const Approvals = ({ relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo person={position.person} />
+                        <LinkTo modelType="Person" model={position.person} />
                       </td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo position={position} />
+                      <LinkTo modelType="Position" model={position} />
                     </td>
                   </tr>
                 ))}
@@ -73,13 +73,13 @@ const Approvals = ({ relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo person={position.person} />
+                        <LinkTo modelType="Person" model={position.person} />
                       </td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo position={position} />
+                      <LinkTo modelType="Position" model={position} />
                     </td>
                   </tr>
                 ))}

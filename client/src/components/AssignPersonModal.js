@@ -115,7 +115,8 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
     <Modal show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
-          Set Person for <LinkTo position={position} isLink={false} />
+          Set Person for{" "}
+          <LinkTo modelType="Position" model={position} isLink={false} />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -128,8 +129,14 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                 setDoSave(true)
               }}
             >
-              Remove <LinkTo person={position.person} isLink={false} /> from{" "}
-              <LinkTo position={position} isLink={false} />
+              Remove{" "}
+              <LinkTo
+                modelType="Person"
+                model={position.person}
+                isLink={false}
+              />{" "}
+              from{" "}
+              <LinkTo modelType="Position" model={position} isLink={false} />
             </Button>
             <hr className="assignModalSplit" />
           </div>

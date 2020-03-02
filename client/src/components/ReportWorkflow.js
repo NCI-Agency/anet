@@ -23,7 +23,8 @@ const ApprovalStepModalStatus = ({ action }) => {
       <span className={cssClass}>
         {actionType.text} by{" "}
         <LinkTo
-          person={action.person}
+          modelType="Person"
+          model={action.person}
           whenUnspecified="system"
           isLink={false}
         />{" "}
@@ -65,8 +66,8 @@ const ApprovalStepModal = ({ action }) => {
           <ul>
             {step.approvers.map(position => (
               <li key={position.uuid}>
-                <LinkTo position={position} /> -{" "}
-                <LinkTo person={position.person} />
+                <LinkTo modelType="Position" model={position} /> -{" "}
+                <LinkTo modelType="Person" model={position.person} />
               </li>
             ))}
           </ul>
@@ -97,7 +98,7 @@ const ActionButton = ({ action }) => {
   ) : (
     <Button className={actionType.cssClass + " btn-sm"}>
       <span>
-        <LinkTo person={action.person} isLink={false} />
+        <LinkTo modelType="Person" model={action.person} isLink={false} />
       </span>
     </Button>
   )
@@ -111,7 +112,12 @@ const ActionDetails = ({ action }) => {
     return (
       <div>
         <span>
-          By <LinkTo person={action.person} whenUnspecified="system" />
+          By{" "}
+          <LinkTo
+            modelType="Person"
+            model={action.person}
+            whenUnspecified="system"
+          />
         </span>
         <br />
         <small>

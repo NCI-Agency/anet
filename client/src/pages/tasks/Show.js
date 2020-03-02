@@ -158,7 +158,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkTo task={task} edit button="primary">
+          <LinkTo modelType="Task" model={task} edit button="primary">
             Edit
           </LinkTo>
         )
@@ -222,7 +222,11 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     task.taskedOrganizations && (
                       <>
                         {task.taskedOrganizations.map(org => (
-                          <LinkTo organization={org} key={`${org.uuid}`} />
+                          <LinkTo
+                            modelType="Organization"
+                            model={org}
+                            key={`${org.uuid}`}
+                          />
                         ))}
                       </>
                     )
@@ -236,7 +240,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.customFieldRef1 && (
-                        <LinkTo task={task.customFieldRef1}>
+                        <LinkTo modelType="Task" model={task.customFieldRef1}>
                           {task.customFieldRef1.shortName}{" "}
                           {task.customFieldRef1.longName}
                         </LinkTo>

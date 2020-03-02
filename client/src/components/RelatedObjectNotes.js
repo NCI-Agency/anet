@@ -20,8 +20,8 @@ import { Button, Panel } from "react-bootstrap"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
 import REMOVE_ICON from "resources/delete.png"
+import { parseHtmlWithLinkTo } from "utils_links"
 import "./BlueprintOverrides.css"
-
 import utils from "utils"
 
 const GQL_DELETE_NOTE = gql`
@@ -264,7 +264,11 @@ const BaseRelatedObjectNotes = ({
                   }}
                 >
                   <i>{updatedAt}</i>{" "}
-                  <LinkTo style={{ color: "white" }} person={note.author} />
+                  <LinkTo
+                    modelType="Person"
+                    model={note.author}
+                    style={{ color: "white" }}
+                  />
                   {canEdit && (
                     <>
                       <Button
@@ -353,8 +357,9 @@ const BaseRelatedObjectNotes = ({
                       overflowWrap: "break-word",
                       /* IE: */ wordWrap: "break-word"
                     }}
-                    dangerouslySetInnerHTML={{ __html: noteText }}
-                  />
+                  >
+                    {parseHtmlWithLinkTo(noteText)}
+                  </div>
                 </Panel.Body>
               </Panel>
             )
