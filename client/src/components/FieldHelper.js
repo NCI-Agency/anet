@@ -316,7 +316,7 @@ export const customEnumButtons = list => {
   return buttons
 }
 
-const ButtonToggleGroup = ({
+const ButtonToggleGroupField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   type,
@@ -370,7 +370,7 @@ const ButtonToggleGroup = ({
     />
   )
 }
-ButtonToggleGroup.propTypes = {
+ButtonToggleGroupField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object,
   type: PropTypes.string,
@@ -382,22 +382,31 @@ ButtonToggleGroup.propTypes = {
   buttons: PropTypes.array
 }
 
-export const RadioButtonToggleGroup = ({
+export const RadioButtonToggleGroupField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
-}) => <ButtonToggleGroup field={field} form={form} type="radio" {...props} />
-RadioButtonToggleGroup.propTypes = {
+}) => (
+  <ButtonToggleGroupField field={field} form={form} type="radio" {...props} />
+)
+RadioButtonToggleGroupField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object
 }
 
-export const CheckboxButtonToggleGroup = ({
+export const CheckboxButtonToggleGroupField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
-}) => <ButtonToggleGroup field={field} form={form} type="checkbox" {...props} />
-CheckboxButtonToggleGroup.propTypes = {
+}) => (
+  <ButtonToggleGroupField
+    field={field}
+    form={form}
+    type="checkbox"
+    {...props}
+  />
+)
+CheckboxButtonToggleGroupField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object
 }
@@ -473,31 +482,28 @@ export const FieldShortcuts = ({
   onChange,
   handleAddItem,
   title
-}) => {
-  return (
-    shortcuts &&
-    shortcuts.length > 0 && (
-      <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
-        <h5>{title}</h5>
-        {shortcuts.map(shortcut => (
-          <Button
-            key={shortcut.uuid}
-            bsStyle="link"
-            onClick={() => handleAddItem(shortcut, onChange, curValue)}
-          >
-            Add{" "}
-            <LinkTo
-              modelType={objectType}
-              model={shortcut}
-              isLink={false}
-              forShortcut
-            />
-          </Button>
-        ))}
-      </div>
-    )
+}) =>
+  shortcuts &&
+  shortcuts.length > 0 && (
+    <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
+      <h5>{title}</h5>
+      {shortcuts.map(shortcut => (
+        <Button
+          key={shortcut.uuid}
+          bsStyle="link"
+          onClick={() => handleAddItem(shortcut, onChange, curValue)}
+        >
+          Add{" "}
+          <LinkTo
+            modelType={objectType}
+            model={shortcut}
+            isLink={false}
+            forShortcut
+          />
+        </Button>
+      ))}
+    </div>
   )
-}
 
 FieldShortcuts.propTypes = {
   shortcuts: PropTypes.arrayOf(PropTypes.shape({ uuid: PropTypes.string })),

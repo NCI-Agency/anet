@@ -44,7 +44,7 @@ const TaskTable = ({
                   {showParent && (
                     <td className="parentTaskName">
                       {task.customFieldRef1 && (
-                        <LinkTo task={task.customFieldRef1}>
+                        <LinkTo modelType="Task" model={task.customFieldRef1}>
                           {task.customFieldRef1.shortName}
                         </LinkTo>
                       )}

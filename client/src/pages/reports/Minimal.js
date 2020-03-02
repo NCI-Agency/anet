@@ -229,239 +229,229 @@ const ReportMinimal = ({ pageDispatchers }) => {
 
   return (
     <Formik enableReinitialize initialValues={report}>
-      {({ values }) => {
-        return (
-          <div className="report-show">
-            {report.isRejected() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This {reportType} has CHANGES REQUESTED.
-                </h4>
-                <p>
-                  You can review the comments below, fix the report and
-                  re-submit
-                </p>
-                <div style={{ textAlign: "left" }}>
-                  {renderValidationMessages()}
-                </div>
-              </Fieldset>
-            )}
+      {({ values }) => (
+        <div className="report-show">
+          {report.isRejected() && (
+            <Fieldset style={{ textAlign: "center" }}>
+              <h4 className="text-danger">
+                This {reportType} has CHANGES REQUESTED.
+              </h4>
+              <p>
+                You can review the comments below, fix the report and re-submit
+              </p>
+              <div style={{ textAlign: "left" }}>
+                {renderValidationMessages()}
+              </div>
+            </Fieldset>
+          )}
 
-            {report.isDraft() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This is a DRAFT {reportType} and hasn't been submitted.
-                </h4>
-                <p>
-                  You can review the draft below to make sure all the details
-                  are correct.
-                </p>
-                <div style={{ textAlign: "left" }}>
-                  {renderValidationMessages()}
-                </div>
-              </Fieldset>
-            )}
+          {report.isDraft() && (
+            <Fieldset style={{ textAlign: "center" }}>
+              <h4 className="text-danger">
+                This is a DRAFT {reportType} and hasn't been submitted.
+              </h4>
+              <p>
+                You can review the draft below to make sure all the details are
+                correct.
+              </p>
+              <div style={{ textAlign: "left" }}>
+                {renderValidationMessages()}
+              </div>
+            </Fieldset>
+          )}
 
-            {report.isPending() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This {reportType} is PENDING approvals.
-                </h4>
-                <p>
-                  It won't be available in the ANET database until your{" "}
-                  <AnchorLink to="workflow">approval organization</AnchorLink>{" "}
-                  marks it as approved.
-                </p>
-                <div style={{ textAlign: "left" }}>
-                  {renderValidationMessages("approving")}
-                </div>
-              </Fieldset>
-            )}
-            <Form className="form-horizontal" method="post">
-              <Fieldset title={`Report #${report.uuid}`} />
-              <Fieldset className="show-report-overview">
-                <Field
-                  name="intent"
-                  label="Summary"
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <div id="intent" className="form-control-static">
-                      <p>
-                        <strong>{Settings.fields.report.intent}:</strong>{" "}
-                        {report.intent}
-                      </p>
-                      {report.keyOutcomes && (
-                        <p>
-                          <span>
-                            <strong>
-                              {Settings.fields.report.keyOutcomes ||
-                                "Key outcomes"}
-                              :
-                            </strong>{" "}
-                            {report.keyOutcomes}&nbsp;
-                          </span>
-                        </p>
-                      )}
-                      <p>
-                        <strong>{Settings.fields.report.nextSteps}:</strong>{" "}
-                        {report.nextSteps}
-                      </p>
-                    </div>
-                  }
-                />
-
-                <Field
-                  name="engagementDate"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    report.engagementDate &&
-                    moment(report.engagementDate).format(
-                      Report.getEngagementDateFormat()
-                    )
-                  }
-                />
-
-                {Settings.engagementsIncludeTimeAndDuration && (
-                  <Field
-                    name="duration"
-                    label="Duration (minutes)"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                )}
-
-                <Field
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    report.location && (
-                      <LinkTo modelType="Location" model={report.location} />
-                    )
-                  }
-                />
-
-                {report.cancelled && (
-                  <Field
-                    name="cancelledReason"
-                    label="Cancelled Reason"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={utils.sentenceCase(report.cancelledReason)}
-                  />
-                )}
-
-                {!report.cancelled && (
-                  <Field
-                    name="atmosphere"
-                    label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <>
-                        {utils.sentenceCase(report.atmosphere)}
-                        {report.atmosphereDetails &&
-                          ` – ${report.atmosphereDetails}`}
-                      </>
-                    }
-                  />
-                )}
-
-                {Settings.fields.report.reportTags && (
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
-                    }
-                  />
-                )}
-
-                <Field
-                  name="author"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo modelType="Person" model={report.author} />
-                  }
-                />
-
-                <Field
-                  name="advisorOrg"
-                  label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo
-                      modelType="Organization"
-                      model={report.advisorOrg}
-                    />
-                  }
-                />
-
-                <Field
-                  name="principalOrg"
-                  label={Settings.fields.principal.org.name}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo
-                      modelType="Organization"
-                      model={report.principalOrg}
-                    />
-                  }
-                />
-              </Fieldset>
-
-              <Fieldset title="Meeting attendees">
-                <AttendeesTable attendees={report.attendees} disabled />
-              </Fieldset>
-
-              <Fieldset title={Settings.fields.task.longLabel}>
-                <TaskTable tasks={report.tasks} showParent />
-              </Fieldset>
-
-              {report.reportText && (
-                <Fieldset title={Settings.fields.report.reportText}>
-                  {parseHtmlWithLinkTo(report.reportText)}
-                </Fieldset>
-              )}
-
-              {report.reportSensitiveInformation &&
-                report.reportSensitiveInformation.text && (
-                  <Fieldset title="Sensitive information">
-                    {parseHtmlWithLinkTo(
-                      report.reportSensitiveInformation.text
-                    )}
-                  </Fieldset>
-              )}
-
-              {report.showWorkflow() && (
-                <ReportCompactWorkflow workflow={report.workflow} />
-              )}
-
-              <Fieldset className="report-sub-form" title="Comments">
-                {report.comments.map(comment => {
-                  const createdAt = moment(comment.createdAt)
-                  return (
-                    <p key={comment.uuid}>
-                      <LinkTo modelType="Person" model={comment.author} />,
-                      <span
-                        title={createdAt.format(
-                          Settings.dateFormats.forms.displayShort.withTime
-                        )}
-                      >
-                        {" "}
-                        {createdAt.fromNow()}:{" "}
-                      </span>
-                      "{comment.text}"
+          {report.isPending() && (
+            <Fieldset style={{ textAlign: "center" }}>
+              <h4 className="text-danger">
+                This {reportType} is PENDING approvals.
+              </h4>
+              <p>
+                It won't be available in the ANET database until your{" "}
+                <AnchorLink to="workflow">approval organization</AnchorLink>{" "}
+                marks it as approved.
+              </p>
+              <div style={{ textAlign: "left" }}>
+                {renderValidationMessages("approving")}
+              </div>
+            </Fieldset>
+          )}
+          <Form className="form-horizontal" method="post">
+            <Fieldset title={`Report #${report.uuid}`} />
+            <Fieldset className="show-report-overview">
+              <Field
+                name="intent"
+                label="Summary"
+                component={FieldHelper.SpecialField}
+                widget={
+                  <div id="intent" className="form-control-static">
+                    <p>
+                      <strong>{Settings.fields.report.intent}:</strong>{" "}
+                      {report.intent}
                     </p>
-                  )
-                })}
+                    {report.keyOutcomes && (
+                      <p>
+                        <span>
+                          <strong>
+                            {Settings.fields.report.keyOutcomes ||
+                              "Key outcomes"}
+                            :
+                          </strong>{" "}
+                          {report.keyOutcomes}&nbsp;
+                        </span>
+                      </p>
+                    )}
+                    <p>
+                      <strong>{Settings.fields.report.nextSteps}:</strong>{" "}
+                      {report.nextSteps}
+                    </p>
+                  </div>
+                }
+              />
 
-                {!report.comments.length && <p>There are no comments yet.</p>}
+              <Field
+                name="engagementDate"
+                component={FieldHelper.ReadonlyField}
+                humanValue={
+                  report.engagementDate &&
+                  moment(report.engagementDate).format(
+                    Report.getEngagementDateFormat()
+                  )
+                }
+              />
+
+              {Settings.engagementsIncludeTimeAndDuration && (
+                <Field
+                  name="duration"
+                  label="Duration (minutes)"
+                  component={FieldHelper.ReadonlyField}
+                />
+              )}
+
+              <Field
+                name="location"
+                component={FieldHelper.ReadonlyField}
+                humanValue={
+                  report.location && (
+                    <LinkTo modelType="Location" model={report.location} />
+                  )
+                }
+              />
+
+              {report.cancelled && (
+                <Field
+                  name="cancelledReason"
+                  label="Cancelled Reason"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={utils.sentenceCase(report.cancelledReason)}
+                />
+              )}
+
+              {!report.cancelled && (
+                <Field
+                  name="atmosphere"
+                  label={Settings.fields.report.atmosphere}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <>
+                      {utils.sentenceCase(report.atmosphere)}
+                      {report.atmosphereDetails &&
+                        ` – ${report.atmosphereDetails}`}
+                    </>
+                  }
+                />
+              )}
+
+              {Settings.fields.report.reportTags && (
+                <Field
+                  name="reportTags"
+                  label={Settings.fields.report.reportTags}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    report.tags &&
+                    report.tags.map((tag, i) => (
+                      <Tag key={tag.uuid} tag={tag} />
+                    ))
+                  }
+                />
+              )}
+
+              <Field
+                name="author"
+                component={FieldHelper.ReadonlyField}
+                humanValue={<LinkTo modelType="Person" model={report.author} />}
+              />
+
+              <Field
+                name="advisorOrg"
+                label={Settings.fields.advisor.org.name}
+                component={FieldHelper.ReadonlyField}
+                humanValue={
+                  <LinkTo modelType="Organization" model={report.advisorOrg} />
+                }
+              />
+
+              <Field
+                name="principalOrg"
+                label={Settings.fields.principal.org.name}
+                component={FieldHelper.ReadonlyField}
+                humanValue={
+                  <LinkTo
+                    modelType="Organization"
+                    model={report.principalOrg}
+                  />
+                }
+              />
+            </Fieldset>
+
+            <Fieldset title="Meeting attendees">
+              <AttendeesTable attendees={report.attendees} disabled />
+            </Fieldset>
+
+            <Fieldset title={Settings.fields.task.longLabel}>
+              <TaskTable tasks={report.tasks} showParent />
+            </Fieldset>
+
+            {report.reportText && (
+              <Fieldset title={Settings.fields.report.reportText}>
+                {parseHtmlWithLinkTo(report.reportText)}
               </Fieldset>
-            </Form>
-          </div>
-        )
-      }}
+            )}
+
+            {report.reportSensitiveInformation &&
+              report.reportSensitiveInformation.text && (
+                <Fieldset title="Sensitive information">
+                  {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
+                </Fieldset>
+            )}
+
+            {report.showWorkflow() && (
+              <ReportCompactWorkflow workflow={report.workflow} />
+            )}
+
+            <Fieldset className="report-sub-form" title="Comments">
+              {report.comments.map(comment => {
+                const createdAt = moment(comment.createdAt)
+                return (
+                  <p key={comment.uuid}>
+                    <LinkTo modelType="Person" model={comment.author} />,
+                    <span
+                      title={createdAt.format(
+                        Settings.dateFormats.forms.displayShort.withTime
+                      )}
+                    >
+                      {" "}
+                      {createdAt.fromNow()}:{" "}
+                    </span>
+                    "{comment.text}"
+                  </p>
+                )
+              })}
+
+              {!report.comments.length && <p>There are no comments yet.</p>}
+            </Fieldset>
+          </Form>
+        </div>
+      )}
     </Formik>
   )
 

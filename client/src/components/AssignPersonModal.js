@@ -1,18 +1,17 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import autobind from "autobind-decorator"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import _isEmpty from "lodash/isEmpty"
+import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
   Button,
   Col,
-  ControlLabel,
   FormGroup,
   Grid,
   Modal,
@@ -20,6 +19,7 @@ import {
   Table
 } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
+import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
   mutation($uuid: String!) {
@@ -32,194 +32,188 @@ const GQL_PUT_PERSON_IN_POSITION = gql`
   }
 `
 
-export default class AssignPersonModal extends Component {
-  static propTypes = {
-    position: PropTypes.instanceOf(Position).isRequired,
-    showModal: PropTypes.bool,
-    onCancel: PropTypes.func.isRequired,
-    onSuccess: PropTypes.func.isRequired
-  }
+const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
+  const latestPositionProp = useRef(position)
+  const positionPropUnchanged = _isEqualWith(
+    latestPositionProp.current,
+    position,
+    utils.treatFunctionsAsEqual
+  )
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      error: null,
-      person: props.position && props.position.person
-    }
-  }
+  const [error, setError] = useState(null)
+  const [person, setPerson] = useState(position && position.person)
+  const [doSave, setDoSave] = useState(false)
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.position.person !== this.props.position.person) {
-      this.setState({ person: this.props.position.person }, () =>
-        this.updateAlert()
-      )
-    }
-  }
-
-  render() {
-    const { position } = this.props
-    const newPerson = this.state.person
-
-    const personSearchQuery = {
-      status: [Person.STATUS.ACTIVE]
-    }
-    if (position.type === Position.TYPE.PRINCIPAL) {
-      personSearchQuery.role = Person.ROLE.PRINCIPAL
-    } else {
-      personSearchQuery.role = Person.ROLE.ADVISOR
-    }
-    const personFilters = {
-      allPersons: {
-        label: "All",
-        queryVars: personSearchQuery
-      }
-    }
-    return (
-      <Modal show={this.props.showModal} onHide={this.close}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            Set Person for{" "}
-            <LinkTo modelType="Position" model={position} isLink={false} />
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {position.person.uuid && (
-            <div style={{ textAlign: "center" }}>
-              <Button bsStyle="danger" onClick={this.remove}>
-                Remove{" "}
-                <LinkTo
-                  modelType="Person"
-                  model={position.person}
-                  isLink={false}
-                />{" "}
-                from{" "}
-                <LinkTo modelType="Position" model={position} isLink={false} />
-              </Button>
-              <hr className="assignModalSplit" />
-            </div>
-          )}
-          <Grid fluid>
-            <Row>
-              <Col md={12}>
-                <FormGroup controlId="person">
-                  <ControlLabel>Select a person</ControlLabel>
-                  <AdvancedSingleSelect
-                    fieldName="person"
-                    id="person"
-                    placeholder="Select a person for this position"
-                    value={this.state.person}
-                    overlayColumns={["Name"]}
-                    overlayRenderRow={PersonSimpleOverlayRow}
-                    filterDefs={personFilters}
-                    onChange={this.handleChangePerson}
-                    objectType={Person}
-                    valueKey="name"
-                    fields={
-                      "uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
-                    }
-                    addon={PEOPLE_ICON}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-            {newPerson && newPerson.uuid && (
-              <Table striped condensed hover responsive>
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>Current Position</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{newPerson.rank}</td>
-                    <td>{newPerson.name}</td>
-                    <td>
-                      {newPerson.position ? (
-                        newPerson.position.name
-                      ) : newPerson.uuid === position.person.uuid ? (
-                        position.name
-                      ) : (
-                        <i>None</i>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            )}
-            <Messages error={this.state.error} />
-          </Grid>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button className="pull-left" onClick={this.close}>
-            Cancel
-          </Button>
-          <Button onClick={this.save} bsStyle="primary" className="save-button">
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    )
-  }
-
-  @autobind
-  remove() {
-    this.setState({ person: null }, () => this.save())
-  }
-
-  @autobind
-  save() {
+  const save = useCallback(() => {
     let graphql, variables
-    if (this.state.person === null) {
+    if (person === null) {
       graphql = GQL_DELETE_PERSON_FROM_POSITION
       variables = {
-        uuid: this.props.position.uuid
+        uuid: position.uuid
       }
     } else {
       graphql = GQL_PUT_PERSON_IN_POSITION
       variables = {
-        uuid: this.props.position.uuid,
-        person: { uuid: this.state.person.uuid }
+        uuid: position.uuid,
+        person: { uuid: person.uuid }
       }
     }
     API.mutation(graphql, variables)
-      .then(data => this.props.onSuccess())
+      .then(data => onSuccess())
       .catch(error => {
-        this.setState({ error: error })
+        setError(error)
       })
-  }
+  }, [position, person, onSuccess])
 
-  @autobind
-  close() {
-    // Reset state before closing (cancel)
-    this.setState({ person: this.props.position.person }, () =>
-      this.updateAlert()
-    )
-    this.props.onCancel()
-  }
+  useEffect(() => {
+    if (!positionPropUnchanged) {
+      latestPositionProp.current = position
+      setPerson(position && position.person)
+    }
+  }, [positionPropUnchanged, position])
 
-  handleChangePerson = person => {
-    this.setState({ person: person }, () => this.updateAlert())
-  }
+  useEffect(() => {
+    if (doSave) {
+      setDoSave(false)
+      save()
+    }
+  }, [doSave, save])
 
-  @autobind
-  updateAlert() {
-    let error = null
+  useEffect(() => {
+    let newError = null
     if (
-      !_isEmpty(this.state.person) &&
-      !_isEmpty(this.state.person.position) &&
-      this.state.person.position.uuid !== this.props.position.uuid
+      !_isEmpty(person) &&
+      !_isEmpty(person.position) &&
+      person.position.uuid !== position.uuid
     ) {
       const errorMessage = (
         <>
           This person is currently in another position. By selecting this
-          person, <b>{this.state.person.position.name}</b> will be left
-          unfilled.
+          person, <b>{person.position.name}</b> will be left unfilled.
         </>
       )
-      error = { message: errorMessage }
+      newError = { message: errorMessage }
     }
-    this.setState({ error: error })
+    setError(newError)
+  }, [person, position.uuid])
+
+  const personSearchQuery = {
+    status: [Person.STATUS.ACTIVE],
+    role:
+      position.type === Position.TYPE.PRINCIPAL
+        ? Person.ROLE.PRINCIPAL
+        : Person.ROLE.ADVISOR
+  }
+  const personFilters = {
+    allPersons: {
+      label: "All",
+      queryVars: personSearchQuery
+    }
+  }
+
+  return (
+    <Modal show={showModal} onHide={closeModal}>
+      <Modal.Header closeButton>
+        <Modal.Title>
+          Set Person for{" "}
+          <LinkTo modelType="Position" model={position} isLink={false} />
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {position.person.uuid && (
+          <div style={{ textAlign: "center" }}>
+            <Button
+              bsStyle="danger"
+              onClick={() => {
+                setPerson(null)
+                setDoSave(true)
+              }}
+            >
+              Remove{" "}
+              <LinkTo
+                modelType="Person"
+                model={position.person}
+                isLink={false}
+              />{" "}
+              from{" "}
+              <LinkTo modelType="Position" model={position} isLink={false} />
+            </Button>
+            <hr className="assignModalSplit" />
+          </div>
+        )}
+        <Grid fluid>
+          <Row>
+            <Col md={12}>
+              <FormGroup controlId="person">
+                <AdvancedSingleSelect
+                  fieldName="person"
+                  fieldLabel="Select a person"
+                  placeholder="Select a person for this position"
+                  value={person}
+                  overlayColumns={["Name"]}
+                  overlayRenderRow={PersonSimpleOverlayRow}
+                  filterDefs={personFilters}
+                  onChange={value => setPerson(value)}
+                  objectType={Person}
+                  valueKey="name"
+                  fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
+                  addon={PEOPLE_ICON}
+                  vertical
+                />
+              </FormGroup>
+            </Col>
+          </Row>
+          {person && person.uuid && (
+            <Table striped condensed hover responsive>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Name</th>
+                  <th>Current Position</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{person.rank}</td>
+                  <td>{person.name}</td>
+                  <td>
+                    {person.position ? (
+                      person.position.name
+                    ) : person.uuid === position.person.uuid ? (
+                      position.name
+                    ) : (
+                      <i>None</i>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
+          )}
+          <Messages error={error} />
+        </Grid>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button className="pull-left" onClick={closeModal}>
+          Cancel
+        </Button>
+        <Button onClick={save} bsStyle="primary" className="save-button">
+          Save
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  )
+
+  function closeModal() {
+    // Reset state before closing (cancel)
+    setPerson(position.person)
+    onCancel()
   }
 }
+AssignPersonModal.propTypes = {
+  position: PropTypes.instanceOf(Position).isRequired,
+  showModal: PropTypes.bool,
+  onCancel: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func.isRequired
+}
+
+export default AssignPersonModal

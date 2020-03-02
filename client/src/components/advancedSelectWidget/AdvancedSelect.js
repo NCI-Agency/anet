@@ -3,12 +3,13 @@ import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import UltimatePagination from "components/UltimatePagination"
-import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
-import _isEqual from "lodash/isEqual"
+import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
+import { useDebouncedCallback } from "use-debounce"
+import utils from "utils"
 import "./AdvancedSelect.css"
 
 const hasMultipleItems = object => Object.keys(object).length > 1
@@ -71,11 +72,18 @@ FilterAsDropdown.propTypes = {
   handleOnChange: PropTypes.func
 }
 
+const FETCH_TYPE = {
+  NONE: "NONE",
+  NORMAL: "NORMAL",
+  DEBOUNCED: "DEBOUNCED"
+}
+
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
   placeholder: PropTypes.string, // input field placeholder
+  pageSize: PropTypes.number,
   disabled: PropTypes.bool,
-  searchTerms: PropTypes.string,
+  selectedValueAsString: PropTypes.string,
   addon: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -84,7 +92,6 @@ export const propTypes = {
   extraAddon: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
-  overlayTableClassName: PropTypes.string,
   overlayTable: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -105,348 +112,345 @@ export const propTypes = {
   handleRemoveItem: PropTypes.func
 }
 
-export default class AdvancedSelect extends Component {
-  static defaultProps = {
-    disabled: false,
-    filterDefs: {},
-    closeOverlayOnAdd: false,
-    searchTerms: ""
-  }
+const AdvancedSelect = ({
+  fieldName,
+  placeholder,
+  pageSize,
+  disabled,
+  selectedValueAsString,
+  addon,
+  extraAddon,
+  value,
+  renderSelected,
+  overlayTable: OverlayTable,
+  overlayColumns,
+  overlayRenderRow,
+  closeOverlayOnAdd,
+  filterDefs,
+  onChange,
+  objectType,
+  queryParams,
+  fields,
+  handleAddItem,
+  handleRemoveItem
+}) => {
+  const firstFilter = Object.keys(filterDefs)[0]
 
-  state = {
-    searchTerms: this.props.searchTerms,
-    filterType: Object.keys(this.props.filterDefs)[0], // per default use the first filter
-    results: {},
-    showOverlay: false,
-    isLoading: false
-  }
+  const latestSelectedValueAsString = useRef(selectedValueAsString)
+  const latestQueryParams = useRef(queryParams)
+  const latestFilterDefs = useRef(filterDefs)
+  const overlayContainer = useRef()
+  const searchInput = useRef()
+  const latestRequest = useRef()
 
-  overlayContainer = React.createRef()
-  overlayTarget = React.createRef()
+  const [searchTerms, setSearchTerms] = useState(
+    latestSelectedValueAsString.current
+  )
+  const [filterType, setFilterType] = useState(firstFilter) // by default use the first filter
+  const [pageNum, setPageNum] = useState(0)
+  const [results, setResults] = useState({})
+  const [showOverlay, setShowOverlay] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [fetchType, setFetchType] = useState(FETCH_TYPE.NONE)
+  const [doReset, setDoReset] = useState(false)
 
-  componentDidMount() {
-    this.setState({
-      searchTerms: this.props.searchTerms || ""
-    })
-  }
+  const selectedFilter = latestFilterDefs.current[filterType]
+  const renderSelectedWithDelete = renderSelected
+    ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
+    : null
+  const [items, totalCount] =
+    results && results[filterType]
+      ? [results[filterType].list, results[filterType].totalCount]
+      : [[], 0]
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!_isEqual(prevProps.searchTerms, this.props.searchTerms)) {
-      this.setState({ searchTerms: this.props.searchTerms })
-    }
-    if (
-      !_isEqual(prevState.showOverlay, this.state.showOverlay) &&
-      this.state.showOverlay === false &&
-      !_isEqual(this.props.searchTerms, this.state.searchTerms)
-    ) {
-      // When the overlay is being closed, update the searchTerms with the selected value
-      this.setState({ searchTerms: this.props.searchTerms || "" })
-    }
-  }
-
-  render() {
-    const {
-      closeOverlayOnAdd,
-      fieldName,
-      placeholder,
-      disabled,
-      value,
-      renderSelected,
-      onChange,
-      objectType,
-      queryParams,
-      fields,
-      handleAddItem,
-      handleRemoveItem,
-      addon,
-      extraAddon,
-      ...overlayProps
-    } = this.props
-
-    const {
-      overlayTableClassName,
-      overlayColumns,
-      overlayRenderRow,
-      filterDefs
-    } = overlayProps
-
-    const {
-      results,
-      filterType,
-      isLoading,
-      searchTerms,
-      showOverlay
-    } = this.state
-
-    const renderSelectedWithDelete = renderSelected
-      ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
-      : null
-    const items = results && results[filterType] ? results[filterType].list : []
-    const pageNum =
-      results && results[filterType] ? results[filterType].pageNum : 0
-
-    const advancedSearchPopoverContent = (
-      <Row className="border-between">
-        <FilterAsNav
-          items={filterDefs}
-          currentFilter={filterType}
-          handleOnClick={this.changeFilterType}
-        />
-
-        <FilterAsDropdown
-          items={filterDefs}
-          handleOnChange={this.handleOnChangeSelect}
-        />
-
-        <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
-          <this.props.overlayTable
-            fieldName={fieldName}
-            items={items}
-            pageNum={pageNum}
-            selectedItems={value}
-            handleAddItem={item => {
-              handleAddItem(item)
-              if (closeOverlayOnAdd) {
-                this.handleHideOverlay()
-              }
-            }}
-            handleRemoveItem={handleRemoveItem}
-            objectType={objectType}
-            columns={[""].concat(overlayColumns)}
-            renderRow={overlayRenderRow}
-            isLoading={isLoading}
-            loaderMessage={
-              <div style={{ width: "300px" }}>No results found</div>
-            }
-            tableClassName={overlayTableClassName}
-          />
-          {this.paginationFor(filterType)}
-        </Col>
-      </Row>
-    )
-
-    return (
-      <>
-        {!(disabled && renderSelectedWithDelete) && (
-          <>
-            <div id={`${fieldName}-popover`}>
-              <InputGroup>
-                <Popover
-                  className="advanced-select-popover"
-                  popoverClassName="bp3-popover-content-sizing"
-                  content={advancedSearchPopoverContent}
-                  isOpen={showOverlay}
-                  captureDismiss
-                  disabled={disabled}
-                  interactionKind={PopoverInteractionKind.CLICK}
-                  onInteraction={this.handleInteraction}
-                  usePortal={false}
-                  position={Position.BOTTOM}
-                  modifiers={{
-                    preventOverflow: {
-                      enabled: false
-                    },
-                    hide: {
-                      enabled: false
-                    },
-                    flip: {
-                      enabled: false
-                    }
-                  }}
-                >
-                  <FormControl
-                    name={fieldName}
-                    value={searchTerms || ""}
-                    placeholder={placeholder}
-                    onChange={this.changeSearchTerms}
-                    onFocus={disabled ? undefined : this.handleInputFocus}
-                    inputRef={ref => {
-                      this.searchInput = ref
-                    }}
-                    disabled={disabled}
-                  />
-                </Popover>
-                {extraAddon && (
-                  <InputGroup.Addon>{extraAddon}</InputGroup.Addon>
-                )}
-                {addon && (
-                  <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-                )}
-              </InputGroup>
-            </div>
-            <AdvancedSelectTarget overlayRef={this.overlayContainer} />
-          </>
-        )}
-        <Row>
-          <Col sm={12}>{renderSelectedWithDelete}</Col>
-        </Row>
-      </>
-    )
-  }
-
-  handleInputFocus = () => {
-    if (this.state.showOverlay) {
-      return // Overlay is already open and we do not need to fetch data
-    }
-    this.setState(
-      {
-        showOverlay: true,
-        searchTerms: "",
-        isLoading: true
-      },
-      this.fetchResults()
-    )
-  }
-
-  handleInteraction = (showOverlay, event) => {
-    const inputFocus = this.searchInput.contains(event && event.target)
-    return this.setState({ showOverlay: showOverlay || inputFocus })
-  }
-
-  handleHideOverlay = () => {
-    this.setState({
-      filterType: Object.keys(this.props.filterDefs)[0],
-      searchTerms: "",
-      results: {},
-      isLoading: false,
-      showOverlay: false
-    })
-  }
-
-  changeSearchTerms = event => {
-    // Reset the results state when the search terms change
-    this.setState(
-      {
-        isLoading: true,
-        searchTerms: event.target.value,
-        results: {}
-      },
-      () => this.fetchResultsDebounced()
-    )
-  }
-
-  refreshSearch = () => {
-    // Reset the search filters, results and fetch new results based on the current (new) criteria
-    this.setState(
-      (prevState, props) => ({
-        filterType: Object.keys(props.filterDefs)[0],
-        isLoading: true,
-        results: {}
-      }),
-      () => this.fetchResultsDebounced()
-    )
-  }
-
-  handleOnChangeSelect = event => {
-    this.changeFilterType(event.target.value)
-  }
-
-  changeFilterType = filterType => {
-    // When changing the filter type, only fetch the results if they were not fetched before
-    const { results } = this.state
-    const filterResults = results[filterType]
-    const doFetchResults = _isEmpty(filterResults)
-    this.setState({ filterType, isLoading: doFetchResults }, () => {
-      if (doFetchResults) {
-        this.fetchResults()
-      }
-    })
-  }
-
-  fetchResults = (pageNum = 0) => {
-    const { filterType, results } = this.state
-    const filterDefs = this.props.filterDefs[filterType]
-    if (filterDefs.list) {
-      // No need to fetch the data, it is already provided in the filter definition
-      this.setState({
-        isLoading: !_isEmpty(filterDefs.list),
-        results: {
-          ...results,
-          [filterType]: {
-            list: filterDefs.list,
-            pageNum: pageNum,
-            pageSize: 6,
-            totalCount: filterDefs.list.length
-          }
+  const fetchResults = useCallback(
+    searchTerms => {
+      if (!selectedFilter.list) {
+        const resourceName = objectType.resourceName
+        const listName = selectedFilter.listName || objectType.listName
+        const queryVars = { pageNum, pageSize }
+        if (latestQueryParams.current) {
+          Object.assign(queryVars, latestQueryParams.current)
         }
-      })
-    } else {
-      // GraphQL search type of query
-      this.queryResults(filterDefs, filterType, results, pageNum)
-    }
-  }
-
-  queryResults = (filterDefs, filterType, oldResults, pageNum) => {
-    const resourceName = this.props.objectType.resourceName
-    const listName = filterDefs.listName || this.props.objectType.listName
-    this.setState({ isLoading: true }, () => {
-      const queryVars = { pageNum: pageNum, pageSize: 6 }
-      if (this.props.queryParams) {
-        Object.assign(queryVars, this.props.queryParams)
-      }
-      if (filterDefs.queryVars) {
-        Object.assign(queryVars, filterDefs.queryVars)
-      }
-      if (this.state.searchTerms) {
-        Object.assign(queryVars, { text: this.state.searchTerms + "*" })
-      }
-      const thisRequest = (this.latestRequest = API.query(
-        gql`
+        if (selectedFilter.queryVars) {
+          Object.assign(queryVars, selectedFilter.queryVars)
+        }
+        if (searchTerms) {
+          Object.assign(queryVars, { text: searchTerms + "*" })
+        }
+        const thisRequest = (latestRequest.current = API.query(
+          gql`
           query($query: ${resourceName}SearchQueryInput) {
             ${listName}(query: $query) {
               pageNum
               pageSize
               totalCount
               list {
-                ${this.props.fields}
+                ${fields}
               }
             }
           }
         `,
-        { query: queryVars }
-      ).then(data => {
-        // If this is true there's a newer request happening, stop everything
-        if (thisRequest !== this.latestRequest) {
-          return
-        }
-        const isLoading = data[listName].totalCount !== 0
-        this.setState({
-          isLoading,
-          results: {
+          { query: queryVars }
+        ).then(data => {
+          // If this is true there's a newer request happening, stop everything
+          if (thisRequest !== latestRequest.current) {
+            return
+          }
+          setIsLoading(data[listName].totalCount !== 0)
+          setResults(oldResults => ({
             ...oldResults,
             [filterType]: data[listName]
-          }
-        })
+          }))
+        }))
+      }
+    },
+    [
+      fields,
+      filterType,
+      objectType.listName,
+      objectType.resourceName,
+      pageNum,
+      pageSize,
+      selectedFilter.list,
+      selectedFilter.listName,
+      selectedFilter.queryVars
+    ]
+  )
+
+  const [fetchResultsDebounced] = useDebouncedCallback(fetchResults, 400)
+
+  useEffect(() => {
+    if (
+      !_isEqualWith(
+        latestQueryParams.current,
+        queryParams,
+        utils.treatFunctionsAsEqual
+      )
+    ) {
+      latestQueryParams.current = queryParams
+    }
+  }, [queryParams])
+
+  useEffect(() => {
+    if (
+      !_isEqualWith(
+        latestFilterDefs.current,
+        filterDefs,
+        utils.treatFunctionsAsEqual
+      )
+    ) {
+      latestFilterDefs.current = filterDefs
+    }
+  }, [filterDefs])
+
+  useEffect(() => {
+    if (latestSelectedValueAsString.current !== selectedValueAsString) {
+      latestSelectedValueAsString.current = selectedValueAsString
+      setSearchTerms(selectedValueAsString)
+      setFetchType(FETCH_TYPE.NONE)
+    }
+  }, [selectedValueAsString])
+
+  useEffect(() => {
+    // No need to fetch the data, it is already provided in the filter definition
+    if (selectedFilter.list) {
+      setIsLoading(!_isEmpty(selectedFilter.list))
+      setResults(oldResults => ({
+        ...oldResults,
+        [filterType]: {
+          list: selectedFilter.list,
+          pageNum,
+          pageSize,
+          totalCount: selectedFilter.list.length
+        }
       }))
-    })
+    }
+  }, [filterType, pageNum, pageSize, selectedFilter.list])
+
+  useEffect(() => {
+    if (fetchType === FETCH_TYPE.NORMAL) {
+      fetchResults(searchTerms)
+    } else if (fetchType === FETCH_TYPE.DEBOUNCED) {
+      fetchResultsDebounced(searchTerms)
+    }
+  }, [fetchType, fetchResults, fetchResultsDebounced, searchTerms])
+
+  useEffect(() => {
+    if (doReset) {
+      setIsLoading(false)
+      setShowOverlay(false)
+      setFilterType(firstFilter)
+      setSearchTerms(selectedValueAsString)
+      setResults({})
+      setPageNum(0)
+      setFetchType(FETCH_TYPE.NONE)
+      setDoReset(false)
+    }
+  }, [doReset, firstFilter, selectedValueAsString])
+
+  return (
+    <>
+      {!(disabled && renderSelectedWithDelete) && (
+        <>
+          <div id={`${fieldName}-popover`}>
+            <InputGroup>
+              <Popover
+                className="advanced-select-popover"
+                popoverClassName="bp3-popover-content-sizing"
+                content={
+                  <Row className="border-between">
+                    <FilterAsNav
+                      items={filterDefs}
+                      currentFilter={filterType}
+                      handleOnClick={changeFilterType}
+                    />
+
+                    <FilterAsDropdown
+                      items={filterDefs}
+                      handleOnChange={handleOnChangeSelect}
+                    />
+
+                    <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
+                      <OverlayTable
+                        fieldName={fieldName}
+                        items={items}
+                        pageNum={pageNum}
+                        selectedItems={value}
+                        handleAddItem={item => {
+                          handleAddItem(item)
+                          if (closeOverlayOnAdd) {
+                            setDoReset(true)
+                          }
+                        }}
+                        handleRemoveItem={handleRemoveItem}
+                        objectType={objectType}
+                        columns={[""].concat(overlayColumns)}
+                        renderRow={overlayRenderRow}
+                        isLoading={isLoading}
+                        loaderMessage={
+                          <div style={{ width: "300px" }}>No results found</div>
+                        }
+                      />
+                      <UltimatePagination
+                        Component="footer"
+                        componentClassName="searchPagination"
+                        className="pull-right"
+                        pageNum={pageNum}
+                        pageSize={pageSize}
+                        totalCount={totalCount}
+                        goToPage={goToPage}
+                      />
+                    </Col>
+                  </Row>
+                }
+                isOpen={showOverlay}
+                captureDismiss
+                dsabled={disabled}
+                interactionKind={PopoverInteractionKind.CLICK}
+                onInteraction={handleInteraction}
+                usePortal={false}
+                position={Position.BOTTOM}
+                modifiers={{
+                  preventOverflow: {
+                    enabled: false
+                  },
+                  hide: {
+                    enabled: false
+                  },
+                  flip: {
+                    enabled: false
+                  }
+                }}
+              >
+                <FormControl
+                  name={fieldName}
+                  value={searchTerms || ""}
+                  placeholder={placeholder}
+                  onChange={changeSearchTerms}
+                  inputRef={ref => {
+                    searchInput.current = ref
+                  }}
+                  disabled={disabled}
+                />
+              </Popover>
+              {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+              {addon && (
+                <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
+              )}
+            </InputGroup>
+          </div>
+          <AdvancedSelectTarget overlayRef={overlayContainer} />
+        </>
+      )}
+      <Row>
+        <Col sm={12}>{renderSelectedWithDelete}</Col>
+      </Row>
+    </>
+  )
+
+  function handleInteraction(nextShowOverlay, event) {
+    // Note: these state updates are not being batched, order is therefore important
+    // Make sure the overlay is being closed when clicking outside of it,
+    // but keep it open when clicking on the input field.
+    if (!disabled) {
+      const inputFocus = searchInput.current.contains(event && event.target)
+      const openOverlay = nextShowOverlay || inputFocus
+      if (openOverlay !== showOverlay) {
+        if (openOverlay) {
+          // overlay is being opened
+          // Note: state updates are being batched here
+          setShowOverlay(openOverlay)
+          setSearchTerms("")
+          setIsLoading(true)
+          setFetchType(FETCH_TYPE.NORMAL)
+        } else {
+          // overlay is being closed
+          // Note: state updates WOULD NOT be batched here
+          // When closing the overlay the state updates were not being batched, we
+          // therefore moved them to an effect, to prevent several too many renders
+          // and also to make sure the state updates are being batched in there
+          setDoReset(true)
+        }
+      }
+    }
   }
 
-  fetchResultsDebounced = _debounce(this.fetchResults, 400)
-
-  paginationFor = filterType => {
-    const { results } = this.state
-    const pageSize =
-      results && results[filterType] ? results[filterType].pageSize : 6
-    const pageNum =
-      results && results[filterType] ? results[filterType].pageNum : 0
-    const totalCount =
-      results && results[filterType] ? results[filterType].totalCount : 0
-    return (
-      <UltimatePagination
-        Component="footer"
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={this.goToPage}
-      />
-    )
+  function changeSearchTerms(event) {
+    setSearchTerms(event.target.value)
+    // Reset the results state when the search terms change
+    setResults({})
+    setPageNum(0)
+    // Make sure we don't do a fetch for each character being typed
+    setFetchType(FETCH_TYPE.DEBOUNCED)
   }
 
-  goToPage = pageNum => {
-    this.fetchResults(pageNum)
+  function handleOnChangeSelect(event) {
+    changeFilterType(event.target.value)
+  }
+
+  function changeFilterType(newFilterType) {
+    // When changing the filter type, only fetch the results if they were not fetched before
+    const filterResults = results[newFilterType]
+    const shouldFetchResults = _isEmpty(filterResults)
+    setFilterType(newFilterType)
+    setPageNum(results && filterResults ? filterResults.pageNum : 0)
+    setIsLoading(shouldFetchResults)
+    setFetchType(shouldFetchResults ? FETCH_TYPE.NORMAL : FETCH_TYPE.NONE)
+  }
+
+  function goToPage(pageNum) {
+    setPageNum(pageNum)
+    setFetchType(FETCH_TYPE.NORMAL)
   }
 }
-
 AdvancedSelect.propTypes = propTypes
+AdvancedSelect.defaultProps = {
+  pageSize: 6,
+  disabled: false,
+  filterDefs: {},
+  closeOverlayOnAdd: false,
+  selectedValueAsString: ""
+}
+
+export default AdvancedSelect

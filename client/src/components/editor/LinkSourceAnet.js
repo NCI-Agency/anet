@@ -11,7 +11,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useRef, useState } from "react"
+import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -120,8 +120,6 @@ const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
     widgetTypeMapping[objectType]
   )
 
-  const advancedSelectRef = useRef()
-
   function onConfirm(value) {
     // Retrieve entity URL and label
     const ModelClass = Models[objectType]
@@ -145,9 +143,6 @@ const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
   function changeObjectType(newObjectType) {
     setObjectType(newObjectType)
     setAdvancedSelectProps(widgetTypeMapping[newObjectType])
-
-    // Filter and type changed, need to update search results
-    advancedSelectRef.current.refreshSearch()
   }
 
   return (
@@ -172,7 +167,6 @@ const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
 
       <Modal.Footer>
         <AdvancedSingleSelect
-          ref={advancedSelectRef}
           autofocus="true"
           fieldName="entitySelect"
           fieldLabel="Search in ANET:"

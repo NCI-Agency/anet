@@ -217,7 +217,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                   <>
                     <FastField
                       name="type"
-                      component={FieldHelper.RadioButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
@@ -261,7 +261,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                     />
                     <FastField
                       name="status"
-                      component={FieldHelper.RadioButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                       disabled={!isAdmin}

@@ -353,23 +353,19 @@ const BaseReportForm = ({
   return (
     <Formik
       enableReinitialize
-      onSubmit={onSubmit}
       validateOnChange={false}
       validationSchema={reportSchema}
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
         validateField,
         validateForm,
         touched,
-        submitForm,
         resetForm,
         setSubmitting
       }) => {
@@ -586,7 +582,7 @@ const BaseReportForm = ({
                   {isFutureEngagement && (
                     <HelpBlock>
                       <span className="text-success">
-                        This will create an planned engagement
+                        This will create a planned engagement
                       </span>
                     </HelpBlock>
                   )}
@@ -699,7 +695,7 @@ const BaseReportForm = ({
                   <FastField
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.RadioButtonToggleGroup}
+                    component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={atmosphereButtons}
                     onChange={value => setFieldValue("atmosphere", value, true)}
                     className="atmosphere-form-group"
@@ -1125,7 +1121,8 @@ const BaseReportForm = ({
                     id="formBottomSubmit"
                     bsStyle="primary"
                     type="button"
-                    onClick={() => onSubmit(values, { resetForm })}
+                    onClick={() =>
+                      onSubmit(values, { resetForm, setSubmitting })}
                     disabled={isSubmitting}
                   >
                     {submitText}

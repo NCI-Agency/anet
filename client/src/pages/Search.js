@@ -922,30 +922,28 @@ const Search = ({
             onSubmit={onSubmitSaveSearch}
             initialValues={{ name: "" }}
           >
-            {({ values, submitForm }) => {
-              return (
-                <Form>
-                  <Field
-                    name="name"
-                    component={FieldHelper.InputField}
-                    placeholder="Give this saved search a name"
-                    vertical
-                  />
-                  <div className="submit-buttons">
-                    <div>
-                      <Button
-                        id="saveSearchModalSubmitButton"
-                        bsStyle="primary"
-                        type="button"
-                        onClick={submitForm}
-                      >
-                        Save
-                      </Button>
-                    </div>
+            {({ values, submitForm }) => (
+              <Form>
+                <Field
+                  name="name"
+                  component={FieldHelper.InputField}
+                  placeholder="Give this saved search a name"
+                  vertical
+                />
+                <div className="submit-buttons">
+                  <div>
+                    <Button
+                      id="saveSearchModalSubmitButton"
+                      bsStyle="primary"
+                      type="button"
+                      onClick={submitForm}
+                    >
+                      Save
+                    </Button>
                   </div>
-                </Form>
-              )
-            }}
+                </div>
+              </Form>
+            )}
           </Formik>
         </Modal.Body>
       </Modal>
