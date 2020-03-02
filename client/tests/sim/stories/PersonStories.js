@@ -118,7 +118,7 @@ function modifiedPerson() {
 }
 
 const _createPerson = async function(user, role, status) {
-  const person = new Person()
+  const person = Object.without(new Person(), "formCustomFields")
   populate(person, randomPerson(role, status))
     .name.always()
     .role.always()

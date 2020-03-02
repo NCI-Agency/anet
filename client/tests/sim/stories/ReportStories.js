@@ -169,7 +169,7 @@ async function populateReport(report, user, args) {
 }
 
 const createReport = async function(user, grow, args) {
-  const report = new Report()
+  const report = Object.without(new Report(), "formCustomFields")
   if (await populateReport(report, user, args)) {
     console.debug(`Creating report ${report.intent.green}`)
     const { reportTags, cancelled, ...reportStripped } = report // TODO: we need to do this more generically
