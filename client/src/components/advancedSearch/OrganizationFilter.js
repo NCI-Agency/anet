@@ -34,7 +34,7 @@ const OrganizationFilter = ({
   }
   const toQuery = val => {
     return {
-      [queryKey]: val.value.uuid,
+      [queryKey]: val.value?.uuid,
       [queryOrgRecurseStrategyKey]: val.orgRecurseStrategy
     }
   }
@@ -46,7 +46,7 @@ const OrganizationFilter = ({
     toQuery
   )
 
-  let msg = value.value.shortName
+  let msg = value.value?.shortName
   if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN) {
     msg += ", including sub-organizations"
   } else if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS) {
