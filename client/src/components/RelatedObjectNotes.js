@@ -243,7 +243,9 @@ const BaseRelatedObjectNotes = ({
               (byMe || currentUser.isAdmin())
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
             const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
-            const noteText = isJson ? jsonFields.text : note.text
+            const noteText = isJson
+              ? jsonFields.text
+              : parseHtmlWithLinkTo(note.text)
             return (
               <Panel
                 key={note.uuid}
@@ -358,7 +360,7 @@ const BaseRelatedObjectNotes = ({
                       /* IE: */ wordWrap: "break-word"
                     }}
                   >
-                    {parseHtmlWithLinkTo(noteText)}
+                    {noteText}
                   </div>
                 </Panel.Body>
               </Panel>
