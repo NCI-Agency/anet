@@ -84,7 +84,12 @@ const BaseAuthorizationGroupShow = ({ pageDispatchers, currentUser }) => {
     <Formik enableReinitialize initialValues={authorizationGroup}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkTo authorizationGroup={authorizationGroup} edit button="primary">
+          <LinkTo
+            modelType="AuthorizationGroup"
+            model={authorizationGroup}
+            edit
+            button="primary"
+          >
             Edit
           </LinkTo>
         )

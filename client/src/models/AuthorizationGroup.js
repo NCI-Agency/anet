@@ -1,5 +1,5 @@
-import encodeQuery from "querystring/encode"
 import Model from "components/Model"
+import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -7,7 +7,6 @@ export default class AuthorizationGroup extends Model {
   static resourceName = "AuthorizationGroup"
   static listName = "authorizationGroupList"
   static getInstanceName = "authorizationGroup"
-  static getModelNameLinkTo = "authorizationGroup"
 
   static displayName() {
     // TODO: Get the display name from the dictionary

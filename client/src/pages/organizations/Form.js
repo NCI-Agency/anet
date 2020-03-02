@@ -181,7 +181,10 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
-                          <LinkTo organization={values.parentOrg}>
+                          <LinkTo
+                            modelType="Organization"
+                            model={values.parentOrg}
+                          >
                             {values.parentOrg.shortName}{" "}
                             {values.parentOrg.longName}{" "}
                             {values.parentOrg.identificationCode}

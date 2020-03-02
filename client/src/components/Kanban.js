@@ -121,7 +121,7 @@ const Card = ({ task }) => {
       }}
     >
       <div>
-        <LinkTo task={task}>
+        <LinkTo modelType="Task" model={task}>
           <strong>{task.shortName}</strong>
         </LinkTo>
         <br />
@@ -172,7 +172,8 @@ const Card = ({ task }) => {
                     {" "}
                     {this.props.task.taskedOrganizations.map(org => (
                       <LinkTo
-                        organization={org}
+                        modelType="Organization"
+                        model={org}
                         isLink={false}
                         key={`${org.uuid}`}
                       />

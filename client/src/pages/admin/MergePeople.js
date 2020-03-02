@@ -299,7 +299,11 @@ const MergePeople = ({ pageDispatchers }) => {
         <Field
           name="position"
           component={FieldHelper.ReadonlyField}
-          humanValue={person.position && <LinkTo position={person.position} />}
+          humanValue={
+            person.position && (
+              <LinkTo modelType="Position" model={person.position} />
+            )
+          }
           vertical
         />
         <Field
@@ -307,7 +311,10 @@ const MergePeople = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={
             person.position && (
-              <LinkTo organization={person.position.organization} />
+              <LinkTo
+                modelType="Organization"
+                model={person.position.organization}
+              />
             )
           }
           vertical

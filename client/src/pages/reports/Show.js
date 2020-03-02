@@ -41,6 +41,7 @@ import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { deserializeQueryParams } from "searchUtils"
 import utils from "utils"
+import { parseHtmlWithLinkTo } from "utils_links"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
@@ -365,7 +366,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               <Button onClick={toggleEmailModal}>Email report</Button>
             )}
             {canEdit && (
-              <LinkTo report={report} edit button="primary">
+              <LinkTo modelType="Report" model={report} edit button="primary">
                 Edit
               </LinkTo>
             )}
@@ -535,7 +536,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   name="location"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    report.location && <LinkTo anetLocation={report.location} />
+                    report.location && (
+                      <LinkTo modelType="Location" model={report.location} />
+                    )
                   }
                 />
 
@@ -580,21 +583,33 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 <Field
                   name="author"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={<LinkTo person={report.author} />}
+                  humanValue={
+                    <LinkTo modelType="Person" model={report.author} />
+                  }
                 />
 
                 <Field
                   name="advisorOrg"
                   label={Settings.fields.advisor.org.name}
                   component={FieldHelper.ReadonlyField}
-                  humanValue={<LinkTo organization={report.advisorOrg} />}
+                  humanValue={
+                    <LinkTo
+                      modelType="Organization"
+                      model={report.advisorOrg}
+                    />
+                  }
                 />
 
                 <Field
                   name="principalOrg"
                   label={Settings.fields.principal.org.name}
                   component={FieldHelper.ReadonlyField}
-                  humanValue={<LinkTo organization={report.principalOrg} />}
+                  humanValue={
+                    <LinkTo
+                      modelType="Organization"
+                      model={report.principalOrg}
+                    />
+                  }
                 />
               </Fieldset>
               <Fieldset title="Meeting attendees">
@@ -606,19 +621,15 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               </Fieldset>
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
-                  <div
-                    dangerouslySetInnerHTML={{ __html: report.reportText }}
-                  />
+                  {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: report.reportSensitiveInformation.text
-                      }}
-                    />
+                    {parseHtmlWithLinkTo(
+                      report.reportSensitiveInformation.text
+                    )}
                     {(hasAuthorizationGroups && (
                       <div>
                         <h5>Authorized groups:</h5>
@@ -703,7 +714,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
-                      <LinkTo person={comment.author} />,
+                      <LinkTo modelType="Person" model={comment.author} />,
                       <span
                         title={createdAt.format(
                           Settings.dateFormats.forms.displayShort.withTime
@@ -852,7 +863,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
           cancelHandler
         )}
         <div className="right-button">
-          <LinkTo report={report} edit button>
+          <LinkTo modelType="Report" model={report} edit button>
             Edit {reportType}
           </LinkTo>
           {renderApproveButton(

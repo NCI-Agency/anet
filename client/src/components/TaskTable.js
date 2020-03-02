@@ -37,12 +37,14 @@ const TaskTable = ({
               {Task.map(tasks, task => (
                 <tr key={task.uuid}>
                   <td className="taskName">
-                    <LinkTo task={task}>{task.shortName}</LinkTo>
+                    <LinkTo modelType="Task" model={task}>
+                      {task.shortName}
+                    </LinkTo>
                   </td>
                   {showParent && (
                     <td className="parentTaskName">
                       {task.customFieldRef1 && (
-                        <LinkTo task={task.customFieldRef1}>
+                        <LinkTo modelType="Task" model={task.customFieldRef1}>
                           {task.customFieldRef1.shortName}
                         </LinkTo>
                       )}
@@ -52,7 +54,8 @@ const TaskTable = ({
                     <td className="taskOrg">
                       {task.taskedOrganizations.map(org => (
                         <LinkTo
-                          organization={org}
+                          modelType="Organization"
+                          model={org}
                           key={`${task.uuid}-${org.uuid}`}
                         />
                       ))}

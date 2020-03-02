@@ -4,18 +4,18 @@ import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
+import _get from "lodash/get"
 import { Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import _get from "lodash/get"
 
 const GQL_GET_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
@@ -76,7 +76,8 @@ const BaseOrganizationTasks = ({
       action={
         isAdminUser && (
           <LinkTo
-            task={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
+            modelType="Task"
+            model={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
             button
           >
             Create {taskShortLabel}
@@ -104,7 +105,9 @@ const BaseOrganizationTasks = ({
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkTo task={task}>{task.shortName}</LinkTo>
+                  <LinkTo modelType="Task" model={task}>
+                    {task.shortName}
+                  </LinkTo>
                 </td>
                 <td>{task.longName}</td>
               </tr>
