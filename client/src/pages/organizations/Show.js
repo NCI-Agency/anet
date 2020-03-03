@@ -1,6 +1,7 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -9,8 +10,8 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -33,7 +34,6 @@ import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import DictionaryField from "../../HOC/DictionaryField"
-import OrganizationApprovals from "./Approvals"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
 
@@ -52,7 +52,7 @@ const GQL_GET_ORGANIZATION = gql`
         longName
         identificationCode
       }
-      childrenOrgs {
+      childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
         uuid
         shortName
         longName
@@ -123,7 +123,7 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const BaseOrganizationShow = props => {
+const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const { uuid } = useParams()
@@ -137,7 +137,7 @@ const BaseOrganizationShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -146,7 +146,6 @@ const BaseOrganizationShow = props => {
   const organization = new Organization(data ? data.organization : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
@@ -193,13 +192,14 @@ const BaseOrganizationShow = props => {
     reportQueryParams.state = Report.STATE.PENDING_APPROVAL
   }
   return (
-    <Formik enableReinitialize initialValues={organization} {...myFormProps}>
+    <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
         const action = (
           <div>
             {isAdmin && (
               <LinkTo
-                organization={Organization.pathForNew({
+                modelType="Organization"
+                model={Organization.pathForNew({
                   parentOrgUuid: organization.uuid
                 })}
                 button
@@ -210,7 +210,8 @@ const BaseOrganizationShow = props => {
 
             {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
               <LinkTo
-                organization={organization}
+                modelType="Organization"
+                model={organization}
                 edit
                 button="primary"
                 id="editButton"
@@ -258,36 +259,39 @@ const BaseOrganizationShow = props => {
               <Fieldset id="info">
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfStatus}
                 />
 
                 <Field
                   name="type"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfType}
                 />
 
                 <LongNameWithLabel
                   dictProps={orgSettings.longName}
                   name="longName"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <IdentificationCodeFieldWithLabel
                   dictProps={orgSettings.identificationCode}
                   name="identificationCode"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
                   <Field
                     name="parentOrg"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     label={Settings.fields.organization.parentOrg}
                     humanValue={
                       organization.parentOrg && (
-                        <LinkTo organization={organization.parentOrg}>
+                        <LinkTo
+                          modelType="Organization"
+                          model={organization.parentOrg}
+                        >
                           {organization.parentOrg.shortName}{" "}
                           {organization.parentOrg.longName}{" "}
                           {organization.parentOrg.identificationCode}
@@ -300,17 +304,21 @@ const BaseOrganizationShow = props => {
                 {organization.isAdvisorOrg() && (
                   <Field
                     name="superUsers"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     label="Super users"
                     humanValue={
                       <>
                         {superUsers.map(position => (
                           <p key={position.uuid}>
                             {position.person ? (
-                              <LinkTo person={position.person} />
+                              <LinkTo
+                                modelType="Person"
+                                model={position.person}
+                              />
                             ) : (
                               <i>
-                                <LinkTo position={position} />- (Unfilled)
+                                <LinkTo modelType="Position" model={position} />
+                                - (Unfilled)
                               </i>
                             )}
                           </p>
@@ -329,13 +337,16 @@ const BaseOrganizationShow = props => {
                   organization.childrenOrgs.length > 0 && (
                     <Field
                       name="childrenOrgs"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label="Sub organizations"
                       humanValue={
                         <ListGroup>
                           {organization.childrenOrgs.map(organization => (
                             <ListGroupItem key={organization.uuid}>
-                              <LinkTo organization={organization}>
+                              <LinkTo
+                                modelType="Organization"
+                                model={organization}
+                              >
                                 {organization.shortName} {organization.longName}{" "}
                                 {organization.identificationCode}
                               </LinkTo>
@@ -348,16 +359,14 @@ const BaseOrganizationShow = props => {
               </Fieldset>
 
               <OrganizationLaydown organization={organization} />
-              {!isPrincipalOrg && (
-                <OrganizationApprovals organization={organization} />
-              )}
+              {!isPrincipalOrg && <Approvals relatedObject={organization} />}
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
                   organization={organization}
                   queryParams={{
                     status: Task.STATUS.ACTIVE,
                     pageSize: 10,
-                    responsibleOrgUuid: organization.uuid
+                    taskedOrgUuid: organization.uuid
                   }}
                 />
               )}
@@ -403,7 +412,7 @@ const BaseOrganizationShow = props => {
 }
 
 BaseOrganizationShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -419,4 +428,7 @@ const OrganizationShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(OrganizationShow)
+export default connect(
+  mapStateToProps,
+  mapPageDispatchersToProps
+)(OrganizationShow)

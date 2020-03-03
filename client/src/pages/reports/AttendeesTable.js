@@ -10,14 +10,11 @@ const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
 )
 
-const RemoveButton = props => {
-  const { title, handleOnClick } = props
-  return (
-    <Button bsStyle="link" title={title} onClick={handleOnClick}>
-      <RemoveIcon />
-    </Button>
-  )
-}
+const RemoveButton = ({ title, handleOnClick }) => (
+  <Button bsStyle="link" title={title} onClick={handleOnClick}>
+    <RemoveIcon />
+  </Button>
+)
 RemoveButton.propTypes = {
   title: PropTypes.string,
   handleOnClick: PropTypes.func
@@ -31,83 +28,78 @@ const AttendeeDividerRow = () => (
   </tr>
 )
 
-const TableHeader = props => {
-  const { showDelete, hide } = props
-  return (
-    <thead>
-      <tr>
-        <th className="col-xs-1" style={{ textAlign: "center" }}>
-          {!hide && "Primary"}
-        </th>
-        <th className="col-xs-3">{!hide && "Name"}</th>
-        <th className="col-xs-3">{!hide && "Position"}</th>
-        <th className="col-xs-2">{!hide && "Location"}</th>
-        <th className="col-xs-2">{!hide && "Organization"}</th>
-        {showDelete && <th className="col-xs-1" />}
-      </tr>
-    </thead>
-  )
-}
+const TableHeader = ({ showDelete, hide }) => (
+  <thead>
+    <tr>
+      <th className="col-xs-1" style={{ textAlign: "center" }}>
+        {!hide && "Primary"}
+      </th>
+      <th className="col-xs-3">{!hide && "Name"}</th>
+      <th className="col-xs-3">{!hide && "Position"}</th>
+      <th className="col-xs-2">{!hide && "Location"}</th>
+      <th className="col-xs-2">{!hide && "Organization"}</th>
+      {showDelete && <th className="col-xs-1" />}
+    </tr>
+  </thead>
+)
 TableHeader.propTypes = {
   showDelete: PropTypes.bool,
   hide: PropTypes.bool
 }
 
-const TableBody = props => {
-  const { attendees, handleAttendeeRow, role, enableDivider } = props
-  return (
-    <tbody>
-      {enableDivider && <AttendeeDividerRow />}
-      {Person.map(
-        attendees.filter(p => p.role === role),
-        person => handleAttendeeRow(person)
-      )}
-    </tbody>
-  )
-}
+const TableBody = ({ attendees, handleAttendeeRow, role, enableDivider }) => (
+  <tbody>
+    {enableDivider && <AttendeeDividerRow />}
+    {Person.map(
+      attendees.filter(p => p.role === role),
+      person => handleAttendeeRow(person)
+    )}
+  </tbody>
+)
 TableBody.propTypes = {
-  attendees: PropTypes.array,
+  attendees: PropTypes.array.isRequired,
   handleAttendeeRow: PropTypes.func,
   role: PropTypes.string,
   enableDivider: PropTypes.bool
 }
-
-const TableContainer = props => {
-  const { className, children } = props
-  return (
-    <Table striped condensed hover responsive className={className}>
-      {children}
-    </Table>
-  )
+TableBody.defaultProps = {
+  attendees: []
 }
+
+const TableContainer = ({ className, children }) => (
+  <Table striped condensed hover responsive className={className}>
+    {children}
+  </Table>
+)
 TableContainer.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node
 }
 
-const RadioButton = props => {
-  const { person, disabled, handleOnChange } = props
-  return (
-    <Radio
-      name={`primaryAttendee${person.role}`}
-      className="primary"
-      checked={person.primary}
-      disabled={disabled}
-      onChange={() => !disabled && handleOnChange(person)}
-    >
-      {person.primary && <Label bsStyle="primary">Primary</Label>}
-    </Radio>
-  )
-}
+const RadioButton = ({ person, disabled, handleOnChange }) => (
+  <Radio
+    name={`primaryAttendee${person.role}`}
+    className="primary"
+    checked={person.primary}
+    disabled={disabled}
+    onChange={() => !disabled && handleOnChange(person)}
+  >
+    {person.primary && <Label bsStyle="primary">Primary</Label>}
+  </Radio>
+)
 RadioButton.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
 
-const AttendeesTable = props => {
-  const { attendees, disabled, onChange, showDelete, onDelete } = props
-
+const AttendeesTable = ({
+  attendees,
+  disabled,
+  onChange,
+  showDelete,
+  onDelete
+}) => {
   return (
     <div id="attendeesContainer">
       <TableContainer className="advisorAttendeesTable">
@@ -141,11 +133,11 @@ const AttendeesTable = props => {
           />
         </td>
         <td>
-          <LinkTo person={person} showIcon={false} />
+          <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
         <td>
           {person.position && person.position.uuid && (
-            <LinkTo position={person.position} />
+            <LinkTo modelType="Position" model={person.position} />
           )}
           {person.position && person.position.code
             ? `, ${person.position.code}`
@@ -153,14 +145,16 @@ const AttendeesTable = props => {
         </td>
         <td>
           <LinkTo
+            modelType="Location"
+            model={person.position && person.position.location}
             whenUnspecified=""
-            anetLocation={person.position && person.position.location}
           />
         </td>
         <td>
           <LinkTo
+            modelType="Organization"
+            model={person.position && person.position.organization}
             whenUnspecified=""
-            organization={person.position && person.position.organization}
           />
         </td>
         {showDelete && (

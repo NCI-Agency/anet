@@ -102,17 +102,19 @@ Dear ${approvalStepName},
 </div>
 
 <#if report.loadTags(context).get()??>
-  <#assign tags = report.getTags()>
-  <div>
-    <strong>${fields.report.reportTags}:</strong>
-    <ul>
-      <#list tags as tag>
-        <li>
-          ${(tag.name)!} <em>(${(tag.description)!})</em>
-        </li>
-      </#list>
-    </ul>
-  </div>
+  <#if fields.report.reportTags??>
+    <#assign tags = report.getTags()>
+    <div>
+      <strong>${fields.report.reportTags}:</strong>
+      <ul>
+        <#list tags as tag>
+          <li>
+            ${(tag.name)!} <em>(${(tag.description)!})</em>
+          </li>
+        </#list>
+      </ul>
+    </div>
+  </#if>
 </#if>
 
 <div>
@@ -134,7 +136,9 @@ Dear ${approvalStepName},
   <div class="col-md-8">
     <p><strong>${fields.report.intent}:</strong> ${report.intent}</p>
     <#if report.keyOutcomes??>
-      <p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
+      <#if fields.report.keyOutcomes??>
+        <p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
+      </#if>
     </#if>
     <#if report.nextSteps??>
       <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>

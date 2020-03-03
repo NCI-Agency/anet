@@ -1,7 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
@@ -17,15 +17,20 @@ import mil.dds.anet.views.UuidFetcher;
 public class Note extends AbstractAnetBean {
 
   public static enum NoteType {
-    FREE_TEXT, CHANGE_RECORD, PARTNER_ASSESSMENT
+    FREE_TEXT, CHANGE_RECORD, PARTNER_ASSESSMENT, ASSESSMENT
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   private NoteType type;
+  @GraphQLQuery
+  @GraphQLInputField
   private String text;
+  // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
+  // annotated below
   private List<NoteRelatedObject> noteRelatedObjects;
 
-  @GraphQLQuery(name = "type")
   public NoteType getType() {
     return type;
   }
@@ -34,7 +39,6 @@ public class Note extends AbstractAnetBean {
     this.type = type;
   }
 
-  @GraphQLQuery(name = "text")
   public String getText() {
     return text;
   }
@@ -56,22 +60,20 @@ public class Note extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setAuthorUuid(String authorUuid) {
     this.author = new ForeignObjectHolder<>(authorUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getAuthorUuid() {
     return author.getForeignUuid();
   }
 
+  @GraphQLInputField(name = "author")
   public void setAuthor(Person author) {
     this.author = new ForeignObjectHolder<>(author);
   }
 
-  @GraphQLIgnore
   public Person getAuthor() {
     return author.getForeignObject();
   }
@@ -89,11 +91,11 @@ public class Note extends AbstractAnetBean {
         });
   }
 
+  @GraphQLInputField(name = "noteRelatedObjects")
   public void setNoteRelatedObjects(List<NoteRelatedObject> relatedObjects) {
     this.noteRelatedObjects = relatedObjects;
   }
 
-  @GraphQLIgnore
   public List<NoteRelatedObject> getNoteRelatedObjects() {
     return noteRelatedObjects;
   }

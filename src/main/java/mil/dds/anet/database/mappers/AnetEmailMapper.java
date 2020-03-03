@@ -5,7 +5,6 @@ import java.lang.invoke.MethodHandles;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.AnetEmail;
-import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class AnetEmailMapper implements RowMapper<AnetEmail> {
       AnetEmail email = mapper.readValue(jobSpec, AnetEmail.class);
 
       email.setId(rs.getInt("id"));
-      email.setCreatedAt(DaoUtils.getInstantAsLocalDateTime(rs, "createdAt"));
+      email.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
       return email;
     } catch (Exception e) {
       logger.error("Error mapping email", e);

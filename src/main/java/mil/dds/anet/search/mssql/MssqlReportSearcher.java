@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.Set;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -17,8 +18,17 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
-  public AnetBeanList<Report> runSearch(ReportSearchQuery query) {
-    return runSearch(outerQb, query);
+  public AnetBeanList<Report> runSearch(Set<String> subFields, ReportSearchQuery query) {
+    return runSearch(outerQb, subFields, query);
+  }
+
+  @Override
+  protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
+    qb.addSelectClause("DISTINCT " + getTableFields(subFields));
+    qb.addFromClause("reports");
+    qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
+    qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
+    super.buildQuery(subFields, query);
   }
 
   @Override
@@ -34,17 +44,17 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
     qb.addFromClause(
         "LEFT JOIN CONTAINSTABLE (reports, (text, intent, keyOutcomes, nextSteps), :containsQuery) c_reports"
             + " ON reports.uuid = c_reports.[Key]"
-            + " LEFT JOIN FREETEXTTABLE(reports, (text, intent, keyOutcomes, nextSteps), :freetextQuery) f_reports"
+            + " LEFT JOIN FREETEXTTABLE(reports, (text, intent, keyOutcomes, nextSteps), :fullTextQuery) f_reports"
             + " ON reports.uuid = f_reports.[Key]");
     qb.addFromClause("LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
         + " ON tags.uuid = c_tags.[Key]"
-        + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
+        + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :fullTextQuery) f_tags"
         + " ON tags.uuid = f_tags.[Key]");
     qb.addWhereClause("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL"
         + " OR c_tags.rank IS NOT NULL OR f_tags.rank IS NOT NULL)");
     final String text = query.getText();
-    qb.addSqlArg("containsQuery", qb.getFullTextQuery(text));
-    qb.addSqlArg("freetextQuery", text);
+    qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
+    qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));
   }
 
   @Override
@@ -53,7 +63,7 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
-  protected void addIncludeEngagementDayOfWeekQuery(ReportSearchQuery query) {
+  protected void addIncludeEngagementDayOfWeekSelect() {
     qb.addSelectClause("DATEPART(dw, reports.engagementDate) AS engagementDayOfWeek");
   }
 

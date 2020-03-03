@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -27,6 +26,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -34,7 +34,8 @@ import mil.dds.anet.beans.search.PositionSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
-import org.junit.Test;
+import mil.dds.anet.utils.DaoUtils;
+import org.junit.jupiter.api.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
   private static final String ORGANIZATION_FIELDS = "uuid shortName";
@@ -46,7 +47,7 @@ public class PositionResourceTest extends AbstractResourceTest {
       " previousPeople { startTime endTime position { uuid } person { uuid name rank role } }";
 
   @Test
-  public void positionTest() throws ExecutionException, InterruptedException {
+  public void positionTest() {
     final Person jack = getJackJackson();
     assertThat(jack.getUuid()).isNotNull();
     assertThat(jack.getPosition()).isNotNull();
@@ -171,7 +172,6 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(history.get(1).getEndTime()).isNotNull();
     assertThat(history.get(1).getStartTime()).isBefore(history.get(1).getEndTime());
 
-
     // Create a principal
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
     queryOrgs.setText("Ministry");
@@ -272,7 +272,6 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(jack.getUuid());
   }
-
 
   @Test
   public void tashkilTest() {
@@ -396,7 +395,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Search by organization
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("ef 1");
+    // FIXME: decide what the search should do in both cases
+    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"ef 1\" or \"ef 1.1\"" : "ef 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -419,14 +419,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(searchResults.stream().filter(p -> p.getOrganizationUuid() == ef1.getUuid())
         .collect(Collectors.toList())).hasSameElementsAs(searchResults);
 
-    query.setIncludeChildrenOrgs(true);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
             new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isNotEmpty();
 
-    query.setIncludeChildrenOrgs(false);
+    query.setOrgRecurseStrategy(RecurseStrategy.NONE);
     query.setText("a");
     query.setSortBy(PositionSearchSortBy.NAME);
     query.setSortOrder(SortOrder.DESC);
@@ -472,7 +472,7 @@ public class PositionResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void createPositionTest() throws ExecutionException, InterruptedException {
+  public void createPositionTest() {
     // Create a new position and designate the person upfront
     Person newb = new Person();
     newb.setName("PositionTest Person");
@@ -617,34 +617,26 @@ public class PositionResourceTest extends AbstractResourceTest {
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
 
     // try to update a position from the user's org
+    final List<Position> userOrgPositions =
+        position.getOrganization().loadPositions(context, null).join();
+    assertThat(userOrgPositions).isNotNull();
+    assertThat(userOrgPositions).isNotEmpty();
+    final Position p1 = userOrgPositions.get(0);
+    p1.loadOrganization(context).join();
     try {
-      List<Position> userOrgPositions =
-          position.getOrganization().loadPositions(context, null).get();
-      assertThat(userOrgPositions).isNotNull();
-      assertThat(userOrgPositions).isNotEmpty();
-      final Position p1 = userOrgPositions.get(0);
-      p1.loadOrganization(context).get();
-      try {
-        final Integer nrUpdated =
-            graphQLHelper.updateObject(user, "updatePosition", "position", "PositionInput", p1);
-        if (isAdmin) {
-          assertThat(nrUpdated).isEqualTo(1);
-        } else if (isSuperUser) {
-          assertThat(nrUpdated).isEqualTo(1);
-        } else {
-          fail("Expected ForbiddenException");
-        }
-      } catch (ForbiddenException expectedException) {
-        if (isAdmin || isSuperUser) {
-          fail("Unexpected ForbiddenException");
-        }
+      final Integer nrUpdated =
+          graphQLHelper.updateObject(user, "updatePosition", "position", "PositionInput", p1);
+      if (isAdmin) {
+        assertThat(nrUpdated).isEqualTo(1);
+      } else if (isSuperUser) {
+        assertThat(nrUpdated).isEqualTo(1);
+      } else {
+        fail("Expected ForbiddenException");
       }
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (ExecutionException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    } catch (ForbiddenException expectedException) {
+      if (isAdmin || isSuperUser) {
+        fail("Unexpected ForbiddenException");
+      }
     }
 
     // create a regular position not related to the user's organization

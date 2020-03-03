@@ -3,15 +3,19 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
+import _get from "lodash/get"
 import { Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import _get from "lodash/get"
 
 const GQL_GET_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
@@ -28,8 +32,12 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 
-const BaseOrganizationTasks = props => {
-  const { queryParams } = props
+const BaseOrganizationTasks = ({
+  pageDispatchers,
+  queryParams,
+  currentUser,
+  organization
+}) => {
   const [pageNum, setPageNum] = useState(0)
   const taskQuery = Object.assign({}, queryParams, { pageNum })
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
@@ -38,7 +46,7 @@ const BaseOrganizationTasks = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -46,7 +54,6 @@ const BaseOrganizationTasks = props => {
 
   const paginatedTasks = data.taskList
   const tasks = paginatedTasks ? paginatedTasks.list : []
-  const { currentUser, organization } = props
   const isAdminUser = currentUser && currentUser.isAdmin()
   const taskShortLabel = Settings.fields.task.shortLabel
 
@@ -69,7 +76,8 @@ const BaseOrganizationTasks = props => {
       action={
         isAdminUser && (
           <LinkTo
-            task={Task.pathForNew({ responsibleOrgUuid: organization.uuid })}
+            modelType="Task"
+            model={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
             button
           >
             Create {taskShortLabel}
@@ -97,7 +105,9 @@ const BaseOrganizationTasks = props => {
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkTo task={task}>{task.shortName}</LinkTo>
+                  <LinkTo modelType="Task" model={task}>
+                    {task.shortName}
+                  </LinkTo>
                 </td>
                 <td>{task.longName}</td>
               </tr>
@@ -110,6 +120,7 @@ const BaseOrganizationTasks = props => {
 }
 
 BaseOrganizationTasks.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person),
   organization: PropTypes.object.isRequired,
   queryParams: PropTypes.object
@@ -123,4 +134,4 @@ const OrganizationTasks = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(OrganizationTasks)
+export default connect(null, mapPageDispatchersToProps)(OrganizationTasks)

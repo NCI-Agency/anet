@@ -49,7 +49,7 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
   /**
    * Converts the supplied result object to a {@link XSSFWorkbook}.
    * 
-   * @param result the result
+   * @param resultMap the content map
    * @return the workbook
    */
   private XSSFWorkbook createWorkbook(final Map<String, Object> resultMap) {
@@ -260,8 +260,7 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
         workbook.write(output);
       } catch (Exception e) {
         final Throwable rootCause = ExceptionUtils.getRootCause(e);
-        logger.error("Error writing XSSFWorkbook",
-            rootCause == null ? e.getMessage() : rootCause.getMessage());
+        logger.error("Error writing XSSFWorkbook", rootCause == null ? e : rootCause);
       }
     }
   }

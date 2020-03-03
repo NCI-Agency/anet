@@ -20,8 +20,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
@@ -198,7 +203,7 @@ public class Utils {
       // These elements are allowed.
       .allowElements("a", "p", "div", "i", "b", "u", "em", "blockquote", "tt", "strong", "br", "ul",
           "ol", "li", "table", "tr", "td", "thead", "tbody", "th", "span", "h1", "h2", "h3", "h4",
-          "h5", "h6", "hr", "img")
+          "h5", "h6", "hr", "img", "strike", "mark")
       .toFactory();
 
   public static String sanitizeHtml(String input) {
@@ -339,8 +344,8 @@ public class Utils {
    * 
    * More info: https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats
    * 
-   * @param email The domain user name to check
-   * @param whitelistDomainNames The list of ignaored domain user names (wildcards allowed)
+   * @param domainUserName The domain user name to check
+   * @param ignoredDomainNames The list of ignored domain user names (wildcards allowed)
    * @return Whether the domain user name is ignored
    */
   public static boolean isDomainUserNameIgnored(final String domainUserName,
@@ -462,4 +467,89 @@ public class Utils {
     ImageIO.write(imageBytes, imageFormatName, os);
     return Base64.getEncoder().encodeToString(os.toByteArray());
   }
+
+  public static void updateApprovalSteps(AbstractAnetBean entity,
+      List<ApprovalStep> planningApprovalSteps, List<ApprovalStep> existingPlanningApprovalSteps,
+      List<ApprovalStep> approvalSteps, List<ApprovalStep> existingApprovalSteps) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+
+    if (planningApprovalSteps != null) {
+      logger.debug("Editing planning approval steps for {}", entity);
+      for (ApprovalStep step : planningApprovalSteps) {
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(entity.getUuid());
+      }
+
+      Utils.addRemoveElementsByUuid(existingPlanningApprovalSteps, planningApprovalSteps,
+          newStep -> engine.getApprovalStepDao().insert(newStep),
+          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
+
+      Utils.updateSteps(planningApprovalSteps, existingPlanningApprovalSteps);
+    }
+
+    if (approvalSteps != null) {
+      logger.debug("Editing approval steps for {}", entity);
+      for (ApprovalStep step : approvalSteps) {
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(entity.getUuid());
+      }
+
+      Utils.addRemoveElementsByUuid(existingApprovalSteps, approvalSteps,
+          newStep -> engine.getApprovalStepDao().insert(newStep),
+          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
+
+      Utils.updateSteps(approvalSteps, existingApprovalSteps);
+    }
+  }
+
+  // Helper method that diffs the name/members of an approvalStep
+  private static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
+    newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing group
+    if (!newStep.getName().equals(oldStep.getName())) {
+      approvalStepDao.update(newStep);
+    } else if (!Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid())) {
+      approvalStepDao.update(newStep);
+    }
+
+    if (newStep.getApprovers() != null) {
+      Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).join(),
+          newStep.getApprovers(),
+          newPosition -> approvalStepDao.addApprover(newStep, DaoUtils.getUuid(newPosition)),
+          oldPositionUuid -> approvalStepDao.removeApprover(newStep, oldPositionUuid));
+    }
+  }
+
+  // Helper method that updates a list of approval steps
+  private static void updateSteps(List<ApprovalStep> steps, List<ApprovalStep> existingSteps) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
+    for (int i = 0; i < steps.size(); i++) {
+      ApprovalStep curr = steps.get(i);
+      ApprovalStep next = (i == (steps.size() - 1)) ? null : steps.get(i + 1);
+      curr.setNextStepUuid(DaoUtils.getUuid(next));
+      ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
+      // If this step didn't exist before, we still need to set the nextStepUuid on it, but
+      // don't need to do a deep update.
+      if (existingStep == null) {
+        approvalStepDao.update(curr);
+      } else {
+        // Check for updates to name, nextStepUuid and approvers.
+        Utils.updateStep(curr, existingStep);
+      }
+    }
+  }
+
+  public static void validateApprovalStep(ApprovalStep step) {
+    if (Utils.isEmptyOrNull(step.getName())) {
+      throw new WebApplicationException("A name is required for every approval step",
+          Status.BAD_REQUEST);
+    }
+    if (Utils.isEmptyOrNull(step.getApprovers())) {
+      throw new WebApplicationException("An approver is required for every approval step",
+          Status.BAD_REQUEST);
+    }
+  }
+
 }

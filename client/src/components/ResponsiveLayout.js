@@ -10,7 +10,7 @@ const anetContainer = {
   display: "flex",
   flexDirection: "column",
   height: "100vh",
-  overflow: "hidden"
+  overflow: "auto"
 }
 const contentContainer = {
   flex: "1 1 auto",
@@ -65,8 +65,7 @@ const loadingBar = {
 
 export const ResponsiveLayoutContext = React.createContext()
 
-const ResponsiveLayout = props => {
-  const { pageProps, sidebarData, children } = props
+const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
   const history = useHistory()
   const [floatingMenu, setFloatingMenu] = useState(false)
   const [topbarHeight, setTopbarHeight] = useState(0)
@@ -90,7 +89,7 @@ const ResponsiveLayout = props => {
     >
       <div style={anetContainer} className="anet">
         <TopBar
-          topbarHeight={handleTopbarHeight}
+          handleTopbarHeight={handleTopbarHeight}
           minimalHeader={pageProps.minimalHeader}
           toggleMenuAction={() => {
             showFloatingMenu(!floatingMenu)

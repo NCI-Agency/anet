@@ -1,4 +1,4 @@
-personRecents {
+personList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
     name

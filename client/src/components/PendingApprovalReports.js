@@ -3,7 +3,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { useBoilerplate } from "components/Page"
+import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
@@ -31,14 +31,14 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const Chart = props => {
-  const {
-    chartId,
-    queryParams,
-    focusedSelection,
-    goToSelection,
-    selectedBarClass
-  } = props
+const Chart = ({
+  pageDispatchers,
+  chartId,
+  queryParams,
+  focusedSelection,
+  goToSelection,
+  selectedBarClass
+}) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
@@ -46,7 +46,7 @@ const Chart = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const graphData = useMemo(() => {
     if (!data) {
@@ -79,8 +79,8 @@ const Chart = props => {
         return d
       })
       .sort((a, b) => {
-        let aIndex = pinnedOrgs.indexOf(a.advisorOrg.shortName)
-        let bIndex = pinnedOrgs.indexOf(b.advisorOrg.shortName)
+        const aIndex = pinnedOrgs.indexOf(a.advisorOrg.shortName)
+        const bIndex = pinnedOrgs.indexOf(b.advisorOrg.shortName)
         if (aIndex < 0) {
           return bIndex < 0
             ? a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName)
@@ -123,6 +123,7 @@ const Chart = props => {
 }
 
 Chart.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   chartId: PropTypes.string,
   queryParams: PropTypes.object,
   focusedSelection: PropTypes.object,
@@ -130,44 +131,36 @@ Chart.propTypes = {
   selectedBarClass: PropTypes.string
 }
 
-const Collection = props => {
-  const { id, queryParams } = props
-
-  return (
-    <div className="scrollable">
-      <ReportCollection
-        paginationKey={`r_${id}`}
-        queryParams={queryParams}
-        viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
-      />
-    </div>
-  )
-}
+const Collection = ({ id, queryParams }) => (
+  <div className="scrollable">
+    <ReportCollection
+      paginationKey={`r_${id}`}
+      queryParams={queryParams}
+      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+    />
+  </div>
+)
 
 Collection.propTypes = {
   id: PropTypes.string,
   queryParams: PropTypes.object
 }
 
-const Map = props => {
-  const { queryParams } = props
-
-  return (
-    <div className="non-scrollable">
-      <ContainerDimensions>
-        {({ width, height }) => (
-          <ReportCollection
-            queryParams={queryParams}
-            width={width}
-            height={height}
-            marginBottom={0}
-            viewFormats={[FORMAT_MAP]}
-          />
-        )}
-      </ContainerDimensions>
-    </div>
-  )
-}
+const Map = ({ queryParams }) => (
+  <div className="non-scrollable">
+    <ContainerDimensions>
+      {({ width, height }) => (
+        <ReportCollection
+          queryParams={queryParams}
+          width={width}
+          height={height}
+          marginBottom={0}
+          viewFormats={[FORMAT_MAP]}
+        />
+      )}
+    </ContainerDimensions>
+  </div>
+)
 
 Map.propTypes = {
   queryParams: PropTypes.object
@@ -178,8 +171,7 @@ Map.propTypes = {
  * which have not been approved yet. They are displayed in different
  * presentation forms: chart, summary, table and map.
  */
-const PendingApprovalReports = props => {
-  const { queryParams, style } = props
+const PendingApprovalReports = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
 
   const advisorOrgLabel = Settings.fields.advisor.org.name
@@ -230,6 +222,7 @@ const PendingApprovalReports = props => {
   function renderChart(id) {
     return (
       <Chart
+        pageDispatchers={pageDispatchers}
         chartId={chartId}
         queryParams={queryParams}
         focusedSelection={focusedSelection}
@@ -285,6 +278,7 @@ const PendingApprovalReports = props => {
 }
 
 PendingApprovalReports.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   style: PropTypes.object
 }

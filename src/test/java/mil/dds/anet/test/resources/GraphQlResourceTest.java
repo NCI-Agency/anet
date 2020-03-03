@@ -12,15 +12,15 @@ import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.test.integration.utils.TestApp;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +30,10 @@ public class GraphQlResourceTest extends AbstractResourceTest {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Test
-  public void test() throws ExecutionException, InterruptedException {
+  public void test() {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
-    File testDir = new File("src/test/resources/graphQLTests/");
+    final File testDir = new File(GraphQlResourceTest.class.getResource("/graphQLTests").getFile());
     assertThat(testDir.getAbsolutePath()).isNotNull();
     assertThat(testDir.isDirectory()).isTrue();
 
@@ -139,7 +139,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
   private Builder httpQuery(String path, Person authUser) {
     final String authString =
         Base64.getEncoder().encodeToString((authUser.getDomainUsername() + ":").getBytes());
-    return client.target(String.format("http://localhost:%d%s", RULE.getLocalPort(), path))
+    return client.target(String.format("http://localhost:%d%s", TestApp.app.getLocalPort(), path))
         .request().header("Authorization", "Basic " + authString)
         .header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
   }

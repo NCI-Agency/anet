@@ -2,12 +2,12 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
-  ApproverOverlayRow,
   OrganizationOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -15,25 +15,18 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import TaskTable from "components/TaskTable"
-import { Field, FieldArray, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Modal, Table } from "react-bootstrap"
+import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
-import REMOVE_ICON from "resources/delete.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
-const GQL_GET_APPROVAL_STEP_IN_USE = gql`
-  query($uuid: String!) {
-    approvalStepInUse(uuid: $uuid)
-  }
-`
 const GQL_CREATE_ORGANIZATION = gql`
   mutation($organization: OrganizationInput!) {
     createOrganization(organization: $organization) {
@@ -47,54 +40,9 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const ApproverTable = props => {
-  const { approvers, onDelete } = props
-  return (
-    <Table striped condensed hover responsive>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Position</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        {approvers.map((approver, approverIndex) => (
-          <tr key={approver.uuid}>
-            <td>
-              <LinkTo person={approver.person} target="_blank" />
-            </td>
-            <td>
-              <LinkTo position={approver} target="_blank" />
-            </td>
-            <td onClick={() => onDelete(approver)}>
-              <span style={{ cursor: "pointer" }}>
-                <img src={REMOVE_ICON} height={14} alt="Remove approver" />
-              </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  )
-}
-
-ApproverTable.propTypes = {
-  approvers: PropTypes.array,
-  onDelete: PropTypes.func
-}
-
-const BaseOrganizationForm = props => {
-  const { currentUser, edit, title, initialValues, ...myFormProps } = props
+const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
   const history = useHistory()
   const [error, setError] = useState(null)
-  const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] = useState(
-    false
-  )
-  const [
-    showRemoveApprovalStepAlert,
-    setShowRemoveApprovalStepAlert
-  ] = useState(false)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -119,23 +67,19 @@ const BaseOrganizationForm = props => {
       label: Settings.fields.principal.org.name
     }
   ]
-  const IdentificationCodeFieldWithLabel = DictionaryField(Field)
-  const LongNameWithLabel = DictionaryField(Field)
+  const IdentificationCodeFieldWithLabel = DictionaryField(FastField)
+  const LongNameWithLabel = DictionaryField(FastField)
 
   return (
     <Formik
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Organization.yupSchema}
-      isInitialValid
       initialValues={initialValues}
-      {...myFormProps}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
@@ -178,11 +122,11 @@ const BaseOrganizationForm = props => {
             queryVars: {}
           }
         }
-        if (props.currentUser.position) {
+        if (currentUser.position) {
           tasksFilters.assignedToMyOrg = {
             label: "Assigned to my organization",
             queryVars: {
-              responsibleOrgUuid: props.currentUser.position.organization.uuid
+              taskedOrgUuid: currentUser.position.organization.uuid
             }
           }
         }
@@ -207,12 +151,12 @@ const BaseOrganizationForm = props => {
             }
           }
         }
-        if (props.currentUser.position) {
+        if (currentUser.position) {
           approversFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
               matchPersonName: true,
-              organizationUuid: props.currentUser.position.organization.uuid
+              organizationUuid: currentUser.position.organization.uuid
             }
           }
         }
@@ -226,18 +170,21 @@ const BaseOrganizationForm = props => {
               <Fieldset>
                 {!isAdmin ? (
                   <>
-                    <Field
+                    <FastField
                       name="type"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfType}
                     />
-                    <Field
+                    <FastField
                       name="parentOrg"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
-                          <LinkTo organization={values.parentOrg}>
+                          <LinkTo
+                            modelType="Organization"
+                            model={values.parentOrg}
+                          >
                             {values.parentOrg.shortName}{" "}
                             {values.parentOrg.longName}{" "}
                             {values.parentOrg.identificationCode}
@@ -245,53 +192,63 @@ const BaseOrganizationForm = props => {
                         )
                       }
                     />
-                    <Field
+                    <FastField
                       name="shortName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       label={Settings.fields.organization.shortName}
                     />
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
-                    <Field
+                    <FastField
                       name="status"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfStatus}
                     />
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderReadonlyField}
+                      component={FieldHelper.ReadonlyField}
                     />
                   </>
                 ) : (
                   <>
-                    <Field
+                    <FastField
                       name="type"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
-                    <AdvancedSingleSelect
-                      fieldName="parentOrg"
-                      fieldLabel={Settings.fields.organization.parentOrg}
-                      placeholder="Search for a higher level organization..."
-                      value={values.parentOrg}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      onChange={value => setFieldValue("parentOrg", value)}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      queryParams={orgSearchQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
+                    <FastField
+                      name="parentOrg"
+                      label={Settings.fields.organization.parentOrg}
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("parentOrg", value)
+                      }}
+                      widget={
+                        <AdvancedSingleSelect
+                          fieldName="parentOrg"
+                          placeholder="Search for a higher level organization..."
+                          value={values.parentOrg}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={OrganizationOverlayRow}
+                          filterDefs={organizationFilters}
+                          objectType={Organization}
+                          fields={Organization.autocompleteQuery}
+                          queryParams={orgSearchQuery}
+                          valueKey="shortName"
+                          addon={ORGANIZATIONS_ICON}
+                        />
+                      }
                     />
-                    <Field
+                    <FastField
                       name="shortName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       label={Settings.fields.organization.shortName}
                       placeholder="e.g. EF1.1"
                       disabled={!isAdmin}
@@ -299,12 +256,12 @@ const BaseOrganizationForm = props => {
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                       disabled={!isAdmin}
                     />
-                    <Field
+                    <FastField
                       name="status"
-                      component={FieldHelper.renderButtonToggleGroup}
+                      component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                       disabled={!isAdmin}
@@ -312,7 +269,7 @@ const BaseOrganizationForm = props => {
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
-                      component={FieldHelper.renderInputField}
+                      component={FieldHelper.InputField}
                     />
                   </>
                 )}
@@ -320,160 +277,29 @@ const BaseOrganizationForm = props => {
 
               {isAdvisorOrg && (
                 <div>
-                  <Fieldset title="Engagement planning approval process">
-                    <FieldArray
-                      name="planningApprovalSteps"
-                      render={arrayHelpers => (
-                        <div>
-                          <Button
-                            className="pull-right"
-                            onClick={() =>
-                              addApprovalStep(
-                                arrayHelpers,
-                                values.planningApprovalSteps
-                              )}
-                            bsStyle="primary"
-                            id="addApprovalStepButton"
-                          >
-                            Add a Planning Approval Step
-                          </Button>
-                          <Modal
-                            show={showAddApprovalStepAlert}
-                            onHide={hideAddApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not added</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              Please complete all approval steps; there already
-                              is an approval step that is not completely filled
-                              in.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideAddApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-                          <Modal
-                            show={showRemoveApprovalStepAlert}
-                            onHide={hideRemoveApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not removed</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              You cannot remove this step; it is being used in a
-                              report.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideRemoveApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-
-                          {values.planningApprovalSteps.map((step, index) =>
-                            renderApprovalStep(
-                              "planningApprovalSteps",
-                              arrayHelpers,
-                              setFieldValue,
-                              step,
-                              index,
-                              approversFilters
-                            )
-                          )}
-                        </div>
-                      )}
-                    />
-                  </Fieldset>
+                  <ApprovalsDefinition
+                    fieldName="planningApprovalSteps"
+                    values={values}
+                    title="Engagement planning approval process"
+                    addButtonLabel="Add a Planning Approval Step"
+                    setFieldTouched={setFieldTouched}
+                    setFieldValue={setFieldValue}
+                    approversFilters={approversFilters}
+                  />
                 </div>
               )}
+
               {isAdvisorOrg && (
                 <div>
-                  <Fieldset title="Report publication approval process">
-                    <FieldArray
-                      name="approvalSteps"
-                      render={arrayHelpers => (
-                        <div>
-                          <Button
-                            className="pull-right"
-                            onClick={() =>
-                              addApprovalStep(
-                                arrayHelpers,
-                                values.approvalSteps
-                              )}
-                            bsStyle="primary"
-                            id="addApprovalStepButton"
-                          >
-                            Add a Publication Approval Step
-                          </Button>
-                          <Modal
-                            show={showAddApprovalStepAlert}
-                            onHide={hideAddApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not added</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              Please complete all approval steps; there already
-                              is an approval step that is not completely filled
-                              in.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideAddApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-                          <Modal
-                            show={showRemoveApprovalStepAlert}
-                            onHide={hideRemoveApprovalStepAlert}
-                          >
-                            <Modal.Header closeButton>
-                              <Modal.Title>Step not removed</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              You cannot remove this step; it is being used in a
-                              report.
-                            </Modal.Body>
-                            <Modal.Footer>
-                              <Button
-                                className="pull-right"
-                                onClick={hideRemoveApprovalStepAlert}
-                                bsStyle="primary"
-                              >
-                                OK
-                              </Button>
-                            </Modal.Footer>
-                          </Modal>
-
-                          {values.approvalSteps.map((step, index) =>
-                            renderApprovalStep(
-                              "approvalSteps",
-                              arrayHelpers,
-                              setFieldValue,
-                              step,
-                              index,
-                              approversFilters
-                            )
-                          )}
-                        </div>
-                      )}
-                    />
-                  </Fieldset>
+                  <ApprovalsDefinition
+                    fieldName="approvalSteps"
+                    values={values}
+                    title="Report publication approval process"
+                    addButtonLabel="Add a Publication Approval Step"
+                    setFieldTouched={setFieldTouched}
+                    setFieldValue={setFieldValue}
+                    approversFilters={approversFilters}
+                  />
 
                   {Organization.isTaskEnabled(values.shortName) && (
                     <Fieldset
@@ -483,24 +309,34 @@ const BaseOrganizationForm = props => {
                       {!isAdmin ? (
                         <TaskTable tasks={values.tasks} />
                       ) : (
-                        <AdvancedMultiSelect
-                          fieldName="tasks"
-                          fieldLabel={Settings.fields.task.shortLabel}
-                          placeholder={`Search for ${pluralize(
-                            Settings.fields.task.shortLabel
-                          )}...`}
-                          value={values.tasks}
-                          renderSelected={
-                            <TaskTable tasks={values.tasks} showDelete />
+                        <FastField
+                          name="tasks"
+                          label={Settings.fields.task.shortLabel}
+                          component={FieldHelper.SpecialField}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("tasks", value)
+                          }}
+                          widget={
+                            <AdvancedMultiSelect
+                              fieldName="tasks"
+                              placeholder={`Search for ${pluralize(
+                                Settings.fields.task.shortLabel
+                              )}...`}
+                              value={values.tasks}
+                              renderSelected={
+                                <TaskTable tasks={values.tasks} showDelete />
+                              }
+                              overlayColumns={["Name"]}
+                              overlayRenderRow={TaskSimpleOverlayRow}
+                              filterDefs={tasksFilters}
+                              objectType={Task}
+                              queryParams={{ status: Task.STATUS.ACTIVE }}
+                              fields={Task.autocompleteQuery}
+                              addon={TASKS_ICON}
+                            />
                           }
-                          overlayColumns={["Name"]}
-                          overlayRenderRow={TaskSimpleOverlayRow}
-                          filterDefs={tasksFilters}
-                          onChange={value => setFieldValue("tasks", value)}
-                          objectType={Task}
-                          queryParams={{ status: Task.STATUS.ACTIVE }}
-                          fields={Task.autocompleteQuery}
-                          addon={TASKS_ICON}
                         />
                       )}
                     </Fieldset>
@@ -533,98 +369,6 @@ const BaseOrganizationForm = props => {
     </Formik>
   )
 
-  function renderApprovalStep(
-    fieldName,
-    arrayHelpers,
-    setFieldValue,
-    step,
-    index,
-    approversFilters
-  ) {
-    const approvers = step.approvers
-
-    return (
-      <Fieldset title={`Step ${index + 1}`} key={index}>
-        <Button
-          className="pull-right"
-          title="Remove this step"
-          onClick={() => removeApprovalStep(arrayHelpers, index, step)}
-        >
-          <img src={REMOVE_ICON} height={14} alt="Remove this step" />
-        </Button>
-
-        <Field
-          name={`${fieldName}.${index}.name`}
-          component={FieldHelper.renderInputField}
-          label="Step name"
-        />
-        <AdvancedMultiSelect
-          fieldName={`${fieldName}.${index}.approvers`}
-          fieldLabel="Add an approver"
-          placeholder="Search for the approver's position..."
-          value={approvers}
-          renderSelected={<ApproverTable approvers={approvers} />}
-          overlayColumns={["Name", "Position"]}
-          overlayRenderRow={ApproverOverlayRow}
-          filterDefs={approversFilters}
-          onChange={value =>
-            setFieldValue(`${fieldName}.${index}.approvers`, value)}
-          objectType={Position}
-          queryParams={{
-            status: Position.STATUS.ACTIVE,
-            type: [
-              Position.TYPE.ADVISOR,
-              Position.TYPE.SUPER_USER,
-              Position.TYPE.ADMINISTRATOR
-            ],
-            matchPersonName: true
-          }}
-          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }"
-          addon={POSITIONS_ICON}
-        />
-      </Fieldset>
-    )
-  }
-
-  function hideAddApprovalStepAlert() {
-    setShowAddApprovalStepAlert(false)
-  }
-
-  function hideRemoveApprovalStepAlert() {
-    setShowRemoveApprovalStepAlert(false)
-  }
-
-  function addApprovalStep(arrayHelpers, values) {
-    const approvalSteps = values || []
-
-    for (let i = 0; i < approvalSteps.length; i++) {
-      const step = approvalSteps[i]
-      if (!step.name || !step.approvers || step.approvers.length === 0) {
-        setShowAddApprovalStepAlert(true)
-        return
-      }
-    }
-
-    arrayHelpers.push({ name: "", approvers: [] })
-  }
-
-  function removeApprovalStep(arrayHelpers, index, step) {
-    if (!step.uuid) {
-      // New, unsaved step
-      arrayHelpers.remove(index)
-      return
-    }
-    return API.query(GQL_GET_APPROVAL_STEP_IN_USE, { uuid: step.uuid }).then(
-      data => {
-        if (data.approvalStepInUse) {
-          setShowRemoveApprovalStepAlert(true)
-        } else {
-          arrayHelpers.remove(index)
-        }
-      }
-    )
-  }
-
   function onCancel() {
     history.goBack()
   }
@@ -640,7 +384,6 @@ const BaseOrganizationForm = props => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    const { edit } = props
     const operation = edit ? "updateOrganization" : "createOrganization"
     const organization = new Organization({
       uuid: response[operation].uuid
@@ -663,13 +406,16 @@ const BaseOrganizationForm = props => {
       new Organization(values),
       "notes",
       "childrenOrgs",
-      "positions"
+      "positions",
+      "tasks"
     )
+    // strip tasks fields not in data model
+    organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
     return API.mutation(
-      props.edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
+      edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
-    )
+    ).then()
   }
 }
 

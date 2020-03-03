@@ -1,9 +1,13 @@
 
-[![Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](http://anet-demo.azurewebsites.net)
 [![Build Status](https://travis-ci.org/NCI-Agency/anet.svg?branch=candidate)](https://travis-ci.org/NCI-Agency/anet)
 [![Build Status](https://dev.azure.com/advisornetwork/anet/_apis/build/status/NCI-Agency.anet)](https://dev.azure.com/advisornetwork/anet/_build/latest?definitionId=1)
 [![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)](https://www.browserstack.com/automate/public-build/SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)
 [![Docker Pulls](https://img.shields.io/docker/pulls/ncia/anet-app-server.svg)](https://hub.docker.com/r/ncia/anet-app-server/)
+
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/context:javascript)
+[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/context:java)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/alerts/)
 
 ## What is ANET?
 

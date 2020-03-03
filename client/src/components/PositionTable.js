@@ -1,7 +1,11 @@
 import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import { mapDispatchToProps, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
+  useBoilerplate
+} from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Position } from "models"
@@ -52,8 +56,11 @@ PositionTable.propTypes = {
   queryParams: PropTypes.object
 }
 
-const PaginatedPositions = props => {
-  const { queryParams, ...otherProps } = props
+const PaginatedPositions = ({
+  queryParams,
+  pageDispatchers,
+  ...otherProps
+}) => {
   const [pageNum, setPageNum] = useState(0)
   const positionQuery = Object.assign({}, queryParams, { pageNum })
   const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
@@ -62,17 +69,25 @@ const PaginatedPositions = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
 
-  const paginatedPositions = data.positionList
+  const {
+    pageSize,
+    pageNum: curPage,
+    totalCount,
+    list: positions
+  } = data.positionList
 
   return (
     <BasePositionTable
-      paginatedPositions={paginatedPositions}
+      positions={positions}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
       goToPage={setPageNum}
       {...otherProps}
     />
@@ -80,18 +95,20 @@ const PaginatedPositions = props => {
 }
 
 PaginatedPositions.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object
 }
 
-const BasePositionTable = props => {
-  let positions
-  if (props.paginatedPositions) {
-    var { pageSize, pageNum, totalCount } = props.paginatedPositions
-    positions = props.paginatedPositions.list
-  } else {
-    positions = props.positions
-  }
-
+const BasePositionTable = ({
+  id,
+  showDelete,
+  onDelete,
+  positions,
+  pageSize,
+  pageNum,
+  totalCount,
+  goToPage
+}) => {
   if (_get(positions, "length", 0) === 0) {
     return <em>No positions found</em>
   }
@@ -104,7 +121,7 @@ const BasePositionTable = props => {
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
-        goToPage={props.goToPage}
+        goToPage={goToPage}
       >
         <Table
           striped
@@ -112,7 +129,7 @@ const BasePositionTable = props => {
           hover
           responsive
           className="positions_table"
-          id={props.id}
+          id={id}
         >
           <thead>
             <tr>
@@ -126,27 +143,36 @@ const BasePositionTable = props => {
           </thead>
           <tbody>
             {Position.map(positions, pos => {
-              let nameComponents = []
+              const nameComponents = []
               pos.name && nameComponents.push(pos.name)
               pos.code && nameComponents.push(pos.code)
               return (
                 <tr key={pos.uuid}>
                   <td>
-                    <LinkTo position={pos}>{nameComponents.join(" - ")}</LinkTo>
+                    <LinkTo modelType="Position" model={pos}>
+                      {nameComponents.join(" - ")}
+                    </LinkTo>
                   </td>
                   <td>
-                    <LinkTo anetLocation={pos.location} />
+                    <LinkTo modelType="Location" model={pos.location} />
                   </td>
                   <td>
                     {pos.organization && (
-                      <LinkTo organization={pos.organization} />
+                      <LinkTo
+                        modelType="Organization"
+                        model={pos.organization}
+                      />
                     )}
                   </td>
-                  <td>{pos.person && <LinkTo person={pos.person} />}</td>
+                  <td>
+                    {pos.person && (
+                      <LinkTo modelType="Person" model={pos.person} />
+                    )}
+                  </td>
                   <td>{utils.sentenceCase(pos.status)}</td>
-                  {props.showDelete && (
+                  {showDelete && (
                     <td
-                      onClick={() => props.onDelete(pos)}
+                      onClick={() => onDelete(pos)}
                       id={"positionDelete_" + pos.uuid}
                     >
                       <span style={{ cursor: "pointer" }}>
@@ -172,16 +198,13 @@ BasePositionTable.propTypes = {
   id: PropTypes.string,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
-  // list of positions, when no pagination wanted:
-  positions: PropTypes.array,
-  // list of positions, when pagination wanted:
-  paginatedPositions: PropTypes.shape({
-    totalCount: PropTypes.number,
-    pageNum: PropTypes.number,
-    pageSize: PropTypes.number,
-    list: PropTypes.array.isRequired
-  }),
+  // list of positions:
+  positions: PropTypes.array.isRequired,
+  // fill these when pagination wanted:
+  totalCount: PropTypes.number,
+  pageNum: PropTypes.number,
+  pageSize: PropTypes.number,
   goToPage: PropTypes.func
 }
 
-export default connect(null, mapDispatchToProps)(PositionTable)
+export default connect(null, mapPageDispatchersToProps)(PositionTable)

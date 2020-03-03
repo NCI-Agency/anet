@@ -1,20 +1,24 @@
 package mil.dds.anet.database;
 
+import com.google.common.collect.ObjectArrays;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
@@ -39,6 +43,7 @@ import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
@@ -57,12 +62,18 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
-  private static final String[] fields = {"uuid", "state", "createdAt", "updatedAt",
-      "engagementDate", "duration", "locationUuid", "approvalStepUuid", "intent", "exsum",
-      "atmosphere", "cancelledReason", "advisorOrganizationUuid", "principalOrganizationUuid",
-      "releasedAt", "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "authorUuid"};
+  // Must always retrieve these e.g. for ORDER BY
+  public static final String[] minimalFields =
+      {"uuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
+  public static final String[] additionalFields = {"state", "duration", "intent", "exsum",
+      "locationUuid", "approvalStepUuid", "advisorOrganizationUuid", "principalOrganizationUuid",
+      "authorUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text", "keyOutcomes",
+      "nextSteps", "customFields"};
+  public static final String[] allFields =
+      ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
-  public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static final String REPORT_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
 
   private String weekFormat;
 
@@ -103,7 +114,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         + "text, \"keyOutcomes\", \"nextSteps\", \"authorUuid\", "
         + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
-        + "\"principalOrganizationUuid\") VALUES "
+        + "\"principalOrganizationUuid\", \"customFields\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
         + ":exsum, :reportText, :keyOutcomes, :nextSteps, :authorUuid, ");
     if (DaoUtils.isMsSql()) {
@@ -112,7 +123,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       sql.append(":engagementDate, :releasedAt, ");
     }
     sql.append(
-        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
+        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid, :customFields)");
 
     getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -167,13 +178,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     void insertReportTags(@Bind("reportUuid") String reportUuid, @BindBean List<Tag> tags);
   }
 
-  public Report getByUuid(String uuid) {
-    // Return the report without sensitive information
-    return getByUuid(uuid, null);
-  }
-
   @InTransaction
-  public Report getByUuid(String uuid, Person user) {
+  @Override
+  public Report getByUuid(String uuid) {
     /* Check whether uuid is purely numerical, and if so, query on legacyId */
     final String queryDescriptor;
     final String keyField;
@@ -188,15 +195,10 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       keyField = "uuid";
       key = uuid;
     }
-    final Report result = getDbHandle()
+    return getDbHandle()
         .createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + "FROM reports "
             + "WHERE reports.\"" + keyField + "\" = :key")
         .bind("key", key).map(new ReportMapper()).findFirst().orElse(null);
-    if (result == null) {
-      return null;
-    }
-    result.setUser(user);
-    return result;
   }
 
   @InTransaction
@@ -235,8 +237,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append(
         "duration = :duration, atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
             + "\"cancelledReason\" = :cancelledReason, "
-            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
-            + "WHERE uuid = :uuid");
+            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid, "
+            + "\"customFields\" = :customFields " + "WHERE uuid = :uuid");
 
     return getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
@@ -357,7 +359,12 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   @Override
   public AnetBeanList<Report> search(ReportSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(query);
+    return search(null, query);
+  }
+
+  public AnetBeanList<Report> search(Set<String> subFields, ReportSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(subFields,
+        query);
   }
 
   /*
@@ -409,7 +416,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       throw new WebApplicationException(
           "Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     }
-    Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
+    long maxReportAge = Long.parseLong(maxReportAgeStr);
     return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
   }
 
@@ -641,7 +648,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         // Skip non-reporting organizations
         continue;
       }
-      final Integer count = ((Number) result.get("count")).intValue();
+      final int count = ((Number) result.get("count")).intValue();
       final ReportState state = ReportState.values()[(Integer) result.get("state")];
 
       final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
@@ -736,7 +743,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     private static final String sql =
         "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
             + "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
-            + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid";
+            + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid ORDER BY uuid";
 
     public TasksBatcher() {
       super(sql, "foreignKeys", new TaskMapper(), "reportUuid");
@@ -768,35 +775,98 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
-  private void sendReportPublishedEmail(Report r) {
-    AnetEmail email = new AnetEmail();
-    ReportPublishedEmail action = new ReportPublishedEmail();
+  public void sendApprovalNeededEmail(Report r) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
+    final List<Position> approvers = step.loadApprovers(engine.getContext()).join();
+    final AnetEmail approverEmail = new AnetEmail();
+    final ApprovalNeededEmail action = new ApprovalNeededEmail();
+    action.setReport(r);
+    approverEmail.setAction(action);
+    approverEmail.setToAddresses(approvers.stream()
+        .filter(a -> (a.getPersonUuid() != null) && !a.getPersonUuid().equals(r.getAuthorUuid()))
+        .map(a -> a.loadPerson(engine.getContext()).join().getEmailAddress())
+        .collect(Collectors.toList()));
+    AnetEmailWorker.sendEmailAsync(approverEmail);
+  }
+
+  public void sendReportPublishedEmail(Report r) {
+    final AnetEmail email = new AnetEmail();
+    final ReportPublishedEmail action = new ReportPublishedEmail();
     action.setReport(r);
     email.setAction(action);
-    try {
-      email.addToAddress(
-          r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
-      AnetEmailWorker.sendEmailAsync(email);
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to load Author", e);
+    email.addToAddress(
+        r.loadAuthor(AnetObjectEngine.getInstance().getContext()).join().getEmailAddress());
+    AnetEmailWorker.sendEmailAsync(email);
+  }
+
+  public int approve(Report r, Person user, ApprovalStep step) {
+    // Write the approval action
+    final ReportAction action = new ReportAction();
+    action.setReportUuid(r.getUuid());
+    action.setStepUuid(step.getUuid());
+    // User could be null when the publication action is being done automatically by a worker
+    action.setPersonUuid(DaoUtils.getUuid(user));
+    action.setType(ActionType.APPROVE);
+    AnetObjectEngine.getInstance().getReportActionDao().insert(action);
+
+    // Update the report
+    final String nextStepUuid = getNextStepUuid(r, step);
+    r.setApprovalStepUuid(nextStepUuid);
+    if (nextStepUuid == null) {
+      if (r.getCancelledReason() != null) {
+        // Done with cancel, move to CANCELLED and set releasedAt
+        r.setState(ReportState.CANCELLED);
+        r.setReleasedAt(Instant.now());
+      } else {
+        // Done with approvals, move to APPROVED
+        r.setState(ReportState.APPROVED);
+      }
     }
+    final int numRows = update(r, r.getAuthor());
+    if (numRows != 0 && nextStepUuid != null) {
+      sendApprovalNeededEmail(r);
+    }
+    return numRows;
+  }
+
+  private String getNextStepUuid(Report report, ApprovalStep step) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final String currentStepUuid = step.getUuid();
+    String nextStepUuid = step.getNextStepUuid();
+    if (nextStepUuid == null) {
+      // Find out if there's a next approval chain
+      final List<ApprovalStep> reportApprovalSteps =
+          report.computeApprovalSteps(engine.getContext(), engine).join();
+      final Iterator<ApprovalStep> iterator = reportApprovalSteps.iterator();
+      while (iterator.hasNext()) {
+        final ApprovalStep reportApprovalStep = iterator.next();
+        if (Objects.equals(DaoUtils.getUuid(reportApprovalStep), currentStepUuid)) {
+          // Found the current step, update the next step
+          if (iterator.hasNext()) {
+            final ApprovalStep reportApprovalStepNext = iterator.next();
+            nextStepUuid = DaoUtils.getUuid(reportApprovalStepNext);
+          }
+          break;
+        }
+      }
+    }
+    return nextStepUuid;
   }
 
   public int publish(Report r, Person user) {
     // Write the publication action
-    ReportAction action = new ReportAction();
+    final ReportAction action = new ReportAction();
     action.setReportUuid(r.getUuid());
-    if (user != null) {
-      // User is null when the publication action is being done automatically by a worker
-      action.setPersonUuid(user.getUuid());
-    }
+    // User could be null when the publication action is being done automatically by a worker
+    action.setPersonUuid(DaoUtils.getUuid(user));
     action.setType(ActionType.PUBLISH);
     AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
     // Move the report to PUBLISHED state
     r.setState(ReportState.PUBLISHED);
     r.setReleasedAt(Instant.now());
-    final int numRows = this.update(r, r.getAuthor());
+    final int numRows = update(r, r.getAuthor());
     if (numRows != 0) {
       sendReportPublishedEmail(r);
     }
@@ -814,7 +884,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     StringBuilder sql = new StringBuilder();
 
     sql.append("/* getFutureToPastReports */");
-    sql.append(" SELECT " + ReportDao.REPORT_FIELDS);
+    sql.append(
+        " SELECT reports.uuid AS reports_uuid, reports.\"authorUuid\" AS \"reports_authorUuid\"");
     sql.append(" FROM reports");
     // We are not interested in draft reports, as they will remain draft.
     // We are not interested in cancelled reports, as they will remain cancelled.

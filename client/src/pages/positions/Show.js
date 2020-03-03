@@ -11,9 +11,9 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
+  PageDispatchersPropType,
   jumpToTop,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -93,7 +93,7 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
-const BasePositionShow = props => {
+const BasePositionShow = ({ pageDispatchers, currentUser }) => {
   const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
   const [
@@ -116,14 +116,13 @@ const BasePositionShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
   }
 
   const position = new Position(data ? data.position : {})
-  const { currentUser, ...myFormProps } = props
   const CodeFieldWithLabel = DictionaryField(Field)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
@@ -150,11 +149,12 @@ const BasePositionShow = props => {
     (!position.person || !position.person.uuid)
 
   return (
-    <Formik enableReinitialize initialValues={position} {...myFormProps}>
+    <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
         const action = canEdit && (
           <LinkTo
-            position={position}
+            modelType="Position"
+            model={position}
             edit
             button="primary"
             className="edit-position"
@@ -191,35 +191,38 @@ const BasePositionShow = props => {
               <Fieldset>
                 <Field
                   name="name"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   label={Settings.fields.position.name}
                 />
 
                 <CodeFieldWithLabel
                   dictProps={positionSettings.code}
                   name="code"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                 />
 
                 <Field
                   name="type"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfType}
                 />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfStatus}
                 />
 
                 {position.organization && (
                   <Field
                     name="organization"
-                    component={FieldHelper.renderReadonlyField}
+                    component={FieldHelper.ReadonlyField}
                     humanValue={
                       position.organization && (
-                        <LinkTo organization={position.organization}>
+                        <LinkTo
+                          modelType="Organization"
+                          model={position.organization}
+                        >
                           {position.organization.shortName}{" "}
                           {position.organization.longName}{" "}
                           {position.organization.identificationCode}
@@ -231,10 +234,10 @@ const BasePositionShow = props => {
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
-                      <LinkTo anetLocation={position.location} />
+                      <LinkTo modelType="Location" model={position.location} />
                     )
                   }
                 />
@@ -262,7 +265,7 @@ const BasePositionShow = props => {
                 {position.person && position.person.uuid ? (
                   <div>
                     <h4 className="assigned-person-name">
-                      <LinkTo person={position.person} />
+                      <LinkTo modelType="Person" model={position.person} />
                     </h4>
                     <p />
                   </div>
@@ -346,7 +349,7 @@ const BasePositionShow = props => {
                     {position.previousPeople.map((pp, idx) => (
                       <tr key={idx} id={`previousPerson_${idx}`}>
                         <td>
-                          <LinkTo person={pp.person} />
+                          <LinkTo modelType="Person" model={pp.person} />
                         </td>
                         <td>
                           {moment(pp.startTime).format(
@@ -390,13 +393,13 @@ const BasePositionShow = props => {
     if (!pos.person) {
       personName = "Unfilled"
     } else {
-      personName = <LinkTo person={pos.person} />
+      personName = <LinkTo modelType="Person" model={pos.person} />
     }
     return (
       <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
         <td>{personName}</td>
         <td>
-          <LinkTo position={pos} />
+          <LinkTo modelType="Position" model={pos} />
         </td>
       </tr>
     )
@@ -438,8 +441,8 @@ const PositionShow = props => (
 )
 
 BasePositionShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
-export default connect(null, mapDispatchToProps)(PositionShow)
+export default connect(null, mapPageDispatchersToProps)(PositionShow)

@@ -1,6 +1,5 @@
-import encodeQuery from "querystring/encode"
 import Model from "components/Model"
-import React from "react"
+import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -8,7 +7,6 @@ export default class AuthorizationGroup extends Model {
   static resourceName = "AuthorizationGroup"
   static listName = "authorizationGroupList"
   static getInstanceName = "authorizationGroup"
-  static getModelNameLinkTo = "authorizationGroup"
 
   static displayName() {
     // TODO: Get the display name from the dictionary
@@ -43,9 +41,6 @@ export default class AuthorizationGroup extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery = "uuid, name, description"
-  static autocompleteTemplate(group) {
-    return <span>{[group.name, group.description].join(" - ")}</span>
-  }
 
   static pathFor(instance, query) {
     if (!instance) {
@@ -62,8 +57,8 @@ export default class AuthorizationGroup extends Model {
       }
     }
 
-    let resourceName = utils.resourceize(this.resourceName)
-    let uuid = instance.uuid
+    const resourceName = utils.resourceize(this.resourceName)
+    const uuid = instance.uuid
     let url = ["", "admin", resourceName, uuid].join("/")
 
     if (query) {
@@ -74,7 +69,7 @@ export default class AuthorizationGroup extends Model {
   }
 
   static pathForNew(query) {
-    let resourceName = utils.resourceize(this.resourceName)
+    const resourceName = utils.resourceize(this.resourceName)
     let url = ["", "admin", resourceName, "new"].join("/")
 
     if (query) {

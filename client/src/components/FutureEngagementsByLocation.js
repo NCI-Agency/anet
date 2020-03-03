@@ -3,7 +3,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import HorizontalBarChart from "components/HorizontalBarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { useBoilerplate } from "components/Page"
+import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import ReportCollection, {
   FORMAT_MAP,
   FORMAT_SUMMARY,
@@ -33,14 +33,14 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-const Chart = props => {
-  const {
-    chartId,
-    queryParams,
-    focusedSelection,
-    goToSelection,
-    selectedBarClass
-  } = props
+const Chart = ({
+  pageDispatchers,
+  chartId,
+  queryParams,
+  focusedSelection,
+  goToSelection,
+  selectedBarClass
+}) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
@@ -48,13 +48,13 @@ const Chart = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const graphData = useMemo(() => {
     function getEngagementDateRangeArray() {
-      let dateArray = []
+      const dateArray = []
       let currentDate = moment(queryParams.engagementDateStart).clone()
-      let endDate = moment(queryParams.engagementDateEnd)
+      const endDate = moment(queryParams.engagementDateEnd)
       while (currentDate <= endDate) {
         dateArray.push(currentDate.clone())
         currentDate = currentDate.add(1, "days")
@@ -80,13 +80,13 @@ const Chart = props => {
       return d
     })
     // add days without data as we want to display them in the chart
-    let allCategories = getEngagementDateRangeArray().map(function(d) {
+    const allCategories = getEngagementDateRangeArray().map(function(d) {
       return {
         key: d.valueOf(),
         values: [{}]
       }
     })
-    let categoriesWithData = d3
+    const categoriesWithData = d3
       .nest()
       .key(function(d) {
         return moment(d.engagementDate)
@@ -101,7 +101,7 @@ const Chart = props => {
       })
       .entries(reportsList)
     const groupedData = allCategories.map(d => {
-      let categData = categoriesWithData.find(x => {
+      const categData = categoriesWithData.find(x => {
         return Number(x.key) === d.key
       })
       return Object.assign({}, d, categData)
@@ -149,6 +149,7 @@ const Chart = props => {
 }
 
 Chart.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   chartId: PropTypes.string,
   queryParams: PropTypes.object,
   focusedSelection: PropTypes.object,
@@ -156,44 +157,36 @@ Chart.propTypes = {
   selectedBarClass: PropTypes.string
 }
 
-const Collection = props => {
-  const { id, queryParams } = props
-
-  return (
-    <div className="scrollable">
-      <ReportCollection
-        paginationKey={`r_${id}`}
-        queryParams={queryParams}
-        viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
-      />
-    </div>
-  )
-}
+const Collection = ({ id, queryParams }) => (
+  <div className="scrollable">
+    <ReportCollection
+      paginationKey={`r_${id}`}
+      queryParams={queryParams}
+      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+    />
+  </div>
+)
 
 Collection.propTypes = {
   id: PropTypes.string,
   queryParams: PropTypes.object
 }
 
-const Map = props => {
-  const { queryParams } = props
-
-  return (
-    <div className="non-scrollable">
-      <ContainerDimensions>
-        {({ width, height }) => (
-          <ReportCollection
-            queryParams={queryParams}
-            width={width}
-            height={height}
-            marginBottom={0}
-            viewFormats={[FORMAT_MAP]}
-          />
-        )}
-      </ContainerDimensions>
-    </div>
-  )
-}
+const Map = ({ queryParams }) => (
+  <div className="non-scrollable">
+    <ContainerDimensions>
+      {({ width, height }) => (
+        <ReportCollection
+          queryParams={queryParams}
+          width={width}
+          height={height}
+          marginBottom={0}
+          viewFormats={[FORMAT_MAP]}
+        />
+      )}
+    </ContainerDimensions>
+  </div>
+)
 
 Map.propTypes = {
   queryParams: PropTypes.object
@@ -203,8 +196,11 @@ Map.propTypes = {
  * Component displaying a chart with number of future engagements per date and
  * location. Locations are grouped per date.
  */
-const FutureEngagementsByLocation = props => {
-  const { queryParams, style } = props
+const FutureEngagementsByLocation = ({
+  pageDispatchers,
+  queryParams,
+  style
+}) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
 
   const chartId = "future_engagements_by_location"
@@ -254,6 +250,7 @@ const FutureEngagementsByLocation = props => {
   function renderChart(id) {
     return (
       <Chart
+        pageDispatchers={pageDispatchers}
         chartId={chartId}
         queryParams={queryParams}
         focusedSelection={focusedSelection}
@@ -323,6 +320,7 @@ const FutureEngagementsByLocation = props => {
 }
 
 FutureEngagementsByLocation.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   style: PropTypes.object
 }

@@ -2,8 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Organization } from "models"
@@ -26,7 +26,7 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const OrganizationNew = props => {
+const OrganizationNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
   const qs = utils.parseQueryString(routerLocation.search)
   if (qs.parentOrgUuid) {
@@ -35,21 +35,26 @@ const OrganizationNew = props => {
     })
     return (
       <OrganizationNewConditional
-        {...props}
+        pageDispatchers={pageDispatchers}
         {...queryResult}
         orgUuid={qs.parentOrgUuid}
       />
     )
   }
-  return <OrganizationNewConditional {...props} />
+  return <OrganizationNewConditional pageDispatchers={pageDispatchers} />
 }
 
 OrganizationNew.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-const OrganizationNewConditional = props => {
-  const { loading, error, data, orgUuid, ...otherProps } = props
+const OrganizationNewConditional = ({
+  loading,
+  error,
+  data,
+  orgUuid,
+  pageDispatchers
+}) => {
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -57,7 +62,7 @@ const OrganizationNewConditional = props => {
     uuid: orgUuid,
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...otherProps
+    pageDispatchers
   })
   if (done) {
     return result
@@ -82,7 +87,7 @@ OrganizationNewConditional.propTypes = {
   error: PropTypes.object,
   data: PropTypes.object,
   orgUuid: PropTypes.string,
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(OrganizationNew)
+export default connect(null, mapPageDispatchersToProps)(OrganizationNew)

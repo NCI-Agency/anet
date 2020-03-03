@@ -1,13 +1,26 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import { Settings } from "api"
-import AdvancedSelectFilter from "components/advancedSearch/AdvancedSelectFilter"
-import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
-import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
-import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
-import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
-import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
-import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
-import TextInputFilter from "components/advancedSearch/TextInputFilter"
+import AdvancedSelectFilter, {
+  deserialize as deserializeAdvancedSelectFilter
+} from "components/advancedSearch/AdvancedSelectFilter"
+import CheckboxFilter, {
+  deserialize as deserializeCheckboxFilter
+} from "components/advancedSearch/CheckboxFilter"
+import DateRangeFilter, {
+  deserialize as deserializeDateRangeFilter
+} from "components/advancedSearch/DateRangeFilter"
+import OrganizationFilter, {
+  deserialize as deserializeOrganizationFilter
+} from "components/advancedSearch/OrganizationFilter"
+import ReportStateFilter, {
+  deserialize as deserializeReportStateFilter
+} from "components/advancedSearch/ReportStateFilter"
+import SelectFilter, {
+  deserialize as deserializeSelectFilter
+} from "components/advancedSearch/SelectFilter"
+import TextInputFilter, {
+  deserialize as deserializeTextInputFilter
+} from "components/advancedSearch/TextInputFilter"
 import {
   LocationOverlayRow,
   PersonDetailedOverlayRow,
@@ -15,6 +28,7 @@ import {
   TagOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import _isEmpty from "lodash/isEmpty"
 import {
   Location,
   Organization,
@@ -31,23 +45,59 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 
-export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
-export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
+export const SearchQueryPropType = PropTypes.shape({
+  text: PropTypes.string,
+  filters: PropTypes.any,
+  objectType: PropTypes.string
+})
 
-const taskFilters = props => {
+export const getSearchQuery = searchQuery => {
+  const query = {}
+  if (!_isEmpty(searchQuery.text)) {
+    query.text = searchQuery.text
+  }
+  if (searchQuery.filters) {
+    searchQuery.filters.forEach(filter => {
+      if (filter.value) {
+        if (filter.value.toQuery) {
+          const toQuery =
+            typeof filter.value.toQuery === "function"
+              ? filter.value.toQuery()
+              : filter.value.toQuery
+          Object.assign(query, toQuery)
+        } else {
+          query[filter.key] = filter.value
+        }
+      }
+    })
+  }
+  return query
+}
+
+export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
+
+export const RECURSE_STRATEGY = {
+  NONE: "NONE",
+  CHILDREN: "CHILDREN",
+  PARENTS: "PARENTS"
+}
+
+const taskFilters = () => {
   const taskFiltersObj = {
     Organization: {
       component: OrganizationFilter,
+      deserializer: deserializeOrganizationFilter,
       props: {
-        queryKey: "responsibleOrgUuid",
-        queryIncludeChildOrgsKey: "includeChildrenOrgs"
+        queryKey: "taskedOrgUuid",
+        queryOrgRecurseStrategyKey: "orgRecurseStrategy"
       }
     },
     Status: {
-      component: SelectSearchFilter,
+      component: SelectFilter,
+      deserializer: deserializeSelectFilter,
       props: {
         queryKey: "status",
-        values: [Task.STATUS.ACTIVE, Task.STATUS.INACTIVE],
+        options: [Task.STATUS.ACTIVE, Task.STATUS.INACTIVE],
         labels: ["Active", "Inactive"]
       }
     }
@@ -55,7 +105,8 @@ const taskFilters = props => {
   const projectedCompletion = Settings.fields.task.projectedCompletion
   if (projectedCompletion) {
     taskFiltersObj[projectedCompletion.label] = {
-      component: DateRangeSearch,
+      component: DateRangeFilter,
+      deserializer: deserializeDateRangeFilter,
       props: {
         queryKey: "projectedCompletion"
       }
@@ -64,7 +115,8 @@ const taskFilters = props => {
   const plannedCompletion = Settings.fields.task.plannedCompletion
   if (plannedCompletion) {
     taskFiltersObj[plannedCompletion.label] = {
-      component: DateRangeSearch,
+      component: DateRangeFilter,
+      deserializer: deserializeDateRangeFilter,
       props: {
         queryKey: "plannedCompletion"
       }
@@ -73,10 +125,11 @@ const taskFilters = props => {
   const customEnum1 = Settings.fields.task.customFieldEnum1
   if (customEnum1) {
     taskFiltersObj[customEnum1.label] = {
-      component: SelectSearchFilter,
+      component: SelectFilter,
+      deserializer: deserializeSelectFilter,
       props: {
         queryKey: "projectStatus",
-        values: Object.keys(customEnum1.enum),
+        options: Object.keys(customEnum1.enum),
         labels: Object.values(customEnum1.enum).map(o => o.label)
       }
     }
@@ -85,6 +138,7 @@ const taskFilters = props => {
   if (customField) {
     taskFiltersObj[customField.label] = {
       component: TextInputFilter,
+      deserializer: deserializeTextInputFilter,
       props: {
         queryKey: "customField"
       }
@@ -127,7 +181,7 @@ const advancedSelectFilterTaskProps = {
   addon: TASKS_ICON
 }
 
-const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
+const searchFilters = function() {
   const filters = {}
   const authorWidgetFilters = {
     all: {
@@ -185,6 +239,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
     filters: {
       Author: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: authorWidgetFilters,
           placeholder: "Filter reports by author...",
@@ -193,6 +248,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Attendee: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: attendeeWidgetFilters,
           placeholder: "Filter reports by attendee...",
@@ -201,6 +257,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Pending Approval Of": {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: pendingApprovalOfWidgetFilters,
           placeholder: "Filter reports pending approval of...",
@@ -209,6 +266,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Author Position": {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPositionProps, {
           filterDefs: authorPositionWidgetFilters,
           placeholder: "Filter reports by author position...",
@@ -217,6 +275,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       "Attendee Position": {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPositionProps, {
           filterDefs: attendeePositionWidgetFilters,
           placeholder: "Filter reports by attendee position...",
@@ -225,37 +284,43 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Organization: {
         component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryIncludeChildOrgsKey: "includeOrgChildren"
+          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       "Engagement Date": {
-        component: DateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "engagementDate"
         }
       },
       "Release Date": {
-        component: DateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "releasedAt"
         }
       },
       "Creation Date": {
-        component: DateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "createdAt"
         }
       },
       "Update Date": {
-        component: DateRangeSearch,
+        component: DateRangeFilter,
+        deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "updatedAt"
         }
       },
       Location: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
           placeholder: "Filter reports by location...",
@@ -263,13 +328,18 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         })
       },
       State: {
-        component: ReportStateSearch
+        component: ReportStateFilter,
+        deserializer: deserializeReportStateFilter,
+        props: {
+          queryKey: "state"
+        }
       },
       "Engagement Status": {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "engagementStatus",
-          values: [
+          options: [
             Report.ENGAGEMENT_STATUS.HAPPENED,
             Report.ENGAGEMENT_STATUS.FUTURE,
             Report.ENGAGEMENT_STATUS.CANCELLED
@@ -277,14 +347,16 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         }
       },
       [Settings.fields.report.atmosphere]: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "atmosphere",
-          values: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
+          options: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
         }
       },
       Tag: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: {
           overlayColumns: ["Name"],
           overlayRenderRow: TagOverlayRow,
@@ -297,7 +369,8 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         }
       },
       "Sensitive Info": {
-        component: CheckboxSearchFilter,
+        component: CheckboxFilter,
+        deserializer: deserializeCheckboxFilter,
         props: {
           queryKey: "sensitiveInfo"
         }
@@ -308,6 +381,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
   const taskShortLabel = Settings.fields.task.shortLabel
   filters[SEARCH_OBJECT_TYPES.REPORTS].filters[taskShortLabel] = {
     component: AdvancedSelectFilter,
+    deserializer: deserializeAdvancedSelectFilter,
     props: Object.assign({}, advancedSelectFilterTaskProps, {
       filterDefs: taskWidgetFilters,
       placeholder: `Filter reports by ${taskShortLabel}...`,
@@ -321,16 +395,18 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
     filters: {
       Organization: {
         component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryIncludeChildOrgsKey: "includeChildOrgs"
+          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       Role: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "role",
-          values: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
+          options: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
           labels: [
             Settings.fields.advisor.person.name,
             Settings.fields.principal.person.name
@@ -338,10 +414,11 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         }
       },
       Status: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [
+          options: [
             Person.STATUS.ACTIVE,
             Person.STATUS.INACTIVE,
             Person.STATUS.NEW_USER
@@ -350,6 +427,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
       },
       Location: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
           placeholder: "Filter by location...",
@@ -357,26 +435,29 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         })
       },
       Rank: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "rank",
-          values: ranks,
+          options: ranks,
           labels: ranks
         }
       },
       Nationality: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "country",
-          values: countries,
+          options: countries,
           labels: countries
         }
       },
       "Has Biography?": {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "hasBiography",
-          values: ["true", "false"],
+          options: ["true", "false"],
           labels: ["Yes", "No"]
         }
       }
@@ -386,17 +467,19 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
   filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
     filters: {
       Status: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
+          options: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
         }
       },
       "Organization Type": {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
-          values: [
+          options: [
             Organization.TYPE.ADVISOR_ORG,
             Organization.TYPE.PRINCIPAL_ORG
           ],
@@ -412,34 +495,37 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
   filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
     filters: {
       [POSTITION_POSITION_TYPE_FILTER_KEY]: {
-        component: PositionTypeSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
-          values: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
+          options: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
           labels: [
             Settings.fields.advisor.position.name,
             Settings.fields.principal.position.name
           ],
-          ref: positionTypeFilterRef
+          isPositionTypeFilter: true
         }
       },
-      [POSTITION_ORGANIZATION_FILTER_KEY]: {
+      Organization: {
         component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "organizationUuid",
-          queryIncludeChildOrgsKey: "includeChildrenOrgs",
-          ref: organizationFilterRef
+          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       Status: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
+          options: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
         }
       },
       Location: {
         component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
           placeholder: "Filter by location...",
@@ -447,10 +533,11 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
         })
       },
       "Is Filled?": {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "isFilled",
-          values: ["true", "false"],
+          options: ["true", "false"],
           labels: ["Yes", "No"]
         }
       }
@@ -460,10 +547,11 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
     filters: {
       Status: {
-        component: SelectSearchFilter,
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          values: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
+          options: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
         }
       }
     }
@@ -478,7 +566,7 @@ const searchFilters = function(positionTypeFilterRef, organizationFilterRef) {
 }
 
 // filters not being displayed in the advanced search but being used in the search
-const extraFilters = function(positionTypeFilterRef, organizationFilterRef) {
+const extraFilters = function() {
   const filters = {}
   filters[SEARCH_OBJECT_TYPES.REPORTS] = [
     "includeEngagementDayOfWeek",
@@ -487,11 +575,10 @@ const extraFilters = function(positionTypeFilterRef, organizationFilterRef) {
   return filters
 }
 
-const SearchFilterDisplay = props => {
-  const { filter, element } = props
+const SearchFilterDisplay = ({ filter, element, showSeparator }) => {
   const label = filter.key
   const ChildComponent = element.component
-  const sep = props.showSeparator ? ", " : ""
+  const sep = showSeparator ? ", " : ""
   return (
     <>
       <b>{label}</b>:{" "}
@@ -516,19 +603,18 @@ SearchFilterDisplay.propTypes = {
   showSeparator: PropTypes.bool
 }
 
-export const SearchDescription = props => {
-  const { query, showPlaceholders } = props
-  const allFilters = searchFilters()
+export const SearchDescription = ({ searchQuery, showPlaceholders }) => {
+  const ALL_FILTERS = searchFilters()
   const filterDefs =
-    query.objectType && SEARCH_OBJECT_TYPES[query.objectType]
-      ? allFilters[SEARCH_OBJECT_TYPES[query.objectType]].filters
+    searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
+      ? ALL_FILTERS[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters
       : {}
-  const filters = query.filters.filter(f => filterDefs[f.key])
+  const filters = searchQuery.filters.filter(f => filterDefs[f.key])
   return (
     <span className="asLink">
-      {query.objectType ? (
+      {searchQuery.objectType ? (
         <>
-          <b>{SEARCH_OBJECT_LABELS[query.objectType]}</b>
+          <b>{SEARCH_OBJECT_LABELS[searchQuery.objectType]}</b>
           {filters.length > 0 ? (
             <>
               <> filtered on </>
@@ -556,11 +642,7 @@ export const SearchDescription = props => {
 }
 
 SearchDescription.propTypes = {
-  query: PropTypes.shape({
-    text: PropTypes.string,
-    filters: PropTypes.any,
-    objectType: PropTypes.string
-  }),
+  searchQuery: SearchQueryPropType,
   showPlaceholders: PropTypes.bool
 }
 

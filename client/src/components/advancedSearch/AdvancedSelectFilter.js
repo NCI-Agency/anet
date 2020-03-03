@@ -1,130 +1,100 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import autobind from "autobind-decorator"
+import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
-import utils from "utils"
+import React from "react"
 
-export default class AdvancedSelectFilter extends Component {
-  static propTypes = {
-    // An AdvancedSingleSelect filter allows users to search the ANET database
-    // for existing records and use that records ID as the search term.
-    // The queryKey property tells this filter what property to set on the
-    // search query (ie authorUuid, organizationUuid, etc).
-    queryKey: PropTypes.string.isRequired,
-    objectType: PropTypes.func.isRequired,
-    value: PropTypes.any,
-    onChange: PropTypes.func,
-    valueKey: PropTypes.string.isRequired,
-    fields: PropTypes.string,
-    asFormField: PropTypes.bool
+const AdvancedSelectFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange,
+  valueKey,
+  ...advancedSelectProps
+}) => {
+  const defaultValue = inputValue || {}
+  const toQuery = val => {
+    return { [queryKey]: val && val.uuid }
   }
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
 
-  static defaultProps = {
-    fields: "",
-    asFormField: true
-  }
+  return !asFormField ? (
+    <>{value[valueKey]}</>
+  ) : (
+    <AdvancedSingleSelect
+      {...advancedSelectProps}
+      fieldName={queryKey}
+      fieldLabel={null}
+      vertical
+      showRemoveButton={false}
+      onChange={handleChange}
+      value={value}
+      valueKey={valueKey}
+      smallOverlay
+    />
+  )
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      value: props.value || {}
-    }
-  }
-
-  componentDidMount() {
-    this.updateFilter()
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      !_isEqualWith(
-        prevProps.value,
-        this.props.value,
-        utils.treatFunctionsAsEqual
-      )
-    ) {
-      this.setState({ value: this.props.value }, this.updateFilter)
-    }
-  }
-
-  render() {
-    let advancedSelectProps = Object.without(
-      this.props,
-      "value",
-      "queryKey",
-      "asFormField",
-      "onChange"
-    )
-    return !this.props.asFormField ? (
-      <>{this.props.value[this.props.valueKey]}</>
-    ) : (
-      <AdvancedSingleSelect
-        {...advancedSelectProps}
-        fieldName={this.props.queryKey}
-        fieldLabel={null}
-        vertical
-        showRemoveButton={false}
-        onChange={this.onChange}
-        value={this.state.value}
-        smallOverlay
-      />
-    )
-  }
-
-  @autobind
-  onChange(event) {
+  function handleChange(event) {
     if (typeof event === "object") {
-      this.setState({ value: event }, this.updateFilter)
+      setValue(event)
     }
-  }
-
-  @autobind
-  toQuery() {
-    return { [this.props.queryKey]: this.state.value && this.state.value.uuid }
-  }
-
-  @autobind
-  updateFilter() {
-    if (this.props.asFormField) {
-      let { value } = this.state
-      value.toQuery = this.toQuery
-      this.props.onChange(value)
-    }
-  }
-
-  @autobind
-  deserialize(query, key) {
-    if (query[this.props.queryKey]) {
-      const getInstanceName = this.props.objectType.getInstanceName
-      return API.query(
-        gql`
-          query($uuid: String!) {
-            ${getInstanceName}(uuid: $uuid) {
-              ${this.props.fields}
-            }
-          }
-        `,
-        { uuid: query[this.props.queryKey] }
-      ).then(data => {
-        if (data[getInstanceName]) {
-          const toQueryValue = {
-            [this.props.queryKey]: query[this.props.queryKey]
-          }
-          return {
-            key: key,
-            value: {
-              ...data[getInstanceName],
-              toQuery: () => toQueryValue
-            }
-          }
-        } else {
-          return null
-        }
-      })
-    }
-    return null
   }
 }
+AdvancedSelectFilter.propTypes = {
+  // An AdvancedSingleSelect filter allows users to search the ANET database
+  // for existing records and use that records ID as the search term.
+  // The queryKey property tells this filter what property to set on the
+  // search query (ie authorUuid, organizationUuid, etc).
+  queryKey: PropTypes.string.isRequired,
+  objectType: PropTypes.func.isRequired,
+  value: PropTypes.any,
+  onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
+  valueKey: PropTypes.string.isRequired,
+  fields: PropTypes.string,
+  asFormField: PropTypes.bool
+}
+AdvancedSelectFilter.defaultProps = {
+  fields: "",
+  asFormField: true
+}
+
+export const deserialize = ({ queryKey, objectType, fields }, query, key) => {
+  if (query[queryKey]) {
+    const getInstanceName = objectType.getInstanceName
+    return API.query(
+      gql`
+        query($uuid: String!) {
+          ${getInstanceName}(uuid: $uuid) {
+            ${fields}
+          }
+        }
+      `,
+      { uuid: query[queryKey] }
+    ).then(data => {
+      if (data[getInstanceName]) {
+        const toQueryValue = {
+          [queryKey]: query[queryKey]
+        }
+        return {
+          key: key,
+          value: {
+            ...data[getInstanceName],
+            toQuery: toQueryValue
+          }
+        }
+      } else {
+        return null
+      }
+    })
+  }
+  return null
+}
+
+export default AdvancedSelectFilter

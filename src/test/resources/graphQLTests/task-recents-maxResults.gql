@@ -1,11 +1,12 @@
-taskRecents(maxResults:${maxResults}) {
+taskList(query: {pageSize: ${maxResults}, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
     shortName
     longName
-    responsibleOrg {
+    taskedOrganizations {
       uuid
       shortName
     }
+    customFields
   }
 }

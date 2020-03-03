@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -29,6 +28,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -51,18 +51,22 @@ import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
+import mil.dds.anet.beans.search.LocationSearchSortBy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.beans.search.PersonSearchSortBy;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchSortBy;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,17 +89,17 @@ public class ReportsResourceTest extends AbstractResourceTest {
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("%1$s customFieldRef1 { %1$s }", _TASK_FIELDS);
-  private static final String FIELDS = String.format(
-      "%1$s" + " advisorOrg { %2$s }" + " principalOrg { %2$s }" + " author { %3$s }"
-          + " attendees { %3$s primary }" + " tasks { %4$s }" + " approvalStep { uuid }"
-          + " location { %5$s }" + " tags { uuid name description }" + " comments { %6$s }"
-          + " authorizationGroups { uuid name }"
-          + " workflow { step { uuid } person { uuid } type createdAt }",
+  private static final String FIELDS = String.format("%1$s" + " advisorOrg { %2$s }"
+      + " principalOrg { %2$s }" + " author { %3$s }" + " attendees { %3$s primary }"
+      + " tasks { %4$s }" + " approvalStep { uuid relatedObjectUuid }" + " location { %5$s }"
+      + " tags { uuid name description }" + " comments { %6$s }"
+      + " authorizationGroups { uuid name }"
+      + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } } person { uuid } type createdAt }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
       COMMENT_FIELDS);
 
   @Test
-  public void createReport() throws ExecutionException, InterruptedException {
+  public void createReport() {
     // Create a report writer
     final Person author = getJackJackson();
 
@@ -105,7 +109,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     principal.setPrimary(true);
     Position principalPosition = principal.loadPosition();
     assertThat(principalPosition).isNotNull();
-    Organization principalOrg = principalPosition.loadOrganization(context).get();
+    final Organization principalOrg = principalPosition.loadOrganization(context).join();
     assertThat(principalOrg).isNotNull();
 
     // Create an Advising Organization for the report writer
@@ -200,7 +204,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final ApprovalStep approval = new ApprovalStep();
     approval.setName("Test Group for Approving");
     approval.setType(ApprovalStepType.REPORT_APPROVAL);
-    approval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
+    approval.setRelatedObjectUuid(advisorOrg.getUuid());
     approval.setApprovers(ImmutableList.of(approver1Pos));
     approvalSteps.add(approval);
 
@@ -208,7 +212,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final ApprovalStep releaseApproval = new ApprovalStep();
     releaseApproval.setName("Test Group of Releasers");
     releaseApproval.setType(ApprovalStepType.REPORT_APPROVAL);
-    releaseApproval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
+    releaseApproval.setRelatedObjectUuid(advisorOrg.getUuid());
     releaseApproval.setApprovers(ImmutableList.of(approver2Pos));
     approvalSteps.add(releaseApproval);
     advisorOrg.setApprovalSteps(approvalSteps);
@@ -218,9 +222,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
     // Pull the approval workflow for this AO
     final Organization orgWithSteps = graphQLHelper.getObjectById(admin, "organization",
-        "uuid approvalSteps { uuid name nextStepUuid advisorOrganizationUuid }",
-        advisorOrg.getUuid(), new TypeReference<GraphQlResponse<Organization>>() {});
-    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).get();
+        "uuid approvalSteps { uuid name nextStepUuid relatedObjectUuid }", advisorOrg.getUuid(),
+        new TypeReference<GraphQlResponse<Organization>>() {});
+    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).join();
     assertThat(steps.size()).isEqualTo(2);
     assertThat(steps.get(0).getName()).isEqualTo(approval.getName());
     assertThat(steps.get(0).getNextStepUuid()).isEqualTo(steps.get(1).getUuid());
@@ -233,7 +237,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Create some tasks for this organization
     final String topUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("test-1", "Test Top Task", "TOP", null, advisorOrg, TaskStatus.ACTIVE),
+        TestData.createTask("test-1", "Test Top Task", "TOP", null,
+            Collections.singletonList(advisorOrg), TaskStatus.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(topUuid).isNotNull();
     final Task top = graphQLHelper.getObjectById(admin, "task", TASK_FIELDS, topUuid,
@@ -262,7 +267,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setTasks(Lists.newArrayList(action));
     r.setLocation(loc);
     r.setAtmosphere(Atmosphere.POSITIVE);
-    r.setAtmosphereDetails("Eerybody was super nice!");
+    r.setAtmosphereDetails("Everybody was super nice!");
     r.setIntent("A testing report to test that reporting reports");
     // set HTML of report text
     r.setReportText(UtilsTest.getCombinedTestCase().getInput());
@@ -292,7 +297,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Verify that author can still edit the report
-    returned.setAtmosphereDetails("Eerybody was super nice! Again!");
+    returned.setAtmosphereDetails("Everybody was super nice! Again!");
     final Report r2 = graphQLHelper.updateObject(author, "updateReport", "report", FIELDS,
         "ReportInput", returned, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
@@ -341,12 +346,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on Report status for who needs to approve
     List<ReportAction> workflow = returned.getWorkflow();
-    assertThat(workflow.size()).isEqualTo(4);
-    ReportAction reportAction = workflow.get(2);
+    assertThat(workflow.size()).isEqualTo(3);
+    ReportAction reportAction = workflow.get(1);
     assertThat(reportAction.getPerson()).isNull(); // Because this hasn't been approved yet.
     assertThat(reportAction.getCreatedAt()).isNull();
     assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-    reportAction = workflow.get(3);
+    reportAction = workflow.get(2);
     assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
     // Reject the report
@@ -457,16 +462,34 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
     // there.
-    AnetBeanList<Person> recentPeople = graphQLHelper.getAllObjects(author, "personRecents",
-        PERSON_FIELDS, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    final PersonSearchQuery queryPeople = new PersonSearchQuery();
+    queryPeople.setStatus(Collections.singletonList(PersonStatus.ACTIVE));
+    queryPeople.setInMyReports(true);
+    queryPeople.setSortBy(PersonSearchSortBy.RECENT);
+    queryPeople.setSortOrder(SortOrder.DESC);
+    final AnetBeanList<Person> recentPeople = graphQLHelper.searchObjects(author, "personList",
+        "query", "PersonSearchQueryInput", PERSON_FIELDS, queryPeople,
+        new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(recentPeople.getList()).contains(principalPerson);
 
-    AnetBeanList<Task> recentTasks = graphQLHelper.getAllObjects(author, "taskRecents", TASK_FIELDS,
-        new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    final TaskSearchQuery queryTasks = new TaskSearchQuery();
+    queryTasks.setStatus(TaskStatus.ACTIVE);
+    queryTasks.setInMyReports(true);
+    queryTasks.setSortBy(TaskSearchSortBy.RECENT);
+    queryTasks.setSortOrder(SortOrder.DESC);
+    final AnetBeanList<Task> recentTasks =
+        graphQLHelper.searchObjects(author, "taskList", "query", "TaskSearchQueryInput",
+            TASK_FIELDS, queryTasks, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
     assertThat(recentTasks.getList()).contains(action);
 
-    AnetBeanList<Location> recentLocations = graphQLHelper.getAllObjects(author, "locationRecents",
-        LOCATION_FIELDS, new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
+    final LocationSearchQuery queryLocations = new LocationSearchQuery();
+    queryLocations.setStatus(LocationStatus.ACTIVE);
+    queryLocations.setInMyReports(true);
+    queryLocations.setSortBy(LocationSearchSortBy.RECENT);
+    queryLocations.setSortOrder(SortOrder.DESC);
+    final AnetBeanList<Location> recentLocations = graphQLHelper.searchObjects(author,
+        "locationList", "query", "LocationSearchQueryInput", LOCATION_FIELDS, queryLocations,
+        new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});;
     assertThat(recentLocations.getList()).contains(loc);
 
     // Go and delete the entire approval chain!
@@ -479,14 +502,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
         graphQLHelper.getObjectById(admin, "organization", ORGANIZATION_FIELDS,
             advisorOrg.getUuid(), new TypeReference<GraphQlResponse<Organization>>() {});
     assertThat(updatedOrg).isNotNull();
-    assertThat(updatedOrg.loadApprovalSteps(context).get()).isEmpty();
+    assertThat(updatedOrg.loadApprovalSteps(context).join()).isEmpty();
   }
 
   @Test
-  public void testDefaultApprovalFlow()
-      throws NumberFormatException, InterruptedException, ExecutionException {
+  public void testDefaultApprovalFlow() throws NumberFormatException {
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
+    final Person bob = getBobBobtown();
 
     // Create a Person who isn't in a Billet
     Person author = new Person();
@@ -541,14 +564,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Organization orgWithSteps = graphQLHelper.getObjectById(jack, "organization",
         "uuid approvalSteps { uuid nextStepUuid }", defaultOrgUuid,
         new TypeReference<GraphQlResponse<Organization>>() {});
-    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).get();
+    final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).join();
     assertThat(steps).isNotNull();
     assertThat(steps).hasSize(1);
+    // Primary advisor (jack) is in EF1 which has no approval chain, so it should fall back to the
+    // default
     assertThat(returned.getApprovalStepUuid()).isEqualTo(steps.get(0).getUuid());
 
-    // Get the Person who is able to approve that report (nick@example.com)
-    Person nick = new Person();
-    nick.setDomainUsername("nick");
+    // The only default approver is admin; reject the report
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("uuid", returned.getUuid());
+    variables.put("comment", TestData.createComment("default approval chain test rejection"));
+    Report rejected = graphQLHelper.updateObject(admin,
+        "mutation ($uuid: String!, $comment: CommentInput!) { payload: rejectReport (uuid: $uuid, comment: $comment) { "
+            + FIELDS + " } }",
+        variables, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(rejected).isNotNull();
 
     // Create billet for Author
     Position billet = new Position();
@@ -556,24 +587,25 @@ public class ReportsResourceTest extends AbstractResourceTest {
     billet.setType(Position.PositionType.ADVISOR);
     billet.setStatus(PositionStatus.ACTIVE);
 
-    // Put billet in EF1
+    // Put billet in EF 1.1
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF 1");
+    // FIXME: decide what the search should do in both cases
+    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
-    final AnetBeanList<Organization> results = graphQLHelper.searchObjects(nick, "organizationList",
-        "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
+    final AnetBeanList<Organization> results = graphQLHelper.searchObjects(admin,
+        "organizationList", "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
         new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(results.getList().size()).isGreaterThan(0);
-    Organization ef1 = null;
+    Organization ef11 = null;
     for (Organization org : results.getList()) {
       if (org.getShortName().trim().equalsIgnoreCase("ef 1.1")) {
         billet.setOrganization(createOrganizationWithUuid(org.getUuid()));
-        ef1 = org;
+        ef11 = org;
         break;
       }
     }
     assertThat(billet.getOrganization()).isNotNull();
-    assertThat(ef1).isNotNull();
+    assertThat(ef11).isNotNull();
 
     final String billetUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", billet, new TypeReference<GraphQlResponse<Position>>() {});
@@ -583,7 +615,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(billet).isNotNull();
 
     // Put Author in the billet
-    Map<String, Object> variables = new HashMap<>();
+    variables = new HashMap<>();
     variables.put("uuid", billet.getUuid());
     variables.put("person", author);
     Integer nrUpdated = graphQLHelper.updateObject(admin,
@@ -591,21 +623,31 @@ public class ReportsResourceTest extends AbstractResourceTest {
         variables);
     assertThat(nrUpdated).isEqualTo(1);
 
-    // Nick should kick the report
-    submitted = graphQLHelper.updateObject(nick, "submitReport", "uuid", FIELDS, "String",
+    // Change primary advisor of the report to someone in EF 1.1
+    returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+        PersonTest.personToReportPerson(jack), PersonTest.personToPrimaryReportPerson(bob)));
+    final Report updated = graphQLHelper.updateObject(author, "updateReport", "report", FIELDS,
+        "ReportInput", returned, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(updated).isNotNull();
+    assertThat(updated.getAdvisorOrgUuid()).isNotEqualTo(returned.getAdvisorOrgUuid());
+
+    // Re-submit the report
+    submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
         r.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(submitted).isNotNull();
 
-    // Report should now be up for review by EF1 approvers
+    // Report should now be up for review by primary advisor org's (EF 1.1) approvers
     Report returned2 = graphQLHelper.getObjectById(jack, "report", FIELDS, r.getUuid(),
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned2.getUuid()).isEqualTo(r.getUuid());
     assertThat(returned2.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
     assertThat(returned2.getApprovalStepUuid()).isNotEqualTo(returned.getApprovalStepUuid());
+    assertThat(returned2.getApprovalStep()).isNotNull();
+    assertThat(returned2.getApprovalStep().getRelatedObjectUuid()).isEqualTo(ef11.getUuid());
   }
 
   @Test
-  public void reportEditTest() throws ExecutionException, InterruptedException {
+  public void reportEditTest() {
     // Elizabeth writes a report about meeting with Roger
     final Person elizabeth = getElizabethElizawell();
     final Person roger = getRogerRogwell();
@@ -712,7 +754,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void searchTest() throws ExecutionException, InterruptedException {
+  public void searchTest() {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
     ReportSearchQuery query = new ReportSearchQuery();
@@ -779,7 +821,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
             queryTasks, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
     assertThat(taskResults).isNotNull();
     assertThat(taskResults.getList()).isNotEmpty();
-    Task task = taskResults.getList().get(0);
+    Task task = taskResults.getList().stream().filter(t -> "1.1.A".equals(t.getShortName()))
+        .findFirst().get();
 
     // Search by Task
     query.setAttendeeUuid(null);
@@ -799,7 +842,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Search by direct organization
     OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF 1");
+    // FIXME: decide what the search should do in both cases
+    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -950,6 +994,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Search for report text with stopwords
     query = new ReportSearchQuery();
     query.setText("Hospital usage of Drugs");
+    query.setPageSize(0); // get them all
     searchResults =
         graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
@@ -1211,7 +1256,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void dailyRollupGraphNonReportingTest() throws ExecutionException, InterruptedException {
+  public void dailyRollupGraphNonReportingTest() {
     Person steve = getSteveSteveson();
 
     Report r = new Report();
@@ -1285,10 +1330,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
     final Position pos = admin.loadPosition();
-    final Organization org = pos.loadOrganization(context).get();
+    final Organization org = pos.loadOrganization(context).join();
     @SuppressWarnings("unchecked")
     final List<String> nro =
-        (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
+        (List<String>) TestApp.app.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
     // Admin's organization should have one more report PUBLISHED only if it is not in the
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
@@ -1303,7 +1348,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void dailyRollupGraphReportingTest() throws ExecutionException, InterruptedException {
+  public void dailyRollupGraphReportingTest() {
     final Person elizabeth = getElizabethElizawell();
     final Person bob = getBobBobtown();
     Person steve = getSteveSteveson();
@@ -1379,14 +1424,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
     final Position pos = elizabeth.loadPosition();
-    final Organization org = pos.loadOrganization(context).get();
+    final Organization org = pos.loadOrganization(context).join();
     @SuppressWarnings("unchecked")
     final List<String> nro =
-        (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
+        (List<String>) TestApp.app.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
     // Elizabeth's organization should have one more report PUBLISHED only if it is not in the
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-    final Organization po = org.loadParentOrg(context).get();
+    final Organization po = org.loadParentOrg(context).join();
     final String orgUuid = po.getUuid();
     Optional<RollupGraph> orgReportsStart = startGraph.stream()
         .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
@@ -1398,7 +1443,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testTagSearch() throws InterruptedException, ExecutionException {
+  public void testTagSearch() {
     final ReportSearchQuery tagQuery = new ReportSearchQuery();
     tagQuery.setText("bribery");
     final AnetBeanList<Report> taggedReportList =
@@ -1414,7 +1459,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testSensitiveInformationByAuthor() throws ExecutionException, InterruptedException {
+  public void testSensitiveInformationByAuthor() {
     final String rsiFields = FIELDS + " reportSensitiveInformation { uuid text }";
     final Person elizabeth = getElizabethElizawell();
     final Report r = new Report();
@@ -1440,7 +1485,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Report returned2 = graphQLHelper.getObjectById(elizabeth, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // elizabeth should be allowed to see it
-    returned2.setUser(elizabeth);
     assertThat(returned2.getReportSensitiveInformation()).isNotNull();
     assertThat(returned2.getReportSensitiveInformation().getText())
         .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
@@ -1459,13 +1503,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Report returned3 = graphQLHelper.getObjectById(jack, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // jack should not be allowed to see it
-    returned3.setUser(jack);
     assertThat(returned3.getReportSensitiveInformation()).isNull();
   }
 
   @Test
-  public void testSensitiveInformationByAuthorizationGroup()
-      throws ExecutionException, InterruptedException {
+  public void testSensitiveInformationByAuthorizationGroup() {
     final PersonSearchQuery erinQuery = new PersonSearchQuery();
     erinQuery.setText("erin");
     final AnetBeanList<Person> erinSearchResults = graphQLHelper.searchObjects(admin, "personList",
@@ -1489,7 +1531,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult).isNotEmpty();
     final Report report = reportResult.get();
-    report.setUser(erin);
     // erin is the author, so should be able to see the sensitive information
     assertThat(report.getReportSensitiveInformation()).isNotNull();
     assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
@@ -1514,7 +1555,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult2).isNotEmpty();
     final Report report2 = reportResult2.get();
-    report2.setUser(reina);
     // reina is in the authorization group, so should be able to see the sensitive information
     assertThat(report2.getReportSensitiveInformation()).isNotNull();
     assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
@@ -1539,7 +1579,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult3).isNotEmpty();
     final Report report3 = reportResult3.get();
-    report3.setUser(elizabeth);
     // elizabeth is not in the authorization group, so should not be able to see the sensitive
     // information
     assertThat(report3.getReportSensitiveInformation()).isNull();
@@ -1626,6 +1665,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Position position = user.getPosition();
     final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
     try {
+      createTestReport();
       final List<AdvisorReportsEntry> advisorReports = graphQLHelper.getObjectList(user,
           "query { payload: advisorReportInsights { uuid name stats { week nrReportsSubmitted nrEngagementsAttended } } }",
           null, new TypeReference<GraphQlResponse<List<AdvisorReportsEntry>>>() {});
@@ -1640,6 +1680,123 @@ public class ReportsResourceTest extends AbstractResourceTest {
         fail("Unexpected ForbiddenException");
       }
     }
+  }
+
+  private void createTestReport() {
+    final Person author = getJackJackson();
+    final ReportPerson attendee = PersonTest.personToReportPerson(author);
+    attendee.setPrimary(true);
+    final Position advisorPosition = attendee.loadPosition();
+    final Organization advisorOrganization = advisorPosition.loadOrganization(context).join();
+
+    final Report r = new Report();
+    r.setAuthor(author);
+    r.setState(ReportState.PUBLISHED);
+    r.setAtmosphere(Atmosphere.POSITIVE);
+    r.setIntent("Testing the advisor reports insight");
+    r.setNextSteps("Retrieve the advisor reports insight");
+    r.setLocation(getLocation(author, "General Hospital"));
+    final Instant engagementDate =
+        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+    r.setEngagementDate(engagementDate);
+    r.setAttendees(Lists.newArrayList(attendee));
+    r.setAdvisorOrg(advisorOrganization);
+    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+        "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(createdUuid).isNotNull();
+  }
+
+  private Location getLocation(Person user, String name) {
+    final LocationSearchQuery query = new LocationSearchQuery();
+    query.setText(name);
+    final AnetBeanList<Location> results =
+        graphQLHelper.searchObjects(user, "locationList", "query", "LocationSearchQueryInput",
+            "uuid", query, new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
+    assertThat(results).isNotNull();
+    assertThat(results.getList()).isNotEmpty();
+    return results.getList().get(0);
+  }
+
+  @Test
+  public void testTaskApprovalFlow() throws NumberFormatException {
+    // Fill a report
+    final Person author = getJackJackson();
+    final Report r = new Report();
+    r.setAuthor(author);
+    r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(getSteveSteveson()),
+        PersonTest.personToPrimaryReportPerson(getElizabethElizawell())));
+    r.setState(ReportState.DRAFT);
+    r.setAtmosphere(Atmosphere.POSITIVE);
+    r.setIntent("Testing the task approval flow");
+    r.setKeyOutcomes("Task approval flow works");
+    r.setNextSteps("Approve through the task flow");
+    r.setReportText("Trying to get this report approved");
+    r.setLocation(getLocation(author, "General Hospital"));
+    final Instant engagementDate =
+        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+    r.setEngagementDate(engagementDate);
+
+    // Reference task 1.1.A
+    final TaskSearchQuery query = new TaskSearchQuery();
+    query.setText("1.1.A");
+    final AnetBeanList<Task> searchObjects =
+        graphQLHelper.searchObjects(author, "taskList", "query", "TaskSearchQueryInput",
+            TASK_FIELDS, query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getList()).isNotEmpty();
+    final List<Task> searchResults = searchObjects.getList();
+    assertThat(searchResults).isNotEmpty();
+    final Task t11a =
+        searchResults.stream().filter(t -> t.getShortName().equals("1.1.A")).findFirst().get();
+    r.setTasks(ImmutableList.of(t11a));
+
+    // Create the report
+    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+        "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(createdUuid).isNotNull();
+    final Report created = graphQLHelper.getObjectById(author, "report", FIELDS, createdUuid,
+        new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
+
+    // Submit the report
+    final Report submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS,
+        "String", created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(submitted).isNotNull();
+    assertThat(submitted.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+
+    // Check that the approval workflow has a step for task 1.1.A
+    final Person andrew = getAndrewAnderson();
+    assertThat(submitted.getWorkflow()).isNotNull();
+    final List<ReportAction> t11aActions = submitted.getWorkflow().stream().filter(
+        ra -> ra.getStep() != null && t11a.getUuid().equals(ra.getStep().getRelatedObjectUuid()))
+        .collect(Collectors.toList());
+    assertThat(t11aActions.size()).isEqualTo(1);
+    final ReportAction t11aAction = t11aActions.get(0);
+    final ApprovalStep t11aStep = t11aAction.getStep();
+    assertThat(t11aStep).isNotNull();
+    final List<Position> t11aApprovers = t11aStep.getApprovers();
+    assertThat(t11aApprovers.size()).isGreaterThan(0);
+    assertThat(t11aApprovers.stream().anyMatch(a -> andrew.getUuid().equals(a.getPersonUuid())))
+        .isEqualTo(true);
+
+    // Have the report approved by the EF 1.1 approver
+    final Person bob = getBobBobtown();
+    final Report approvedStep1 = graphQLHelper.updateObject(bob, "approveReport", "uuid", FIELDS,
+        "String", submitted.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(approvedStep1).isNotNull();
+    assertThat(approvedStep1.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
+
+    // Check that the next step is the task approval
+    final ApprovalStep nextStep = approvedStep1.getApprovalStep();
+    assertThat(nextStep).isNotNull();
+    assertThat(nextStep.getRelatedObjectUuid()).isEqualTo(t11a.getUuid());
+
+    // Have the report approved by the 1.1.A approver
+    final Report approvedStep2 = graphQLHelper.updateObject(andrew, "approveReport", "uuid", FIELDS,
+        "String", submitted.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(approvedStep2).isNotNull();
+    assertThat(approvedStep2.getState()).isEqualTo(Report.ReportState.APPROVED);
   }
 
 }

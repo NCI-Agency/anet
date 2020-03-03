@@ -1,4 +1,4 @@
-"$schema": http://json-schema.org/draft-06/schema#
+"$schema": "http://json-schema.org/draft-07/schema#"
 "$id": https://raw.githubusercontent.com/NCI-Agency/anet/master/src/main/resources/anet-schema.json
 
 #########################################################
@@ -57,13 +57,128 @@ definitions:
           description: Used in the UI where a placeholder for the field is shown (example input).
           additionalProperties:
             "$ref": "#/definitions/labeledField"
-          examples: 
-            - RED:
-                label: Red
-                color: "#FF0000"
-              WHITE:
-                label: White
       required: [enum]
+
+# definition for custom fields
+  customField:
+    type: object
+    additionalProperties: false
+    required: [type]
+    properties:
+      type:
+        title: value type field
+        type: string
+        enum: [text, number, date, datetime, enum, enumset, array_of_objects, special_field]
+      typeError:
+        title: custom value for type error
+        type: string
+      label:
+        type: string
+      helpText:
+        type: string
+      visibleWhen:
+        type: string
+      style:
+        type: object
+      placeholder:
+        type: string
+      componentClass:
+        type: string
+      validations:
+        type: array
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+            params:
+              type: array
+          required: [type]
+
+# TODO: The following properties should not be here as these are only dependency fields.
+# I can't figure out yet why the schema validation will not pass without them
+      choices:
+        type: object
+      addButtonLabel:
+        type: string
+      objectLabel:
+        type: string
+      objectFields:
+        type: object
+        additionalProperties:
+          "$ref": "#/definitions/customField"
+      widget:
+        type: string
+        enum: [likertScale, default]
+      levels:
+        type: array
+        uniqueItems: true
+        items:
+          type: object
+          title: likert scale range
+          properties:
+            color:
+              type: string
+            endValue:
+              type: number
+            label:
+              type: string
+
+    dependencies:
+      type:
+        oneOf:
+        - properties:
+            type:
+              enum: [text, number, date, datetime]
+        - properties:
+            type:
+              enum: [enum, enumset]
+            choices:
+              type: object
+          required: [choices]
+        - properties:
+            type:
+              enum: [array_of_objects]
+            addButtonLabel:
+              type: string
+            objectLabel:
+              type: string
+            objectFields:
+              type: object
+              additionalProperties:
+                "$ref": "#/definitions/customField"
+          required: [addButtonLabel,objectLabel,objectFields]
+        - properties:
+            type:
+              enum: [special_field]
+            widget:
+              title: custom widget for field
+              type: string
+              enum: [likertScale, default]
+          required: [widget]
+          dependencies:
+            widget:
+              oneOf:
+              - properties:
+                  widget:
+                    enum: [default]
+              - properties:
+                  widget:
+                    enum: [likertScale]
+                  levels:
+                    type: array
+                    uniqueItems: true
+                    items:
+                      type: object
+                      title: likert scale range
+                      properties:
+                        color:
+                          type: string
+                        endValue:
+                          type: number
+                        label:
+                          type: string
+                required: [levels]
 
 #########################################################
 ### schema root
@@ -76,7 +191,6 @@ properties:
     type: string
     title: The support email address
     description: The email address where support requests can be sent.
-    examples: [support@example.com]
 
   engagementsIncludeTimeAndDuration:
     type: boolean
@@ -98,17 +212,14 @@ properties:
             type: string
             title: The date format for email
             description: Used in report emails; should be easy to read, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
-            examples: ["d MMMM yyyy"]
           withTime:
             type: string
             title: The date format including the time for email if `engagementsIncludeTimeAndDuration` is `true`
             description: Used to show the report engagement date/time in report emails; should be easy to read, e.g. "6 December 1998 @ 13:45"; see see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
-            examples: ["d MMMM yyyy @ HH:mm"]
       excel:
         type: string
         title: The date format for Excel export
         description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
-        examples: ["d MMMM yyyy"]
       forms:
         type: object
         additionalProperties: false
@@ -127,7 +238,6 @@ properties:
                   type: string
                   title: The supported date formats for form input fields
                   description: Used in date inputs in the user interface, the first one is used as placeholder; should be easy to type, e.g. "06-12-1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-                  examples: ["DD-MM-YYYY", "DD/MM/YYYY", "D MMMM YYYY"]
               withTime:
                 type: array
                 uniqueItems: true
@@ -136,7 +246,6 @@ properties:
                   type: string
                   title: The supported date/time formats if `engagementsIncludeTimeAndDuration` is `true`
                   description: Used for the report engagement date input in the user interface, the first one is used as placeholder; should be easy to type, e.g. "06-12-1998 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-                  examples: ["DD-MM-YYYY HH:mm", "DD/MM/YYYY HH:mm", "D MMMM YYYY HH:mm"]
           displayShort:
             additionalProperties: false
             required: [date]
@@ -145,12 +254,10 @@ properties:
                 type: string
                 title: The short date format for forms
                 description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-                examples: ["D MMMM YYYY"]
               withTime:
                 type: string
                 title: The date format including the time for forms
                 description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998 @ 13:45"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-                examples: ["D MMMM YYYY @ HH:mm"]
           displayLong:
             additionalProperties: false
             required: [date]
@@ -159,31 +266,32 @@ properties:
                 type: string
                 title: The long date format for forms
                 description: Used to show dates in forms in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-                examples: ["dddd, D MMMM YYYY"]
               withTime:
                 type: string
                 title: The long date/time format if `engagementsIncludeTimeAndDuration` is `true`
                 description: Used to show the report engagement date/time in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998 @ 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-                examples: ["dddd, D MMMM YYYY @ HH:mm"]
 
   reportWorkflow:
     type: object
     additionalProperties: false
-    required: [nbOfHoursQuarantineApproved]
+    required: [nbOfHoursQuarantineApproved, nbOfHoursApprovalTimeout]
     properties:
       nbOfHoursQuarantineApproved:
         type: integer
         minimum: 0
         title: The number of hours between the approval of the report and the automatic publication
         description: Used in the UI of an approved report to show how many hours are left till publication.
-        examples: [24]
+      nbOfHoursApprovalTimeout:
+        type: integer
+        minimum: 0
+        title: The number of hours between the last action on a report and the automatic approval of the next step in the workflow
+        description: Used to automatically advance a report to the next step in the workflow is manual action takes too long.
 
   maxTextFieldLength:
     type: integer
     minimum: 0
     title: The maximum number of characters allowed in selected text fields
     description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
-    examples: [250]
 
   fields:
     type: object
@@ -194,20 +302,18 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, longLabel, longName, responsibleOrg, responsiblePositions]
+        required: [shortLabel, shortName, longLabel, longName, taskedOrganizations, responsiblePositions]
         properties:
           shortLabel:
             type: string
             title: The short label for this field
             description: Used in the UI where a short label for tasks is shown.
-            examples: [Task]
           shortName:
             "$ref": "#/definitions/inputField"
           longLabel:
             type: string
             title: The long label for this field
             description: Used in the UI where a long label for tasks is shown.
-            examples: [Tasks and Milestones]
           longName:
             "$ref": "#/definitions/inputField"
           projectedCompletion: 
@@ -222,18 +328,19 @@ properties:
             "$ref": "#/definitions/choiceField"
           customFieldEnum2:
             "$ref": "#/definitions/choiceField"
-          responsibleOrg:
-            type: string
-            title: The label for a task's responsible organization
-            description: Used in the UI where a label for a task's responsible organization is shown.
-            examples: [Responsible organization]
+          taskedOrganizations:
+            "$ref": "#/definitions/inputField"
           responsiblePositions:
             "$ref": "#/definitions/inputField"
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/definitions/customField"
 
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,keyOutcomes,reportText]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
         properties:
           intent:
             type: string
@@ -267,6 +374,10 @@ properties:
             type: string
             title: The label for report's engagement details
             description: Used in the UI where report's engagement details are shown.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/definitions/customField"
 
       person:
         type: object
@@ -297,6 +408,10 @@ properties:
             type: string
             title: The label for a person's country
             description: Used in the UI where a person's country is shown.
+          code:
+            type: string
+            title: The label for a person's code
+            description: Used in the UI where a person's code is shown.
           rank:
             type: string
             title: The label for a person's rank
@@ -315,6 +430,10 @@ properties:
             type: string
             title: The label for a person's end of tour date
             description: Used in the UI where a person's end of tour date is shown.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/definitions/customField"
 
       position:
         type: object
@@ -355,7 +474,6 @@ properties:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a person inside an advisor organization is shown.
-                examples: [NATO Member]
               countries:
                 type: array
                 uniqueItems: true
@@ -365,7 +483,6 @@ properties:
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for
                     a person inside an advisor organization.
-                  examples: [Australia, Finland, Georgia, Greece, Sweden, Turkey]
 
           position:
             type: object
@@ -376,12 +493,10 @@ properties:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a position inside an advisor organization is shown.
-                examples: [NATO Billet]
               type:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an advisor position.
-                examples: [ANET User]
               code:
                 "$ref": "#/definitions/inputField"
 
@@ -394,12 +509,10 @@ properties:
                 type: string
                 title: The name of this field
                 description: Used in the UI where an advisor organization is shown.
-                examples: [Advisor Organization]
               allOrgName:
                 type: string
                 title: The name used to represent 'all organizations'
                 description: Used in the UI to refer to all organizations collectively.
-                examples: [Advisor Organizations]
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:
@@ -420,8 +533,6 @@ properties:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a person inside a principal organization is shown.
-                examples:
-                - Afghan Partner
               countries:
                 type: array
                 uniqueItems: true
@@ -430,7 +541,6 @@ properties:
                   type: string
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for a person inside a principal organization.
-                  examples: [Netherlands]
               assessment:
                 type: object
                 additionalProperties: false
@@ -476,12 +586,10 @@ properties:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a position inside a principal organization is shown.
-                examples: [Afghan Tashkil]
               type:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a principal position.
-                examples: [Afghan Partner]
               code:
                 "$ref": "#/definitions/inputField"
 
@@ -494,7 +602,6 @@ properties:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a principal organization is shown.
-                examples: [Afghan Government Organization]
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:
@@ -515,7 +622,6 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a super user position.
-                examples: [ANET Super User]
 
       administrator:
         type: object
@@ -532,8 +638,6 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an administrator position.
-                examples:
-                - ANET Administrator
 
   pinned_ORGs:
     type: array
@@ -542,7 +646,6 @@ properties:
       type: string
       title: The list of pinned organizations
       description: A list of organization that are pinned at the top of insights (e.g. rollups).
-      examples: [Key Leader Engagement]
 
   non_reporting_ORGs:
     type: array
@@ -551,7 +654,6 @@ properties:
       type: string
       title: The list of non-reporting organizations
       description: A list of organizations that are considered non-reporting and as such will not be shown in insights.
-      examples: [ANET Administrators]
 
   tasking_ORGs:
     type: array
@@ -560,7 +662,6 @@ properties:
       type: string
       title: The list of tasking organizations
       description: When defined, indicates which organizations maintain tasks. When not set, all organizations may contain tasks
-      examples: [EF 2.2]
 
   domainNames:
     type: array
@@ -570,7 +671,6 @@ properties:
       type: string
       title: The list of possible (email) domain names
       description: Valid email domain names for this ANET instance; may contain wildcards.
-      examples: ["*.nato.int", dds.mil]
 
   activeDomainNames:
     type: array
@@ -580,7 +680,6 @@ properties:
       type: string
       title: The list of active (email) domain names
       description: Valid email domain names for this ANET instance; may contain wildcards.
-      examples: ["*.nato.int", dds.mil]
 
   imagery:
     type: object
@@ -671,17 +770,14 @@ properties:
           type: integer
           title: The list of days prior to account inactivation. An email will be sent to the user with a warning.
           description: Days to send a warning prior to account inactivation.
-          examples: [15, 30, 45]
       ignoredDomainNames:
         type: array
         items:
           type: string
           title: The list of ignored (email) domain names. These will not be affected by auto-inactivation or be sent email warnings.
           description: Valid email domain names for this ANET instance; may contain wildcards.
-          examples: ["*.nato.int", dds.mil]
       checkIntervalInSecs:
         type: integer
         minimum: 0
         title: The checking interval expressed in seconds.
         description: Used in the application to set the interval at which the deactivation (warning) checks will occur.
-        examples: [86400]

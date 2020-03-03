@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "config:base",
+    "group:test",
+    "group:linters"
+  ],
+  "lockFileMaintenance": { "enabled": true },
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "packagePatterns": ["*"],
+      "excludePackageNames": ["com.microsoft.sqlserver:mssql-jdbc", "draft-js"],
+      "minor": {
+        "groupName": "most non-major dependencies",
+        "groupSlug": "most-minor-patch"
+      }
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  }
+}

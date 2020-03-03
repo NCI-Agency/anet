@@ -2,7 +2,7 @@ package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.FkBatchParams;
+import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
@@ -23,7 +24,6 @@ import mil.dds.anet.views.UuidFetcher;
 public class Organization extends AbstractAnetBean {
 
   /** Pseudo uuid to represent all/top-level organization(s). */
-  @GraphQLIgnore
   public static final String DUMMY_ORG_UUID = "-1";
 
   public static enum OrganizationStatus {
@@ -34,19 +34,32 @@ public class Organization extends AbstractAnetBean {
     ADVISOR_ORG, PRINCIPAL_ORG
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   String shortName;
+  @GraphQLQuery
+  @GraphQLInputField
   String longName;
+  @GraphQLQuery
+  @GraphQLInputField
   private OrganizationStatus status;
+  @GraphQLQuery
+  @GraphQLInputField
   private String identificationCode;
+  // annotated below
   private ForeignObjectHolder<Organization> parentOrg = new ForeignObjectHolder<>();
+  @GraphQLQuery
+  @GraphQLInputField
   OrganizationType type;
 
   /* The following are all Lazy Loaded */
+  // annotated below
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Org */
+  // annotated below
   List<ApprovalStep> approvalSteps; /* Approval process for this Org */
+  // annotated below
   List<Task> tasks;
 
-  @GraphQLQuery(name = "shortName")
   public String getShortName() {
     return shortName;
   }
@@ -55,7 +68,6 @@ public class Organization extends AbstractAnetBean {
     this.shortName = Utils.trimStringReturnNull(shortName);
   }
 
-  @GraphQLQuery(name = "longName")
   public String getLongName() {
     return longName;
   }
@@ -64,7 +76,6 @@ public class Organization extends AbstractAnetBean {
     this.longName = Utils.trimStringReturnNull(longName);
   }
 
-  @GraphQLQuery(name = "status")
   public OrganizationStatus getStatus() {
     return status;
   }
@@ -73,7 +84,6 @@ public class Organization extends AbstractAnetBean {
     this.status = status;
   }
 
-  @GraphQLQuery(name = "identificationCode")
   public String getIdentificationCode() {
     return identificationCode;
   }
@@ -96,27 +106,24 @@ public class Organization extends AbstractAnetBean {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setParentOrgUuid(String parentOrgUuid) {
     this.parentOrg = new ForeignObjectHolder<>(parentOrgUuid);
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public String getParentOrgUuid() {
     return parentOrg.getForeignUuid();
   }
 
-  @GraphQLIgnore
   public Organization getParentOrg() {
     return parentOrg.getForeignObject();
   }
 
+  @GraphQLInputField(name = "parentOrg")
   public void setParentOrg(Organization parentOrg) {
     this.parentOrg = new ForeignObjectHolder<>(parentOrg);
   }
 
-  @GraphQLQuery(name = "type")
   public OrganizationType getType() {
     return type;
   }
@@ -145,18 +152,18 @@ public class Organization extends AbstractAnetBean {
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForOrg(context, uuid)
+    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForRelatedObject(context, uuid)
         .thenApply(o -> {
           planningApprovalSteps = o;
           return o;
         });
   }
 
-  @GraphQLIgnore
   public List<ApprovalStep> getPlanningApprovalSteps() {
     return planningApprovalSteps;
   }
 
+  @GraphQLInputField(name = "planningApprovalSteps")
   public void setPlanningApprovalSteps(List<ApprovalStep> steps) {
     this.planningApprovalSteps = steps;
   }
@@ -167,17 +174,18 @@ public class Organization extends AbstractAnetBean {
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return AnetObjectEngine.getInstance().getApprovalStepsForOrg(context, uuid).thenApply(o -> {
-      approvalSteps = o;
-      return o;
-    });
+    return AnetObjectEngine.getInstance().getApprovalStepsForRelatedObject(context, uuid)
+        .thenApply(o -> {
+          approvalSteps = o;
+          return o;
+        });
   }
 
-  @GraphQLIgnore
   public List<ApprovalStep> getApprovalSteps() {
     return approvalSteps;
   }
 
+  @GraphQLInputField(name = "approvalSteps")
   public void setApprovalSteps(List<ApprovalStep> steps) {
     this.approvalSteps = steps;
   }
@@ -210,14 +218,15 @@ public class Organization extends AbstractAnetBean {
         uuid, query);
   }
 
+
   @GraphQLQuery(name = "tasks")
   public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
     if (tasks != null) {
       return CompletableFuture.completedFuture(tasks);
     }
     final TaskSearchQuery query = new TaskSearchQuery();
-    // Note: no recursion, only direct children!
-    query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"organizationUuid\""));
+    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
+        "\"taskTaskedOrganizations\"", "\"taskUuid\"", "\"organizationUuid\""));
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
         .thenApply(o -> {
           tasks = o;
@@ -225,11 +234,11 @@ public class Organization extends AbstractAnetBean {
         });
   }
 
-  @GraphQLIgnore
   public List<Task> getTasks() {
     return tasks;
   }
 
+  @GraphQLInputField(name = "tasks")
   public void setTasks(List<Task> tasks) {
     this.tasks = tasks;
   }

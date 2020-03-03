@@ -1,6 +1,5 @@
 import { Settings } from "api"
 import Model from "components/Model"
-import React from "react"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -9,7 +8,6 @@ export default class Organization extends Model {
   static resourceName = "Organization"
   static listName = "organizationList"
   static getInstanceName = "organization"
-  static getModelNameLinkTo = "organization"
 
   static STATUS = {
     ACTIVE: "ACTIVE",
@@ -112,14 +110,6 @@ export default class Organization extends Model {
 
   static autocompleteQuery =
     "uuid, shortName, longName, identificationCode, type"
-
-  static autocompleteTemplate(org) {
-    return (
-      <span>
-        {org.shortName} - {org.longName} {org.identificationCode}
-      </span>
-    )
-  }
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

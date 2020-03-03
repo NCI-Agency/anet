@@ -1,15 +1,14 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import autobind from "autobind-decorator"
+import useSearchFilter from "components/advancedSearch/hooks"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import _isEqualWith from "lodash/isEqualWith"
 import { Organization } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
-import { Checkbox } from "react-bootstrap"
+import React from "react"
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import utils from "utils"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {
@@ -20,169 +19,144 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-export default class OrganizationFilter extends Component {
-  static propTypes = {
-    // An OrganizationFilter filter allows users to search the ANET database
-    // for existing organizations and use that records ID as the search term.
-    // The queryKey property tells this filter what property to set on the
-    // search query (ie authorUuid, organizationUuid, etc).
-    queryKey: PropTypes.string.isRequired,
-    queryIncludeChildOrgsKey: PropTypes.string.isRequired,
-    value: PropTypes.any,
-    onChange: PropTypes.func,
-    queryParams: PropTypes.object,
-    asFormField: PropTypes.bool
+const OrganizationFilter = ({
+  asFormField,
+  queryKey,
+  value: inputValue,
+  onChange,
+  queryOrgRecurseStrategyKey,
+  orgFilterQueryParams,
+  ...advancedSelectProps
+}) => {
+  const defaultValue = {
+    value: inputValue.value || {},
+    orgRecurseStrategy: inputValue.orgRecurseStrategy || RECURSE_STRATEGY.NONE
   }
-
-  static defaultProps = {
-    asFormField: true
-  }
-
-  constructor(props) {
-    super(props)
-
-    const value = props.value || {}
-    this.state = {
-      value: value,
-      includeChildOrgs: value.includeChildOrgs || false,
-      queryParams: props.queryParams || {}
-    }
-  }
-
-  componentDidMount() {
-    this.updateFilter()
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      !_isEqualWith(
-        prevProps.value,
-        this.props.value,
-        utils.treatFunctionsAsEqual
-      )
-    ) {
-      this.setState(
-        {
-          value: this.props.value,
-          includeChildOrgs: this.props.value.includeChildOrgs || false
-        },
-        this.updateFilter
-      )
-    }
-  }
-
-  render() {
-    const advancedSelectProps = Object.without(
-      this.props,
-      "value",
-      "queryKey",
-      "queryIncludeChildOrgsKey",
-      "queryParams",
-      "asFormField"
-    )
-    let msg = this.props.value.shortName
-    if (msg && this.state.includeChildOrgs) {
-      msg += ", including sub-organizations"
-    }
-    const organizationWidgetFilters = {
-      all: {
-        label: "All",
-        queryVars: this.state.queryParams
-      }
-    }
-
-    return !this.props.asFormField ? (
-      <>{msg}</>
-    ) : (
-      <div>
-        <AdvancedSingleSelect
-          {...advancedSelectProps}
-          fieldName={this.props.queryKey}
-          fieldLabel={null}
-          vertical
-          showRemoveButton={false}
-          filterDefs={organizationWidgetFilters}
-          overlayColumns={["Name"]}
-          overlayRenderRow={OrganizationOverlayRow}
-          objectType={Organization}
-          valueKey="shortName"
-          fields={Organization.autocompleteQuery}
-          placeholder="Filter by organization..."
-          addon={ORGANIZATIONS_ICON}
-          onChange={this.onChange}
-          value={this.state.value}
-        />
-        <Checkbox
-          inline
-          checked={this.state.includeChildOrgs}
-          onChange={this.changeIncludeChildren}
-        >
-          Include sub-organizations
-        </Checkbox>
-      </div>
-    )
-  }
-
-  @autobind
-  changeIncludeChildren(event) {
-    this.setState({ includeChildOrgs: event.target.checked }, this.updateFilter)
-  }
-
-  @autobind
-  onChange(event) {
-    if (typeof event === "object") {
-      this.setState({ value: event }, this.updateFilter)
-    }
-  }
-
-  @autobind
-  toQuery() {
+  const toQuery = val => {
     return {
-      [this.props.queryKey]: this.state.value.uuid,
-      [this.props.queryIncludeChildOrgsKey]: this.state.includeChildOrgs
+      [queryKey]: val.value?.uuid,
+      [queryOrgRecurseStrategyKey]: val.orgRecurseStrategy
+    }
+  }
+  const [value, setValue] = useSearchFilter(
+    asFormField,
+    onChange,
+    inputValue,
+    defaultValue,
+    toQuery
+  )
+
+  let msg = value.value?.shortName
+  if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN) {
+    msg += ", including sub-organizations"
+  } else if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS) {
+    msg += ", including parent organizations"
+  }
+
+  const advancedSelectFilters = {
+    all: {
+      label: "All",
+      queryVars: orgFilterQueryParams
     }
   }
 
-  @autobind
-  updateFilter() {
-    if (this.props.asFormField) {
-      let { value } = this.state
-      if (typeof value === "object") {
-        value.includeChildOrgs = this.state.includeChildOrgs
-        value.toQuery = this.toQuery
-      }
-      this.props.onChange(value)
+  return !asFormField ? (
+    <>{msg}</>
+  ) : (
+    <div>
+      <AdvancedSingleSelect
+        {...advancedSelectProps}
+        fieldName={queryKey}
+        fieldLabel={null}
+        vertical
+        showRemoveButton={false}
+        filterDefs={advancedSelectFilters}
+        overlayColumns={["Name"]}
+        overlayRenderRow={OrganizationOverlayRow}
+        objectType={Organization}
+        valueKey="shortName"
+        fields={Organization.autocompleteQuery}
+        placeholder="Filter by organization..."
+        addon={ORGANIZATIONS_ICON}
+        onChange={handleChangeOrg}
+        value={value.value}
+      />
+      <div>
+        <ToggleButtonGroup
+          type="radio"
+          name="orgRecurseStrategy"
+          value={value.orgRecurseStrategy}
+          onChange={handleChangeOrgRecurseStrategy}
+        >
+          <ToggleButton value={RECURSE_STRATEGY.NONE}>exact match</ToggleButton>
+          <ToggleButton value={RECURSE_STRATEGY.CHILDREN}>
+            include sub-orgs
+          </ToggleButton>
+          <ToggleButton value={RECURSE_STRATEGY.PARENTS}>
+            include parent orgs
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </div>
+    </div>
+  )
+
+  function handleChangeOrg(event) {
+    if (typeof event === "object") {
+      setValue(prevValue => ({
+        ...prevValue,
+        value: event
+      }))
     }
   }
 
-  @autobind
-  deserialize(query, key) {
-    if (query[this.props.queryKey]) {
-      return API.query(GQL_GET_ORGANIZATION, {
-        uuid: query[this.props.queryKey]
-      }).then(data => {
-        if (data.organization) {
-          const toQueryValue = {
-            [this.props.queryKey]: query[this.props.queryKey]
-          }
-          if (query[this.props.queryIncludeChildOrgsKey]) {
-            data.organization.includeChildOrgs =
-              query[this.props.queryIncludeChildOrgsKey]
-            toQueryValue[this.props.queryIncludeChildOrgsKey] =
-              query[this.props.queryIncludeChildOrgsKey]
-          }
-          return {
-            key: key,
-            value: {
-              ...data.organization,
-              toQuery: () => toQueryValue
-            }
-          }
-        } else {
-          return null
-        }
-      })
-    }
-    return null
+  function handleChangeOrgRecurseStrategy(value) {
+    setValue(prevValue => ({ ...prevValue, orgRecurseStrategy: value }))
   }
 }
+OrganizationFilter.propTypes = {
+  queryKey: PropTypes.string.isRequired,
+  queryOrgRecurseStrategyKey: PropTypes.string.isRequired,
+  value: PropTypes.any,
+  onChange: PropTypes.func,
+  orgFilterQueryParams: PropTypes.object,
+  asFormField: PropTypes.bool
+}
+OrganizationFilter.defaultProps = {
+  asFormField: true
+}
+
+export const deserialize = (
+  { queryKey, queryOrgRecurseStrategyKey },
+  query,
+  key
+) => {
+  if (query[queryKey]) {
+    return API.query(GQL_GET_ORGANIZATION, {
+      uuid: query[queryKey]
+    }).then(data => {
+      if (data.organization) {
+        const toQueryValue = {
+          [queryKey]: query[queryKey]
+        }
+        const value = { value: data.organization }
+        const orgRecurseStrategy = query[queryOrgRecurseStrategyKey]
+        if (orgRecurseStrategy) {
+          value.orgRecurseStrategy = orgRecurseStrategy
+          toQueryValue[queryOrgRecurseStrategyKey] = orgRecurseStrategy
+        }
+        return {
+          key: key,
+          value: {
+            ...value,
+            toQuery: toQueryValue
+          }
+        }
+      } else {
+        return null
+      }
+    })
+  }
+  return null
+}
+
+export default OrganizationFilter

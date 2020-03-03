@@ -9,17 +9,17 @@ const AdvancedSelectOverlayTable = ({
   fieldName,
   objectType,
   items,
+  pageNum,
   selectedItems,
   handleAddItem,
   handleRemoveItem,
   columns,
   renderRow,
-  selectItemComponent,
-  tableClassName
+  selectItemComponent
 }) => {
   const selectedItemsUuids = selectedItems.map(a => a.uuid)
   return (
-    <Table responsive hover striped className={tableClassName}>
+    <Table responsive hover striped>
       <thead>
         <tr>
           {columns.map(col => (
@@ -28,7 +28,7 @@ const AdvancedSelectOverlayTable = ({
         </tr>
       </thead>
       <tbody>
-        {objectType.map(items, item => {
+        {objectType.map(items, (item, i) => {
           const isSelected = selectedItemsUuids.includes(item.uuid)
           const handleClick = () =>
             isSelected ? handleRemoveItem(item) : handleAddItem(item)
@@ -37,7 +37,7 @@ const AdvancedSelectOverlayTable = ({
             { name: fieldName, checked: isSelected, onChange: handleClick }
           )
           return (
-            <tr key={item.uuid} onClick={handleClick}>
+            <tr key={`${item.uuid}-${pageNum}-${i}`} onClick={handleClick}>
               <td style={{ textAlign: "center" }}>{renderSelectComponent}</td>
               {renderRow(item)}
             </tr>
@@ -51,37 +51,35 @@ AdvancedSelectOverlayTable.propTypes = {
   fieldName: PropTypes.string.isRequired,
   objectType: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
+  pageNum: PropTypes.number,
   selectedItems: PropTypes.array.isRequired,
   handleAddItem: PropTypes.func,
   handleRemoveItem: PropTypes.func,
   columns: PropTypes.array.isRequired,
   renderRow: PropTypes.func.isRequired,
-  selectItemComponent: PropTypes.element.isRequired,
-  tableClassName: PropTypes.string
+  selectItemComponent: PropTypes.element.isRequired
 }
 AdvancedSelectOverlayTable.defaultProps = {
-  tableClassName: ""
+  selectedItems: []
 }
 
-const AdvancedSingleSelectOverlayTableBase = props => {
-  const { selectedItems, ...otherProps } = props
-  return (
-    <AdvancedSelectOverlayTable
-      {...otherProps}
-      selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
-      selectItemComponent={<Radio />}
-    />
-  )
-}
+const AdvancedSingleSelectOverlayTableBase = ({
+  selectedItems,
+  ...otherProps
+}) => (
+  <AdvancedSelectOverlayTable
+    {...otherProps}
+    selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
+    selectItemComponent={<Radio />}
+  />
+)
 AdvancedSingleSelectOverlayTableBase.propTypes = {
   selectedItems: PropTypes.oneOfType([PropTypes.object, PropTypes.array])
 }
 
-const AdvancedMultiSelectOverlayTableBase = props => {
-  return (
-    <AdvancedSelectOverlayTable {...props} selectItemComponent={<Checkbox />} />
-  )
-}
+const AdvancedMultiSelectOverlayTableBase = props => (
+  <AdvancedSelectOverlayTable {...props} selectItemComponent={<Checkbox />} />
+)
 
 export const AdvancedSingleSelectOverlayTable = LoaderHOC("isLoading")("items")(
   AdvancedSingleSelectOverlayTableBase

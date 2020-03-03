@@ -6,7 +6,7 @@ import NoPositionBanner from "components/NoPositionBanner"
 import SecurityBanner from "components/SecurityBanner"
 import { Person } from "models"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 
 const GENERAL_BANNER_LEVEL = "GENERAL_BANNER_LEVEL"
@@ -19,60 +19,47 @@ const visible = {
   USERS_AND_SUPER_USERS: 3
 }
 
-class BaseTopBar extends Component {
-  static propTypes = {
-    currentUser: PropTypes.instanceOf(Person),
-    appSettings: PropTypes.object,
-    topbarHeight: PropTypes.func.isRequired,
-    resetPages: PropTypes.func.isRequired,
-    minimalHeader: PropTypes.bool,
-    toggleMenuAction: PropTypes.func
+const BaseTopBar = ({
+  currentUser,
+  appSettings,
+  handleTopbarHeight,
+  resetPages,
+  minimalHeader,
+  toggleMenuAction
+}) => {
+  const [bannerVisibility, setBannerVisibility] = useState(false)
+  const [height, setHeight] = useState(0)
+  const topbarDiv = useRef()
+
+  const visibilitySetting = parseInt(appSettings[GENERAL_BANNER_VISIBILITY], 10)
+  const bannerOptions = {
+    level: appSettings[GENERAL_BANNER_LEVEL],
+    message: appSettings[GENERAL_BANNER_TEXT],
+    title: GENERAL_BANNER_TITLE,
+    visible: bannerVisibility
   }
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      bannerVisibility: false,
-      height: 0
+  useEffect(() => {
+    function updateTopbarHeight() {
+      const curHeight = topbarDiv.current.clientHeight
+      if (curHeight !== undefined && curHeight !== height) {
+        setHeight(curHeight)
+      }
     }
-    this.topbarDiv = React.createRef()
-  }
-
-  componentDidMount() {
-    this.handleTopbarHeight()
-    this.updateBannerVisibility()
-    window.addEventListener("resize", this.handleTopbarHeight)
-  }
-
-  componentDidUpdate() {
-    this.handleTopbarHeight()
-    this.updateBannerVisibility()
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.handleTopbarHeight)
-  }
-
-  handleTopbarHeight = () => {
-    const height = this.topbarDiv.current.clientHeight
-    if (height !== undefined && height !== this.state.height) {
-      this.setState({ height }, () =>
-        this.props.topbarHeight(this.state.height)
-      )
+    updateTopbarHeight()
+    window.addEventListener("resize", updateTopbarHeight)
+    // returned function will be called on component unmount
+    return () => {
+      window.removeEventListener("resize", updateTopbarHeight)
     }
-  }
+  }, [currentUser, height])
 
-  handleOnHomeClick = () => {
-    this.props.resetPages()
-  }
+  useEffect(() => {
+    handleTopbarHeight(height)
+  }, [height, handleTopbarHeight])
 
-  updateBannerVisibility() {
-    let visibilitySetting = parseInt(
-      this.props.appSettings[GENERAL_BANNER_VISIBILITY],
-      10
-    )
+  useEffect(() => {
     let output = false
-    const { currentUser } = this.props
     if (
       visibilitySetting === visible.USERS &&
       currentUser &&
@@ -93,42 +80,35 @@ class BaseTopBar extends Component {
     ) {
       output = true
     }
-    if (this.state.bannerVisibility !== output) {
-      this.setState({ bannerVisibility: output })
+    if (bannerVisibility !== output) {
+      setBannerVisibility(output)
     }
-  }
+  }, [bannerVisibility, currentUser, visibilitySetting])
 
-  bannerOptions() {
-    return (
-      {
-        level: this.props.appSettings[GENERAL_BANNER_LEVEL],
-        message: this.props.appSettings[GENERAL_BANNER_TEXT],
-        title: GENERAL_BANNER_TITLE,
-        visible: this.state.bannerVisibility
-      } || {}
-    )
-  }
-
-  render() {
-    const { currentUser, minimalHeader, toggleMenuAction } = this.props
-
-    return (
-      <div style={{ flex: "0 0 auto", zIndex: 100 }} ref={this.topbarDiv}>
-        <div id="topbar">
-          <GeneralBanner options={this.bannerOptions()} />
-          <SecurityBanner />
-          {currentUser &&
-            !currentUser.hasActivePosition() &&
-            !currentUser.isNewUser() && <NoPositionBanner />}
-          <Header
-            minimalHeader={minimalHeader}
-            toggleMenuAction={toggleMenuAction}
-            onHomeClick={this.handleOnHomeClick}
-          />
-        </div>
+  return (
+    <div style={{ flex: "0 0 auto", zIndex: 1100 }} ref={topbarDiv}>
+      <div id="topbar">
+        <GeneralBanner options={bannerOptions} />
+        <SecurityBanner />
+        {currentUser &&
+          !currentUser.hasActivePosition() &&
+          !currentUser.isNewUser() && <NoPositionBanner />}
+        <Header
+          minimalHeader={minimalHeader}
+          toggleMenuAction={toggleMenuAction}
+          onHomeClick={resetPages}
+        />
       </div>
-    )
-  }
+    </div>
+  )
+}
+BaseTopBar.propTypes = {
+  currentUser: PropTypes.instanceOf(Person),
+  appSettings: PropTypes.object,
+  handleTopbarHeight: PropTypes.func.isRequired,
+  resetPages: PropTypes.func.isRequired,
+  minimalHeader: PropTypes.bool,
+  toggleMenuAction: PropTypes.func
 }
 
 const TopBar = props => (

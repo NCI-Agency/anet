@@ -15,8 +15,7 @@ const ADMIN_ACTIONS = [
   Models.AuthorizationGroup
 ]
 
-const BaseCreateButton = props => {
-  const { currentUser } = props
+const BaseCreateButton = ({ currentUser }) => {
   const history = useHistory()
 
   const modelClasses = DEFAULT_ACTIONS.concat(
@@ -33,15 +32,22 @@ const BaseCreateButton = props => {
         id="createButton"
         onSelect={onSelect}
       >
-        {modelClasses.map((modelClass, i) => (
-          <MenuItem key={modelClass.resourceName} eventKey={modelClass}>
-            New {modelClass.displayName() || modelClass.resourceName}
-          </MenuItem>
-        ))}
+        {modelClasses.map((modelClass, i) => {
+          const name = modelClass.displayName() || modelClass.resourceName
+          return (
+            <MenuItem
+              key={modelClass.resourceName}
+              eventKey={modelClass}
+              id={`new-${name.toLowerCase()}`}
+            >
+              New {name}
+            </MenuItem>
+          )
+        })}
       </DropdownButton>
     )
   } else if (modelClasses.length) {
-    let modelClass = modelClasses[0]
+    const modelClass = modelClasses[0]
     return (
       <Button
         bsStyle="primary"

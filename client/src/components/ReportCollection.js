@@ -1,4 +1,9 @@
+import { setPagination } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import {
+  PageDispatchersPropType,
+  mapPageDispatchersToProps
+} from "components/Page"
 import ReportCalendar from "components/ReportCalendar"
 import ReportMap from "components/ReportMap"
 import ReportSummary from "components/ReportSummary"
@@ -6,24 +11,27 @@ import ReportTable from "components/ReportTable"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
+import { connect } from "react-redux"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
 
-const ReportCollection = props => {
-  const {
-    paginationKey,
-    viewFormats,
-    reportsFilter,
-    queryParams,
-    setTotalCount,
-    mapId,
-    width,
-    height,
-    marginBottom
-  } = props
+const ReportCollection = ({
+  pageDispatchers,
+  paginationKey,
+  pagination,
+  setPagination,
+  viewFormats,
+  reportsFilter,
+  queryParams,
+  setTotalCount,
+  mapId,
+  width,
+  height,
+  marginBottom
+}) => {
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
 
@@ -62,6 +70,7 @@ const ReportCollection = props => {
         <div>
           {viewFormat === FORMAT_CALENDAR && (
             <ReportCalendar
+              pageDispatchers={pageDispatchers}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
             />
@@ -69,20 +78,27 @@ const ReportCollection = props => {
           {viewFormat === FORMAT_TABLE && (
             <ReportTable
               showAuthors
+              pageDispatchers={pageDispatchers}
               paginationKey={paginationKey}
+              pagination={pagination}
+              setPagination={setPagination}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
             />
           )}
           {viewFormat === FORMAT_SUMMARY && (
             <ReportSummary
+              pageDispatchers={pageDispatchers}
               paginationKey={paginationKey}
+              pagination={pagination}
+              setPagination={setPagination}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
             />
           )}
           {viewFormat === FORMAT_MAP && (
             <ReportMap
+              pageDispatchers={pageDispatchers}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
               mapId={mapId}
@@ -98,7 +114,10 @@ const ReportCollection = props => {
 }
 
 ReportCollection.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   paginationKey: PropTypes.string,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired,
   viewFormats: PropTypes.arrayOf(PropTypes.string),
   reportsFilter: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
   queryParams: PropTypes.object,
@@ -113,4 +132,17 @@ ReportCollection.defaultProps = {
   viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_CALENDAR, FORMAT_MAP]
 }
 
-export default ReportCollection
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
+  return {
+    setPagination: (pageKey, pageNum) =>
+      dispatch(setPagination(pageKey, pageNum)),
+    ...pageDispatchers
+  }
+}
+
+const mapStateToProps = (state, ownProps) => ({
+  pagination: state.pagination
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ReportCollection)

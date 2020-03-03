@@ -9,11 +9,11 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
-  getSearchQuery,
-  mapDispatchToProps as pageMapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
+import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
@@ -90,7 +90,7 @@ const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
 })
 
-const DecisivesDashboard = props => {
+const DecisivesDashboard = ({ pageDispatchers }) => {
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dashboardData, setDashboardData] = useState([])
@@ -103,13 +103,17 @@ const DecisivesDashboard = props => {
     fetchData()
   }, [dashboardSettings.data])
 
-  return <DecisivesDashboardStatic dashboardData={dashboardData} {...props} />
+  return (
+    <DecisivesDashboardStatic
+      dashboardData={dashboardData}
+      pageDispatchers={pageDispatchers}
+    />
+  )
 }
 
-DecisivesDashboard.propTypes = { ...pagePropTypes }
+DecisivesDashboard.propTypes = { pageDispatchers: PageDispatchersPropType }
 
-const DecisivesDashboardStatic = props => {
-  const { dashboardData } = props
+const DecisivesDashboardStatic = ({ dashboardData, pageDispatchers }) => {
   const { loading, error, data } = API.useApiQuery(GQL_GET_STATIC_DATA, {
     positionQuery: {
       // TODO: make this work with AbstractSearchQueryInput
@@ -131,7 +135,7 @@ const DecisivesDashboardStatic = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   const decisives = useMemo(() => {
     if (!data || !dashboardData) {
@@ -157,17 +161,24 @@ const DecisivesDashboardStatic = props => {
   }
 
   return _isEmpty(dashboardData) ? null : (
-    <DecisivesDashboardImpl decisives={decisives} {...props} />
+    <DecisivesDashboardImpl
+      decisives={decisives}
+      pageDispatchers={pageDispatchers}
+    />
   )
 }
 
 DecisivesDashboardStatic.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   dashboardData: PropTypes.array
 }
 
-const DecisivesDashboardImpl = props => {
-  const { decisives, searchQuery } = props
+const BaseDecisivesDashboardImpl = ({
+  decisives,
+  searchQuery,
+  setSearchQuery,
+  pageDispatchers
+}) => {
   let queryParams
   if (searchQuery === DEFAULT_SEARCH_QUERY) {
     // when going from a different page to the decisives page, use the default
@@ -199,7 +210,7 @@ const DecisivesDashboardImpl = props => {
     error,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: _SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   const [reportStats, prevReportStats] = useMemo(() => {
     if (!data) {
@@ -260,7 +271,11 @@ const DecisivesDashboardImpl = props => {
               data={decisive.positions}
               contentData={reportStats.positionStats}
               prevContentData={prevReportStats.positionStats}
-              itemLabel={item => <LinkTo position={item}>{item.name}</LinkTo>}
+              itemLabel={item => (
+                <LinkTo modelType="Position" model={item}>
+                  {item.name}
+                </LinkTo>
+              )}
             />
           ))}
         </Panel.Body>
@@ -278,7 +293,9 @@ const DecisivesDashboardImpl = props => {
               contentData={reportStats.locationStats}
               prevContentData={prevReportStats.locationStats}
               itemLabel={item => (
-                <LinkTo anetLocation={item}>{item.name}</LinkTo>
+                <LinkTo modelType="Location" model={item}>
+                  {item.name}
+                </LinkTo>
               )}
             />
           ))}
@@ -315,7 +332,7 @@ const DecisivesDashboardImpl = props => {
 
   function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
-    props.setSearchQuery({
+    setSearchQuery({
       objectType: objectType,
       filters: filters,
       text: text
@@ -323,46 +340,64 @@ const DecisivesDashboardImpl = props => {
   }
 }
 
-DecisivesDashboardImpl.propTypes = {
-  ...pagePropTypes,
+BaseDecisivesDashboardImpl.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
+  searchQuery: SearchQueryPropType,
   setSearchQuery: PropTypes.func.isRequired,
   decisives: PropTypes.array
 }
 
-const StatsTable = props => {
-  return (
-    <Table responsive>
-      <thead>
-        <tr>
-          <th>{props.label}</th>
-          {props.data.map(item => (
-            <th key={item.uuid}>{props.itemLabel(item)}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td />
-          {props.data.map(item => {
-            const previous = props.prevContentData[item.uuid] || 0
-            const current = props.contentData[item.uuid] || 0
-            const color =
-              current > 1.3 * previous
-                ? "green"
-                : current < 0.7 * previous
-                  ? "red"
-                  : "white"
-            return (
-              <td bgcolor={color} key={item.uuid}>
-                {current}/{previous}
-              </td>
-            )
-          })}
-        </tr>
-      </tbody>
-    </Table>
-  )
-}
+const mapStateToProps = (state, ownProps) => ({
+  searchQuery: state.searchQuery
+})
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery))
+})
+
+const DecisivesDashboardImpl = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(BaseDecisivesDashboardImpl)
+
+const StatsTable = ({
+  data,
+  itemLabel,
+  label,
+  contentData,
+  prevContentData
+}) => (
+  <Table responsive>
+    <thead>
+      <tr>
+        <th>{label}</th>
+        {data.map(item => (
+          <th key={item.uuid}>{itemLabel(item)}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td />
+        {data.map(item => {
+          const previous = prevContentData[item.uuid] || 0
+          const current = contentData[item.uuid] || 0
+          const color =
+            current > 1.3 * previous
+              ? "green"
+              : current < 0.7 * previous
+                ? "red"
+                : "white"
+          return (
+            <td bgcolor={color} key={item.uuid}>
+              {current}/{previous}
+            </td>
+          )
+        })}
+      </tr>
+    </tbody>
+  </Table>
+)
 
 StatsTable.propTypes = {
   data: PropTypes.array.isRequired,
@@ -372,16 +407,4 @@ StatsTable.propTypes = {
   prevContentData: PropTypes.object.isRequired
 }
 
-const mapStateToProps = (state, ownProps) => ({
-  searchQuery: state.searchQuery
-})
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  const pageDispatchToProps = pageMapDispatchToProps(dispatch, ownProps)
-  return {
-    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
-    ...pageDispatchToProps
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(DecisivesDashboard)
+export default connect(null, mapPageDispatchersToProps)(DecisivesDashboard)

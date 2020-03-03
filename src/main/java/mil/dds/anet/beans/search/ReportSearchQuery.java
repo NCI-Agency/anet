@@ -1,12 +1,12 @@
 package mil.dds.anet.beans.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
@@ -17,44 +17,103 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     HAPPENED, FUTURE, CANCELLED
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   String authorUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant engagementDateStart;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant engagementDateEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   private Integer engagementDayOfWeek;
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean includeEngagementDayOfWeek;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant createdAtStart;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant createdAtEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant updatedAtStart;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant updatedAtEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant releasedAtStart;
+  @GraphQLQuery
+  @GraphQLInputField
   Instant releasedAtEnd;
+  @GraphQLQuery
+  @GraphQLInputField
   String attendeeUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   Atmosphere atmosphere;
 
   // Can use either orgUuid or one or both of advisorOrgUuid and principalOrgUuid
   // only use orgUuid if you don't know the type of the organization.
+  @GraphQLQuery
+  @GraphQLInputField
   String advisorOrgUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   Boolean includeAdvisorOrgChildren;
   // Set principalOrgUuid or advisorOrgUuid = Organization.DUMMY_ORG_UUID to tell ANET to search for
   // reports specifically with a NULL organizationUuid.
+  @GraphQLQuery
+  @GraphQLInputField
   String principalOrgUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   Boolean includePrincipalOrgChildren;
+  @GraphQLQuery
+  @GraphQLInputField
   String orgUuid;
-  Boolean includeOrgChildren;
+  @GraphQLQuery
+  @GraphQLInputField
+  private RecurseStrategy orgRecurseStrategy;
 
+  @GraphQLQuery
+  @GraphQLInputField
   String locationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   String taskUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   String pendingApprovalOf;
+  @GraphQLQuery
+  @GraphQLInputField
   List<ReportState> state;
+  @GraphQLQuery
+  @GraphQLInputField
   List<EngagementStatus> engagementStatus;
+  @GraphQLQuery
+  @GraphQLInputField
   ReportCancelledReason cancelledReason;
+  @GraphQLQuery
+  @GraphQLInputField
   private String tagUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   private String authorPositionUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   private String attendeePositionUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   private List<String> authorizationGroupUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean sensitiveInfo;
-  // internal search parameters:
-  private Person user;
+  // internal search parameter:
   private boolean systemSearch;
 
   public ReportSearchQuery() {
@@ -206,12 +265,12 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     this.orgUuid = orgUuid;
   }
 
-  public boolean getIncludeOrgChildren() {
-    return Boolean.TRUE.equals(includeOrgChildren);
+  public RecurseStrategy getOrgRecurseStrategy() {
+    return orgRecurseStrategy;
   }
 
-  public void setIncludeOrgChildren(Boolean includeOrgChildren) {
-    this.includeOrgChildren = includeOrgChildren;
+  public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
+    this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
   public String getLocationUuid() {
@@ -303,25 +362,11 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   }
 
   @JsonIgnore
-  @GraphQLIgnore
-  public Person getUser() {
-    return user;
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
-  public void setUser(Person user) {
-    this.user = user;
-  }
-
-  @JsonIgnore
-  @GraphQLIgnore
   public boolean isSystemSearch() {
     return systemSearch;
   }
 
   @JsonIgnore
-  @GraphQLIgnore
   public void setSystemSearch(boolean systemSearch) {
     this.systemSearch = systemSearch;
   }
@@ -332,9 +377,9 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         engagementDayOfWeek, includeEngagementDayOfWeek, createdAtStart, createdAtEnd,
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
-        orgUuid, includeOrgChildren, locationUuid, taskUuid, pendingApprovalOf, state,
+        orgUuid, orgRecurseStrategy, locationUuid, taskUuid, pendingApprovalOf, state,
         engagementStatus, cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid,
-        authorizationGroupUuid, sensitiveInfo, user, systemSearch);
+        authorizationGroupUuid, sensitiveInfo, systemSearch);
   }
 
   @Override
@@ -361,7 +406,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getPrincipalOrgUuid(), other.getPrincipalOrgUuid())
         && Objects.equals(getIncludePrincipalOrgChildren(), other.getIncludePrincipalOrgChildren())
         && Objects.equals(getOrgUuid(), other.getOrgUuid())
-        && Objects.equals(getIncludeOrgChildren(), other.getIncludeOrgChildren())
+        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
         && Objects.equals(getTaskUuid(), other.getTaskUuid())
         && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())

@@ -1,7 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { Location } from "models"
@@ -9,11 +9,11 @@ import React from "react"
 import { connect } from "react-redux"
 import LocationForm from "./Form"
 
-const LocationNew = props => {
+const LocationNew = ({ pageDispatchers }) => {
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   const location = new Location()
@@ -22,7 +22,7 @@ const LocationNew = props => {
 }
 
 LocationNew.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(LocationNew)
+export default connect(null, mapPageDispatchersToProps)(LocationNew)

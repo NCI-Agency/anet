@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -41,8 +40,9 @@ public class AuthorizationGroupResource {
   }
 
   @GraphQLQuery(name = "authorizationGroupList")
-  public AnetBeanList<AuthorizationGroup> search(
+  public AnetBeanList<AuthorizationGroup> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") AuthorizationGroupSearchQuery query) {
+    query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
 
@@ -73,40 +73,24 @@ public class AuthorizationGroupResource {
     }
     // Update positions:
     if (t.getPositions() != null) {
-      try {
-        final List<Position> existingPositions =
-            dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getUuid()).get();
-        for (final Position p : t.getPositions()) {
-          Optional<Position> existingPosition =
-              existingPositions.stream().filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
-          if (existingPosition.isPresent()) {
-            existingPositions.remove(existingPosition.get());
-          } else {
-            dao.addPositionToAuthorizationGroup(p, t);
-          }
+      final List<Position> existingPositions =
+          dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getUuid()).join();
+      for (final Position p : t.getPositions()) {
+        Optional<Position> existingPosition =
+            existingPositions.stream().filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
+        if (existingPosition.isPresent()) {
+          existingPositions.remove(existingPosition.get());
+        } else {
+          dao.addPositionToAuthorizationGroup(p, t);
         }
-        for (final Position p : existingPositions) {
-          dao.removePositionFromAuthorizationGroup(p, t);
-        }
-      } catch (InterruptedException | ExecutionException e) {
-        throw new WebApplicationException("failed to load Positions", e);
+      }
+      for (final Position p : existingPositions) {
+        dao.removePositionFromAuthorizationGroup(p, t);
       }
     }
     AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
-  }
-
-  /**
-   * Returns the most recent authorization groups that this user used in reports.
-   * 
-   * @param maxResults maximum number of results to return, defaults to 3
-   */
-  @GraphQLQuery(name = "authorizationGroupRecents")
-  public AnetBeanList<AuthorizationGroup> recents(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "maxResults", defaultValue = "3") int maxResults) {
-    return new AnetBeanList<AuthorizationGroup>(
-        dao.getRecentAuthorizationGroups(DaoUtils.getUserFromContext(context), maxResults));
   }
 
 }

@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
 import mil.dds.anet.utils.Utils;
@@ -7,10 +8,13 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Tag extends AbstractAnetBean {
 
+  @GraphQLQuery
+  @GraphQLInputField
   private String name;
+  @GraphQLQuery
+  @GraphQLInputField
   private String description;
 
-  @GraphQLQuery(name = "name")
   public String getName() {
     return name;
   }
@@ -19,7 +23,6 @@ public class Tag extends AbstractAnetBean {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  @GraphQLQuery(name = "description")
   public String getDescription() {
     return description;
   }

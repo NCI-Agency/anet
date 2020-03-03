@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.beans.ApprovalStep;
@@ -26,7 +25,7 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
 
@@ -35,7 +34,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       "uuid name code type status organization { uuid } location { uuid }";
 
   @Test
-  public void createAO() throws InterruptedException, ExecutionException {
+  public void createAO() {
     final Organization ao = OrganizationTest.getTestAO(true);
     final Person jack = getJackJackson();
 
@@ -116,9 +115,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Verify approval step was saved.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
         new TypeReference<GraphQlResponse<Organization>>() {});
-    List<ApprovalStep> returnedSteps = updated.loadApprovalSteps(context).get();
+    List<ApprovalStep> returnedSteps = updated.loadApprovalSteps(context).join();
     assertThat(returnedSteps.size()).isEqualTo(1);
-    assertThat(returnedSteps.get(0).loadApprovers(context).get()).contains(b1);
+    assertThat(returnedSteps.get(0).loadApprovers(context).join()).contains(b1);
 
     // Give this org a Task
     Task task = new Task();
@@ -141,7 +140,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Verify task was saved.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
         new TypeReference<GraphQlResponse<Organization>>() {});
-    final List<Task> tasks = updated.loadTasks(context).get();
+    final List<Task> tasks = updated.loadTasks(context).join();
     assertThat(tasks).isNotNull();
     assertThat(tasks.size()).isEqualTo(1);
     assertThat(tasks.get(0).getUuid()).isEqualTo(task.getUuid());
@@ -161,12 +160,12 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Verify approval steps updated correct.
     updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
         new TypeReference<GraphQlResponse<Organization>>() {});
-    returnedSteps = updated.loadApprovalSteps(context).get();
+    returnedSteps = updated.loadApprovalSteps(context).join();
     assertThat(returnedSteps.size()).isEqualTo(2);
     assertThat(returnedSteps.get(0).getName()).isEqualTo(step1.getName());
-    assertThat(returnedSteps.get(0).loadApprovers(context).get())
+    assertThat(returnedSteps.get(0).loadApprovers(context).join())
         .containsExactly(admin.loadPosition());
-    assertThat(returnedSteps.get(1).loadApprovers(context).get()).containsExactly(b1);
+    assertThat(returnedSteps.get(1).loadApprovers(context).join()).containsExactly(b1);
 
   }
 

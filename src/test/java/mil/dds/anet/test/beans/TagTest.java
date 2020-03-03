@@ -1,7 +1,7 @@
 package mil.dds.anet.test.beans;
 
 import mil.dds.anet.beans.Tag;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TagTest extends BeanTester<Tag> {
 

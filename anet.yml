@@ -24,6 +24,9 @@ developmentMode: true
 redirectToHttps: false
 
 assets:
+  cacheControlHeader: max-age=259200, public
+  mimeTypes:
+    ".js.map": application/json
   overrides:
     /imagery: imagery
     /data: data
@@ -192,18 +195,19 @@ dictionary:
 
   reportWorkflow:
     nbOfHoursQuarantineApproved: 24
+    nbOfHoursApprovalTimeout: 48
 
   maxTextFieldLength: 250
 
   fields:
 
     task:
-      shortLabel: Effort / Task
+      shortLabel: Objective / Effort
       shortName:
-        label: Effort number
+        label: Objective / Effort number
         placeholder: Enter an effort name, example....
 
-      longLabel: Tasks and Milestones
+      longLabel: Objectives and Efforts
       longName:
         label: Task description
         placeholder: Enter an effort description, example ....
@@ -228,20 +232,128 @@ dictionary:
           RED:
             label: Red
             color: '#ff8279'
-      responsibleOrg: Responsible organization
+      taskedOrganizations:
+        label: Tasked organizations
+        placeholder: Search for an organization...
       responsiblePositions:
         label: Responsible positions
         placeholder: Search for a position...
+      customFields:
+        assessmentDefinition:
+          type: text
+          label: Assessment definition
+          placeholder: JSON that defines the effort (you need to know what you are doing)
+          componentClass: textarea
+          style:
+            height: 200px
 
     report:
-      intent: Meeting goal (purpose)
+      intent: Engagement purpose
       atmosphere: Atmospherics
       atmosphereDetails: Atmospherics details
       cancelled: ''
       reportTags: Tags
       nextSteps: Next steps
       keyOutcomes: Key outcomes
-      reportText: Engagement details
+      reportText: Key details
+      customFields:
+        multipleButtons:
+          type: enumset
+          label: Engagement types
+          helpText: Choose one or more of the engagement purposess
+          choices:
+            train:
+              label: Train
+            advise:
+              label: Advise
+            assist:
+              label: Assist
+            other:
+              label: Other
+        trainingEvent:
+          type: enum
+          label: Training event
+          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+          choices:
+            YES:
+              label: "Yes"
+            NO:
+              label: "No"
+        numberTrained:
+          type: number
+          typeError: Number trained must be a number
+          label: Number trained
+          placeholder: Number of trainees
+          validations:
+            - type: integer
+            - type: min
+              params: [1]
+          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        levelTrained:
+          type: special_field
+          widget: likertScale
+          label: Level trained
+          helpText: Basic / Intermediate / Advanced
+          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+          levels:
+            - color: lightGray
+              endValue: 3
+              label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
+            - color: lightGray
+              endValue: 7
+              label: intermediate
+            - color: lightGray
+              endValue: 10
+              label: advanced advanced advanced advanced
+        systemProcess:
+          type: enum
+          label: System / process
+          visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+          choices:
+            YES:
+              label: System
+            NO:
+              label: Process
+        echelons:
+          type: text
+          label: Issue echelon to fix
+          placeholder:  Enter the issue echelon to fix
+          validations:
+            - type: required
+              params: [You must provide the text field]
+          visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        itemsAgreed:
+          type: array_of_objects
+          label: Items Agreed To
+          addButtonLabel: Add an item
+          objectLabel: Item agreed
+          objectFields:
+            item:
+              type: text
+              label: Item
+              placeholder: Enter description of the item that has been agreed to
+              validations:
+                - type: required
+                  params: [You must provide the text field]
+            dueDate:
+              type: date
+              label: Due date
+          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
+        assetsUsed:
+          type: array_of_objects
+          label: Assets used to assist
+          addButtonLabel: Add an asset
+          objectLabel: Asset used
+          objectFields:
+            asset:
+              type: text
+              label: Item
+              placeholder: Enter description of the asset
+            quantity:
+              type: number
+              typeError: Qty must be a number
+              label: Qty
+          visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
 
     person:
       firstName: First name
@@ -250,6 +362,7 @@ dictionary:
       emailAddress: Email
       phoneNumber: Phone
       country: Nationality
+      code: ID card number
       rank: Rank
       ranks:
         - value: CIV
@@ -313,6 +426,86 @@ dictionary:
           app6Modifier: K
       gender: Gender
       endOfTourDate: End of tour
+      customFields:
+        multipleButtons:
+          type: enumset
+          label: Choose one or more of the options
+          helpText: Help text for choosing multiple values
+          choices:
+            opt1:
+              label: Option 1
+            opt2:
+              label: Option 2
+            opt3:
+              label: Option 3
+        inputFieldName:
+          type: text
+          label: Text field
+          placeholder: Placeholder text for input field
+          helpText: Help text for text field
+          validations:
+            - type: required
+              params: [You must provide the text field]
+        colourOptions:
+          type: enum
+          label: Choose one of the colours
+          helpText: Help text for choosing colours
+          choices:
+            GREEN:
+              label: Green
+              color: '#c2ffb3'
+            AMBER:
+              label: Amber
+              color: '#ffe396'
+            RED:
+              label: Red
+              color: '#ff8279'
+        textareaFieldName:
+          type: text
+          label: Textarea field
+          placeholder: Placeholder text for textarea field
+          helpText: Help text for textarea field
+          componentClass: textarea
+          style:
+            height: 200px
+          visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        numberFieldName:
+          type: number
+          typeError: Number field must be a number
+          label: Number field
+          placeholder: Placeholder text for number field
+          helpText: Help text for number field
+          validations:
+            - type: integer
+            - type: min
+              params: [5]
+            - type: max
+              params: [100]
+          visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        nlt:
+          type: date
+          label: Not later than date
+          helpText: Help text for date field
+        nlt_dt:
+          type: datetime
+          label: Not later than datetime
+          helpText: Help text for datetime field
+        arrayFieldName:
+          type: array_of_objects
+          label: Array of objects
+          addButtonLabel: Add an object
+          objectLabel: Object
+          objectFields:
+            textF:
+              type: text
+              label: Object text
+              placeholder: Placeholder text for object text field
+              helpText: Help text for object text field
+            dateF:
+              type: date
+              label: Object date
+              helpText: Help text for object date field
+              visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
     position:
       name: 'Position Name'
@@ -466,9 +659,6 @@ dictionary:
   dashboards:
     - label: dashboard0
       data: /data/dashboards/dashboard0.json
-      type: kanban
-    - label: dashboard1
-      data: /data/dashboards/dashboard1.json
       type: kanban
     - label: decisives
       data: /data/dashboards/decisives.json

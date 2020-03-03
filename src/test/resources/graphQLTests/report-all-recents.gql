@@ -1,10 +1,10 @@
-locationRecents(maxResults: 6) {
+locationList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
     name
   }
 }
-personRecents(maxResults: 6) {
+personList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
     name
@@ -19,28 +19,29 @@ personRecents(maxResults: 6) {
       type
       status
       organization {
-	uuid
-	shortName
+        uuid
+        shortName
       }
       location {
-	uuid
-	name
+        uuid
+        name
       }
     }
   }
 }
-taskRecents(maxResults: 6) {
+taskList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
     shortName
     longName
-    responsibleOrg {
+    taskedOrganizations {
       uuid
       shortName
     }
+    customFields
   }
 }
-authorizationGroupRecents(maxResults: 6) {
+authorizationGroupList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
   list {
     uuid
     name

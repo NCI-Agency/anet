@@ -2,8 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -32,6 +32,7 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       avatar(size: 256)
+      code
       position {
         uuid
         name
@@ -42,12 +43,13 @@ const GQL_GET_PERSON = gql`
           identificationCode
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
 
-const PersonEdit = props => {
+const PersonEdit = ({ pageDispatchers }) => {
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
@@ -59,7 +61,7 @@ const PersonEdit = props => {
     uuid,
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -72,6 +74,7 @@ const PersonEdit = props => {
     const parsedFullName = Person.parseFullName(data.person.name)
     data.person.firstName = parsedFullName.firstName
     data.person.lastName = parsedFullName.lastName
+    data.person.formCustomFields = JSON.parse(data.person.customFields)
   }
   const person = new Person(data ? data.person : {})
   const legendText = person.isNewUser()
@@ -102,7 +105,7 @@ const PersonEdit = props => {
 }
 
 PersonEdit.propTypes = {
-  ...pagePropTypes
+  pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapDispatchToProps)(PersonEdit)
+export default connect(null, mapPageDispatchersToProps)(PersonEdit)

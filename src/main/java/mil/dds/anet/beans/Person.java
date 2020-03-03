@@ -1,7 +1,7 @@
 package mil.dds.anet.beans;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
-import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
@@ -15,9 +15,9 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 
-public class Person extends AbstractAnetBean implements Principal {
+public class Person extends AbstractCustomizableAnetBean implements Principal {
 
   public static enum PersonStatus {
     ACTIVE, INACTIVE, NEW_USER
@@ -27,32 +27,57 @@ public class Person extends AbstractAnetBean implements Principal {
     ADVISOR, PRINCIPAL
   }
 
+  @GraphQLQuery
+  @GraphQLInputField
   private String name;
+  @GraphQLQuery
+  @GraphQLInputField
   private PersonStatus status;
+  @GraphQLQuery
+  @GraphQLInputField
   private Role role;
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean pendingVerification;
-
+  @GraphQLQuery
+  @GraphQLInputField
   private String emailAddress;
+  @GraphQLQuery
+  @GraphQLInputField
   private String phoneNumber;
+  @GraphQLQuery
+  @GraphQLInputField
   private String gender;
+  @GraphQLQuery
+  @GraphQLInputField
   private String country;
+  @GraphQLQuery
+  @GraphQLInputField
   private Instant endOfTourDate;
-
+  @GraphQLQuery
+  @GraphQLInputField
   private String rank;
+  @GraphQLQuery
+  @GraphQLInputField
   private String biography;
+  @GraphQLQuery
+  @GraphQLInputField
   private String domainUsername;
-
+  // annotated below
   private Position position;
-
+  // annotated below
   private List<PersonPositionHistory> previousPositions;
-
+  // annotated below
   private String avatar;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String code;
 
   public Person() {
     this.pendingVerification = false; // Defaults
   }
 
-  @GraphQLQuery(name = "name")
+  @Override
   public String getName() {
     return name;
   }
@@ -61,7 +86,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  @GraphQLQuery(name = "status")
   public PersonStatus getStatus() {
     return status;
   }
@@ -70,7 +94,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.status = status;
   }
 
-  @GraphQLQuery(name = "role")
   public Role getRole() {
     return role;
   }
@@ -79,7 +102,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.role = role;
   }
 
-  @GraphQLQuery(name = "pendingVerification")
   public Boolean getPendingVerification() {
     return pendingVerification;
   }
@@ -88,7 +110,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.pendingVerification = pendingVerification;
   }
 
-  @GraphQLQuery(name = "emailAddress")
   public String getEmailAddress() {
     return emailAddress;
   }
@@ -97,7 +118,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.emailAddress = Utils.trimStringReturnNull(emailAddress);
   }
 
-  @GraphQLQuery(name = "phoneNumber")
   public String getPhoneNumber() {
     return phoneNumber;
   }
@@ -106,7 +126,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.phoneNumber = Utils.trimStringReturnNull(phoneNumber);
   }
 
-  @GraphQLQuery(name = "gender")
   public String getGender() {
     return gender;
   }
@@ -115,7 +134,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.gender = Utils.trimStringReturnNull(gender);
   }
 
-  @GraphQLQuery(name = "country")
   public String getCountry() {
     return country;
   }
@@ -124,7 +142,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.country = Utils.trimStringReturnNull(country);
   }
 
-  @GraphQLQuery(name = "endOfTourDate")
   public Instant getEndOfTourDate() {
     return endOfTourDate;
   }
@@ -133,7 +150,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.endOfTourDate = endOfTourDate;
   }
 
-  @GraphQLQuery(name = "rank")
   public String getRank() {
     return rank;
   }
@@ -142,7 +158,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.rank = Utils.trimStringReturnNull(rank);
   }
 
-  @GraphQLQuery(name = "biography")
   public String getBiography() {
     return biography;
   }
@@ -151,7 +166,6 @@ public class Person extends AbstractAnetBean implements Principal {
     this.biography = Utils.trimStringReturnNull(biography);
   }
 
-  @GraphQLQuery(name = "domainUsername")
   public String getDomainUsername() {
     return domainUsername;
   }
@@ -182,11 +196,11 @@ public class Person extends AbstractAnetBean implements Principal {
     return position;
   }
 
+  @GraphQLInputField(name = "position")
   public void setPosition(Position position) {
     this.position = position;
   }
 
-  @GraphQLIgnore
   public Position getPosition() {
     return position;
   }
@@ -204,11 +218,11 @@ public class Person extends AbstractAnetBean implements Principal {
         });
   }
 
-  @GraphQLIgnore
   public List<PersonPositionHistory> getPreviousPositions() {
     return previousPositions;
   }
 
+  @GraphQLInputField(name = "previousPositions")
   public void setPreviousPositions(List<PersonPositionHistory> previousPositions) {
     this.previousPositions = previousPositions;
   }
@@ -244,8 +258,17 @@ public class Person extends AbstractAnetBean implements Principal {
     return this.avatar;
   }
 
+  @GraphQLInputField(name = "avatar")
   public void setAvatar(String avatar) {
     this.avatar = avatar;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
   }
 
   @Override
@@ -260,18 +283,20 @@ public class Person extends AbstractAnetBean implements Principal {
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatar(), avatar) && (createdAt != null)
+        && Objects.equals(other.getAvatar(), avatar) && Objects.equals(other.getCode(), code)
+        && (createdAt != null)
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)
                 ? (updatedAt.equals(other.getUpdatedAt()))
-                : (other.getUpdatedAt() == null);
+                : (other.getUpdatedAt() == null)
+                    && Objects.equals(other.getCustomFields(), customFields);
     return b;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(uuid, name, status, role, emailAddress, phoneNumber, rank, biography,
-        createdAt, updatedAt, pendingVerification);
+        pendingVerification, avatar, code, createdAt, updatedAt);
   }
 
   @Override

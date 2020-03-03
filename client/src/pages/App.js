@@ -3,8 +3,8 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
@@ -30,6 +30,7 @@ const GQL_GET_APP_DATA = gql`
       emailAddress
       status
       avatar(size: 32)
+      code
       position {
         uuid
         name
@@ -93,15 +94,15 @@ const GQL_GET_APP_DATA = gql`
   }
 `
 
-const App = props => {
-  let appState = processData(window.ANET_DATA)
+const App = ({ pageDispatchers, pageProps }) => {
   const history = useHistory()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageProps,
+    pageDispatchers
   })
   if (done) {
     return result
@@ -112,7 +113,7 @@ const App = props => {
       <Messages error={error || { message: "Could not load initial data" }} />
     )
   }
-  appState = processData(data)
+  const appState = processData(data)
   // if this is a new user, redirect to onboarding
   if (
     appState.currentUser.isNewUser() &&
@@ -120,8 +121,6 @@ const App = props => {
   ) {
     return <Redirect to="/onboarding" />
   }
-
-  const { pageProps } = props
 
   return (
     <AppContext.Provider
@@ -152,7 +151,7 @@ const App = props => {
     organizations = Organization.fromArray(organizations)
     organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
 
-    let settings = {}
+    const settings = {}
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
     )
@@ -162,7 +161,7 @@ const App = props => {
 }
 
 App.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   pageProps: PropTypes.object
 }
 
@@ -170,4 +169,4 @@ const mapStateToProps = (state, ownProps) => ({
   pageProps: state.pageProps
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(mapStateToProps, mapPageDispatchersToProps)(App)

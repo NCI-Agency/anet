@@ -10,9 +10,8 @@ import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 
-const BaseOrganizationLaydown = props => {
+const BaseOrganizationLaydown = ({ currentUser, organization }) => {
   const [showInactivePositions, setShowInactivePositions] = useState(false)
-  const { currentUser, organization } = props
   const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
 
   const numInactivePos = organization.positions.filter(
@@ -43,11 +42,11 @@ const BaseOrganizationLaydown = props => {
             <ContainerDimensions>
               {({ width, height }) => (
                 <OrganizationalChart
-                  width={width}
-                  height={height}
                   label="test"
                   org={organization}
-                  size={{ width: "100%", height: 800 }}
+                  exportTitle={`Organization diagram for ${organization}`}
+                  width={width}
+                  height={height}
                 />
               )}
             </ContainerDimensions>
@@ -62,7 +61,8 @@ const BaseOrganizationLaydown = props => {
           <div>
             {isSuperUser && (
               <LinkTo
-                position={Position.pathForNew({
+                modelType="Position"
+                model={Position.pathForNew({
                   organizationUuid: organization.uuid
                 })}
                 button
@@ -152,13 +152,15 @@ const BaseOrganizationLaydown = props => {
       key += "." + other.uuid
       otherNameCol = (
         <td>
-          <LinkTo position={other}>{positionWithStatus(other)}</LinkTo>
+          <LinkTo modelType="Position" model={other}>
+            {positionWithStatus(other)}
+          </LinkTo>
         </td>
       )
 
       otherPersonCol = other.person ? (
         <td>
-          <LinkTo person={other.person}>
+          <LinkTo modelType="Person" model={other.person}>
             {personWithStatus(other.person)}
           </LinkTo>
         </td>
@@ -170,13 +172,15 @@ const BaseOrganizationLaydown = props => {
     if (otherIndex === 0) {
       positionNameCol = (
         <td>
-          <LinkTo position={position}>{positionWithStatus(position)}</LinkTo>
+          <LinkTo modelType="Position" model={position}>
+            {positionWithStatus(position)}
+          </LinkTo>
         </td>
       )
       positionPersonCol =
         position.person && position.person.uuid ? (
           <td>
-            <LinkTo person={position.person}>
+            <LinkTo modelType="Person" model={position.person}>
               {personWithStatus(position.person)}
             </LinkTo>
           </td>
@@ -210,7 +214,7 @@ const BaseOrganizationLaydown = props => {
   }
 
   function positionWithStatus(pos) {
-    let code = pos.code ? ` (${pos.code})` : ""
+    const code = pos.code ? ` (${pos.code})` : ""
     if (pos.status === Position.STATUS.INACTIVE) {
       return <i>{`${pos.name}${code} (Inactive)`}</i>
     } else {

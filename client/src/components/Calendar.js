@@ -11,58 +11,55 @@ import PropTypes from "prop-types"
 import React from "react"
 import "./Calendar.css"
 
-const Calendar = props => {
-  const { events, eventClick, calendarComponentRef } = props
-  return (
-    <FullCalendar
-      plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-      header={{
-        left: "prev,next today filterDraft",
-        center: "title",
-        right: "dayGridMonth,timeGridWeek,timeGridDay,listDay"
-      }}
-      buttonText={{
-        listDay: "list day"
-      }}
-      defaultView="dayGridMonth"
-      views={{
-        timeGridWeek: {
-          eventLimitClick: "day"
-        },
-        dayGrid: {
-          eventLimitClick: "popover"
-        }
-      }}
-      allDayDefault={false}
-      eventTimeFormat={{
-        hour: "2-digit",
-        minute: "2-digit",
-        meridiem: false,
-        omitZeroMinute: false,
-        hour12: false
-      }}
-      slotLabelFormat={{
-        hour: "2-digit",
-        minute: "2-digit",
-        meridiem: false,
-        omitZeroMinute: false,
-        hour12: false
-      }}
-      height="auto" // assume a natural height, no scrollbars will be used
-      aspectRatio={3} // ratio of width-to-height
-      timeGridEventMinHeight={20}
-      ref={calendarComponentRef}
-      events={events}
-      eventOverlap
-      eventLimit
-      eventClick={eventClick}
-      dateClick={info => {
-        const calendarApi = calendarComponentRef.current.getApi()
-        calendarApi.changeView("listDay", info.dateStr) // call a method on the Calendar object
-      }}
-    />
-  )
-}
+const Calendar = ({ events, eventClick, calendarComponentRef }) => (
+  <FullCalendar
+    plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+    header={{
+      left: "prev,next today filterDraft",
+      center: "title",
+      right: "dayGridMonth,timeGridWeek,timeGridDay,listDay"
+    }}
+    buttonText={{
+      listDay: "list day"
+    }}
+    defaultView="dayGridMonth"
+    views={{
+      timeGridWeek: {
+        eventLimitClick: "day"
+      },
+      dayGrid: {
+        eventLimitClick: "popover"
+      }
+    }}
+    allDayDefault={false}
+    eventTimeFormat={{
+      hour: "2-digit",
+      minute: "2-digit",
+      meridiem: false,
+      omitZeroMinute: false,
+      hour12: false
+    }}
+    slotLabelFormat={{
+      hour: "2-digit",
+      minute: "2-digit",
+      meridiem: false,
+      omitZeroMinute: false,
+      hour12: false
+    }}
+    height="auto" // assume a natural height, no scrollbars will be used
+    aspectRatio={3} // ratio of width-to-height
+    timeGridEventMinHeight={20}
+    ref={calendarComponentRef}
+    events={events}
+    eventOverlap
+    eventLimit
+    eventClick={eventClick}
+    dateClick={info => {
+      const calendarApi = calendarComponentRef.current.getApi()
+      calendarApi.changeView("listDay", info.dateStr) // call a method on the Calendar object
+    }}
+  />
+)
 
 Calendar.propTypes = {
   events: PropTypes.func.isRequired,

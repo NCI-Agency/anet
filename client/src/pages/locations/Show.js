@@ -8,8 +8,8 @@ import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -52,7 +52,7 @@ Coordinate.propTypes = {
   coord: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
-const BaseLocationShow = props => {
+const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
@@ -65,7 +65,7 @@ const BaseLocationShow = props => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
   if (done) {
     return result
@@ -74,11 +74,10 @@ const BaseLocationShow = props => {
   const location = new Location(data ? data.location : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const { currentUser, ...myFormProps } = props
   const canEdit = currentUser.isSuperUser()
 
   return (
-    <Formik enableReinitialize initialValues={location} {...myFormProps}>
+    <Formik enableReinitialize initialValues={location}>
       {({ values }) => {
         const marker = {
           id: location.uuid || 0,
@@ -91,7 +90,13 @@ const BaseLocationShow = props => {
           })
         }
         const action = canEdit && (
-          <LinkTo anetLocation={location} edit button="primary" id="editButton">
+          <LinkTo
+            modelType="Location"
+            model={location}
+            edit
+            button="primary"
+            id="editButton"
+          >
             Edit
           </LinkTo>
         )
@@ -110,20 +115,17 @@ const BaseLocationShow = props => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Location ${location.name}`} action={action} />
               <Fieldset>
-                <Field
-                  name="name"
-                  component={FieldHelper.renderReadonlyField}
-                />
+                <Field name="name" component={FieldHelper.ReadonlyField} />
 
                 <Field
                   name="status"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfStatus}
                 />
 
                 <Field
                   name="location"
-                  component={FieldHelper.renderReadonlyField}
+                  component={FieldHelper.ReadonlyField}
                   humanValue={
                     <>
                       <Coordinate coord={location.lat} />,{" "}
@@ -157,7 +159,7 @@ const BaseLocationShow = props => {
 }
 
 BaseLocationShow.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -169,4 +171,4 @@ const LocationShow = props => (
   </AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(LocationShow)
+export default connect(null, mapPageDispatchersToProps)(LocationShow)

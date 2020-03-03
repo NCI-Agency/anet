@@ -1,15 +1,13 @@
 import PropTypes from "prop-types"
-import { Component } from "react"
 import ReactDOM from "react-dom"
 
-export default class SubNav extends Component {
-  static propTypes = {
-    subnavElemId: PropTypes.string.isRequired,
-    children: PropTypes.node
-  }
-
-  render() {
-    const subnavElem = document.getElementById(this.props.subnavElemId)
-    return subnavElem && ReactDOM.createPortal(this.props.children, subnavElem)
-  }
+const SubNav = ({ subnavElemId, children }) => {
+  const subnavElem = document.getElementById(subnavElemId)
+  return subnavElem && ReactDOM.createPortal(children, subnavElem)
 }
+SubNav.propTypes = {
+  subnavElemId: PropTypes.string.isRequired,
+  children: PropTypes.node
+}
+
+export default SubNav

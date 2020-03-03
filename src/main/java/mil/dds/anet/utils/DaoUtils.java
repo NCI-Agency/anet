@@ -2,8 +2,6 @@ package mil.dds.anet.utils;
 
 import com.google.common.base.Joiner;
 import java.lang.invoke.MethodHandles;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,7 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +71,10 @@ public class DaoUtils {
     return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.MSSQL;
   }
 
+  public static boolean isPostgresql() {
+    return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.POSTGRESQL;
+  }
+
   public static String getNewUuid() {
     return UUID.randomUUID().toString();
   }
@@ -90,37 +91,6 @@ public class DaoUtils {
     bean.setUpdatedAt(now);
   }
 
-  public static void setCommonBeanFields(AbstractAnetBean bean, ResultSet rs, String tableName)
-      throws SQLException {
-    // Should always be there
-    bean.setUuid(rs.getString(getQualifiedFieldName(tableName, "uuid")));
-
-    // Not all beans have createdAt and/or updatedAt
-    final String createdAtCol = getQualifiedFieldName(tableName, "createdAt");
-    if (MapperUtils.containsColumnNamed(rs, createdAtCol)) {
-      bean.setCreatedAt(getInstantAsLocalDateTime(rs, createdAtCol));
-    }
-    final String updatedAtCol = getQualifiedFieldName(tableName, "updatedAt");
-    if (MapperUtils.containsColumnNamed(rs, updatedAtCol)) {
-      bean.setUpdatedAt(getInstantAsLocalDateTime(rs, updatedAtCol));
-    }
-
-    // Only present when batch searching
-    if (MapperUtils.containsColumnNamed(rs, "batchUuid")) {
-      bean.setBatchUuid(rs.getString("batchUuid"));
-    }
-  }
-
-  private static String getQualifiedFieldName(String tableName, String fieldName) {
-    final StringBuilder result = new StringBuilder();
-    if (!Utils.isEmptyOrNull(tableName)) {
-      result.append(tableName);
-      result.append("_");
-    }
-    result.append(fieldName);
-    return result.toString();
-  }
-
   public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {
     final List<String> fieldAliases = new LinkedList<String>();
     for (String field : fields) {
@@ -131,18 +101,6 @@ public class DaoUtils {
       fieldAliases.add(sb.toString());
     }
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
-  }
-
-  public static Double getOptionalDouble(final ResultSet rs, final String columnName)
-      throws SQLException {
-    final Double value = rs.getDouble(columnName);
-    return rs.wasNull() ? null : value;
-  }
-
-  public static Integer getOptionalInt(final ResultSet rs, final String columnName)
-      throws SQLException {
-    final Integer value = rs.getInt(columnName);
-    return rs.wasNull() ? null : value;
   }
 
   public static Person getUser(Map<String, Object> context, Person user) {
@@ -162,17 +120,6 @@ public class DaoUtils {
 
   public static ZoneOffset getDefaultZoneOffset() {
     return ZoneOffset.UTC;
-  }
-
-  public static Instant getInstantAsLocalDateTime(ResultSet rs, String field) throws SQLException {
-    // We would like to do <code>rs.getObject(field, java.time.Instant.class)</code>
-    // but the MSSQL JDBC driver does not support that (yet).
-    // However, as of the 7.1.0 preview, at least java.time.LocalDateTime *is* supported.
-    final LocalDateTime result = rs.getObject(field, LocalDateTime.class);
-    if (result != null) {
-      return result.toInstant(getDefaultZoneOffset());
-    }
-    return null;
   }
 
   public static void addInstantAsLocalDateTime(Map<String, Object> args, String parameterName,
@@ -199,13 +146,13 @@ public class DaoUtils {
    * Unix Epoch, OR a number of milliseconds relative to today's date. Relative times should be
    * milliseconds less than one year. Since it doesn't make sense to look for any date before 1971.
    */
-  private static final long MILLIS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+  private static final long MILLIS_IN_YEAR = 1000L * 60L * 60L * 24L * 365L;
 
   public static boolean isRelativeDate(Instant input) {
     if (input == null) {
       return false;
     }
-    final Long millis = input.toEpochMilli();
+    final long millis = input.toEpochMilli();
     return millis < MILLIS_IN_YEAR;
   }
 

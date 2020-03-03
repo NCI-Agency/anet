@@ -249,7 +249,7 @@ public class AccountDeactivationWorkerTest {
     assertThat(emails.size()).isEqualTo(1);
 
     assertThat(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
-        && e.getToAddresses().contains("test1_eot_acive@test.com")));
+        && e.getToAddresses().contains("test1_eot_acive@test.com"))).isTrue();
   }
 
   @Test

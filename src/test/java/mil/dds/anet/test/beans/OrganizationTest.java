@@ -4,7 +4,7 @@ import java.util.UUID;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class OrganizationTest extends BeanTester<Organization> {
 

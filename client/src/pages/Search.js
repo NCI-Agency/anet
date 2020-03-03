@@ -2,7 +2,8 @@ import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   SEARCH_OBJECT_LABELS,
-  SEARCH_OBJECT_TYPES
+  SEARCH_OBJECT_TYPES,
+  setPagination
 } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
@@ -12,15 +13,18 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  getSearchQuery,
+  PageDispatchersPropType,
   jumpToTop,
-  mapDispatchToProps,
-  propTypes as pagePropTypes,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import ReportCollection from "components/ReportCollection"
-import { SearchDescription } from "components/SearchFilters"
+import {
+  SearchDescription,
+  SearchQueryPropType,
+  getSearchQuery
+} from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
@@ -31,7 +35,7 @@ import _isEqual from "lodash/isEqual"
 import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Badge,
@@ -170,14 +174,14 @@ const GQL_GET_LOCATION_LIST = gql`
 
 const DEFAULT_PAGESIZE = 10
 
-const Organizations = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    paginationKey,
-    pagination,
-    setPagination
-  } = props
+const Organizations = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
@@ -203,7 +207,7 @@ const Organizations = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     // Reset the total count
@@ -242,7 +246,7 @@ const Organizations = props => {
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
                 <td>
-                  <LinkTo organization={org} />
+                  <LinkTo modelType="Organization" model={org} />
                 </td>
                 <td>{org.longName}</td>
                 <td>{org.identificationCode}</td>
@@ -262,6 +266,7 @@ const Organizations = props => {
 }
 
 Organizations.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
@@ -269,14 +274,14 @@ Organizations.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
-const People = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    paginationKey,
-    pagination,
-    setPagination
-  } = props
+const People = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
@@ -302,7 +307,7 @@ const People = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     // Reset the total count
@@ -340,23 +345,27 @@ const People = props => {
             {Person.map(people, person => (
               <tr key={person.uuid}>
                 <td>
-                  <LinkTo person={person} />
+                  <LinkTo modelType="Person" model={person} />
                 </td>
                 <td>
-                  <LinkTo position={person.position} />
+                  <LinkTo modelType="Position" model={person.position} />
                   {person.position && person.position.code
                     ? `, ${person.position.code}`
                     : ""}
                 </td>
                 <td>
                   <LinkTo
+                    modelType="Location"
+                    model={person.position && person.position.location}
                     whenUnspecified=""
-                    anetLocation={person.position && person.position.location}
                   />
                 </td>
                 <td>
                   {person.position && person.position.organization && (
-                    <LinkTo organization={person.position.organization} />
+                    <LinkTo
+                      modelType="Organization"
+                      model={person.position.organization}
+                    />
                   )}
                 </td>
               </tr>
@@ -374,6 +383,7 @@ const People = props => {
 }
 
 People.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
@@ -381,14 +391,14 @@ People.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
-const Positions = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    paginationKey,
-    pagination,
-    setPagination
-  } = props
+const Positions = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
@@ -414,7 +424,7 @@ const Positions = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     // Reset the total count
@@ -423,12 +433,20 @@ const Positions = props => {
   }
 
   const paginatedPositions = data ? data.positionList : []
-  const totalCount = paginatedPositions && data.positionList.totalCount
+  const {
+    pageSize,
+    pageNum: curPage,
+    totalCount,
+    list: positions
+  } = paginatedPositions
   setTotalCount(totalCount)
 
   return (
     <PositionTable
-      paginatedPositions={paginatedPositions}
+      positions={positions}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
       goToPage={setPage}
       id="positions-search-results"
     />
@@ -441,6 +459,7 @@ const Positions = props => {
 }
 
 Positions.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
@@ -448,14 +467,14 @@ Positions.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
-const Tasks = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    paginationKey,
-    pagination,
-    setPagination
-  } = props
+const Tasks = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
@@ -481,7 +500,7 @@ const Tasks = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     // Reset the total count
@@ -493,7 +512,7 @@ const Tasks = props => {
   const totalCount = data && data.taskList && data.taskList.totalCount
   setTotalCount(totalCount)
   if (_get(tasks, "length", 0) === 0) {
-    return <em>No tasks found</em>
+    return <em>No {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]} found</em>
   }
 
   return (
@@ -516,7 +535,7 @@ const Tasks = props => {
             {Task.map(tasks, task => (
               <tr key={task.uuid}>
                 <td>
-                  <LinkTo task={task}>
+                  <LinkTo modelType="Task" model={task}>
                     {task.shortName} {task.longName}
                   </LinkTo>
                 </td>
@@ -535,6 +554,7 @@ const Tasks = props => {
 }
 
 Tasks.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
@@ -542,14 +562,14 @@ Tasks.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
-const Locations = props => {
-  const {
-    queryParams,
-    setTotalCount,
-    paginationKey,
-    pagination,
-    setPagination
-  } = props
+const Locations = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
   const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
@@ -575,7 +595,7 @@ const Locations = props => {
   const { done, result } = useBoilerplate({
     loading,
     error,
-    ...props
+    pageDispatchers
   })
   if (done) {
     // Reset the total count
@@ -610,7 +630,7 @@ const Locations = props => {
             {locations.map(loc => (
               <tr key={loc.uuid}>
                 <td>
-                  <LinkTo anetLocation={loc} />
+                  <LinkTo modelType="Location" model={loc} />
                 </td>
               </tr>
             ))}
@@ -627,6 +647,7 @@ const Locations = props => {
 }
 
 Locations.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
@@ -638,8 +659,12 @@ const sum = (...args) => {
   return args.reduce((prev, curr) => (curr === null ? prev : prev + curr))
 }
 
-const Search = props => {
-  const { searchQuery, pagination, setPagination } = props
+const Search = ({
+  pageDispatchers,
+  searchQuery,
+  pagination,
+  setPagination
+}) => {
   const history = useHistory()
   const [error, setError] = useState(null)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
@@ -658,7 +683,26 @@ const Search = props => {
     numReports
   )
   const taskShortLabel = Settings.fields.task.shortLabel
-  const searchQueryParams = getSearchQuery(searchQuery)
+  // Memo'ize the search query parameters we use to prevent unnecessary re-renders
+  const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
+    searchQuery
+  ])
+  const genericSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "NAME",
+        sortOrder: "ASC"
+      }),
+    [searchQueryParams]
+  )
+  const reportsSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "ENGAGEMENT_DATE",
+        sortOrder: "DESC"
+      }),
+    [searchQueryParams]
+  )
   const queryTypes = _isEmpty(searchQueryParams)
     ? []
     : searchQuery.objectType
@@ -680,7 +724,7 @@ const Search = props => {
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    ...props
+    pageDispatchers
   })
 
   return (
@@ -779,7 +823,7 @@ const Search = props => {
         <h2 className="only-show-for-print">
           Search query: {searchQuery.text}
           <br />
-          Filters: <SearchDescription query={searchQuery} />
+          Filters: <SearchDescription searchQuery={searchQuery} />
         </h2>
       )}
       {_isEmpty(searchQueryParams) && (
@@ -794,131 +838,76 @@ const Search = props => {
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) && (
         <Fieldset id="organizations" title="Organizations">
-          {renderOrganizations(searchQueryParams)}
+          <Organizations
+            pageDispatchers={pageDispatchers}
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumOrganizations}
+            paginationKey="SEARCH_organizations"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && (
         <Fieldset id="people" title="People">
-          {renderPeople(searchQueryParams)}
+          <People
+            pageDispatchers={pageDispatchers}
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumPeople}
+            paginationKey="SEARCH_people"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && (
         <Fieldset id="positions" title="Positions">
-          {renderPositions(searchQueryParams)}
+          <Positions
+            pageDispatchers={pageDispatchers}
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumPositions}
+            paginationKey="SEARCH_positions"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && (
         <Fieldset id="tasks" title={pluralize(taskShortLabel)}>
-          {renderTasks(searchQueryParams)}
+          <Tasks
+            pageDispatchers={pageDispatchers}
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumTasks}
+            paginationKey="SEARCH_tasks"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && (
         <Fieldset id="locations" title="Locations">
-          {renderLocations(searchQueryParams)}
+          <Locations
+            pageDispatchers={pageDispatchers}
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumLocations}
+            paginationKey="SEARCH_locations"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && (
         <Fieldset id="reports" title="Reports">
-          {renderReports(searchQueryParams)}
+          <ReportCollection
+            queryParams={reportsSearchQueryParams}
+            setTotalCount={setNumReports}
+            paginationKey="SEARCH_reports"
+          />
         </Fieldset>
       )}
       {renderSaveModal()}
     </div>
   )
-
-  function renderOrganizations(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Organizations
-        queryParams={queryParams}
-        setTotalCount={setNumOrganizations}
-        paginationKey="SEARCH_organizations"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderPeople(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <People
-        queryParams={queryParams}
-        setTotalCount={setNumPeople}
-        paginationKey="SEARCH_people"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderPositions(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Positions
-        queryParams={queryParams}
-        setTotalCount={setNumPositions}
-        paginationKey="SEARCH_positions"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderTasks(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Tasks
-        queryParams={queryParams}
-        setTotalCount={setNumTasks}
-        paginationKey="SEARCH_tasks"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderLocations(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "NAME",
-      sortOrder: "ASC"
-    })
-    return (
-      <Locations
-        queryParams={queryParams}
-        setTotalCount={setNumLocations}
-        paginationKey="SEARCH_locations"
-        pagination={pagination}
-        setPagination={setPagination}
-      />
-    )
-  }
-
-  function renderReports(searchQueryParams) {
-    const queryParams = Object.assign({}, searchQueryParams, {
-      sortBy: "ENGAGEMENT_DATE",
-      sortOrder: "DESC"
-    })
-    return (
-      <ReportCollection
-        queryParams={queryParams}
-        setTotalCount={setNumReports}
-        paginationKey="SEARCH_reports"
-      />
-    )
-  }
 
   function renderSaveModal() {
     return (
@@ -933,30 +922,28 @@ const Search = props => {
             onSubmit={onSubmitSaveSearch}
             initialValues={{ name: "" }}
           >
-            {({ values, submitForm }) => {
-              return (
-                <Form>
-                  <Field
-                    name="name"
-                    component={FieldHelper.renderInputField}
-                    placeholder="Give this saved search a name"
-                    vertical
-                  />
-                  <div className="submit-buttons">
-                    <div>
-                      <Button
-                        id="saveSearchModalSubmitButton"
-                        bsStyle="primary"
-                        type="button"
-                        onClick={submitForm}
-                      >
-                        Save
-                      </Button>
-                    </div>
+            {({ values, submitForm }) => (
+              <Form>
+                <Field
+                  name="name"
+                  component={FieldHelper.InputField}
+                  placeholder="Give this saved search a name"
+                  vertical
+                />
+                <div className="submit-buttons">
+                  <div>
+                    <Button
+                      id="saveSearchModalSubmitButton"
+                      bsStyle="primary"
+                      type="button"
+                      onClick={submitForm}
+                    >
+                      Save
+                    </Button>
                   </div>
-                </Form>
-              )
-            }}
+                </div>
+              </Form>
+            )}
           </Formik>
         </Modal.Body>
       </Modal>
@@ -1003,9 +990,19 @@ const Search = props => {
 }
 
 Search.propTypes = {
-  ...pagePropTypes,
+  pageDispatchers: PageDispatchersPropType,
   pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
+  setPagination: PropTypes.func.isRequired,
+  searchQuery: SearchQueryPropType
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
+  return {
+    setPagination: (pageKey, pageNum) =>
+      dispatch(setPagination(pageKey, pageNum)),
+    ...pageDispatchers
+  }
 }
 
 const mapStateToProps = (state, ownProps) => ({
