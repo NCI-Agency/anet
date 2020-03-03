@@ -120,7 +120,7 @@
     "formik": "2.1.4",
     "graphiql": "0.17.5",
     "hopscotch": "0.3.1",
-    "html-react-parser": "^0.9.1",
+    "html-react-parser": "0.10.1",
     "jsonpath-plus": "3.0.0",
     "leaflet": "1.6.0",
     "leaflet-defaulticon-compatibility": "0.1.1",
