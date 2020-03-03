@@ -1,14 +1,17 @@
+plugins {
+	id "org.kordamp.markdown.convert" version "1.2.0"
+	id "com.bmuschko.docker-remote-api" version "6.1.4"
+	id "com.github.node-gradle.node" version "2.2.3"
+	id "com.diffplug.gradle.spotless" version "3.27.1"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
-apply plugin: 'org.kordamp.markdown.convert'
-apply plugin: 'com.bmuschko.docker-remote-api'
-apply plugin: 'com.moowork.node'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
-apply plugin: 'com.diffplug.gradle.spotless'
 
 sourceCompatibility = 1.8
 
@@ -446,19 +449,6 @@ distributions {
 				from('lib/sqljdbc_auth.dll')
 			}
 		}
-	}
-}
-
-//Add gradle plugin repos
-buildscript {
-	repositories {
-		gradlePluginPortal()
-	}
-	dependencies {
-		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:6.1.4'
-		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.27.1"
 	}
 }
 
