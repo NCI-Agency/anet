@@ -117,10 +117,10 @@ public class AccountDeactivationWorker implements Runnable {
     // Sort in descending order so largest value is first (so there is no need to make multiple
     // queries)
     Collections.sort(warningDays, Collections.reverseOrder());
-    final Long daysUntilEndOfTour = Duration.between(now, person.getEndOfTourDate())
+    final long daysUntilEndOfTour = Duration.between(now, person.getEndOfTourDate())
         .plus(this.warningIntervalInSecs, ChronoUnit.SECONDS).toDays();
 
-    // Find the most appropiate warning point
+    // Find the most appropriate warning point
     Integer currentConfiguredWarning = warningDays.get(0);
     Integer previousConfiguredWarning = null;
     Integer nextConfiguredWarning = warningDays.size() > 1 ? warningDays.get(1) : null;

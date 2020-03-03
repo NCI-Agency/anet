@@ -14,6 +14,7 @@ public class EmailDeactivationWarningDao
   public static String TABLE_NAME = "emailDeactivationWarnings";
   public static String EDW_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
+  @Override
   public EmailDeactivationWarning getByUuid(final String uuid) {
     throw new UnsupportedOperationException();
   }
