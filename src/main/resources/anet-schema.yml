@@ -94,6 +94,15 @@ definitions:
             params:
               type: array
           required: [type]
+      aggregation:
+        type: object
+        properties:
+          widget:
+            type: string
+            enum: [likertScaleAggregation, NumberAggregationdefault]
+          aggregationType:
+            type: string
+            enum: [avg, sum, default]
 
 # TODO: The following properties should not be here as these are only dependency fields.
 # I can't figure out yet why the schema validation will not pass without them

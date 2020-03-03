@@ -1,5 +1,9 @@
 import { Settings } from "api"
-import Model, { createYupObjectShape, yupDate } from "components/Model"
+import Model, {
+  createYupObjectShape,
+  NOTE_TYPE,
+  yupDate
+} from "components/Model"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -162,5 +166,27 @@ export default class Task extends Model {
 
   toString() {
     return `${this.shortName}`
+  }
+
+  getAssessmentResults() {
+    const taskAssessmentNotes = this.notes
+      .filter(
+        n =>
+          n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.filter(
+            ro =>
+              ro.relatedObjectType === "tasks" &&
+              ro.relatedObjectUuid === this.uuid
+          ).length
+      )
+      .map(ta => JSON.parse(ta.text))
+    const assessmentResults = {}
+    taskAssessmentNotes.forEach(o =>
+      Object.keys(o).forEach(k => {
+        assessmentResults[k] = assessmentResults[k] || []
+        assessmentResults[k].push(o[k])
+      })
+    )
+    return assessmentResults
   }
 }

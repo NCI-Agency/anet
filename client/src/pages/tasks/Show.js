@@ -1,6 +1,7 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import AggregationWidget from "components/AggregationWidgets"
 import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -149,6 +150,22 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
+
+  const taskAssessmentDef = JSON.parse(
+    JSON.parse(task.customFields || "{}").assessmentDefinition || "{}"
+  )
+  const taskAssessmentResults = task.getAssessmentResults()
+  const assessmentResultsWidgets = []
+  Object.keys(taskAssessmentDef).forEach(key => {
+    assessmentResultsWidgets.push(
+      <AggregationWidget
+        key={key}
+        label={taskAssessmentDef[key].label}
+        values={taskAssessmentResults[key]}
+        {...taskAssessmentDef[key].aggregation}
+      />
+    )
+  })
 
   return (
     <Formik enableReinitialize initialValues={task}>
@@ -322,6 +339,15 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 mapId="reports"
               />
             </Fieldset>
+
+            {assessmentResultsWidgets && (
+              <Fieldset
+                title="Task assessments results"
+                id="task-assessments-results"
+              >
+                {assessmentResultsWidgets}
+              </Fieldset>
+            )}
           </div>
         )
       }}
