@@ -242,7 +242,7 @@ test("Draft and submit a report", async t => {
 })
 
 test("Publish report chain", async t => {
-  t.plan(7)
+  t.plan(6)
 
   const {
     pageHelpers,
@@ -258,34 +258,6 @@ test("Publish report chain", async t => {
   } = t.context
 
   await httpRequestSmtpServer("DELETE")
-
-  // Try to have Erin approve her own report
-  await t.context.get("/", "erin")
-  const $homeTileErin = await $$(".home-tile")
-  const [
-    /* eslint-disable no-unused-vars */ $draftReportsErin /* eslint-enable no-unused-vars */,
-    $reportsPendingErin,
-    /* eslint-disable no-unused-vars */
-    $orgReportsErin,
-    $plannedEngagementsErin
-    /* eslint-enable no-unused-vars */
-  ] = $homeTileErin
-  await t.context.driver.wait(
-    until.elementIsVisible($reportsPendingErin),
-    mediumWaitMs
-  )
-  await $reportsPendingErin.click()
-  await t.context.driver.wait(
-    until.stalenessOf($reportsPendingErin),
-    mediumWaitMs
-  )
-  const $reportCollection = await $(".report-collection em")
-  await assertElementText(
-    t,
-    $reportCollection,
-    "No reports found",
-    "Erin should not be allowed to approve her own reports"
-  )
 
   // First Jacob needs to approve the report, then Rebecca can approve the report
   await approveReport(t, "jacob")
