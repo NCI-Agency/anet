@@ -1,6 +1,7 @@
 import { Settings } from "api"
 import LinkTo from "components/LinkTo"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -21,20 +22,25 @@ const TaskTable = ({
   return (
     <div id={id}>
       {tasksExist ? (
-        <div>
-          <Table striped condensed hover responsive className="tasks_table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                {/* TODO: Implement conditional labels, until then, we need to be explicit here */}
-                {showParent && <th>Objective</th>}
-                {showOrganization && <th>Tasked organizations</th>}
-                {showDescription && <th>Description</th>}
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {Task.map(tasks, task => (
+        <Table striped condensed hover responsive className="tasks_table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              {showParent && (
+                <th>{Settings.fields.task.topLevel.shortLabel}</th>
+              )}
+              {showOrganization && <th>Tasked organizations</th>}
+              {showDescription && <th>Description</th>}
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {Task.map(tasks, task => {
+              const isTopLevelTask = _isEmpty(task.customFieldRef1)
+              const fieldSettings = isTopLevelTask
+                ? Settings.fields.task.topLevel
+                : Settings.fields.task.subLevel
+              return (
                 <tr key={task.uuid}>
                   <td className="taskName">
                     <LinkTo modelType="Task" model={task}>
@@ -75,24 +81,18 @@ const TaskTable = ({
                         <img
                           src={REMOVE_ICON}
                           height={14}
-                          alt={`Remove ${Settings.fields.task.shortLabel}`}
+                          alt={`Remove ${fieldSettings.shortLabel}`}
                         />
                       </span>
                     </td>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-
-          {tasks.length === 0 && (
-            <p style={{ textAlign: "center" }}>
-              <em>No {Settings.fields.task.shortLabel} selected.</em>
-            </p>
-          )}
-        </div>
+              )
+            })}
+          </tbody>
+        </Table>
       ) : (
-        <em>No effort found</em>
+        <em>No {Settings.fields.task.shortLabel} found</em>
       )}
     </div>
   )

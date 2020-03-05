@@ -614,8 +614,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               <Fieldset title="Meeting attendees">
                 <AttendeesTable attendees={report.attendees} disabled />
               </Fieldset>
-              {/* TODO: Implement conditional labels, until then, we need to be explicit here */}
-              <Fieldset title="Efforts">
+              <Fieldset title={Settings.fields.task.subLevel.longLabel}>
                 <TaskTable tasks={report.tasks} showParent />
               </Fieldset>
               {report.reportText && (

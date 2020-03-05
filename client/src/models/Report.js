@@ -182,7 +182,7 @@ export default class Report extends Model {
           function(tasks) {
             return _isEmpty(tasks)
               ? this.createError({
-                message: `You must provide at least one ${Settings.fields.task.shortLabel}`
+                message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
               })
               : true
           }

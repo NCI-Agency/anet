@@ -423,10 +423,10 @@ const BaseReportForm = ({
           }
         }
 
-        const tasksFiltersLevel = {}
+        const tasksFilters = {}
 
         if (currentOrg) {
-          tasksFiltersLevel.assignedToMyOrg = {
+          tasksFilters.assignedToMyOrg = {
             label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
               taskedOrgUuid: currentOrg.uuid,
@@ -445,7 +445,7 @@ const BaseReportForm = ({
           primaryAdvisor?.position?.organization &&
           primaryAdvisor.position.organization.uuid !== currentOrg?.uuid
         ) {
-          tasksFiltersLevel.assignedToReportOrg = {
+          tasksFilters.assignedToReportOrg = {
             label: `Assigned to ${primaryAdvisor.position.organization}`,
             queryVars: {
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
@@ -456,8 +456,8 @@ const BaseReportForm = ({
         }
 
         if (currentUser.isAdmin()) {
-          tasksFiltersLevel.allTasks = {
-            label: "All efforts", // TODO: Implement conditional labels, until then, we need to be explicit here
+          tasksFilters.allTasks = {
+            label: `All ${pluralize(Settings.fields.task.subLevel.shortLabel)}`,
             queryVars: { hasCustomFieldRef1: true }
           }
         }
@@ -799,12 +799,12 @@ const BaseReportForm = ({
               </Fieldset>
 
               <Fieldset
-                title="Efforts" // TODO: Implement conditional labels, until then, we need to be explicit here
+                title={Settings.fields.task.subLevel.longLabel}
                 className="tasks-selector"
               >
                 <Field
                   name="tasks"
-                  label="Efforts" // TODO: Implement conditional labels, until then, we need to be explicit here
+                  label={Settings.fields.task.subLevel.longLabel}
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -816,7 +816,7 @@ const BaseReportForm = ({
                     <AdvancedMultiSelect
                       fieldName="tasks"
                       placeholder={`Search for ${pluralize(
-                        Settings.fields.task.shortLabel
+                        Settings.fields.task.subLevel.shortLabel
                       )}...`}
                       value={values.tasks}
                       renderSelected={
@@ -829,11 +829,11 @@ const BaseReportForm = ({
                         />
                       }
                       overlayColumns={[
-                        "Effort", // TODO: Implement conditional labels, until then, we need to be explicit here
-                        "Objective"
+                        Settings.fields.task.subLevel.shortLabel,
+                        Settings.fields.task.topLevel.shortLabel
                       ]}
                       overlayRenderRow={TaskDetailedOverlayRow}
-                      filterDefs={tasksFiltersLevel}
+                      filterDefs={tasksFilters}
                       objectType={Task}
                       queryParams={{ status: Task.STATUS.ACTIVE }}
                       fields={Task.autocompleteQuery}
@@ -844,7 +844,7 @@ const BaseReportForm = ({
                     <>
                       <FieldHelper.FieldShortcuts
                         title={`Recent ${pluralize(
-                          Settings.fields.task.shortLabel
+                          Settings.fields.task.subLevel.shortLabel
                         )}`}
                         shortcuts={recents.tasks}
                         fieldName="tasks"
