@@ -21,6 +21,30 @@ jobs:
         java-version: 1.8
     - run: echo "::add-path::./.gradle/yarn/yarn-latest/bin"
     - run: echo "::add-path::./.gradle/nodejs/*/bin"
+    - name: cache gradle
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: cache node
+      uses: actions/cache@v1
+      with:
+        path: ./client/node_modules/.cache
+        key: ${{ runner.os }}-node
+        restore-keys: |
+          ${{ runner.os }}-node
+    - name: get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: cache yarn
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
     - run: ./gradlew jar
     - working-directory: ./client
       run: yarn lint
@@ -30,7 +54,7 @@ jobs:
     name: Test with ${{ matrix.database.DB_DRIVER }}
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      fail-fast: false
       matrix:
         database:
         - DB_DRIVER: sqlserver
@@ -49,10 +73,32 @@ jobs:
         java-version: 1.8
     - run: echo "::add-path::./.gradle/yarn/yarn-latest/bin"
     - run: echo "::add-path::./.gradle/nodejs/*/bin"
+    - uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - uses: actions/cache@v1
+      with:
+        path: ./client/node_modules/.cache
+        key: ${{ runner.os }}-node
+        restore-keys: |
+          ${{ runner.os }}-node
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - uses: actions/cache@v1
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
-    - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB dbWait dbMigrate dbLoad
+    - run: ./gradlew -PtestEnv jar
+    - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
     - run: ./gradlew -PtestEnv check test jacocoTestReport
-    - run: ./gradlew -PtestEnv run & SERVER_PID=$!
+    - run: ./gradlew -PtestEnv run &
     - working-directory: ./client
       run: yarn test-all
-    - run: kill $SERVER_PID
