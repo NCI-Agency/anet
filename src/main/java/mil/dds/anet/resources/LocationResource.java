@@ -4,10 +4,12 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -16,12 +18,15 @@ import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 
 public class LocationResource {
 
+  private final AnetObjectEngine engine;
   private final LocationDao dao;
 
   public LocationResource(AnetObjectEngine engine) {
+    this.engine = engine;
     this.dao = engine.getLocationDao();
   }
 
@@ -49,7 +54,24 @@ public class LocationResource {
     if (l.getName() == null || l.getName().trim().length() == 0) {
       throw new WebApplicationException("Location name must not be empty", Status.BAD_REQUEST);
     }
-    l = dao.insert(l);
+    final Location created = dao.insert(l);
+    if (l.getPlanningApprovalSteps() != null) {
+      // Create the planning approval steps
+      for (ApprovalStep step : l.getPlanningApprovalSteps()) {
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(created.getUuid());
+        engine.getApprovalStepDao().insertAtEnd(step);
+      }
+    }
+    if (l.getApprovalSteps() != null) {
+      // Create the approval steps
+      for (ApprovalStep step : l.getApprovalSteps()) {
+        Utils.validateApprovalStep(step);
+        step.setRelatedObjectUuid(created.getUuid());
+        engine.getApprovalStepDao().insertAtEnd(step);
+      }
+    }
+
     AnetAuditLogger.log("Location {} created by {}", l, user);
     return l;
   }
@@ -63,6 +85,15 @@ public class LocationResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process location update", Status.NOT_FOUND);
     }
+
+    // Load the existing location, so we can check for differences.
+    final Location existing = dao.getByUuid(l.getUuid());
+    final List<ApprovalStep> existingPlanningApprovalSteps =
+        existing.loadPlanningApprovalSteps(engine.getContext()).join();
+    final List<ApprovalStep> existingApprovalSteps =
+        existing.loadApprovalSteps(engine.getContext()).join();
+    Utils.updateApprovalSteps(l, l.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
+        l.getApprovalSteps(), existingApprovalSteps);
     AnetAuditLogger.log("Location {} updated by {}", l, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

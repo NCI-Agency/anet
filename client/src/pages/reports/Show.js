@@ -321,9 +321,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAuthor = Person.isEqual(currentUser, report.author)
 
-  // When either admin or not the author, user can approve if report is pending approval and user is one of the approvers in the current approval step
+  // User can approve if report is pending approval and user is one of the approvers in the current approval step
   const canApprove =
-    (isAdmin || !isAuthor) &&
     report.isPending() &&
     currentUser.position &&
     report.approvalStep &&
