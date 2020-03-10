@@ -166,7 +166,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
         key={key}
         label={taskAssessmentDef[key].label}
         values={taskAssessmentResults[key]}
-        {...taskAssessmentDef[key].aggregation}
+        widget={taskAssessmentDef[key].aggregation?.widget}
+        defaultWidget={taskAssessmentDef[key].widget}
+        aggregationType={taskAssessmentDef[key].aggregation?.aggregationType}
       />
     )
   })

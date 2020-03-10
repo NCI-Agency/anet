@@ -57,13 +57,17 @@ const LikertScale = ({
   }, [scale])
 
   let activeColor = null
-  const valuesStats = values && {
-    min: Math.min(...values),
-    max: Math.max(...values),
-    avg: values.reduce((a, b) => a + b, 0) / values.length
+  let valuesStats = null
+  if (values?.length) {
+    valuesStats = {
+      min: Math.min(...values),
+      max: Math.max(...values),
+      avg: values.reduce((a, b) => a + b, 0) / values.length
+    }
+    valuesStats.avgColor =
+      valuesStats &&
+      levels.find(level => level.endValue > valuesStats.avg)?.color
   }
-  valuesStats.avgColor =
-    valuesStats && levels.find(level => level.endValue > valuesStats.avg)?.color
 
   return (
     <svg
@@ -146,7 +150,7 @@ const LikertScale = ({
         </g>
       )}
 
-      {values.length > 0 && (
+      {values?.length > 0 && (
         <g transform={`translate(0 ${scaleYPosition})`}>
           <circle
             cx={scale(valuesStats.avg)}

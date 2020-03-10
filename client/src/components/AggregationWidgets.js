@@ -16,10 +16,11 @@ const NumberAggWidget = ({ values, aggregationType, ...otherWidgetProps }) =>
   NUMBER_AGG[aggregationType](values)
 
 const DefaultAggWidget = ({ values, aggregationType, ...otherWidgetProps }) =>
-  values
+  values.length + " values: [" + values + "]"
 
 const WIDGETS = {
   likertScaleAggregation: LikertScale,
+  likertScale: LikertScale,
   numberAggregation: NumberAggWidget,
   listAggregation: DefaultAggWidget
 }
@@ -27,11 +28,12 @@ const WIDGETS = {
 const AggregationWidget = ({
   label,
   widget,
+  defaultWidget,
   values,
   aggregationType,
   ...otherWidgetProps
 }) => {
-  const Widget = WIDGETS[widget]
+  const Widget = widget ? WIDGETS[widget] : WIDGETS[defaultWidget]
   return (
     <Row>
       {label !== null && (
@@ -41,11 +43,13 @@ const AggregationWidget = ({
       )}
       <Col sm={10}>
         <div>
-          <Widget
-            values={values}
-            aggregationType={aggregationType}
-            {...otherWidgetProps}
-          />
+          {Widget && (
+            <Widget
+              values={values}
+              aggregationType={aggregationType}
+              {...otherWidgetProps}
+            />
+          )}
         </div>
       </Col>
     </Row>
@@ -54,12 +58,12 @@ const AggregationWidget = ({
 AggregationWidget.propTypes = {
   label: PropTypes.string,
   widget: PropTypes.string,
+  defaultWidget: PropTypes.string,
   values: PropTypes.arrayOf(PropTypes.number),
   aggregationType: PropTypes.string
 }
 AggregationWidget.defaultProps = {
   label: "",
-  widget: "list",
   values: [],
   aggregationType: ""
 }
