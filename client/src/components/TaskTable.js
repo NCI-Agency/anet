@@ -15,7 +15,8 @@ const TaskTable = ({
   showOrganization,
   showDelete,
   showDescription,
-  onDelete
+  onDelete,
+  noTasksMessage
 }) => {
   const tasksExist = _get(tasks, "length", 0) > 0
 
@@ -92,7 +93,7 @@ const TaskTable = ({
           </tbody>
         </Table>
       ) : (
-        <em>No {Settings.fields.task.shortLabel} found</em>
+        <em>{noTasksMessage}</em>
       )}
     </div>
   )
@@ -105,12 +106,14 @@ TaskTable.propTypes = {
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
   showOrganization: PropTypes.bool,
-  showDescription: PropTypes.bool
+  showDescription: PropTypes.bool,
+  noTasksMessage: PropTypes.string
 }
 
 TaskTable.defaultProps = {
   showDelete: false,
-  showOrganization: false
+  showOrganization: false,
+  noTasksMessage: `No ${Settings.fields.task.shortLabel} found`
 }
 
 export default TaskTable

@@ -256,6 +256,7 @@ const BaseReportForm = ({
   const submitText = currentUser.hasActivePosition()
     ? "Preview and submit"
     : "Save draft"
+  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
   const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
   const showActivePositionWarning =
     currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()
@@ -457,7 +458,7 @@ const BaseReportForm = ({
 
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
-            label: `All ${pluralize(Settings.fields.task.subLevel.shortLabel)}`,
+            label: `All ${tasksLabel}`,
             queryVars: { hasCustomFieldRef1: true }
           }
         }
@@ -815,9 +816,7 @@ const BaseReportForm = ({
                   widget={
                     <AdvancedMultiSelect
                       fieldName="tasks"
-                      placeholder={`Search for ${pluralize(
-                        Settings.fields.task.subLevel.shortLabel
-                      )}...`}
+                      placeholder={`Search for ${tasksLabel}...`}
                       value={values.tasks}
                       renderSelected={
                         <TaskTable
@@ -826,6 +825,7 @@ const BaseReportForm = ({
                           showParent
                           showDelete
                           showDescription
+                          noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
                         />
                       }
                       overlayColumns={[
@@ -843,9 +843,7 @@ const BaseReportForm = ({
                   extraColElem={
                     <>
                       <FieldHelper.FieldShortcuts
-                        title={`Recent ${pluralize(
-                          Settings.fields.task.subLevel.shortLabel
-                        )}`}
+                        title={`Recent ${tasksLabel}`}
                         shortcuts={recents.tasks}
                         fieldName="tasks"
                         objectType="Task"
