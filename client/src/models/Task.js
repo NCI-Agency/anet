@@ -168,7 +168,7 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
-  getAssessmentResults() {
+  getAssessmentResults(dateRange) {
     const taskAssessmentNotes = this.notes
       .filter(
         n =>
@@ -177,7 +177,9 @@ export default class Task extends Model {
             ro =>
               ro.relatedObjectType === "tasks" &&
               ro.relatedObjectUuid === this.uuid
-          ).length
+          ).length &&
+          (!dateRange ||
+            (n.createdAt < dateRange.end && n.createdAt > dateRange.start))
       )
       .map(ta => JSON.parse(ta.text))
     const assessmentResults = {}

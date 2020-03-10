@@ -158,14 +158,56 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const taskAssessmentDef = JSON.parse(
     JSON.parse(task.customFields || "{}").assessmentDefinition || "{}"
   )
-  const taskAssessmentResults = task.getAssessmentResults()
+
+  const ongoingPeriod = {
+    start: moment().startOf("month"),
+    end: moment().endOf("month")
+  }
+  const assessmentPeriod = {
+    start: moment()
+      .subtract(1, "months")
+      .startOf("month"),
+    end: moment()
+      .subtract(1, "months")
+      .endOf("month")
+  }
+  const previousAssessmentPeriod = {
+    start: moment()
+      .subtract(2, "months")
+      .startOf("month"),
+    end: moment()
+      .subtract(2, "months")
+      .endOf("month")
+  }
+  const ongoingResultsWidgets = []
   const assessmentResultsWidgets = []
+  const previousAssessmentResultsWidgets = []
   Object.keys(taskAssessmentDef).forEach(key => {
+    ongoingResultsWidgets.push(
+      <AggregationWidget
+        key={key}
+        label={taskAssessmentDef[key].label}
+        values={task.getAssessmentResults(ongoingPeriod)[key]}
+        widget={taskAssessmentDef[key].aggregation?.widget}
+        defaultWidget={taskAssessmentDef[key].widget}
+        aggregationType={taskAssessmentDef[key].aggregation?.aggregationType}
+      />
+    )
     assessmentResultsWidgets.push(
       <AggregationWidget
         key={key}
         label={taskAssessmentDef[key].label}
-        values={taskAssessmentResults[key]}
+        values={task.getAssessmentResults(assessmentPeriod)[key]}
+        widget={taskAssessmentDef[key].aggregation?.widget}
+        defaultWidget={taskAssessmentDef[key].widget}
+        aggregationType={taskAssessmentDef[key].aggregation?.aggregationType}
+      />
+    )
+    previousAssessmentResultsWidgets.push(
+      <AggregationWidget
+        key={key}
+        label={taskAssessmentDef[key].label}
+        values={task.getAssessmentResults(previousAssessmentPeriod)[key]}
         widget={taskAssessmentDef[key].aggregation?.widget}
         defaultWidget={taskAssessmentDef[key].widget}
         aggregationType={taskAssessmentDef[key].aggregation?.aggregationType}
@@ -198,130 +240,165 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 title={`${fieldSettings.shortLabel} ${task.shortName}`}
                 action={action}
               />
-              <Fieldset>
-                <ShortNameField
-                  dictProps={fieldSettings.shortName}
-                  name="shortName"
-                  component={FieldHelper.ReadonlyField}
-                />
-
-                {/* Override componentClass and style from dictProps */}
-                <LongNameField
-                  dictProps={fieldSettings.longName}
-                  componentClass="div"
-                  style={{}}
-                  name="longName"
-                  component={FieldHelper.ReadonlyField}
-                />
-
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Task.humanNameOfStatus}
-                />
-
-                <Field
-                  name="taskedOrganizations"
-                  label={Settings.fields.task.taskedOrganizations.label}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    task.taskedOrganizations && (
-                      <>
-                        {task.taskedOrganizations.map(org => (
-                          <LinkTo
-                            modelType="Organization"
-                            model={org}
-                            key={`${org.uuid}`}
-                          />
-                        ))}
-                      </>
-                    )
-                  }
-                />
-
-                {Settings.fields.task.customFieldRef1 && (
-                  <TaskCustomFieldRef1
-                    dictProps={Settings.fields.task.customFieldRef1}
-                    name="customFieldRef1"
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  padding: "10px"
+                }}
+              >
+                <Fieldset style={{flex: "1 1 0"}}
+>
+                  >
+                  <ShortNameField
+                    dictProps={fieldSettings.shortName}
+                    name="shortName"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                  {/* Override componentClass and style from dictProps */}
+                  <LongNameField
+                    dictProps={fieldSettings.longName}
+                    componentClass="div"
+                    style={{}}
+                    name="longName"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                  <Field
+                    name="status"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={Task.humanNameOfStatus}
+                  />
+                  <Field
+                    name="taskedOrganizations"
+                    label={Settings.fields.task.taskedOrganizations.label}
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      task.customFieldRef1 && (
-                        <LinkTo modelType="Task" model={task.customFieldRef1}>
-                          {task.customFieldRef1.shortName}{" "}
-                          {task.customFieldRef1.longName}
-                        </LinkTo>
+                      task.taskedOrganizations && (
+                        <>
+                          {task.taskedOrganizations.map(org => (
+                            <LinkTo
+                              modelType="Organization"
+                              model={org}
+                              key={`${org.uuid}`}
+                            />
+                          ))}
+                        </>
                       )
                     }
                   />
-                )}
-
-                <TaskCustomField
-                  dictProps={Settings.fields.task.customField}
-                  name="customField"
-                  component={FieldHelper.ReadonlyField}
-                />
-
-                {Settings.fields.task.plannedCompletion && (
-                  <PlannedCompletionField
-                    dictProps={Settings.fields.task.plannedCompletion}
-                    name="plannedCompletion"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      task.plannedCompletion &&
-                      moment(task.plannedCompletion).format(
-                        Settings.dateFormats.forms.displayShort.date
-                      )
-                    }
-                  />
-                )}
-
-                {Settings.fields.task.projectedCompletion && (
-                  <ProjectedCompletionField
-                    dictProps={Settings.fields.task.projectedCompletion}
-                    name="projectedCompletion"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      task.projectedCompletion &&
-                      moment(task.projectedCompletion).format(
-                        Settings.dateFormats.forms.displayShort.date
-                      )
-                    }
-                  />
-                )}
-
-                {Settings.fields.task.customFieldEnum1 && (
-                  <TaskCustomFieldEnum1
-                    dictProps={Object.without(
-                      Settings.fields.task.customFieldEnum1,
-                      "enum"
-                    )}
-                    name="customFieldEnum1"
+                  {Settings.fields.task.customFieldRef1 && (
+                    <TaskCustomFieldRef1
+                      dictProps={Settings.fields.task.customFieldRef1}
+                      name="customFieldRef1"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        task.customFieldRef1 && (
+                          <LinkTo modelType="Task" model={task.customFieldRef1}>
+                            {task.customFieldRef1.shortName}{" "}
+                            {task.customFieldRef1.longName}
+                          </LinkTo>
+                        )
+                      }
+                    />
+                  )}
+                  <TaskCustomField
+                    dictProps={Settings.fields.task.customField}
+                    name="customField"
                     component={FieldHelper.ReadonlyField}
                   />
-                )}
-
-                {Settings.fields.task.customFieldEnum2 && (
-                  <TaskCustomFieldEnum2
-                    dictProps={Object.without(
-                      Settings.fields.task.customFieldEnum2,
-                      "enum"
-                    )}
-                    name="customFieldEnum2"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                )}
-              </Fieldset>
-
-              {assessmentResultsWidgets && (
-                <Fieldset
-                  title="Assessments results"
-                  id="task-assessments-results"
-                >
-                  {assessmentResultsWidgets}
+                  {Settings.fields.task.plannedCompletion && (
+                    <PlannedCompletionField
+                      dictProps={Settings.fields.task.plannedCompletion}
+                      name="plannedCompletion"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        task.plannedCompletion &&
+                        moment(task.plannedCompletion).format(
+                          Settings.dateFormats.forms.displayShort.date
+                        )
+                      }
+                    />
+                  )}
+                  {Settings.fields.task.projectedCompletion && (
+                    <ProjectedCompletionField
+                      dictProps={Settings.fields.task.projectedCompletion}
+                      name="projectedCompletion"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        task.projectedCompletion &&
+                        moment(task.projectedCompletion).format(
+                          Settings.dateFormats.forms.displayShort.date
+                        )
+                      }
+                    />
+                  )}
+                  {Settings.fields.task.customFieldEnum1 && (
+                    <TaskCustomFieldEnum1
+                      dictProps={Object.without(
+                        Settings.fields.task.customFieldEnum1,
+                        "enum"
+                      )}
+                      name="customFieldEnum1"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                  )}
+                  {Settings.fields.task.customFieldEnum2 && (
+                    <TaskCustomFieldEnum2
+                      dictProps={Object.without(
+                        Settings.fields.task.customFieldEnum2,
+                        "enum"
+                      )}
+                      name="customFieldEnum2"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                  )}
                 </Fieldset>
-              )}
 
-              {currentUser.isAdmin() && // TODO: Only show task custom fields to admins until we implement visibility per role
+                {ongoingResultsWidgets && (
+                  <Fieldset style={{flex: "1 1 0"}}
+                    title={`Ongoing results for ${ongoingPeriod.start.format(
+                      "MMM-YYYY"
+                    )}`}
+                    id="ongoing-task-assessments-results"
+                    width={0}
+                  >
+                    {ongoingResultsWidgets}
+                  </Fieldset>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  padding: "10px"
+                }}
+              >
+                {previousAssessmentResultsWidgets && (
+                  <Fieldset
+                    title={`Previous assessments results for ${previousAssessmentPeriod.start.format(
+                      "MMM-YYYY"
+                    )}`}
+                    id="previous-task-assessments-results"
+                  >
+                    {previousAssessmentResultsWidgets}
+                  </Fieldset>
+                )}
+
+                {assessmentResultsWidgets && (
+                  <Fieldset
+                    title={`Assessments results for ${assessmentPeriod.start.format(
+                      "MMM-YYYY"
+                    )}`}
+                    id="task-assessments-results"
+                  >
+                    {assessmentResultsWidgets}
+                  </Fieldset>
+                )}
+              </div>
+              {false && // TODO: Do not show task custom fields until we implement a better widget
                 Settings.fields.task.customFields && (
                   <Fieldset
                     title={`${fieldSettings.shortLabel} information`}
