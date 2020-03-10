@@ -88,7 +88,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	implementation 'com.networknt:json-schema-validator:1.0.32'
+	implementation 'com.networknt:json-schema-validator:1.0.33'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:4.1.2'
