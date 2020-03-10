@@ -4,7 +4,15 @@ import PropTypes from "prop-types"
 import Text from "react-svg-text"
 import useDimensions from "react-use-dimensions"
 
-const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
+const LikertScale = ({
+  onChange,
+  value,
+  values,
+  levels,
+  width,
+  height,
+  readonly
+}) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
   const [containerRef, containerBox] = useDimensions()
@@ -49,6 +57,13 @@ const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
   }, [scale])
 
   let activeColor = null
+  const valuesStats = values && {
+    min: Math.min(...values),
+    max: Math.max(...values),
+    avg: values.reduce((a, b) => a + b, 0) / values.length
+  }
+  valuesStats.avgColor =
+    valuesStats && levels.find(level => level.endValue > valuesStats.avg)?.color
 
   return (
     <svg
@@ -89,34 +104,99 @@ const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
           </React.Fragment>
         )
       })}
+      {values?.map((xValue, index) => (
+        <g
+          transform={`translate(${scale(xValue)} ${scaleYPosition})`}
+          key={`values-${index}-${xValue}`}
+        >
+          <path
+            d="M -10,-10 L 10,10 M 10,-10 L -10,10"
+            style={{
+              stroke: "black",
+              fill: "black",
+              strokeWidth: 2
+            }}
+          />
+        </g>
+      ))}
+
+      {values?.length > 1 && (
+        <g transform={`translate(0 ${scaleYPosition})`}>
+          <line
+            x1={scale(valuesStats.min)}
+            y1="-15"
+            x2={scale(valuesStats.min)}
+            y2="15"
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+          <line
+            x1={scale(valuesStats.max)}
+            y1="-15"
+            x2={scale(valuesStats.max)}
+            y2="15"
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+          <line
+            x1={scale(valuesStats.min)}
+            y1="0"
+            x2={scale(valuesStats.max)}
+            y2="0"
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+        </g>
+      )}
+
+      {values.length > 0 && (
+        <g transform={`translate(0 ${scaleYPosition})`}>
+          <circle
+            cx={scale(valuesStats.avg)}
+            r="10"
+            style={{
+              stroke: valuesStats.avgColor,
+              strokeWidth: 7
+            }}
+          />
+          <text
+            x={scale(valuesStats.avg) - 22}
+            y={25}
+            style={{ pointerEvents: "none" }}
+          >
+            avg:{" "}
+            {Number(valuesStats.avg).toFixed(value < scale.domain()[1] ? 1 : 0)}
+          </text>
+        </g>
       )}
       <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
-      <g ref={cursorRef}>
-        <polygon
-          points="0,0 13,13 13,30 -13,30 -13,13"
-          style={{
-            stroke: "gray",
-            fill: "" + activeColor,
-            strokeWidth: 1,
-            cursor: readonly ? null : "pointer"
-          }}
-        />
-        <text
-          fill={activeColor?.l < 0.5 ? "white" : "black"}
-          fontWeight="bold"
-          x={-11}
-          y={25}
-          style={{ pointerEvents: "none" }}
-        >
-          {Number(value).toFixed(value < scale.domain()[1] ? 1 : 0)}
-        </text>
-      </g>
+
+      {onChange && (
+        <g ref={cursorRef}>
+          <polygon
+            points="0,0 13,13 13,30 -13,30 -13,13"
+            style={{
+              stroke: "gray",
+              fill: "" + activeColor,
+              strokeWidth: 1,
+              cursor: readonly ? null : "pointer"
+            }}
+          />
+          <text
+            fill={activeColor?.l < 0.5 ? "white" : "black"}
+            fontWeight="bold"
+            x={-11}
+            y={25}
+            style={{ pointerEvents: "none" }}
+          >
+            {Number(value).toFixed(value < scale.domain()[1] ? 1 : 0)}
+          </text>
+        </g>
+      )}
     </svg>
   )
 }
 
 LikertScale.propTypes = {
   value: PropTypes.number,
+  values: PropTypes.arrayOf(PropTypes.number),
   onChange: PropTypes.func,
   levels: PropTypes.arrayOf(
     PropTypes.shape({

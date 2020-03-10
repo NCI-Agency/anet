@@ -306,6 +306,15 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 )}
               </Fieldset>
 
+              {assessmentResultsWidgets && (
+                <Fieldset
+                  title="Assessments results"
+                  id="task-assessments-results"
+                >
+                  {assessmentResultsWidgets}
+                </Fieldset>
+              )}
+
               {currentUser.isAdmin() && // TODO: Only show task custom fields to admins until we implement visibility per role
                 Settings.fields.task.customFields && (
                   <Fieldset
@@ -339,15 +348,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 mapId="reports"
               />
             </Fieldset>
-
-            {assessmentResultsWidgets && (
-              <Fieldset
-                title="Task assessments results"
-                id="task-assessments-results"
-              >
-                {assessmentResultsWidgets}
-              </Fieldset>
-            )}
           </div>
         )
       }}

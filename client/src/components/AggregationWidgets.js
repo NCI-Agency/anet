@@ -54,7 +54,7 @@ const AggregationWidget = ({
 AggregationWidget.propTypes = {
   label: PropTypes.string,
   widget: PropTypes.string,
-  values: PropTypes.array,
+  values: PropTypes.arrayOf(PropTypes.number),
   aggregationType: PropTypes.string
 }
 AggregationWidget.defaultProps = {
