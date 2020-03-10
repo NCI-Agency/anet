@@ -141,24 +141,22 @@ const ReportSummary = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.reportList?.totalCount
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
-    if (setTotalCount) {
-      // Reset the total count
-      setTotalCount(null)
-    }
     return result
   }
 
   const reports = data ? data.reportList.list : []
-  if (setTotalCount) {
-    const totalCount = data && data.reportList && data.reportList.totalCount
-    setTotalCount(totalCount)
-  }
   if (_get(reports, "length", 0) === 0) {
     return <em>No reports found</em>
   }
 
-  const { pageSize, totalCount } = data.reportList
+  const { pageSize } = data.reportList
 
   return (
     <div>
@@ -327,7 +325,9 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.tasks.length > 0 && (
             <span>
-              <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
+              <strong>
+                {pluralize(Settings.fields.task.subLevel.shortLabel)}:
+              </strong>{" "}
               {report.tasks.map(
                 (task, i) =>
                   task.shortName + (i < report.tasks.length - 1 ? ", " : "")
