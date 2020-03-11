@@ -1,15 +1,11 @@
 package mil.dds.anet.database;
 
 import com.google.common.collect.ObjectArrays;
-import java.lang.invoke.MethodHandles;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
@@ -23,8 +19,6 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
@@ -40,9 +34,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
   public static String PERSON_FIELDS_NOAS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Override
   public Person getByUuid(String uuid) {
@@ -101,8 +92,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
-        .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", convertImageToBlob(p.getAvatar())).execute();
+        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
     return p;
   }
 
@@ -128,8 +118,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
-        .bind("role", DaoUtils.getEnumId(p.getRole()))
-        .bind("avatar", convertImageToBlob(p.getAvatar())).execute();
+        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
   }
 
   @Override
@@ -247,12 +236,4 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     }
   }
 
-  private static Blob convertImageToBlob(String image) {
-    try {
-      return image == null ? null : new SerialBlob(image.getBytes());
-    } catch (SQLException e) {
-      logger.error("Failed to save avatar", e);
-      return null;
-    }
-  }
 }

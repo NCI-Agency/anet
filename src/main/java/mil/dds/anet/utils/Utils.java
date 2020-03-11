@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -415,18 +414,20 @@ public class Utils {
   /**
    * Resizes an image.
    * 
-   * @param imageBase64 The image as a Base64 string
+   * @param imageBytes The image as a byte-array
    * @param width The desired output width
    * @param height The desired output height
    * @param imageFormatName The desired output format (png, jpg)
-   * @return The resized image as a Base64 string
+   * @return The resized image as a byte-array
    * @throws Exception When the binary data cannot be converted to an image string representation
    */
-  public static String resizeImageBase64(String imageBase64, int width, int height,
-      String imageFormatName) throws Exception {
-
-    // From Base64-string to BufferedImage
-    final BufferedImage imageBinary = convert(imageBase64);
+  public static byte[] resizeImage(byte[] imageBytes, int width, int height, String imageFormatName)
+      throws Exception {
+    if (imageBytes == null) {
+      return null;
+    }
+    // From byte-array to BufferedImage
+    final BufferedImage imageBinary = convert(imageBytes);
 
     if (imageBinary == null) {
       throw new Exception("Cannot interpret image binary data.");
@@ -436,36 +437,35 @@ public class Utils {
     final BufferedImage thumbnail =
         Scalr.resize(imageBinary, Method.AUTOMATIC, Mode.AUTOMATIC, width, height);
 
-    // From BufferedImage back to Base64-string
+    // From BufferedImage back to byte-array
     return convert(thumbnail, imageFormatName);
   }
 
   /**
-   * Converts an image represented as a Base64 string into a BufferedImage.
+   * Converts an image represented as a byte-array into a BufferedImage.
    * 
-   * @param imageBase64 The image as a Base64 string
+   * @param imageBytes The image as a byte-array
    * @return The BufferedImage object
    * @throws IOException When an error occurs while reading the string
    */
-  public static BufferedImage convert(String imageBase64) throws IOException {
-    final byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
+  public static BufferedImage convert(byte[] imageBytes) throws IOException {
     final ByteArrayInputStream is = new ByteArrayInputStream(imageBytes);
     return ImageIO.read(is);
   }
 
   /**
-   * Converts a BufferedImage representing an image into a Base64 string.
+   * Converts a BufferedImage representing an image into a byte-array.
    * 
    * @param imageBytes The image as bytes
    * @param imageFormatName The desired output format
-   * @return The image as Base64 string
+   * @return The image as byte-array
    * @throws IOException When an error occurs while writing the string
    */
-  public static String convert(BufferedImage imageBytes, String imageFormatName)
+  public static byte[] convert(BufferedImage imageBytes, String imageFormatName)
       throws IOException {
     final ByteArrayOutputStream os = new ByteArrayOutputStream();
     ImageIO.write(imageBytes, imageFormatName, os);
-    return Base64.getEncoder().encodeToString(os.toByteArray());
+    return os.toByteArray();
   }
 
   public static void updateApprovalSteps(AbstractAnetBean entity,
