@@ -2,6 +2,7 @@ package mil.dds.anet.beans.search;
 
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -18,10 +19,10 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
   @GraphQLQuery
   @GraphQLInputField
   private Boolean hasParentOrg;
-  // Search for organizations with a specific parent Org.
+  // Search for organizations with a specific parent Org(s).
   @GraphQLQuery
   @GraphQLInputField
-  private String parentOrgUuid;
+  private List<String> parentOrgUuid;
   // Include descendants recursively from the specified parent.
   // If true will include all orgs in the tree of the parentOrg
   // Including the parent Org.
@@ -57,11 +58,11 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
     this.hasParentOrg = hasParentOrg;
   }
 
-  public String getParentOrgUuid() {
+  public List<String> getParentOrgUuid() {
     return parentOrgUuid;
   }
 
-  public void setParentOrgUuid(String parentOrgUuid) {
+  public void setParentOrgUuid(List<String> parentOrgUuid) {
     this.parentOrgUuid = parentOrgUuid;
   }
 

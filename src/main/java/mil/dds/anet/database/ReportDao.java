@@ -4,6 +4,7 @@ import com.google.common.collect.ObjectArrays;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -445,7 +446,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       // doing this as two separate queries because I do need all the information about the
       // organizations
       OrganizationSearchQuery query = new OrganizationSearchQuery();
-      query.setParentOrgUuid(parentOrgUuid);
+      query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
       query.setParentOrgRecursively(true);
       query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();

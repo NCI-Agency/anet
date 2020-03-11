@@ -69,7 +69,7 @@ public abstract class AbstractOrganizationSearcher extends
       qb.addRecursiveClause(null, "organizations", "\"uuid\"", "parent_orgs", "organizations",
           "\"parentOrgUuid\"", "parentOrgUuid", query.getParentOrgUuid(), true);
     } else {
-      qb.addEqualsClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",
+      qb.addInListClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",
           query.getParentOrgUuid());
     }
   }
