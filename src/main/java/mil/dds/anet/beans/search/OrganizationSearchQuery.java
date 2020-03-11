@@ -14,7 +14,10 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
   @GraphQLQuery
   @GraphQLInputField
   private OrganizationType type;
-
+  // Find organizations who (don't) have the parentOrg filled in
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean hasParentOrg;
   // Search for organizations with a specific parent Org.
   @GraphQLQuery
   @GraphQLInputField
@@ -46,6 +49,14 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
     this.type = type;
   }
 
+  public Boolean getHasParentOrg() {
+    return hasParentOrg;
+  }
+
+  public void setHasParentOrg(Boolean hasParentOrg) {
+    this.hasParentOrg = hasParentOrg;
+  }
+
   public String getParentOrgUuid() {
     return parentOrgUuid;
   }
@@ -64,7 +75,8 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), status, type, parentOrgUuid, parentOrgRecursively);
+    return Objects.hash(super.hashCode(), status, type, hasParentOrg, parentOrgUuid,
+        parentOrgRecursively);
   }
 
   @Override
@@ -75,6 +87,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
     final OrganizationSearchQuery other = (OrganizationSearchQuery) obj;
     return super.equals(obj) && Objects.equals(getStatus(), other.getStatus())
         && Objects.equals(getType(), other.getType())
+        && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
         && Objects.equals(getParentOrgRecursively(), other.getParentOrgRecursively());
   }

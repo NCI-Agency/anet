@@ -41,6 +41,14 @@ public abstract class AbstractOrganizationSearcher extends
     qb.addEqualsClause("status", "organizations.status", query.getStatus());
     qb.addEqualsClause("type", "organizations.type", query.getType());
 
+    if (query.getHasParentOrg() != null) {
+      if (query.getHasParentOrg()) {
+        qb.addWhereClause("organizations.\"parentOrgUuid\" IS NOT NULL");
+      } else {
+        qb.addWhereClause("organizations.\"parentOrgUuid\" IS NULL");
+      }
+    }
+
     if (query.getParentOrgUuid() != null) {
       addParentOrgUuidQuery(query);
     }

@@ -85,7 +85,14 @@ const GQL_GET_APP_DATA = gql`
       value
     }
 
-    organizationTopLevelOrgs(type: ADVISOR_ORG) {
+    organizationTopLevelOrgs: organizationList(
+      query: {
+        pageSize: 0
+        hasParentOrg: false
+        status: ACTIVE
+        type: ADVISOR_ORG
+      }
+    ) {
       list {
         uuid
         shortName
