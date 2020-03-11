@@ -214,29 +214,71 @@ dictionary:
         style:
           height: 400px
       topLevel:
-         shortLabel: Objective
-         shortName:
-           label: Objective name
-           placeholder: Enter an objective name, example....
-         longLabel: Objectives
-         longName:
-           label: Objective description
-           placeholder: Enter an objective description, example ....
-           componentClass: textarea
-           style:
-             height: 400px
+        shortLabel: Objective
+        shortName:
+          label: Objective name
+          placeholder: Enter an objective name, example....
+        longLabel: Objectives
+        longName:
+          label: Objective description
+          placeholder: Enter an objective description, example ....
+          componentClass: textarea
+          style:
+            height: 400px
+        assessment:
+          customFields:
+            issues:
+              type: text
+              label: Top 3 issues
+              placeholder:  Enter the top 3 issues
+              componentClass: textarea
+              style:
+                height: 300px
+              validations:
+                - type: required
+                  params: [You must provide the top 3 issues]
+            status:
+              type: enum
+              label: Project status
+              helpText: Select an assessement status for objective
+              choices:
+                GREEN:
+                  label: Green
+                  color: '#c2ffb3'
+                AMBER:
+                  label: Amber
+                  color: '#ffe396'
+                RED:
+                  label: Red
+                  color: '#ff8279'
+              validations:
+                - type: required
+                  params: [You must provide the assessment status]
       subLevel:
-         shortLabel: Effort
-         shortName:
-           label: Effort name
-           placeholder: Enter an effort name, example....
-         longLabel: Efforts
-         longName:
-           label: Effort description
-           placeholder: Enter an effort description, example ....
-           componentClass: textarea
-           style:
-             height: 400px
+        shortLabel: Effort
+        shortName:
+          label: Effort name
+          placeholder: Enter an effort name, example....
+        longLabel: Efforts
+        longName:
+          label: Effort description
+          placeholder: Enter an effort description, example ....
+          componentClass: textarea
+          style:
+            height: 400px
+        assessment:
+          customFields:
+            issues:
+              type: text
+              label: Top 3 issues
+              placeholder:  Enter the top 3 issues
+              componentClass: textarea
+              style:
+                height: 300px
+              validations:
+                - type: required
+                  params: [You must provide the top 3 issues]
+
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task

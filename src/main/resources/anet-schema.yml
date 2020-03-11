@@ -326,18 +326,26 @@ properties:
           longName:
             "$ref": "#/definitions/inputField"
           topLevel:
-           type: object
-           additionalProperties: false
-           required: [shortLabel, shortName, longLabel, longName]
-           properties:
-             shortLabel:
-               "$ref": "#/properties/fields/properties/task/properties/shortLabel"
-             shortName:
-               "$ref": "#/properties/fields/properties/task/properties/shortName"
-             longLabel:
-               "$ref": "#/properties/fields/properties/task/properties/longLabel"
-             longName:
-               "$ref": "#/properties/fields/properties/task/properties/longName"
+            type: object
+            additionalProperties: false
+            required: [shortLabel, shortName, longLabel, longName]
+            properties:
+              shortLabel:
+                "$ref": "#/properties/fields/properties/task/properties/shortLabel"
+              shortName:
+                "$ref": "#/properties/fields/properties/task/properties/shortName"
+              longLabel:
+                "$ref": "#/properties/fields/properties/task/properties/longLabel"
+              longName:
+                "$ref": "#/properties/fields/properties/task/properties/longName"
+              assessment:
+                type: object
+                required: [customFields]
+                properties:
+                  customFields:
+                    type: object
+                    additionalProperties:
+                      "$ref": "#/definitions/customField"
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion: 

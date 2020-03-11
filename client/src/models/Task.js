@@ -44,6 +44,14 @@ export default class Task extends Model {
     Settings.fields.task.customFields
   )
 
+  static topLevelAssessmentCustomFieldsSchema = createYupObjectShape(
+    Settings.fields.task.topLevel.assessment.customFields
+  )
+
+  static subLevelAssessmentCustomFieldsSchema = createYupObjectShape(
+    Settings.fields.task.subLevel.assessment.customFields
+  )
+
   static yupSchema = yup
     .object()
     .shape({
@@ -190,5 +198,24 @@ export default class Task extends Model {
       })
     )
     return assessmentResults
+  }
+
+  getAssessments(dateRange) {
+    const taskAssessmentNotes = this.notes
+      .filter(n => {
+        return (
+          n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.length === 1 &&
+          n.noteRelatedObjects.filter(
+            ro =>
+              ro.relatedObjectType === "tasks" &&
+              ro.relatedObjectUuid === this.uuid
+          ).length &&
+          (!dateRange ||
+            (n.createdAt < dateRange.end && n.createdAt > dateRange.start))
+        )
+      })
+      .map(ta => JSON.parse(ta.text))
+    return taskAssessmentNotes
   }
 }

@@ -1,10 +1,16 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import { GQL_CREATE_NOTE, NOTE_TYPE } from "components/Model"
+import { Button, Modal } from "react-bootstrap"
 import AggregationWidget from "components/AggregationWidgets"
 import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import {
+  ReadonlyCustomFields,
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -14,6 +20,7 @@ import {
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
+
 import PositionTable from "components/PositionTable"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -24,7 +31,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import DictionaryField from "../../HOC/DictionaryField"
@@ -112,6 +119,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
+  const [assessmentError, setAssessmentError] = useState(null)
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false)
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -121,18 +130,23 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  if (done) {
-    return result
-  }
 
   if (data) {
     data.task.formCustomFields = JSON.parse(data.task.customFields)
+    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text)))
   }
   const task = new Task(data ? data.task : {})
+  const [notes, setNotes] = useState(task.notes)
+  if (done) {
+    return result
+  }
   const isTopLevelTask = _isEmpty(task.customFieldRef1)
   const fieldSettings = isTopLevelTask
     ? Settings.fields.task.topLevel
     : Settings.fields.task.subLevel
+  const yupSchema = isTopLevelTask
+    ? Task.topLevelAssessmentCustomFieldsSchema
+    : Task.subLevelAssessmentCustomFieldsSchema
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskCustomFieldRef1 = DictionaryField(Field)
@@ -226,7 +240,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
         return (
           <div>
             <RelatedObjectNotes
-              notes={task.notes}
+              notes={notes}
               relatedObject={
                 task.uuid && {
                   relatedObjectType: "tasks",
@@ -248,9 +262,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   padding: "10px"
                 }}
               >
-                <Fieldset style={{flex: "1 1 0"}}
->
-                  >
+                <Fieldset style={{ flex: "1 1 0" }}>
                   <ShortNameField
                     dictProps={fieldSettings.shortName}
                     name="shortName"
@@ -356,8 +368,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 </Fieldset>
 
                 {ongoingResultsWidgets && (
-                  <Fieldset style={{flex: "1 1 0"}}
-                    title={`Ongoing results for ${ongoingPeriod.start.format(
+                  <Fieldset
+                    style={{ flex: "1 1 0" }}
+                    title={`Ongoing activity for ${ongoingPeriod.start.format(
                       "MMM-YYYY"
                     )}`}
                     id="ongoing-task-assessments-results"
@@ -395,6 +408,107 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     id="task-assessments-results"
                   >
                     {assessmentResultsWidgets}
+
+                    {task
+                      .getAssessments(ongoingPeriod)
+                      .map((assessment, index) => (
+                        <ReadonlyCustomFields
+                          key={`assessment-${assessment}`}
+                          fieldsConfig={fieldSettings.assessment?.customFields}
+                          formikProps={{
+                            values: assessment
+                          }}
+                        />
+                      ))}
+
+                    {canEdit && fieldSettings.assessment && (
+                      <>
+                        <Button
+                          bsStyle="primary"
+                          onClick={() => setShowAssessmentModal(true)}
+                        >
+                          Add new monthly assessment for{" "}
+                          {assessmentPeriod.start.format("MMM-YYYY")}
+                        </Button>
+                        <Modal
+                          show={showAssessmentModal}
+                          onHide={() => setShowAssessmentModal(false)}
+                        >
+                          <Formik
+                            enableReinitialize
+                            onSubmit={onAssessmentSubmit}
+                            validationSchema={yupSchema}
+                            initialValues={{
+                              type: NOTE_TYPE.ASSESSMENT,
+                              noteRelatedObjects: [
+                                {
+                                  relatedObjectType: "tasks",
+                                  relatedObjectUuid: task.uuid
+                                }
+                              ]
+                            }}
+                          >
+                            {({
+                              isSubmitting,
+                              isValid,
+                              setFieldValue,
+                              setFieldTouched,
+                              validateForm,
+                              values,
+                              submitForm
+                            }) => (
+                              <Form>
+                                <Modal.Header closeButton>
+                                  <Modal.Title>
+                                    Assessment for {task.shortName} for{" "}
+                                    {assessmentPeriod.start.format("MMM-YYYY")}
+                                  </Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      padding: 5,
+                                      height: "100%"
+                                    }}
+                                  >
+                                    <Messages error={assessmentError} />
+
+                                    <CustomFieldsContainer
+                                      fieldsConfig={
+                                        fieldSettings.assessment?.customFields
+                                      }
+                                      formikProps={{
+                                        setFieldTouched,
+                                        setFieldValue,
+                                        values,
+                                        validateForm
+                                      }}
+                                    />
+                                  </div>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                  <Button
+                                    className="pull-left"
+                                    onClick={assessmentClose}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    onClick={submitForm}
+                                    bsStyle="primary"
+                                    disabled={isSubmitting || !isValid}
+                                  >
+                                    Save
+                                  </Button>
+                                </Modal.Footer>
+                              </Form>
+                            )}
+                          </Formik>
+                        </Modal>
+                      </>
+                    )}
                   </Fieldset>
                 )}
               </div>
@@ -434,6 +548,39 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       }}
     </Formik>
   )
+  function onAssessmentSubmit(values, form) {
+    return saveAssessment(values, form)
+      .then(response => onSubmitSuccess(response, values, form))
+      .catch(error => {
+        setAssessmentError(error)
+        form.setSubmitting(false)
+      })
+  }
+
+  function onSubmitSuccess(response, values, form) {
+    notes.unshift(response.createNote)
+    setNotes(notes)
+    assessmentClose()
+  }
+
+  function saveAssessment(values, form) {
+    const updatedNote = {
+      uuid: values.uuid,
+      author: values.author,
+      type: values.type,
+      noteRelatedObjects: values.noteRelatedObjects,
+      text: values.text
+    }
+    updatedNote.text = customFieldsJSONString(values)
+    return API.mutation(GQL_CREATE_NOTE, {
+      note: updatedNote
+    })
+  }
+
+  function assessmentClose() {
+    setAssessmentError(null)
+    setShowAssessmentModal(false)
+  }
 }
 
 BaseTaskShow.propTypes = {
