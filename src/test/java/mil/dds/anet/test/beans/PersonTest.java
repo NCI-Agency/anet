@@ -67,7 +67,7 @@ public class PersonTest extends BeanTester<Person> {
   @Test
   public void testAvatarResizingNoAvatar() {
     Person person = new Person();
-    person.setAvatar(null);
+    person.setAvatar((String) null);
     assertThat(person.getAvatar(32)).isNull();
   }
 
@@ -92,7 +92,7 @@ public class PersonTest extends BeanTester<Person> {
     String resizedAvatar = person.getAvatar(32);
 
     assertThat(resizedAvatar).isNotNull();
-    imageBinary = Utils.convert(resizedAvatar);
+    imageBinary = Utils.convert(Base64.getDecoder().decode(resizedAvatar));
 
     assertThat(imageBinary.getWidth()).isEqualTo(32);
     assertThat(imageBinary.getHeight()).isEqualTo(32);
