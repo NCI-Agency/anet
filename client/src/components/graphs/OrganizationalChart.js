@@ -1,5 +1,6 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import { AVATAR_IMAGE_DATA_PREFIX } from "components/AvatarDisplayComponent"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
   PageDispatchersPropType,
@@ -314,7 +315,7 @@ const OrganizationalChart = ({
         d =>
           d.person &&
           (d.person.avatar
-            ? "data:image/jpeg;base64," + d.person.avatar
+            ? `${AVATAR_IMAGE_DATA_PREFIX}${d.person.avatar}`
             : DEFAULT_AVATAR)
       )
 
@@ -371,7 +372,7 @@ const OrganizationalChart = ({
         d =>
           d.person &&
           (d.person.avatar
-            ? "data:image/jpeg;base64," + d.person.avatar
+            ? `${AVATAR_IMAGE_DATA_PREFIX}${d.person.avatar}`
             : DEFAULT_AVATAR)
       )
 
