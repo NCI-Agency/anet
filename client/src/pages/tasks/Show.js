@@ -131,7 +131,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     data.task.formCustomFields = JSON.parse(data.task.customFields)
     data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text)))
   }
-  const task = new Task(data ? data.task : {})
+  let task = new Task(data ? data.task : {})
   if (done) {
     return result
   }
@@ -220,6 +220,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       />
     )
   })
+
+  // Get initial task assessments values
+  task = Object.assign(task, task.getAssessments())
 
   return (
     <Formik enableReinitialize initialValues={task}>
@@ -401,17 +404,16 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   >
                     {assessmentResultsWidgets}
 
-                    {task
-                      .getAssessments(ongoingPeriod)
-                      .map((assessment, index) => (
-                        <ReadonlyCustomFields
-                          key={`assessment-${assessment}`}
-                          fieldsConfig={fieldSettings.assessment?.customFields}
-                          formikProps={{
-                            values: assessment
-                          }}
-                        />
-                      ))}
+                    {Object.keys(values.assessments).map(assessmentUuid => (
+                      <ReadonlyCustomFields
+                        key={`assessment-${assessmentUuid}`}
+                        fieldNamePrefix={`assessments.${assessmentUuid}`}
+                        fieldsConfig={fieldSettings.assessment?.customFields}
+                        formikProps={{
+                          values
+                        }}
+                      />
+                    ))}
 
                     {canEdit && fieldSettings.assessment && (
                       <>
