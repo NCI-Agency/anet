@@ -1,16 +1,12 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
-import { GQL_CREATE_NOTE, NOTE_TYPE } from "components/Model"
-import { Button, Modal } from "react-bootstrap"
+import { Button } from "react-bootstrap"
+import AddAssessmentModal from "components/assessments/AddAssessmentModal"
 import AggregationWidget from "components/AggregationWidgets"
 import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
-import {
-  ReadonlyCustomFields,
-  CustomFieldsContainer,
-  customFieldsJSONString
-} from "components/CustomFields"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -116,10 +112,10 @@ const GQL_GET_TASK = gql`
 const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
-  const [assessmentError, setAssessmentError] = useState(null)
+
   const [showAssessmentModal, setShowAssessmentModal] = useState(false)
   const { done, result } = useBoilerplate({
     loading,
@@ -136,7 +132,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text)))
   }
   const task = new Task(data ? data.task : {})
-  const [notes, setNotes] = useState(task.notes)
   if (done) {
     return result
   }
@@ -144,9 +139,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const fieldSettings = isTopLevelTask
     ? Settings.fields.task.topLevel
     : Settings.fields.task.subLevel
-  const yupSchema = isTopLevelTask
-    ? Task.topLevelAssessmentCustomFieldsSchema
-    : Task.subLevelAssessmentCustomFieldsSchema
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskCustomFieldRef1 = DictionaryField(Field)
@@ -240,7 +232,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
         return (
           <div>
             <RelatedObjectNotes
-              notes={notes}
+              notes={task.notes}
               relatedObject={
                 task.uuid && {
                   relatedObjectType: "tasks",
@@ -430,83 +422,13 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                           Add new monthly assessment for{" "}
                           {assessmentPeriod.start.format("MMM-YYYY")}
                         </Button>
-                        <Modal
-                          show={showAssessmentModal}
-                          onHide={() => setShowAssessmentModal(false)}
-                        >
-                          <Formik
-                            enableReinitialize
-                            onSubmit={onAssessmentSubmit}
-                            validationSchema={yupSchema}
-                            initialValues={{
-                              type: NOTE_TYPE.ASSESSMENT,
-                              noteRelatedObjects: [
-                                {
-                                  relatedObjectType: "tasks",
-                                  relatedObjectUuid: task.uuid
-                                }
-                              ]
-                            }}
-                          >
-                            {({
-                              isSubmitting,
-                              isValid,
-                              setFieldValue,
-                              setFieldTouched,
-                              validateForm,
-                              values,
-                              submitForm
-                            }) => (
-                              <Form>
-                                <Modal.Header closeButton>
-                                  <Modal.Title>
-                                    Assessment for {task.shortName} for{" "}
-                                    {assessmentPeriod.start.format("MMM-YYYY")}
-                                  </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      padding: 5,
-                                      height: "100%"
-                                    }}
-                                  >
-                                    <Messages error={assessmentError} />
-
-                                    <CustomFieldsContainer
-                                      fieldsConfig={
-                                        fieldSettings.assessment?.customFields
-                                      }
-                                      formikProps={{
-                                        setFieldTouched,
-                                        setFieldValue,
-                                        values,
-                                        validateForm
-                                      }}
-                                    />
-                                  </div>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                  <Button
-                                    className="pull-left"
-                                    onClick={assessmentClose}
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    onClick={submitForm}
-                                    bsStyle="primary"
-                                    disabled={isSubmitting || !isValid}
-                                  >
-                                    Save
-                                  </Button>
-                                </Modal.Footer>
-                              </Form>
-                            )}
-                          </Formik>
-                        </Modal>
+                        <AddAssessmentModal
+                          task={task}
+                          assessmentPeriod={assessmentPeriod}
+                          showModal={showAssessmentModal}
+                          onCancel={() => hideAddAssessmentModal(false)}
+                          onSuccess={() => hideAddAssessmentModal(true)}
+                        />
                       </>
                     )}
                   </Fieldset>
@@ -548,38 +470,11 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       }}
     </Formik>
   )
-  function onAssessmentSubmit(values, form) {
-    return saveAssessment(values, form)
-      .then(response => onSubmitSuccess(response, values, form))
-      .catch(error => {
-        setAssessmentError(error)
-        form.setSubmitting(false)
-      })
-  }
-
-  function onSubmitSuccess(response, values, form) {
-    notes.unshift(response.createNote)
-    setNotes(notes)
-    assessmentClose()
-  }
-
-  function saveAssessment(values, form) {
-    const updatedNote = {
-      uuid: values.uuid,
-      author: values.author,
-      type: values.type,
-      noteRelatedObjects: values.noteRelatedObjects,
-      text: values.text
-    }
-    updatedNote.text = customFieldsJSONString(values)
-    return API.mutation(GQL_CREATE_NOTE, {
-      note: updatedNote
-    })
-  }
-
-  function assessmentClose() {
-    setAssessmentError(null)
+  function hideAddAssessmentModal(success) {
     setShowAssessmentModal(false)
+    if (success) {
+      refetch()
+    }
   }
 }
 
