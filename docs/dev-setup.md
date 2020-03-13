@@ -9,14 +9,13 @@ This section describes the recommended Developer Environment and how to set it u
 - [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
-- Checkout the [source code](https://github.com/deptofdefense/anet) from github.
+- Checkout the [source code](https://github.com/NCI-Agency/anet) from github.
    ```
-   git clone git@github.com:deptofdefense/anet.git
+   git clone git@github.com:NCI-Agency/anet.git
    ```
 - Install the recommended git hooks
    ```
    cd anet
-   git config core.hooksPath scripts/githooks
    ```
 
 ### Possible Problems
