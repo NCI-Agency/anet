@@ -568,15 +568,24 @@ ReadonlyCustomFields.defaultProps = {
   fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
 }
 
-// customFields should contain the JSON of all the visible custom fields
-export const customFieldsJSONString = values => {
-  if (values.formCustomFields) {
+// customFields should contain the JSON of all the visible custom fields.
+// When used for notes text, it should not contain the invisibleCustomFields.
+export const customFieldsJSONString = (
+  values,
+  forNoteText = false,
+  prefix = DEFAULT_CUSTOM_FIELDS_PREFIX
+) => {
+  if (Object.get(values, prefix)) {
     const clonedValues = _cloneDeep(values)
-    if (values.formCustomFields.invisibleCustomFields) {
-      clonedValues.formCustomFields.invisibleCustomFields.forEach(f =>
+    const customFieldsValues = Object.get(clonedValues, prefix)
+    if (customFieldsValues.invisibleCustomFields) {
+      customFieldsValues.invisibleCustomFields.forEach(f =>
         _set(clonedValues, f.split("."), undefined)
       )
+      if (forNoteText) {
+        delete customFieldsValues.invisibleCustomFields
+      }
     }
-    return JSON.stringify(clonedValues.formCustomFields)
+    return JSON.stringify(customFieldsValues)
   }
 }

@@ -123,7 +123,7 @@ const AddAssessmentModal = ({
       noteRelatedObjects: values.noteRelatedObjects,
       text: values.text
     }
-    updatedNote.text = customFieldsJSONString(values)
+    updatedNote.text = customFieldsJSONString(values, true)
     return API.mutation(GQL_CREATE_NOTE, {
       note: updatedNote
     })
