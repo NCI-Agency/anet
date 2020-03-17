@@ -177,14 +177,21 @@ export default class Task extends Model {
   }
 
   getAssessmentResults(dateRange) {
+    const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
     const taskAssessmentNotes = this.notes
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.length === 2 &&
           n.noteRelatedObjects.filter(
             ro =>
               ro.relatedObjectType === "tasks" &&
               ro.relatedObjectUuid === this.uuid
+          ).length &&
+          n.noteRelatedObjects.filter(
+            ro =>
+              ro.relatedObjectType === "reports" &&
+              publishedReportsUuids.includes(ro.relatedObjectUuid)
           ).length &&
           (!dateRange ||
             (n.createdAt < dateRange.end && n.createdAt > dateRange.start))
