@@ -59,7 +59,9 @@ AggregationWidget.propTypes = {
   label: PropTypes.string,
   widget: PropTypes.string,
   defaultWidget: PropTypes.string,
-  values: PropTypes.arrayOf(PropTypes.number),
+  values: PropTypes.arrayOf(
+    PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  ),
   aggregationType: PropTypes.string
 }
 AggregationWidget.defaultProps = {
