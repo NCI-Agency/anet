@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,7 +69,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
-  private String avatar;
+  private byte[] avatar;
   @GraphQLQuery
   @GraphQLInputField
   private String code;
@@ -248,19 +249,23 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   @GraphQLQuery(name = "avatar")
   public String getAvatar(@GraphQLArgument(name = "size", defaultValue = "256") int size) {
     try {
-      return Utils.resizeImageBase64(this.avatar, size, size, "png");
+      return Base64.getEncoder().encodeToString(Utils.resizeImage(avatar, size, size, "png"));
     } catch (Exception e) {
       return null;
     }
   }
 
-  public String getAvatar() {
-    return this.avatar;
+  public byte[] getAvatar() {
+    return avatar;
+  }
+
+  public void setAvatar(byte[] avatar) {
+    this.avatar = avatar;
   }
 
   @GraphQLInputField(name = "avatar")
   public void setAvatar(String avatar) {
-    this.avatar = avatar;
+    this.avatar = avatar == null ? null : Base64.getDecoder().decode(avatar);
   }
 
   public String getCode() {

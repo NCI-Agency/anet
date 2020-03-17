@@ -508,9 +508,6 @@ dictionary:
           label: Text field
           placeholder: Placeholder text for input field
           helpText: Help text for text field
-          validations:
-            - type: required
-              params: [You must provide the text field]
         colourOptions:
           type: enum
           label: Choose one of the colours
