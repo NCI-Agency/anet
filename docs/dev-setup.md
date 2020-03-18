@@ -184,10 +184,11 @@ Then download the appropriate `BrowserStackLocal`, unpack it.
 
 When all is set up, run the remote tests:
 1. Run `BrowserStackLocal` with your key: ./BrowserStackLocal --key mYbRoWsErStAcKkEy
-1. Run the tests: ```
-$ export TEST_ENV=remote
-$ yarn run test-e2e
-```
+1. Run the tests:
+  ```
+  $ export TEST_ENV=remote
+  $ yarn run test-e2e
+  ```
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ### Simulator
