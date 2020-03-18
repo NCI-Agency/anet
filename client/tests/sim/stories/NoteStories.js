@@ -25,7 +25,13 @@ function getListEndpoint(type) {
   }
 }
 
-export async function getRandomObject(user, type, variables, fields = "uuid") {
+export async function getRandomObject(
+  user,
+  type,
+  variables,
+  fields = "uuid",
+  ignoredUuids = []
+) {
   const [listEndpoint, queryType] = getListEndpoint(type)
   const objectQuery = Object.assign({}, variables, {
     pageNum: 0,
@@ -48,24 +54,36 @@ export async function getRandomObject(user, type, variables, fields = "uuid") {
   if (totalCount === 0) {
     return null
   }
-  objectQuery.pageNum = faker.random.number({ max: totalCount - 1 })
-  const list = (
-    await runGQL(user, {
-      query: `
-      query ($objectQuery: ${queryType}) {
-        ${listEndpoint}(query: $objectQuery) {
-          list {
-            ${fields}
+  let attempt = 0
+  while (attempt < 10) {
+    objectQuery.pageNum = faker.random.number({ max: totalCount - 1 })
+    const list = (
+      await runGQL(user, {
+        query: `
+          query ($objectQuery: ${queryType}) {
+            ${listEndpoint}(query: $objectQuery) {
+              list {
+                ${fields}
+              }
+            }
           }
+        `,
+        variables: {
+          objectQuery
         }
-      }
-    `,
-      variables: {
-        objectQuery
-      }
-    })
-  ).data[listEndpoint].list
-  return _isEmpty(list) ? null : list[0]
+      })
+    ).data[listEndpoint].list
+    if (_isEmpty(list)) {
+      return null
+    }
+    const randomObject = list[0]
+    if (ignoredUuids.includes(randomObject?.uuid)) {
+      attempt++
+    } else {
+      return randomObject
+    }
+  }
+  return null
 }
 
 async function populateNote(note, user, relatedObjectType) {
