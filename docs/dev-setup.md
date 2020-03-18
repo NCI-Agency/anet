@@ -5,7 +5,6 @@ This section describes the recommended Developer Environment and how to set it u
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html).  This can also be either installed, or downloaded as a .zip.  If you do not use the installer, be sure to set the `JAVA_HOME` environment variable to the location of the JDK.
 - [Eclipse](http://www.eclipse.org/downloads/).  Eclipse is a Java IDE.  It can be downloaded as an installer or as a .zip file that does not require installation.
   - When the installer asks which version you'd like to install, choose "Eclipse IDE for Java Developers".
-- [node.js 10.x LTS](https://nodejs.org/en/).
 - [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
@@ -23,7 +22,7 @@ This section describes the recommended Developer Environment and how to set it u
 - **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
 - **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code. 
 
-## Set Up Gradle, Eclipse and NPM
+## Set Up Gradle and Eclipse
 The frontend is run with `yarn`.  We recommend running the backend via `eclipse` if you are doing any backend development, and `gradle` if you are only doing frontend development.
 
 1. Set up Gradle
@@ -40,12 +39,8 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
    1. Ensure there are no compile errors. If there are, you are probably missing dependencies or forgot to set environment variables in Eclipse. Try re-running `./gradlew eclipse` or checking the Eclipse run configuration vs gradle configs.
 1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/NCI-Agency/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
    1. `emailFromAddr` - use your own email address for testing.
-1. Set up npm
-   1. Change Directories into the `client/` directory
-   1. Run `yarn install`  to download all the javascript dependencies.  This can take several minutes depending on your internet connection. If the command hangs, it may be because your network blocks ssh. Try the command again on a different network.
 
 ## Java Backend
-
 ### Initial Setup
 1. You can either use PostgreSQL or Microsoft SQL Server for your database. Both allow you to run entirely on your local machine and develop offline.
    - MSSQL
@@ -72,7 +67,8 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
    - The database schema is stored in `src/main/resources/migrations.xml`.
 1. Seed the initial data:
    - If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and load the data.
-1. Run `./gradlew build` to download all dependencies and build the project.
+1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn) and build the project
+_Note_: it will also start the back-end but at this step we are not interested in that.
 
 ### The Base Data Set
 Provided with the ANET source code is the file `insertBaseData-mssql.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
@@ -162,6 +158,7 @@ The tests are reliant on the data looking pretty similar to what you'd get after
 1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
+1. Make sure you have the proper nodejs and yarn in your path (see the [React Frontend](#react-frontend) instructions).
 
 Run `yarn run lint-fix` to automatically fix some kinds of lint errors.
 
@@ -225,10 +222,15 @@ The simulator can be started by running 'yarn run sim' in 'client'.
 
 ## React Frontend
 ### Initial Setup
-1. Make sure you have node.js v10.x LTS installed: ( http://nodejs.org )
+1. Make sure you have the proper nodejs and yarn in your path. Example:
+    ```
+    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-latest
+    export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v12.14.1-linux-x64
+    export PATH="$YARN_HOME/bin:$NODEJS_HOME/bin:$PATH"
+    ```
+_Note_: nodejs version might have changed in the meanwhile, check inside <anet_root_path>/.gradle/nodejs/ for which version is being used and change the path accordingly.
 1. `cd client/`
     - All of the frontend code is in the `client/` directory.
-1. Install the development dependencies: `yarn install`
 1. Run the server: `yarn run start`
 1. Go to [http://localhost:3000/](http://localhost:3000/) in your browser.
    - When prompted for credentials:
