@@ -4,10 +4,7 @@ import createEngine, {
   DiagramModel
 } from "@projectstorm/react-diagrams"
 import { Settings } from "api"
-import {
-  mapPageDispatchersToProps,
-  PageDispatchersPropType
-} from "components/Page"
+import { mapPageDispatchersToProps } from "components/Page"
 import FileSaver from "file-saver"
 import _keys from "lodash/keys"
 import PropTypes from "prop-types"
@@ -37,12 +34,13 @@ PrototypeNode.propTypes = {
   model: PropTypes.object
 }
 
-const BoardDashboard = ({ pageDispatchers }) => {
+const BoardDashboard = () => {
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dropEvent, setDropEvent] = useState()
   const engineRef = useRef(createEngine())
   const [model, setModel] = useState()
+  const [edit, setEdit] = useState(false)
 
   useEffect(() => {
     setModel(new DiagramModel())
@@ -51,6 +49,10 @@ const BoardDashboard = ({ pageDispatchers }) => {
   useEffect(() => {
     engineRef.current.setModel(model)
   }, [model])
+
+  useEffect(() => {
+    model && model.setLocked(!edit)
+  }, [model, edit])
 
   useEffect(() => {
     async function fetchData() {
@@ -101,18 +103,24 @@ const BoardDashboard = ({ pageDispatchers }) => {
       }}
     >
       <div style={{ flexGrow: 0 }}>
-        <PrototypeNode model={{ type: "in" }} name="In Node" />
-        <PrototypeNode model={{ type: "out" }} name="Out Node" />
-        <Button
-          onClick={() => {
-            const blob = new Blob([JSON.stringify(model.serialize())], {
-              type: "application/json;charset=utf-8"
-            })
-            FileSaver.saveAs(blob, "BoardDashboard.json")
-          }}
-        >
-          <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
-        </Button>
+        <Button onClick={() => setEdit(!edit)}>{edit ? "View" : "Edit"}</Button>
+
+        {edit && (
+          <>
+            <PrototypeNode model={{ type: "in" }} name="In Node" />
+            <PrototypeNode model={{ type: "out" }} name="Out Node" />
+            <Button
+              onClick={() => {
+                const blob = new Blob([JSON.stringify(model.serialize())], {
+                  type: "application/json;charset=utf-8"
+                })
+                FileSaver.saveAs(blob, "BoardDashboard.json")
+              }}
+            >
+              <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
+            </Button>
+          </>
+        )}
       </div>
       <div
         style={{
@@ -137,7 +145,5 @@ const BoardDashboard = ({ pageDispatchers }) => {
     </div>
   )
 }
-
-BoardDashboard.propTypes = { pageDispatchers: PageDispatchersPropType }
 
 export default connect(null, mapPageDispatchersToProps)(BoardDashboard)
