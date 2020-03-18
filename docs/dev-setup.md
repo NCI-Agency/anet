@@ -27,15 +27,12 @@ This section describes the recommended Developer Environment and how to set it u
 The frontend is run with `yarn`.  We recommend running the backend via `eclipse` if you are doing any backend development, and `gradle` if you are only doing frontend development.
 
 1. Set up Gradle
-   1. Open a command line in the `anet` directory that was retrieved from github.
-   1. Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
-   1. Run `./gradlew eclipse` (linux/mac) or `./gradlew.bat eclipse` (windows) to download all the java dependencies.  This can take several minutes depending on your internet connection.
-1. Set up npm
-   1. Change Directories into the `client/` directory
-   1. Run `yarn install`  to download all the javascript dependencies.  This can take several minutes depending on your internet connection. If the command hangs, it may be because your network blocks ssh. Try the command again on a different network.
+   1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
+   - Open a command line in the `anet` directory that was retrieved from github.
+   - Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
 1. Set up Eclipse
    1. Eclipse will ask you for a `workspace` directory. You can choose any empty directory.
-   1. Import the `anet/` directory into eclipse as an existing project.
+   1. Import the `anet/` directory into Eclipse as an existing `Gradle project`. This changes the .classpath and makes sure Eclipse finds the Java dependencies through the `build.gradle`.
    1. Run the project as a Java Application.  Open the Run Configuration and make sure:
       1. The main method is `mil.dds.anet.AnetApplication`
       1. Arguments includes `server anet.yml`
@@ -43,6 +40,9 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
    1. Ensure there are no compile errors. If there are, you are probably missing dependencies or forgot to set environment variables in Eclipse. Try re-running `./gradlew eclipse` or checking the Eclipse run configuration vs gradle configs.
 1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/NCI-Agency/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
    1. `emailFromAddr` - use your own email address for testing.
+1. Set up npm
+   1. Change Directories into the `client/` directory
+   1. Run `yarn install`  to download all the javascript dependencies.  This can take several minutes depending on your internet connection. If the command hangs, it may be because your network blocks ssh. Try the command again on a different network.
 
 ## Java Backend
 
@@ -50,7 +50,7 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
 1. You can either use PostgreSQL or Microsoft SQL Server for your database. Both allow you to run entirely on your local machine and develop offline.
    - MSSQL
      - This is currently the default, so you don't need to do anything special
-     - Paste the following in your `localSettings.gradle` file (with the correct values):
+     - If you want to change any of the default database settings (see `build.gradle` for the defaults), you can paste them as following in your `localSettings.gradle` file (do it for the ones you want to change and with the correct values):
 
       ```java
       run.environment("DB_DRIVER", "sqlserver")
