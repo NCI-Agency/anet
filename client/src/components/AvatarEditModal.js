@@ -37,7 +37,7 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
 
   function save() {
     const updatedAvatar = currentPreview.substring(
-      AVATAR_IMAGE_DATA_PREFIX.length - 1
+      AVATAR_IMAGE_DATA_PREFIX.length
     )
     onAvatarUpdate(updatedAvatar)
     close()
