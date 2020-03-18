@@ -9,9 +9,9 @@ This section describes the recommended Developer Environment and how to set it u
 - [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
-- Checkout the [source code](https://github.com/deptofdefense/anet) from github.
+- Checkout the [source code](https://github.com/NCI-Agency/anet) from github.
    ```
-   git clone git@github.com:deptofdefense/anet.git
+   git clone git@github.com:NCI-Agency/anet.git
    ```
 - Install the recommended git hooks
    ```
@@ -20,7 +20,7 @@ This section describes the recommended Developer Environment and how to set it u
    ```
 
 ### Possible Problems
-- **You cannot access [the source code repo](https://github.com/deptofdefense/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
+- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
 - **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code. 
 
 ## Set Up Gradle, Eclipse and NPM
@@ -41,7 +41,7 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
       1. Arguments includes `server anet.yml`
       1. Environment variables include anything set in build.gradle or localSettings.gradle.
    1. Ensure there are no compile errors. If there are, you are probably missing dependencies or forgot to set environment variables in Eclipse. Try re-running `./gradlew eclipse` or checking the Eclipse run configuration vs gradle configs.
-1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/deptofdefense/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
+1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/NCI-Agency/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
    1. `emailFromAddr` - use your own email address for testing.
 
 ## Java Backend
