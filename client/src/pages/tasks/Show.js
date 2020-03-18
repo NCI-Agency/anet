@@ -196,39 +196,36 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const assessmentResultsWidgets = []
   const previousAssessmentResultsWidgets = []
   Object.keys(taskAssessmentDef).forEach(key => {
+    const aggWidgetProps = {
+      label: taskAssessmentDef[key].label,
+      widget: taskAssessmentDef[key].aggregation?.widget,
+      defaultWidget: taskAssessmentDef[key].widget,
+      aggregationType: taskAssessmentDef[key].aggregation?.aggregationType
+    }
     ongoingResultsWidgets.push(
       <AggregationWidget
-        key={key}
-        label={taskAssessmentDef[key].label}
+        key={`ongoing-${key}`}
         values={task.getAssessmentResults(ongoingPeriod)[key]}
-        widget={taskAssessmentDef[key].aggregation?.widget}
-        defaultWidget={taskAssessmentDef[key].widget}
-        aggregationType={taskAssessmentDef[key].aggregation?.aggregationType}
+        {...aggWidgetProps}
       />
     )
     assessmentResultsWidgets.push(
       <AggregationWidget
-        key={key}
-        label={taskAssessmentDef[key].label}
+        key={`assessment-${key}`}
         values={task.getAssessmentResults(assessmentPeriod)[key]}
-        widget={taskAssessmentDef[key].aggregation?.widget}
-        defaultWidget={taskAssessmentDef[key].widget}
-        aggregationType={taskAssessmentDef[key].aggregation?.aggregationType}
+        {...aggWidgetProps}
       />
     )
     previousAssessmentResultsWidgets.push(
       <AggregationWidget
-        key={key}
-        label={taskAssessmentDef[key].label}
+        key={`previousAssessment-${key}`}
         values={task.getAssessmentResults(previousAssessmentPeriod)[key]}
-        widget={taskAssessmentDef[key].aggregation?.widget}
-        defaultWidget={taskAssessmentDef[key].widget}
-        aggregationType={taskAssessmentDef[key].aggregation?.aggregationType}
+        {...aggWidgetProps}
       />
     )
   })
 
-  // Get initial task assessments values
+  // Set initial task.assessments (contains assessments made directly on the task)
   task = Object.assign(task, task.getAssessments())
 
   return (
