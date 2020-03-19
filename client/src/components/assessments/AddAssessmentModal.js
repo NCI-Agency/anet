@@ -78,6 +78,7 @@ const AddAssessmentModal = ({
                     values,
                     validateForm
                   }}
+                  vertical
                 />
               </div>
             </Modal.Body>
