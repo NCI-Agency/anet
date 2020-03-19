@@ -31,7 +31,6 @@ const AggregationWidget = ({
   aggregationType,
   ...otherWidgetProps
 }) => {
-  console.log("agg values", values)
   const Widget = widget ? WIDGETS[widget] : WIDGETS.default
   return (
     <Row>

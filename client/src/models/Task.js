@@ -207,7 +207,7 @@ export default class Task extends Model {
     return assessmentResults
   }
 
-  getAssessments(dateRange) {
+  getLastAssessment(dateRange) {
     const notesToAssessments = this.notes
       .filter(n => {
         return (
@@ -222,14 +222,11 @@ export default class Task extends Model {
             (n.createdAt < dateRange.end && n.createdAt > dateRange.start))
         )
       })
+      .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
       .map(ta => ({
         uuid: ta.uuid,
         assessment: JSON.parse(ta.text)
       }))
-    const taskAssessments = {}
-    notesToAssessments.forEach(ta => {
-      taskAssessments[ta.uuid] = ta.assessment
-    })
-    return { assessments: taskAssessments }
+    return notesToAssessments.length && notesToAssessments[0].assessment
   }
 }

@@ -226,8 +226,17 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     )
   })
 
-  // Set initial task.assessments (contains assessments made directly on the task)
-  task = Object.assign(task, task.getAssessments())
+  // Set initial task.lastAssessment (contains the last assessments made directly on the task)
+  const lastAssessment = task.getLastAssessment()
+  if (lastAssessment) {
+    task = Object.assign(task, {
+      lastAssessment: lastAssessment
+    })
+  }
+  const assessmentLabelPrefix = task.lastAssessment ? "Add a" : "Make a new"
+  const addAssessmentLabel = `${assessmentLabelPrefix} ${
+    task.shortName
+  } assessment for the month of ${assessmentPeriod.start.format("MMM-YYYY")}`
 
   return (
     <Formik enableReinitialize initialValues={task}>
@@ -409,16 +418,15 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   >
                     {assessmentResultsWidgets}
 
-                    {Object.keys(values.assessments).map(assessmentUuid => (
+                    {values.lastAssessment && (
                       <ReadonlyCustomFields
-                        key={`assessment-${assessmentUuid}`}
-                        fieldNamePrefix={`assessments.${assessmentUuid}`}
+                        fieldNamePrefix="lastAssessment"
                         fieldsConfig={fieldSettings.assessment?.customFields}
                         formikProps={{
                           values
                         }}
                       />
-                    ))}
+                    )}
 
                     {canEdit && fieldSettings.assessment && (
                       <>
@@ -426,8 +434,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                           bsStyle="primary"
                           onClick={() => setShowAssessmentModal(true)}
                         >
-                          Add new monthly assessment for{" "}
-                          {assessmentPeriod.start.format("MMM-YYYY")}
+                          {addAssessmentLabel}
                         </Button>
                         <AddAssessmentModal
                           task={task}
