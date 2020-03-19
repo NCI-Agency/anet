@@ -201,7 +201,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       widget:
         taskAssessmentDef[key].aggregation?.widget ||
         taskAssessmentDef[key].widget,
-      aggregationType: taskAssessmentDef[key].aggregation?.aggregationType
+      aggregationType: taskAssessmentDef[key].aggregation?.aggregationType,
+      vertical: true
     }
     ongoingResultsWidgets.push(
       <AggregationWidget
@@ -425,6 +426,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                         formikProps={{
                           values
                         }}
+                        vertical
                       />
                     )}
 
