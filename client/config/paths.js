@@ -32,7 +32,7 @@ module.exports = {
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
   clientBuild: resolveApp("build"),
-  testsSetup: resolveApp("src/setupTests.js"),
+  testSrc: resolveApp("tests"),
   appNodeModules: resolveApp("node_modules"),
   ownNodeModules: resolveApp("node_modules"),
   nodePaths: nodePaths

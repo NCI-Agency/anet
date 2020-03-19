@@ -325,7 +325,9 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.tasks.length > 0 && (
             <span>
-              <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
+              <strong>
+                {pluralize(Settings.fields.task.subLevel.shortLabel)}:
+              </strong>{" "}
               {report.tasks.map(
                 (task, i) =>
                   task.shortName + (i < report.tasks.length - 1 ? ", " : "")

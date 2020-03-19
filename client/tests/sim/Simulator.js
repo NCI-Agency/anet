@@ -97,7 +97,13 @@ async function runBuildup(scenario) {
 
       await sleep(buildup.preDelay)
       for (var i = 0; i < buildup.number; i++) {
-        await buildup.runnable(user, grow, buildup.arguments)
+        try {
+          await buildup.runnable(user, grow, buildup.arguments)
+        } catch (e) {
+          console.log(
+            colors.red(`Buildup '${buildup.name}' iteration ${i} failed`)
+          )
+        }
       }
     }
   })

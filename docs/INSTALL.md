@@ -528,8 +528,8 @@ assets:
   overrides:
     /imagery: imagery
 ```
-1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
-1. To use this new tile source, add under `baseLayers`:
+2. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
+3. To use this new tile source, add under `baseLayers`:
 ```yaml
       - name: OSM
         default: true
