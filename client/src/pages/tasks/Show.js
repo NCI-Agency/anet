@@ -198,8 +198,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   Object.keys(taskAssessmentDef).forEach(key => {
     const aggWidgetProps = {
       label: taskAssessmentDef[key].label,
-      widget: taskAssessmentDef[key].aggregation?.widget,
-      defaultWidget: taskAssessmentDef[key].widget,
+      widget:
+        taskAssessmentDef[key].aggregation?.widget ||
+        taskAssessmentDef[key].widget,
       aggregationType: taskAssessmentDef[key].aggregation?.aggregationType
     }
     ongoingResultsWidgets.push(

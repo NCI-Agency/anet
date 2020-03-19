@@ -99,10 +99,10 @@ definitions:
         properties:
           widget:
             type: string
-            enum: [likertScaleAggregation, NumberAggregationdefault]
+            enum: [likertScale, numberAggregation, default]
           aggregationType:
             type: string
-            enum: [avg, sum, default]
+            enum: [sum, avg, min, max]
 
 # TODO: The following properties should not be here as these are only dependency fields.
 # I can't figure out yet why the schema validation will not pass without them
