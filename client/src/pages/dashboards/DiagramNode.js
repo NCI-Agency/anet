@@ -6,12 +6,15 @@ import {
 import {
   DefaultLinkModel,
   NodeModel,
+  DefaultNodeModel,
   PortModel,
   PortModelAlignment,
   PortWidget
 } from "@projectstorm/react-diagrams"
 import * as React from "react"
 import PropTypes from "prop-types"
+import * as Models from "models"
+import LinkTo from "components/LinkTo"
 
 export class DiagramPortModel extends PortModel {
   constructor(alignment) {
@@ -25,7 +28,7 @@ export class DiagramPortModel extends PortModel {
   createLinkModel = () => new DefaultLinkModel()
 }
 
-export class DiagramNodeModel extends NodeModel {
+export class DiagramNodeModel extends DefaultNodeModel {
   constructor() {
     super({
       type: "diamond"
@@ -49,89 +52,74 @@ const Port = styled.div`
   }
 `
 
-export const DiagramNodeWidget = ({ size, node, engine }) => (
-  <div
-    className="diamond-node"
-    style={{
-      position: "relative",
-      width: size,
-      height: size
-    }}
-  >
-    <svg
-      width={size}
-      height={size}
-      dangerouslySetInnerHTML={{
-        __html:
-          `
-          <g id="Layer_1">
-          </g>
-          <g id="Layer_2">
-            <polygon fill="mediumpurple" stroke="${
-              node.isSelected() ? "white" : "#000000"
-            }" stroke-width="3" stroke-miterlimit="10" points="10,` +
-          size / 2 +
-          " " +
-          size / 2 +
-          ",10 " +
-          (size - 10) +
-          "," +
-          size / 2 +
-          " " +
-          size / 2 +
-          "," +
-          (size - 10) +
-          ` "/>
-          </g>
-        `
-      }}
-    />
-    <PortWidget
+export const DiagramNodeWidget = ({ size, node, engine }) => {
+  const ModelClass = node.anetObjectType && Models[node.anetObjectType]
+
+  const modelInstance = ModelClass && new ModelClass(node.anetObject)
+  return (
+    <div
+      className="diamond-node"
       style={{
-        top: size / 2 - 8,
-        left: -8,
-        position: "absolute"
+        position: "relative",
+        width: size,
+        height: size
       }}
-      port={node.getPort(PortModelAlignment.LEFT)}
-      engine={engine}
     >
-      <Port />
-    </PortWidget>
-    <PortWidget
-      style={{
-        left: size / 2 - 8,
-        top: -8,
-        position: "absolute"
-      }}
-      port={node.getPort(PortModelAlignment.TOP)}
-      engine={engine}
-    >
-      <Port />
-    </PortWidget>
-    <PortWidget
-      style={{
-        left: size - 8,
-        top: size / 2 - 8,
-        position: "absolute"
-      }}
-      port={node.getPort(PortModelAlignment.RIGHT)}
-      engine={engine}
-    >
-      <Port />
-    </PortWidget>
-    <PortWidget
-      style={{
-        left: size / 2 - 8,
-        top: size - 8,
-        position: "absolute"
-      }}
-      port={node.getPort(PortModelAlignment.BOTTOM)}
-      engine={engine}
-    >
-      <Port />
-    </PortWidget>
-  </div>
-)
+      <img
+        src={modelInstance?.iconUrl()}
+        alt=""
+        width={50}
+        height={50}
+        style={{ pointerEvents: "none" }}
+      />
+      { node.anetObjectType && node.anetObject && <LinkTo modelType={node.anetObjectType} model={node.anetObject} showAvatar={false} showIcon={false}/>}
+      <PortWidget
+        style={{
+          top: size / 2 - 8,
+          left: -8,
+          position: "absolute"
+        }}
+        port={node.getPort(PortModelAlignment.LEFT)}
+        engine={engine}
+      >
+        <Port />
+      </PortWidget>
+      <PortWidget
+        style={{
+          left: size / 2 - 8,
+          top: -8,
+          position: "absolute"
+        }}
+        port={node.getPort(PortModelAlignment.TOP)}
+        engine={engine}
+      >
+        <Port />
+      </PortWidget>
+      <PortWidget
+        style={{
+          left: size - 8,
+          top: size / 2 - 8,
+          position: "absolute"
+        }}
+        port={node.getPort(PortModelAlignment.RIGHT)}
+        engine={engine}
+      >
+        <Port />
+      </PortWidget>
+      <PortWidget
+        style={{
+          left: size / 2 - 8,
+          top: size - 8,
+          position: "absolute"
+        }}
+        port={node.getPort(PortModelAlignment.BOTTOM)}
+        engine={engine}
+      >
+        <Port />
+      </PortWidget>
+    </div>
+  )
+}
 
 DiagramNodeWidget.propTypes = {
   size: PropTypes.number,

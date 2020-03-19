@@ -1,25 +1,26 @@
 import { CanvasWidget } from "@projectstorm/react-canvas-core"
-import * as Models from "models"
 import createEngine, {
   DiagramModel,
   PortModelAlignment
 } from "@projectstorm/react-diagrams"
 import { Settings } from "api"
+import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import { mapPageDispatchersToProps } from "components/Page"
 import FileSaver from "file-saver"
+import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useState, useRef } from "react"
-import { Badge, Button } from "react-bootstrap"
+import React, { useEffect, useRef, useState } from "react"
+import { Badge, Button, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
-import {
-  DiagramNodeModel,
-  DiagramNodeFactory,
-  SimplePortFactory,
-  DiagramPortModel
-} from "./DiagramNode"
 import "./BoardDashboard.css"
+import {
+  DiagramNodeFactory,
+  DiagramNodeModel,
+  DiagramPortModel,
+  SimplePortFactory
+} from "./DiagramNode"
 
 const PrototypeNode = ({ name, model }) => (
   <Badge style={{ margin: 10, background: "white", color: "#106ba3" }}>
@@ -32,7 +33,7 @@ const PrototypeNode = ({ name, model }) => (
       <img
         src={model.iconUrl()}
         alt=""
-        style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
+        style={{ marginLeft: 5, marginRight: 5, height: "2em", pointerEvents: "none" }}
       />
       {name}
     </div>
@@ -61,10 +62,11 @@ PrototypeNode.propTypes = {
 const BoardDashboard = () => {
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
-  const [dropEvent, setDropEvent] = useState()
+  const [dropEvent, setDropEvent] = useState(null)
   const engineRef = useRef(bootstrapEngine())
-  const [model, setModel] = useState()
+  const [model, setModel] = useState(null)
   const [edit, setEdit] = useState(false)
+  const [editedNode, setEditedNode] = useState(null)
 
   useEffect(() => {
     setModel(new DiagramModel())
@@ -102,6 +104,7 @@ const BoardDashboard = () => {
       node.setPosition(point)
       engineRef.current.getModel().addNode(node)
       setDropEvent(null)
+      setEditedNode(node)
     }
   }, [model, dropEvent])
   return (
@@ -158,6 +161,20 @@ const BoardDashboard = () => {
           </>
         )}
       </div>
+      <Modal show={editedNode !== null} onHide={() => setEditedNode(null)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit diagram node</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <MultiTypeAdvancedSelectComponent
+            onConfirm={(value, objectType) => {
+              editedNode.extras = value.uuid
+              editedNode.anetObject = value
+              editedNode.anetObjectType = objectType
+            }}
+          />
+        </Modal.Body>
+      </Modal>
     </div>
   )
 }
