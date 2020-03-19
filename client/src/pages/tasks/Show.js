@@ -132,6 +132,10 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     data.task.formCustomFields = JSON.parse(data.task.customFields)
   }
   const task = new Task(data ? data.task : {})
+  const isTopLevelTask = _isEmpty(task.customFieldRef1)
+  const fieldSettings = isTopLevelTask
+    ? Settings.fields.task.topLevel
+    : Settings.fields.task.subLevel
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskCustomFieldRef1 = DictionaryField(Field)
@@ -187,21 +191,21 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                         refetch
                       )
                     )}{" "}
-                    {Settings.fields.task.shortLabel} {task.shortName}
+                    {fieldSettings.shortLabel} {task.shortName}
                   </>
                 }
                 action={action}
               />
               <Fieldset>
                 <ShortNameField
-                  dictProps={Settings.fields.task.shortName}
+                  dictProps={fieldSettings.shortName}
                   name="shortName"
                   component={FieldHelper.ReadonlyField}
                 />
 
                 {/* Override componentClass and style from dictProps */}
                 <LongNameField
-                  dictProps={Settings.fields.task.longName}
+                  dictProps={fieldSettings.longName}
                   componentClass="div"
                   style={{}}
                   name="longName"
@@ -309,7 +313,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               {currentUser.isAdmin() && // TODO: Only show task custom fields to admins until we implement visibility per role
                 Settings.fields.task.customFields && (
                   <Fieldset
-                    title={`${Settings.fields.task.shortLabel} information`}
+                    title={`${fieldSettings.shortLabel} information`}
                     id="custom-fields"
                   >
                     <ReadonlyCustomFields
@@ -328,9 +332,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
 
             <Approvals relatedObject={task} />
 
-            <Fieldset
-              title={`Reports for this ${Settings.fields.task.shortLabel}`}
-            >
+            <Fieldset title={`Reports for this ${fieldSettings.shortLabel}`}>
               <ReportCollection
                 paginationKey={`r_${uuid}`}
                 queryParams={{

@@ -302,7 +302,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, longLabel, longName, taskedOrganizations, responsiblePositions]
+        required: [shortLabel, shortName, longLabel, longName, topLevel, subLevel, taskedOrganizations, responsiblePositions]
         properties:
           shortLabel:
             type: string
@@ -316,6 +316,21 @@ properties:
             description: Used in the UI where a long label for tasks is shown.
           longName:
             "$ref": "#/definitions/inputField"
+          topLevel:
+           type: object
+           additionalProperties: false
+           required: [shortLabel, shortName, longLabel, longName]
+           properties:
+             shortLabel:
+               "$ref": "#/properties/fields/properties/task/properties/shortLabel"
+             shortName:
+               "$ref": "#/properties/fields/properties/task/properties/shortName"
+             longLabel:
+               "$ref": "#/properties/fields/properties/task/properties/longLabel"
+             longName:
+               "$ref": "#/properties/fields/properties/task/properties/longName"
+          subLevel:
+            "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion: 
             "$ref": "#/definitions/inputField"
           plannedCompletion:

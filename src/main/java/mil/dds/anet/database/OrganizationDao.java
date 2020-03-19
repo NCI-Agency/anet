@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationStatus;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
@@ -94,15 +92,6 @@ public class OrganizationDao
       Map<String, Object> context, String personUuid) {
     return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
         personUuid);
-  }
-
-  @InTransaction
-  public List<Organization> getTopLevelOrgs(OrganizationType type) {
-    return getDbHandle()
-        .createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS + " FROM organizations "
-            + "WHERE \"parentOrgUuid\" IS NULL AND status = :status AND type = :type")
-        .bind("status", DaoUtils.getEnumId(OrganizationStatus.ACTIVE))
-        .bind("type", DaoUtils.getEnumId(type)).map(new OrganizationMapper()).list();
   }
 
   public interface OrgListQueries {

@@ -205,15 +205,38 @@ dictionary:
       shortLabel: Objective / Effort
       shortName:
         label: Objective / Effort number
-        placeholder: Enter an effort name, example....
-
+        placeholder: Enter an objective / effort name, example....
       longLabel: Objectives and Efforts
       longName:
-        label: Task description
-        placeholder: Enter an effort description, example ....
+        label: Objective / Effort description
+        placeholder: Enter an objective / effort description, example ....
         componentClass: textarea
         style:
           height: 400px
+      topLevel:
+         shortLabel: Objective
+         shortName:
+           label: Objective name
+           placeholder: Enter an objective name, example....
+         longLabel: Objectives
+         longName:
+           label: Objective description
+           placeholder: Enter an objective description, example ....
+           componentClass: textarea
+           style:
+             height: 400px
+      subLevel:
+         shortLabel: Effort
+         shortName:
+           label: Effort name
+           placeholder: Enter an effort name, example....
+         longLabel: Efforts
+         longName:
+           label: Effort description
+           placeholder: Enter an effort description, example ....
+           componentClass: textarea
+           style:
+             height: 400px
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task
@@ -443,9 +466,6 @@ dictionary:
           label: Text field
           placeholder: Placeholder text for input field
           helpText: Help text for text field
-          validations:
-            - type: required
-              params: [You must provide the text field]
         colourOptions:
           type: enum
           label: Choose one of the colours

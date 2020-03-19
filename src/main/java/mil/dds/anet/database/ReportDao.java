@@ -464,7 +464,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       // doing this as two separate queries because I do need all the information about the
       // organizations
       OrganizationSearchQuery query = new OrganizationSearchQuery();
-      query.setParentOrgUuid(parentOrgUuid);
+      query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
       query.setParentOrgRecursively(true);
       query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();

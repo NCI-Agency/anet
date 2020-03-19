@@ -39,12 +39,10 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   @GraphQLQuery
   @GraphQLInputField
   private String customField;
-
   // Find tasks who (don't) have the customFieldRef1 filled in
   @GraphQLQuery
   @GraphQLInputField
-  Boolean hasCustomFieldRef1;
-
+  private Boolean hasCustomFieldRef1;
   // Search for tasks with one of the given parent Task(s)
   @GraphQLQuery
   @GraphQLInputField

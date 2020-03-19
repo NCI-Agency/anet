@@ -30,6 +30,10 @@
 	<property name="fts_high" value="'A'" dbms="postgresql" />
 	<property name="fts_low" value="'B'" dbms="postgresql" />
 
+	<!-- For storing the avatar -->
+	<property name="blob_type" value="blob" dbms="mssql" />
+	<property name="blob_type" value="bytea" dbms="postgresql" />
+
 	<changeSet id="1" author="hpitelka">
 		<createTable tableName="people">
 			<column name="id" type="int" autoIncrement="true">
@@ -3102,6 +3106,42 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="change-avatar-type" author="gjvoosten">
+		<!-- This temporarily needs about twice the storage space for all avatars -->
+		<addColumn tableName="people">
+			<column name="b64_avatar" type="${long_text_type}" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE people SET b64_avatar = encode(lo_get(avatar), 'escape') WHERE avatar IS NOT NULL;
+			SELECT lo_unlink(oid) FROM pg_largeobject_metadata;
+		</sql>
+		<sql dbms="mssql">
+			UPDATE people SET b64_avatar = cast(avatar as varchar(max)) WHERE avatar IS NOT NULL;
+		</sql>
+		<dropColumn tableName="people" columnName="avatar" />
+		<addColumn tableName="people">
+			<column name="new_avatar" type="${blob_type}" />
+		</addColumn>
+		<sql dbms="postgresql">
+			UPDATE people SET new_avatar = decode(b64_avatar, 'base64') WHERE b64_avatar IS NOT NULL;
+		</sql>
+		<sql dbms="mssql">
+			UPDATE people SET new_avatar = cast(N'' AS xml).value('xs:base64Binary(sql:column("people.b64_avatar"))', 'varbinary(max)') WHERE b64_avatar IS NOT NULL;
+		</sql>
+		<dropColumn tableName="people" columnName="b64_avatar" />
+		<renameColumn
+			columnDataType="${blob_type}"
+			oldColumnName="new_avatar"
+			newColumnName="avatar"
+			tableName="people" />
+	</changeSet>
+
+	<changeSet id="clean-postgresql-large-objects" author="gjvoosten" dbms="postgresql" runInTransaction="false">
+		<sql>
+			VACUUM FULL ANALYZE pg_largeobject;
+		</sql>
+	</changeSet>
+
 	<changeSet id="add_subscriptions" author="gjvoosten">
 		<createTable tableName="subscriptions">
 			<column name="uuid" type="${uuid_type}">
@@ -3132,7 +3172,7 @@
 			tableName="subscriptions" constraintName="UQ_SubscriptionSubScriberSubscribedObject" columnNames="subscriberUuid, subscribedObjectType, subscribedObjectUuid" />
 	</changeSet>
 
-	<changeSet id="add_subscription_updatess" author="gjvoosten">
+	<changeSet id="add_subscription_updates" author="gjvoosten">
 		<createTable tableName="subscriptionUpdates">
 			<column name="subscriptionUuid" type="${uuid_type}">
 				<constraints nullable="false" />

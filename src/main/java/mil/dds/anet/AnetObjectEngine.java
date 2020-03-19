@@ -269,7 +269,7 @@ public class AnetObjectEngine {
    */
   public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setParentOrgUuid(parentOrgUuid);
+    query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
     query.setParentOrgRecursively(true);
     query.setPageSize(0);
     final List<Organization> orgList =

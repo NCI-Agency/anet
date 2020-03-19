@@ -34,6 +34,7 @@ import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { Comment, Person, Position, Report } from "models"
 import moment from "moment"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
@@ -320,6 +321,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAuthor = Person.isEqual(currentUser, report.author)
+  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
   const canApprove =
@@ -635,9 +637,12 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               <Fieldset title="Meeting attendees">
                 <AttendeesTable attendees={report.attendees} disabled />
               </Fieldset>
-              {/* TODO: Implement conditional labels, until then, we need to be explicit here */}
-              <Fieldset title="Efforts">
-                <TaskTable tasks={report.tasks} showParent />
+              <Fieldset title={Settings.fields.task.subLevel.longLabel}>
+                <TaskTable
+                  tasks={report.tasks}
+                  showParent
+                  noTasksMessage={`No ${tasksLabel} selected`}
+                />
               </Fieldset>
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
