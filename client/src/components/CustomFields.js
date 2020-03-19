@@ -7,6 +7,7 @@ import Model, {
   CUSTOM_FIELD_TYPE,
   createYupObjectShape
 } from "components/Model"
+import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
@@ -21,9 +22,11 @@ import { Button, HelpBlock } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
+import { parseHtmlWithLinkTo } from "utils_links"
 
 const WIDGETS = {
-  likertScale: LikertScale
+  likertScale: LikertScale,
+  richTextEditor: RichTextEditor
 }
 const RENDERERS = {}
 
@@ -41,8 +44,18 @@ const SpecialField = fieldProps => {
   )
 }
 
-const ReadonlySpecialField = fieldProps =>
-  SpecialField({ ...fieldProps, readonly: true })
+const ReadonlySpecialField = ({
+  fieldConfig,
+  formikProps,
+  ...otherfieldProps
+}) => {
+  if (fieldConfig.widget === "richTextEditor") {
+    const fieldValue = Object.get(formikProps.values, otherfieldProps.name)
+    return fieldValue ? <div>{parseHtmlWithLinkTo(fieldValue)}</div> : null
+  } else {
+    return SpecialField({ ...otherfieldProps, readonly: true })
+  }
+}
 
 const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
@@ -562,7 +575,10 @@ export const ReadonlyCustomFields = ({
         ...fieldProps
       } = fieldConfig
       let extraProps = {}
-      if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+      if (
+        type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS ||
+        type === CUSTOM_FIELD_TYPE.SPECIAL_FIELD
+      ) {
         extraProps = {
           fieldConfig,
           formikProps

@@ -118,7 +118,7 @@ definitions:
           "$ref": "#/definitions/customField"
       widget:
         type: string
-        enum: [likertScale, default]
+        enum: [likertScale, richTextEditor, default]
       levels:
         type: array
         uniqueItems: true
@@ -163,7 +163,7 @@ definitions:
             widget:
               title: custom widget for field
               type: string
-              enum: [likertScale, default]
+              enum: [likertScale, richTextEditor, default]
           required: [widget]
           dependencies:
             widget:
@@ -171,6 +171,9 @@ definitions:
               - properties:
                   widget:
                     enum: [default]
+              - properties:
+                  widget:
+                    enum: [richTextEditor]                    
               - properties:
                   widget:
                     enum: [likertScale]

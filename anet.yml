@@ -228,10 +228,10 @@ dictionary:
         assessment:
           customFields:
             issues:
-              type: text
+              type: special_field
               label: Top 3 issues
               placeholder:  Enter the top 3 issues
-              componentClass: textarea
+              widget: richTextEditor
               style:
                 height: 300px
               validations:
@@ -269,10 +269,10 @@ dictionary:
         assessment:
           customFields:
             issues:
-              type: text
+              type: special_field
               label: Top 3 issues
               placeholder:  Enter the top 3 issues
-              componentClass: textarea
+              widget: richTextEditor
               style:
                 height: 300px
               validations:
