@@ -1,22 +1,32 @@
 import LikertScale from "components/graphs/LikertScale"
 import PropTypes from "prop-types"
 import React from "react"
-import { Col, ControlLabel, Row } from "react-bootstrap"
+import { Col, ControlLabel, FormGroup } from "react-bootstrap"
+
+const aggregationPropTypes = {
+  values: PropTypes.arrayOf(
+    PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  ),
+  aggregationType: PropTypes.string
+}
 
 const arrayOfNumbers = arr => arr.map(x => Number(x))
 
 const NUMBER_AGG = {
-  sum: arr => arrayOfNumbers(arr).reduce((a, b) => a + b, 0),
-  avg: arr => arrayOfNumbers(arr).reduce((a, b) => a + b, 0) / arr.length,
+  sum: arr => arrayOfNumbers(arr).reduce((a, b) => a + b),
+  avg: arr => arrayOfNumbers(arr).reduce((a, b) => a + b) / arr.length,
   min: arr => Math.min(...arrayOfNumbers(arr)),
   max: arr => Math.max(...arrayOfNumbers(arr))
 }
 
 const NumberAggWidget = ({ values, aggregationType, ...otherWidgetProps }) =>
-  NUMBER_AGG[aggregationType](values)
+  values.length ? <div>{NUMBER_AGG[aggregationType](values)}</div> : null
+NumberAggWidget.propTypes = aggregationPropTypes
 
-const DefaultAggWidget = ({ values, ...otherWidgetProps }) =>
-  values.length + " values: [" + values + "]"
+const DefaultAggWidget = ({ values, ...otherWidgetProps }) => (
+  <div>values.length + " values: [" + values + "]"</div>
+)
+DefaultAggWidget.propTypes = aggregationPropTypes
 
 const WIDGETS = {
   likertScale: LikertScale,
@@ -29,28 +39,37 @@ const AggregationWidget = ({
   widget,
   values,
   aggregationType,
+  vertical,
   ...otherWidgetProps
 }) => {
   const Widget = widget ? WIDGETS[widget] : WIDGETS.default
+  const widgetElem = (
+    <Widget
+      values={values}
+      aggregationType={aggregationType}
+      {...otherWidgetProps}
+    />
+  )
   return (
-    <Row>
-      {label !== null && (
-        <Col sm={2} componentClass={ControlLabel}>
-          {label}
-        </Col>
-      )}
-      <Col sm={10}>
-        <div>
-          {Widget && (
-            <Widget
-              values={values}
-              aggregationType={aggregationType}
-              {...otherWidgetProps}
-            />
+    <FormGroup>
+      {vertical ? (
+        <>
+          {label !== null && <ControlLabel>{label}</ControlLabel>}
+          {widgetElem}
+        </>
+      ) : (
+        <>
+          {label !== null && (
+            <Col sm={2} componentClass={ControlLabel}>
+              {label}
+            </Col>
           )}
-        </div>
-      </Col>
-    </Row>
+          <Col sm={10}>
+            <div>{widgetElem}</div>
+          </Col>
+        </>
+      )}
+    </FormGroup>
   )
 }
 AggregationWidget.propTypes = {
@@ -59,13 +78,15 @@ AggregationWidget.propTypes = {
   values: PropTypes.arrayOf(
     PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   ),
-  aggregationType: PropTypes.string
+  aggregationType: PropTypes.string,
+  vertical: PropTypes.bool
 }
 AggregationWidget.defaultProps = {
   label: "",
   widget: "",
   values: [],
-  aggregationType: ""
+  aggregationType: "",
+  vertical: false
 }
 
 export default AggregationWidget
