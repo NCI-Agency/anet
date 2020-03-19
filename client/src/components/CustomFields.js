@@ -56,11 +56,12 @@ const TextField = fieldProps => {
 }
 
 const ReadonlyTextField = fieldProps => {
-  const { name, label } = fieldProps
+  const { name, label, vertical } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
+      vertical={vertical}
       component={FieldHelper.ReadonlyField}
     />
   )
@@ -79,11 +80,12 @@ const DateField = fieldProps => {
 }
 
 const ReadonlyDateField = fieldProps => {
-  const { name, label, withTime } = fieldProps
+  const { name, label, vertical, withTime } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
+      vertical={vertical}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal =>
         fieldVal &&
@@ -120,11 +122,12 @@ const enumHumanValue = (choices, fieldVal) => {
 }
 
 const ReadonlyEnumField = fieldProps => {
-  const { name, label, choices } = fieldProps
+  const { name, label, vertical, choices } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
+      vertical={vertical}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
     />
@@ -155,7 +158,8 @@ const ArrayOfObjectsField = fieldProps => {
     fieldConfig,
     formikProps,
     invisibleFields,
-    updateInvisibleFields
+    updateInvisibleFields,
+    vertical
   } = fieldProps
   const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
     formikProps.values,
@@ -190,6 +194,7 @@ const ArrayOfObjectsField = fieldProps => {
                 formikProps={formikProps}
                 invisibleFields={invisibleFields}
                 updateInvisibleFields={updateInvisibleFields}
+                vertical={vertical}
                 arrayHelpers={arrayHelpers}
                 index={index}
               />
@@ -207,6 +212,7 @@ const ArrayObject = ({
   formikProps,
   invisibleFields,
   updateInvisibleFields,
+  vertical,
   arrayHelpers,
   index
 }) => {
@@ -225,6 +231,7 @@ const ArrayObject = ({
         formikProps={formikProps}
         invisibleFields={invisibleFields}
         updateInvisibleFields={updateInvisibleFields}
+        vertical={vertical}
         fieldNamePrefix={`${fieldName}.${index}`}
       />
     </Fieldset>
@@ -236,6 +243,7 @@ ArrayObject.propTypes = {
   formikProps: PropTypes.object.isRequired,
   invisibleFields: PropTypes.array.isRequired,
   updateInvisibleFields: PropTypes.func.isRequired,
+  vertical: PropTypes.bool,
   arrayHelpers: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired
 }
@@ -245,7 +253,7 @@ const addObject = (objDefault, arrayHelpers) => {
 }
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
-  const { name, fieldConfig, formikProps } = fieldProps
+  const { name, fieldConfig, formikProps, vertical } = fieldProps
   const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
     formikProps.values,
     name
@@ -264,6 +272,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
                 fieldConfig={fieldConfig}
                 formikProps={formikProps}
                 index={index}
+                vertical={vertical}
               />
             ))}
           </div>
@@ -277,6 +286,7 @@ const ReadonlyArrayObject = ({
   fieldName,
   fieldConfig,
   formikProps,
+  vertical,
   index
 }) => {
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
@@ -286,6 +296,7 @@ const ReadonlyArrayObject = ({
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
         fieldNamePrefix={`${fieldName}.${index}`}
+        vertical={vertical}
       />
     </Fieldset>
   )
@@ -294,6 +305,7 @@ ReadonlyArrayObject.propTypes = {
   fieldName: PropTypes.string.isRequired,
   fieldConfig: PropTypes.object.isRequired,
   formikProps: PropTypes.object.isRequired,
+  vertical: PropTypes.bool,
   index: PropTypes.number.isRequired
 }
 
@@ -369,10 +381,12 @@ export const CustomFieldsContainer = props => {
 CustomFieldsContainer.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
-  fieldNamePrefix: PropTypes.string.isRequired
+  fieldNamePrefix: PropTypes.string.isRequired,
+  vertical: PropTypes.bool
 }
 CustomFieldsContainer.defaultProps = {
-  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
+  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX,
+  vertical: false
 }
 
 const CustomField = ({
@@ -380,7 +394,8 @@ const CustomField = ({
   fieldName,
   formikProps,
   invisibleFields,
-  updateInvisibleFields
+  updateInvisibleFields,
+  vertical
 }) => {
   const {
     type,
@@ -422,6 +437,7 @@ const CustomField = ({
     <FieldComponent
       name={fieldName}
       onChange={handleChange}
+      vertical={vertical}
       {...fieldProps}
       {...extraProps}
     >
@@ -434,7 +450,8 @@ CustomField.propTypes = {
   fieldName: PropTypes.string.isRequired,
   formikProps: PropTypes.object,
   invisibleFields: PropTypes.array,
-  updateInvisibleFields: PropTypes.func
+  updateInvisibleFields: PropTypes.func,
+  vertical: PropTypes.bool
 }
 
 const CustomFields = ({
@@ -442,10 +459,10 @@ const CustomFields = ({
   formikProps,
   fieldNamePrefix,
   invisibleFields,
-  updateInvisibleFields
+  updateInvisibleFields,
+  vertical
 }) => {
   const formikValues = formikProps.values
-
   const latestInvisibleFieldsProp = useRef(invisibleFields)
   const invisibleFieldsPropUnchanged = _isEqualWith(
     latestInvisibleFieldsProp.current,
@@ -494,6 +511,7 @@ const CustomFields = ({
             formikProps={formikProps}
             invisibleFields={invisibleFields}
             updateInvisibleFields={updateInvisibleFields}
+            vertical={vertical}
           />
         )
       })}
@@ -505,10 +523,12 @@ CustomFields.propTypes = {
   formikProps: PropTypes.object,
   fieldNamePrefix: PropTypes.string.isRequired,
   invisibleFields: PropTypes.array,
-  updateInvisibleFields: PropTypes.func
+  updateInvisibleFields: PropTypes.func,
+  vertical: PropTypes.bool
 }
 CustomFields.defaultProps = {
-  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
+  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX,
+  vertical: false
 }
 
 const READONLY_FIELD_COMPONENTS = {
@@ -525,7 +545,8 @@ const READONLY_FIELD_COMPONENTS = {
 export const ReadonlyCustomFields = ({
   fieldsConfig,
   formikProps,
-  fieldNamePrefix
+  fieldNamePrefix,
+  vertical
 }) => (
   <>
     {Object.keys(fieldsConfig).map(key => {
@@ -552,6 +573,7 @@ export const ReadonlyCustomFields = ({
         <FieldComponent
           key={key}
           name={`${fieldNamePrefix}.${key}`}
+          vertical={vertical}
           {...fieldProps}
           {...extraProps}
         />
@@ -562,10 +584,12 @@ export const ReadonlyCustomFields = ({
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
-  fieldNamePrefix: PropTypes.string.isRequired
+  fieldNamePrefix: PropTypes.string.isRequired,
+  vertical: PropTypes.bool
 }
 ReadonlyCustomFields.defaultProps = {
-  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX
+  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX,
+  vertical: false
 }
 
 // customFields should contain the JSON of all the visible custom fields.
