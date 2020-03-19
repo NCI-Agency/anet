@@ -209,16 +209,14 @@ const Organizations = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.organizationList?.totalCount
+  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
   if (done) {
-    // Reset the total count
-    setTotalCount(null)
     return result
   }
 
   const organizations = data ? data.organizationList.list : []
-  const totalCount =
-    data && data.organizationList && data.organizationList.totalCount
-  setTotalCount(totalCount)
   if (_get(organizations, "length", 0) === 0) {
     return <em>No organizations found</em>
   }
@@ -246,7 +244,7 @@ const Organizations = ({
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
                 <td>
-                  <LinkTo organization={org} />
+                  <LinkTo modelType="Organization" model={org} />
                 </td>
                 <td>{org.longName}</td>
                 <td>{org.identificationCode}</td>
@@ -309,15 +307,14 @@ const People = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.personList?.totalCount
+  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
   if (done) {
-    // Reset the total count
-    setTotalCount(null)
     return result
   }
 
   const people = data ? data.personList.list : []
-  const totalCount = data && data.personList && data.personList.totalCount
-  setTotalCount(totalCount)
   if (_get(people, "length", 0) === 0) {
     return <em>No people found</em>
   }
@@ -345,23 +342,27 @@ const People = ({
             {Person.map(people, person => (
               <tr key={person.uuid}>
                 <td>
-                  <LinkTo person={person} />
+                  <LinkTo modelType="Person" model={person} />
                 </td>
                 <td>
-                  <LinkTo position={person.position} />
+                  <LinkTo modelType="Position" model={person.position} />
                   {person.position && person.position.code
                     ? `, ${person.position.code}`
                     : ""}
                 </td>
                 <td>
                   <LinkTo
+                    modelType="Location"
+                    model={person.position && person.position.location}
                     whenUnspecified=""
-                    anetLocation={person.position && person.position.location}
                   />
                 </td>
                 <td>
                   {person.position && person.position.organization && (
-                    <LinkTo organization={person.position.organization} />
+                    <LinkTo
+                      modelType="Organization"
+                      model={person.position.organization}
+                    />
                   )}
                 </td>
               </tr>
@@ -422,20 +423,15 @@ const Positions = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.positionList?.totalCount
+  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
   if (done) {
-    // Reset the total count
-    setTotalCount(null)
     return result
   }
 
   const paginatedPositions = data ? data.positionList : []
-  const {
-    pageSize,
-    pageNum: curPage,
-    totalCount,
-    list: positions
-  } = paginatedPositions
-  setTotalCount(totalCount)
+  const { pageSize, pageNum: curPage, list: positions } = paginatedPositions
 
   return (
     <PositionTable
@@ -498,15 +494,14 @@ const Tasks = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.taskList?.totalCount
+  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
   if (done) {
-    // Reset the total count
-    setTotalCount(null)
     return result
   }
 
   const tasks = data ? data.taskList.list : []
-  const totalCount = data && data.taskList && data.taskList.totalCount
-  setTotalCount(totalCount)
   if (_get(tasks, "length", 0) === 0) {
     return <em>No {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]} found</em>
   }
@@ -531,7 +526,7 @@ const Tasks = ({
             {Task.map(tasks, task => (
               <tr key={task.uuid}>
                 <td>
-                  <LinkTo task={task}>
+                  <LinkTo modelType="Task" model={task}>
                     {task.shortName} {task.longName}
                   </LinkTo>
                 </td>
@@ -593,15 +588,14 @@ const Locations = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.locationList?.totalCount
+  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
   if (done) {
-    // Reset the total count
-    setTotalCount(null)
     return result
   }
 
   const locations = data ? data.locationList.list : []
-  const totalCount = data && data.locationList && data.locationList.totalCount
-  setTotalCount(totalCount)
   if (_get(locations, "length", 0) === 0) {
     return <em>No locations found</em>
   }
@@ -626,7 +620,7 @@ const Locations = ({
             {locations.map(loc => (
               <tr key={loc.uuid}>
                 <td>
-                  <LinkTo anetLocation={loc} />
+                  <LinkTo modelType="Location" model={loc} />
                 </td>
               </tr>
             ))}

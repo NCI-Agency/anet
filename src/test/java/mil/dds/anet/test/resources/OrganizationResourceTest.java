@@ -96,7 +96,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(child.getUuid()).isNotNull();
 
     OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setParentOrgUuid(created.getUuid());
+    query.setParentOrgUuid(ImmutableList.of(created.getUuid()));
     final AnetBeanList<Organization> children = graphQLHelper.searchObjects(admin,
         "organizationList", "query", "OrganizationSearchQueryInput", FIELDS, query,
         new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});

@@ -1,6 +1,6 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { Organization, Task } from "models"
+import { Location, Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
@@ -33,13 +33,13 @@ const Approvals = ({ relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo person={position.person} />
+                        <LinkTo modelType="Person" model={position.person} />
                       </td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo position={position} />
+                      <LinkTo modelType="Position" model={position} />
                     </td>
                   </tr>
                 ))}
@@ -73,13 +73,13 @@ const Approvals = ({ relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo person={position.person} />
+                        <LinkTo modelType="Person" model={position.person} />
                       </td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo position={position} />
+                      <LinkTo modelType="Position" model={position} />
                     </td>
                   </tr>
                 ))}
@@ -100,6 +100,7 @@ const Approvals = ({ relatedObject }) => {
 
 Approvals.propTypes = {
   relatedObject: PropTypes.oneOfType([
+    PropTypes.instanceOf(Location),
     PropTypes.instanceOf(Organization),
     PropTypes.instanceOf(Task)
   ]).isRequired

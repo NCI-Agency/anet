@@ -126,7 +126,7 @@ Dear ${approvalStepName},
 <div class="row">
   <div class="col-xs-12">
     <#-- <a href="${serverUrl}/tasks/${task.uuid}"> -->
-    <strong>Task:</strong> ${(task.longName)!}
+    <strong>${fields.task.subLevel.shortLabel}:</strong> ${(task.longName)!}
     <#-- </a> -->
   </div>
 </div>

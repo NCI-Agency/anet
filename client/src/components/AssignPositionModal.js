@@ -5,6 +5,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
@@ -20,7 +21,6 @@ import {
   Table
 } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
@@ -96,8 +96,9 @@ const BaseAssignPositionModal = ({
     ) {
       const errorMessage = (
         <>
-          This position is currently held by <LinkTo person={position.person} />
-          . By selecting this position, they will be removed.
+          This position is currently held by{" "}
+          <LinkTo modelType="Person" model={position.person} />. By selecting
+          this position, they will be removed.
         </>
       )
       newError = { message: errorMessage }
@@ -136,7 +137,8 @@ const BaseAssignPositionModal = ({
     <Modal show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
-          Set Position for <LinkTo person={person} isLink={false} />
+          Set Position for{" "}
+          <LinkTo modelType="Person" model={person} isLink={false} />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -150,8 +152,13 @@ const BaseAssignPositionModal = ({
               }}
               className="remove-person-from-position"
             >
-              Remove <LinkTo person={person} isLink={false} /> from{" "}
-              <LinkTo position={person.position} isLink={false} />
+              Remove <LinkTo modelType="Person" model={person} isLink={false} />{" "}
+              from{" "}
+              <LinkTo
+                modelType="Position"
+                model={person.position}
+                isLink={false}
+              />
             </Button>
             <hr className="assignModalSplit" />
           </div>

@@ -135,8 +135,9 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
             currentUser.position &&
             currentUser.position.type === Position.TYPE.SUPER_USER
           ) {
-            orgSearchQuery.parentOrgUuid =
+            orgSearchQuery.parentOrgUuid = [
               currentUser.position.organization.uuid
+            ]
             orgSearchQuery.parentOrgRecursively = true
           }
         }
@@ -209,8 +210,9 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                     <HelpBlock>
                       <span className="text-danger">
                         Setting this position to inactive will automatically
-                        remove <LinkTo person={values.person} /> from this
-                        position.
+                        remove{" "}
+                        <LinkTo modelType="Person" model={values.person} /> from
+                        this position.
                       </span>
                     </HelpBlock>
                   )}

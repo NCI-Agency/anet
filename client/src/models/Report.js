@@ -15,7 +15,6 @@ export default class Report extends Model {
   static resourceName = "Report"
   static listName = "reportList"
   static getInstanceName = "report"
-  static getModelNameLinkTo = "report"
 
   static STATE = {
     DRAFT: "DRAFT",
@@ -183,7 +182,7 @@ export default class Report extends Model {
           function(tasks) {
             return _isEmpty(tasks)
               ? this.createError({
-                message: `You must provide at least one ${Settings.fields.task.shortLabel}`
+                message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
               })
               : true
           }
@@ -283,6 +282,8 @@ export default class Report extends Model {
             If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
       )
   })
+
+  static autocompleteQuery = "uuid, intent, author { uuid, name, rank, role }"
 
   constructor(props) {
     super(Model.fillObject(props, Report.yupSchema))

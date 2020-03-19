@@ -2,6 +2,7 @@ package mil.dds.anet.beans.search;
 
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -14,11 +15,14 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
   @GraphQLQuery
   @GraphQLInputField
   private OrganizationType type;
-
-  // Search for organizations with a specific parent Org.
+  // Find organizations who (don't) have the parentOrg filled in
   @GraphQLQuery
   @GraphQLInputField
-  private String parentOrgUuid;
+  private Boolean hasParentOrg;
+  // Search for organizations with a specific parent Org(s).
+  @GraphQLQuery
+  @GraphQLInputField
+  private List<String> parentOrgUuid;
   // Include descendants recursively from the specified parent.
   // If true will include all orgs in the tree of the parentOrg
   // Including the parent Org.
@@ -46,11 +50,19 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
     this.type = type;
   }
 
-  public String getParentOrgUuid() {
+  public Boolean getHasParentOrg() {
+    return hasParentOrg;
+  }
+
+  public void setHasParentOrg(Boolean hasParentOrg) {
+    this.hasParentOrg = hasParentOrg;
+  }
+
+  public List<String> getParentOrgUuid() {
     return parentOrgUuid;
   }
 
-  public void setParentOrgUuid(String parentOrgUuid) {
+  public void setParentOrgUuid(List<String> parentOrgUuid) {
     this.parentOrgUuid = parentOrgUuid;
   }
 
@@ -64,7 +76,8 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), status, type, parentOrgUuid, parentOrgRecursively);
+    return Objects.hash(super.hashCode(), status, type, hasParentOrg, parentOrgUuid,
+        parentOrgRecursively);
   }
 
   @Override
@@ -75,6 +88,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
     final OrganizationSearchQuery other = (OrganizationSearchQuery) obj;
     return super.equals(obj) && Objects.equals(getStatus(), other.getStatus())
         && Objects.equals(getType(), other.getType())
+        && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
         && Objects.equals(getParentOrgRecursively(), other.getParentOrgRecursively());
   }

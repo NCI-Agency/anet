@@ -1,12 +1,11 @@
 import PropTypes from "prop-types"
 import React from "react"
-
 import "./Icon.css"
 
 /**
  * Icon as SVG element. Can optionally render a React element instead.
  */
-const Icon = ({ icon, title, className }) => {
+const Icon = ({ icon, title, className, width, height, viewBox }) => {
   const isPathOrRef = typeof icon === "string"
   let children
 
@@ -24,13 +23,13 @@ const Icon = ({ icon, title, className }) => {
 
   return (
     <svg
-      width="16"
-      height="16"
-      viewBox="0 0 1024 1024"
-      className={`Draftail-Icon ${className || ""}`}
+      width={width}
+      height={height}
+      viewBox={viewBox}
+      className={`Draftail-Icon ${className}`}
       aria-hidden={title ? null : true}
       role={title ? "img" : null}
-      aria-label={title || null}
+      aria-label={title}
     >
       {children}
     </svg>
@@ -48,12 +47,18 @@ Icon.propTypes = {
     PropTypes.node
   ]).isRequired,
   title: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  width: PropTypes.string,
+  height: PropTypes.string,
+  viewBox: PropTypes.string
 }
 
 Icon.defaultProps = {
   title: null,
-  className: null
+  className: "",
+  width: "16",
+  height: "16",
+  viewBox: "0 0 1024 1024"
 }
 
 export default Icon

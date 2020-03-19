@@ -32,10 +32,14 @@ const ApproverTable = ({ approvers, onDelete }) => (
       {approvers.map((approver, approverIndex) => (
         <tr key={approver.uuid}>
           <td>
-            <LinkTo person={approver.person} target="_blank" />
+            <LinkTo
+              modelType="Person"
+              model={approver.person}
+              target="_blank"
+            />
           </td>
           <td>
-            <LinkTo position={approver} target="_blank" />
+            <LinkTo modelType="Position" model={approver} target="_blank" />
           </td>
           <td onClick={() => onDelete(approver)}>
             <span style={{ cursor: "pointer" }}>

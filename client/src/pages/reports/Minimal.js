@@ -17,11 +17,13 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
+import pluralize from "pluralize"
 import React from "react"
 import { Alert } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import utils from "utils"
+import { parseHtmlWithLinkTo } from "utils_links"
 import AttendeesTable from "./AttendeesTable"
 
 const GQL_GET_REPORT = gql`
@@ -109,6 +111,10 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
+        customFieldRef1 {
+          uuid
+          shortName
+        }
         taskedOrganizations {
           uuid
           shortName
@@ -225,6 +231,7 @@ const ReportMinimal = ({ pageDispatchers }) => {
   }
 
   const reportType = report.isFuture() ? "planned engagement" : "report"
+  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   return (
     <Formik enableReinitialize initialValues={report}>
@@ -330,7 +337,9 @@ const ReportMinimal = ({ pageDispatchers }) => {
                 name="location"
                 component={FieldHelper.ReadonlyField}
                 humanValue={
-                  report.location && <LinkTo anetLocation={report.location} />
+                  report.location && (
+                    <LinkTo modelType="Location" model={report.location} />
+                  )
                 }
               />
 
@@ -375,21 +384,28 @@ const ReportMinimal = ({ pageDispatchers }) => {
               <Field
                 name="author"
                 component={FieldHelper.ReadonlyField}
-                humanValue={<LinkTo person={report.author} />}
+                humanValue={<LinkTo modelType="Person" model={report.author} />}
               />
 
               <Field
                 name="advisorOrg"
                 label={Settings.fields.advisor.org.name}
                 component={FieldHelper.ReadonlyField}
-                humanValue={<LinkTo organization={report.advisorOrg} />}
+                humanValue={
+                  <LinkTo modelType="Organization" model={report.advisorOrg} />
+                }
               />
 
               <Field
                 name="principalOrg"
                 label={Settings.fields.principal.org.name}
                 component={FieldHelper.ReadonlyField}
-                humanValue={<LinkTo organization={report.principalOrg} />}
+                humanValue={
+                  <LinkTo
+                    modelType="Organization"
+                    model={report.principalOrg}
+                  />
+                }
               />
             </Fieldset>
 
@@ -397,24 +413,24 @@ const ReportMinimal = ({ pageDispatchers }) => {
               <AttendeesTable attendees={report.attendees} disabled />
             </Fieldset>
 
-            <Fieldset title={Settings.fields.task.longLabel}>
-              <TaskTable tasks={report.tasks} showParent />
+            <Fieldset title={Settings.fields.task.subLevel.longLabel}>
+              <TaskTable
+                tasks={report.tasks}
+                showParent
+                noTasksMessage={`No ${tasksLabel} selected`}
+              />
             </Fieldset>
 
             {report.reportText && (
               <Fieldset title={Settings.fields.report.reportText}>
-                <div dangerouslySetInnerHTML={{ __html: report.reportText }} />
+                {parseHtmlWithLinkTo(report.reportText)}
               </Fieldset>
             )}
 
             {report.reportSensitiveInformation &&
               report.reportSensitiveInformation.text && (
                 <Fieldset title="Sensitive information">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: report.reportSensitiveInformation.text
-                    }}
-                  />
+                  {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
                 </Fieldset>
             )}
 
@@ -427,7 +443,7 @@ const ReportMinimal = ({ pageDispatchers }) => {
                 const createdAt = moment(comment.createdAt)
                 return (
                   <p key={comment.uuid}>
-                    <LinkTo person={comment.author} />,
+                    <LinkTo modelType="Person" model={comment.author} />,
                     <span
                       title={createdAt.format(
                         Settings.dateFormats.forms.displayShort.withTime

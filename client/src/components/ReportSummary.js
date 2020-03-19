@@ -141,24 +141,22 @@ const ReportSummary = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.reportList?.totalCount
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
-    if (setTotalCount) {
-      // Reset the total count
-      setTotalCount(null)
-    }
     return result
   }
 
   const reports = data ? data.reportList.list : []
-  if (setTotalCount) {
-    const totalCount = data && data.reportList && data.reportList.totalCount
-    setTotalCount(totalCount)
-  }
   if (_get(reports, "length", 0) === 0) {
     return <em>No reports found</em>
   }
 
-  const { pageSize, totalCount } = data.reportList
+  const { pageSize } = data.reportList
 
   return (
     <div>
@@ -260,16 +258,16 @@ const ReportSummaryRow = ({ report }) => {
       </Row>
       <Row>
         <Col md={12}>
-          <LinkTo person={report.primaryAdvisor} />
+          <LinkTo modelType="Person" model={report.primaryAdvisor} />
           <span>
             {" "}
-            (<LinkTo organization={report.advisorOrg} />)
+            (<LinkTo modelType="Organization" model={report.advisorOrg} />)
           </span>
           <span className="people-separator">&#x25B6;</span>
-          <LinkTo person={report.primaryPrincipal} />
+          <LinkTo modelType="Person" model={report.primaryPrincipal} />
           <span>
             {" "}
-            (<LinkTo organization={report.principalOrg} />)
+            (<LinkTo modelType="Organization" model={report.principalOrg} />)
           </span>
         </Col>
       </Row>
@@ -278,7 +276,7 @@ const ReportSummaryRow = ({ report }) => {
           <Col md={12}>
             <span>
               <strong>Location: </strong>
-              <LinkTo anetLocation={report.location} />
+              <LinkTo modelType="Location" model={report.location} />
             </span>
           </Col>
         </Row>
@@ -327,7 +325,9 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.tasks.length > 0 && (
             <span>
-              <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
+              <strong>
+                {pluralize(Settings.fields.task.subLevel.shortLabel)}:
+              </strong>{" "}
               {report.tasks.map(
                 (task, i) =>
                   task.shortName + (i < report.tasks.length - 1 ? ", " : "")
@@ -351,7 +351,12 @@ const ReportSummaryRow = ({ report }) => {
       </Row>
       <Row className="hide-for-print">
         <Col className="read-report-actions" md={12}>
-          <LinkTo report={report} button className="read-report-button">
+          <LinkTo
+            modelType="Report"
+            model={report}
+            button
+            className="read-report-button"
+          >
             Read report
           </LinkTo>
         </Col>

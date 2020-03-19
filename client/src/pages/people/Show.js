@@ -35,6 +35,7 @@ import React, { useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import { parseHtmlWithLinkTo } from "utils_links"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -153,7 +154,8 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
           <div>
             {canEdit && (
               <LinkTo
-                person={person}
+                modelType="Person"
+                model={person}
                 edit
                 button="primary"
                 className="edit-person"
@@ -265,11 +267,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                   name="biography"
                   className="biography"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <div
-                      dangerouslySetInnerHTML={{ __html: person.biography }}
-                    />
-                  }
+                  humanValue={parseHtmlWithLinkTo(person.biography)}
                 />
               </Fieldset>
 
@@ -284,7 +282,12 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                     hasPosition &&
                     canChangePosition && (
                       <div>
-                        <LinkTo position={position} edit button="default">
+                        <LinkTo
+                          modelType="Position"
+                          model={position}
+                          edit
+                          button="default"
+                        >
                           Edit position details
                         </LinkTo>
                         <Button
@@ -382,7 +385,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                       {person.previousPositions.map((pp, idx) => (
                         <tr key={idx} id={`previousPosition_${idx}`}>
                           <td>
-                            <LinkTo position={pp.position} />
+                            <LinkTo modelType="Position" model={pp.position} />
                           </td>
                           <td>
                             {moment(pp.startTime).format(
@@ -422,8 +425,13 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
     return (
       <div style={{ textAlign: "center" }}>
         <h4>
-          <LinkTo position={position} className="position-name" /> (
-          <LinkTo organization={position.organization} />)
+          <LinkTo
+            modelType="Position"
+            model={position}
+            className="position-name"
+          />{" "}
+          (
+          <LinkTo modelType="Organization" model={position.organization} />)
         </h4>
       </div>
     )
@@ -450,13 +458,18 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
               {Position.map(position.associatedPositions, assocPos => (
                 <tr key={assocPos.uuid}>
                   <td>
-                    {assocPos.person && <LinkTo person={assocPos.person} />}
+                    {assocPos.person && (
+                      <LinkTo modelType="Person" model={assocPos.person} />
+                    )}
                   </td>
                   <td>
-                    <LinkTo position={assocPos} />
+                    <LinkTo modelType="Position" model={assocPos} />
                   </td>
                   <td>
-                    <LinkTo organization={assocPos.organization} />
+                    <LinkTo
+                      modelType="Organization"
+                      model={assocPos.organization}
+                    />
                   </td>
                 </tr>
               ))}

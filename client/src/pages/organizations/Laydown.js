@@ -61,7 +61,8 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
           <div>
             {isSuperUser && (
               <LinkTo
-                position={Position.pathForNew({
+                modelType="Position"
+                model={Position.pathForNew({
                   organizationUuid: organization.uuid
                 })}
                 button
@@ -151,13 +152,15 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
       key += "." + other.uuid
       otherNameCol = (
         <td>
-          <LinkTo position={other}>{positionWithStatus(other)}</LinkTo>
+          <LinkTo modelType="Position" model={other}>
+            {positionWithStatus(other)}
+          </LinkTo>
         </td>
       )
 
       otherPersonCol = other.person ? (
         <td>
-          <LinkTo person={other.person}>
+          <LinkTo modelType="Person" model={other.person}>
             {personWithStatus(other.person)}
           </LinkTo>
         </td>
@@ -169,13 +172,15 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
     if (otherIndex === 0) {
       positionNameCol = (
         <td>
-          <LinkTo position={position}>{positionWithStatus(position)}</LinkTo>
+          <LinkTo modelType="Position" model={position}>
+            {positionWithStatus(position)}
+          </LinkTo>
         </td>
       )
       positionPersonCol =
         position.person && position.person.uuid ? (
           <td>
-            <LinkTo person={position.person}>
+            <LinkTo modelType="Person" model={position.person}>
               {personWithStatus(position.person)}
             </LinkTo>
           </td>

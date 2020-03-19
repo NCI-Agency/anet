@@ -67,7 +67,7 @@ export const INSIGHT_DETAILS = {
   [REPORTS_BY_TASK]: {
     searchProps: _SEARCH_PROPS,
     component: ReportsByTask,
-    navTitle: "Reports by Task",
+    navTitle: `Reports by ${Settings.fields.task.subLevel.shortLabel}`,
     title: ""
   },
   [REPORTS_BY_DAY_OF_WEEK]: {

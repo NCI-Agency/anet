@@ -133,11 +133,11 @@ const AttendeesTable = ({
           />
         </td>
         <td>
-          <LinkTo person={person} showIcon={false} />
+          <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
         <td>
           {person.position && person.position.uuid && (
-            <LinkTo position={person.position} />
+            <LinkTo modelType="Position" model={person.position} />
           )}
           {person.position && person.position.code
             ? `, ${person.position.code}`
@@ -145,14 +145,16 @@ const AttendeesTable = ({
         </td>
         <td>
           <LinkTo
+            modelType="Location"
+            model={person.position && person.position.location}
             whenUnspecified=""
-            anetLocation={person.position && person.position.location}
           />
         </td>
         <td>
           <LinkTo
+            modelType="Organization"
+            model={person.position && person.position.organization}
             whenUnspecified=""
-            organization={person.position && person.position.organization}
           />
         </td>
         {showDelete && (

@@ -2,6 +2,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import Approvals from "components/approvals/Approvals"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
@@ -37,6 +38,36 @@ const GQL_GET_LOCATION = gql`
       lat
       lng
       status
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      approvalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -90,7 +121,13 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
           })
         }
         const action = canEdit && (
-          <LinkTo anetLocation={location} edit button="primary" id="editButton">
+          <LinkTo
+            modelType="Location"
+            model={location}
+            edit
+            button="primary"
+            id="editButton"
+          >
             Edit
           </LinkTo>
         )
@@ -131,6 +168,8 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
 
               <Leaflet markers={[marker]} />
             </Form>
+
+            <Approvals relatedObject={location} />
 
             <Fieldset title="Reports at this Location">
               <ReportCollection

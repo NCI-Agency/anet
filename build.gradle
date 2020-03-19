@@ -1,14 +1,17 @@
+plugins {
+	id "org.kordamp.markdown.convert" version "1.2.0"
+	id "com.bmuschko.docker-remote-api" version "6.3.0"
+	id "com.github.node-gradle.node" version "2.2.3"
+	id "com.diffplug.gradle.spotless" version "3.27.2"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
-apply plugin: 'org.kordamp.markdown.convert'
-apply plugin: 'com.bmuschko.docker-remote-api'
-apply plugin: 'com.moowork.node'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
-apply plugin: 'com.diffplug.gradle.spotless'
 
 sourceCompatibility = 1.8
 
@@ -57,56 +60,56 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '2.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-jdbi3', version: '2.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '2.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '2.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '2.0.2'
-	compile group: 'io.dropwizard-bundles', name: 'dropwizard-configurable-assets-bundle', version: '1.3.5'
+	implementation 'io.dropwizard:dropwizard-core:2.0.2'
+	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.2'
+	implementation 'io.dropwizard:dropwizard-migrations:2.0.2'
+	implementation 'io.dropwizard:dropwizard-auth:2.0.2'
+	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.2'
+	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
-	compile 'ru.vyarus.guicey:guicey-jdbi3:5.0.0-0'
-	compile 'com.google.guava:guava:28.2-jre' // Pick the non-Android version of Guice
-	compile 'commons-collections:commons-collections:3.2.2'
+	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.0.1-1'
+	implementation 'com.google.guava:guava:28.2-jre' // Pick the non-Android version of Guice
+	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.2.1.jre8'
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.10' // If using postgresql
-	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.8.7' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.1.jre8'
+	implementation 'org.postgresql:postgresql:42.2.11' // If using postgresql
+	implementation 'org.liquibase:liquibase-core:3.8.7'
 
-	compile 'javax.mail:mail:1.4.7'
-	compile 'ch.qos.logback:logback-classic:1.2.3'
-	compile 'ch.qos.logback:logback-core:1.2.3'
-	compile 'ch.qos.logback:logback-access:1.2.3'
-	compile 'com.github.waffle:waffle-jna:1.9.1'
-	compile 'com.graphql-java:java-dataloader:2.2.3'
-	compile 'io.leangen.graphql:spqr:0.10.1'
-	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20191001.1'
+	implementation 'javax.mail:mail:1.4.7'
+	implementation 'ch.qos.logback:logback-classic:1.2.3'
+	implementation 'ch.qos.logback:logback-core:1.2.3'
+	implementation 'ch.qos.logback:logback-access:1.2.3'
+	implementation 'com.github.waffle:waffle-jna:1.9.1'
+	implementation 'com.graphql-java:java-dataloader:2.2.3'
+	implementation 'io.leangen.graphql:spqr:0.10.1'
+	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20191001.1'
 
 	// Used for converting GraphQL request output to XML:
-	compile 'com.github.javadev:underscore-lodash:1.26'
+	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.networknt:json-schema-validator:1.0.31'
+	implementation 'com.networknt:json-schema-validator:1.0.35'
 
 	// used for writing Excel documents
-	compile group: 'org.apache.poi', name: 'poi', version: '4.1.2'
-	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+	implementation 'org.apache.poi:poi:4.1.2'
+	implementation 'org.apache.poi:poi-ooxml:4.1.2'
 
 	// For parsing HTML to check for 'empty' input
-	compile 'org.jsoup:jsoup:1.12.2'
+	implementation 'org.jsoup:jsoup:1.13.1'
 
 	// For fast and simple image scaling
-	compile group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
+	implementation 'org.imgscalr:imgscalr-lib:4.2'
 
-	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '2.0.2'
-	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '2.0.2'
-	testCompile 'org.apache.commons:commons-io:1.3.2'
+	testImplementation 'io.dropwizard:dropwizard-testing:2.0.2'
+	testImplementation 'io.dropwizard:dropwizard-client:2.0.2'
+	testImplementation 'org.apache.commons:commons-io:1.3.2'
 	
-	testCompile 'org.powermock:powermock-api-mockito2:2.0.5'
-	testCompile 'org.powermock:powermock-module-junit4:2.0.5'
-	testCompile 'org.powermock:powermock-module-junit4-rule:2.0.5'
+	testImplementation 'org.powermock:powermock-api-mockito2:2.0.5'
+	testImplementation 'org.powermock:powermock-module-junit4:2.0.5'
+	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.5'
 
-	testCompile 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
 }
 
 test {
@@ -446,19 +449,6 @@ distributions {
 				from('lib/sqljdbc_auth.dll')
 			}
 		}
-	}
-}
-
-//Add gradle plugin repos
-buildscript {
-	repositories {
-		gradlePluginPortal()
-	}
-	dependencies {
-		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:6.1.4'
-		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.27.1"
 	}
 }
 

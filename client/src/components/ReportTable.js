@@ -114,24 +114,22 @@ const ReportTable = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.reportList?.totalCount
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
-    if (setTotalCount) {
-      // Reset the total count
-      setTotalCount(null)
-    }
     return result
   }
 
   const reports = data ? Report.fromArray(data.reportList.list) : []
-  if (setTotalCount) {
-    const totalCount = data && data.reportList && data.reportList.totalCount
-    setTotalCount(totalCount)
-  }
   if (_get(reports, "length", 0) === 0) {
     return <em>No reports found</em>
   }
 
-  const { pageSize, totalCount } = data.reportList
+  const { pageSize } = data.reportList
 
   return (
     <div>
@@ -158,14 +156,18 @@ const ReportTable = ({
               <tr key={report.uuid}>
                 {showAuthors && (
                   <td>
-                    <LinkTo person={report.author} />
+                    <LinkTo modelType="Person" model={report.author} />
                   </td>
                 )}
                 <td>
-                  <LinkTo organization={report.advisorOrg} />
+                  <LinkTo modelType="Organization" model={report.advisorOrg} />
                 </td>
                 <td>
-                  <LinkTo report={report} className="read-report-button" />
+                  <LinkTo
+                    modelType="Report"
+                    model={report}
+                    className="read-report-button"
+                  />
                 </td>
                 {showStatus && <td>{report.state}</td>}
                 <td>
