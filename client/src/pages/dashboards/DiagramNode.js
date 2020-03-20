@@ -1,3 +1,4 @@
+import { css, keyframes } from "@emotion/core"
 import styled from "@emotion/styled"
 import {
   AbstractModelFactory,
@@ -9,11 +10,24 @@ import {
   PortModelAlignment,
   PortWidget
 } from "@projectstorm/react-diagrams-core"
-import { DefaultLinkModel } from "@projectstorm/react-diagrams-defaults"
-import * as React from "react"
-import PropTypes from "prop-types"
-import * as Models from "models"
+import {
+  DefaultLinkFactory,
+  DefaultLinkModel,
+  DefaultLinkWidget
+} from "@projectstorm/react-diagrams-defaults"
 import LinkTo from "components/LinkTo"
+import * as Models from "models"
+import PropTypes from "prop-types"
+import * as React from "react"
+
+const ENTITY_GQL_FIELDS = {
+  Report: "uuid, intent",
+  Person: "uuid, name, role, avatar(size: 32)",
+  Organization: "uuid, shortName",
+  Position: "uuid, name",
+  Location: "uuid, name",
+  Task: "uuid, shortName, longName"
+}
 
 export class DiagramPortModel extends PortModel {
   constructor(alignment) {
@@ -24,9 +38,16 @@ export class DiagramPortModel extends PortModel {
     })
   }
 
-  createLinkModel = () => new DefaultLinkModel()
+  createLinkModel = () => new DiagramLinkModel()
 }
 
+export class DiagramLinkModel extends DefaultLinkModel {
+  constructor() {
+    super({
+      type: "anet"
+    })
+  }
+}
 export class DiagramNodeModel extends NodeModel {
   constructor() {
     super({
@@ -40,14 +61,24 @@ export class DiagramNodeModel extends NodeModel {
 
   deserialize = event => {
     super.deserialize(event)
-    this.options.anetObjectType = event.data.anetObjectType
-    this.options.color = event.data.color
+    const options = this.options
+    options.anetObjectType = event.data.anetObjectType
+    options.color = event.data.color
+    // TODO: batch-process all queries as one
+    const modelClass = Models[event.data.anetObjectType]
+    console.log(" deserializing ..." + modelClass.resourceName)
+    modelClass &&
+      modelClass
+        .fetchByUuid(event.data.anetObjectUuid, ENTITY_GQL_FIELDS)
+        .then(function(entity) {
+          options.anetObject = entity
+          console.log(" deserialized ..." + event.data.anetObjectUuid)
+        })
   }
 
   serialize = () => ({
     ...super.serialize(),
-    ports: undefined,
-    anetObjectUuid: this.options.anetObject.uuid,
+    anetObjectUuid: this.options.anetObject?.uuid,
     anetObjectType: this.options.anetObjectType,
     color: this.options.color
   })
@@ -66,7 +97,8 @@ const Port = styled.div`
 `
 
 export const DiagramNodeWidget = ({ size, node, engine }) => {
-  const ModelClass = node.options.anetObjectType && Models[node.options.anetObjectType]
+  const ModelClass =
+    node.options.anetObjectType && Models[node.options.anetObjectType]
 
   const modelInstance = ModelClass && new ModelClass(node.options.anetObject)
   return (
@@ -85,10 +117,10 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
         height={50}
         style={{ pointerEvents: "none" }}
       />
-      {node.anetObjectType && node.anetObject && (
+      {node.options.anetObjectType && node.options.anetObject && (
         <LinkTo
-          modelType={node.anetObjectType}
-          model={node.anetObject}
+          modelType={node.options.anetObjectType}
+          model={node.options.anetObject}
           showAvatar={false}
           showIcon={false}
         />
@@ -154,6 +186,53 @@ export class SimplePortFactory extends AbstractModelFactory {
   }
 
   generateModel = event => this.cb(event.initialConfig)
+}
+
+export const Keyframes = keyframes`
+from {
+  stroke-dashoffset: 24;
+}
+to {
+  stroke-dashoffset: 0;
+}
+`
+
+const selected = css`
+  stroke-dasharray: 10, 2;
+  animation: ${Keyframes} 1s linear infinite;
+`
+
+export const Path = styled.path`
+  ${p => p.selected && selected};
+  fill: none;
+  pointer-events: all;
+`
+
+export class DiagramLinkFactory extends DefaultLinkFactory {
+  constructor() {
+    super("anet")
+  }
+
+  generateReactWidget(event) {
+    return <DefaultLinkWidget link={event.model} diagramEngine={this.engine} />
+  }
+
+  generateModel() {
+    return new DiagramLinkModel()
+  }
+
+  generateLinkSegment(model, selected, path) {
+    return (
+      <Path
+        selected={selected}
+        stroke={
+          selected ? model.getOptions().selectedColor : model.getOptions().color
+        }
+        strokeWidth={model.getOptions().width}
+        d={path}
+      />
+    )
+  }
 }
 
 export class DiagramNodeFactory extends AbstractReactFactory {

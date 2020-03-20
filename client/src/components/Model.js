@@ -1,8 +1,11 @@
-import encodeQuery from "querystring/encode"
+import API from "api"
+import { gql } from "apollo-boost"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
+import * as Models from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
+import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -268,6 +271,27 @@ export default class Model {
 
   static isEqual(a, b) {
     return a && b && a.uuid === b.uuid
+  }
+
+  static fetchByUuid(uuid, ENTITY_GQL_FIELDS) {
+    console.log("getting resources for " + this.resourceName)
+    const fields = ENTITY_GQL_FIELDS[this.resourceName]
+    if (!fields) {
+      return null
+    }
+
+    return API.query(
+      gql`
+      query($uuid: String!) {
+        ${this.getInstanceName}(uuid: $uuid) {
+          ${fields}
+        }
+      }
+    `,
+      {
+        uuid: uuid
+      }
+    ).then(data => new Models[this.resourceName](data[this.getInstanceName]))
   }
 
   constructor(props) {

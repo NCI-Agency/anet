@@ -6,11 +6,11 @@ import {
   NodeLayerFactory,
   PortModelAlignment
 } from "@projectstorm/react-diagrams-core"
+import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
 import {
-  DefaultLabelFactory,
-  DefaultLinkFactory
-} from "@projectstorm/react-diagrams-defaults"
-import { CanvasWidget, SelectionBoxLayerFactory } from "@projectstorm/react-canvas-core"
+  CanvasWidget,
+  SelectionBoxLayerFactory
+} from "@projectstorm/react-canvas-core"
 import { PathFindingLinkFactory } from "@projectstorm/react-diagrams-routing"
 import { Settings } from "api"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
@@ -27,11 +27,12 @@ import "./BoardDashboard.css"
 import {
   DiagramNodeFactory,
   DiagramNodeModel,
+  DiagramLinkFactory,
   DiagramPortModel,
   SimplePortFactory
 } from "./DiagramNode"
 
-const createEngine = (options) => {
+const createEngine = options => {
   const engine = new DiagramEngine({})
   engine.getLayerFactories().registerFactory(new NodeLayerFactory())
   engine.getLayerFactories().registerFactory(new LinkLayerFactory())
@@ -39,7 +40,7 @@ const createEngine = (options) => {
 
   engine.getLabelFactories().registerFactory(new DefaultLabelFactory())
   engine.getNodeFactories().registerFactory(new DiagramNodeFactory())
-  engine.getLinkFactories().registerFactory(new DefaultLinkFactory())
+  engine.getLinkFactories().registerFactory(new DiagramLinkFactory())
   engine.getLinkFactories().registerFactory(new PathFindingLinkFactory())
   engine
     .getPortFactories()
@@ -191,9 +192,8 @@ const BoardDashboard = () => {
         <Modal.Body>
           <MultiTypeAdvancedSelectComponent
             onConfirm={(value, objectType) => {
-              editedNode.extras = value.uuid
-              editedNode.anetObject = value
-              editedNode.anetObjectType = objectType
+              editedNode.options.anetObject = value
+              editedNode.options.anetObjectType = objectType
             }}
           />
         </Modal.Body>
