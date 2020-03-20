@@ -142,7 +142,7 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                       <Coordinate coord={values.lat} />,{" "}
                       <Coordinate coord={values.lng} />
                       {
-                        values.lat && values.lng &&
+                        Location.hasCoordinates(values) &&
                         <Button
                           style={{ width: "auto", padding: "0 0 0 16px" }}
                           bsStyle="link"
