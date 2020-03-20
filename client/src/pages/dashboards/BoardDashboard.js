@@ -1,8 +1,17 @@
-import { CanvasWidget } from "@projectstorm/react-canvas-core"
-import createEngine, {
+import {
+  DefaultDiagramState,
+  DiagramEngine,
   DiagramModel,
+  LinkLayerFactory,
+  NodeLayerFactory,
   PortModelAlignment
-} from "@projectstorm/react-diagrams"
+} from "@projectstorm/react-diagrams-core"
+import {
+  DefaultLabelFactory,
+  DefaultLinkFactory
+} from "@projectstorm/react-diagrams-defaults"
+import { CanvasWidget, SelectionBoxLayerFactory } from "@projectstorm/react-canvas-core"
+import { PathFindingLinkFactory } from "@projectstorm/react-diagrams-routing"
 import { Settings } from "api"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import { mapPageDispatchersToProps } from "components/Page"
@@ -22,6 +31,29 @@ import {
   SimplePortFactory
 } from "./DiagramNode"
 
+const createEngine = (options) => {
+  const engine = new DiagramEngine({})
+  engine.getLayerFactories().registerFactory(new NodeLayerFactory())
+  engine.getLayerFactories().registerFactory(new LinkLayerFactory())
+  engine.getLayerFactories().registerFactory(new SelectionBoxLayerFactory())
+
+  engine.getLabelFactories().registerFactory(new DefaultLabelFactory())
+  engine.getNodeFactories().registerFactory(new DiagramNodeFactory())
+  engine.getLinkFactories().registerFactory(new DefaultLinkFactory())
+  engine.getLinkFactories().registerFactory(new PathFindingLinkFactory())
+  engine
+    .getPortFactories()
+    .registerFactory(
+      new SimplePortFactory(
+        "anet",
+        config => new DiagramPortModel(PortModelAlignment.LEFT)
+      )
+    )
+
+  engine.getStateMachine().pushState(new DefaultDiagramState())
+  return engine
+}
+
 const PrototypeNode = ({ name, model }) => (
   <Badge style={{ margin: 10, background: "white", color: "#106ba3" }}>
     <div
@@ -33,26 +65,17 @@ const PrototypeNode = ({ name, model }) => (
       <img
         src={model.iconUrl()}
         alt=""
-        style={{ marginLeft: 5, marginRight: 5, height: "2em", pointerEvents: "none" }}
+        style={{
+          marginLeft: 5,
+          marginRight: 5,
+          height: "2em",
+          pointerEvents: "none"
+        }}
       />
       {name}
     </div>
   </Badge>
 )
-
-function bootstrapEngine() {
-  const engine = createEngine()
-  engine
-    .getPortFactories()
-    .registerFactory(
-      new SimplePortFactory(
-        "diamond",
-        config => new DiagramPortModel(PortModelAlignment.LEFT)
-      )
-    )
-  engine.getNodeFactories().registerFactory(new DiagramNodeFactory())
-  return engine
-}
 
 PrototypeNode.propTypes = {
   name: PropTypes.string,
@@ -63,7 +86,7 @@ const BoardDashboard = () => {
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dropEvent, setDropEvent] = useState(null)
-  const engineRef = useRef(bootstrapEngine())
+  const engineRef = useRef(createEngine())
   const [model, setModel] = useState(null)
   const [edit, setEdit] = useState(false)
   const [editedNode, setEditedNode] = useState(null)

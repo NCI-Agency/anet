@@ -4,13 +4,12 @@ import {
   AbstractReactFactory
 } from "@projectstorm/react-canvas-core"
 import {
-  DefaultLinkModel,
   NodeModel,
-  DefaultNodeModel,
   PortModel,
   PortModelAlignment,
   PortWidget
-} from "@projectstorm/react-diagrams"
+} from "@projectstorm/react-diagrams-core"
+import { DefaultLinkModel } from "@projectstorm/react-diagrams-defaults"
 import * as React from "react"
 import PropTypes from "prop-types"
 import * as Models from "models"
@@ -19,7 +18,7 @@ import LinkTo from "components/LinkTo"
 export class DiagramPortModel extends PortModel {
   constructor(alignment) {
     super({
-      type: "diamond",
+      type: "anet",
       name: alignment,
       alignment: alignment
     })
@@ -28,16 +27,30 @@ export class DiagramPortModel extends PortModel {
   createLinkModel = () => new DefaultLinkModel()
 }
 
-export class DiagramNodeModel extends DefaultNodeModel {
+export class DiagramNodeModel extends NodeModel {
   constructor() {
     super({
-      type: "diamond"
+      type: "anet"
     })
     this.addPort(new DiagramPortModel(PortModelAlignment.TOP))
     this.addPort(new DiagramPortModel(PortModelAlignment.LEFT))
     this.addPort(new DiagramPortModel(PortModelAlignment.BOTTOM))
     this.addPort(new DiagramPortModel(PortModelAlignment.RIGHT))
   }
+
+  deserialize = event => {
+    super.deserialize(event)
+    this.options.anetObjectType = event.data.anetObjectType
+    this.options.color = event.data.color
+  }
+
+  serialize = () => ({
+    ...super.serialize(),
+    ports: undefined,
+    anetObjectUuid: this.options.anetObject.uuid,
+    anetObjectType: this.options.anetObjectType,
+    color: this.options.color
+  })
 }
 
 const Port = styled.div`
@@ -53,12 +66,12 @@ const Port = styled.div`
 `
 
 export const DiagramNodeWidget = ({ size, node, engine }) => {
-  const ModelClass = node.anetObjectType && Models[node.anetObjectType]
+  const ModelClass = node.options.anetObjectType && Models[node.options.anetObjectType]
 
-  const modelInstance = ModelClass && new ModelClass(node.anetObject)
+  const modelInstance = ModelClass && new ModelClass(node.options.anetObject)
   return (
     <div
-      className="diamond-node"
+      className="diagram-node"
       style={{
         position: "relative",
         width: size,
@@ -72,7 +85,14 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
         height={50}
         style={{ pointerEvents: "none" }}
       />
-      { node.anetObjectType && node.anetObject && <LinkTo modelType={node.anetObjectType} model={node.anetObject} showAvatar={false} showIcon={false}/>}
+      {node.anetObjectType && node.anetObject && (
+        <LinkTo
+          modelType={node.anetObjectType}
+          model={node.anetObject}
+          showAvatar={false}
+          showIcon={false}
+        />
+      )}
       <PortWidget
         style={{
           top: size / 2 - 8,
@@ -138,7 +158,7 @@ export class SimplePortFactory extends AbstractModelFactory {
 
 export class DiagramNodeFactory extends AbstractReactFactory {
   constructor() {
-    super("diamond")
+    super("anet")
   }
 
   generateReactWidget = event => {
