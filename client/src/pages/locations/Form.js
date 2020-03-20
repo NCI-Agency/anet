@@ -15,7 +15,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
-import { Coordinate } from "./Show"
+import GeoLocation from "./GeoLocation"
 
 const GQL_CREATE_LOCATION = gql`
   mutation($location: LocationInput!) {
@@ -138,22 +138,12 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                   name="location"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    <>
-                      <Coordinate coord={values.lat} />,{" "}
-                      <Coordinate coord={values.lng} />
-                      {
-                        Location.hasCoordinates(values) &&
-                        <Button
-                          style={{ width: "auto", padding: "0 0 0 16px" }}
-                          bsStyle="link"
-                          bsSize="sm"
-                          onClick={() => onClearLocation(setFieldValue)}
-                          disabled={isSubmitting}
-                        >
-                          Clear Location
-                        </Button>
-                      }
-                    </>
+                    <GeoLocation
+                      lat={values.lat}
+                      lng={values.lng}
+                      isSubmitting={isSubmitting}
+                      onClearLocation={() => onClearLocation(setFieldValue)}
+                    />
                   }
                 />
               </Fieldset>
