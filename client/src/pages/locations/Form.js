@@ -141,6 +141,18 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                     <>
                       <Coordinate coord={values.lat} />,{" "}
                       <Coordinate coord={values.lng} />
+                      {
+                        values.lat && values.lng &&
+                        <Button
+                          style={{ width: "auto", padding: "0 0 0 16px" }}
+                          bsStyle="link"
+                          bsSize="sm"
+                          onClick={() => onClearLocation(setFieldValue)}
+                          disabled={isSubmitting}
+                        >
+                          Clear Location
+                        </Button>
+                      }
                     </>
                   }
                 />
@@ -196,6 +208,11 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
     const latLng = map.wrapLatLng(event.latlng)
     setFieldValue("lat", latLng.lat)
     setFieldValue("lng", latLng.lng)
+  }
+
+  function onClearLocation(setFieldValue) {
+    setFieldValue("lat", null)
+    setFieldValue("lng", null)
   }
 
   function onCancel() {
