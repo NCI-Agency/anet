@@ -4,7 +4,9 @@ import {
   DiagramModel,
   LinkLayerFactory,
   NodeLayerFactory,
-  PortModelAlignment
+  PortModelAlignment,
+  LinkModel,
+  NodeModel
 } from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
 import {
@@ -18,12 +20,13 @@ import { mapPageDispatchersToProps } from "components/Page"
 import FileSaver from "file-saver"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, useCallback } from "react"
 import { Badge, Button, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
 import "./BoardDashboard.css"
+import _forEach from "lodash/forEach"
 import {
   DiagramNodeFactory,
   DiagramNodeModel,
@@ -60,7 +63,10 @@ const PrototypeNode = ({ name, model }) => (
     <div
       draggable
       onDragStart={event => {
-        event.dataTransfer.setData("storm-diagram-node", JSON.stringify(model))
+        event.dataTransfer.setData(
+          "storm-diagram-node",
+          JSON.stringify({ anetObjectType: model.constructor.resourceName })
+        )
       }}
     >
       <img
@@ -91,6 +97,8 @@ const BoardDashboard = () => {
   const [model, setModel] = useState(null)
   const [edit, setEdit] = useState(false)
   const [editedNode, setEditedNode] = useState(null)
+  const [, updateState] = React.useState()
+  const forceUpdate = useCallback(() => updateState({}), [])
 
   useEffect(() => {
     setModel(new DiagramModel())
@@ -122,8 +130,7 @@ const BoardDashboard = () => {
       const data = JSON.parse(
         dropEvent.dataTransfer.getData("storm-diagram-node")
       )
-      console.log(data)
-      const node = new DiagramNodeModel()
+      const node = new DiagramNodeModel(data)
       const point = engineRef.current.getRelativeMousePoint(dropEvent)
       node.setPosition(point)
       engineRef.current.getModel().addNode(node)
@@ -131,6 +138,32 @@ const BoardDashboard = () => {
       setEditedNode(node)
     }
   }, [model, dropEvent])
+
+  const cloneSelected = () => {
+    const offset = { x: 100, y: 100 }
+    const itemMap = {}
+    _forEach(model.getSelectedEntities(), item => {
+      const newItem = item.clone(itemMap)
+
+      // offset the nodes slightly
+      if (newItem instanceof NodeModel) {
+        newItem.setPosition(
+          newItem.getX() + offset.x,
+          newItem.getY() + offset.y
+        )
+        model.addNode(newItem)
+      } else if (newItem instanceof LinkModel) {
+        // offset the link points
+        newItem.getPoints().forEach(p => {
+          p.setPosition(p.getX() + offset.x, p.getY() + offset.y)
+        })
+        model.addLink(newItem)
+      }
+      newItem.setSelected(false)
+      forceUpdate()
+    })
+  }
+
   return (
     <div
       style={{
@@ -160,10 +193,13 @@ const BoardDashboard = () => {
         )}
       </div>
       <div style={{ flexGrow: 0, display: "flex", flexDirection: "column" }}>
-        <Button onClick={() => setEdit(!edit)}>{edit ? "View" : "Edit"}</Button>
+        <Button onClick={() => setEdit(!edit)}>{edit ? "x" : "Edit"}</Button>
 
         {edit && (
           <>
+            <Button onClick={cloneSelected}>Copy</Button>
+
+            <span>drag and drop into diafgram:</span>
             <PrototypeNode model={new Models.Task()} name="Task" />
             <PrototypeNode model={new Models.Position()} name="Position" />
             <PrototypeNode model={new Models.Person()} name="Person" />
@@ -195,6 +231,7 @@ const BoardDashboard = () => {
               editedNode.options.anetObject = value
               editedNode.options.anetObjectType = objectType
             }}
+            objectType={editedNode?.options.anetObjectType}
           />
         </Modal.Body>
       </Modal>

@@ -274,7 +274,6 @@ export default class Model {
   }
 
   static fetchByUuid(uuid, ENTITY_GQL_FIELDS) {
-    console.log("getting resources for " + this.resourceName)
     const fields = ENTITY_GQL_FIELDS[this.resourceName]
     if (!fields) {
       return null

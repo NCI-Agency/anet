@@ -112,8 +112,13 @@ const widgetTypeMapping = {
   [ENTITY_TYPES.TASKS]: widgetPropsTask
 }
 
-const MultiTypeAdvancedSelectComponent = ({ onConfirm }) => {
-  const [objectType, setObjectType] = useState(ENTITY_TYPES.REPORTS)
+const MultiTypeAdvancedSelectComponent = ({
+  onConfirm,
+  objectType: objectTypeArg
+}) => {
+  const [objectType, setObjectType] = useState(
+    objectTypeArg || ENTITY_TYPES.REPORTS
+  )
   const [advancedSelectProps, setAdvancedSelectProps] = useState(
     widgetTypeMapping[objectType]
   )
@@ -158,7 +163,8 @@ const MultiTypeAdvancedSelectComponent = ({ onConfirm }) => {
 }
 
 MultiTypeAdvancedSelectComponent.propTypes = {
-  onConfirm: PropTypes.func
+  onConfirm: PropTypes.func,
+  objectType: PropTypes.string
 }
 
 export default MultiTypeAdvancedSelectComponent

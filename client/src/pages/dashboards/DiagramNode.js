@@ -19,10 +19,11 @@ import LinkTo from "components/LinkTo"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import * as React from "react"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 const ENTITY_GQL_FIELDS = {
   Report: "uuid, intent",
-  Person: "uuid, name, role, avatar(size: 32)",
+  Person: "uuid, name, role, avatar(size: 64)",
   Organization: "uuid, shortName",
   Position: "uuid, name",
   Location: "uuid, name",
@@ -49,9 +50,10 @@ export class DiagramLinkModel extends DefaultLinkModel {
   }
 }
 export class DiagramNodeModel extends NodeModel {
-  constructor() {
+  constructor(options) {
     super({
-      type: "anet"
+      type: "anet",
+      ...options
     })
     this.addPort(new DiagramPortModel(PortModelAlignment.TOP))
     this.addPort(new DiagramPortModel(PortModelAlignment.LEFT))
@@ -66,13 +68,13 @@ export class DiagramNodeModel extends NodeModel {
     options.color = event.data.color
     // TODO: batch-process all queries as one
     const modelClass = Models[event.data.anetObjectType]
-    console.log(" deserializing ..." + modelClass.resourceName)
     modelClass &&
       modelClass
         .fetchByUuid(event.data.anetObjectUuid, ENTITY_GQL_FIELDS)
         .then(function(entity) {
           options.anetObject = entity
-          console.log(" deserialized ..." + event.data.anetObjectUuid)
+          // TODO: fire an event instead
+          event.engine.repaintCanvas()
         })
   }
 
@@ -88,6 +90,7 @@ const Port = styled.div`
   width: 16px;
   height: 16px;
   z-index: 10;
+  border: 2px solid rgba(255, 255, 255, 0.5);
   background: rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   cursor: pointer;
@@ -107,23 +110,36 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
       style={{
         position: "relative",
         width: size,
-        height: size
+        height: size,
+        backgroundColor: node.isSelected() ? "rgba(0, 0, 255, 0.3)" : "white"
       }}
     >
-      <img
-        src={modelInstance?.iconUrl()}
-        alt=""
-        width={50}
-        height={50}
-        style={{ pointerEvents: "none" }}
-      />
-      {node.options.anetObjectType && node.options.anetObject && (
-        <LinkTo
-          modelType={node.options.anetObjectType}
-          model={node.options.anetObject}
-          showAvatar={false}
-          showIcon={false}
+      {modelInstance &&
+      Object.prototype.hasOwnProperty.call(modelInstance, "avatar") ? (
+        <AvatarDisplayComponent
+          avatar={modelInstance.avatar}
+          height={64}
+          width={64}
+          style={{ pointerEvents: "none" }}
         />
+        ) : (
+          <img
+            src={modelInstance?.iconUrl()}
+            alt=""
+            width={48}
+            height={48}
+            style={{ marginLeft: 8, marginTop: 8, pointerEvents: "none" }}
+          />
+        )}
+      {node.options.anetObjectType && node.options.anetObject && (
+        <div style={{ paddingTop: 5 }}>
+          <LinkTo
+            modelType={node.options.anetObjectType}
+            model={node.options.anetObject}
+            showAvatar={false}
+            showIcon={false}
+          />
+        </div>
       )}
       <PortWidget
         style={{
@@ -242,7 +258,7 @@ export class DiagramNodeFactory extends AbstractReactFactory {
 
   generateReactWidget = event => {
     return (
-      <DiagramNodeWidget engine={this.engine} size={50} node={event.model} />
+      <DiagramNodeWidget engine={this.engine} size={64} node={event.model} />
     )
   }
 
