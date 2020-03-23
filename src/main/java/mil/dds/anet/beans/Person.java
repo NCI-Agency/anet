@@ -28,6 +28,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     ADVISOR, PRINCIPAL
   }
 
+  private static final String AVATAR_TYPE = "png";
+
   @GraphQLQuery
   @GraphQLInputField
   private String name;
@@ -249,7 +251,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   @GraphQLQuery(name = "avatar")
   public String getAvatar(@GraphQLArgument(name = "size", defaultValue = "256") int size) {
     try {
-      return Base64.getEncoder().encodeToString(Utils.resizeImage(avatar, size, size, "png"));
+      return String.format("data:image/%1$s;base64,%2$s", AVATAR_TYPE,
+          Base64.getEncoder().encodeToString(Utils.resizeImage(avatar, size, size, AVATAR_TYPE)));
     } catch (Exception e) {
       return null;
     }
@@ -265,7 +268,16 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
 
   @GraphQLInputField(name = "avatar")
   public void setAvatar(String avatar) {
-    this.avatar = avatar == null ? null : Base64.getDecoder().decode(avatar);
+    if (avatar == null) {
+      this.avatar = null;
+    } else {
+      try {
+        final String[] parts = avatar.split(",");
+        this.avatar = Base64.getDecoder().decode(parts[1]);
+      } catch (Exception e) {
+        this.avatar = null;
+      }
+    }
   }
 
   public String getCode() {
