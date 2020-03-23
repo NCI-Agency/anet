@@ -135,7 +135,7 @@
     "prop-types": "15.7.2",
     "react": "16.13.1",
     "react-avatar-edit": "0.8.3",
-    "react-bootstrap": "0.33.1",
+    "react-bootstrap": "1.0.0",
     "react-confirm-bootstrap": "5.3.1",
     "react-container-dimensions": "1.4.1",
     "react-dom": "16.13.1",
