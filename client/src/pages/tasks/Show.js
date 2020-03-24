@@ -1,22 +1,19 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
-import { Button } from "react-bootstrap"
-import AddAssessmentModal from "components/assessments/AddAssessmentModal"
-import AggregationWidget from "components/AggregationWidgets"
-import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
+import Approvals from "components/approvals/Approvals"
+import AssessmentResults from "components/assessments/AssessmentResults"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-
 import PositionTable from "components/PositionTable"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -27,7 +24,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import DictionaryField from "../../HOC/DictionaryField"
@@ -113,6 +110,22 @@ const GQL_GET_TASK = gql`
         uuid
       }
     }
+    subTasks: taskList(query: {pageSize: 0, customFieldRef1Uuid: [$uuid], customFieldRef1Recursively: true}) {
+      list {
+        uuid
+        shortName
+        longName
+        customFields
+        ${GRAPHQL_NOTES_FIELDS}
+        publishedReports: reports(query: {
+          pageSize:0,
+          state: [${Report.STATE.PUBLISHED}],
+          taskUuid: $uuid
+        }) {
+          uuid
+        }
+      }
+    }
   }
 `
 
@@ -123,7 +136,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     uuid
   })
 
-  const [showAssessmentModal, setShowAssessmentModal] = useState(false)
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -135,10 +147,18 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   })
 
   if (data) {
-    data.task.formCustomFields = JSON.parse(data.task.customFields)
-    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text)))
+    data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
+    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
   }
-  let task = new Task(data ? data.task : {})
+  const task = new Task(data ? data.task : {})
+
+  const subTasks = []
+  data &&
+    data.subTasks.list.forEach(subTask => {
+      subTask.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
+      subTasks.push(new Task(subTask))
+    })
+
   if (done) {
     return result
   }
@@ -167,77 +187,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
-
-  const taskAssessmentDef = JSON.parse(
-    JSON.parse(task.customFields || "{}").assessmentDefinition || "{}"
-  )
-
-  const ongoingPeriod = {
-    start: moment().startOf("month"),
-    end: moment().endOf("month")
-  }
-  const assessmentPeriod = {
-    start: moment()
-      .subtract(1, "months")
-      .startOf("month"),
-    end: moment()
-      .subtract(1, "months")
-      .endOf("month")
-  }
-  const previousAssessmentPeriod = {
-    start: moment()
-      .subtract(2, "months")
-      .startOf("month"),
-    end: moment()
-      .subtract(2, "months")
-      .endOf("month")
-  }
-  const ongoingResultsWidgets = []
-  const assessmentResultsWidgets = []
-  const previousAssessmentResultsWidgets = []
-  Object.keys(taskAssessmentDef).forEach(key => {
-    const aggWidgetProps = {
-      label: taskAssessmentDef[key].label,
-      widget:
-        taskAssessmentDef[key].aggregation?.widget ||
-        taskAssessmentDef[key].widget,
-      aggregationType: taskAssessmentDef[key].aggregation?.aggregationType,
-      vertical: true
-    }
-    ongoingResultsWidgets.push(
-      <AggregationWidget
-        key={`ongoing-${key}`}
-        values={task.getAssessmentResults(ongoingPeriod)[key]}
-        {...aggWidgetProps}
-      />
-    )
-    assessmentResultsWidgets.push(
-      <AggregationWidget
-        key={`assessment-${key}`}
-        values={task.getAssessmentResults(assessmentPeriod)[key]}
-        {...aggWidgetProps}
-      />
-    )
-    previousAssessmentResultsWidgets.push(
-      <AggregationWidget
-        key={`previousAssessment-${key}`}
-        values={task.getAssessmentResults(previousAssessmentPeriod)[key]}
-        {...aggWidgetProps}
-      />
-    )
-  })
-
-  // Set initial task.lastAssessment (contains the last assessments made directly on the task)
-  const lastAssessment = task.getLastAssessment()
-  if (lastAssessment) {
-    task = Object.assign(task, {
-      lastAssessment: lastAssessment
-    })
-  }
-  const assessmentLabelPrefix = task.lastAssessment ? "Add a" : "Make a new"
-  const addAssessmentLabel = `${assessmentLabelPrefix} ${
-    task.shortName
-  } assessment for the month of ${assessmentPeriod.start.format("MMM-YYYY")}`
 
   return (
     <Formik enableReinitialize initialValues={task}>
@@ -377,18 +326,18 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   )}
                 </Fieldset>
 
-                {ongoingResultsWidgets && (
-                  <Fieldset
-                    style={{ flex: "1 1 0" }}
-                    title={`Ongoing activity for ${ongoingPeriod.start.format(
-                      "MMM-YYYY"
-                    )}`}
-                    id="ongoing-task-assessments-results"
-                    width={0}
-                  >
-                    {ongoingResultsWidgets}
-                  </Fieldset>
-                )}
+                <AssessmentResults
+                  style={{ flex: "1 1 0" }}
+                  entity={task}
+                  subEntities={subTasks}
+                  label="Ongoing assessment"
+                  assessmentPeriod={{
+                    start: moment().startOf("month"),
+                    end: moment().endOf("month")
+                  }}
+                  canEdit={false}
+                  refetch={refetch}
+                />
               </div>
 
               <div
@@ -399,56 +348,41 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   padding: "10px"
                 }}
               >
-                {previousAssessmentResultsWidgets && (
-                  <Fieldset
-                    title={`Previous assessments results for ${previousAssessmentPeriod.start.format(
-                      "MMM-YYYY"
-                    )}`}
-                    id="previous-task-assessments-results"
-                  >
-                    {previousAssessmentResultsWidgets}
-                  </Fieldset>
-                )}
+                <AssessmentResults
+                  entity={task}
+                  subEntities={subTasks}
+                  label="Previous assessment"
+                  assessmentPeriod={{
+                    start: moment()
+                      .subtract(2, "months")
+                      .startOf("month"),
+                    end: moment()
+                      .subtract(2, "months")
+                      .endOf("month")
+                  }}
+                  fieldSettings={fieldSettings.assessment?.customFields}
+                  canEdit={currentUser.isAdmin()}
+                  refetch={refetch}
+                />
 
-                {assessmentResultsWidgets && (
-                  <Fieldset
-                    title={`Assessments results for ${assessmentPeriod.start.format(
-                      "MMM-YYYY"
-                    )}`}
-                    id="task-assessments-results"
-                  >
-                    {assessmentResultsWidgets}
-
-                    {values.lastAssessment && (
-                      <ReadonlyCustomFields
-                        fieldNamePrefix="lastAssessment"
-                        fieldsConfig={fieldSettings.assessment?.customFields}
-                        formikProps={{
-                          values
-                        }}
-                        vertical
-                      />
-                    )}
-
-                    {canEdit && fieldSettings.assessment && (
-                      <>
-                        <Button
-                          bsStyle="primary"
-                          onClick={() => setShowAssessmentModal(true)}
-                        >
-                          {addAssessmentLabel}
-                        </Button>
-                        <AddAssessmentModal
-                          task={task}
-                          assessmentPeriod={assessmentPeriod}
-                          showModal={showAssessmentModal}
-                          onCancel={() => hideAddAssessmentModal(false)}
-                          onSuccess={() => hideAddAssessmentModal(true)}
-                        />
-                      </>
-                    )}
-                  </Fieldset>
-                )}
+                <AssessmentResults
+                  entity={task}
+                  subEntities={subTasks}
+                  label="Assessment"
+                  assessmentPeriod={{
+                    start: moment()
+                      .subtract(1, "months")
+                      .startOf("month"),
+                    end: moment()
+                      .subtract(1, "months")
+                      .endOf("month")
+                  }}
+                  assessmentCustomFields={
+                    fieldSettings.assessment?.customFields
+                  }
+                  canEdit={canEdit}
+                  refetch={refetch}
+                />
               </div>
               {false && // TODO: Do not show task custom fields until we implement a better widget
                 Settings.fields.task.customFields && (
@@ -486,12 +420,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       }}
     </Formik>
   )
-  function hideAddAssessmentModal(success) {
-    setShowAssessmentModal(false)
-    if (success) {
-      refetch()
-    }
-  }
 }
 
 BaseTaskShow.propTypes = {
