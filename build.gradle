@@ -72,7 +72,7 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.1.jre8'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.2.jre8'
 	implementation 'org.postgresql:postgresql:42.2.11' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:3.8.8'
 
