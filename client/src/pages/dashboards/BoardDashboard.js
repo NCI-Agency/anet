@@ -1,23 +1,39 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { CanvasWidget, SelectionBoxLayerFactory } from "@projectstorm/react-canvas-core"
-import { DefaultDiagramState, DiagramEngine, DiagramModel, LinkLayerFactory, LinkModel, NodeLayerFactory, NodeModel, PortModelAlignment } from "@projectstorm/react-diagrams-core"
+import {
+  CanvasWidget,
+  SelectionBoxLayerFactory
+} from "@projectstorm/react-canvas-core"
+import {
+  DefaultDiagramState,
+  DiagramEngine,
+  DiagramModel,
+  LinkLayerFactory,
+  NodeLayerFactory,
+  PortModelAlignment
+} from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
 import { PathFindingLinkFactory } from "@projectstorm/react-diagrams-routing"
 import { Settings } from "api"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import { mapPageDispatchersToProps } from "components/Page"
 import FileSaver from "file-saver"
-import _forEach from "lodash/forEach"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Badge, Button, Modal } from "react-bootstrap"
+import React, { useEffect, useRef, useState } from "react"
+import { Badge, Button, Modal, Panel } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
 import "./BoardDashboard.css"
-import { DiagramLinkFactory, DiagramNodeFactory, DiagramNodeModel, DiagramPortModel, SimplePortFactory } from "./DiagramNode"
+import LinkTo from "components/LinkTo"
+import {
+  DiagramLinkFactory,
+  DiagramNodeFactory,
+  DiagramNodeModel,
+  DiagramPortModel,
+  SimplePortFactory
+} from "./DiagramNode"
 
 const createEngine = options => {
   const engine = new DiagramEngine({})
@@ -82,16 +98,41 @@ const BoardDashboard = () => {
   const engineRef = useRef(createEngine())
   const [model, setModel] = useState(null)
   const [edit, setEdit] = useState(false)
+  const [selectingEntity, setSelectingEntity] = useState(false)
   const [editedNode, setEditedNode] = useState(null)
-  const [, updateState] = React.useState()
-  const forceUpdate = useCallback(() => updateState({}), [])
 
   useEffect(() => {
     setModel(new DiagramModel())
+    return () => setModel(null)
   }, [])
 
   useEffect(() => {
+    const previousModel = engineRef.current.getModel()
+    if (previousModel) {
+      previousModel.clearListeners()
+      previousModel.getNodes().forEach(node => node.clearListeners())
+    }
     engineRef.current.setModel(model)
+    if (model) {
+      const selectionListener = {
+        selectionChanged: () =>
+          setEditedNode(
+            model.getSelectedEntities().length === 1
+              ? model.getSelectedEntities()[0]
+              : null
+          )
+      }
+      model.registerListener({
+        nodesUpdated: function(event) {
+          if (event.isCreated) {
+            event.node.registerListener(selectionListener)
+          } else {
+            event.node.clearListeners()
+          }
+        }
+      })
+      model.getNodes().forEach(node => node.registerListener(selectionListener))
+    }
   }, [model])
 
   useEffect(() => {
@@ -117,9 +158,11 @@ const BoardDashboard = () => {
       const node = new DiagramNodeModel(data)
 
       node.setPosition(point)
+      model.getSelectedEntities().forEach(entity => entity.setSelected(false))
+      node.setSelected(true)
+      setEditedNode(node)
       engineRef.current.getModel().addNode(node)
       setDropEvent(null)
-      setEditedNode(node)
     }
   }, [model, dropEvent])
 
@@ -156,25 +199,30 @@ const BoardDashboard = () => {
         )}
       </div>
       <div style={{ flexGrow: 0, display: "flex", flexDirection: "column" }}>
-        <Button onClick={() => setEdit(!edit)}>{edit ? (<Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />) : "Edit"}</Button>
+        <Button onClick={() => setEdit(!edit)}>
+          {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
+        </Button>
 
         {edit && (
           <>
             {Object.values(Models).map(Model => {
               const instance = new Model()
               const modelName = instance.constructor.resourceName
-              return (instance.iconUrl() && <PrototypeNode
-                  key={`palette-${modelName}`}
-                  model={instance}
-                  name={modelName}
-                  onClick={event => {
-                    const data = { anetObjectType: modelName }
-                    const point = {x:150, y:150}
-                    setDropEvent({ data, point })
-                  }}
-                />)
+              return (
+                instance.iconUrl() && (
+                  <PrototypeNode
+                    key={`palette-${modelName}`}
+                    model={instance}
+                    name={modelName}
+                    onClick={event => {
+                      const data = { anetObjectType: modelName }
+                      const point = { x: 150, y: 150 }
+                      setDropEvent({ data, point })
+                    }}
+                  />
+                )
+              )
             })}
-
             <Button
               onClick={() => {
                 const blob = new Blob([JSON.stringify(model.serialize())], {
@@ -185,23 +233,45 @@ const BoardDashboard = () => {
             >
               <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
             </Button>
+            <br />
+            <br />
+            {editedNode && (
+              <Panel>
+                <Panel.Heading>Selected node editor</Panel.Heading>
+                <Panel.Body>
+                  <div>
+                    <Button onClick={() => setSelectingEntity(true)}>
+                      <LinkTo
+                        modelType={editedNode.options.anetObjectType}
+                        model={editedNode.options.anetObject}
+                        isLink={false}
+                      />
+                    </Button>
+                  </div>
+                </Panel.Body>
+                <Modal
+                  show={selectingEntity}
+                  onHide={() => setSelectingEntity(false)}
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title>Edit diagram node</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <MultiTypeAdvancedSelectComponent
+                      onConfirm={(value, objectType) => {
+                        editedNode.options.anetObject = value
+                        editedNode.options.anetObjectType = objectType
+                        setSelectingEntity(false)
+                      }}
+                      objectType={editedNode?.options.anetObjectType}
+                    />
+                  </Modal.Body>
+                </Modal>
+              </Panel>
+            )}
           </>
         )}
       </div>
-      <Modal show={editedNode !== null} onHide={() => setEditedNode(null)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit diagram node</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <MultiTypeAdvancedSelectComponent
-            onConfirm={(value, objectType) => {
-              editedNode.options.anetObject = value
-              editedNode.options.anetObjectType = objectType
-            }}
-            objectType={editedNode?.options.anetObjectType}
-          />
-        </Modal.Body>
-      </Modal>
     </div>
   )
 }
