@@ -442,7 +442,7 @@ const CustomField = ({
         typeof value === "object" && value.target ? value.target.value : value
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
-      setFieldValue(fieldName, val, false)
+      setFieldValue(fieldName, val, sv)
       if (!sv) {
         validateFormDebounced()
       }
