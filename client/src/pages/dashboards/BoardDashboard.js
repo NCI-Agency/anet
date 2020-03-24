@@ -1,39 +1,23 @@
-import {
-  DefaultDiagramState,
-  DiagramEngine,
-  DiagramModel,
-  LinkLayerFactory,
-  NodeLayerFactory,
-  PortModelAlignment,
-  LinkModel,
-  NodeModel
-} from "@projectstorm/react-diagrams-core"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import { CanvasWidget, SelectionBoxLayerFactory } from "@projectstorm/react-canvas-core"
+import { DefaultDiagramState, DiagramEngine, DiagramModel, LinkLayerFactory, LinkModel, NodeLayerFactory, NodeModel, PortModelAlignment } from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
-import {
-  CanvasWidget,
-  SelectionBoxLayerFactory
-} from "@projectstorm/react-canvas-core"
 import { PathFindingLinkFactory } from "@projectstorm/react-diagrams-routing"
 import { Settings } from "api"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import { mapPageDispatchersToProps } from "components/Page"
 import FileSaver from "file-saver"
+import _forEach from "lodash/forEach"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState, useCallback } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Badge, Button, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
 import "./BoardDashboard.css"
-import _forEach from "lodash/forEach"
-import {
-  DiagramNodeFactory,
-  DiagramNodeModel,
-  DiagramLinkFactory,
-  DiagramPortModel,
-  SimplePortFactory
-} from "./DiagramNode"
+import { DiagramLinkFactory, DiagramNodeFactory, DiagramNodeModel, DiagramPortModel, SimplePortFactory } from "./DiagramNode"
 
 const createEngine = options => {
   const engine = new DiagramEngine({})
@@ -58,10 +42,11 @@ const createEngine = options => {
   return engine
 }
 
-const PrototypeNode = ({ name, model }) => (
+const PrototypeNode = ({ name, model, onClick }) => (
   <Badge style={{ margin: 10, background: "white", color: "#106ba3" }}>
     <div
       draggable
+      onClick={onClick}
       onDragStart={event => {
         event.dataTransfer.setData(
           "storm-diagram-node",
@@ -86,7 +71,8 @@ const PrototypeNode = ({ name, model }) => (
 
 PrototypeNode.propTypes = {
   name: PropTypes.string,
-  model: PropTypes.object
+  model: PropTypes.object,
+  onClick: PropTypes.func
 }
 
 const BoardDashboard = () => {
@@ -127,42 +113,15 @@ const BoardDashboard = () => {
 
   useEffect(() => {
     if (dropEvent) {
-      const data = JSON.parse(
-        dropEvent.dataTransfer.getData("storm-diagram-node")
-      )
+      const { data, point } = dropEvent
       const node = new DiagramNodeModel(data)
-      const point = engineRef.current.getRelativeMousePoint(dropEvent)
+
       node.setPosition(point)
       engineRef.current.getModel().addNode(node)
       setDropEvent(null)
       setEditedNode(node)
     }
   }, [model, dropEvent])
-
-  const cloneSelected = () => {
-    const offset = { x: 100, y: 100 }
-    const itemMap = {}
-    _forEach(model.getSelectedEntities(), item => {
-      const newItem = item.clone(itemMap)
-
-      // offset the nodes slightly
-      if (newItem instanceof NodeModel) {
-        newItem.setPosition(
-          newItem.getX() + offset.x,
-          newItem.getY() + offset.y
-        )
-        model.addNode(newItem)
-      } else if (newItem instanceof LinkModel) {
-        // offset the link points
-        newItem.getPoints().forEach(p => {
-          p.setPosition(p.getX() + offset.x, p.getY() + offset.y)
-        })
-        model.addLink(newItem)
-      }
-      newItem.setSelected(false)
-      forceUpdate()
-    })
-  }
 
   return (
     <div
@@ -179,7 +138,11 @@ const BoardDashboard = () => {
         }}
         onDrop={event => {
           event.persist()
-          setDropEvent(event)
+          const data = JSON.parse(
+            event.dataTransfer.getData("storm-diagram-node")
+          )
+          const point = engineRef.current.getRelativeMousePoint(event)
+          setDropEvent({ data, point })
         }}
         onDragOver={event => {
           event.preventDefault()
@@ -193,21 +156,25 @@ const BoardDashboard = () => {
         )}
       </div>
       <div style={{ flexGrow: 0, display: "flex", flexDirection: "column" }}>
-        <Button onClick={() => setEdit(!edit)}>{edit ? "x" : "Edit"}</Button>
+        <Button onClick={() => setEdit(!edit)}>{edit ? (<Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />) : "Edit"}</Button>
 
         {edit && (
           <>
-            <Button onClick={cloneSelected}>Copy</Button>
+            {Object.values(Models).map(Model => {
+              const instance = new Model()
+              const modelName = instance.constructor.resourceName
+              return (instance.iconUrl() && <PrototypeNode
+                  key={`palette-${modelName}`}
+                  model={instance}
+                  name={modelName}
+                  onClick={event => {
+                    const data = { anetObjectType: modelName }
+                    const point = {x:150, y:150}
+                    setDropEvent({ data, point })
+                  }}
+                />)
+            })}
 
-            <span>drag and drop into diafgram:</span>
-            <PrototypeNode model={new Models.Task()} name="Task" />
-            <PrototypeNode model={new Models.Position()} name="Position" />
-            <PrototypeNode model={new Models.Person()} name="Person" />
-            <PrototypeNode
-              model={new Models.Organization()}
-              name="Organization"
-            />
-            <PrototypeNode model={new Models.Location()} name="Location" />
             <Button
               onClick={() => {
                 const blob = new Blob([JSON.stringify(model.serialize())], {
