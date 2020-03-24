@@ -36,7 +36,7 @@ const RENDERERS = {}
 
 const DEFAULT_CUSTOM_FIELDS_PREFIX = "formCustomFields"
 
-const SpecialField = ({ widget, name, formikProps, ...otherFieldProps }) => {
+const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
   const widgetProps = {}
   if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
@@ -55,21 +55,32 @@ const SpecialField = ({ widget, name, formikProps, ...otherFieldProps }) => {
   )
 }
 SpecialField.propTypes = {
-  widget: PropTypes.string,
   name: PropTypes.string.isRequired,
+  widget: PropTypes.string,
   formikProps: PropTypes.object
 }
 
-const ReadonlySpecialField = ({
-  fieldConfig,
-  formikProps,
-  ...otherfieldProps
-}) => {
-  if (fieldConfig.widget === "richTextEditor") {
-    const fieldValue = Object.get(formikProps.values, otherfieldProps.name)
-    return fieldValue ? <div>{parseHtmlWithLinkTo(fieldValue)}</div> : null
+const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
+  if (widget === "richTextEditor") {
+    return (
+      <FastField
+        name={name}
+        component={FieldHelper.ReadonlyField}
+        humanValue={parseHtmlWithLinkTo(values[name])}
+        {...Object.without(otherFieldProps, "style")}
+      />
+    )
   } else {
-    return SpecialField({ ...otherfieldProps, readonly: true })
+    const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
+    return (
+      <FastField
+        name={name}
+        component={FieldHelper.SpecialField}
+        widget={<WidgetComponent />}
+        readonly
+        {...otherFieldProps}
+      />
+    )
   }
 }
 
@@ -282,11 +293,8 @@ const addObject = (objDefault, arrayHelpers) => {
 }
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
-  const { name, fieldConfig, formikProps, vertical } = fieldProps
-  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
-    formikProps.values,
-    name
-  ])
+  const { name, fieldConfig, values, vertical } = fieldProps
+  const value = useMemo(() => getArrayObjectValue(values, name), [values, name])
   const fieldsetTitle = fieldConfig.label || ""
   return (
     <Fieldset title={fieldsetTitle}>
@@ -299,7 +307,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
                 key={index}
                 fieldName={name}
                 fieldConfig={fieldConfig}
-                formikProps={formikProps}
+                values={values}
                 index={index}
                 vertical={vertical}
               />
@@ -314,7 +322,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
 const ReadonlyArrayObject = ({
   fieldName,
   fieldConfig,
-  formikProps,
+  values,
   vertical,
   index
 }) => {
@@ -323,8 +331,8 @@ const ReadonlyArrayObject = ({
     <Fieldset title={`${objLabel} ${index + 1}`}>
       <ReadonlyCustomFields
         fieldsConfig={fieldConfig.objectFields}
-        formikProps={formikProps}
         fieldNamePrefix={`${fieldName}.${index}`}
+        values={values}
         vertical={vertical}
       />
     </Fieldset>
@@ -333,7 +341,7 @@ const ReadonlyArrayObject = ({
 ReadonlyArrayObject.propTypes = {
   fieldName: PropTypes.string.isRequired,
   fieldConfig: PropTypes.object.isRequired,
-  formikProps: PropTypes.object.isRequired,
+  values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
   index: PropTypes.number.isRequired
 }
@@ -452,15 +460,18 @@ const CustomField = ({
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(
     () =>
-      type !== CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS &&
-      type !== CUSTOM_FIELD_TYPE.SPECIAL_FIELD
-        ? {}
-        : {
-          fieldConfig,
-          formikProps,
-          invisibleFields,
-          updateInvisibleFields
-        },
+      type === CUSTOM_FIELD_TYPE.SPECIAL_FIELD
+        ? {
+          fieldConfig
+        }
+        : type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS
+          ? {
+            fieldConfig,
+            formikProps,
+            invisibleFields,
+            updateInvisibleFields
+          }
+          : {},
     [fieldConfig, formikProps, invisibleFields, type, updateInvisibleFields]
   )
   return (
@@ -574,50 +585,50 @@ const READONLY_FIELD_COMPONENTS = {
 
 export const ReadonlyCustomFields = ({
   fieldsConfig,
-  formikProps,
-  fieldNamePrefix,
+  fieldNamePrefix, // key path in the values object to get to the level of fields given by the fieldsConfig
+  values,
   vertical
-}) => (
-  <>
-    {Object.keys(fieldsConfig).map(key => {
-      const fieldConfig = fieldsConfig[key]
-      const {
-        type,
-        typeError,
-        placeholder,
-        helpText,
-        validations,
-        visibleWhen,
-        objectFields,
-        ...fieldProps
-      } = fieldConfig
-      let extraProps = {}
-      if (
-        type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS ||
-        type === CUSTOM_FIELD_TYPE.SPECIAL_FIELD
-      ) {
-        extraProps = {
-          fieldConfig,
-          formikProps
+}) => {
+  return (
+    <>
+      {Object.keys(fieldsConfig).map(key => {
+        const fieldConfig = fieldsConfig[key]
+        const {
+          type,
+          typeError,
+          placeholder,
+          helpText,
+          validations,
+          visibleWhen,
+          objectFields,
+          ...fieldProps
+        } = fieldConfig
+        let extraProps = {}
+        if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+          extraProps = {
+            fieldConfig
+          }
         }
-      }
-      const FieldComponent = READONLY_FIELD_COMPONENTS[type]
-      return (
-        <FieldComponent
-          key={key}
-          name={`${fieldNamePrefix}.${key}`}
-          vertical={vertical}
-          {...fieldProps}
-          {...extraProps}
-        />
-      )
-    })}
-  </>
-)
+        const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
+        const fieldName = fieldNamePrefix ? `${fieldNamePrefix}.${key}` : key
+        return (
+          <ReadonlyFieldComponent
+            key={key}
+            name={fieldName}
+            values={values}
+            vertical={vertical}
+            {...fieldProps}
+            {...extraProps}
+          />
+        )
+      })}
+    </>
+  )
+}
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
-  formikProps: PropTypes.object,
   fieldNamePrefix: PropTypes.string.isRequired,
+  values: PropTypes.object.isRequired,
   vertical: PropTypes.bool
 }
 ReadonlyCustomFields.defaultProps = {

@@ -335,6 +335,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     start: moment().startOf("month"),
                     end: moment().endOf("month")
                   }}
+                  assessmentCustomFields={
+                    fieldSettings.assessment?.customFields
+                  }
                   canEdit={false}
                   refetch={refetch}
                 />
@@ -360,7 +363,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .subtract(2, "months")
                       .endOf("month")
                   }}
-                  fieldSettings={fieldSettings.assessment?.customFields}
+                  assessmentCustomFields={
+                    fieldSettings.assessment?.customFields
+                  }
                   canEdit={currentUser.isAdmin()}
                   refetch={refetch}
                 />
@@ -392,9 +397,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   >
                     <ReadonlyCustomFields
                       fieldsConfig={Settings.fields.task.customFields}
-                      formikProps={{
-                        values
-                      }}
+                      values={values}
                     />
                   </Fieldset>
               )}

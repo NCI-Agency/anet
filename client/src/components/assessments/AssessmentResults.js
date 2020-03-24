@@ -1,11 +1,23 @@
 import AggregationWidget from "components/AggregationWidgets"
 import AddAssessmentModal from "components/assessments/AddAssessmentModal"
-// import { ReadonlyCustomFields } from "components/CustomFields"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 
+/* The AssessmentResults component displays the results of two types of
+ * assessments made on a given entity and subentities:
+ * - aggregation of the assessments made on the entity/subentities when
+ *   working on them in relation to another type of entity (example:
+ *   assessments made on tasks, while filling  report related to the tasks);
+ *   the definition of these assessments is to be found in
+ *   entity.customFields.assessmentDefinition
+ * - display of the last assessment made on the entity/subentities
+ *   as a conclusion about a given period of time;
+ *   the definition of these assessments is to be found in
+ *   assessmentCustomFields
+ */
 const AssessmentResults = ({
   assessmentPeriod,
   entity,
@@ -27,6 +39,7 @@ const AssessmentResults = ({
   )
 
   const assessmentResultsWidgets = []
+  // display one aggregation widget per assessment question
   Object.keys(assessmentDefinition || {}).forEach(key => {
     const aggWidgetProps = {
       widget:
@@ -83,16 +96,14 @@ const AssessmentResults = ({
             />
           ))}
 
-          {/* {lastAssessment && (
+          {lastAssessment && assessmentCustomFields && (
             <ReadonlyCustomFields
-              fieldNamePrefix="lastAssessment"
+              fieldNamePrefix=""
               fieldsConfig={assessmentCustomFields}
-              formikProps={{
-                formikProps
-              }}
+              values={lastAssessment}
               vertical
             />
-          )} */}
+          )}
 
           {canEdit && assessmentCustomFields && (
             <>
@@ -121,17 +132,17 @@ const AssessmentResults = ({
 }
 
 AssessmentResults.propTypes = {
-  label: PropTypes.string,
+  assessmentCustomFields: PropTypes.object,
   assessmentPeriod: PropTypes.shape({
     start: PropTypes.object,
     end: PropTypes.object
   }),
-  entity: PropTypes.object,
-  subEntities: PropTypes.array,
   canEdit: PropTypes.bool,
-  assessmentCustomFields: PropTypes.object,
+  entity: PropTypes.object,
+  label: PropTypes.string,
+  refetch: PropTypes.func,
   style: PropTypes.object,
-  refetch: PropTypes.func
+  subEntities: PropTypes.array
 }
 
 export default AssessmentResults
