@@ -74,7 +74,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.1.jre8'
 	implementation 'org.postgresql:postgresql:42.2.11' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:3.8.7'
+	implementation 'org.liquibase:liquibase-core:3.8.8'
 
 	implementation 'javax.mail:mail:1.4.7'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
