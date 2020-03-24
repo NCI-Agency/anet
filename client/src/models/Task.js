@@ -237,6 +237,6 @@ export default class Task extends Model {
         uuid: ta.uuid,
         assessment: JSON.parse(ta.text)
       }))
-    return notesToAssessments.length && notesToAssessments[0].assessment
+    return notesToAssessments.length ? notesToAssessments[0].assessment : null
   }
 }
