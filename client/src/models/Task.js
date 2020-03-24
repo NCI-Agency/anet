@@ -8,6 +8,16 @@ import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
 
+function createTaskAssessmentSchema(customFieldsConfig) {
+  const taskAssessmentSchemaShape = createYupObjectShape(
+    customFieldsConfig,
+    "taskAssessment"
+  )
+  return yup.object().shape({
+    taskAssessment: taskAssessmentSchemaShape
+  })
+}
+
 export const {
   shortLabel,
   longLabel,
@@ -44,11 +54,11 @@ export default class Task extends Model {
     Settings.fields.task.customFields
   )
 
-  static topLevelAssessmentCustomFieldsSchema = createYupObjectShape(
+  static topLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
     Settings.fields.task.topLevel.assessment.customFields
   )
 
-  static subLevelAssessmentCustomFieldsSchema = createYupObjectShape(
+  static subLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
     Settings.fields.task.subLevel.assessment.customFields
   )
 
