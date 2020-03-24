@@ -29,18 +29,29 @@ const AssessmentResults = ({
   const assessmentResultsWidgets = []
   Object.keys(assessmentDefinition || {}).forEach(key => {
     const aggWidgetProps = {
-      label: assessmentDefinition[key].label,
       widget:
         assessmentDefinition[key].aggregation?.widget ||
         assessmentDefinition[key].widget,
       aggregationType: assessmentDefinition[key].aggregation?.aggregationType,
       vertical: true
     }
+    const widgetLayoutConfig = Object.without(
+      assessmentDefinition[key],
+      "aggregation",
+      "type",
+      "typeError",
+      "placeholder",
+      "helpText",
+      "validations",
+      "visibleWhen",
+      "objectFields"
+    )
     assessmentResultsWidgets.push(
       <AggregationWidget
         key={`assessment-${key}`}
         values={entity.getAssessmentResults(assessmentPeriod)[key]}
         {...aggWidgetProps}
+        {...widgetLayoutConfig}
       />
     )
   })
@@ -55,9 +66,9 @@ const AssessmentResults = ({
     <div style={{ ...style, margin: 10 }}>
       {assessmentResultsWidgets && (
         <Fieldset
-          title={`${
-            label
-          } results for ${assessmentPeriod.start.format("MMM-YYYY")}`}
+          title={`${label} results for ${assessmentPeriod.start.format(
+            "MMM-YYYY"
+          )}`}
           id="assessments-results"
         >
           {assessmentResultsWidgets}
