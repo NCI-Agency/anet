@@ -24,24 +24,40 @@ import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
-const WIDGETS = {
-  likertScale: LikertScale,
-  richTextEditor: RichTextEditor
+const SPECIAL_WIDGET_TYPES = {
+  LIKERT_SCALE: "likertScale",
+  RICH_TEXT_EDITOR: "richTextEditor"
+}
+const SPECIAL_WIDGET_COMPONENTS = {
+  [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: LikertScale,
+  [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
 const RENDERERS = {}
 
 const DEFAULT_CUSTOM_FIELDS_PREFIX = "formCustomFields"
 
-const SpecialField = fieldProps => {
-  const { widget, ...otherFieldProps } = fieldProps
-  const SpecialFieldWidget = WIDGETS[widget]
+const SpecialField = ({ widget, name, formikProps, ...otherFieldProps }) => {
+  const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
+  const widgetProps = {}
+  if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
+    widgetProps.onHandleBlur = () => {
+      // validation will be done by setFieldValue
+      formikProps.setFieldTouched(name, true, false)
+    }
+  }
   return (
     <FastField
+      name={name}
       component={FieldHelper.SpecialField}
-      widget={<SpecialFieldWidget />}
+      widget={<WidgetComponent {...widgetProps} />}
       {...otherFieldProps}
     />
   )
+}
+SpecialField.propTypes = {
+  widget: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  formikProps: PropTypes.object
 }
 
 const ReadonlySpecialField = ({
@@ -61,7 +77,7 @@ const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
   return (
     <FastField
-      onChange={value => onChange(value, false)}
+      onChange={value => onChange(value, false)} // do debounced validation
       component={FieldHelper.InputField}
       {...otherFieldProps}
     />
@@ -436,7 +452,8 @@ const CustomField = ({
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(
     () =>
-      type !== CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS
+      type !== CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS &&
+      type !== CUSTOM_FIELD_TYPE.SPECIAL_FIELD
         ? {}
         : {
           fieldConfig,
