@@ -107,7 +107,7 @@ export default class Location extends Model {
       return null
     }
     // 4 decimal point precision seems precise enough. https://stackoverflow.com/a/16743805/1209097
-    return parseFloat(value.toPrecision(6))
+    return parseFloat(value.toFixed(4))
   }
 
   static hasCoordinates(location) {

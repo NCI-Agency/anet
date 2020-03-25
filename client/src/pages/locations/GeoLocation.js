@@ -11,7 +11,7 @@ const GeoLocation = ({ lat, lng, onClearLocation, isSubmitting }) => {
       <Coordinate coord={lat} />,&nbsp;
       <Coordinate coord={lng} />
       {
-        Location.hasCoordinates({ lat, lng }) && typeof onClearLocation === "function" &&
+        Location.hasCoordinates({ lat, lng }) && onClearLocation &&
         <Button
           style={{ width: "auto", margin: "0 0 4px 16px", padding: "0" }}
           bsStyle="link"

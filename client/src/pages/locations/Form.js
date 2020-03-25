@@ -149,19 +149,21 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                   }
                 />
 
-                <FastField
+                <Field
                   name="lat"
                   component={FieldHelper.InputField}
                   onBlur={() => {
+                    setFieldTouched("lat", true, false)
                     setFieldValue("lat", Location.parseCoordinate(values.lat))
                     updateMarkers = !updateMarkers
                   }}
                 />
 
-                <FastField
+                <Field
                   name="lng"
                   component={FieldHelper.InputField}
                   onBlur={() => {
+                    setFieldTouched("lng", true, false)
                     setFieldValue("lng", Location.parseCoordinate(values.lng))
                     updateMarkers = !updateMarkers
                   }}

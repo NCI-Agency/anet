@@ -138,7 +138,7 @@ const Leaflet = ({
 
       if (newMarkers.length > 0) {
         if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
-          map.fitBounds(markerLayer.getBounds(), { maxZoom: maxZoom })
+          map.fitBounds(markerLayer.getBounds(), { maxZoom })
         }
       }
     },
@@ -216,7 +216,8 @@ Leaflet.propTypes = {
 Leaflet.defaultProps = {
   width: "100%",
   height: "500px",
-  marginBottom: "18px"
+  marginBottom: "18px",
+  updateMarkers: false
 }
 
 export default Leaflet
