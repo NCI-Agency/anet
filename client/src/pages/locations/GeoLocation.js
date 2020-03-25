@@ -2,23 +2,24 @@ import React from "react"
 import PropTypes from "prop-types"
 import { Button } from "react-bootstrap"
 import { Location } from "../../models"
+import REMOVE_ICON from "../../resources/delete.png"
 import { Coordinate } from "./Show"
 
-const GeoLocation = ({ lat, lng, isSubmitting, onClearLocation }) => {
+const GeoLocation = ({ lat, lng, onClearLocation, isSubmitting }) => {
   return (
     <>
-      <Coordinate coord={lat} />, {" "}
+      <Coordinate coord={lat} />,&nbsp;
       <Coordinate coord={lng} />
       {
-        Location.hasCoordinates({ lat, lng }) &&
+        Location.hasCoordinates({ lat, lng }) && typeof onClearLocation === "function" &&
         <Button
-          style={{ width: "auto", padding: "0 0 0 16px" }}
+          style={{ width: "auto", margin: "0 0 4px 16px", padding: "0" }}
           bsStyle="link"
           bsSize="sm"
           onClick={onClearLocation}
           disabled={isSubmitting}
         >
-          Clear Location
+          <img src={REMOVE_ICON} height={14} alt="Clear Location" />
         </Button>
       }
     </>
@@ -28,8 +29,8 @@ const GeoLocation = ({ lat, lng, isSubmitting, onClearLocation }) => {
 GeoLocation.propTypes = {
   lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  isSubmitting: PropTypes.bool.isRequired,
-  onClearLocation: PropTypes.func.isRequired
+  onClearLocation: PropTypes.func,
+  isSubmitting: PropTypes.bool
 }
 
 export default GeoLocation

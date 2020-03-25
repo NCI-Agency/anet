@@ -94,7 +94,8 @@ const Leaflet = ({
   height,
   marginBottom,
   markers,
-  mapId: initialMapId
+  mapId: initialMapId,
+  updateMarkers
 }) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
@@ -114,7 +115,7 @@ const Leaflet = ({
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
 
   const updateMarkerLayer = useCallback(
-    (newMarkers = []) => {
+    (newMarkers = [], maxZoom = 15) => {
       newMarkers.forEach(m => {
         const latLng = Location.hasCoordinates(m)
           ? [m.lat, m.lng]
@@ -130,13 +131,14 @@ const Leaflet = ({
         }
         if (m.onMove) {
           marker.on("move", event => m.onMove(event, map))
+          map.on("click", event => marker.setLatLng(event.latlng).update())
         }
         markerLayer.addLayer(marker)
       })
 
       if (newMarkers.length > 0) {
         if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
-          map.fitBounds(markerLayer.getBounds(), { maxZoom: 15 })
+          map.fitBounds(markerLayer.getBounds(), { maxZoom: maxZoom })
         }
       }
     },
@@ -172,6 +174,13 @@ const Leaflet = ({
   }, [mapId])
 
   useEffect(() => {
+    if (!doInitializeMarkerLayer && markerLayer) {
+      markerLayer.clearLayers()
+      updateMarkerLayer(markers, map.getZoom())
+    }
+  }, [updateMarkers]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (doInitializeMarkerLayer) {
       updateMarkerLayer(markers)
       setDoInitializeMarkerLayer(false)
@@ -201,7 +210,8 @@ Leaflet.propTypes = {
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   markers: PropTypes.array,
-  mapId: PropTypes.string // pass this when you have more than one map on a page
+  mapId: PropTypes.string, // pass this when you have more than one map on a page
+  updateMarkers: PropTypes.bool
 }
 Leaflet.defaultProps = {
   width: "100%",

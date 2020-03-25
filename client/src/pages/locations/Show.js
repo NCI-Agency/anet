@@ -75,7 +75,7 @@ const GQL_GET_LOCATION = gql`
 
 export const Coordinate = ({ coord }) => {
   const parsedCoord =
-    typeof coord === "number" ? Math.round(coord * 1000) / 1000 : "?"
+    typeof coord === "number" ? Math.round(coord * 10000) / 10000 : "?"
   return <span>{parsedCoord}</span>
 }
 

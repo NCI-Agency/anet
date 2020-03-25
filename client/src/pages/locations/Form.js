@@ -71,6 +71,8 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
     }
   }
 
+  let updateMarkers = false
+
   return (
     <Formik
       enableReinitialize
@@ -97,8 +99,8 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
         }
         if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
-            lat: values.lat,
-            lng: values.lng
+            lat: parseFloat(values.lat),
+            lng: parseFloat(values.lng)
           })
         }
         const action = (
@@ -146,10 +148,28 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                     />
                   }
                 />
+
+                <FastField
+                  name="lat"
+                  component={FieldHelper.InputField}
+                  onBlur={() => {
+                    setFieldValue("lat", Location.parseCoordinate(values.lat))
+                    updateMarkers = !updateMarkers
+                  }}
+                />
+
+                <FastField
+                  name="lng"
+                  component={FieldHelper.InputField}
+                  onBlur={() => {
+                    setFieldValue("lng", Location.parseCoordinate(values.lng))
+                    updateMarkers = !updateMarkers
+                  }}
+                />
               </Fieldset>
 
               <h3>Drag the marker below to set the location</h3>
-              <Leaflet markers={[marker]} />
+              <Leaflet markers={[marker]} updateMarkers={updateMarkers} />
 
               <ApprovalsDefinition
                 fieldName="planningApprovalSteps"
@@ -196,8 +216,8 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
 
   function onMarkerMove(event, map, setFieldValue) {
     const latLng = map.wrapLatLng(event.latlng)
-    setFieldValue("lat", latLng.lat)
-    setFieldValue("lng", latLng.lng)
+    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
+    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
   }
 
   function onClearLocation(setFieldValue) {
