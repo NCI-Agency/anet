@@ -358,7 +358,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .subtract(2, "months")
                       .endOf("month")
                   }}
-                  canEdit={currentUser.isAdmin()}
                   refetch={refetch}
                 />
 
