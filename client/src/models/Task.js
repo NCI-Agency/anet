@@ -239,6 +239,10 @@ export default class Task extends Model {
   }
 
   getLastAssessment(dateRange) {
+    // For now we assume that the dateRange is a month and that assessments
+    // for a given month will have been made in the next month
+    // TODO: rethink assessments for a period: should we also save the period
+    // in the assessment?
     const notesToAssessments = this.notes
       .filter(n => {
         return (
@@ -250,7 +254,8 @@ export default class Task extends Model {
               ro.relatedObjectUuid === this.uuid
           ).length &&
           (!dateRange ||
-            (n.createdAt < dateRange.end && n.createdAt > dateRange.start))
+            (n.createdAt < dateRange.end.add(1, "months") &&
+              n.createdAt > dateRange.start.add(1, "months")))
         )
       })
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
