@@ -4,6 +4,7 @@ import Model, {
   NOTE_TYPE,
   yupDate
 } from "components/Model"
+import _isEmpty from "lodash/isEmpty"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -176,6 +177,26 @@ export default class Task extends Model {
 
   constructor(props) {
     super(Model.fillObject(props, Task.yupSchema))
+  }
+
+  isTopLevelTask() {
+    return _isEmpty(this.customFieldRef1)
+  }
+
+  fieldSettings() {
+    return this.isTopLevelTask()
+      ? Settings.fields.task.topLevel
+      : Settings.fields.task.subLevel
+  }
+
+  periodAssessmentYupSchema() {
+    return this.isTopLevelTask()
+      ? Task.topLevelAssessmentCustomFieldsSchema
+      : Task.subLevelAssessmentCustomFieldsSchema
+  }
+
+  periodAssessmentConfig() {
+    return this.fieldSettings().assessment?.customFields
   }
 
   iconUrl() {

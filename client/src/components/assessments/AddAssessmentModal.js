@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -6,7 +6,6 @@ import {
 import Model, { GQL_CREATE_NOTE, NOTE_TYPE } from "components/Model"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
-import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
@@ -20,16 +19,11 @@ const AddAssessmentModal = ({
   onSuccess
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
-  const isTopLevelTask = _isEmpty(task.customFieldRef1)
-  const fieldSettings = isTopLevelTask
-    ? Settings.fields.task.topLevel
-    : Settings.fields.task.subLevel
-  const yupSchema = isTopLevelTask
-    ? Task.topLevelAssessmentCustomFieldsSchema
-    : Task.subLevelAssessmentCustomFieldsSchema
+  const yupSchema = task.periodAssessmentYupSchema()
   const initialValues = useMemo(() => Model.fillObject({}, yupSchema), [
     yupSchema
   ])
+  const periodAssessmentConfig = task.periodAssessmentConfig()
   return (
     <Modal show={showModal} onHide={closeModal}>
       <Formik
@@ -66,7 +60,7 @@ const AddAssessmentModal = ({
                 >
                   <Messages error={assessmentError} />
                   <CustomFieldsContainer
-                    fieldsConfig={fieldSettings.assessment?.customFields}
+                    fieldsConfig={periodAssessmentConfig}
                     fieldNamePrefix="taskAssessment"
                     formikProps={{
                       setFieldTouched,

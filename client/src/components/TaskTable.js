@@ -1,7 +1,6 @@
 import { Settings } from "api"
 import LinkTo from "components/LinkTo"
 import _get from "lodash/get"
-import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -37,10 +36,7 @@ const TaskTable = ({
           </thead>
           <tbody>
             {Task.map(tasks, task => {
-              const isTopLevelTask = _isEmpty(task.customFieldRef1)
-              const fieldSettings = isTopLevelTask
-                ? Settings.fields.task.topLevel
-                : Settings.fields.task.subLevel
+              const fieldSettings = task.fieldSettings()
               return (
                 <tr key={task.uuid}>
                   <td className="taskName">

@@ -24,7 +24,6 @@ import PositionTable from "components/PositionTable"
 import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import _isEmpty from "lodash/isEmpty"
 import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -155,10 +154,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
         const disabled = !isAdmin
-        const isTopLevelTask = _isEmpty(values.customFieldRef1)
-        const fieldSettings = isTopLevelTask
-          ? Settings.fields.task.topLevel
-          : Settings.fields.task.subLevel
+        const fieldSettings = values.fieldSettings()
         const action = (
           <div>
             <Button

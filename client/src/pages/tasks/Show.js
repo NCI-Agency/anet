@@ -115,6 +115,7 @@ const GQL_GET_TASK = gql`
         uuid
         shortName
         longName
+        customFieldRef1 { uuid, shortName }
         customFields
         ${GRAPHQL_NOTES_FIELDS}
         publishedReports: reports(query: {
@@ -162,10 +163,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   if (done) {
     return result
   }
-  const isTopLevelTask = _isEmpty(task.customFieldRef1)
-  const fieldSettings = isTopLevelTask
-    ? Settings.fields.task.topLevel
-    : Settings.fields.task.subLevel
+  const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskCustomFieldRef1 = DictionaryField(Field)
@@ -335,9 +333,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     start: moment().startOf("month"),
                     end: moment().endOf("month")
                   }}
-                  assessmentCustomFields={
-                    fieldSettings.assessment?.customFields
-                  }
                   canEdit={false}
                   refetch={refetch}
                 />
@@ -363,9 +358,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .subtract(2, "months")
                       .endOf("month")
                   }}
-                  assessmentCustomFields={
-                    fieldSettings.assessment?.customFields
-                  }
                   canEdit={currentUser.isAdmin()}
                   refetch={refetch}
                 />
@@ -382,9 +374,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .subtract(1, "months")
                       .endOf("month")
                   }}
-                  assessmentCustomFields={
-                    fieldSettings.assessment?.customFields
-                  }
                   canEdit={canEdit}
                   refetch={refetch}
                 />

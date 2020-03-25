@@ -17,7 +17,7 @@ import { Button } from "react-bootstrap"
  * - display of the last period related assessment made on the entity/subentities
  *   as a conclusion about the given period of time;
  *   the definition of these assessments is to be found in
- *   assessmentCustomFields
+ *   entity.periodAssessmentConfig()
  */
 const AssessmentResults = ({
   assessmentPeriod,
@@ -25,7 +25,6 @@ const AssessmentResults = ({
   label,
   subEntities,
   style,
-  assessmentCustomFields,
   refetch,
   canEdit
 }) => {
@@ -34,7 +33,6 @@ const AssessmentResults = ({
   if (!entity) {
     return null
   }
-
   const assessmentDefinition = JSON.parse(
     JSON.parse(entity.customFields || "{}").assessmentDefinition || "{}"
   )
@@ -70,6 +68,7 @@ const AssessmentResults = ({
     )
   })
 
+  const periodAssessmentConfig = entity.periodAssessmentConfig()
   const lastAssessment = entity.getLastAssessment(assessmentPeriod)
   const assessmentLabelPrefix = lastAssessment ? "Add a" : "Make a new"
   const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for the month of ${assessmentPeriod.start.format(
@@ -97,7 +96,7 @@ const AssessmentResults = ({
             />
           ))}
 
-          {lastAssessment && assessmentCustomFields && (
+          {periodAssessmentConfig && lastAssessment && (
             <Formik
               initialValues={{
                 [`lastAssessment-${entity.uuid}`]: lastAssessment
@@ -106,7 +105,7 @@ const AssessmentResults = ({
               {({ values }) => (
                 <ReadonlyCustomFields
                   fieldNamePrefix={`lastAssessment-${entity.uuid}`}
-                  fieldsConfig={assessmentCustomFields}
+                  fieldsConfig={periodAssessmentConfig}
                   values={values}
                   vertical
                 />
@@ -114,7 +113,7 @@ const AssessmentResults = ({
             </Formik>
           )}
 
-          {canEdit && assessmentCustomFields && (
+          {periodAssessmentConfig && canEdit && (
             <>
               <Button
                 bsStyle="primary"
@@ -141,7 +140,6 @@ const AssessmentResults = ({
 }
 
 AssessmentResults.propTypes = {
-  assessmentCustomFields: PropTypes.object,
   assessmentPeriod: PropTypes.shape({
     start: PropTypes.object,
     end: PropTypes.object
