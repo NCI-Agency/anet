@@ -2,6 +2,7 @@ import AggregationWidget from "components/AggregationWidgets"
 import AddAssessmentModal from "components/assessments/AddAssessmentModal"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
+import { Formik } from "formik"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -13,8 +14,8 @@ import { Button } from "react-bootstrap"
  *   assessments made on tasks, while filling  report related to the tasks);
  *   the definition of these assessments is to be found in
  *   entity.customFields.assessmentDefinition
- * - display of the last assessment made on the entity/subentities
- *   as a conclusion about a given period of time;
+ * - display of the last period related assessment made on the entity/subentities
+ *   as a conclusion about the given period of time;
  *   the definition of these assessments is to be found in
  *   assessmentCustomFields
  */
@@ -97,12 +98,20 @@ const AssessmentResults = ({
           ))}
 
           {lastAssessment && assessmentCustomFields && (
-            <ReadonlyCustomFields
-              fieldNamePrefix=""
-              fieldsConfig={assessmentCustomFields}
-              values={lastAssessment}
-              vertical
-            />
+            <Formik
+              initialValues={{
+                [`lastAssessment-${entity.uuid}`]: lastAssessment
+              }}
+            >
+              {({ values }) => (
+                <ReadonlyCustomFields
+                  fieldNamePrefix={`lastAssessment-${entity.uuid}`}
+                  fieldsConfig={assessmentCustomFields}
+                  values={values}
+                  vertical
+                />
+              )}
+            </Formik>
           )}
 
           {canEdit && assessmentCustomFields && (
