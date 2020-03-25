@@ -62,11 +62,12 @@ SpecialField.propTypes = {
 
 const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
   if (widget === "richTextEditor") {
+    const fieldValue = Object.get(values, name) // name might be a path for a nested prop
     return (
       <FastField
         name={name}
         component={FieldHelper.ReadonlyField}
-        humanValue={parseHtmlWithLinkTo(values[name])}
+        humanValue={parseHtmlWithLinkTo(fieldValue)}
         {...Object.without(otherFieldProps, "style")}
       />
     )
@@ -162,12 +163,13 @@ const enumHumanValue = (choices, fieldVal) => {
 }
 
 const ReadonlyEnumField = fieldProps => {
-  const { name, label, vertical, choices } = fieldProps
+  const { name, label, vertical, values, choices } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
       vertical={vertical}
+      values={values}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
     />
@@ -462,7 +464,8 @@ const CustomField = ({
     () =>
       type === CUSTOM_FIELD_TYPE.SPECIAL_FIELD
         ? {
-          fieldConfig
+          fieldConfig,
+          formikProps
         }
         : type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS
           ? {
@@ -610,11 +613,10 @@ export const ReadonlyCustomFields = ({
           }
         }
         const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
-        const fieldName = fieldNamePrefix ? `${fieldNamePrefix}.${key}` : key
         return (
           <ReadonlyFieldComponent
             key={key}
-            name={fieldName}
+            name={`${fieldNamePrefix}.${key}`}
             values={values}
             vertical={vertical}
             {...fieldProps}
