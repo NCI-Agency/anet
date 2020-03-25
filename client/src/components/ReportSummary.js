@@ -191,35 +191,33 @@ ReportSummary.propTypes = {
 
 const ReportSummaryRow = ({ report }) => {
   report = new Report(report)
+  const className = `report-${report.getStateForClassName()}`
 
   return (
     <Grid fluid className="report-summary">
       {report.isDraft() && (
-        <p className="report-draft">
+        <p>
+          <span className={className} />
           <strong>Draft</strong>
-          {/* If the parent does not fetch report.updatedAt, we will not display this
-            so we do not get a broken view.
-          */
-          report.updatedAt && (
-            <span>
-              : last saved at{" "}
-              {moment(report.updatedAt).format(
-                Settings.dateFormats.forms.displayShort.withTime
-              )}
-            </span>
-          )
-}
+          <span>
+            : last saved at{" "}
+            {moment(report.updatedAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )}
+          </span>
         </p>
       )}
 
       {report.isRejected() && (
-        <p className="report-rejected">
+        <p>
+          <span className={className} />
           <strong>Changes requested</strong>
         </p>
       )}
 
       {report.cancelledReason && (
-        <p className="report-cancelled">
+        <p>
+          <span className={className} />
           <strong>Cancelled: </strong>
           {utils.sentenceCase(
             report.cancelledReason.substr(report.cancelledReason.indexOf("_"))
@@ -228,14 +226,16 @@ const ReportSummaryRow = ({ report }) => {
       )}
 
       {report.isFuture() && (
-        <p className="report-future">
+        <p>
+          <span className={className} />
           <strong>Planned Engagement</strong>
         </p>
       )}
 
       {report.isPending() && (
         <>
-          <p className="report-pending">
+          <p>
+            <span className={className} />
             <strong>Pending Approval</strong>
           </p>
           <Row>
@@ -245,6 +245,7 @@ const ReportSummaryRow = ({ report }) => {
           </Row>
         </>
       )}
+
       <Row>
         <Col md={12}>
           {report.engagementDate && (

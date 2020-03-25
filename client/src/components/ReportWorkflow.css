@@ -11,26 +11,45 @@ fieldset.workflow-fieldset .workflow-action {
 	text-align: center;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn-pending {
-	background-color: #969696;
-	color: #fff;
+fieldset.workflow-fieldset .workflow-action .btn-pending.default {
+  background-color: #bdbdaf;
+  color: #fff;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn-pending:hover {
-	background-color: #777;
-	color: #fff;
+fieldset.workflow-fieldset .workflow-action .btn-pending.submitted {
+  background-color: #848478;
+  color: #fff;
+}
+
+fieldset.workflow-fieldset .workflow-action .btn-success.published {
+  background-color: #5cb85c;
+  color: #fff;
+}
+
+fieldset.workflow-fieldset .workflow-action .btn-success.approved {
+  background-color: #75eb75;
+  color: #fff;
+}
+
+fieldset.workflow-fieldset .workflow-action .btn-danger.rejected {
+  background-color: #c23030;
+  color: #fff;
 }
 
 fieldset.workflow-fieldset .workflow-action .btn {
 	border-radius: 30px;
 }
 
+fieldset.workflow-fieldset .workflow-action .btn[disabled] {
+  opacity: 1;
+}
+
 fieldset.workflow-fieldset .workflow-action button::after {
 	position: relative;
-    font-family: 'Glyphicons Halflings';
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
 	-webkit-font-smoothing: antialiased;
 	content: "\e092";
 	color: #777;
@@ -57,18 +76,18 @@ fieldset.workflow-fieldset.compact{
 }
 
 .modal-content .modal-footer .approved {
-	background-color: #5cb85c;
+	background-color: #75eb75;
 }
 
 .modal-content .modal-footer .pending {
-	background-color: #777;
+	background-color: #848478;
 }
 
 .modal-content .modal-footer .rejected {
 	background-color: #c23030;
 }
 
-.action-status{
+.action-status {
 	text-transform: uppercase;
 	font-weight: bold;
 }

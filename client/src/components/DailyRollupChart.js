@@ -157,7 +157,7 @@ const DailyRollupChart = ({
       .append("rect")
       .attr("width", d => d.published && xScale(d.published))
       .attr("height", BAR_HEIGHT)
-      .attr("fill", barColors.verified)
+      .attr("fill", barColors.published)
 
     bar
       .append("text")
@@ -201,7 +201,7 @@ DailyRollupChart.propTypes = {
   tooltip: PropTypes.func,
   barColors: PropTypes.shape({
     cancelled: PropTypes.string.isRequired,
-    verified: PropTypes.string.isRequired
+    published: PropTypes.string.isRequired
   }).isRequired
 }
 
