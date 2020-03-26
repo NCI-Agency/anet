@@ -254,8 +254,8 @@ export default class Task extends Model {
               ro.relatedObjectUuid === this.uuid
           ).length &&
           (!dateRange ||
-            (n.createdAt < dateRange.end.add(1, "months") &&
-              n.createdAt > dateRange.start.add(1, "months")))
+            (n.createdAt < dateRange.end.clone().add(1, "months") &&
+              n.createdAt > dateRange.start.clone().add(1, "months")))
         )
       })
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
