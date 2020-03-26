@@ -323,19 +323,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     />
                   )}
                 </Fieldset>
-
-                <AssessmentResults
-                  style={{ flex: "1 1 0" }}
-                  entity={task}
-                  subEntities={subTasks}
-                  label="Ongoing assessment"
-                  assessmentPeriod={{
-                    start: moment().startOf("month"),
-                    end: moment().endOf("month")
-                  }}
-                  canEdit={false}
-                  refetch={refetch}
-                />
               </div>
 
               <div
@@ -347,6 +334,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 }}
               >
                 <AssessmentResults
+                  style={{ flex: "0 0 100%", maxWidth: "25%", minWidth: "25%" }}
                   entity={task}
                   subEntities={subTasks}
                   label="Previous assessment"
@@ -362,6 +350,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 />
 
                 <AssessmentResults
+                  style={{ flex: "0 0 100%", maxWidth: "50%", minWidth: "50%" }}
                   entity={task}
                   subEntities={subTasks}
                   label="Assessment"
@@ -376,6 +365,20 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   canEdit={canEdit}
                   refetch={refetch}
                 />
+
+                <AssessmentResults
+                  style={{ flex: "0 0 100%", maxWidth: "25%", minWidth: "25%" }}
+                  entity={task}
+                  subEntities={subTasks}
+                  label="Ongoing assessment"
+                  assessmentPeriod={{
+                    start: moment().startOf("month"),
+                    end: moment().endOf("month")
+                  }}
+                  canEdit={false}
+                  refetch={refetch}
+                />
+
               </div>
               {false && // TODO: Do not show task custom fields until we implement a better widget
                 Settings.fields.task.customFields && (
