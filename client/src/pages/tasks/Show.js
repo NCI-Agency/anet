@@ -346,7 +346,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .subtract(2, "months")
                       .endOf("month")
                   }}
-                  refetch={refetch}
+                  onAddAssessment={refetch}
                 />
 
                 <AssessmentResults
@@ -363,7 +363,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .endOf("month")
                   }}
                   canEdit={canEdit}
-                  refetch={refetch}
+                  onAddAssessment={refetch}
                 />
 
                 <AssessmentResults
@@ -376,9 +376,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     end: moment().endOf("month")
                   }}
                   canEdit={false}
-                  refetch={refetch}
+                  onAddAssessment={refetch}
                 />
-
               </div>
               {false && // TODO: Do not show task custom fields until we implement a better widget
                 Settings.fields.task.customFields && (

@@ -25,7 +25,7 @@ const AssessmentResults = ({
   label,
   subEntities,
   style,
-  refetch,
+  onAddAssessment,
   canEdit
 }) => {
   const [showAssessmentModal, setShowAssessmentModal] = useState(false)
@@ -36,7 +36,6 @@ const AssessmentResults = ({
   const assessmentDefinition = JSON.parse(
     JSON.parse(entity.customFields || "{}").assessmentDefinition || "{}"
   )
-
   const assessmentResultsWidgets = []
   // display one aggregation widget per assessment question
   Object.keys(assessmentDefinition || {}).forEach(key => {
@@ -128,7 +127,7 @@ const AssessmentResults = ({
                 onCancel={() => setShowAssessmentModal(false)}
                 onSuccess={() => {
                   setShowAssessmentModal(false)
-                  refetch()
+                  onAddAssessment()
                 }}
               />
             </>
@@ -147,7 +146,7 @@ AssessmentResults.propTypes = {
   canEdit: PropTypes.bool,
   entity: PropTypes.object,
   label: PropTypes.string,
-  refetch: PropTypes.func,
+  onAddAssessment: PropTypes.func,
   style: PropTypes.object,
   subEntities: PropTypes.array
 }
