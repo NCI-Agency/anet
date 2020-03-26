@@ -142,10 +142,10 @@ const Chart = ({
     return result
   }
 
-  const CHART_ID = "reports_by_day_of_week"
+  const CHART_ID = "reports_by_organization"
   const barColors = {
-    cancelled: "#EC971F",
-    verified: "#337AB7"
+    cancelled: "#ec971f",
+    published: "#75eb75"
   }
   const legendCss = {
     width: "14px",
@@ -174,7 +174,7 @@ const Chart = ({
       </ContainerDimensions>
 
       <div className="graph-legend">
-        <div style={{ ...legendCss, background: barColors.verified }} />{" "}
+        <div style={{ ...legendCss, background: barColors.published }} />{" "}
         Published reports:&nbsp;
         <strong>
           {graphData.reduce((acc, org) => acc + org.published, 0)}

@@ -102,7 +102,7 @@ const ReportCalendar = ({
             .add(r.duration, "minutes")
             .format("YYYY-MM-DD HH:mm"),
           url: Report.pathFor(r),
-          classNames: ["event-" + r.state.toLowerCase()],
+          classNames: [`event-${Report.getStateForClassName(r)}`],
           extendedProps: { ...r },
           allDay:
             !Settings.engagementsIncludeTimeAndDuration || r.duration === null

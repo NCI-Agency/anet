@@ -53,8 +53,17 @@ const Chart = ({
   const graphData = useMemo(() => {
     function getEngagementDateRangeArray() {
       const dateArray = []
-      let currentDate = moment(queryParams.engagementDateStart).clone()
-      const endDate = moment(queryParams.engagementDateEnd)
+      let currentDate, endDate
+      if (queryParams.engagementDateStart < 0) {
+        // Relative date
+        endDate = moment().endOf("day")
+        currentDate = moment(endDate)
+          .add(moment.duration(queryParams.engagementDateStart))
+          .startOf("day")
+      } else {
+        endDate = moment(queryParams.engagementDateEnd)
+        currentDate = moment(queryParams.engagementDateStart)
+      }
       while (currentDate <= endDate) {
         dateArray.push(currentDate.clone())
         currentDate = currentDate.add(1, "days")
