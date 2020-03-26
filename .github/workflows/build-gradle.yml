@@ -47,7 +47,7 @@ jobs:
           ${{ runner.os }}-yarn-
     - run: ./gradlew jar
     - working-directory: ./client
-      run: yarn lint
+      run: yarn run lint
 
   test:
     needs: build
@@ -100,5 +100,21 @@ jobs:
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
     - run: ./gradlew -PtestEnv check test jacocoTestReport
     - run: ./gradlew -PtestEnv run &
+    - uses: olegtarasov/get-tag@v2
+      id: tagName
+    - name: Set local identifier for BrowserStack
+      id: browserstack-local
+      run: echo ::set-output name=identifier::github-${GITHUB_RUN_ID}-${{ matrix.database.DB_DRIVER }}
+    - name: Start BrowserStackLocal if needed
+      run: |
+        curl -qso bsl.zip https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip
+        unzip -q bsl.zip
+        ./BrowserStackLocal --local-identifier ${{ steps.browserstack-local.outputs.identifier }} --key ${{ secrets.BROWSERSTACK_ACCESS_KEY }} &
+      if: steps.tagName.outputs.tag != ''
     - working-directory: ./client
-      run: yarn test-all
+      run: yarn run test-all
+      env:
+        GIT_TAG_NAME: ${{ steps.tagName.outputs.tag }}
+        BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
+        BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+        BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
