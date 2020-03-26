@@ -97,6 +97,7 @@ const AssessmentResults = ({
 
           {periodAssessmentConfig && lastAssessment && (
             <Formik
+              enableReinitialize
               initialValues={{
                 [`lastAssessment-${entity.uuid}`]: lastAssessment
               }}
