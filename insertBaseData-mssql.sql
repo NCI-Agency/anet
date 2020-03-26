@@ -398,6 +398,8 @@ INSERT INTO taskResponsiblePositions (taskUuid, positionUuid)
 		((SELECT uuid FROM tasks WHERE shortName = '1.1.B'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Interagency Advising')),
 		((SELECT uuid FROM tasks WHERE shortName = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor C')),
 		((SELECT uuid FROM tasks WHERE shortName = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Mining')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.2.A'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.2.B'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
 		((SELECT uuid FROM tasks WHERE shortName = '2.A'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 SuperUser')),
 		((SELECT uuid FROM tasks WHERE shortName = '2.B'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor B')),
 		((SELECT uuid FROM tasks WHERE shortName = '2.C'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Accounting')),
