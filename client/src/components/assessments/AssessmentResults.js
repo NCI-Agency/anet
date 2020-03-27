@@ -26,7 +26,7 @@ const AssessmentResults = ({
   subEntities,
   style,
   onAddAssessment,
-  canEdit
+  canAddAssessment
 }) => {
   const [showAssessmentModal, setShowAssessmentModal] = useState(false)
 
@@ -91,7 +91,7 @@ const AssessmentResults = ({
               label={`${subEntity.toString()} ${label}`}
               entity={subEntity}
               assessmentPeriod={assessmentPeriod}
-              canEdit={false}
+              canAddAssessment={false}
             />
           ))}
 
@@ -113,7 +113,7 @@ const AssessmentResults = ({
             </Formik>
           )}
 
-          {periodAssessmentConfig && canEdit && (
+          {periodAssessmentConfig && canAddAssessment && (
             <>
               <Button
                 bsStyle="primary"
@@ -144,7 +144,7 @@ AssessmentResults.propTypes = {
     start: PropTypes.object,
     end: PropTypes.object
   }),
-  canEdit: PropTypes.bool,
+  canAddAssessment: PropTypes.bool,
   entity: PropTypes.object,
   label: PropTypes.string,
   onAddAssessment: PropTypes.func,

@@ -75,7 +75,7 @@ const AssessmentResultsTable = ({
   subEntities,
   style,
   assessmentPeriods,
-  canEdit,
+  canAddAssessment,
   onAddAssessment
 }) => {
   if (!entity) {
@@ -119,7 +119,7 @@ const AssessmentResultsTable = ({
             key={`subassessment-${subEntity.uuid}`}
             entity={subEntity}
             assessmentPeriods={assessmentPeriods}
-            canEdit={false}
+            canAddAssessment={false}
           />
         ))}
       </>
@@ -137,7 +137,7 @@ AssessmentResultsTable.propTypes = {
     })
   ),
   onAddAssessment: PropTypes.func,
-  canEdit: PropTypes.bool
+  canAddAssessment: PropTypes.bool
 }
 
 export default AssessmentResultsTable

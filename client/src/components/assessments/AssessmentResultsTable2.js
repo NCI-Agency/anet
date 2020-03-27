@@ -82,7 +82,7 @@ const EntityAssessmentResultsTable = ({
   entity,
   style,
   assessmentPeriods,
-  canEdit,
+  canAddAssessment,
   onAddAssessment
 }) => {
   if (!entity) {
@@ -124,7 +124,7 @@ EntityAssessmentResultsTable.propTypes = {
     })
   ),
   onAddAssessment: PropTypes.func,
-  canEdit: PropTypes.bool
+  canAddAssessment: PropTypes.bool
 }
 
 const AssessmentResultsTable2 = ({
@@ -132,7 +132,7 @@ const AssessmentResultsTable2 = ({
   subEntities,
   style,
   assessmentPeriods,
-  canEdit,
+  canAddAssessment,
   onAddAssessment
 }) => {
   if (!entity) {
@@ -149,7 +149,7 @@ const AssessmentResultsTable2 = ({
             style={{ flex: "0 0 100%" }}
             entity={entity}
             assessmentPeriods={assessmentPeriods}
-            canEdit={false}
+            canAddAssessment={false}
             onAddAssessment={onAddAssessment}
           />
         </Fieldset>
@@ -165,7 +165,7 @@ const AssessmentResultsTable2 = ({
                 key={`subassessment-${subEntity.uuid}`}
                 entity={subEntity}
                 assessmentPeriods={assessmentPeriods}
-                canEdit={false}
+                canAddAssessment={false}
               />
             ))}
           </Fieldset>
@@ -185,7 +185,7 @@ AssessmentResultsTable2.propTypes = {
     })
   ),
   onAddAssessment: PropTypes.func,
-  canEdit: PropTypes.bool
+  canAddAssessment: PropTypes.bool
 }
 
 export default AssessmentResultsTable2

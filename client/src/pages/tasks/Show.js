@@ -386,7 +386,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .subtract(1, "months")
                       .endOf("month")
                   }}
-                  canEdit={canEdit}
+                  canAddAssessment={canEdit}
                   onAddAssessment={refetch}
                 />
 
@@ -399,7 +399,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     start: moment().startOf("month"),
                     end: moment().endOf("month")
                   }}
-                  canEdit={false}
+                  canAddAssessment={false}
                   onAddAssessment={refetch}
                 />
               </div>
@@ -422,7 +422,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               entity={task}
               subEntities={subTasks}
               assessmentPeriods={assessmentPeriods}
-              canEdit={false}
+              canAddAssessment={false}
               onAddAssessment={refetch}
             />
 
@@ -431,7 +431,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               entity={task}
               subEntities={subTasks}
               assessmentPeriods={assessmentPeriods}
-              canEdit={false}
+              canAddAssessment={false}
               onAddAssessment={refetch}
             />
 
