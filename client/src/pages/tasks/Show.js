@@ -4,6 +4,8 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResults from "components/assessments/AssessmentResults"
+import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
+import AssessmentResultsTable2 from "components/assessments/AssessmentResultsTable2"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -185,6 +187,28 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
+  const assessmentPeriods = [
+    {
+      start: moment()
+        .subtract(2, "months")
+        .startOf("month"),
+      end: moment()
+        .subtract(2, "months")
+        .endOf("month")
+    },
+    {
+      start: moment()
+        .subtract(1, "months")
+        .startOf("month"),
+      end: moment()
+        .subtract(1, "months")
+        .endOf("month")
+    },
+    {
+      start: moment().startOf("month"),
+      end: moment().endOf("month")
+    }
+  ]
 
   return (
     <Formik enableReinitialize initialValues={task}>
@@ -392,6 +416,24 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   </Fieldset>
               )}
             </Form>
+
+            <AssessmentResultsTable
+              style={{ flex: "0 0 100%" }}
+              entity={task}
+              subEntities={subTasks}
+              assessmentPeriods={assessmentPeriods}
+              canEdit={false}
+              onAddAssessment={refetch}
+            />
+
+            <AssessmentResultsTable2
+              style={{ flex: "0 0 100%" }}
+              entity={task}
+              subEntities={subTasks}
+              assessmentPeriods={assessmentPeriods}
+              canEdit={false}
+              onAddAssessment={refetch}
+            />
 
             <Fieldset title="Responsible positions">
               <PositionTable positions={task.responsiblePositions} />
