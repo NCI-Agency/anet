@@ -1,18 +1,21 @@
 import AggregationWidget from "components/AggregationWidgets"
+import AddAssessmentModal from "components/assessments/AddAssessmentModal"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
+import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React from "react"
-import { Table } from "react-bootstrap"
+import React, { useState } from "react"
+import { Button, Table } from "react-bootstrap"
 
-/* The AssessmentResults component displays the results of two types of
+/* The AssessmentResultsTable component displays the results of two types of
  * assessments made on a given entity and subentities:
- * - aggregation of the assessments made on the entity/subentities when
+ * - aggregation of the measurements made on the entity/subentities when
  *   working on them in relation to another type of entity (example:
  *   assessments made on tasks, while filling  report related to the tasks);
  *   the definition of these assessments is to be found in
  *   entity.customFields.assessmentDefinition
- * - display of the last period related assessment made on the entity/subentities
+ * - display of the last monthly assessment made on the entity/subentities
  *   as a conclusion about the given period of time;
  *   the definition of these assessments is to be found in
  *   entity.periodAssessmentConfig()
@@ -39,14 +42,14 @@ AssessmentsTableHeader.propTypes = {
   periods: PropTypes.array
 }
 
-const AssessmentsTableRow = ({ questionKey, questionDef, data }) => {
+const MeasurementRow = ({ measurementKey, measurementDef, data }) => {
   const aggWidgetProps = {
-    widget: questionDef.aggregation?.widget || questionDef.widget,
-    aggregationType: questionDef.aggregation?.aggregationType,
+    widget: measurementDef.aggregation?.widget || measurementDef.widget,
+    aggregationType: measurementDef.aggregation?.aggregationType,
     vertical: true
   }
   const widgetLayoutConfig = Object.without(
-    questionDef,
+    measurementDef,
     "aggregation",
     "type",
     "typeError",
@@ -56,14 +59,13 @@ const AssessmentsTableRow = ({ questionKey, questionDef, data }) => {
     "visibleWhen",
     "objectFields"
   )
-
   return (
     <tr>
       {data.map((assessment, index) => (
         <td key={index}>
           <AggregationWidget
-            key={`assessment-${questionKey}`}
-            values={assessment[questionKey]}
+            key={`assessment-${measurementKey}`}
+            values={assessment[measurementKey]}
             {...aggWidgetProps}
             {...widgetLayoutConfig}
           />
@@ -72,10 +74,89 @@ const AssessmentsTableRow = ({ questionKey, questionDef, data }) => {
     </tr>
   )
 }
-AssessmentsTableRow.propTypes = {
-  questionKey: PropTypes.string,
-  questionDef: PropTypes.object,
+MeasurementRow.propTypes = {
+  measurementKey: PropTypes.string,
+  measurementDef: PropTypes.object,
   data: PropTypes.array
+}
+
+const MonthlyAssessmentRow = ({
+  entity,
+  assessmentPeriods,
+  canAddAssessment,
+  onAddAssessment
+}) => {
+  const periodAssessmentConfig = entity.periodAssessmentConfig()
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false)
+  return (
+    <tr>
+      {assessmentPeriods.map((period, index) => {
+        const lastAssessment = entity.getLastAssessment(period)
+        const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
+        const allowAddAssessment =
+          periodAssessmentConfig &&
+          period.allowNewAssessments &&
+          canAddAssessment
+        const assessmentLabelPrefix = lastAssessment ? "Add a" : "Make a new"
+        const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for the month of ${period.start.format(
+          "MMM-YYYY"
+        )}`
+        return (
+          <td key={index}>
+            {periodAssessmentConfig && lastAssessment && (
+              <Formik
+                enableReinitialize
+                initialValues={{
+                  [lastAssessmentPrefix]: lastAssessment
+                }}
+              >
+                {({ values }) => (
+                  <ReadonlyCustomFields
+                    fieldNamePrefix={lastAssessmentPrefix}
+                    fieldsConfig={periodAssessmentConfig}
+                    values={values}
+                    vertical
+                  />
+                )}
+              </Formik>
+            )}
+            {allowAddAssessment && (
+              <>
+                <Button
+                  bsStyle="primary"
+                  onClick={() => setShowAssessmentModal(true)}
+                >
+                  {addAssessmentLabel}
+                </Button>
+                <AddAssessmentModal
+                  task={entity}
+                  assessmentPeriod={period}
+                  showModal={showAssessmentModal}
+                  onCancel={() => setShowAssessmentModal(false)}
+                  onSuccess={() => {
+                    setShowAssessmentModal(false)
+                    onAddAssessment()
+                  }}
+                />
+              </>
+            )}
+          </td>
+        )
+      })}
+    </tr>
+  )
+}
+MonthlyAssessmentRow.propTypes = {
+  entity: PropTypes.object,
+  assessmentPeriods: PropTypes.arrayOf(
+    PropTypes.shape({
+      start: PropTypes.object,
+      end: PropTypes.object,
+      allowNewAssessments: PropTypes.bool
+    })
+  ),
+  canAddAssessment: PropTypes.bool,
+  onAddAssessment: PropTypes.func
 }
 
 const EntityAssessmentResultsTable = ({
@@ -94,7 +175,6 @@ const EntityAssessmentResultsTable = ({
   const assessmentResults = assessmentPeriods.map(p =>
     entity.getAssessmentResults(p)
   )
-
   return (
     <Table striped bordered condensed hover responsive>
       <AssessmentsTableHeader
@@ -103,13 +183,19 @@ const EntityAssessmentResultsTable = ({
       />
       <tbody>
         {Object.keys(assessmentDefinition || {}).map(key => (
-          <AssessmentsTableRow
+          <MeasurementRow
             key={key}
-            questionKey={key}
-            questionDef={assessmentDefinition[key]}
+            measurementKey={key}
+            measurementDef={assessmentDefinition[key]}
             data={assessmentResults}
           />
         ))}
+        <MonthlyAssessmentRow
+          entity={entity}
+          assessmentPeriods={assessmentPeriods}
+          canAddAssessment={canAddAssessment}
+          onAddAssessment={onAddAssessment}
+        />
       </tbody>
     </Table>
   )
@@ -149,7 +235,7 @@ const AssessmentResultsTable2 = ({
             style={{ flex: "0 0 100%" }}
             entity={entity}
             assessmentPeriods={assessmentPeriods}
-            canAddAssessment={false}
+            canAddAssessment={canAddAssessment}
             onAddAssessment={onAddAssessment}
           />
         </Fieldset>

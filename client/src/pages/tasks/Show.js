@@ -204,7 +204,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       end: moment()
         .subtract(1, "months")
         .endOf("month"),
-      allowNewAssessments: false
+      allowNewAssessments: true
     },
     {
       start: moment().startOf("month"),
@@ -428,7 +428,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               entity={task}
               subEntities={subTasks}
               assessmentPeriods={assessmentPeriods}
-              canAddAssessment={false}
+              canAddAssessment={canEdit}
               onAddAssessment={refetch}
             />
 
@@ -437,7 +437,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               entity={task}
               subEntities={subTasks}
               assessmentPeriods={assessmentPeriods}
-              canAddAssessment={false}
+              canAddAssessment={canEdit}
               onAddAssessment={refetch}
             />
 
