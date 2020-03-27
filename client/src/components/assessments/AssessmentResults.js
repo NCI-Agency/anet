@@ -73,6 +73,10 @@ const AssessmentResults = ({
   const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for the month of ${assessmentPeriod.start.format(
     "MMM-YYYY"
   )}`
+  const allowAddAssessment =
+    periodAssessmentConfig &&
+    assessmentPeriod.allowNewAssessments &&
+    canAddAssessment
 
   return (
     <div style={{ ...style, margin: 10 }}>
@@ -113,7 +117,7 @@ const AssessmentResults = ({
             </Formik>
           )}
 
-          {periodAssessmentConfig && canAddAssessment && (
+          {allowAddAssessment && (
             <>
               <Button
                 bsStyle="primary"
@@ -142,7 +146,8 @@ const AssessmentResults = ({
 AssessmentResults.propTypes = {
   assessmentPeriod: PropTypes.shape({
     start: PropTypes.object,
-    end: PropTypes.object
+    end: PropTypes.object,
+    allowNewAssessments: PropTypes.bool
   }),
   canAddAssessment: PropTypes.bool,
   entity: PropTypes.object,

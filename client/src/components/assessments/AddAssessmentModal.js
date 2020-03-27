@@ -127,7 +127,11 @@ const AddAssessmentModal = ({
 }
 AddAssessmentModal.propTypes = {
   task: PropTypes.instanceOf(Task).isRequired,
-  assessmentPeriod: PropTypes.object,
+  assessmentPeriod: PropTypes.shape({
+    start: PropTypes.object,
+    end: PropTypes.object,
+    allowNewAssessments: PropTypes.bool
+  }),
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired

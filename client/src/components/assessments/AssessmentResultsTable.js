@@ -133,7 +133,8 @@ AssessmentResultsTable.propTypes = {
   assessmentPeriods: PropTypes.arrayOf(
     PropTypes.shape({
       start: PropTypes.object,
-      end: PropTypes.object
+      end: PropTypes.object,
+      allowNewAssessments: PropTypes.bool
     })
   ),
   onAddAssessment: PropTypes.func,

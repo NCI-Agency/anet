@@ -194,7 +194,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
         .startOf("month"),
       end: moment()
         .subtract(2, "months")
-        .endOf("month")
+        .endOf("month"),
+      allowNewAssessments: false
     },
     {
       start: moment()
@@ -202,11 +203,13 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
         .startOf("month"),
       end: moment()
         .subtract(1, "months")
-        .endOf("month")
+        .endOf("month"),
+      allowNewAssessments: false
     },
     {
       start: moment().startOf("month"),
-      end: moment().endOf("month")
+      end: moment().endOf("month"),
+      allowNewAssessments: false
     }
   ]
 
@@ -368,7 +371,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .startOf("month"),
                     end: moment()
                       .subtract(2, "months")
-                      .endOf("month")
+                      .endOf("month"),
+                    allowNewAssessments: false
                   }}
                   onAddAssessment={refetch}
                 />
@@ -384,7 +388,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                       .startOf("month"),
                     end: moment()
                       .subtract(1, "months")
-                      .endOf("month")
+                      .endOf("month"),
+                    allowNewAssessments: true
                   }}
                   canAddAssessment={canEdit}
                   onAddAssessment={refetch}
@@ -397,7 +402,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   label="Ongoing assessment"
                   assessmentPeriod={{
                     start: moment().startOf("month"),
-                    end: moment().endOf("month")
+                    end: moment().endOf("month"),
+                    allowNewAssessments: false
                   }}
                   canAddAssessment={false}
                   onAddAssessment={refetch}
