@@ -4,9 +4,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
-import AssessmentResults from "components/assessments/AssessmentResults"
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
-import AssessmentResultsTable2 from "components/assessments/AssessmentResultsTable2"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -352,80 +350,9 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   )}
                 </Fieldset>
               </div>
-              {/*
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  flexWrap: "nowrap",
-                  padding: "10px"
-                }}
-              >
-                <AssessmentResults
-                  style={{ flex: "0 0 100%", maxWidth: "25%", minWidth: "25%" }}
-                  entity={task}
-                  subEntities={subTasks}
-                  label="Previous assessment"
-                  assessmentPeriod={{
-                    start: moment()
-                      .subtract(2, "months")
-                      .startOf("month"),
-                    end: moment()
-                      .subtract(2, "months")
-                      .endOf("month"),
-                    allowNewAssessments: false
-                  }}
-                  onAddAssessment={refetch}
-                />
-
-                <AssessmentResults
-                  style={{ flex: "0 0 100%", maxWidth: "50%", minWidth: "50%" }}
-                  entity={task}
-                  subEntities={subTasks}
-                  label="Assessment"
-                  assessmentPeriod={{
-                    start: moment()
-                      .subtract(1, "months")
-                      .startOf("month"),
-                    end: moment()
-                      .subtract(1, "months")
-                      .endOf("month"),
-                    allowNewAssessments: true
-                  }}
-                  canAddAssessment={canEdit}
-                  onAddAssessment={refetch}
-                />
-
-                <AssessmentResults
-                  style={{ flex: "0 0 100%", maxWidth: "25%", minWidth: "25%" }}
-                  entity={task}
-                  subEntities={subTasks}
-                  label="Ongoing assessment"
-                  assessmentPeriod={{
-                    start: moment().startOf("month"),
-                    end: moment().endOf("month"),
-                    allowNewAssessments: false
-                  }}
-                  canAddAssessment={false}
-                  onAddAssessment={refetch}
-                />
-              </div>
-              {false && // TODO: Do not show task custom fields until we implement a better widget
-                Settings.fields.task.customFields && (
-                  <Fieldset
-                    title={`${fieldSettings.shortLabel} information`}
-                    id="custom-fields"
-                  >
-                    <ReadonlyCustomFields
-                      fieldsConfig={Settings.fields.task.customFields}
-                      values={values}
-                    />
-                  </Fieldset>
-              )}
-*/}
             </Form>
 
-            <AssessmentResultsTable2
+            <AssessmentResultsTable
               style={{ flex: "0 0 100%" }}
               entity={task}
               subEntities={subTasks}
