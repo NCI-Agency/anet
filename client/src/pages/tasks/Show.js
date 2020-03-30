@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
@@ -351,7 +352,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   )}
                 </Fieldset>
               </div>
-
+              {/*
               <div
                 style={{
                   display: "flex",
@@ -421,16 +422,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                     />
                   </Fieldset>
               )}
+*/}
             </Form>
-
-            <AssessmentResultsTable
-              style={{ flex: "0 0 100%" }}
-              entity={task}
-              subEntities={subTasks}
-              assessmentPeriods={assessmentPeriods}
-              canAddAssessment={canEdit}
-              onAddAssessment={refetch}
-            />
 
             <AssessmentResultsTable2
               style={{ flex: "0 0 100%" }}

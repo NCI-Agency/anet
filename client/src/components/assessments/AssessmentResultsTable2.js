@@ -21,13 +21,8 @@ import { Button, Table } from "react-bootstrap"
  *   entity.periodAssessmentConfig()
  */
 
-const AssessmentsTableHeader = ({ title, periods }) => (
+const AssessmentsTableHeader = ({ periods }) => (
   <thead>
-    {title && (
-      <tr key="title">
-        <th colSpan={periods.length}>{title}</th>
-      </tr>
-    )}
     <tr key="periods">
       <>
         {periods.map(period => (
@@ -38,7 +33,6 @@ const AssessmentsTableHeader = ({ title, periods }) => (
   </thead>
 )
 AssessmentsTableHeader.propTypes = {
-  title: PropTypes.string,
   periods: PropTypes.array
 }
 
@@ -62,7 +56,7 @@ const MeasurementRow = ({ measurementKey, measurementDef, data }) => {
   return (
     <tr>
       {data.map((assessment, index) => (
-        <td key={index}>
+        <td key={index} style={{ border: "none" }}>
           <AggregationWidget
             key={`assessment-${measurementKey}`}
             values={assessment[measurementKey]}
@@ -80,7 +74,7 @@ MeasurementRow.propTypes = {
   data: PropTypes.array
 }
 
-const MonthlyAssessmentRow = ({
+const MonthlyAssessmentRows = ({
   entity,
   assessmentPeriods,
   canAddAssessment,
@@ -88,65 +82,89 @@ const MonthlyAssessmentRow = ({
 }) => {
   const periodAssessmentConfig = entity.periodAssessmentConfig()
   const [showAssessmentModal, setShowAssessmentModal] = useState(false)
+  const periodsLastAssessment = []
+  const periodsAllowNewAssessment = []
+  assessmentPeriods.forEach(period => {
+    periodsLastAssessment.push(entity.getLastAssessment(period))
+    periodsAllowNewAssessment.push(
+      periodAssessmentConfig && canAddAssessment && period.allowNewAssessments
+    )
+  })
+  const hasLastAssessments = !_isEmpty(
+    periodsLastAssessment.filter(x => !_isEmpty(x))
+  )
+  const hasAddAssessment = !_isEmpty(periodsAllowNewAssessment.filter(x => x))
   return (
-    <tr>
-      {assessmentPeriods.map((period, index) => {
-        const lastAssessment = entity.getLastAssessment(period)
-        const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
-        const allowAddAssessment =
-          periodAssessmentConfig &&
-          period.allowNewAssessments &&
-          canAddAssessment
-        const assessmentLabelPrefix = lastAssessment ? "Add a" : "Make a new"
-        const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for the month of ${period.start.format(
-          "MMM-YYYY"
-        )}`
-        return (
-          <td key={index}>
-            {periodAssessmentConfig && lastAssessment && (
-              <Formik
-                enableReinitialize
-                initialValues={{
-                  [lastAssessmentPrefix]: lastAssessment
-                }}
-              >
-                {({ values }) => (
-                  <ReadonlyCustomFields
-                    fieldNamePrefix={lastAssessmentPrefix}
-                    fieldsConfig={periodAssessmentConfig}
-                    values={values}
-                    vertical
-                  />
+    <>
+      {hasLastAssessments && (
+        <tr>
+          {assessmentPeriods.map((period, index) => {
+            const lastAssessment = entity.getLastAssessment(period)
+            const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
+            return (
+              <td key={index} style={{ border: "none" }}>
+                {periodAssessmentConfig && lastAssessment && (
+                  <Formik
+                    enableReinitialize
+                    initialValues={{
+                      [lastAssessmentPrefix]: lastAssessment
+                    }}
+                  >
+                    {({ values }) => (
+                      <ReadonlyCustomFields
+                        fieldNamePrefix={lastAssessmentPrefix}
+                        fieldsConfig={periodAssessmentConfig}
+                        values={values}
+                        vertical
+                      />
+                    )}
+                  </Formik>
                 )}
-              </Formik>
-            )}
-            {allowAddAssessment && (
-              <>
-                <Button
-                  bsStyle="primary"
-                  onClick={() => setShowAssessmentModal(true)}
-                >
-                  {addAssessmentLabel}
-                </Button>
-                <AddAssessmentModal
-                  task={entity}
-                  assessmentPeriod={period}
-                  showModal={showAssessmentModal}
-                  onCancel={() => setShowAssessmentModal(false)}
-                  onSuccess={() => {
-                    setShowAssessmentModal(false)
-                    onAddAssessment()
-                  }}
-                />
-              </>
-            )}
-          </td>
-        )
-      })}
-    </tr>
+              </td>
+            )
+          })}
+        </tr>
+      )}
+      {hasAddAssessment && (
+        <tr>
+          {assessmentPeriods.map((period, index) => {
+            const assessmentLabelPrefix = periodsLastAssessment[index]
+              ? "Add a"
+              : "Make a new"
+            const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for the month of ${period.start.format(
+              "MMM-YYYY"
+            )}`
+            return (
+              <td key={index} style={{ border: "none" }}>
+                {periodsAllowNewAssessment[index] && (
+                  <>
+                    <Button
+                      bsStyle="primary"
+                      onClick={() => setShowAssessmentModal(true)}
+                    >
+                      {addAssessmentLabel}
+                    </Button>
+                    <AddAssessmentModal
+                      task={entity}
+                      assessmentPeriod={period}
+                      showModal={showAssessmentModal}
+                      onCancel={() => setShowAssessmentModal(false)}
+                      onSuccess={() => {
+                        setShowAssessmentModal(false)
+                        onAddAssessment()
+                      }}
+                    />
+                  </>
+                )}
+              </td>
+            )
+          })}
+        </tr>
+      )}
+    </>
   )
 }
-MonthlyAssessmentRow.propTypes = {
+MonthlyAssessmentRows.propTypes = {
   entity: PropTypes.object,
   assessmentPeriods: PropTypes.arrayOf(
     PropTypes.shape({
@@ -159,7 +177,7 @@ MonthlyAssessmentRow.propTypes = {
   onAddAssessment: PropTypes.func
 }
 
-const EntityAssessmentResultsTable = ({
+const EntityAssessmentResults = ({
   entity,
   style,
   assessmentPeriods,
@@ -176,31 +194,28 @@ const EntityAssessmentResultsTable = ({
     entity.getAssessmentResults(p)
   )
   return (
-    <Table striped bordered condensed hover responsive>
-      <AssessmentsTableHeader
-        title={entity?.toString()}
-        periods={assessmentPeriods}
-      />
-      <tbody>
-        {Object.keys(assessmentDefinition || {}).map(key => (
-          <MeasurementRow
-            key={key}
-            measurementKey={key}
-            measurementDef={assessmentDefinition[key]}
-            data={assessmentResults}
-          />
-        ))}
-        <MonthlyAssessmentRow
-          entity={entity}
-          assessmentPeriods={assessmentPeriods}
-          canAddAssessment={canAddAssessment}
-          onAddAssessment={onAddAssessment}
+    <>
+      <tr style={{ borderBottom: 0 }}>
+        <td colSpan={assessmentPeriods.length}>{entity?.toString()}</td>
+      </tr>
+      {Object.keys(assessmentDefinition || {}).map(key => (
+        <MeasurementRow
+          key={key}
+          measurementKey={key}
+          measurementDef={assessmentDefinition[key]}
+          data={assessmentResults}
         />
-      </tbody>
-    </Table>
+      ))}
+      <MonthlyAssessmentRows
+        entity={entity}
+        assessmentPeriods={assessmentPeriods}
+        canAddAssessment={canAddAssessment}
+        onAddAssessment={onAddAssessment}
+      />
+    </>
   )
 }
-EntityAssessmentResultsTable.propTypes = {
+EntityAssessmentResults.propTypes = {
   style: PropTypes.object,
   entity: PropTypes.object,
   assessmentPeriods: PropTypes.arrayOf(
@@ -225,39 +240,33 @@ const AssessmentResultsTable2 = ({
     return null
   }
   return (
-    <>
-      <div style={{ ...style }}>
-        <Fieldset
-          title={`${entity.toString()} assessment results`}
-          id="entity-assessments-results"
-        >
-          <EntityAssessmentResultsTable
-            style={{ flex: "0 0 100%" }}
-            entity={entity}
-            assessmentPeriods={assessmentPeriods}
-            canAddAssessment={canAddAssessment}
-            onAddAssessment={onAddAssessment}
-          />
-        </Fieldset>
-      </div>
-      <>
-        {!_isEmpty(subEntities) && (
-          <Fieldset
-            title="Subtasks assessment results"
-            id="subentities-assessments-results"
-          >
-            {subEntities?.map(subEntity => (
-              <EntityAssessmentResultsTable
-                key={`subassessment-${subEntity.uuid}`}
-                entity={subEntity}
-                assessmentPeriods={assessmentPeriods}
-                canAddAssessment={false}
-              />
-            ))}
-          </Fieldset>
-        )}
-      </>
-    </>
+    <div style={{ ...style }}>
+      <Fieldset title="Assessment results" id="entity-assessments-results">
+        <Table condensed hover responsive>
+          <AssessmentsTableHeader periods={assessmentPeriods} />
+          <tbody>
+            {!_isEmpty(subEntities) && (
+              <>
+                {subEntities?.map(subEntity => (
+                  <EntityAssessmentResults
+                    key={`subassessment-${subEntity.uuid}`}
+                    entity={subEntity}
+                    assessmentPeriods={assessmentPeriods}
+                    canAddAssessment={false}
+                  />
+                ))}
+              </>
+            )}
+            <EntityAssessmentResults
+              entity={entity}
+              assessmentPeriods={assessmentPeriods}
+              canAddAssessment={canAddAssessment}
+              onAddAssessment={onAddAssessment}
+            />
+          </tbody>
+        </Table>
+      </Fieldset>
+    </div>
   )
 }
 AssessmentResultsTable2.propTypes = {
