@@ -14,7 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
+
     steps:
+    - name: Notify slack start
+      id: slack
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: voxmedia/github-action-slack-notify-build@v1
+      with:
+        channel: anet-notifications
+        status: STARTING
+        color: warning
     - uses: actions/checkout@v1
     - uses: actions/setup-java@v1
       with:
@@ -48,6 +58,26 @@ jobs:
     - run: ./gradlew jar
     - working-directory: ./client
       run: yarn run lint
+    - name: Notify slack success
+      if: success()
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: voxmedia/github-action-slack-notify-build@v1
+      with:
+        message_id: ${{ steps.slack.outputs.message_id }}
+        channel: anet-notifications
+        status: SUCCESS
+        color: good
+    - name: Notify slack fail
+      if: failure()
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: voxmedia/github-action-slack-notify-build@v1
+      with:
+        message_id: ${{ steps.slack.outputs.message_id }}
+        channel: anet-notifications
+        status: FAILED
+        color: danger
 
   test:
     needs: build
@@ -67,6 +97,15 @@ jobs:
       CONTAINER: ${{ matrix.database.CONTAINER }}
 
     steps:
+    - name: Notify slack start
+      id: slack
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: voxmedia/github-action-slack-notify-build@v1
+      with:
+        channel: anet-notifications
+        status: STARTING
+        color: warning
     - uses: actions/checkout@v1
     - uses: actions/setup-java@v1
       with:
@@ -118,3 +157,23 @@ jobs:
         BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+    - name: Notify slack success
+      if: success()
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: voxmedia/github-action-slack-notify-build@v1
+      with:
+        message_id: ${{ steps.slack.outputs.message_id }}
+        channel: anet-notifications
+        status: SUCCESS
+        color: good
+    - name: Notify slack fail
+      if: failure()
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: voxmedia/github-action-slack-notify-build@v1
+      with:
+        message_id: ${{ steps.slack.outputs.message_id }}
+        channel: anet-notifications
+        status: FAILED
+        color: danger
