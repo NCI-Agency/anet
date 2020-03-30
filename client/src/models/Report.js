@@ -350,6 +350,16 @@ export default class Report extends Model {
     return Report.isApproved(this.state)
   }
 
+  static getStateForClassName(report) {
+    return `${
+      Report.isFuture(report.engagementDate) ? "future-" : ""
+    }${report.state.toLowerCase()}`
+  }
+
+  getStateForClassName() {
+    return Report.getStateForClassName(this)
+  }
+
   showWorkflow() {
     return this.state && !this.isDraft()
   }
