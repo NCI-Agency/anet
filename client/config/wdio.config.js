@@ -267,7 +267,9 @@ var config = {
   // }
 }
 const testEnv =
-  (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
+  ((process.env.GIT_TAG_NAME || process.env.TRAVIS_TAG) && "remote") ||
+  process.env.TEST_ENV ||
+  "local"
 if (testEnv === "local") {
   config.services = ["chromedriver"]
   config.port = 9515
