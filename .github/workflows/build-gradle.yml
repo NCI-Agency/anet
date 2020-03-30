@@ -3,7 +3,7 @@ name: Build ANET
 on:
   push:
     branches:
-    - candidate
+    - '**'
   pull_request:
     branches:
     - candidate
