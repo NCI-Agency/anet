@@ -5,7 +5,6 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
-import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -204,12 +203,13 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
         .subtract(1, "months")
         .endOf("month"),
       allowNewAssessments: true
-    },
-    {
-      start: moment().startOf("month"),
-      end: moment().endOf("month"),
-      allowNewAssessments: false
     }
+    //,
+    // {
+    //   start: moment().startOf("month"),
+    //   end: moment().endOf("month"),
+    //   allowNewAssessments: false
+    // }
   ]
 
   return (

@@ -7,6 +7,7 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
+import "components/assessments/AssessmentResultsTable.css"
 
 /* The AssessmentResultsTable component displays the results of two types of
  * assessments made on a given entity and subentities:
@@ -36,7 +37,12 @@ AssessmentsTableHeader.propTypes = {
   periods: PropTypes.array
 }
 
-const MeasurementRow = ({ measurementKey, measurementDef, data }) => {
+const MeasurementRow = ({
+  measurementKey,
+  measurementDef,
+  entity,
+  assessmentPeriods
+}) => {
   const aggWidgetProps = {
     widget: measurementDef.aggregation?.widget || measurementDef.widget,
     aggregationType: measurementDef.aggregation?.aggregationType,
@@ -53,13 +59,16 @@ const MeasurementRow = ({ measurementKey, measurementDef, data }) => {
     "visibleWhen",
     "objectFields"
   )
+
   return (
     <tr>
-      {data.map((assessment, index) => (
-        <td key={index} style={{ border: "none" }}>
+      {assessmentPeriods.map((assessmentPeriod, index) => (
+        <td key={index}>
           <AggregationWidget
             key={`assessment-${measurementKey}`}
-            values={assessment[measurementKey]}
+            values={
+              entity.getAssessmentResults(assessmentPeriod)[measurementKey]
+            }
             {...aggWidgetProps}
             {...widgetLayoutConfig}
           />
@@ -69,9 +78,16 @@ const MeasurementRow = ({ measurementKey, measurementDef, data }) => {
   )
 }
 MeasurementRow.propTypes = {
+  entity: PropTypes.object,
+  assessmentPeriods: PropTypes.arrayOf(
+    PropTypes.shape({
+      start: PropTypes.object,
+      end: PropTypes.object,
+      allowNewAssessments: PropTypes.bool
+    })
+  ),
   measurementKey: PropTypes.string,
-  measurementDef: PropTypes.object,
-  data: PropTypes.array
+  measurementDef: PropTypes.object
 }
 
 const MonthlyAssessmentRows = ({
@@ -112,7 +128,7 @@ const MonthlyAssessmentRows = ({
           {periodsLastAssessment.map((lastAssessment, index) => {
             const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
             return (
-              <td key={index} style={{ border: "none" }}>
+              <td key={index}>
                 {periodAssessmentConfig && lastAssessment && (
                   <Formik
                     enableReinitialize
@@ -145,7 +161,7 @@ const MonthlyAssessmentRows = ({
               "MMM-YYYY"
             )}`
             return (
-              <td key={index} style={{ border: "none" }}>
+              <td key={index}>
                 {periodsAllowNewAssessment[index] && (
                   <>
                     <Button
@@ -200,20 +216,18 @@ const EntityAssessmentResults = ({
   const assessmentDefinition = JSON.parse(
     JSON.parse(entity.customFields || "{}").assessmentDefinition || "{}"
   )
-  const assessmentResults = assessmentPeriods.map(p =>
-    entity.getAssessmentResults(p)
-  )
   return (
     <>
-      <tr style={{ borderBottom: 0 }}>
-        <td colSpan={assessmentPeriods.length}>{entity?.toString()}</td>
+      <tr>
+        <td colSpan={assessmentPeriods.length}><b>{entity?.toString()}</b></td>
       </tr>
       {Object.keys(assessmentDefinition || {}).map(key => (
         <MeasurementRow
           key={key}
           measurementKey={key}
           measurementDef={assessmentDefinition[key]}
-          data={assessmentResults}
+          assessmentPeriods={assessmentPeriods}
+          entity={entity}
         />
       ))}
       <MonthlyAssessmentRows
@@ -231,7 +245,8 @@ EntityAssessmentResults.propTypes = {
   assessmentPeriods: PropTypes.arrayOf(
     PropTypes.shape({
       start: PropTypes.object,
-      end: PropTypes.object
+      end: PropTypes.object,
+      allowNewAssessments: PropTypes.bool
     })
   ),
   onAddAssessment: PropTypes.func,
