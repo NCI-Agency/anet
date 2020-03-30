@@ -85,7 +85,18 @@ const MonthlyAssessmentRows = ({
   const periodsLastAssessment = []
   const periodsAllowNewAssessment = []
   assessmentPeriods.forEach(period => {
-    periodsLastAssessment.push(entity.getLastAssessment(period))
+    // TODO: rethink assessments for a period: should we also save the period
+    // in the assessment? For now we assume that the dateRange is a month and
+    // that assessments for a given month will have been made in the next month.
+    periodsLastAssessment.push(
+      entity.getLastAssessment({
+        start: period.start.clone().add(1, "months"),
+        end: period.start
+          .clone()
+          .add(1, "months")
+          .endOf("month")
+      })
+    )
     periodsAllowNewAssessment.push(
       periodAssessmentConfig && canAddAssessment && period.allowNewAssessments
     )
@@ -98,8 +109,7 @@ const MonthlyAssessmentRows = ({
     <>
       {hasLastAssessments && (
         <tr>
-          {assessmentPeriods.map((period, index) => {
-            const lastAssessment = entity.getLastAssessment(period)
+          {periodsLastAssessment.map((lastAssessment, index) => {
             const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
             return (
               <td key={index} style={{ border: "none" }}>
