@@ -23,7 +23,7 @@ jobs:
       uses: voxmedia/github-action-slack-notify-build@v1
       with:
         channel: anet-notifications
-        status: STARTING
+        status: STARTED
         color: warning
     - uses: actions/checkout@v1
     - uses: actions/setup-java@v1
@@ -66,9 +66,9 @@ jobs:
       with:
         message_id: ${{ steps.slack.outputs.message_id }}
         channel: anet-notifications
-        status: SUCCESS
+        status: SUCCEEDED
         color: good
-    - name: Notify slack fail
+    - name: Notify slack failure
       if: failure()
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -104,7 +104,7 @@ jobs:
       uses: voxmedia/github-action-slack-notify-build@v1
       with:
         channel: anet-notifications
-        status: STARTING
+        status: STARTED
         color: warning
     - uses: actions/checkout@v1
     - uses: actions/setup-java@v1
@@ -165,9 +165,9 @@ jobs:
       with:
         message_id: ${{ steps.slack.outputs.message_id }}
         channel: anet-notifications
-        status: SUCCESS
+        status: SUCCEEDED
         color: good
-    - name: Notify slack fail
+    - name: Notify slack failure
       if: failure()
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
