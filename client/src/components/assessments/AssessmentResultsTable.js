@@ -219,7 +219,9 @@ const EntityAssessmentResults = ({
   return (
     <>
       <tr>
-        <td colSpan={assessmentPeriods.length}><b>{entity?.toString()}</b></td>
+        <td colSpan={assessmentPeriods.length} className="entity-title-row">
+          <b>{entity?.toString()}</b>
+        </td>
       </tr>
       {Object.keys(assessmentDefinition || {}).map(key => (
         <MeasurementRow
@@ -267,7 +269,7 @@ const AssessmentResultsTable2 = ({
   return (
     <div style={{ ...style }}>
       <Fieldset title="Assessment results" id="entity-assessments-results">
-        <Table condensed hover responsive>
+        <Table condensed responsive>
           <AssessmentsTableHeader periods={assessmentPeriods} />
           <tbody>
             {!_isEmpty(subEntities) && (
