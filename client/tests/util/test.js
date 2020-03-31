@@ -10,7 +10,7 @@ const chalk = require("chalk")
 
 let capabilities = {}
 const testEnv =
-  (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
+  (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   // This gives us access to send Chrome commands.
   require("chromedriver")

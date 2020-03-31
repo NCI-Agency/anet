@@ -12,13 +12,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import mil.dds.anet.beans.Person;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Path("/api/logging")
 public class LoggingResource {
 
-  private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   static class LogEntry {
     /** one of 'DEBUG','ERROR','FATAL','INFO','WARN'. */
@@ -49,9 +51,26 @@ public class LoggingResource {
   public void logMessage(final @Context HttpServletRequest requestContext, final @Auth Person user,
       final List<LogEntry> logEntries) {
     for (final LogEntry logEntry : logEntries) {
-      logger.log(Level.toLevel(logEntry.severity),
-          String.format("%1$s %2$s %3$s %4$s %5$s", user.getUuid(), requestContext.getRemoteAddr(),
-              logEntry.url, logEntry.lineNr, logEntry.message));
+
+      final String message = String.format("%1$s %2$s %3$s %4$s %5$s", user.getUuid(),
+          requestContext.getRemoteAddr(), logEntry.url, logEntry.lineNr, logEntry.message);
+
+      switch (logEntry.severity) {
+        case "DEBUG":
+          logger.debug(message);
+          break;
+        case "FATAL":
+          logger.error(message);
+          break;
+        case "INFO":
+          logger.info(message);
+          break;
+        case "WARN":
+          logger.info(message);
+          break;
+        default:
+          logger.error(message);
+      }
     }
   }
 }
