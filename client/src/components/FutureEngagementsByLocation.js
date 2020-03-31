@@ -98,9 +98,7 @@ const Chart = ({
     const categoriesWithData = d3
       .nest()
       .key(function(d) {
-        return moment(d.engagementDate)
-          .startOf("day")
-          .valueOf()
+        return moment(d.engagementDate).startOf("day").valueOf()
       })
       .key(function(d) {
         return d.location.uuid
@@ -317,12 +315,8 @@ const FutureEngagementsByLocation = ({
     return {
       // Use here the start and end of a date in order to make sure the
       // fetch is independent of the engagementDate time value
-      engagementDateStart: moment(focusedDate)
-        .startOf("day")
-        .valueOf(),
-      engagementDateEnd: moment(focusedDate)
-        .endOf("day")
-        .valueOf(),
+      engagementDateStart: moment(focusedDate).startOf("day").valueOf(),
+      engagementDateEnd: moment(focusedDate).endOf("day").valueOf(),
       locationUuid: focusedLocation
     }
   }

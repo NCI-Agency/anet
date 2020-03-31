@@ -27,9 +27,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.views.AbstractAnetBean;
-import org.imgscalr.Scalr;
-import org.imgscalr.Scalr.Method;
-import org.imgscalr.Scalr.Mode;
+import net.coobird.thumbnailator.Thumbnails;
 import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -434,11 +432,10 @@ public class Utils {
     }
 
     // Resizing
-    final BufferedImage thumbnail =
-        Scalr.resize(imageBinary, Method.AUTOMATIC, Mode.AUTOMATIC, width, height);
-
-    // From BufferedImage back to byte-array
-    return convert(thumbnail, imageFormatName);
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
+    Thumbnails.of(imageBinary).size(width, height).outputFormat(imageFormatName).outputQuality(1.0f)
+        .toOutputStream(os);
+    return os.toByteArray();
   }
 
   /**
