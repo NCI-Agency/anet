@@ -98,7 +98,7 @@ dependencies {
 	implementation 'org.jsoup:jsoup:1.13.1'
 
 	// For fast and simple image scaling
-	implementation 'org.imgscalr:imgscalr-lib:4.2'
+	implementation 'net.coobird:thumbnailator:0.4.11'
 
 	testImplementation 'io.dropwizard:dropwizard-testing:2.0.5'
 	testImplementation 'io.dropwizard:dropwizard-client:2.0.5'
