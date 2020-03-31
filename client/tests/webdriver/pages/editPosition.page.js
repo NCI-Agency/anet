@@ -52,8 +52,13 @@ class EditPosition extends Page {
       () => {
         return this.orgAdvancedSelectFirstItem.getText() === value
       },
-      5000,
-      'Expected org advanced select input to contain "' + value + '" after 5s'
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected org advanced select input to contain "' +
+          value +
+          '" after 5s'
+      }
     )
   }
 

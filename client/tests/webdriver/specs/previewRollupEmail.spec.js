@@ -34,8 +34,7 @@ describe("Preview rollup page", () => {
             "Classification: DEMO USE ONLY"
           )
         },
-        3000,
-        "Expected classification"
+        { timeout: 3000, timeoutMsg: "Expected classification" }
       )
       browser.closeWindow()
     })
