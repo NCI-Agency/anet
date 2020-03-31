@@ -21,4 +21,4 @@ If you are one of the following, we interpret that your contribution is partly o
   - direct NCIA hire, identified by username@ncia.nato.int
   - Airbus employee or subcontractors contributing to NCIA projects, identified by dspcarlson@gmail.com
   - West IT Solutions employee or subcontractor contributing to NCIA projects, typically identified by username@west.nl or edwin@vdhoudt.nl
-
+  - SimSoft employee or subcontractor contributing to NCIA projects, typically identified by username@simsoft.com.tr

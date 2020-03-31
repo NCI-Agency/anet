@@ -141,24 +141,22 @@ const ReportSummary = ({
     error,
     pageDispatchers
   })
+  // Update the total count
+  const totalCount = done ? null : data?.reportList?.totalCount
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
-    if (setTotalCount) {
-      // Reset the total count
-      setTotalCount(null)
-    }
     return result
   }
 
   const reports = data ? data.reportList.list : []
-  if (setTotalCount) {
-    const totalCount = data && data.reportList && data.reportList.totalCount
-    setTotalCount(totalCount)
-  }
   if (_get(reports, "length", 0) === 0) {
     return <em>No reports found</em>
   }
 
-  const { pageSize, totalCount } = data.reportList
+  const { pageSize } = data.reportList
 
   return (
     <div>
@@ -193,35 +191,33 @@ ReportSummary.propTypes = {
 
 const ReportSummaryRow = ({ report }) => {
   report = new Report(report)
+  const className = `report-${report.getStateForClassName()}`
 
   return (
     <Grid fluid className="report-summary">
       {report.isDraft() && (
-        <p className="report-draft">
+        <p>
+          <span className={className} />
           <strong>Draft</strong>
-          {/* If the parent does not fetch report.updatedAt, we will not display this
-            so we do not get a broken view.
-          */
-          report.updatedAt && (
-            <span>
-              : last saved at{" "}
-              {moment(report.updatedAt).format(
-                Settings.dateFormats.forms.displayShort.withTime
-              )}
-            </span>
-          )
-}
+          <span>
+            : last saved at{" "}
+            {moment(report.updatedAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )}
+          </span>
         </p>
       )}
 
       {report.isRejected() && (
-        <p className="report-rejected">
+        <p>
+          <span className={className} />
           <strong>Changes requested</strong>
         </p>
       )}
 
       {report.cancelledReason && (
-        <p className="report-cancelled">
+        <p>
+          <span className={className} />
           <strong>Cancelled: </strong>
           {utils.sentenceCase(
             report.cancelledReason.substr(report.cancelledReason.indexOf("_"))
@@ -230,14 +226,16 @@ const ReportSummaryRow = ({ report }) => {
       )}
 
       {report.isFuture() && (
-        <p className="report-future">
+        <p>
+          <span className={className} />
           <strong>Planned Engagement</strong>
         </p>
       )}
 
       {report.isPending() && (
         <>
-          <p className="report-pending">
+          <p>
+            <span className={className} />
             <strong>Pending Approval</strong>
           </p>
           <Row>
@@ -247,6 +245,7 @@ const ReportSummaryRow = ({ report }) => {
           </Row>
         </>
       )}
+
       <Row>
         <Col md={12}>
           {report.engagementDate && (
@@ -327,7 +326,9 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.tasks.length > 0 && (
             <span>
-              <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
+              <strong>
+                {pluralize(Settings.fields.task.subLevel.shortLabel)}:
+              </strong>{" "}
               {report.tasks.map(
                 (task, i) =>
                   task.shortName + (i < report.tasks.length - 1 ? ", " : "")

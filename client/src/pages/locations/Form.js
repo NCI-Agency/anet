@@ -1,6 +1,7 @@
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
@@ -9,7 +10,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
-import { Location, Person } from "models"
+import { Location, Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -47,6 +48,29 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
     }
   ]
 
+  const approversFilters = {
+    allAdvisorPositions: {
+      label: "All advisor positions",
+      queryVars: {
+        type: [
+          Position.TYPE.ADVISOR,
+          Position.TYPE.SUPER_USER,
+          Position.TYPE.ADMINISTRATOR
+        ],
+        matchPersonName: true
+      }
+    }
+  }
+  if (currentUser.position) {
+    approversFilters.myColleagues = {
+      label: "My colleagues",
+      queryVars: {
+        matchPersonName: true,
+        organizationUuid: currentUser.position.organization.uuid
+      }
+    }
+  }
+
   return (
     <Formik
       enableReinitialize
@@ -59,6 +83,7 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
         isSubmitting,
         dirty,
         errors,
+        setFieldTouched,
         setFieldValue,
         values,
         submitForm
@@ -123,6 +148,26 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
 
               <h3>Drag the marker below to set the location</h3>
               <Leaflet markers={[marker]} />
+
+              <ApprovalsDefinition
+                fieldName="planningApprovalSteps"
+                values={values}
+                title="Engagement planning approval process"
+                addButtonLabel="Add a Planning Approval Step"
+                setFieldTouched={setFieldTouched}
+                setFieldValue={setFieldValue}
+                approversFilters={approversFilters}
+              />
+
+              <ApprovalsDefinition
+                fieldName="approvalSteps"
+                values={values}
+                title="Report publication approval process"
+                addButtonLabel="Add a Publication Approval Step"
+                setFieldTouched={setFieldTouched}
+                setFieldValue={setFieldValue}
+                approversFilters={approversFilters}
+              />
 
               <div className="submit-buttons">
                 <div>

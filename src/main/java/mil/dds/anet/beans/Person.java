@@ -6,16 +6,20 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Person extends AbstractCustomizableAnetBean implements Principal {
 
@@ -26,6 +30,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   public static enum Role {
     ADVISOR, PRINCIPAL
   }
+
+  private static final String AVATAR_TYPE = "png";
 
   @GraphQLQuery
   @GraphQLInputField
@@ -68,7 +74,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
-  private String avatar;
+  private Optional<byte[]> avatar;
   @GraphQLQuery
   @GraphQLInputField
   private String code;
@@ -246,21 +252,48 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   }
 
   @GraphQLQuery(name = "avatar")
-  public String getAvatar(@GraphQLArgument(name = "size", defaultValue = "256") int size) {
+  public CompletableFuture<String> loadAvatar(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "size", defaultValue = "256") int size) {
+    if (avatar != null) {
+      return CompletableFuture.completedFuture(resizeAvatar(size));
+    }
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE_AVATARS, uuid)
+        .thenApply(o -> {
+          avatar = Optional.ofNullable(o.getAvatar());
+          return resizeAvatar(size);
+        });
+  }
+
+  public String resizeAvatar(int size) {
     try {
-      return Utils.resizeImageBase64(this.avatar, size, size, "png");
+      return String.format("data:image/%1$s;base64,%2$s", AVATAR_TYPE, Base64.getEncoder()
+          .encodeToString(Utils.resizeImage(getAvatar(), size, size, AVATAR_TYPE)));
     } catch (Exception e) {
       return null;
     }
   }
 
-  public String getAvatar() {
-    return this.avatar;
+  public byte[] getAvatar() {
+    return avatar == null ? null : avatar.orElse(null);
+  }
+
+  public void setAvatar(byte[] avatar) {
+    this.avatar = Optional.ofNullable(avatar);
   }
 
   @GraphQLInputField(name = "avatar")
   public void setAvatar(String avatar) {
-    this.avatar = avatar;
+    if (avatar == null) {
+      this.avatar = Optional.ofNullable(null);
+    } else {
+      try {
+        final String[] parts = avatar.split(",", 2);
+        final String dataPart = parts.length == 1 ? parts[0] : parts[1];
+        this.avatar = Optional.ofNullable(Base64.getDecoder().decode(dataPart));
+      } catch (Exception e) {
+        this.avatar = Optional.ofNullable(null);
+      }
+    }
   }
 
   public String getCode() {
@@ -283,7 +316,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatar(), avatar) && Objects.equals(other.getCode(), code)
+        && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
         && (createdAt != null)
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)

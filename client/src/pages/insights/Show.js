@@ -67,7 +67,7 @@ export const INSIGHT_DETAILS = {
   [REPORTS_BY_TASK]: {
     searchProps: _SEARCH_PROPS,
     component: ReportsByTask,
-    navTitle: "Reports by Task",
+    navTitle: `Reports by ${Settings.fields.task.subLevel.shortLabel}`,
     title: ""
   },
   [REPORTS_BY_DAY_OF_WEEK]: {
@@ -185,9 +185,7 @@ const BaseInsightsShow = ({
   function getCutoffDate() {
     const maxReportAge =
       1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
-    return moment()
-      .subtract(maxReportAge, "days")
-      .clone()
+    return moment().subtract(maxReportAge, "days").clone()
   }
 
   function getCurrentDateTime() {

@@ -17,6 +17,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
+import pluralize from "pluralize"
 import React from "react"
 import { Alert } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -110,6 +111,10 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
+        customFieldRef1 {
+          uuid
+          shortName
+        }
         taskedOrganizations {
           uuid
           shortName
@@ -226,6 +231,7 @@ const ReportMinimal = ({ pageDispatchers }) => {
   }
 
   const reportType = report.isFuture() ? "planned engagement" : "report"
+  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   return (
     <Formik enableReinitialize initialValues={report}>
@@ -407,8 +413,12 @@ const ReportMinimal = ({ pageDispatchers }) => {
               <AttendeesTable attendees={report.attendees} disabled />
             </Fieldset>
 
-            <Fieldset title={Settings.fields.task.longLabel}>
-              <TaskTable tasks={report.tasks} showParent />
+            <Fieldset title={Settings.fields.task.subLevel.longLabel}>
+              <TaskTable
+                tasks={report.tasks}
+                showParent
+                noTasksMessage={`No ${tasksLabel} selected`}
+              />
             </Fieldset>
 
             {report.reportText && (

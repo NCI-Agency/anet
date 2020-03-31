@@ -266,10 +266,6 @@ async function validateUserCanEditUserForCurrentPage(t) {
 
   const fakeBioText = ` fake bio ${uuidv4()}`
   await $bioTextArea.sendKeys(t.context.Key.END + fakeBioText)
-  await t.context.pageHelpers.writeInForm(
-    "[id='formCustomFields.inputFieldName']",
-    "custom field text"
-  )
   // wait for component to update (internal) state
   await t.context.driver.sleep(shortWaitMs)
 

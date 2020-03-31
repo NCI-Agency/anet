@@ -55,10 +55,6 @@ class CreatePerson extends Page {
     return browser.$(".biography .public-DraftEditor-content")
   }
 
-  get customFieldsTextField() {
-    return browser.$('input[name="formCustomFields.inputFieldName"]')
-  }
-
   get submitButton() {
     return browser.$("#formBottomSubmit")
   }

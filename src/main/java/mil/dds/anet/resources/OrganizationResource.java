@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -38,12 +37,6 @@ public class OrganizationResource {
   public OrganizationResource(AnetObjectEngine engine) {
     this.dao = engine.getOrganizationDao();
     this.engine = engine;
-  }
-
-  @GraphQLQuery(name = "organizationTopLevelOrgs")
-  public AnetBeanList<Organization> getTopLevelOrgs(
-      @GraphQLArgument(name = "type") OrganizationType type) {
-    return new AnetBeanList<Organization>(dao.getTopLevelOrgs(type));
   }
 
   @GraphQLQuery(name = "organization")

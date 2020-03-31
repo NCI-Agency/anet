@@ -1,6 +1,5 @@
 package mil.dds.anet.database.mappers;
 
-import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Person;
@@ -45,10 +44,10 @@ public class PersonMapper implements RowMapper<Person> {
     a.setBiography(MapperUtils.getOptionalString(rs, "people_biography"));
     a.setDomainUsername(MapperUtils.getOptionalString(rs, "people_domainUsername"));
     a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
-    final Blob avatarBlob = MapperUtils.getOptionalBlob(rs, "people_avatar");
-    final String avatar =
-        avatarBlob == null ? null : new String(avatarBlob.getBytes(1L, (int) avatarBlob.length()));
-    a.setAvatar(avatar);
+    // Treat "avatar" special so it only gets loaded & set when explicitly requested
+    if (MapperUtils.containsColumnNamed(rs, "people_avatar")) {
+      a.setAvatar(rs.getBytes("people_avatar"));
+    }
 
     return a;
   }

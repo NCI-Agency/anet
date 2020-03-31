@@ -163,7 +163,8 @@ class RichTextEditor extends Component {
       sideToolbarPlugin: createSideToolbarPlugin(),
       content: {}
     }
-    this.focus = () => this.refs.editor.focus()
+    this.editorRef = React.createRef()
+    this.focus = () => this.editorRef.current.focus()
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -177,7 +178,7 @@ class RichTextEditor extends Component {
     return (
       <div className={className} onClick={this.focus}>
         <DraftailEditor
-          ref="editor"
+          ref={this.editorRef}
           id="rich-text"
           ariaDescribedBy="rich-text-editor"
           blockTypes={BLOCK_TYPES}

@@ -182,6 +182,14 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.PEOPLE_AVATARS.toString(),
+        new DataLoader<>(new BatchLoader<String, Person>() {
+          @Override
+          public CompletionStage<List<Person>> load(List<String> keys) {
+            return CompletableFuture.supplyAsync(() -> engine.getPersonDao().getAvatars(keys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.PERSON_ORGANIZATIONS.toString(),
         new DataLoader<>(new BatchLoader<String, List<Organization>>() {
           @Override

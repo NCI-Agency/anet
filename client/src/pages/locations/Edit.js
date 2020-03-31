@@ -23,6 +23,36 @@ const GQL_GET_LOCATION = gql`
       status
       lat
       lng
+      planningApprovalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }
+      approvalSteps {
+        uuid
+        name
+        approvers {
+          uuid
+          name
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+        }
+      }      
       ${GRAPHQL_NOTES_FIELDS}
     }
   }

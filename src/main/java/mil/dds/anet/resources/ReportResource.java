@@ -460,11 +460,6 @@ public class ReportResource {
       throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
     }
 
-    // Report author cannot approve own report, unless admin
-    if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
-      logger.info("Author {} cannot approve own report UUID {}", approver.getUuid(), r.getUuid());
-      throw new WebApplicationException("You cannot approve your own report", Status.FORBIDDEN);
-    }
     // Verify that this user can approve for this step.
     boolean canApprove =
         engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
@@ -504,13 +499,6 @@ public class ReportResource {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
     ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
-    // Report author cannot reject own report, unless admin
-    if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
-      logger.info("Author {} cannot request changes to own report UUID {}", approver.getUuid(),
-          r.getUuid());
-      throw new WebApplicationException("You cannot request changes to your own report",
-          Status.FORBIDDEN);
-    }
     // Report can be rejected when pending approval or by an admin when pending approval or in
     // approved state
     if (step == null && !((r.getState() == ReportState.APPROVED) && AuthUtils.isAdmin(approver))) {

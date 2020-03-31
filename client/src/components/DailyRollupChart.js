@@ -42,11 +42,7 @@ const DailyRollupChart = ({
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
-    const tmpSVG = d3
-      .select("#tmp_svg")
-      .data([1])
-      .enter()
-      .append("svg")
+    const tmpSVG = d3.select("#tmp_svg").data([1]).enter().append("svg")
     const xLabelWidth = function() {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
@@ -87,25 +83,13 @@ const DailyRollupChart = ({
     const chartHeight = yHeight + MARGIN.top + marginBottom
 
     const xMax = d3.max(xLabels)
-    const xScale = d3
-      .scaleLinear()
-      .domain([0, xMax])
-      .range([0, xWidth])
+    const xScale = d3.scaleLinear().domain([0, xMax]).range([0, xWidth])
 
-    const yScale = d3
-      .scaleBand()
-      .domain(yDomain)
-      .range([0, yHeight])
+    const yScale = d3.scaleBand().domain(yDomain).range([0, yHeight])
 
     const xTicks = Math.min(xMax, 10)
-    const xAxisTop = d3
-      .axisTop()
-      .scale(xScale)
-      .ticks(xTicks, "d")
-    const xAxis = d3
-      .axisBottom()
-      .scale(xScale)
-      .ticks(xTicks, "d")
+    const xAxisTop = d3.axisTop().scale(xScale).ticks(xTicks, "d")
+    const xAxis = d3.axisBottom().scale(xScale).ticks(xTicks, "d")
 
     const yAxis = d3
       .axisLeft()
@@ -123,10 +107,7 @@ const DailyRollupChart = ({
 
     chart.append("g").call(xAxisTop)
 
-    chart
-      .append("g")
-      .attr("transform", `translate(0, ${yHeight})`)
-      .call(xAxis)
+    chart.append("g").attr("transform", `translate(0, ${yHeight})`).call(xAxis)
 
     chart.append("g").call(yAxis)
 
@@ -157,7 +138,7 @@ const DailyRollupChart = ({
       .append("rect")
       .attr("width", d => d.published && xScale(d.published))
       .attr("height", BAR_HEIGHT)
-      .attr("fill", barColors.verified)
+      .attr("fill", barColors.published)
 
     bar
       .append("text")
@@ -201,7 +182,7 @@ DailyRollupChart.propTypes = {
   tooltip: PropTypes.func,
   barColors: PropTypes.shape({
     cancelled: PropTypes.string.isRequired,
-    verified: PropTypes.string.isRequired
+    published: PropTypes.string.isRequired
   }).isRequired
 }
 

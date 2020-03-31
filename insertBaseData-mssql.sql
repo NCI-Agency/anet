@@ -475,6 +475,11 @@ INSERT INTO locations (uuid, name, createdAt, updatedAt)
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
 	VALUES (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+-- Create a location approval process for a location
+INSERT INTO approvalSteps (uuid, relatedObjectUuid, name, type)
+    SELECT lower(newid()), (SELECT uuid FROM locations WHERE name = 'Portugal Cove Ferry Terminal'), 'Location approval', 1;
+INSERT INTO approvers (approvalStepUuid, positionUuid)
+    VALUES ((SELECT uuid from approvalSteps where name = 'Location approval'), (SELECT uuid from positions where name = 'ANET Administrator'));
 
 INSERT INTO organizations (uuid, shortName, longName, type, identificationCode, createdAt, updatedAt)
 	VALUES (lower(newid()), 'MoD', 'Ministry of Defense', 1, 'Z12345', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

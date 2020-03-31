@@ -6,6 +6,7 @@ me {
   emailAddress
   status
   avatar(size: 32)
+  code
   position {
     uuid
     name
@@ -60,7 +61,14 @@ adminSettings {
   value
 }
 
-organizationTopLevelOrgs(type: ADVISOR_ORG) {
+organizationTopLevelOrgs: organizationList(
+  query: {
+    pageSize: 0
+    hasParentOrg: false
+    status: ACTIVE
+    type: ADVISOR_ORG
+  }
+) {
   list {
     uuid
     shortName

@@ -118,7 +118,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
         )
         const tasksFilters = {
           allTasks: {
-            label: "All tasks",
+            label: `All ${pluralize(Settings.fields.task.shortLabel)}`,
             queryVars: {}
           }
         }

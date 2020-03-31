@@ -9,7 +9,7 @@ import {
 import _escape from "lodash/escape"
 import { Location } from "models"
 import PropTypes from "prop-types"
-import React, { useMemo } from "react"
+import React, { useEffect, useMemo } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -70,17 +70,14 @@ const ReportMap = ({
     })
     return markerArray
   }, [data])
+  // Update the total count
+  const totalCount = done ? null : data?.reportList?.totalCount
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
-    if (setTotalCount) {
-      // Reset the total count
-      setTotalCount(null)
-    }
     return result
-  }
-
-  if (setTotalCount) {
-    const { totalCount } = data.reportList
-    setTotalCount(totalCount)
   }
 
   return (

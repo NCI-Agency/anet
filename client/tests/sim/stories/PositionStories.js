@@ -190,9 +190,15 @@ const _createPosition = async function(user) {
     {},
     "uuid type"
   )
-  const person = await getRandomObject(user, "people", {
-    role: getPersonRole(organization.type)
-  })
+  const person = await getRandomObject(
+    user,
+    "people",
+    {
+      role: getPersonRole(organization.type)
+    },
+    "uuid",
+    [user.uuid]
+  )
   const location = await getRandomObject(user, "locations")
   const template = {
     name: () => faker.name.jobTitle(),

@@ -267,7 +267,7 @@ var config = {
   // }
 }
 const testEnv =
-  (process.env.TRAVIS_TAG && "remote") || process.env.TEST_ENV || "local"
+  (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   config.services = ["chromedriver"]
   config.port = 9515
@@ -279,6 +279,6 @@ if (testEnv === "local") {
   config.maxInstances = 1
   config.user = capabilities["browserstack.user"]
   config.key = capabilities["browserstack.key"]
-  // config.browserstackLocal = true -- already started by Travis CI
+  // config.browserstackLocal = true -- already started by the GitHub Actions workflow
 }
 exports.config = config

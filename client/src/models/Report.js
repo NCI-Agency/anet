@@ -66,10 +66,7 @@ export default class Report extends Model {
         .nullable()
         .required("You must provide the Date of Engagement")
         .default(null),
-      duration: yup
-        .number()
-        .nullable()
-        .default(null),
+      duration: yup.number().nullable().default(null),
       // not actually in the database, but used for validation:
       cancelled: yup
         .boolean()
@@ -164,14 +161,8 @@ export default class Report extends Model {
             )
         )
         .default([]),
-      principalOrg: yup
-        .object()
-        .nullable()
-        .default({}),
-      advisorOrg: yup
-        .object()
-        .nullable()
-        .default({}),
+      principalOrg: yup.object().nullable().default({}),
+      advisorOrg: yup.object().nullable().default({}),
       tasks: yup
         .array()
         .nullable()
@@ -182,16 +173,13 @@ export default class Report extends Model {
           function(tasks) {
             return _isEmpty(tasks)
               ? this.createError({
-                message: `You must provide at least one ${Settings.fields.task.shortLabel}`
+                message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
               })
               : true
           }
         )
         .default([]),
-      comments: yup
-        .array()
-        .nullable()
-        .default([]),
+      comments: yup.array().nullable().default([]),
       reportText: yup
         .string()
         .nullable()
@@ -242,33 +230,21 @@ export default class Report extends Model {
         )
         .default("")
         .label(Settings.fields.report.keyOutcomes),
-      tags: yup
-        .array()
-        .nullable()
-        .default([]),
+      tags: yup.array().nullable().default([]),
       reportTags: yup
         .array()
         .nullable()
         .default([])
         .label(Settings.fields.report.reportTags),
-      reportSensitiveInformation: yup
-        .object()
-        .nullable()
-        .default({}), // null?
-      authorizationGroups: yup
-        .array()
-        .nullable()
-        .default([]),
+      reportSensitiveInformation: yup.object().nullable().default({}), // null?
+      authorizationGroups: yup.array().nullable().default([]),
       // not actually in the database, the database contains the JSON customFields
       formCustomFields: Report.customFieldsSchema.nullable()
     })
     .concat(Model.yupSchema)
 
   static yupWarningSchema = yup.object().shape({
-    reportSensitiveInformation: yup
-      .object()
-      .nullable()
-      .default({}),
+    reportSensitiveInformation: yup.object().nullable().default({}),
     authorizationGroups: yup
       .array()
       .nullable()
@@ -330,12 +306,7 @@ export default class Report extends Model {
   }
 
   static isFuture(engagementDate) {
-    return (
-      engagementDate &&
-      moment()
-        .endOf("day")
-        .isBefore(engagementDate)
-    )
+    return engagementDate && moment().endOf("day").isBefore(engagementDate)
   }
 
   isFuture() {
@@ -348,6 +319,16 @@ export default class Report extends Model {
 
   isApproved() {
     return Report.isApproved(this.state)
+  }
+
+  static getStateForClassName(report) {
+    return `${
+      Report.isFuture(report.engagementDate) ? "future-" : ""
+    }${report.state.toLowerCase()}`
+  }
+
+  getStateForClassName() {
+    return Report.getStateForClassName(this)
   }
 
   showWorkflow() {

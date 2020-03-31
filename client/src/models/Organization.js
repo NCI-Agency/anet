@@ -32,18 +32,12 @@ export default class Organization extends Model {
         .required()
         .default("")
         .label(Settings.fields.organization.shortName),
-      longName: yup
-        .string()
-        .nullable()
-        .default(""),
+      longName: yup.string().nullable().default(""),
       status: yup
         .string()
         .required()
         .default(() => Organization.STATUS.ACTIVE),
-      identificationCode: yup
-        .string()
-        .nullable()
-        .default(""),
+      identificationCode: yup.string().nullable().default(""),
       type: yup
         .string()
         .required()
@@ -53,10 +47,7 @@ export default class Organization extends Model {
         .nullable()
         .default({})
         .label(Settings.fields.organization.parentOrg),
-      childrenOrgs: yup
-        .array()
-        .nullable()
-        .default([]),
+      childrenOrgs: yup.array().nullable().default([]),
       planningApprovalSteps: yup
         .array()
         .of(
@@ -97,14 +88,8 @@ export default class Organization extends Model {
         )
         .nullable()
         .default([]),
-      positions: yup
-        .array()
-        .nullable()
-        .default([]),
-      tasks: yup
-        .array()
-        .nullable()
-        .default([])
+      positions: yup.array().nullable().default([]),
+      tasks: yup.array().nullable().default([])
     })
     .concat(Model.yupSchema)
 

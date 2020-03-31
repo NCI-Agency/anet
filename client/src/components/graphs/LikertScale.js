@@ -72,8 +72,8 @@ const LikertScale = ({ onChange, value, levels, width, height, readonly }) => {
               style={{ fill: fillColor, stroke: "gray", strokeWidth: 1 }}
               y={0}
               x={startX}
-              height={containerHeight - 11}
-              width={endX - startX}
+              height={Math.max(0, containerHeight - 11)}
+              width={Math.max(0, endX - startX)}
             />
             <Text
               fill={active ? "black" : "gray"}

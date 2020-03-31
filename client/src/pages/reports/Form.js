@@ -256,6 +256,7 @@ const BaseReportForm = ({
   const submitText = currentUser.hasActivePosition()
     ? "Preview and submit"
     : "Save draft"
+  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
   const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
   const showActivePositionWarning =
     currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()
@@ -423,10 +424,10 @@ const BaseReportForm = ({
           }
         }
 
-        const tasksFiltersLevel = {}
+        const tasksFilters = {}
 
         if (currentOrg) {
-          tasksFiltersLevel.assignedToMyOrg = {
+          tasksFilters.assignedToMyOrg = {
             label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
               taskedOrgUuid: currentOrg.uuid,
@@ -445,7 +446,7 @@ const BaseReportForm = ({
           primaryAdvisor?.position?.organization &&
           primaryAdvisor.position.organization.uuid !== currentOrg?.uuid
         ) {
-          tasksFiltersLevel.assignedToReportOrg = {
+          tasksFilters.assignedToReportOrg = {
             label: `Assigned to ${primaryAdvisor.position.organization}`,
             queryVars: {
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
@@ -456,8 +457,8 @@ const BaseReportForm = ({
         }
 
         if (currentUser.isAdmin()) {
-          tasksFiltersLevel.allTasks = {
-            label: "All efforts", // TODO: Implement conditional labels, until then, we need to be explicit here
+          tasksFilters.allTasks = {
+            label: `All ${tasksLabel}`,
             queryVars: { hasCustomFieldRef1: true }
           }
         }
@@ -799,12 +800,12 @@ const BaseReportForm = ({
               </Fieldset>
 
               <Fieldset
-                title="Efforts" // TODO: Implement conditional labels, until then, we need to be explicit here
+                title={Settings.fields.task.subLevel.longLabel}
                 className="tasks-selector"
               >
                 <Field
                   name="tasks"
-                  label="Efforts" // TODO: Implement conditional labels, until then, we need to be explicit here
+                  label={Settings.fields.task.subLevel.longLabel}
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -815,9 +816,7 @@ const BaseReportForm = ({
                   widget={
                     <AdvancedMultiSelect
                       fieldName="tasks"
-                      placeholder={`Search for ${pluralize(
-                        Settings.fields.task.shortLabel
-                      )}...`}
+                      placeholder={`Search for ${tasksLabel}...`}
                       value={values.tasks}
                       renderSelected={
                         <TaskTable
@@ -826,14 +825,15 @@ const BaseReportForm = ({
                           showParent
                           showDelete
                           showDescription
+                          noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
                         />
                       }
                       overlayColumns={[
-                        "Effort", // TODO: Implement conditional labels, until then, we need to be explicit here
-                        "Objective"
+                        Settings.fields.task.subLevel.shortLabel,
+                        Settings.fields.task.topLevel.shortLabel
                       ]}
                       overlayRenderRow={TaskDetailedOverlayRow}
-                      filterDefs={tasksFiltersLevel}
+                      filterDefs={tasksFilters}
                       objectType={Task}
                       queryParams={{ status: Task.STATUS.ACTIVE }}
                       fields={Task.autocompleteQuery}
@@ -843,9 +843,7 @@ const BaseReportForm = ({
                   extraColElem={
                     <>
                       <FieldHelper.FieldShortcuts
-                        title={`Recent ${pluralize(
-                          Settings.fields.task.shortLabel
-                        )}`}
+                        title={`Recent ${tasksLabel}`}
                         shortcuts={recents.tasks}
                         fieldName="tasks"
                         objectType="Task"

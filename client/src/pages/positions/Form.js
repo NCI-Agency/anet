@@ -135,8 +135,9 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
             currentUser.position &&
             currentUser.position.type === Position.TYPE.SUPER_USER
           ) {
-            orgSearchQuery.parentOrgUuid =
+            orgSearchQuery.parentOrgUuid = [
               currentUser.position.organization.uuid
+            ]
             orgSearchQuery.parentOrgRecursively = true
           }
         }

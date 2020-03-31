@@ -1,6 +1,6 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { Organization, Task } from "models"
+import { Location, Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
@@ -100,6 +100,7 @@ const Approvals = ({ relatedObject }) => {
 
 Approvals.propTypes = {
   relatedObject: PropTypes.oneOfType([
+    PropTypes.instanceOf(Location),
     PropTypes.instanceOf(Organization),
     PropTypes.instanceOf(Task)
   ]).isRequired

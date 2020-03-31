@@ -167,8 +167,9 @@ const OrganizationalChart = ({
     )
     canvas.attr(
       "transform",
-      `translate(${width / 2 - scale * bounds.center[0]},${height / 2 -
-        scale * bounds.center[1]}) scale(${scale})`
+      `translate(${width / 2 - scale * bounds.center[0]},${
+        height / 2 - scale * bounds.center[1]
+      }) scale(${scale})`
     )
 
     setHeight(scale * bounds.size[1] + 50)
@@ -309,14 +310,7 @@ const OrganizationalChart = ({
       .attr("width", 26)
       .attr("height", 26)
       .attr("y", -15)
-      .attr(
-        "href",
-        d =>
-          d.person &&
-          (d.person.avatar
-            ? "data:image/jpeg;base64," + d.person.avatar
-            : DEFAULT_AVATAR)
-      )
+      .attr("href", d => d.person && (d.person.avatar || DEFAULT_AVATAR))
 
     headGenter
       .append("text")
@@ -366,14 +360,7 @@ const OrganizationalChart = ({
       .attr("width", 13)
       .attr("height", 13)
       .attr("y", -10)
-      .attr(
-        "href",
-        d =>
-          d.person &&
-          (d.person.avatar
-            ? "data:image/jpeg;base64," + d.person.avatar
-            : DEFAULT_AVATAR)
-      )
+      .attr("href", d => d.person && (d.person.avatar || DEFAULT_AVATAR))
 
     positionsGA
       .append("text")

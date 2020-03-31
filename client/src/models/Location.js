@@ -13,25 +13,62 @@ export default class Location extends Model {
     INACTIVE: "INACTIVE"
   }
 
+  static APPROVAL_STEP_TYPE = {
+    PLANNING_APPROVAL: "PLANNING_APPROVAL",
+    REPORT_APPROVAL: "REPORT_APPROVAL"
+  }
+
   static yupSchema = yup
     .object()
     .shape({
-      name: yup
-        .string()
-        .required()
-        .default(""),
+      name: yup.string().required().default(""),
       status: yup
         .string()
         .required()
         .default(() => Location.STATUS.ACTIVE),
-      lat: yup
-        .number()
+      lat: yup.number().nullable().default(null),
+      lng: yup.number().nullable().default(null),
+      // FIXME: resolve code duplication in yup schema for approval steps
+      planningApprovalSteps: yup
+        .array()
+        .of(
+          yup.object().shape({
+            name: yup
+              .string()
+              .required("You must provide the step name")
+              .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Location.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
+            approvers: yup
+              .array()
+              .required("You must select at least one approver")
+              .default([])
+          })
+        )
         .nullable()
-        .default(null),
-      lng: yup
-        .number()
+        .default([]),
+      approvalSteps: yup
+        .array()
+        .of(
+          yup.object().shape({
+            name: yup
+              .string()
+              .required("You must provide the step name")
+              .default(""),
+            type: yup
+              .string()
+              .required()
+              .default(() => Location.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
+            approvers: yup
+              .array()
+              .required("You must select at least one approver")
+              .default([])
+          })
+        )
         .nullable()
-        .default(null)
+        .default([])
     })
     .concat(Model.yupSchema)
 

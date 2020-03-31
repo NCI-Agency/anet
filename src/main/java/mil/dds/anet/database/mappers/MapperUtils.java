@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.invoke.MethodHandles;
-import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -86,12 +85,12 @@ public class MapperUtils {
     return rs.getBoolean(columnName);
   }
 
-  public static Blob getOptionalBlob(final ResultSet rs, final String columnName)
+  public static byte[] getOptionalBytes(final ResultSet rs, final String columnName)
       throws SQLException {
     if (!containsColumnNamed(rs, columnName)) {
       return null;
     }
-    return rs.getBlob(columnName);
+    return rs.getBytes(columnName);
   }
 
   public static <T extends Enum<T>> T getEnumIdx(ResultSet rs, String columnName, Class<T> clazz)

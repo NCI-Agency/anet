@@ -67,15 +67,15 @@ public class PersonTest extends BeanTester<Person> {
   @Test
   public void testAvatarResizingNoAvatar() {
     Person person = new Person();
-    person.setAvatar(null);
-    assertThat(person.getAvatar(32)).isNull();
+    person.setAvatar((String) null);
+    assertThat(person.resizeAvatar(32)).isNull();
   }
 
   @Test
   public void testAvatarResizingMalformedData() {
     Person person = new Person();
     person.setAvatar("malformedImageData");
-    assertThat(person.getAvatar(32)).isNull();
+    assertThat(person.resizeAvatar(32)).isNull();
   }
 
   @Test
@@ -89,10 +89,11 @@ public class PersonTest extends BeanTester<Person> {
     assertThat(imageBinary.getWidth()).isNotEqualTo(32);
     assertThat(imageBinary.getHeight()).isNotEqualTo(32);
 
-    String resizedAvatar = person.getAvatar(32);
-
+    String resizedAvatar = person.resizeAvatar(32);
     assertThat(resizedAvatar).isNotNull();
-    imageBinary = Utils.convert(resizedAvatar);
+
+    person.setAvatar(resizedAvatar);
+    imageBinary = Utils.convert(person.getAvatar());
 
     assertThat(imageBinary.getWidth()).isEqualTo(32);
     assertThat(imageBinary.getHeight()).isEqualTo(32);

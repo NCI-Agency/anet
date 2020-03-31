@@ -21,6 +21,7 @@ public enum IdDataLoaderKey {
   LOCATIONS(LocationDao.TABLE_NAME), // -
   ORGANIZATIONS(OrganizationDao.TABLE_NAME), // -
   PEOPLE(PersonDao.TABLE_NAME), // -
+  PEOPLE_AVATARS((PersonDao.TABLE_NAME + ".avatar")), // -
   POSITIONS(PositionDao.TABLE_NAME), // -
   REPORTS(ReportDao.TABLE_NAME), // -
   TAGS(TagDao.TABLE_NAME), // -

@@ -52,7 +52,7 @@ const Chart = ({
     if (!data) {
       return []
     }
-    const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
+    const noTaskMessage = `No ${Settings.fields.task.subLevel.shortLabel}`
     const noTask = {
       uuid: "-1",
       shortName: noTaskMessage,
@@ -170,7 +170,7 @@ Map.propTypes = {
 const ReportsByTask = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
 
-  const taskShortLabel = Settings.fields.task.shortLabel
+  const taskShortLabel = Settings.fields.task.subLevel.shortLabel
   const chartId = "reports_by_task"
   const selectedBarClass = "selected-bar"
   const VISUALIZATIONS = [
