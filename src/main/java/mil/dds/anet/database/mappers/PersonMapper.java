@@ -44,7 +44,10 @@ public class PersonMapper implements RowMapper<Person> {
     a.setBiography(MapperUtils.getOptionalString(rs, "people_biography"));
     a.setDomainUsername(MapperUtils.getOptionalString(rs, "people_domainUsername"));
     a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
-    a.setAvatar(MapperUtils.getOptionalBytes(rs, "people_avatar"));
+    // Treat "avatar" special so it only gets loaded & set when explicitly requested
+    if (MapperUtils.containsColumnNamed(rs, "people_avatar")) {
+      a.setAvatar(rs.getBytes("people_avatar"));
+    }
 
     return a;
   }

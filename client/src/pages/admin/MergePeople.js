@@ -57,12 +57,16 @@ const MergePeople = ({ pageDispatchers }) => {
         "You must select a ${path}",
         value => value && value.uuid
       )
-      .test("not-equals-loser", "You selected the same person twice!", function(
-        value
-      ) {
-        const l = this.resolve(yup.ref("loser"))
-        return value && value.uuid && l && l.uuid ? value.uuid !== l.uuid : true
-      })
+      .test(
+        "not-equals-loser",
+        "You selected the same person twice!",
+        function(value) {
+          const l = this.resolve(yup.ref("loser"))
+          return value && value.uuid && l && l.uuid
+            ? value.uuid !== l.uuid
+            : true
+        }
+      )
       .test(
         "equal-roles",
         `You can only merge people of the same Role (i.e. ${Settings.fields.advisor.person.name}/${Settings.fields.principal.person.name})`,

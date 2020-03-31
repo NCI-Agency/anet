@@ -185,9 +185,7 @@ const BaseInsightsShow = ({
   function getCutoffDate() {
     const maxReportAge =
       1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
-    return moment()
-      .subtract(maxReportAge, "days")
-      .clone()
+    return moment().subtract(maxReportAge, "days").clone()
   }
 
   function getCurrentDateTime() {

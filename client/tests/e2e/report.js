@@ -517,10 +517,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   // check date and time
   const dateTimeFormat = "DD-MM-YYYY HH:mm"
   const dateTimeValue = await $engagementDate.getAttribute("value")
-  const expectedDateTime = moment()
-    .hour(23)
-    .minute(45)
-    .format(dateTimeFormat)
+  const expectedDateTime = moment().hour(23).minute(45).format(dateTimeFormat)
   t.is(
     dateTimeValue,
     expectedDateTime,

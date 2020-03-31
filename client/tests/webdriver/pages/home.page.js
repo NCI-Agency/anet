@@ -24,8 +24,7 @@ class Home extends Page {
       () => {
         return this.securityBanner.getText() === value
       },
-      5000,
-      "Expected different banner text after 5s"
+      { timeout: 5000, timeoutMsg: "Expected different banner text after 5s" }
     )
   }
 }

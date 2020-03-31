@@ -21,22 +21,13 @@ export default class Location extends Model {
   static yupSchema = yup
     .object()
     .shape({
-      name: yup
-        .string()
-        .required()
-        .default(""),
+      name: yup.string().required().default(""),
       status: yup
         .string()
         .required()
         .default(() => Location.STATUS.ACTIVE),
-      lat: yup
-        .number()
-        .nullable()
-        .default(null),
-      lng: yup
-        .number()
-        .nullable()
-        .default(null),
+      lat: yup.number().nullable().default(null),
+      lng: yup.number().nullable().default(null),
       // FIXME: resolve code duplication in yup schema for approval steps
       planningApprovalSteps: yup
         .array()

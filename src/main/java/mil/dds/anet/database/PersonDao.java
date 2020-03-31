@@ -27,11 +27,15 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
   public static String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
       "biography", "country", "gender", "endOfTourDate", "domainUsername", "pendingVerification",
-      "avatar", "code", "updatedAt", "customFields"};
+      "code", "updatedAt", "customFields"};
+  // "avatar" has its own batcher
+  public static String[] avatarFields = {"uuid", "avatar"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static String TABLE_NAME = "people";
   public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
+  public static String PERSON_AVATAR_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, avatarFields, true);
   public static String PERSON_FIELDS_NOAS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
 
@@ -49,11 +53,30 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     }
   }
 
+  static class AvatarBatcher extends IdBatcher<Person> {
+    private static final String sql = "/* batch.getPeopleAvatars */ SELECT " + PERSON_AVATAR_FIELDS
+        + " FROM people WHERE uuid IN ( <uuids> )";
+
+    public AvatarBatcher() {
+      super(sql, "uuids", new PersonMapper());
+    }
+  }
+
   @Override
   public List<Person> getByIds(List<String> uuids) {
     final IdBatcher<Person> idBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
     return idBatcher.getByIds(uuids);
+  }
+
+  public Person getAvatar(String uuid) {
+    return getAvatars(Arrays.asList(uuid)).get(0);
+  }
+
+  public List<Person> getAvatars(List<String> uuids) {
+    final IdBatcher<Person> avatarBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(AvatarBatcher.class);
+    return avatarBatcher.getByIds(uuids);
   }
 
   static class PersonPositionHistoryBatcher extends ForeignKeyBatcher<PersonPositionHistory> {
