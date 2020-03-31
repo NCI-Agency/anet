@@ -16,8 +16,7 @@ class Onboard extends Page {
       () => {
         return this.welcomeText.getText() === value
       },
-      5000,
-      "Expected different welcome text after 5s"
+      { timeout: 5000, timeoutMsg: "Expected different welcome text after 5s" }
     )
   }
 }

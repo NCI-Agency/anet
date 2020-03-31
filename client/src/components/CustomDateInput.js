@@ -63,10 +63,7 @@ const CustomDateInput = ({
       formatDate={date => moment(date).format(inputFormat)}
       parseDate={str => moment(str, dateFormats, true).toDate()}
       placeholder={inputFormat}
-      maxDate={moment()
-        .add(20, "years")
-        .endOf("year")
-        .toDate()}
+      maxDate={moment().add(20, "years").endOf("year").toDate()}
       canClearSelection={false}
       showActionsBar
       closeOnSelection={!withTime}

@@ -496,60 +496,228 @@ table hr.attendee-divider {
 	clear: both;
 }
 
-.report-cancelled {
-	/*border-left: 1.5rem solid #DA9795;*/
-	border-left: 1.5rem solid #C23030;
-	padding-left: 1rem;
-}
-
-.report-rejected {
-	border-left: 1.5rem solid #EB532D;
-	padding-left: 1rem;
-}
-
+/* Colour indication of reports in the ReportSummary */
 .report-draft {
-	border-left: 1.5rem solid #f3a537;
-	padding-left: 1rem;
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #bdbdaf;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 0.3rem,
+		#bdbdaf 0.3rem,
+		#bdbdaf 0.6rem
+	);
+}
+.report-pending_approval {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #848478;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 0.3rem,
+		#848478 0.3rem,
+		#848478 0.6rem
+	);
+}
+.report-published {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #5cb85c;
+	background-color: #5cb85c;
+}
+.report-rejected {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #c23030;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 0.3rem,
+		#c23030 0.3rem,
+		#c23030 0.6rem
+	);
+}
+.report-cancelled {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #ec971f;
+	background-color: #ec971f;
+}
+.report-approved {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #75eb75;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 0.3rem,
+		#75eb75 0.3rem,
+		#75eb75 0.6rem
+	);
 }
 
-.report-future {
-	/*border-left: 1.5rem solid #238C2C; */
-	border-left: 1.5rem solid #00998C;
-	padding-left: 1rem;
+/* Colour indication of future reports in the ReportSummary */
+.report-future-draft {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #bdbdaf;
+	background: repeating-linear-gradient(
+		45deg,
+		#2965cc,
+		#2965cc 0.3rem,
+		#bdbdaf 0.3rem,
+		#bdbdaf 0.6rem
+	);
+}
+.report-future-pending_approval {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #848478;
+	background: repeating-linear-gradient(
+		45deg,
+		#2965cc,
+		#2965cc 0.3rem,
+		#848478 0.3rem,
+		#848478 0.6rem
+	);
+}
+.report-future-published {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #2965cc;
+	background-color: #2965cc;
+}
+.report-future-rejected {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #c23030;
+	background: repeating-linear-gradient(
+		45deg,
+		#2965cc,
+		#2965cc 0.3rem,
+		#c23030 0.3rem,
+		#c23030 0.6rem
+	);
+}
+.report-future-cancelled {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #ec971f;
+	background-color: #ec971f;
+}
+.report-future-approved {
+	width: 1.5rem;
+	padding-right: 1.5rem;
+	margin-right: 1rem;
+	border: 1px solid #2965cc;
+	background-color: #2965cc;
 }
 
-.report-pending {
-	border-left: 1.5rem solid #2965CC;
-	padding-left: 1rem;
-}
-
+/* Colour indication of reports in the ReportCalendar */
 .fc-dayGrid-view .event-draft, .fc-timeGrid-view .event-draft {
-  background-color: #f3a537;
-  border-color: #f3a537;
-}
-.fc-dayGrid-view .event-cancelled, .fc-timeGrid-view .event-cancelled {
-  background-color: #EC971F;
-  border-color: #EC971F;
+	border-color: #bdbdaf;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 3rem,
+		#bdbdaf 3rem,
+		#bdbdaf 4rem
+	);
 }
 .fc-dayGrid-view .event-pending_approval, .fc-timeGrid-view .event-pending_approval {
-  background-color: #969696;
-  border-color: #969696;
-}
-.fc-dayGrid-view .event-rejected, .fc-timeGrid-view .event-rejected {
-  background-color: #c23030;
-  border-color: #c23030;
-}
-.fc-dayGrid-view .event-approved, .fc-timeGrid-view .event-approved {
-  background-color: #5cb85c;
-  border-color: #5cb85c;
+	border-color: #848478;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 3rem,
+		#848478 3rem,
+		#848478 4rem
+	);
 }
 .fc-dayGrid-view .event-published, .fc-timeGrid-view .event-published {
-  background-color: #2965CC;
-  border-color: #2965CC;
+	border-color: #5cb85c;
+	background-color: #5cb85c;
 }
-.fc-dayGrid-view .event-future, .fc-timeGrid-view .event-future {
-  background-color: #00998C;
-  border-color: #00998C;
+.fc-dayGrid-view .event-rejected, .fc-timeGrid-view .event-rejected {
+	border-color: #c23030;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 3rem,
+		#c23030 3rem,
+		#c23030 4rem
+	);
+}
+.fc-dayGrid-view .event-cancelled, .fc-timeGrid-view .event-cancelled {
+	border-color: #ec971f;
+	background-color: #ec971f;
+}
+.fc-dayGrid-view .event-approved, .fc-timeGrid-view .event-approved {
+	border-color: #75eb75;
+	background: repeating-linear-gradient(
+		45deg,
+		#5cb85c,
+		#5cb85c 3rem,
+		#75eb75 3rem,
+		#75eb75 4rem
+	);
+}
+
+/* Colour indication of future reports in the ReportCalendar */
+.fc-dayGrid-view .event-future-draft, .fc-timeGrid-view .event-future-draft {
+	border-color: #bdbdaf;
+	background: repeating-linear-gradient(
+		45deg,
+		#2965cc,
+		#2965cc 3rem,
+		#bdbdaf 3rem,
+		#bdbdaf 4rem
+	);
+}
+.fc-dayGrid-view .event-future-pending_approval, .fc-timeGrid-view .event-future-pending_approval {
+	border-color: #848478;
+	background: repeating-linear-gradient(
+		45deg,
+		#2965cc,
+		#2965cc 3rem,
+		#848478 3rem,
+		#848478 4rem
+	);
+}
+.fc-dayGrid-view .event-future-published, .fc-timeGrid-view .event-future-published {
+	border-color: #2965cc;
+	background-color: #2965cc;
+}
+.fc-dayGrid-view .event-future-rejected, .fc-timeGrid-view .event-future-rejected {
+	border-color: #c23030;
+	background: repeating-linear-gradient(
+		45deg,
+		#2965cc,
+		#2965cc 3rem,
+		#c23030 3rem,
+		#c23030 4rem
+	);
+}
+.fc-dayGrid-view .event-future-cancelled, .fc-timeGrid-view .event-future-cancelled {
+	border-color: #ec971f;
+	background-color: #ec971f;
+}
+.fc-dayGrid-view .event-future-approved, .fc-timeGrid-view .event-future-approved {
+	border-color: #2965cc;
+	background-color: #2965cc;
 }
 
 .form-horizontal fieldset:last-child {

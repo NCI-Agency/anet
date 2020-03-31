@@ -50,7 +50,7 @@ if (debug) {
   capabilities["browserstack.debug"] = debug
 }
 if (localIdentifier) {
-  // For Travis CI
+  // For GitHub Actions
   capabilities["browserstack.localIdentifier"] = localIdentifier
 }
 capabilities.build = util.format(
