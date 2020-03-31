@@ -1356,7 +1356,7 @@
     jest-util "^25.2.3"
     slash "^3.0.0"
 
-"@jest/core@^25.2.3", "@jest/core@^25.2.4":
+"@jest/core@^25.2.4":
   version "25.2.4"
   resolved "https://registry.yarnpkg.com/@jest/core/-/core-25.2.4.tgz#382ef80369d3311f1df79db1ee19e958ae95cdad"
   integrity sha512-WcWYShl0Bqfcb32oXtjwbiR78D/djhMdJW+ulp4/bmHgeODcsieqUJfUH+kEv8M7VNV77E6jds5aA+WuGh1nmg==
@@ -1471,7 +1471,7 @@
     jest-runner "^25.2.4"
     jest-runtime "^25.2.4"
 
-"@jest/transform@^25.2.3", "@jest/transform@^25.2.4":
+"@jest/transform@^25.2.4":
   version "25.2.4"
   resolved "https://registry.yarnpkg.com/@jest/transform/-/transform-25.2.4.tgz#34336f37f13f62f7d1f5b93d5d150ba9eb3e11b9"
   integrity sha512-6eRigvb+G6bs4kW5j1/y8wu4nCrmVuIe0epPBbiWaYlwawJ8yi1EIyK3d/btDqmBpN5GpN4YhR6iPPnDmkYdTA==
@@ -3292,10 +3292,10 @@ autoprefixer@9.7.5, autoprefixer@^9.7.2:
     postcss "^7.0.27"
     postcss-value-parser "^4.0.3"
 
-ava@3.5.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/ava/-/ava-3.5.1.tgz#6dde079621606824495957c78f95c8485639bc14"
-  integrity sha512-gde/nh438C6cj6/pKntjoPmGg1VSsZlRjyuYTjp0ixsNDj+1YNVeASrlzI+NgvcUmbx17G8uOgByt7lDu8ddXA==
+ava@3.5.2:
+  version "3.5.2"
+  resolved "https://registry.yarnpkg.com/ava/-/ava-3.5.2.tgz#9a37305c03840c4b63eb53edae29741d8414633e"
+  integrity sha512-4MYpx0D7VQwzvqCOQsbnPK2Dmg7lipWe2k/n75i0cuFwuosq9MYIWc9MnmCZ1GIlPQ70qOP1DgQcD0ScH/W79Q==
   dependencies:
     "@concordance/react" "^2.0.0"
     ansi-styles "^4.2.1"
@@ -3428,20 +3428,7 @@ babel-helper-to-multiple-sequence-expressions@^0.5.0:
   resolved "https://registry.yarnpkg.com/babel-helper-to-multiple-sequence-expressions/-/babel-helper-to-multiple-sequence-expressions-0.5.0.tgz#a3f924e3561882d42fcf48907aa98f7979a4588d"
   integrity sha512-m2CvfDW4+1qfDdsrtf4dwOslQC3yhbgyBFptncp4wvtdrDHqueW7slsYv4gArie056phvQFhT2nRcGS4bnm6mA==
 
-babel-jest@25.2.3:
-  version "25.2.3"
-  resolved "https://registry.yarnpkg.com/babel-jest/-/babel-jest-25.2.3.tgz#8f1c088b1954963e8a5384be2e219dae00d053f4"
-  integrity sha512-03JjvEwuDrEz/A45K8oggAv+Vqay0xcOdNTJxYFxiuZvB5vlHKo1iZg9Pi5vQTHhNCKpGLb7L/jvUUafyh9j7g==
-  dependencies:
-    "@jest/transform" "^25.2.3"
-    "@jest/types" "^25.2.3"
-    "@types/babel__core" "^7.1.0"
-    babel-plugin-istanbul "^6.0.0"
-    babel-preset-jest "^25.2.1"
-    chalk "^3.0.0"
-    slash "^3.0.0"
-
-babel-jest@^25.2.4:
+babel-jest@25.2.4, babel-jest@^25.2.4:
   version "25.2.4"
   resolved "https://registry.yarnpkg.com/babel-jest/-/babel-jest-25.2.4.tgz#b21b68d3af8f161c3e6e501e91f0dea8e652e344"
   integrity sha512-+yDzlyJVWrqih9i2Cvjpt7COaN8vUwCsKGtxJLzg6I0xhxD54K8mvDUCliPKLufyzHh/c5C4MRj4Vk7VMjOjIg==
@@ -6657,10 +6644,10 @@ eslint-plugin-flowtype@4.7.0:
   dependencies:
     lodash "^4.17.15"
 
-eslint-plugin-import@2.20.1:
-  version "2.20.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.20.1.tgz#802423196dcb11d9ce8435a5fc02a6d3b46939b3"
-  integrity sha512-qQHgFOTjguR+LnYRoToeZWT62XM55MBVXObHM6SKFd1VzDcX/vqT1kAz8ssqigh5eMj8qXcRoXXGZpPP6RfdCw==
+eslint-plugin-import@2.20.2:
+  version "2.20.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.20.2.tgz#91fc3807ce08be4837141272c8b99073906e588d"
+  integrity sha512-FObidqpXrR8OnCh4iNsxy+WACztJLXAHBO5hK79T1Hc77PgQZkyDGA5Ag9xAvRpglvLNxhH/zSmZ70/pZ31dHg==
   dependencies:
     array-includes "^3.0.3"
     array.prototype.flat "^1.2.1"
@@ -8578,19 +8565,7 @@ html-react-parser@0.10.3:
     react-property "1.0.1"
     style-to-object "0.3.0"
 
-html-webpack-plugin@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-4.0.2.tgz#c96a48d0ee53d33dcc909d6b65ad28f3d627efd4"
-  integrity sha512-dCyjg2dEBf0Azni2byDcwfk5l5XKNEnA3OU4cejovqkKGc4ZixC6Aw6+U2sAG/ellHIjoiQhyU4oKMO6fQFaYA==
-  dependencies:
-    html-minifier-terser "^5.0.1"
-    loader-utils "^1.2.3"
-    lodash "^4.17.15"
-    pretty-error "^2.1.1"
-    tapable "^1.1.3"
-    util.promisify "1.0.0"
-
-html-webpack-plugin@^4.0.0-beta.2:
+html-webpack-plugin@4.0.3, html-webpack-plugin@^4.0.0-beta.2:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-4.0.3.tgz#70659c8836210249cb6fa9dd6706a957547666d5"
   integrity sha512-XCm5MGK6Yv/ey30fbhqjKIGm1r6G1HxmNorJ/xUdL/Zj3mOLtb9ZHEEIw0e4h3VzgyUrp8szCJh3VN9z1LNx7A==
@@ -9646,7 +9621,7 @@ jest-changed-files@^25.2.3:
     execa "^3.2.0"
     throat "^5.0.0"
 
-jest-cli@^25.2.3:
+jest-cli@^25.2.4:
   version "25.2.4"
   resolved "https://registry.yarnpkg.com/jest-cli/-/jest-cli-25.2.4.tgz#021c2383904696597abc060dcb133c82ebd8bfcc"
   integrity sha512-zeY2pRDWKj2LZudIncvvguwLMEdcnJqc2jJbwza1beqi80qqLvkPF/BjbFkK2sIV3r+mfTJS+7ITrvK6pCdRjg==
@@ -9981,14 +9956,14 @@ jest-worker@^25.1.0, jest-worker@^25.2.1:
     merge-stream "^2.0.0"
     supports-color "^7.0.0"
 
-jest@25.2.3:
-  version "25.2.3"
-  resolved "https://registry.yarnpkg.com/jest/-/jest-25.2.3.tgz#0cc9b35192f236fe1d5e76ed8eb3a54e7e0ee2e0"
-  integrity sha512-UbUmyGeZt0/sCIj/zsWOY0qFfQsx2qEFIZp0iEj8yVH6qASfR22fJOf12gFuSPsdSufam+llZBB0MdXWCg6EEQ==
+jest@25.2.4:
+  version "25.2.4"
+  resolved "https://registry.yarnpkg.com/jest/-/jest-25.2.4.tgz#d10941948a2b57eb7accc2e7ae78af4a0e11b40a"
+  integrity sha512-Lu4LXxf4+durzN/IFilcAoQSisOwgHIXgl9vffopePpSSwFqfj1Pj4y+k3nL8oTbnvjxgDIsEcepy6he4bWqnQ==
   dependencies:
-    "@jest/core" "^25.2.3"
+    "@jest/core" "^25.2.4"
     import-local "^3.0.2"
-    jest-cli "^25.2.3"
+    jest-cli "^25.2.4"
 
 js-base64@^2.3.2:
   version "2.5.2"
@@ -13332,10 +13307,10 @@ react-toastify@5.5.0:
     prop-types "^15.7.2"
     react-transition-group "^4"
 
-react-tooltip@4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/react-tooltip/-/react-tooltip-4.1.2.tgz#bc9f8620759518f6ef294198d082097e968d549c"
-  integrity sha512-AXQ5uumN/ZpPO6mlPrV52S1As1OOHhyp3pinWFEtTlpKojS8+CL5r/n0oiO8GR5hWqrvEONU34NEF01N2ODwqg==
+react-tooltip@4.1.3:
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/react-tooltip/-/react-tooltip-4.1.3.tgz#29d4fe854b678992965b131698b3bf1818474015"
+  integrity sha512-Tzi9QGn7WGC6NocvWHtQw2Lp7nOFSt2rB9Gyg4O4vflT/catGDNMvo8vXBIzKHYKp+tXYj8eZCN7AxoZtW3zXg==
   dependencies:
     prop-types "^15.7.2"
 
