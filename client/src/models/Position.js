@@ -40,22 +40,13 @@ export default class Position extends Model {
         .string()
         .required()
         .default(() => Position.TYPE.ADVISOR),
-      code: yup
-        .string()
-        .nullable()
-        .default(""),
+      code: yup.string().nullable().default(""),
       status: yup
         .string()
         .required()
         .default(() => Position.STATUS.ACTIVE),
-      associatedPositions: yup
-        .array()
-        .nullable()
-        .default([]),
-      previousPeople: yup
-        .array()
-        .nullable()
-        .default([]),
+      associatedPositions: yup.array().nullable().default([]),
+      previousPeople: yup.array().nullable().default([]),
       organization: yup
         .object()
         .nullable()
@@ -66,14 +57,8 @@ export default class Position extends Model {
           "${path} is required",
           value => value && value.uuid
         ),
-      person: yup
-        .object()
-        .nullable()
-        .default({}),
-      location: yup
-        .object()
-        .nullable()
-        .default({})
+      person: yup.object().nullable().default({}),
+      location: yup.object().nullable().default({})
     })
     .concat(Model.yupSchema)
 

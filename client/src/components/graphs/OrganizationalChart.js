@@ -167,8 +167,9 @@ const OrganizationalChart = ({
     )
     canvas.attr(
       "transform",
-      `translate(${width / 2 - scale * bounds.center[0]},${height / 2 -
-        scale * bounds.center[1]}) scale(${scale})`
+      `translate(${width / 2 - scale * bounds.center[0]},${
+        height / 2 - scale * bounds.center[1]
+      }) scale(${scale})`
     )
 
     setHeight(scale * bounds.size[1] + 50)

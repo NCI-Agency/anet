@@ -55,32 +55,14 @@ export const CUSTOM_FIELD_TYPE = {
 }
 
 const CUSTOM_FIELD_TYPE_SCHEMA = {
-  [CUSTOM_FIELD_TYPE.TEXT]: yup
-    .string()
-    .nullable()
-    .default(""),
-  [CUSTOM_FIELD_TYPE.NUMBER]: yup
-    .number()
-    .nullable()
-    .default(null),
+  [CUSTOM_FIELD_TYPE.TEXT]: yup.string().nullable().default(""),
+  [CUSTOM_FIELD_TYPE.NUMBER]: yup.number().nullable().default(null),
   [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
   [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
-  [CUSTOM_FIELD_TYPE.ENUM]: yup
-    .string()
-    .nullable()
-    .default(""),
-  [CUSTOM_FIELD_TYPE.ENUMSET]: yup
-    .array()
-    .nullable()
-    .default([]),
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup
-    .array()
-    .nullable()
-    .default([]),
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup
-    .mixed()
-    .nullable()
-    .default(null)
+  [CUSTOM_FIELD_TYPE.ENUM]: yup.string().nullable().default(""),
+  [CUSTOM_FIELD_TYPE.ENUMSET]: yup.array().nullable().default([]),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup.array().nullable().default([]),
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null)
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
@@ -105,10 +87,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
     })
   }
 
-  let fieldYupSchema = yup
-    .mixed()
-    .nullable()
-    .default(null)
+  let fieldYupSchema = yup.mixed().nullable().default(null)
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }
@@ -138,10 +117,7 @@ export const createYupObjectShape = (config, prefix = "formCustomFields") => {
         .map(([k, v]) => [k, createFieldYupSchema(k, config[k], prefix)])
         .filter(([k, v]) => v !== null)
     )
-    objShape.invisibleCustomFields = yup
-      .mixed()
-      .nullable()
-      .default(null)
+    objShape.invisibleCustomFields = yup.mixed().nullable().default(null)
   }
   return yup.object().shape(objShape)
 }
@@ -152,10 +128,7 @@ export default class Model {
   }
 
   static yupSchema = yup.object().shape({
-    notes: yup
-      .array()
-      .nullable()
-      .default([])
+    notes: yup.array().nullable().default([])
   })
 
   static fillObject(props, yupSchema) {

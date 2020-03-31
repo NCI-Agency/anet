@@ -149,7 +149,14 @@ const names = [
   { name: "RAHMANZAI", ethnicGroup: ["Pashto"] },
   {
     name: "RASUL",
-    ethnicGroup: ["Urdu", "Pashto", "Bengali", "Indian", "Arabic", "Indonesian"]
+    ethnicGroup: [
+      "Urdu",
+      "Pashto",
+      "Bengali",
+      "Indian",
+      "Arabic",
+      "Indonesian"
+    ]
   },
   {
     name: "REHMAN",
