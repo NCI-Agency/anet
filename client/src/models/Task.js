@@ -216,11 +216,6 @@ export default class Task extends Model {
           n.noteRelatedObjects.length === 2 &&
           n.noteRelatedObjects.filter(
             ro =>
-              ro.relatedObjectType === "tasks" &&
-              ro.relatedObjectUuid === this.uuid
-          ).length &&
-          n.noteRelatedObjects.filter(
-            ro =>
               ro.relatedObjectType === "reports" &&
               publishedReportsUuids.includes(ro.relatedObjectUuid)
           ).length &&
@@ -235,6 +230,7 @@ export default class Task extends Model {
         assessmentResults[k].push(o[k])
       })
     )
+    console.log("assessmentResults", dateRange, assessmentResults)
     return assessmentResults
   }
 
@@ -244,11 +240,6 @@ export default class Task extends Model {
         return (
           n.type === NOTE_TYPE.ASSESSMENT &&
           n.noteRelatedObjects.length === 1 &&
-          n.noteRelatedObjects.filter(
-            ro =>
-              ro.relatedObjectType === "tasks" &&
-              ro.relatedObjectUuid === this.uuid
-          ).length &&
           (!dateRange ||
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
         )
