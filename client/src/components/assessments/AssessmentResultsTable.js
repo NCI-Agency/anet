@@ -270,7 +270,7 @@ const AssessmentResultsTable2 = ({
   return (
     <div style={{ ...style }}>
       <Fieldset title="Assessment results" id="entity-assessments-results">
-        <Table condensed responsive>
+        <Table condensed responsive className="assessments-table">
           <AssessmentsTableHeader periods={assessmentPeriods} />
           <tbody>
             {!_isEmpty(subEntities) && (
