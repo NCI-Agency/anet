@@ -3,6 +3,7 @@ import AddAssessmentModal from "components/assessments/AddAssessmentModal"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import { Formik } from "formik"
+import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -220,7 +221,7 @@ const EntityAssessmentResults = ({
     <>
       <tr>
         <td colSpan={assessmentPeriods.length} className="entity-title-row">
-          <b>{entity?.toString()}</b>
+          <LinkTo modelType="Task" model={entity} />
         </td>
       </tr>
       {Object.keys(assessmentDefinition || {}).map(key => (
