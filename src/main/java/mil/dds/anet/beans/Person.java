@@ -21,7 +21,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Person extends AbstractCustomizableAnetBean implements Principal {
+public class Person extends AbstractCustomizableAnetBean implements Principal, RelatableObject {
 
   public static enum PersonStatus {
     ACTIVE, INACTIVE, NEW_USER
