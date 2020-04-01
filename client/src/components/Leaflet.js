@@ -95,7 +95,7 @@ const Leaflet = ({
   marginBottom,
   markers,
   mapId: initialMapId,
-  updateMarkers
+  onMapClick
 }) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
@@ -113,6 +113,7 @@ const Leaflet = ({
   const [map, setMap] = useState(null)
   const [markerLayer, setMarkerLayer] = useState(null)
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
+  const prevMarkersRef = useRef()
 
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
@@ -130,8 +131,7 @@ const Leaflet = ({
           marker.bindPopup(m.name)
         }
         if (m.onMove) {
-          marker.on("move", event => m.onMove(event, map))
-          map.on("click", event => marker.setLatLng(event.latlng).update())
+          marker.on("moveend", event => m.onMove(event, map))
         }
         markerLayer.addLayer(marker)
       })
@@ -159,7 +159,13 @@ const Leaflet = ({
       Settings.imagery.mapOptions.homeView.zoomLevel
     )
     if (searchProvider) {
-      new GeoSearchControl({ provider: searchProvider }).addTo(newMap)
+      const gsc = new GeoSearchControl({ provider: searchProvider })
+      setTimeout(() => {
+        // workaround for preventing the marker from moving when search icon is clicked
+        // https://github.com/smeijer/leaflet-geosearch/issues/169#issuecomment-458573562
+        gsc.getContainer().onclick = e => e.stopPropagation()
+      })
+      gsc.addTo(newMap)
     }
     const layerControl = new Control.Layers({}, {}, { collapsed: false })
     layerControl.addTo(newMap)
@@ -174,11 +180,36 @@ const Leaflet = ({
   }, [mapId])
 
   useEffect(() => {
-    if (!doInitializeMarkerLayer && markerLayer) {
-      markerLayer.clearLayers()
-      updateMarkerLayer(markers, map.getZoom())
+    // if the map container is not fully visible and not focused, google chrome scrolls down to make whole container visible when it is focused
+    // thus when clicked on the map, a scroll event gets fired before click event
+    // leaflet calculates lon/lat coordinates with respect to the click event X and Y coordinates
+    // since the click event is fired after scroll, map coordinates shift with respect to click event X - Y coordinates
+    // and eventually marker is placed a certain amount (scrolled height to be precise) belove the clicked point
+    // firefox doesn't behave this way and everything works as expected
+    // see https://github.com/Leaflet/Leaflet/issues/4125
+    if (map && onMapClick) {
+      map.on("click", event => onMapClick(event, map))
+      return () => map.off("click")
     }
-  }, [updateMarkers]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [onMapClick, map])
+
+  useEffect(() => {
+    if (
+      !doInitializeMarkerLayer &&
+      markerLayer &&
+      JSON.stringify(prevMarkersRef.current) !== JSON.stringify(markers)
+    ) {
+      // setTimeout is a workaround for "Uncaught DOMException: Failed to execute 'removeChild' on 'Node': The node to be removed is no longer a child of this node."
+      setTimeout(() => {
+        markerLayer.clearLayers()
+        updateMarkerLayer(markers, map.getZoom())
+      })
+    }
+  }, [doInitializeMarkerLayer, markerLayer, updateMarkerLayer, map, markers])
+
+  useEffect(() => {
+    prevMarkersRef.current = markers
+  }, [markers])
 
   useEffect(() => {
     if (doInitializeMarkerLayer) {
@@ -211,13 +242,12 @@ Leaflet.propTypes = {
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   markers: PropTypes.array,
   mapId: PropTypes.string, // pass this when you have more than one map on a page
-  updateMarkers: PropTypes.bool
+  onMapClick: PropTypes.func
 }
 Leaflet.defaultProps = {
   width: "100%",
   height: "500px",
-  marginBottom: "18px",
-  updateMarkers: false
+  marginBottom: "18px"
 }
 
 export default Leaflet

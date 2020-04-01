@@ -8,7 +8,7 @@ import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { FastField, Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -70,8 +70,6 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
       }
     }
   }
-
-  let updateMarkers = false
 
   return (
     <Formik
@@ -136,42 +134,22 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <Field
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <GeoLocation
-                      lat={values.lat}
-                      lng={values.lng}
-                      isSubmitting={isSubmitting}
-                      onClearLocation={() => onClearLocation(setFieldValue)}
-                    />
-                  }
+                <GeoLocation
+                  readOnly={false}
+                  lat={values.lat}
+                  lng={values.lng}
+                  isSubmitting={isSubmitting}
+                  setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
                 />
 
-                <Field
-                  name="lat"
-                  component={FieldHelper.InputField}
-                  onBlur={() => {
-                    setFieldTouched("lat", true, false)
-                    setFieldValue("lat", Location.parseCoordinate(values.lat))
-                    updateMarkers = !updateMarkers
-                  }}
-                />
-
-                <Field
-                  name="lng"
-                  component={FieldHelper.InputField}
-                  onBlur={() => {
-                    setFieldTouched("lng", true, false)
-                    setFieldValue("lng", Location.parseCoordinate(values.lng))
-                    updateMarkers = !updateMarkers
-                  }}
-                />
               </Fieldset>
 
               <h3>Drag the marker below to set the location</h3>
-              <Leaflet markers={[marker]} updateMarkers={updateMarkers} />
+              <Leaflet
+                markers={[marker]}
+                onMapClick={(event, map) => onMarkerMapClick(event, map, setFieldValue)}
+              />
 
               <ApprovalsDefinition
                 fieldName="planningApprovalSteps"
@@ -217,14 +195,15 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
   )
 
   function onMarkerMove(event, map, setFieldValue) {
-    const latLng = map.wrapLatLng(event.latlng)
+    const latLng = map.wrapLatLng(event.target.getLatLng())
     setFieldValue("lat", Location.parseCoordinate(latLng.lat))
     setFieldValue("lng", Location.parseCoordinate(latLng.lng))
   }
 
-  function onClearLocation(setFieldValue) {
-    setFieldValue("lat", null)
-    setFieldValue("lng", null)
+  function onMarkerMapClick(event, map, setFieldValue) {
+    const latLng = map.wrapLatLng(event.latlng)
+    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
+    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
   }
 
   function onCancel() {
