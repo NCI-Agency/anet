@@ -203,13 +203,12 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
         .subtract(1, "months")
         .endOf("month"),
       allowNewAssessments: true
+    },
+    {
+      start: moment().startOf("month"),
+      end: moment().endOf("month"),
+      allowNewAssessments: false
     }
-    //,
-    // {
-    //   start: moment().startOf("month"),
-    //   end: moment().endOf("month"),
-    //   allowNewAssessments: false
-    // }
   ]
 
   return (
