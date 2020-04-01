@@ -98,7 +98,7 @@ const Field = ({
     <FormGroup controlId={id} validationState={validationState}>
       {vertical ? (
         <>
-          {label !== null && <ControlLabel>{label}</ControlLabel>}
+          <div>{label !== null && <ControlLabel>{label}</ControlLabel>}</div>
           {widget}
           {getHelpBlock(field, form)}
           {children}
