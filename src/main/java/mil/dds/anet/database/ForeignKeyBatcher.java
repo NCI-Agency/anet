@@ -23,14 +23,16 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
   private Provider<Handle> handle;
   private final String sql;
   private final String paramName;
-  private final ForeignKeyMapper<T> mapper;
+  private final RowMapper<T> objectMapper;
+  private final String foreignKeyName;
   private final Map<String, Object> additionalParams;
 
   public ForeignKeyBatcher(String sql, String paramName, RowMapper<T> objectMapper,
       String foreignKeyName, Map<String, Object> additionalParams) {
     this.sql = sql;
     this.paramName = paramName;
-    this.mapper = new ForeignKeyMapper<>(foreignKeyName, objectMapper);
+    this.objectMapper = objectMapper;
+    this.foreignKeyName = foreignKeyName;
     this.additionalParams = additionalParams;
   }
 
@@ -50,6 +52,7 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
     if (additionalParams != null && !additionalParams.isEmpty()) {
       query.bindMap(additionalParams);
     }
+    final ForeignKeyMapper<T> mapper = new ForeignKeyMapper<>(foreignKeyName, objectMapper);
     return query.map(mapper).withStream(result -> {
       final Map<String, List<T>> map = result.collect(Collectors.toMap(obj -> obj.getForeignKey(), // key
           obj -> new ArrayList<>(Collections.singletonList(obj.getObject())), // value

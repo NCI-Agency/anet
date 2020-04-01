@@ -116,7 +116,8 @@ describe("Create new Person form page", () => {
       CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
       CreatePerson.lastName.click()
       let errorMessage = browser.$("input#emailAddress + span.help-block")
-      errorMessage.waitForDisplayed(1000, true) // element should *not* be visible!
+      // element should *not* be visible!
+      errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       CreatePerson.rank.selectByAttribute(
         "value",
         CreatePerson.getRandomOption(CreatePerson.rank)
@@ -157,7 +158,8 @@ describe("Create new Person form page", () => {
       )
       CreatePerson.lastName.click()
       const errorMessage = browser.$("input#emailAddress + span.help-block")
-      errorMessage.waitForDisplayed(1000, true) // element should *not* be visible!
+      // element should *not* be visible!
+      errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       CreatePerson.rank.selectByAttribute(
         "value",
         CreatePerson.getRandomOption(CreatePerson.rank)
@@ -170,9 +172,7 @@ describe("Create new Person form page", () => {
         "value",
         CreatePerson.getRandomOption(CreatePerson.country)
       )
-      const tomorrow = moment()
-        .add(1, "days")
-        .format("DD-MM-YYYY")
+      const tomorrow = moment().add(1, "days").format("DD-MM-YYYY")
 
       CreatePerson.endOfTourDate.setValue(
         "\uE003".repeat(CreatePerson.endOfTourDate.getValue().length) + tomorrow

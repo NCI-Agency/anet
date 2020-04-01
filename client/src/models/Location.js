@@ -21,10 +21,7 @@ export default class Location extends Model {
   static yupSchema = yup
     .object()
     .shape({
-      name: yup
-        .string()
-        .required()
-        .default(""),
+      name: yup.string().required().default(""),
       status: yup
         .string()
         .required()
