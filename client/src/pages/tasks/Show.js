@@ -12,11 +12,11 @@ import Messages from "components/Messages"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
+  GRAPHQL_NOTES_FIELDS,
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
@@ -134,7 +134,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
-    uuid
+    uuid,
   })
 
   const { done, result } = useBoilerplate({
@@ -144,7 +144,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
-    pageDispatchers
+    pageDispatchers,
   })
 
   if (data) {
@@ -187,28 +187,20 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       ))
   const assessmentPeriods = [
     {
-      start: moment()
-        .subtract(2, "months")
-        .startOf("month"),
-      end: moment()
-        .subtract(2, "months")
-        .endOf("month"),
-      allowNewAssessments: false
+      start: moment().subtract(2, "months").startOf("month"),
+      end: moment().subtract(2, "months").endOf("month"),
+      allowNewAssessments: false,
     },
     {
-      start: moment()
-        .subtract(1, "months")
-        .startOf("month"),
-      end: moment()
-        .subtract(1, "months")
-        .endOf("month"),
-      allowNewAssessments: true
+      start: moment().subtract(1, "months").startOf("month"),
+      end: moment().subtract(1, "months").endOf("month"),
+      allowNewAssessments: true,
     },
     {
       start: moment().startOf("month"),
       end: moment().endOf("month"),
-      allowNewAssessments: false
-    }
+      allowNewAssessments: false,
+    },
   ]
 
   return (
@@ -226,7 +218,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 task.uuid && {
                   relatedObjectType: "tasks",
-                  relatedObjectUuid: task.uuid
+                  relatedObjectUuid: task.uuid,
                 }
               }
             />
@@ -241,7 +233,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                   display: "flex",
                   flexDirection: "row",
                   flexWrap: "nowrap",
-                  padding: "10px"
+                  padding: "10px",
                 }}
               >
                 <Fieldset style={{ flex: "1 1 0" }}>
@@ -370,7 +362,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               <ReportCollection
                 paginationKey={`r_${uuid}`}
                 queryParams={{
-                  taskUuid: uuid
+                  taskUuid: uuid,
                 }}
                 mapId="reports"
               />
@@ -384,7 +376,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
 
 BaseTaskShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+  currentUser: PropTypes.instanceOf(Person),
 }
 
 const TaskShow = props => (

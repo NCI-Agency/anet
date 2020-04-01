@@ -108,10 +108,7 @@ const MonthlyAssessmentRows = ({
     periodsLastAssessment.push(
       entity.getLastAssessment({
         start: period.start.clone().add(1, "months"),
-        end: period.start
-          .clone()
-          .add(1, "months")
-          .endOf("month")
+        end: period.start.clone().add(1, "months").endOf("month")
       })
     )
     periodsAllowNewAssessment.push(
