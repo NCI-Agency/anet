@@ -1,5 +1,4 @@
 import AvatarComponent from "components/AvatarComponent"
-import { AVATAR_IMAGE_DATA_PREFIX } from "components/AvatarDisplayComponent"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
@@ -36,10 +35,7 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
   }
 
   function save() {
-    const updatedAvatar = currentPreview.substring(
-      AVATAR_IMAGE_DATA_PREFIX.length - 1
-    )
-    onAvatarUpdate(updatedAvatar)
+    onAvatarUpdate(currentPreview)
     close()
   }
 }

@@ -96,7 +96,7 @@ const ActionButton = ({ action }) => {
   return step ? (
     <ApprovalStepModal action={action} />
   ) : (
-    <Button className={actionType.cssClass + " btn-sm"}>
+    <Button className={actionType.cssClass + " btn-sm"} disabled>
       <span>
         <LinkTo modelType="Person" model={action.person} isLink={false} />
       </span>

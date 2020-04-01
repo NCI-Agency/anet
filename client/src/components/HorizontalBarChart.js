@@ -100,11 +100,7 @@ const HorizontalBarChart = ({
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
-    const tmpSVG = d3
-      .select("#tmp_svg")
-      .data([1])
-      .enter()
-      .append("svg")
+    const tmpSVG = d3.select("#tmp_svg").data([1]).enter().append("svg")
     const xLabelWidth = function() {
       if (this.getBBox().width > maxXLabelWidth) {
         maxXLabelWidth = this.getBBox().width
@@ -168,20 +164,11 @@ const HorizontalBarChart = ({
     yCategoryScale.domain([yCategoryDomain, 0])
 
     const xMax = d3.max(xLabels)
-    const xScale = d3
-      .scaleLinear()
-      .range([0, xWidth])
-      .domain([0, xMax])
+    const xScale = d3.scaleLinear().range([0, xWidth]).domain([0, xMax])
 
     const xTicks = Math.min(xMax, 10)
-    const xAxisTop = d3
-      .axisTop()
-      .scale(xScale)
-      .ticks(xTicks, "d")
-    const xAxis = d3
-      .axisBottom()
-      .scale(xScale)
-      .ticks(xTicks, "d")
+    const xAxisTop = d3.axisTop().scale(xScale).ticks(xTicks, "d")
+    const xAxis = d3.axisBottom().scale(xScale).ticks(xTicks, "d")
 
     const yAxis = d3.axisLeft().scale(yCategoryScale)
 
@@ -192,10 +179,7 @@ const HorizontalBarChart = ({
       .append("g")
       .attr("transform", `translate(${marginLeft}, ${MARGIN.top})`)
 
-    chart
-      .append("g")
-      .attr("class", "x axis")
-      .call(xAxisTop)
+    chart.append("g").attr("class", "x axis").call(xAxisTop)
 
     chart
       .append("g")
@@ -203,10 +187,7 @@ const HorizontalBarChart = ({
       .attr("transform", `translate(0, ${yHeight})`)
       .call(xAxis)
 
-    chart
-      .append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
+    chart.append("g").attr("class", "y axis").call(yAxis)
 
     const categoryGroup = chart
       .selectAll(".category")

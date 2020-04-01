@@ -62,11 +62,7 @@ const BarChart = ({
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
     let maxYLabelWidth = 0
-    const tmpSVG = d3
-      .select("#tmp_svg")
-      .data([1])
-      .enter()
-      .append("svg")
+    const tmpSVG = d3.select("#tmp_svg").data([1]).enter().append("svg")
     const xText = function(d) {
       return xLabels[getPropValue(d, xProp)]
     }

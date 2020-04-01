@@ -189,7 +189,7 @@ Object.without = function(source, ...keys) {
 }
 
 // eslint-disable-next-line
-Promise.prototype.log = function() {
+Promise.prototype.log = function () {
   return this.then(function(data) {
     console.log(data)
     return data
