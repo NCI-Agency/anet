@@ -7,6 +7,7 @@ import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
+import Messages from "components/Messages"
 import Model, { NOTE_TYPE } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import { JSONPath } from "jsonpath-plus"
@@ -46,9 +47,7 @@ const BaseRelatedObjectNotes = ({
     utils.treatFunctionsAsEqual
   )
 
-  // TODO: display somewhere the error state
-  // eslint-disable-next-line no-unused-vars
-  const [error, setError] = useState(null) // lgtm[js/unused-local-variable]
+  const [error, setError] = useState(null)
   const [hidden, setHidden] = useState(true)
   const [
     showRelatedObjectNoteModalKey,
@@ -137,6 +136,7 @@ const BaseRelatedObjectNotes = ({
             <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
           </Button>
         </div>
+        <Messages error={error} />
         <br />
         <div
           style={{
