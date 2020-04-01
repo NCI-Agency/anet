@@ -227,7 +227,6 @@ export default class Task extends Model {
         assessmentResults[k].push(o[k])
       })
     )
-    console.log("assessmentResults", dateRange, assessmentResults)
     return assessmentResults
   }
 

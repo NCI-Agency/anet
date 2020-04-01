@@ -43,7 +43,6 @@ const AggregationWidget = ({
   ...otherWidgetProps
 }) => {
   const Widget = (widget && WIDGETS[widget]) || WIDGETS.default
-  console.log(Widget)
   const widgetElem = (
     <Widget
       values={values}
