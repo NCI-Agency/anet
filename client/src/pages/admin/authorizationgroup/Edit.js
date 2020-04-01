@@ -75,7 +75,8 @@ const AuthorizationGroupEdit = ({ pageDispatchers }) => {
         relatedObject={
           authorizationGroup.uuid && {
             relatedObjectType: AuthorizationGroup.relatedObjectType,
-            relatedObjectUuid: authorizationGroup.uuid
+            relatedObjectUuid: authorizationGroup.uuid,
+            relatedObject: authorizationGroup
           }
         }
       />

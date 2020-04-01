@@ -1,4 +1,5 @@
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import { OBJECT_TYPE_TO_MODEL } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -74,7 +75,8 @@ export default class LinkTo extends Component {
       return <span>{whenUnspecified}</span>
     }
 
-    const ModelClass = Models[modelType]
+    const ModelClass =
+      Models[modelType] || Models[OBJECT_TYPE_TO_MODEL[modelType]]
     const isModel = typeof model !== "string"
     const modelInstance = new ModelClass(isModel ? model : {})
 

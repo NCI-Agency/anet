@@ -97,7 +97,8 @@ const OrganizationEdit = ({ pageDispatchers }) => {
         relatedObject={
           organization.uuid && {
             relatedObjectType: Organization.relatedObjectType,
-            relatedObjectUuid: organization.uuid
+            relatedObjectUuid: organization.uuid,
+            relatedObject: organization
           }
         }
       />

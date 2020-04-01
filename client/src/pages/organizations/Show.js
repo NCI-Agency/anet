@@ -246,7 +246,8 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 organization.uuid && {
                   relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid
+                  relatedObjectUuid: organization.uuid,
+                  relatedObject: organization
                 }
               }
             />

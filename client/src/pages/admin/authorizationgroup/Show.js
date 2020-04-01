@@ -100,7 +100,8 @@ const BaseAuthorizationGroupShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 authorizationGroup.uuid && {
                   relatedObjectType: AuthorizationGroup.relatedObjectType,
-                  relatedObjectUuid: authorizationGroup.uuid
+                  relatedObjectUuid: authorizationGroup.uuid,
+                  relatedObject: authorizationGroup
                 }
               }
             />

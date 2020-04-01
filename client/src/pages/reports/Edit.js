@@ -131,7 +131,8 @@ const ReportEdit = ({ pageDispatchers }) => {
         relatedObject={
           report.uuid && {
             relatedObjectType: Report.relatedObjectType,
-            relatedObjectUuid: report.uuid
+            relatedObjectUuid: report.uuid,
+            relatedObject: report
           }
         }
       />

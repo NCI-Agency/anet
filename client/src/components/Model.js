@@ -26,6 +26,34 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
     noteUuid
     relatedObjectType
     relatedObjectUuid
+    relatedObject {
+      ... on AuthorizationGroup {
+        name
+      }
+      ... on Location {
+        name
+      }
+      ... on Organization {
+        shortName
+      }
+      ... on Person {
+        role
+        rank
+        name
+        avatar(size: 32)
+      }
+      ... on Position {
+        type
+        name
+      }
+      ... on Report {
+        intent
+      }
+      ... on Task {
+        shortName
+        longName
+      }
+    }
   }
 `
 export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
@@ -48,6 +76,20 @@ export const GQL_UPDATE_NOTE = gql`
     }
   }
 `
+
+export const MODEL_TO_OBJECT_TYPE = {
+  AuthorizationGroup: "authorizationGroups",
+  Location: "locations",
+  Organization: "organizations",
+  Person: "people",
+  Position: "positions",
+  Report: "reports",
+  Task: "tasks"
+}
+export const OBJECT_TYPE_TO_MODEL = {}
+Object.entries(MODEL_TO_OBJECT_TYPE).forEach(([k, v]) => {
+  OBJECT_TYPE_TO_MODEL[v] = k
+})
 
 export const NOTE_TYPE = {
   FREE_TEXT: "FREE_TEXT",
@@ -113,7 +155,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
   }
   // Field type specific validation not needed when the field is invisible or
   // when invisibleCustomFields hasn't even been filled (like when the report
-  // has been created via sevrer side tests, or later maybe imported from an
+  // has been created via server side tests, or later maybe imported from an
   // external system (and never went through the edit/create form which normally
   // fills the invisibleCustomFields)
   fieldYupSchema = fieldYupSchema.when(
@@ -170,7 +212,18 @@ export default class Model {
     }
   }
 
-  static notePropTypes = PropTypes.shape({
+  static relatedObjectPropType = PropTypes.shape({
+    noteUuid: PropTypes.string,
+    relatedObjectType: PropTypes.string.isRequired,
+    relatedObjectUuid: PropTypes.string.isRequired,
+    relatedObject: PropTypes.object
+  })
+
+  static noteRelatedObjectsPropType = PropTypes.arrayOf(
+    Model.relatedObjectPropType
+  )
+
+  static notePropType = PropTypes.shape({
     uuid: PropTypes.string,
     createdAt: PropTypes.number,
     text: PropTypes.string,
@@ -180,13 +233,7 @@ export default class Model {
       rank: PropTypes.string,
       role: PropTypes.string
     }),
-    noteRelatedObjects: PropTypes.arrayOf(
-      PropTypes.shape({
-        noteUuid: PropTypes.string,
-        relatedObjectType: PropTypes.string,
-        relatedObjectUuid: PropTypes.string
-      })
-    )
+    noteRelatedObjects: Model.noteRelatedObjectsPropType
   })
 
   static resourceName = null

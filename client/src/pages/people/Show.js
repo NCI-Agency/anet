@@ -188,7 +188,8 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 person.uuid && {
                   relatedObjectType: Person.relatedObjectType,
-                  relatedObjectUuid: person.uuid
+                  relatedObjectUuid: person.uuid,
+                  relatedObject: person
                 }
               }
               relatedObjectValue={person}
