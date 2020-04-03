@@ -64,9 +64,9 @@ const LikertScale = ({
       max: Math.max(...values),
       avg: values.reduce((a, b) => a + b, 0) / values.length
     }
-    valuesStats.avgColor =
-      valuesStats &&
-      levels.find(level => level.endValue > valuesStats.avg)?.color
+    valuesStats.avgColor = levels.find(
+      level => level.endValue > valuesStats.avg
+    )?.color
   }
 
   return (
