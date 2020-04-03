@@ -204,47 +204,66 @@ const BoardDashboard = () => {
           />
         )}
       </div>
-      <div style={{ flexGrow: 0, display: "flex", flexDirection: "column" }}>
-        <Button bsStyle="primary" type="button" onClick={() => setEdit(!edit)}>
+      <div>
+        <Button
+          bsStyle="primary"
+          type="button"
+          style={{ marginBottom: 15 }}
+          onClick={() => setEdit(!edit)}
+        >
           {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
         </Button>
 
         {edit && (
           <>
-            {Object.values(Models).map(Model => {
-              const instance = new Model()
-              const modelName = instance.constructor.resourceName
-              return (
-                instance.iconUrl() && (
-                  <PrototypeNode
-                    key={`palette-${modelName}`}
-                    model={instance}
-                    name={modelName}
-                    onClick={event => {
-                      const data = { anetObjectType: modelName }
-                      const point = { x: 150, y: 150 }
-                      setDropEvent({ data, point })
-                    }}
-                  />
-                )
-              )
-            })}
-            <Button
-              onClick={() => {
-                const blob = new Blob([JSON.stringify(model.serialize())], {
-                  type: "application/json;charset=utf-8"
-                })
-                FileSaver.saveAs(blob, "BoardDashboard.json")
-              }}
-            >
-              <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
-            </Button>
-            <br />
-            <br />
-            {editedNode && (
-              <Panel>
-                <Panel.Heading>Selected node editor</Panel.Heading>
-                <Panel.Body>
+            <Panel bsStyle="primary">
+              <Panel.Heading>Diagram tools</Panel.Heading>
+              <Panel.Body>
+                <Button onClick={() => engineRef.current?.zoomToFit()}>
+                  <Icon icon={IconNames.ZOOM_TO_FIT} />
+                </Button>
+                <Button
+                  onClick={() => {
+                    const blob = new Blob([JSON.stringify(model.serialize())], {
+                      type: "application/json;charset=utf-8"
+                    })
+                    FileSaver.saveAs(blob, "BoardDashboard.json")
+                  }}
+                >
+                  <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
+                </Button>
+              </Panel.Body>
+            </Panel>
+            <Panel bsStyle="primary">
+              <Panel.Heading>Node palette</Panel.Heading>
+              <Panel.Body style={{ display: "flex", flexDirection: "column" }}>
+                {Object.values(Models).map(Model => {
+                  const instance = new Model()
+                  const modelName = instance.constructor.resourceName
+                  return (
+                    instance.iconUrl() && (
+                      <PrototypeNode
+                        key={`palette-${modelName}`}
+                        model={instance}
+                        name={modelName}
+                        onClick={event => {
+                          const data = { anetObjectType: modelName }
+                          const point = { x: 150, y: 150 }
+                          setDropEvent({ data, point })
+                        }}
+                      />
+                    )
+                  )
+                })}
+                <span>
+                  <i>Click or drag into diagram</i>
+                </span>
+              </Panel.Body>
+            </Panel>
+            <Panel bsStyle="primary">
+              <Panel.Heading>Node editor</Panel.Heading>
+              <Panel.Body>
+                {editedNode ? (
                   <div>
                     <Button onClick={() => setSelectingEntity(true)}>
                       <LinkTo
@@ -254,27 +273,31 @@ const BoardDashboard = () => {
                       />
                     </Button>
                   </div>
-                </Panel.Body>
-                <Modal
-                  show={selectingEntity}
-                  onHide={() => setSelectingEntity(false)}
-                >
-                  <Modal.Header closeButton>
-                    <Modal.Title>Edit diagram node</Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    <MultiTypeAdvancedSelectComponent
-                      onConfirm={(value, objectType) => {
-                        editedNode.options.anetObject = value
-                        editedNode.options.anetObjectType = objectType
-                        setSelectingEntity(false)
-                      }}
-                      objectType={editedNode?.options.anetObjectType}
-                    />
-                  </Modal.Body>
-                </Modal>
-              </Panel>
-            )}
+                ) : (
+                  <span>
+                    <i>Select an item on diagram</i>
+                  </span>
+                )}
+              </Panel.Body>
+              <Modal
+                show={selectingEntity}
+                onHide={() => setSelectingEntity(false)}
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Edit diagram node</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <MultiTypeAdvancedSelectComponent
+                    onConfirm={(value, objectType) => {
+                      editedNode.options.anetObject = value
+                      editedNode.options.anetObjectType = objectType
+                      setSelectingEntity(false)
+                    }}
+                    objectType={editedNode?.options.anetObjectType}
+                  />
+                </Modal.Body>
+              </Modal>
+            </Panel>
           </>
         )}
       </div>
