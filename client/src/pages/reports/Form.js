@@ -1289,11 +1289,11 @@ const BaseReportForm = ({
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
             {
-              relatedObjectType: "tasks",
+              relatedObjectType: Task.relatedObjectType,
               relatedObjectUuid: key
             },
             {
-              relatedObjectType: "reports",
+              relatedObjectType: Report.relatedObjectType,
               relatedObjectUuid: reportUuid
             }
           ],

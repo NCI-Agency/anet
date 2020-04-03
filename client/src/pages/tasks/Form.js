@@ -513,7 +513,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
         type: NOTE_TYPE.CHANGE_RECORD,
         noteRelatedObjects: [
           {
-            relatedObjectType: "tasks",
+            relatedObjectType: Task.relatedObjectType,
             relatedObjectUuid: initialValues.uuid
           }
         ],

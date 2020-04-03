@@ -386,7 +386,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               notes={report.notes}
               relatedObject={
                 uuid && {
-                  relatedObjectType: "reports",
+                  relatedObjectType: Report.relatedObjectType,
                   relatedObjectUuid: uuid
                 }
               }

@@ -5,6 +5,7 @@ import Model, {
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
+import { Report } from "models"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -35,6 +36,7 @@ export default class Task extends Model {
   static resourceName = "Task"
   static listName = "taskList"
   static getInstanceName = "task"
+  static relatedObjectType = "tasks"
 
   static displayName() {
     return shortLabel
@@ -213,7 +215,7 @@ export default class Task extends Model {
           n.noteRelatedObjects.length === 2 &&
           n.noteRelatedObjects.filter(
             ro =>
-              ro.relatedObjectType === "reports" &&
+              ro.relatedObjectType === Report.relatedObjectType &&
               publishedReportsUuids.includes(ro.relatedObjectUuid)
           ).length &&
           (!dateRange ||
