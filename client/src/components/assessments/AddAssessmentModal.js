@@ -12,18 +12,19 @@ import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
 const AddAssessmentModal = ({
-  task,
-  assessmentPeriod,
+  entity,
+  entityType,
+  yupSchema,
+  assessmentConfig,
+  title,
   showModal,
   onCancel,
   onSuccess
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
-  const yupSchema = task.periodAssessmentYupSchema()
   const initialValues = useMemo(() => Model.fillObject({}, yupSchema), [
     yupSchema
   ])
-  const periodAssessmentConfig = task.periodAssessmentConfig()
   return (
     <Modal show={showModal} onHide={closeModal}>
       <Formik
@@ -44,10 +45,7 @@ const AddAssessmentModal = ({
           return (
             <Form>
               <Modal.Header closeButton>
-                <Modal.Title>
-                  Assessment for {task.shortName} for{" "}
-                  {assessmentPeriod.start.format("MMM-YYYY")}
-                </Modal.Title>
+                <Modal.Title>{title}</Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 <div
@@ -60,8 +58,8 @@ const AddAssessmentModal = ({
                 >
                   <Messages error={assessmentError} />
                   <CustomFieldsContainer
-                    fieldsConfig={periodAssessmentConfig}
-                    fieldNamePrefix="taskAssessment"
+                    fieldsConfig={assessmentConfig}
+                    fieldNamePrefix="entityAssessment"
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
@@ -114,27 +112,30 @@ const AddAssessmentModal = ({
       type: NOTE_TYPE.ASSESSMENT,
       noteRelatedObjects: [
         {
-          relatedObjectType: "tasks",
-          relatedObjectUuid: task.uuid
+          relatedObjectType: entityType.relatedObjectType,
+          relatedObjectUuid: entity.uuid
         }
       ]
     }
-    updatedNote.text = customFieldsJSONString(values, true, "taskAssessment")
+    updatedNote.text = customFieldsJSONString(values, true, "entityAssessment")
     return API.mutation(GQL_CREATE_NOTE, {
       note: updatedNote
     })
   }
 }
 AddAssessmentModal.propTypes = {
-  task: PropTypes.instanceOf(Task).isRequired,
-  assessmentPeriod: PropTypes.shape({
-    start: PropTypes.object,
-    end: PropTypes.object,
-    allowNewAssessments: PropTypes.bool
-  }),
+  entity: PropTypes.oneOfType([PropTypes.instanceOf(Task)]).isRequired,
+  entityType: PropTypes.func.isRequired,
+  yupSchema: PropTypes.object.isRequired,
+  assessmentConfig: PropTypes.object.isRequired,
+  title: PropTypes.string,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired
+}
+AddAssessmentModal.defaultProps = {
+  title: "Assessment",
+  showModal: false
 }
 
 export default AddAssessmentModal

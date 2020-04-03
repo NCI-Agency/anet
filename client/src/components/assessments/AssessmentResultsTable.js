@@ -60,7 +60,6 @@ const MeasurementRow = ({
     "visibleWhen",
     "objectFields"
   )
-
   return (
     <tr>
       {assessmentPeriods.map((assessmentPeriod, index) => (
@@ -93,6 +92,7 @@ MeasurementRow.propTypes = {
 
 const MonthlyAssessmentRows = ({
   entity,
+  entityType,
   assessmentPeriods,
   canAddAssessment,
   onAddAssessment
@@ -169,8 +169,13 @@ const MonthlyAssessmentRows = ({
                       {addAssessmentLabel}
                     </Button>
                     <AddAssessmentModal
-                      task={entity}
-                      assessmentPeriod={period}
+                      entity={entity}
+                      entityType={entityType}
+                      title={`Assessment for ${
+                        entity.shortName
+                      } for ${period.start.format("MMM-YYYY")}`}
+                      yupSchema={entity.periodAssessmentYupSchema()}
+                      assessmentConfig={entity.periodAssessmentConfig()}
                       showModal={showAssessmentModal}
                       onCancel={() => setShowAssessmentModal(false)}
                       onSuccess={() => {
@@ -190,6 +195,7 @@ const MonthlyAssessmentRows = ({
 }
 MonthlyAssessmentRows.propTypes = {
   entity: PropTypes.object,
+  entityType: PropTypes.func.isRequired,
   assessmentPeriods: PropTypes.arrayOf(
     PropTypes.shape({
       start: PropTypes.object,
@@ -203,6 +209,7 @@ MonthlyAssessmentRows.propTypes = {
 
 const EntityAssessmentResults = ({
   entity,
+  entityType,
   style,
   assessmentPeriods,
   canAddAssessment,
@@ -232,6 +239,7 @@ const EntityAssessmentResults = ({
       ))}
       <MonthlyAssessmentRows
         entity={entity}
+        entityType={entityType}
         assessmentPeriods={assessmentPeriods}
         canAddAssessment={canAddAssessment}
         onAddAssessment={onAddAssessment}
@@ -242,6 +250,7 @@ const EntityAssessmentResults = ({
 EntityAssessmentResults.propTypes = {
   style: PropTypes.object,
   entity: PropTypes.object,
+  entityType: PropTypes.func.isRequired,
   assessmentPeriods: PropTypes.arrayOf(
     PropTypes.shape({
       start: PropTypes.object,
@@ -253,8 +262,9 @@ EntityAssessmentResults.propTypes = {
   canAddAssessment: PropTypes.bool
 }
 
-const AssessmentResultsTable2 = ({
+const AssessmentResultsTable = ({
   entity,
+  entityType,
   subEntities,
   style,
   assessmentPeriods,
@@ -276,6 +286,7 @@ const AssessmentResultsTable2 = ({
                   <EntityAssessmentResults
                     key={`subassessment-${subEntity.uuid}`}
                     entity={subEntity}
+                    entityType={entityType}
                     assessmentPeriods={assessmentPeriods}
                     canAddAssessment={false}
                   />
@@ -284,6 +295,7 @@ const AssessmentResultsTable2 = ({
             )}
             <EntityAssessmentResults
               entity={entity}
+              entityType={entityType}
               assessmentPeriods={assessmentPeriods}
               canAddAssessment={canAddAssessment}
               onAddAssessment={onAddAssessment}
@@ -294,9 +306,10 @@ const AssessmentResultsTable2 = ({
     </div>
   )
 }
-AssessmentResultsTable2.propTypes = {
+AssessmentResultsTable.propTypes = {
   style: PropTypes.object,
   entity: PropTypes.object,
+  entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
   assessmentPeriods: PropTypes.arrayOf(
     PropTypes.shape({
@@ -309,4 +322,4 @@ AssessmentResultsTable2.propTypes = {
   canAddAssessment: PropTypes.bool
 }
 
-export default AssessmentResultsTable2
+export default AssessmentResultsTable
