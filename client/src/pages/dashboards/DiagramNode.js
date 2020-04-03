@@ -111,7 +111,7 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
         position: "relative",
         width: size,
         height: size,
-        backgroundColor: node.isSelected() ? "rgba(0, 0, 255, 0.3)" : "white"
+        backgroundColor: node.isSelected() ? "rgba(0, 0, 255, 0.3)" : null
       }}
     >
       {modelInstance &&
