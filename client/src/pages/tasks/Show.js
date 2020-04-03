@@ -103,8 +103,7 @@ const GQL_GET_TASK = gql`
       ${GRAPHQL_NOTES_FIELDS},
       publishedReports: reports(query: {
         pageSize:0,
-        state: [${Report.STATE.PUBLISHED}],
-        taskUuid: $uuid
+        state: [${Report.STATE.PUBLISHED}]
       }) {
         uuid
       }
@@ -119,8 +118,7 @@ const GQL_GET_TASK = gql`
         ${GRAPHQL_NOTES_FIELDS}
         publishedReports: reports(query: {
           pageSize:0,
-          state: [${Report.STATE.PUBLISHED}],
-          taskUuid: $uuid
+          state: [${Report.STATE.PUBLISHED}]
         }) {
           uuid
         }
