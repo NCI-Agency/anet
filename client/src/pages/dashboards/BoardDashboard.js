@@ -69,6 +69,7 @@ const PrototypeNode = ({ name, model, onClick }) => (
           JSON.stringify({ anetObjectType: model.constructor.resourceName })
         )
       }}
+      style={{ textAlign: "left", cursor: "grab" }}
     >
       <img
         src={model.iconUrl()}
@@ -127,7 +128,12 @@ const BoardDashboard = () => {
           if (event.isCreated) {
             event.node.registerListener(selectionListener)
           } else {
-            event.node.clearListeners()
+            if (
+              editedNode?.options.anetObject.uuid ===
+              event.node.anetObject?.uuid
+            ) {
+              setEditedNode(null)
+            }
           }
         }
       })
@@ -199,7 +205,7 @@ const BoardDashboard = () => {
         )}
       </div>
       <div style={{ flexGrow: 0, display: "flex", flexDirection: "column" }}>
-        <Button onClick={() => setEdit(!edit)}>
+        <Button bsStyle="primary" type="button" onClick={() => setEdit(!edit)}>
           {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
         </Button>
 
