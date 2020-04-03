@@ -19,7 +19,7 @@ const LikertScale = ({
   const containerHeight = containerBox.height || 0
   const containerWidth = containerBox.width || 0
   const containerX = containerBox.x || 0
-  const MARGIN = 5
+  const MARGIN = 13
   const scaleYPosition = containerHeight - 30
 
   const scale = d3
