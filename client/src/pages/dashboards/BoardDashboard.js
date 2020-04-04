@@ -13,7 +13,10 @@ import {
   PortModelAlignment
 } from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
-import { PathFindingLinkFactory } from "@projectstorm/react-diagrams-routing"
+import {
+  PathFindingLinkFactory,
+  DagreEngine
+} from "@projectstorm/react-diagrams-routing"
 import { Settings } from "api"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import { mapPageDispatchersToProps } from "components/Page"
@@ -101,6 +104,17 @@ const BoardDashboard = () => {
   const [edit, setEdit] = useState(false)
   const [selectingEntity, setSelectingEntity] = useState(false)
   const [editedNode, setEditedNode] = useState(null)
+  const dagreEngineRef = useRef(
+    new DagreEngine({
+      graph: {
+        rankdir: "RL",
+        ranker: "longest-path",
+        marginx: 25,
+        marginy: 25
+      },
+      includeLinks: true
+    })
+  )
 
   useEffect(() => {
     setModel(new DiagramModel())
@@ -205,35 +219,46 @@ const BoardDashboard = () => {
         )}
       </div>
       <div>
-        <Button
-          bsStyle="primary"
-          type="button"
-          style={{ marginBottom: 15 }}
-          onClick={() => setEdit(!edit)}
-        >
-          {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
-        </Button>
+        <Panel>
+          <Button
+            bsStyle="primary"
+            type="button"
+            onClick={() => setEdit(!edit)}
+          >
+            {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
+          </Button>
+
+          {edit && (
+            <>
+              <Button onClick={() => engineRef.current.zoomToFit()}>
+                <Icon icon={IconNames.ZOOM_TO_FIT} />
+              </Button>
+              <Button
+                onClick={() => {
+                  dagreEngineRef.current.redistribute(model)
+
+                  // this.reroute();
+                  engineRef.current.repaintCanvas()
+                }}
+              >
+                <Icon icon={IconNames.LAYOUT_AUTO} />
+              </Button>
+              <Button
+                onClick={() => {
+                  const blob = new Blob([JSON.stringify(model.serialize())], {
+                    type: "application/json;charset=utf-8"
+                  })
+                  FileSaver.saveAs(blob, "BoardDashboard.json")
+                }}
+              >
+                <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
+              </Button>
+            </>
+          )}
+        </Panel>
 
         {edit && (
           <>
-            <Panel bsStyle="primary">
-              <Panel.Heading>Diagram tools</Panel.Heading>
-              <Panel.Body>
-                <Button onClick={() => engineRef.current?.zoomToFit()}>
-                  <Icon icon={IconNames.ZOOM_TO_FIT} />
-                </Button>
-                <Button
-                  onClick={() => {
-                    const blob = new Blob([JSON.stringify(model.serialize())], {
-                      type: "application/json;charset=utf-8"
-                    })
-                    FileSaver.saveAs(blob, "BoardDashboard.json")
-                  }}
-                >
-                  <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
-                </Button>
-              </Panel.Body>
-            </Panel>
             <Panel bsStyle="primary">
               <Panel.Heading>Node palette</Panel.Heading>
               <Panel.Body style={{ display: "flex", flexDirection: "column" }}>
@@ -264,7 +289,9 @@ const BoardDashboard = () => {
               <Panel.Heading>Node editor</Panel.Heading>
               <Panel.Body>
                 {editedNode ? (
-                  <div>
+                  <>
+                    <span>ANET entity:</span>
+                    <br />
                     <Button onClick={() => setSelectingEntity(true)}>
                       <LinkTo
                         modelType={editedNode.options.anetObjectType}
@@ -272,7 +299,7 @@ const BoardDashboard = () => {
                         isLink={false}
                       />
                     </Button>
-                  </div>
+                  </>
                 ) : (
                   <span>
                     <i>Select an item on diagram</i>
