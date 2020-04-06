@@ -5,7 +5,7 @@ import { Col, ControlLabel, FormGroup } from "react-bootstrap"
 
 const aggregationPropTypes = {
   values: PropTypes.arrayOf(
-    PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array])
   ),
   aggregationType: PropTypes.string
 }
@@ -75,11 +75,8 @@ const AggregationWidget = ({
 AggregationWidget.propTypes = {
   label: PropTypes.string,
   widget: PropTypes.string,
-  values: PropTypes.arrayOf(
-    PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-  ),
-  aggregationType: PropTypes.string,
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  ...aggregationPropTypes
 }
 AggregationWidget.defaultProps = {
   label: "",
