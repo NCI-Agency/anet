@@ -1,5 +1,9 @@
 import { Settings } from "api"
-import Model, { createYupObjectShape, yupDate } from "components/Model"
+import Model, {
+  createAssessmentSchema,
+  createYupObjectShape,
+  yupDate
+} from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
@@ -29,6 +33,20 @@ export default class Person extends Model {
   }
 
   static nameDelimiter = ","
+
+  static advisorAssessmentConfig =
+    Settings.fields.advisor.person.assessment?.customFields
+
+  static principalAssessmentConfig =
+    Settings.fields.principal.person.assessment?.customFields
+
+  static advisorAssessmentSchema = createAssessmentSchema(
+    Person.advisorAssessmentConfig
+  )
+
+  static principalAssessmentSchema = createAssessmentSchema(
+    Person.principalAssessmentConfig
+  )
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createYupObjectShape(
@@ -253,6 +271,25 @@ export default class Person extends Model {
     const orgUuids = orgs.map(o => o.uuid)
 
     return orgUuids.includes(org.uuid)
+  }
+
+  getPeriodAssessmentDetails() {
+    if (this.isAdvisor()) {
+      return {
+        assessmentConfig: Person.advisorAssessmentConfig,
+        assessmentYupSchema: Person.advisorAssessmentSchema
+      }
+    } else if (this.isPrincipal()) {
+      return {
+        assessmentConfig: Person.principalAssessmentConfig,
+        assessmentYupSchema: Person.principalAssessmentSchema
+      }
+    } else {
+      return {
+        assessmentConfig: null,
+        assessmentYupSchema: null
+      }
+    }
   }
 
   iconUrl() {

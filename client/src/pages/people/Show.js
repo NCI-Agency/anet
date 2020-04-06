@@ -2,6 +2,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -146,6 +147,23 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
     (!hasPosition && currentUser.isSuperUser()) ||
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
+  const assessmentPeriods = [
+    {
+      start: moment().subtract(2, "months").startOf("month"),
+      end: moment().subtract(2, "months").endOf("month"),
+      allowNewAssessments: false
+    },
+    {
+      start: moment().subtract(1, "months").startOf("month"),
+      end: moment().subtract(1, "months").endOf("month"),
+      allowNewAssessments: true
+    },
+    {
+      start: moment().startOf("month"),
+      end: moment().endOf("month"),
+      allowNewAssessments: false
+    }
+  ]
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -413,6 +431,15 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 </Fieldset>
               )}
             </Form>
+
+            <AssessmentResultsTable
+              style={{ flex: "0 0 100%" }}
+              entity={person}
+              entityType={Person}
+              assessmentPeriods={assessmentPeriods}
+              canAddAssessment
+              onAddAssessment={refetch}
+            />
           </div>
         )
       }}

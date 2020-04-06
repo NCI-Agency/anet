@@ -611,6 +611,10 @@ properties:
                                 type: string
                               color:
                                 type: string
+                  customFields:
+                    type: object
+                    additionalProperties:
+                      "$ref": "#/definitions/customField"
 
           position:
             type: object

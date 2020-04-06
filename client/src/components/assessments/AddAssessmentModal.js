@@ -6,7 +6,7 @@ import {
 import Model, { GQL_CREATE_NOTE, NOTE_TYPE } from "components/Model"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
-import { Task } from "models"
+import { Person, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
@@ -124,7 +124,10 @@ const AddAssessmentModal = ({
   }
 }
 AddAssessmentModal.propTypes = {
-  entity: PropTypes.oneOfType([PropTypes.instanceOf(Task)]).isRequired,
+  entity: PropTypes.oneOfType([
+    PropTypes.instanceOf(Person),
+    PropTypes.instanceOf(Task)
+  ]).isRequired,
   entityType: PropTypes.func.isRequired,
   yupSchema: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,

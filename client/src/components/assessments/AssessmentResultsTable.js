@@ -19,8 +19,8 @@ import "components/assessments/AssessmentResultsTable.css"
  *   entity.customFields.assessmentDefinition
  * - display of the last monthly assessment made on the entity/subentities
  *   as a conclusion about the given period of time;
- *   the definition of these assessments is to be found in
- *   entity.periodAssessmentConfig()
+ *   the config and yupSchema for these assessments is to be found in
+ *   entity.getPeriodAssessmentDetails()
  */
 
 const AssessmentsTableHeader = ({ periods }) => (
@@ -97,7 +97,10 @@ const MonthlyAssessmentRows = ({
   canAddAssessment,
   onAddAssessment
 }) => {
-  const periodAssessmentConfig = entity.periodAssessmentConfig()
+  const {
+    assessmentConfig,
+    assessmentYupSchema
+  } = entity.getPeriodAssessmentDetails()
   const [showAssessmentModal, setShowAssessmentModal] = useState(false)
   const periodsLastAssessment = []
   const periodsAllowNewAssessment = []
@@ -112,7 +115,7 @@ const MonthlyAssessmentRows = ({
       })
     )
     periodsAllowNewAssessment.push(
-      periodAssessmentConfig && canAddAssessment && period.allowNewAssessments
+      assessmentConfig && canAddAssessment && period.allowNewAssessments
     )
   })
   const hasLastAssessments = !_isEmpty(
@@ -127,7 +130,7 @@ const MonthlyAssessmentRows = ({
             const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
             return (
               <td key={index}>
-                {periodAssessmentConfig && lastAssessment && (
+                {assessmentConfig && lastAssessment && (
                   <Formik
                     enableReinitialize
                     initialValues={{
@@ -137,7 +140,7 @@ const MonthlyAssessmentRows = ({
                     {({ values }) => (
                       <ReadonlyCustomFields
                         fieldNamePrefix={lastAssessmentPrefix}
-                        fieldsConfig={periodAssessmentConfig}
+                        fieldsConfig={assessmentConfig}
                         values={values}
                         vertical
                       />
@@ -171,11 +174,11 @@ const MonthlyAssessmentRows = ({
                     <AddAssessmentModal
                       entity={entity}
                       entityType={entityType}
-                      title={`Assessment for ${
-                        entity.shortName
-                      } for ${period.start.format("MMM-YYYY")}`}
-                      yupSchema={entity.periodAssessmentYupSchema()}
-                      assessmentConfig={entity.periodAssessmentConfig()}
+                      title={`Assessment for ${entity.toString()} for ${period.start.format(
+                        "MMM-YYYY"
+                      )}`}
+                      yupSchema={assessmentYupSchema}
+                      assessmentConfig={assessmentConfig}
                       showModal={showAssessmentModal}
                       onCancel={() => setShowAssessmentModal(false)}
                       onSuccess={() => {
@@ -225,7 +228,7 @@ const EntityAssessmentResults = ({
     <>
       <tr>
         <td colSpan={assessmentPeriods.length} className="entity-title-row">
-          <LinkTo modelType="Task" model={entity} />
+          <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
       {Object.keys(assessmentDefinition || {}).map(key => (

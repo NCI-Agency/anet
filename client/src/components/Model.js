@@ -139,6 +139,16 @@ export const createYupObjectShape = (config, prefix = "formCustomFields") => {
   return yup.object().shape(objShape)
 }
 
+export const createAssessmentSchema = (
+  assessmentConfig,
+  prefix = "entityAssessment"
+) => {
+  const assessmentSchemaShape = createYupObjectShape(assessmentConfig, prefix)
+  return yup.object().shape({
+    prefix: assessmentSchemaShape
+  })
+}
+
 export default class Model {
   static schema = {
     notes: []
@@ -300,5 +310,23 @@ export default class Model {
 
   toString() {
     return this.name || this.uuid
+  }
+
+  getLastAssessment(dateRange) {
+    const notesToAssessments = this.notes
+      .filter(n => {
+        return (
+          n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.length === 1 &&
+          (!dateRange ||
+            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
+        )
+      })
+      .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
+      .map(note => ({
+        uuid: note.uuid,
+        assessment: JSON.parse(note.text)
+      }))
+    return notesToAssessments.length ? notesToAssessments[0].assessment : null
   }
 }

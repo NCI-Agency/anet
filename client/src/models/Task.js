@@ -1,5 +1,6 @@
 import { Settings } from "api"
 import Model, {
+  createAssessmentSchema,
   createYupObjectShape,
   NOTE_TYPE,
   yupDate
@@ -9,16 +10,6 @@ import { Report } from "models"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
-
-function createTaskAssessmentSchema(customFieldsConfig) {
-  const taskAssessmentSchemaShape = createYupObjectShape(
-    customFieldsConfig,
-    "entityAssessment"
-  )
-  return yup.object().shape({
-    entityAssessment: taskAssessmentSchemaShape
-  })
-}
 
 export const {
   shortLabel,
@@ -57,11 +48,11 @@ export default class Task extends Model {
     Settings.fields.task.customFields
   )
 
-  static topLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
+  static topLevelAssessmentCustomFieldsSchema = createAssessmentSchema(
     Settings.fields.task.topLevel.assessment.customFields
   )
 
-  static subLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
+  static subLevelAssessmentCustomFieldsSchema = createAssessmentSchema(
     Settings.fields.task.subLevel.assessment.customFields
   )
 
@@ -188,14 +179,19 @@ export default class Task extends Model {
       : Settings.fields.task.subLevel
   }
 
-  periodAssessmentYupSchema() {
-    return this.isTopLevelTask()
-      ? Task.topLevelAssessmentCustomFieldsSchema
-      : Task.subLevelAssessmentCustomFieldsSchema
-  }
-
-  periodAssessmentConfig() {
-    return this.fieldSettings().assessment?.customFields
+  getPeriodAssessmentDetails() {
+    const assessmentConfig = this.fieldSettings().assessment?.customFields
+    if (this.isTopLevelTask()) {
+      return {
+        assessmentConfig: assessmentConfig,
+        assessmentYupSchema: Task.topLevelAssessmentCustomFieldsSchema
+      }
+    } else {
+      return {
+        assessmentConfig: assessmentConfig,
+        assessmentYupSchema: Task.subLevelAssessmentCustomFieldsSchema
+      }
+    }
   }
 
   iconUrl() {
@@ -230,23 +226,5 @@ export default class Task extends Model {
       })
     )
     return assessmentResults
-  }
-
-  getLastAssessment(dateRange) {
-    const notesToAssessments = this.notes
-      .filter(n => {
-        return (
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.length === 1 &&
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
-        )
-      })
-      .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(ta => ({
-        uuid: ta.uuid,
-        assessment: JSON.parse(ta.text)
-      }))
-    return notesToAssessments.length ? notesToAssessments[0].assessment : null
   }
 }
