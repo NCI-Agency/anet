@@ -13,10 +13,10 @@ import * as yup from "yup"
 function createTaskAssessmentSchema(customFieldsConfig) {
   const taskAssessmentSchemaShape = createYupObjectShape(
     customFieldsConfig,
-    "taskAssessment"
+    "entityAssessment"
   )
   return yup.object().shape({
-    taskAssessment: taskAssessmentSchemaShape
+    entityAssessment: taskAssessmentSchemaShape
   })
 }
 
