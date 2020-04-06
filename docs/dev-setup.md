@@ -2,19 +2,19 @@
 This section describes the recommended Developer Environment and how to set it up.  You are welcome to use any other tools you prefer.
 
 ## Download open source software
-- [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html).  This can also be either installed, or downloaded as a .zip.  If you do not use the installer, be sure to set the `JAVA_HOME` environment variable to the location of the JDK.
-- [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
+1. [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html).  This can also be either installed, or downloaded as a .zip.  If you do not use the installer, be sure to set the `JAVA_HOME` environment variable to the location of the JDK.
+1. [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
-- Checkout the [source code](https://github.com/NCI-Agency/anet) from github.
-   ```
-   git clone git@github.com:NCI-Agency/anet.git
-   ```
-- Install the recommended git hooks
-   ```
-   cd anet
-   git config core.hooksPath scripts/githooks
-   ```
+1. Checkout the [source code](https://github.com/NCI-Agency/anet) from github.
+    ```
+    git clone git@github.com:NCI-Agency/anet.git
+    ```
+1. Install the recommended git hooks
+    ```
+    cd anet
+    git config core.hooksPath scripts/githooks
+    ```
 
 ### Possible Problems
 - **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
@@ -24,40 +24,39 @@ This section describes the recommended Developer Environment and how to set it u
 The frontend is run with `yarn`.  We recommend running the backend `gradle` if you are only doing frontend development.
 
 1. Set up Gradle
-   1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
-   - Open a command line in the `anet` directory that was retrieved from github.
-   - Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
+    1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
+    1. Open a command line in the `anet` directory that was retrieved from github.
+    1. Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
 1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/NCI-Agency/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
-   1. `emailFromAddr` - use your own email address for testing.
+    1. `emailFromAddr` - use your own email address for testing.
 
 ## Java Backend
 ### Initial Setup
 1. You can either use PostgreSQL or Microsoft SQL Server for your database. Both allow you to run entirely on your local machine and develop offline.
-   - MSSQL
-     - This is currently the default, so you don't need to do anything special
-     - If you want to change any of the default database settings (see `build.gradle` for the defaults), you can paste them as following in your `localSettings.gradle` file (do it for the ones you want to change and with the correct values):
-
-      ```java
-      run.environment("DB_DRIVER", "sqlserver")
-      run.environment("ANET_DB_USERNAME","username")
-      run.environment("ANET_DB_PASSWORD", "password")
-      run.environment("ANET_DB_SERVER", "db server hostname")
-      run.environment("ANET_DB_NAME","database name")
-      ```
-   - PostgreSQL
-     - To re-force gradle to use PostgreSQL you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
-
-      ```java
-      run.environment("DB_DRIVER", "postgresql")
-      ```
+    1. MSSQL
+        1. This is currently the default, so you don't need to do anything special
+        1. If you want to change any of the default database settings (see `build.gradle` for the defaults), you can paste them as following in your `localSettings.gradle` file (do it for the ones you want to change and with the correct values):
+            ```java
+            run.environment("DB_DRIVER", "sqlserver")
+            run.environment("ANET_DB_USERNAME","username")
+            run.environment("ANET_DB_PASSWORD", "password")
+            run.environment("ANET_DB_SERVER", "db server hostname")
+            run.environment("ANET_DB_NAME","database name")
+            ```
+   1. PostgreSQL
+        1. To re-force gradle to use PostgreSQL you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
+            ```java
+            run.environment("DB_DRIVER", "postgresql")
+            ```
 1. Pull the MSSQL Docker image: `./gradlew dockerPullDB`
 1. Create the MSSQL Docker container and the initial database: `./gradlew dockerCreateDB`
 1. Start the MSSQL Docker container: `./gradlew dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew dbMigrate` to build and migrate the database.
-   - The database schema is stored in `src/main/resources/migrations.xml`.
+    1. The database schema is stored in `src/main/resources/migrations.xml`.
 1. Seed the initial data:
-   - If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and load the data.
+    1. If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and load the data.
 1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn) and build the project
+
 _Note_: it will also start the back-end but at this step we are not interested in that.
 
 ### The Base Data Set
@@ -76,28 +75,28 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ### Developing
 1. Run `./gradlew dbMigrate` whenever you pull new changes to migrate the database.
-   For background info on some of these Liquibase commands, see: https://dropwizard.readthedocs.io/en/latest/manual/migrations.html
-   - Before applying migrations, you can try them out with a dry-run: `./gradlew dbMigrate -Pdry-run`; this shows you the SQL commands that would be executed without actually applying the migrations
-   - You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
-   - You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
-   - You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
-   - You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
+    For background info on some of these Liquibase commands, see: https://dropwizard.readthedocs.io/en/latest/manual/migrations.html
+    1. Before applying migrations, you can try them out with a dry-run: `./gradlew dbMigrate -Pdry-run`; this shows you the SQL commands that would be executed without actually applying the migrations
+    1. You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
+    1. You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
+    1. You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
+    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Run `./gradlew run` to run the server via Gradle
-   - If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
-   - The following output indicates that the server is ready:
-    ```
-    INFO  [2017-02-10 16:44:59,902] org.eclipse.jetty.server.Server: Started @4098ms
-    > Building 75% > :run
-    ```
+    1. If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
+    1. The following output indicates that the server is ready:
+        ```
+        INFO  [2017-02-10 16:44:59,902] org.eclipse.jetty.server.Server: Started @4098ms
+        > Building 75% > :run
+        ```
 1. Go to [http://localhost:8080/](http://localhost:8080/) in your browser.
-   - When prompted for credentials:
-     - **Username:** `erin`
-     - **Password:** Leave it blank
-   - You will get an error about a missing `index.ftl` file; this is expected and means the backend server is working. The error looks like:
-    ```
-    ERROR [2017-02-10 16:49:33,967] javax.ws.rs.ext.MessageBodyWriter: Template Error
-    ! freemarker.template.TemplateNotFoundException: Template not found for name "/views/index.ftl".
-    ```
+    1. When prompted for credentials:
+        - **Username:** `erin`
+        - **Password:** Leave it blank
+    1. You will get an error about a missing `index.ftl` file; this is expected and means the backend server is working. The error looks like:
+        ```
+        ERROR [2017-02-10 16:49:33,967] javax.ws.rs.ext.MessageBodyWriter: Template Error
+        ! freemarker.template.TemplateNotFoundException: Template not found for name "/views/index.ftl".
+        ```
 
     The web page will say ***Template Error***
 
@@ -114,8 +113,8 @@ After successfully creating and building the MSSQL Docker container it is posisb
 
 #### Override Default Gradle Settings
 Override the default gradle settings if you want to run your tests on a different database:
-   1. Open a command line in the `anet` directory that was retrieved from github.
-   1. Create a new empty file at `localTestSettings.gradle`. (`touch localTestSettings.gradle` on linux/mac).  This will be a file for all of your local test settings and passwords that should not be checked into GitHub.
+1. Open a command line in the `anet` directory that was retrieved from github.
+1. Create a new empty file at `localTestSettings.gradle`. (`touch localTestSettings.gradle` on linux/mac).  This will be a file for all of your local test settings and passwords that should not be checked into GitHub.
 
 ### Server side tests
 1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
@@ -185,10 +184,10 @@ Then download the appropriate `BrowserStackLocal`, unpack it.
 When all is set up, run the remote tests:
 1. Run `BrowserStackLocal` with your key: ./BrowserStackLocal --key mYbRoWsErStAcKkEy
 1. Run the tests:
-  ```
-  $ export TEST_ENV=remote
-  $ yarn run test-e2e
-  ```
+    ```
+    $ export TEST_ENV=remote
+    $ yarn run test-e2e
+    ```
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ### Simulator
@@ -204,14 +203,14 @@ The simulator can be started by running 'yarn run sim' in 'client'.
     export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v12.14.1-linux-x64
     export PATH="$YARN_HOME/bin:$NODEJS_HOME/bin:$PATH"
     ```
-_Note_: nodejs version might have changed in the meanwhile, check inside <anet_root_path>/.gradle/nodejs/ for which version is being used and change the path accordingly.
+    _Note_: nodejs version might have changed in the meanwhile, check inside <anet_root_path>/.gradle/nodejs/ for which version is being used and change the path accordingly.
 1. `cd client/`
-    - All of the frontend code is in the `client/` directory.
+    1. All of the frontend code is in the `client/` directory.
 1. Run the server: `yarn run start`
 1. Go to [http://localhost:3000/](http://localhost:3000/) in your browser.
-   - When prompted for credentials:
-     - **Username:** `erin`
-     - **Password:** Leave it blank
+    1. When prompted for credentials:
+        - **Username:** `erin`
+        - **Password:** Leave it blank
 
 NB: You only need node.js and the npm dependencies for developing. When we deploy for production, everything is compiled to static files. No javascript dependencies are necessary on the server.
 
