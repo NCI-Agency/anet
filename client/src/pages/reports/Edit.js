@@ -122,7 +122,10 @@ const ReportEdit = ({ pageDispatchers }) => {
     data.report.formCustomFields = JSON.parse(data.report.customFields)
   }
   const report = new Report(data ? data.report : {})
-  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
+  const reportInitialValues = Object.assign(
+    report,
+    report.getTasksMeasurements()
+  )
 
   return (
     <div className="report-edit">

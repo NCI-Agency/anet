@@ -200,7 +200,7 @@ const BaseReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  // We need the report tasks in order to be able to dynamically update the yup schema for the selected task assessments
+  // We need the report tasks in order to be able to dynamically update the yup schema for the selected tasks measurements
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
@@ -328,23 +328,23 @@ const BaseReportForm = ({
     }))
   }
 
-  // Update the task assessments schema according to the selected report tasks
-  const taskAssessmentsSchemaShape = {}
+  // Update the task measurements schema according to the selected report tasks
+  const tasksMeasurementsSchemaShape = {}
   reportTasks
     .filter(t => t.customFields)
     .forEach(t => {
-      taskAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
+      tasksMeasurementsSchemaShape[t.uuid] = createYupObjectShape(
         JSON.parse(JSON.parse(t.customFields).assessmentDefinition),
-        `taskAssessments.${t.uuid}`
+        `tasksMeasurements.${t.uuid}`
       )
     })
-  const reportSchema = _isEmpty(taskAssessmentsSchemaShape)
+  const reportSchema = _isEmpty(tasksMeasurementsSchemaShape)
     ? Report.yupSchema
     : Report.yupSchema.concat(
       yup.object().shape({
-        taskAssessments: yup
+        tasksMeasurements: yup
           .object()
-          .shape(taskAssessmentsSchemaShape)
+          .shape(tasksMeasurementsSchemaShape)
           .nullable()
           .default(null)
       })
@@ -1072,14 +1072,14 @@ const BaseReportForm = ({
                   if (!taskCustomFields.assessmentDefinition) {
                     return null
                   }
-                  const taskAssessmentDefinition = JSON.parse(
+                  const taskMeasurementConfig = JSON.parse(
                     taskCustomFields.assessmentDefinition
                   )
                   return (
                     <CustomFieldsContainer
-                      key={`assessment-${values.uuid}-${task.uuid}`}
-                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
-                      fieldsConfig={taskAssessmentDefinition}
+                      key={`measurement-${values.uuid}-${task.uuid}`}
+                      fieldNamePrefix={`tasksMeasurements.${task.uuid}`}
+                      fieldsConfig={taskMeasurementConfig}
                       formikProps={{
                         setFieldTouched,
                         setFieldValue,
@@ -1268,21 +1268,21 @@ const BaseReportForm = ({
     })
   }
 
-  function isEmptyTaskAssessment(assessment) {
+  function isEmptyTaskMeasurement(measurement) {
     return (
-      (Object.keys(assessment).length === 1 &&
-        Object.keys(assessment)[0] === "invisibleCustomFields") ||
-      _isEmpty(assessment)
+      (Object.keys(measurement).length === 1 &&
+        Object.keys(measurement)[0] === "invisibleCustomFields") ||
+      _isEmpty(measurement)
     )
   }
 
-  function createTaskAssessmentsNotes(values, reportUuid) {
+  function createTasksMeasurementsNotes(values, reportUuid) {
     const selectedTasksUuids = values.tasks.map(t => t.uuid)
-    return Object.keys(values.taskAssessments)
+    return Object.keys(values.tasksMeasurements)
       .filter(
         key =>
           selectedTasksUuids.includes(key) &&
-          !isEmptyTaskAssessment(values.taskAssessments[key])
+          !isEmptyTaskMeasurement(values.tasksMeasurements[key])
       )
       .map(key => {
         const noteObj = {
@@ -1297,11 +1297,15 @@ const BaseReportForm = ({
               relatedObjectUuid: reportUuid
             }
           ],
-          text: customFieldsJSONString(values, true, `taskAssessments.${key}`)
+          text: customFieldsJSONString(
+            values,
+            true,
+            `tasksMeasurements.${key}`
+          )
         }
-        const initialAssessmentUuid = values.taskToAssessmentUuid[key]
-        if (initialAssessmentUuid) {
-          noteObj.uuid = initialAssessmentUuid
+        const initialMeasurementUuid = values.taskToMeasurementUuid[key]
+        if (initialMeasurementUuid) {
+          noteObj.uuid = initialMeasurementUuid
         }
         return noteObj
       })
@@ -1317,8 +1321,8 @@ const BaseReportForm = ({
       "tasks",
       "customFields", // initial JSON from the db
       "formCustomFields",
-      "taskAssessments",
-      "taskToAssessmentUuid"
+      "tasksMeasurements",
+      "taskToMeasurementUuid"
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1361,7 +1365,7 @@ const BaseReportForm = ({
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
       const updateNotesVariables = { report }
-      updateNotesVariables.notes = createTaskAssessmentsNotes(
+      updateNotesVariables.notes = createTasksMeasurementsNotes(
         values,
         report.uuid
       )
@@ -1375,7 +1379,6 @@ const BaseReportForm = ({
   function _saveReport(edit, variables, sendEmail) {
     if (edit) {
       variables.sendEditEmail = sendEmail
-      // Add an additional mutation to create notes for the taskAssessments
       return API.mutation(GQL_UPDATE_REPORT, variables)
     } else {
       return API.mutation(GQL_CREATE_REPORT, variables)

@@ -202,9 +202,9 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
-  getAssessmentResults(dateRange) {
+  getMeasurementsResults(dateRange) {
     const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
-    const taskAssessmentNotes = this.notes
+    const measurementsNotes = this.notes
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
@@ -217,14 +217,14 @@ export default class Task extends Model {
           (!dateRange ||
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
       )
-      .map(ta => JSON.parse(ta.text))
-    const assessmentResults = {}
-    taskAssessmentNotes.forEach(o =>
-      Object.keys(o).forEach(k => {
-        assessmentResults[k] = assessmentResults[k] || []
-        assessmentResults[k].push(o[k])
+      .map(n => JSON.parse(n.text))
+    const measurementsResults = {}
+    measurementsNotes.forEach(n =>
+      Object.keys(n).forEach(k => {
+        measurementsResults[k] = measurementsResults[k] || []
+        measurementsResults[k].push(n[k])
       })
     )
-    return assessmentResults
+    return measurementsResults
   }
 }

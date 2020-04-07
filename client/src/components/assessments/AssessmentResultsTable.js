@@ -15,7 +15,7 @@ import "components/assessments/AssessmentResultsTable.css"
  * - aggregation of the measurements made on the entity/subentities when
  *   working on them in relation to another type of entity (example:
  *   assessments made on tasks, while filling  report related to the tasks);
- *   the definition of these assessments is to be found in
+ *   the configuration of these measurements is to be found in
  *   entity.customFields.assessmentDefinition
  * - display of the last monthly assessment made on the entity/subentities
  *   as a conclusion about the given period of time;
@@ -67,7 +67,7 @@ const MeasurementRow = ({
           <AggregationWidget
             key={`assessment-${measurementKey}`}
             values={
-              entity.getAssessmentResults(assessmentPeriod)[measurementKey]
+              entity.getMeasurementsResults(assessmentPeriod)[measurementKey]
             }
             {...aggWidgetProps}
             {...widgetLayoutConfig}
@@ -118,13 +118,15 @@ const MonthlyAssessmentRows = ({
       assessmentConfig && canAddAssessment && period.allowNewAssessments
     )
   })
-  const hasLastAssessments = !_isEmpty(
+  const rowHasLastAssessments = !_isEmpty(
     periodsLastAssessment.filter(x => !_isEmpty(x))
   )
-  const hasAddAssessment = !_isEmpty(periodsAllowNewAssessment.filter(x => x))
+  const rowHasAddAssessment = !_isEmpty(
+    periodsAllowNewAssessment.filter(x => x)
+  )
   return (
     <>
-      {hasLastAssessments && (
+      {rowHasLastAssessments && (
         <tr>
           {periodsLastAssessment.map((lastAssessment, index) => {
             const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
@@ -152,7 +154,7 @@ const MonthlyAssessmentRows = ({
           })}
         </tr>
       )}
-      {hasAddAssessment && (
+      {rowHasAddAssessment && (
         <tr>
           {assessmentPeriods.map((period, index) => {
             const assessmentLabelPrefix = periodsLastAssessment[index]
@@ -221,7 +223,7 @@ const EntityAssessmentResults = ({
   if (!entity) {
     return null
   }
-  const assessmentDefinition = JSON.parse(
+  const measurementsConfig = JSON.parse(
     JSON.parse(entity.customFields || "{}").assessmentDefinition || "{}"
   )
   return (
@@ -231,11 +233,11 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.keys(assessmentDefinition || {}).map(key => (
+      {Object.keys(measurementsConfig || {}).map(key => (
         <MeasurementRow
           key={key}
           measurementKey={key}
-          measurementDef={assessmentDefinition[key]}
+          measurementDef={measurementsConfig[key]}
           assessmentPeriods={assessmentPeriods}
           entity={entity}
         />

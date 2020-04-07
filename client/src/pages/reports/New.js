@@ -26,7 +26,10 @@ const BaseReportNew = ({ pageDispatchers, currentUser }) => {
     person.primary = true
     report.attendees.push(person)
   }
-  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
+  const reportInitialValues = Object.assign(
+    report,
+    report.getTasksMeasurements()
+  )
 
   return (
     <div className="report-new">

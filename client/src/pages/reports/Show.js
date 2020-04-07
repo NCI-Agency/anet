@@ -350,8 +350,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial task assessments values
-  report = Object.assign(report, report.getTaskAssessments())
+  // Get initial task measurements values
+  report = Object.assign(report, report.getTasksMeasurements())
 
   return (
     <Formik
@@ -664,14 +664,14 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   if (!taskCustomFields.assessmentDefinition) {
                     return null
                   }
-                  const taskAssessmentDefinition = JSON.parse(
+                  const taskMeasurementsConfig = JSON.parse(
                     taskCustomFields.assessmentDefinition
                   )
                   return (
                     <ReadonlyCustomFields
-                      key={`assessment-${values.uuid}-${task.uuid}`}
-                      fieldsConfig={taskAssessmentDefinition}
-                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      key={`measurement-${values.uuid}-${task.uuid}`}
+                      fieldsConfig={taskMeasurementsConfig}
+                      fieldNamePrefix={`tasksMeasurements.${task.uuid}`}
                       values={values}
                     />
                   )
