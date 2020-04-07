@@ -145,7 +145,7 @@ export const createAssessmentSchema = (
 ) => {
   const assessmentSchemaShape = createYupObjectShape(assessmentConfig, prefix)
   return yup.object().shape({
-    prefix: assessmentSchemaShape
+    [prefix]: assessmentSchemaShape
   })
 }
 
