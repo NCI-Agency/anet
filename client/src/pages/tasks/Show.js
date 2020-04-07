@@ -168,9 +168,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       subTasks.push(new Task(subTask))
     })
 
-  if (done) {
-    return result
-  }
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
