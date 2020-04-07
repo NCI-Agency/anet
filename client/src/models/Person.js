@@ -273,25 +273,6 @@ export default class Person extends Model {
     return orgUuids.includes(org.uuid)
   }
 
-  getPeriodAssessmentDetails() {
-    if (this.isAdvisor()) {
-      return {
-        assessmentConfig: Person.advisorAssessmentConfig,
-        assessmentYupSchema: Person.advisorAssessmentSchema
-      }
-    } else if (this.isPrincipal()) {
-      return {
-        assessmentConfig: Person.principalAssessmentConfig,
-        assessmentYupSchema: Person.principalAssessmentSchema
-      }
-    } else {
-      return {
-        assessmentConfig: null,
-        assessmentYupSchema: null
-      }
-    }
-  }
-
   iconUrl() {
     if (this.isAdvisor()) {
       return RS_ICON
@@ -351,6 +332,29 @@ export default class Person extends Model {
     return {
       lastName: lastName.trim().toUpperCase(),
       firstName: firstName.trim()
+    }
+  }
+
+  getMeasurementsConfig() {
+    return {}
+  }
+
+  getPeriodAssessmentDetails() {
+    if (this.isAdvisor()) {
+      return {
+        assessmentConfig: Person.advisorAssessmentConfig,
+        assessmentYupSchema: Person.advisorAssessmentSchema
+      }
+    } else if (this.isPrincipal()) {
+      return {
+        assessmentConfig: Person.principalAssessmentConfig,
+        assessmentYupSchema: Person.principalAssessmentSchema
+      }
+    } else {
+      return {
+        assessmentConfig: null,
+        assessmentYupSchema: null
+      }
     }
   }
 }

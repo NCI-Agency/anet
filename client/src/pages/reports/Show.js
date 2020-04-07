@@ -30,7 +30,7 @@ import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
-import { Comment, Person, Position, Report } from "models"
+import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -657,16 +657,12 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 id="engagement-assessments"
               >
                 {values.tasks.map(task => {
-                  if (!task.customFields) {
-                    return null
-                  }
-                  const taskCustomFields = JSON.parse(task.customFields)
-                  if (!taskCustomFields.assessmentDefinition) {
-                    return null
-                  }
-                  const taskMeasurementsConfig = JSON.parse(
-                    taskCustomFields.assessmentDefinition
+                  const taskMeasurementsConfig = Task.getMeasurementsConfig(
+                    task.customFields
                   )
+                  if (_isEmpty(taskMeasurementsConfig)) {
+                    return null
+                  }
                   return (
                     <ReadonlyCustomFields
                       key={`measurement-${values.uuid}-${task.uuid}`}

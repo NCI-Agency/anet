@@ -179,27 +179,22 @@ export default class Task extends Model {
       : Settings.fields.task.subLevel
   }
 
-  getPeriodAssessmentDetails() {
-    const assessmentConfig = this.fieldSettings().assessment?.customFields
-    if (this.isTopLevelTask()) {
-      return {
-        assessmentConfig: assessmentConfig,
-        assessmentYupSchema: Task.topLevelAssessmentCustomFieldsSchema
-      }
-    } else {
-      return {
-        assessmentConfig: assessmentConfig,
-        assessmentYupSchema: Task.subLevelAssessmentCustomFieldsSchema
-      }
-    }
-  }
-
   iconUrl() {
     return TASKS_ICON
   }
 
   toString() {
     return `${this.shortName}`
+  }
+
+  static getMeasurementsConfig(customFields) {
+    return JSON.parse(
+      JSON.parse(customFields || "{}").assessmentDefinition || "{}"
+    )
+  }
+
+  getMeasurementsConfig() {
+    return Task.getMeasurementsConfig(this.customFields)
   }
 
   getMeasurementsResults(dateRange) {
@@ -226,5 +221,20 @@ export default class Task extends Model {
       })
     )
     return measurementsResults
+  }
+
+  getPeriodAssessmentDetails() {
+    const assessmentConfig = this.fieldSettings().assessment?.customFields
+    if (this.isTopLevelTask()) {
+      return {
+        assessmentConfig: assessmentConfig,
+        assessmentYupSchema: Task.topLevelAssessmentCustomFieldsSchema
+      }
+    } else {
+      return {
+        assessmentConfig: assessmentConfig,
+        assessmentYupSchema: Task.subLevelAssessmentCustomFieldsSchema
+      }
+    }
   }
 }

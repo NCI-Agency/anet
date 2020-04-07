@@ -15,8 +15,8 @@ import "components/assessments/AssessmentResultsTable.css"
  * - aggregation of the measurements made on the entity/subentities when
  *   working on them in relation to another type of entity (example:
  *   assessments made on tasks, while filling  report related to the tasks);
- *   the configuration of these measurements is to be found in
- *   entity.customFields.assessmentDefinition
+ *   the configuration of these measurements can be retrieved using
+ *   entity.getMeasurementsConfig()
  * - display of the last monthly assessment made on the entity/subentities
  *   as a conclusion about the given period of time;
  *   the config and yupSchema for these assessments is to be found in
@@ -223,9 +223,7 @@ const EntityAssessmentResults = ({
   if (!entity) {
     return null
   }
-  const measurementsConfig = JSON.parse(
-    JSON.parse(entity.customFields || "{}").assessmentDefinition || "{}"
-  )
+  const measurementsConfig = entity.getMeasurementsConfig()
   return (
     <>
       <tr>
@@ -279,36 +277,49 @@ const AssessmentResultsTable = ({
   if (!entity) {
     return null
   }
+  const entityMeasurementsConfig = entity.getMeasurementsConfig()
+  const subentitiesMeasurementsConfig = subEntities
+    ?.map(s => s.getMeasurementsConfig())
+    .filter(mc => !_isEmpty(mc))
+  const { assessmentConfig } = entity.getPeriodAssessmentDetails()
+  const showAssessmentResults =
+    !_isEmpty(entityMeasurementsConfig) ||
+    !_isEmpty(subentitiesMeasurementsConfig) ||
+    !_isEmpty(assessmentConfig)
   return (
-    <div style={{ ...style }}>
-      <Fieldset title="Assessment results" id="entity-assessments-results">
-        <Table condensed responsive className="assessments-table">
-          <AssessmentsTableHeader periods={assessmentPeriods} />
-          <tbody>
-            {!_isEmpty(subEntities) && (
-              <>
-                {subEntities?.map(subEntity => (
-                  <EntityAssessmentResults
-                    key={`subassessment-${subEntity.uuid}`}
-                    entity={subEntity}
-                    entityType={entityType}
-                    assessmentPeriods={assessmentPeriods}
-                    canAddAssessment={false}
-                  />
-                ))}
-              </>
-            )}
-            <EntityAssessmentResults
-              entity={entity}
-              entityType={entityType}
-              assessmentPeriods={assessmentPeriods}
-              canAddAssessment={canAddAssessment}
-              onAddAssessment={onAddAssessment}
-            />
-          </tbody>
-        </Table>
-      </Fieldset>
-    </div>
+    <>
+      {showAssessmentResults && (
+        <div style={{ ...style }}>
+          <Fieldset title="Assessment results" id="entity-assessments-results">
+            <Table condensed responsive className="assessments-table">
+              <AssessmentsTableHeader periods={assessmentPeriods} />
+              <tbody>
+                {!_isEmpty(subEntities) && (
+                  <>
+                    {subEntities?.map(subEntity => (
+                      <EntityAssessmentResults
+                        key={`subassessment-${subEntity.uuid}`}
+                        entity={subEntity}
+                        entityType={entityType}
+                        assessmentPeriods={assessmentPeriods}
+                        canAddAssessment={false}
+                      />
+                    ))}
+                  </>
+                )}
+                <EntityAssessmentResults
+                  entity={entity}
+                  entityType={entityType}
+                  assessmentPeriods={assessmentPeriods}
+                  canAddAssessment={canAddAssessment}
+                  onAddAssessment={onAddAssessment}
+                />
+              </tbody>
+            </Table>
+          </Fieldset>
+        </div>
+      )}
+    </>
   )
 }
 AssessmentResultsTable.propTypes = {
