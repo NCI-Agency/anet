@@ -56,7 +56,10 @@ const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
 }
 SpecialField.propTypes = {
   name: PropTypes.string.isRequired,
-  widget: PropTypes.string,
+  widget: PropTypes.oneOf([
+    SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
+    SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  ]).isRequired,
   formikProps: PropTypes.object
 }
 
@@ -83,6 +86,14 @@ const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
       />
     )
   }
+}
+ReadonlySpecialField.propTypes = {
+  name: PropTypes.string.isRequired,
+  widget: PropTypes.oneOf([
+    SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
+    SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  ]).isRequired,
+  values: PropTypes.object
 }
 
 const TextField = fieldProps => {
