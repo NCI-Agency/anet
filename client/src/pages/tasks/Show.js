@@ -190,24 +190,24 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
+  const now = moment()
   const assessmentPeriods = [
     {
-      start: moment().subtract(2, "months").startOf("month"),
-      end: moment().subtract(2, "months").endOf("month"),
+      start: now.clone().subtract(2, "months").startOf("month"),
+      end: now.clone().subtract(2, "months").endOf("month"),
       allowNewAssessments: false
     },
     {
-      start: moment().subtract(1, "months").startOf("month"),
-      end: moment().subtract(1, "months").endOf("month"),
+      start: now.clone().subtract(1, "months").startOf("month"),
+      end: now.clone().subtract(1, "months").endOf("month"),
       allowNewAssessments: true
     },
     {
-      start: moment().startOf("month"),
-      end: moment().endOf("month"),
+      start: now.clone().startOf("month"),
+      end: now.clone().endOf("month"),
       allowNewAssessments: false
     }
   ]
-
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
