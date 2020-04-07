@@ -113,11 +113,14 @@ const GQL_GET_TASK = gql`
         uuid
         shortName
         longName
-        customFieldRef1 { uuid, shortName }
+        customFieldRef1 {
+          uuid
+          shortName
+        }
         customFields
         ${GRAPHQL_NOTES_FIELDS}
         publishedReports: reports(query: {
-          pageSize:0,
+          pageSize: 0,
           state: [${Report.STATE.PUBLISHED}]
         }) {
           uuid
@@ -143,6 +146,10 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+
+  if (done) {
+    return result
+  }
 
   if (data) {
     data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()

@@ -20,7 +20,7 @@ const NUMBER_AGG = {
 }
 
 const NumberAggWidget = ({ values, aggregationType, ...otherWidgetProps }) =>
-  values.length ? <div>{NUMBER_AGG[aggregationType](values)}</div> : null
+  values?.length ? <div>{NUMBER_AGG[aggregationType](values)}</div> : null
 NumberAggWidget.propTypes = aggregationPropTypes
 
 const DefaultAggWidget = ({ values, ...otherWidgetProps }) => (

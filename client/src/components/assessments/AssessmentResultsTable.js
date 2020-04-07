@@ -23,12 +23,14 @@ import "components/assessments/AssessmentResultsTable.css"
  *   entity.periodAssessmentConfig()
  */
 
+const PERIOD_FORMAT = "MMM-YYYY"
+
 const AssessmentsTableHeader = ({ periods }) => (
   <thead>
     <tr key="periods">
       <>
         {periods.map(period => (
-          <th key={period.start}>{period.start.format("MMM-YYYY")}</th>
+          <th key={period.start}>{period.start.format(PERIOD_FORMAT)}</th>
         ))}
       </>
     </tr>
@@ -156,7 +158,7 @@ const MonthlyAssessmentRows = ({
               ? "Add a"
               : "Make a new"
             const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for the month of ${period.start.format(
-              "MMM-YYYY"
+              PERIOD_FORMAT
             )}`
             return (
               <td key={index}>
@@ -173,7 +175,7 @@ const MonthlyAssessmentRows = ({
                       entityType={entityType}
                       title={`Assessment for ${
                         entity.shortName
-                      } for ${period.start.format("MMM-YYYY")}`}
+                      } for ${period.start.format(PERIOD_FORMAT)}`}
                       yupSchema={entity.periodAssessmentYupSchema()}
                       assessmentConfig={entity.periodAssessmentConfig()}
                       showModal={showAssessmentModal}
