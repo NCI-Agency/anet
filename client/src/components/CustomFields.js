@@ -64,7 +64,7 @@ SpecialField.propTypes = {
 }
 
 const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
-  if (widget === "richTextEditor") {
+  if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
     const fieldValue = Object.get(values, name) // name might be a path for a nested prop
     return (
       <FastField
@@ -656,7 +656,10 @@ export const customFieldsJSONString = (
   forNoteText = false,
   prefix = DEFAULT_CUSTOM_FIELDS_PREFIX
 ) => {
-  if (Object.get(values, prefix)) {
+  if (
+    Object.get(values, prefix) &&
+    typeof Object.get(values, prefix) === "object"
+  ) {
     const clonedValues = _cloneDeep(values)
     const customFieldsValues = Object.get(clonedValues, prefix)
     if (customFieldsValues.invisibleCustomFields) {
