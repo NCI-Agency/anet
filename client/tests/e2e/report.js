@@ -3,9 +3,9 @@ const _includes = require("lodash/includes")
 const moment = require("moment")
 const test = require("../util/test")
 
-var testReportURL = null
+let testReportURL = null
 
-test("Draft and submit a report", async t => {
+test.serial("Draft and submit a report", async t => {
   t.plan(19)
 
   const {
@@ -241,7 +241,7 @@ test("Draft and submit a report", async t => {
   await assert.strictEqual(jsonResponse.length, 0) // Domain not in active users
 })
 
-test("Publish report chain", async t => {
+test.serial("Publish report chain", async t => {
   t.plan(6)
 
   const {
@@ -411,7 +411,7 @@ async function approveReport(t, user) {
   await $ApproveButton.click()
   await t.context.driver.wait(until.stalenessOf($ApproveButton), mediumWaitMs)
 }
-test("Verify that validation and other reports/new interactions work", async t => {
+test.serial("Verify that validation and other reports/new interactions work", async t => {
   t.plan(29)
 
   const {
