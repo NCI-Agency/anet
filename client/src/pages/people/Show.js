@@ -164,7 +164,10 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
       allowNewAssessments: false
     }
   ]
-
+  const canAddAssessment = currentUser.position.associatedPositions
+    .filter(ap => ap.person)
+    .map(ap => ap.person.uuid)
+    .includes(person.uuid)
   return (
     <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
@@ -437,7 +440,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
               entity={person}
               entityType={Person}
               assessmentPeriods={assessmentPeriods}
-              canAddAssessment
+              canAddAssessment={canAddAssessment}
               onAddAssessment={refetch}
             />
           </div>
