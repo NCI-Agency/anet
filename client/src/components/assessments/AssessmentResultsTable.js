@@ -1,4 +1,4 @@
-import AggregationWidget from "components/AggregationWidgets"
+import AggregationWidget from "components/AggregationWidget"
 import AddAssessmentModal from "components/assessments/AddAssessmentModal"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
