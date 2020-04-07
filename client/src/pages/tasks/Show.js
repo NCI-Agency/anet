@@ -100,15 +100,19 @@ const GQL_GET_TASK = gql`
         }
       }
       customFields
-      ${GRAPHQL_NOTES_FIELDS},
+      ${GRAPHQL_NOTES_FIELDS}
       publishedReports: reports(query: {
-        pageSize:0,
+        pageSize: 0
         state: [${Report.STATE.PUBLISHED}]
       }) {
         uuid
       }
     }
-    subTasks: taskList(query: {pageSize: 0, customFieldRef1Uuid: [$uuid], customFieldRef1Recursively: true}) {
+    subTasks: taskList(query: {
+      pageSize: 0
+      customFieldRef1Uuid: [$uuid]
+      customFieldRef1Recursively: true
+    }) {
       list {
         uuid
         shortName
@@ -120,7 +124,7 @@ const GQL_GET_TASK = gql`
         customFields
         ${GRAPHQL_NOTES_FIELDS}
         publishedReports: reports(query: {
-          pageSize: 0,
+          pageSize: 0
           state: [${Report.STATE.PUBLISHED}]
         }) {
           uuid
