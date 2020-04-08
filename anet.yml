@@ -216,12 +216,12 @@ dictionary:
       topLevel:
         shortLabel: Objective
         shortName:
-          label: Objective name
-          placeholder: Enter an objective name, example....
+          label: Name of this Objective
+          placeholder: Enter a Name for this Objective name, example ....
         longLabel: Objectives
         longName:
-          label: Objective description
-          placeholder: Enter an objective description, example ....
+          label: Description of this Objective
+          placeholder: Enter a description for this Objective, example ....
           componentClass: textarea
           style:
             height: 400px
