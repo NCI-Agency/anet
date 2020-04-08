@@ -225,7 +225,9 @@ export default class Task extends Model {
     const assessmentResults = {}
     taskAssessmentNotes.forEach(o =>
       Object.keys(o).forEach(k => {
-        assessmentResults[k] = assessmentResults[k] || []
+        if (!Object.prototype.hasOwnProperty.call(assessmentResults, k)) {
+          assessmentResults[k] = []
+        }
         assessmentResults[k].push(o[k])
       })
     )
