@@ -657,20 +657,18 @@ export const customFieldsJSONString = (
   forNoteText = false,
   prefix = DEFAULT_CUSTOM_FIELDS_PREFIX
 ) => {
-  if (
-    Object.get(values, prefix) &&
-    typeof Object.get(values, prefix) === "object"
-  ) {
+  const customFieldsValues = Object.get(values, prefix)
+  if (customFieldsValues && typeof customFieldsValues === "object") {
     const clonedValues = _cloneDeep(values)
-    const customFieldsValues = Object.get(clonedValues, prefix)
-    if (customFieldsValues.invisibleCustomFields) {
-      customFieldsValues.invisibleCustomFields.forEach(f =>
+    const filteredCustomFieldsValues = Object.get(clonedValues, prefix)
+    if (filteredCustomFieldsValues.invisibleCustomFields) {
+      filteredCustomFieldsValues.invisibleCustomFields.forEach(f =>
         _set(clonedValues, f.split("."), undefined)
       )
       if (forNoteText) {
-        delete customFieldsValues.invisibleCustomFields
+        delete filteredCustomFieldsValues.invisibleCustomFields
       }
     }
-    return JSON.stringify(customFieldsValues)
+    return JSON.stringify(filteredCustomFieldsValues)
   }
 }
