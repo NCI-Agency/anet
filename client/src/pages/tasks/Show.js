@@ -1,16 +1,16 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
-import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import Approvals from "components/approvals/Approvals"
+import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -20,7 +20,7 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Task } from "models"
+import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -101,6 +101,35 @@ const GQL_GET_TASK = gql`
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
+      publishedReports: reports(query: {
+        pageSize: 0
+        state: [${Report.STATE.PUBLISHED}]
+      }) {
+        uuid
+      }
+    }
+    subTasks: taskList(query: {
+      pageSize: 0
+      customFieldRef1Uuid: [$uuid]
+      customFieldRef1Recursively: true
+    }) {
+      list {
+        uuid
+        shortName
+        longName
+        customFieldRef1 {
+          uuid
+          shortName
+        }
+        customFields
+        ${GRAPHQL_NOTES_FIELDS}
+        publishedReports: reports(query: {
+          pageSize: 0
+          state: [${Report.STATE.PUBLISHED}]
+        }) {
+          uuid
+        }
+      }
     }
   }
 `
@@ -108,9 +137,10 @@ const GQL_GET_TASK = gql`
 const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK, {
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
+
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -120,18 +150,25 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+
   if (done) {
     return result
   }
 
   if (data) {
-    data.task.formCustomFields = JSON.parse(data.task.customFields)
+    data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
+    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
   }
   const task = new Task(data ? data.task : {})
-  const isTopLevelTask = _isEmpty(task.customFieldRef1)
-  const fieldSettings = isTopLevelTask
-    ? Settings.fields.task.topLevel
-    : Settings.fields.task.subLevel
+
+  const subTasks = []
+  data &&
+    data.subTasks.list.forEach(subTask => {
+      subTask.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
+      subTasks.push(new Task(subTask))
+    })
+
+  const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskCustomFieldRef1 = DictionaryField(Field)
@@ -153,7 +190,24 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
-
+  const now = moment()
+  const assessmentPeriods = [
+    {
+      start: now.clone().subtract(2, "months").startOf("month"),
+      end: now.clone().subtract(2, "months").endOf("month"),
+      allowNewAssessments: false
+    },
+    {
+      start: now.clone().subtract(1, "months").startOf("month"),
+      end: now.clone().subtract(1, "months").endOf("month"),
+      allowNewAssessments: true
+    },
+    {
+      start: now.clone().startOf("month"),
+      end: now.clone().endOf("month"),
+      allowNewAssessments: false
+    }
+  ]
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -168,7 +222,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               notes={task.notes}
               relatedObject={
                 task.uuid && {
-                  relatedObjectType: "tasks",
+                  relatedObjectType: Task.relatedObjectType,
                   relatedObjectUuid: task.uuid
                 }
               }
@@ -179,135 +233,130 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
                 title={`${fieldSettings.shortLabel} ${task.shortName}`}
                 action={action}
               />
-              <Fieldset>
-                <ShortNameField
-                  dictProps={fieldSettings.shortName}
-                  name="shortName"
-                  component={FieldHelper.ReadonlyField}
-                />
-
-                {/* Override componentClass and style from dictProps */}
-                <LongNameField
-                  dictProps={fieldSettings.longName}
-                  componentClass="div"
-                  style={{}}
-                  name="longName"
-                  component={FieldHelper.ReadonlyField}
-                />
-
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Task.humanNameOfStatus}
-                />
-
-                <Field
-                  name="taskedOrganizations"
-                  label={Settings.fields.task.taskedOrganizations.label}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    task.taskedOrganizations && (
-                      <>
-                        {task.taskedOrganizations.map(org => (
-                          <LinkTo
-                            modelType="Organization"
-                            model={org}
-                            key={`${org.uuid}`}
-                          />
-                        ))}
-                      </>
-                    )
-                  }
-                />
-
-                {Settings.fields.task.customFieldRef1 && (
-                  <TaskCustomFieldRef1
-                    dictProps={Settings.fields.task.customFieldRef1}
-                    name="customFieldRef1"
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                  padding: "10px"
+                }}
+              >
+                <Fieldset style={{ flex: "1 1 0" }}>
+                  <ShortNameField
+                    dictProps={fieldSettings.shortName}
+                    name="shortName"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                  {/* Override componentClass and style from dictProps */}
+                  <LongNameField
+                    dictProps={fieldSettings.longName}
+                    componentClass="div"
+                    style={{}}
+                    name="longName"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                  <Field
+                    name="status"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={Task.humanNameOfStatus}
+                  />
+                  <Field
+                    name="taskedOrganizations"
+                    label={Settings.fields.task.taskedOrganizations.label}
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      task.customFieldRef1 && (
-                        <LinkTo modelType="Task" model={task.customFieldRef1}>
-                          {task.customFieldRef1.shortName}{" "}
-                          {task.customFieldRef1.longName}
-                        </LinkTo>
+                      task.taskedOrganizations && (
+                        <>
+                          {task.taskedOrganizations.map(org => (
+                            <LinkTo
+                              modelType="Organization"
+                              model={org}
+                              key={`${org.uuid}`}
+                            />
+                          ))}
+                        </>
                       )
                     }
                   />
-                )}
-
-                <TaskCustomField
-                  dictProps={Settings.fields.task.customField}
-                  name="customField"
-                  component={FieldHelper.ReadonlyField}
-                />
-
-                {Settings.fields.task.plannedCompletion && (
-                  <PlannedCompletionField
-                    dictProps={Settings.fields.task.plannedCompletion}
-                    name="plannedCompletion"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      task.plannedCompletion &&
-                      moment(task.plannedCompletion).format(
-                        Settings.dateFormats.forms.displayShort.date
-                      )
-                    }
-                  />
-                )}
-
-                {Settings.fields.task.projectedCompletion && (
-                  <ProjectedCompletionField
-                    dictProps={Settings.fields.task.projectedCompletion}
-                    name="projectedCompletion"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      task.projectedCompletion &&
-                      moment(task.projectedCompletion).format(
-                        Settings.dateFormats.forms.displayShort.date
-                      )
-                    }
-                  />
-                )}
-
-                {Settings.fields.task.customFieldEnum1 && (
-                  <TaskCustomFieldEnum1
-                    dictProps={Object.without(
-                      Settings.fields.task.customFieldEnum1,
-                      "enum"
-                    )}
-                    name="customFieldEnum1"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                )}
-
-                {Settings.fields.task.customFieldEnum2 && (
-                  <TaskCustomFieldEnum2
-                    dictProps={Object.without(
-                      Settings.fields.task.customFieldEnum2,
-                      "enum"
-                    )}
-                    name="customFieldEnum2"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                )}
-              </Fieldset>
-
-              {currentUser.isAdmin() && // TODO: Only show task custom fields to admins until we implement visibility per role
-                Settings.fields.task.customFields && (
-                  <Fieldset
-                    title={`${fieldSettings.shortLabel} information`}
-                    id="custom-fields"
-                  >
-                    <ReadonlyCustomFields
-                      fieldsConfig={Settings.fields.task.customFields}
-                      formikProps={{
-                        values
-                      }}
+                  {Settings.fields.task.customFieldRef1 && (
+                    <TaskCustomFieldRef1
+                      dictProps={Settings.fields.task.customFieldRef1}
+                      name="customFieldRef1"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        task.customFieldRef1 && (
+                          <LinkTo modelType="Task" model={task.customFieldRef1}>
+                            {task.customFieldRef1.shortName}{" "}
+                            {task.customFieldRef1.longName}
+                          </LinkTo>
+                        )
+                      }
                     />
-                  </Fieldset>
-              )}
+                  )}
+                  <TaskCustomField
+                    dictProps={Settings.fields.task.customField}
+                    name="customField"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                  {Settings.fields.task.plannedCompletion && (
+                    <PlannedCompletionField
+                      dictProps={Settings.fields.task.plannedCompletion}
+                      name="plannedCompletion"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        task.plannedCompletion &&
+                        moment(task.plannedCompletion).format(
+                          Settings.dateFormats.forms.displayShort.date
+                        )
+                      }
+                    />
+                  )}
+                  {Settings.fields.task.projectedCompletion && (
+                    <ProjectedCompletionField
+                      dictProps={Settings.fields.task.projectedCompletion}
+                      name="projectedCompletion"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        task.projectedCompletion &&
+                        moment(task.projectedCompletion).format(
+                          Settings.dateFormats.forms.displayShort.date
+                        )
+                      }
+                    />
+                  )}
+                  {Settings.fields.task.customFieldEnum1 && (
+                    <TaskCustomFieldEnum1
+                      dictProps={Object.without(
+                        Settings.fields.task.customFieldEnum1,
+                        "enum"
+                      )}
+                      name="customFieldEnum1"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                  )}
+                  {Settings.fields.task.customFieldEnum2 && (
+                    <TaskCustomFieldEnum2
+                      dictProps={Object.without(
+                        Settings.fields.task.customFieldEnum2,
+                        "enum"
+                      )}
+                      name="customFieldEnum2"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                  )}
+                </Fieldset>
+              </div>
             </Form>
+
+            <AssessmentResultsTable
+              style={{ flex: "0 0 100%" }}
+              entity={task}
+              entityType={Task}
+              subEntities={subTasks}
+              assessmentPeriods={assessmentPeriods}
+              canAddAssessment={canEdit}
+              onAddAssessment={refetch}
+            />
 
             <Fieldset title="Responsible positions">
               <PositionTable positions={task.responsiblePositions} />

@@ -96,7 +96,7 @@ const OrganizationEdit = ({ pageDispatchers }) => {
         notes={organization.notes}
         relatedObject={
           organization.uuid && {
-            relatedObjectType: "organizations",
+            relatedObjectType: Organization.relatedObjectType,
             relatedObjectUuid: organization.uuid
           }
         }

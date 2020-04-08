@@ -15,6 +15,7 @@ export default class Person extends Model {
   static resourceName = "Person"
   static listName = "personList"
   static getInstanceName = "person"
+  static relatedObjectType = "people"
 
   static STATUS = {
     NEW_USER: "NEW_USER",
