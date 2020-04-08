@@ -439,6 +439,21 @@ CustomFieldsContainer.defaultProps = {
   vertical: false
 }
 
+export const getFieldPropsFromFieldConfig = fieldConfig => {
+  const {
+    aggregations,
+    type,
+    typeError,
+    placeholder,
+    helpText,
+    validations,
+    visibleWhen,
+    objectFields,
+    ...fieldProps
+  } = fieldConfig
+  return fieldProps
+}
+
 const CustomField = ({
   fieldConfig,
   fieldName,
@@ -447,14 +462,8 @@ const CustomField = ({
   updateInvisibleFields,
   vertical
 }) => {
-  const {
-    type,
-    typeError,
-    helpText,
-    validations,
-    visibleWhen,
-    ...fieldProps
-  } = fieldConfig
+  const { type, helpText } = fieldConfig
+  const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
   const [validateFormDebounced] = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
@@ -607,16 +616,8 @@ export const ReadonlyCustomFields = ({
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
-        const {
-          type,
-          typeError,
-          placeholder,
-          helpText,
-          validations,
-          visibleWhen,
-          objectFields,
-          ...fieldProps
-        } = fieldConfig
+        const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+        const { type } = fieldConfig
         let extraProps = {}
         if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
           extraProps = {

@@ -1,6 +1,9 @@
 import AggregationWidget from "components/AggregationWidget"
 import AddAssessmentModal from "components/assessments/AddAssessmentModal"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import {
+  getFieldPropsFromFieldConfig,
+  ReadonlyCustomFields
+} from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import { Formik } from "formik"
 import LinkTo from "components/LinkTo"
@@ -51,17 +54,7 @@ const MeasurementRow = ({
     aggregationType: measurementDef.aggregation?.aggregationType,
     vertical: true
   }
-  const widgetLayoutConfig = Object.without(
-    measurementDef,
-    "aggregation",
-    "type",
-    "typeError",
-    "placeholder",
-    "helpText",
-    "validations",
-    "visibleWhen",
-    "objectFields"
-  )
+  const fieldProps = getFieldPropsFromFieldConfig(measurementDef)
   return (
     <tr>
       {assessmentPeriods.map((assessmentPeriod, index) => (
@@ -72,7 +65,7 @@ const MeasurementRow = ({
               entity.getAssessmentResults(assessmentPeriod)[measurementKey]
             }
             {...aggWidgetProps}
-            {...widgetLayoutConfig}
+            {...fieldProps}
           />
         </td>
       ))}
