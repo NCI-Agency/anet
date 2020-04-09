@@ -82,14 +82,14 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
   [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null)
 }
 
-const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
+const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
   const { label, validations, objectFields, typeError } = fieldConfig
   let fieldTypeYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
   if (typeError) {
     fieldTypeYupSchema = fieldTypeYupSchema.typeError(typeError)
   }
   if (!_isEmpty(objectFields)) {
-    const objSchema = createYupObjectShape(objectFields, fieldPrefix)
+    const objSchema = createYupObjectShape(objectFields, parentFieldName)
     fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)
   }
   if (!_isEmpty(validations)) {
@@ -118,7 +118,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
     (invisibleCustomFields, schema) => {
       return invisibleCustomFields === null ||
         (invisibleCustomFields &&
-          invisibleCustomFields.includes(`${fieldPrefix}.${fieldKey}`))
+          invisibleCustomFields.includes(`${parentFieldName}.${fieldKey}`))
         ? schema
         : schema.concat(fieldTypeYupSchema)
     }
@@ -126,12 +126,18 @@ const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
   return fieldYupSchema
 }
 
-export const createYupObjectShape = (config, prefix = "formCustomFields") => {
+export const createYupObjectShape = (
+  config,
+  parentFieldName = "formCustomFields"
+) => {
   let objShape = {}
   if (config) {
     objShape = Object.fromEntries(
       Object.entries(config)
-        .map(([k, v]) => [k, createFieldYupSchema(k, config[k], prefix)])
+        .map(([k, v]) => [
+          k,
+          createFieldYupSchema(k, config[k], parentFieldName)
+        ])
         .filter(([k, v]) => v !== null)
     )
     objShape.invisibleCustomFields = yup.mixed().nullable().default(null)
@@ -139,15 +145,18 @@ export const createYupObjectShape = (config, prefix = "formCustomFields") => {
   return yup.object().shape(objShape)
 }
 
-export const ENTITY_ASSESSMENT_FIELD = "entityAssessment"
+export const ENTITY_ASSESSMENT_PARENT_FIELD = "entityAssessment"
 
 export const createAssessmentSchema = (
   assessmentConfig,
-  prefix = ENTITY_ASSESSMENT_FIELD
+  parentFieldName = ENTITY_ASSESSMENT_PARENT_FIELD
 ) => {
-  const assessmentSchemaShape = createYupObjectShape(assessmentConfig, prefix)
+  const assessmentSchemaShape = createYupObjectShape(
+    assessmentConfig,
+    parentFieldName
+  )
   return yup.object().shape({
-    [prefix]: assessmentSchemaShape
+    [parentFieldName]: assessmentSchemaShape
   })
 }
 

@@ -4,7 +4,7 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import Model, {
-  ENTITY_ASSESSMENT_FIELD,
+  ENTITY_ASSESSMENT_PARENT_FIELD,
   GQL_CREATE_NOTE,
   NOTE_TYPE
 } from "components/Model"
@@ -63,7 +63,7 @@ const AddAssessmentModal = ({
                   <Messages error={assessmentError} />
                   <CustomFieldsContainer
                     fieldsConfig={assessmentConfig}
-                    fieldNamePrefix={ENTITY_ASSESSMENT_FIELD}
+                    parentFieldName={ENTITY_ASSESSMENT_PARENT_FIELD}
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
@@ -124,7 +124,7 @@ const AddAssessmentModal = ({
     updatedNote.text = customFieldsJSONString(
       values,
       true,
-      ENTITY_ASSESSMENT_FIELD
+      ENTITY_ASSESSMENT_PARENT_FIELD
     )
     return API.mutation(GQL_CREATE_NOTE, {
       note: updatedNote

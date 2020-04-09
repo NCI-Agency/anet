@@ -1078,7 +1078,7 @@ const BaseReportForm = ({
                   return (
                     <CustomFieldsContainer
                       key={`measurement-${values.uuid}-${task.uuid}`}
-                      fieldNamePrefix={`tasksMeasurements.${task.uuid}`}
+                      parentFieldName={`tasksMeasurements.${task.uuid}`}
                       fieldsConfig={taskMeasurementConfig}
                       formikProps={{
                         setFieldTouched,

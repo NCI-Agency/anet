@@ -124,19 +124,19 @@ const MonthlyAssessmentRows = ({
       {rowHasLastAssessments && (
         <tr>
           {periodsLastAssessment.map((lastAssessment, index) => {
-            const lastAssessmentPrefix = `lastAssessment-${entity.uuid}-${index}`
+            const lastAssessmentParentFieldName = `lastAssessment-${entity.uuid}-${index}`
             return (
               <td key={index}>
                 {assessmentConfig && lastAssessment && (
                   <Formik
                     enableReinitialize
                     initialValues={{
-                      [lastAssessmentPrefix]: lastAssessment
+                      [lastAssessmentParentFieldName]: lastAssessment
                     }}
                   >
                     {({ values }) => (
                       <ReadonlyCustomFields
-                        fieldNamePrefix={lastAssessmentPrefix}
+                        parentFieldName={lastAssessmentParentFieldName}
                         fieldsConfig={assessmentConfig}
                         values={values}
                         vertical

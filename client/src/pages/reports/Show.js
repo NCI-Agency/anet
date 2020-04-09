@@ -667,7 +667,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                     <ReadonlyCustomFields
                       key={`measurement-${values.uuid}-${task.uuid}`}
                       fieldsConfig={taskMeasurementsConfig}
-                      fieldNamePrefix={`tasksMeasurements.${task.uuid}`}
+                      parentFieldName={`tasksMeasurements.${task.uuid}`}
                       values={values}
                     />
                   )
