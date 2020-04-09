@@ -236,8 +236,8 @@ test.serial("Draft and submit a report", async t => {
     "Clicking the submit report button displays a message telling the user that the action was successful."
   )
 
-  var serverResponse = await httpRequestSmtpServer("GET")
-  var jsonResponse = JSON.parse(serverResponse)
+  const serverResponse = await httpRequestSmtpServer("GET")
+  const jsonResponse = JSON.parse(serverResponse)
   await assert.strictEqual(jsonResponse.length, 0) // Domain not in active users
 })
 
@@ -360,8 +360,8 @@ test.serial("Publish report chain", async t => {
     "Daily rollup report list includes the recently approved report"
   )
 
-  var serverResponse = await httpRequestSmtpServer("GET")
-  var jsonResponse = JSON.parse(serverResponse)
+  const serverResponse = await httpRequestSmtpServer("GET")
+  const jsonResponse = JSON.parse(serverResponse)
   await assert.strictEqual(jsonResponse.length, 0) // Domains not in active users
 })
 
