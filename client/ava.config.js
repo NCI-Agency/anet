@@ -17,25 +17,25 @@ if (testEnv === "local") {
   config.serial = false
 } else {
   /*
-   * we have 1 parallel execution in our browserstack plan. that's why there is no point of
+   * We have 1 parallel execution in our BrowserStack plan. That's why there is no point of
    * running tests concurrently when TEST_ENV is not local. In fact, when we try to run more
-   * than 6 tests in parallel on browserstack, tests fail with a message indicating that all
-   * parallel test are in use.
+   * than 6 tests in parallel on BrowserStack, tests fail with a message indicating that all
+   * parallel tests are in use.
    *
    * https://www.browserstack.com/question/617
    *
-   * even on free trial plan with 5 parallel executions, we cannot run more than 10 tests
-   * in parallel as we do when testing locally. when we run ava without `serial` or `concurrency`
-   * flags, number of test files running at the same time is number of CPU cores.
+   * Even on a free trial plan with 5 parallel executions, we cannot run more than 10 tests
+   * in parallel as we do when testing locally. When we run ava without `serial` or `concurrency`
+   * flags, the number of test files running at the same time is number of CPU cores.
    *
    * https://github.com/avajs/ava/blob/master/docs/05-command-line.md#cli
    *
-   * that's why i used {serial:false, concurrency:1} config when runnig tests in parallel
-   * on browserstack. results of my experiments on browserstack are as follows;
-   * serial {serial: true} execution on browsertack took ~684 seconds
-   * free trial plan with 5 parallel executions {serial:false, concurrency:1} took ~429 seconds
+   * That's why I used {serial:false, concurrency:1} config when runnig tests in parallel
+   * on BrowserStack. Results of my experiments on BrowserStack are as follows;
+   * Serial {serial: true} execution on browsertack took ~684 seconds.
+   * Free trial plan with 5 parallel executions {serial:false, concurrency:1} took ~429 seconds.
    *
-   * also keep in mind that report.js test are always serialized with test.serialize
+   * Also keep in mind that report.js test are always serialized with test.serialize
    */
   // config.serial = false
   // config.concurrency = 1
