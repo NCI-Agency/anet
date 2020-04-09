@@ -327,6 +327,6 @@ export default class Model {
         uuid: note.uuid,
         assessment: JSON.parse(note.text)
       }))
-    return notesToAssessments.length ? notesToAssessments[0].assessment : null
+    return notesToAssessments?.[0]?.assessment
   }
 }
