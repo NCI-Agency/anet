@@ -139,9 +139,11 @@ export const createYupObjectShape = (config, prefix = "formCustomFields") => {
   return yup.object().shape(objShape)
 }
 
+export const ENTITY_ASSESSMENT_FIELD = "entityAssessment"
+
 export const createAssessmentSchema = (
   assessmentConfig,
-  prefix = "entityAssessment"
+  prefix = ENTITY_ASSESSMENT_FIELD
 ) => {
   const assessmentSchemaShape = createYupObjectShape(assessmentConfig, prefix)
   return yup.object().shape({

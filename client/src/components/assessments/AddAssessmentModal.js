@@ -3,7 +3,11 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
-import Model, { GQL_CREATE_NOTE, NOTE_TYPE } from "components/Model"
+import Model, {
+  ENTITY_ASSESSMENT_FIELD,
+  GQL_CREATE_NOTE,
+  NOTE_TYPE
+} from "components/Model"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
 import { Person, Task } from "models"
@@ -59,7 +63,7 @@ const AddAssessmentModal = ({
                   <Messages error={assessmentError} />
                   <CustomFieldsContainer
                     fieldsConfig={assessmentConfig}
-                    fieldNamePrefix="entityAssessment"
+                    fieldNamePrefix={ENTITY_ASSESSMENT_FIELD}
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
@@ -117,7 +121,11 @@ const AddAssessmentModal = ({
         }
       ]
     }
-    updatedNote.text = customFieldsJSONString(values, true, "entityAssessment")
+    updatedNote.text = customFieldsJSONString(
+      values,
+      true,
+      ENTITY_ASSESSMENT_FIELD
+    )
     return API.mutation(GQL_CREATE_NOTE, {
       note: updatedNote
     })
