@@ -13,6 +13,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   AnchorLink,
   PageDispatchersPropType,
@@ -299,7 +300,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       text: tag.name
     }))
     data.report.to = ""
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+      data.report.customFields
+    )
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })

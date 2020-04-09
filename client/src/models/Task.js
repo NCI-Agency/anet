@@ -1,7 +1,7 @@
 import { Settings } from "api"
 import Model, {
   createAssessmentSchema,
-  createYupObjectShape,
+  createCustomFieldsSchema,
   NOTE_TYPE,
   yupDate
 } from "components/Model"
@@ -44,7 +44,7 @@ export default class Task extends Model {
   }
 
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.task.customFields
   )
 
@@ -152,10 +152,10 @@ export default class Task extends Model {
           })
         )
         .nullable()
-        .default([]),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Task.customFieldsSchema.nullable()
+        .default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Task.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =

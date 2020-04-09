@@ -1,6 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -74,7 +75,9 @@ const PersonEdit = ({ pageDispatchers }) => {
     const parsedFullName = Person.parseFullName(data.person.name)
     data.person.firstName = parsedFullName.firstName
     data.person.lastName = parsedFullName.lastName
-    data.person.formCustomFields = JSON.parse(data.person.customFields)
+    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+      data.person.customFields
+    )
   }
   const person = new Person(data ? data.person : {})
   const legendText = person.isNewUser()

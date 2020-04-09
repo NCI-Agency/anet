@@ -17,7 +17,11 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_NOTE_FIELDS,
+  NOTE_TYPE
+} from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -493,7 +497,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
       "notes",
       "assessment_customFieldEnum1",
       "customFields", // initial JSON from the db
-      "formCustomFields"
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     task.customFields = customFieldsJSONString(values)

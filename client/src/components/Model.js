@@ -52,6 +52,9 @@ export const NOTE_TYPE = {
   PARTNER_ASSESSMENT: "PARTNER_ASSESSMENT",
   ASSESSMENT: "ASSESSMENT"
 }
+
+export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
+
 export const yupDate = yup.date().transform(function(value, originalValue) {
   if (this.isType(value)) {
     return value
@@ -128,7 +131,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
 
 export const createYupObjectShape = (
   config,
-  parentFieldName = "formCustomFields"
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT
 ) => {
   let objShape = {}
   if (config) {
@@ -159,6 +162,13 @@ export const createAssessmentSchema = (
     [parentFieldName]: assessmentSchemaShape
   })
 }
+
+export const createCustomFieldsSchema = customFieldsConfig =>
+  yup.object().shape({
+    [DEFAULT_CUSTOM_FIELDS_PARENT]: createYupObjectShape(
+      customFieldsConfig
+    ).nullable()
+  })
 
 export default class Model {
   static schema = {

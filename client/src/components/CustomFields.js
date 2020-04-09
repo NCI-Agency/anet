@@ -5,7 +5,8 @@ import Fieldset from "components/Fieldset"
 import LikertScale from "components/graphs/LikertScale"
 import Model, {
   CUSTOM_FIELD_TYPE,
-  createYupObjectShape
+  createYupObjectShape,
+  DEFAULT_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
@@ -33,8 +34,6 @@ const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
 const RENDERERS = {}
-
-const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
 
 const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]

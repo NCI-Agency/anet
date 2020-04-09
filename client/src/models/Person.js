@@ -1,7 +1,7 @@
 import { Settings } from "api"
 import Model, {
   createAssessmentSchema,
-  createYupObjectShape,
+  createCustomFieldsSchema,
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -49,7 +49,7 @@ export default class Person extends Model {
   )
 
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.person.customFields
   )
 
@@ -160,10 +160,10 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Person.customFieldsSchema.nullable()
+        .default(() => Person.STATUS.ACTIVE)
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Person.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =

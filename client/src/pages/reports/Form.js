@@ -20,7 +20,11 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import { createYupObjectShape, NOTE_TYPE } from "components/Model"
+import {
+  createYupObjectShape,
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  NOTE_TYPE
+} from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
@@ -241,7 +245,6 @@ const BaseReportForm = ({
       text: "__should_not_match_anything__" // TODO: Do this more gracefully
     }
   }
-
   const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS, {
     taskQuery: recentTasksVarUser
   })
@@ -1320,7 +1323,7 @@ const BaseReportForm = ({
       "attendees",
       "tasks",
       "customFields", // initial JSON from the db
-      "formCustomFields",
+      DEFAULT_CUSTOM_FIELDS_PARENT,
       "tasksMeasurements",
       "taskToMeasurementUuid"
     )
@@ -1352,7 +1355,7 @@ const BaseReportForm = ({
         "lastName",
         "position",
         "customFields",
-        "formCustomFields"
+        DEFAULT_CUSTOM_FIELDS_PARENT
       )
     )
     // strip tasks fields not in data model

@@ -12,6 +12,7 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -119,7 +120,9 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
     return result
   }
   if (data) {
-    data.person.formCustomFields = JSON.parse(data.person.customFields)
+    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+      data.person.customFields
+    )
   }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success

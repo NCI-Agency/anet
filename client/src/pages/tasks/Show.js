@@ -8,6 +8,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -156,7 +157,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   }
 
   if (data) {
-    data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
+    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
     data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
   }
   const task = new Task(data ? data.task : {})

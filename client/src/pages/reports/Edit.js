@@ -1,6 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -119,7 +120,9 @@ const ReportEdit = ({ pageDispatchers }) => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+      data.report.customFields
+    )
   }
   const report = new Report(data ? data.report : {})
   const reportInitialValues = Object.assign(

@@ -1,6 +1,6 @@
 import { Settings } from "api"
 import Model, {
-  createYupObjectShape,
+  createCustomFieldsSchema,
   NOTE_TYPE,
   yupDate
 } from "components/Model"
@@ -50,7 +50,7 @@ export default class Report extends Model {
   }
 
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.report.customFields
   )
 
@@ -238,10 +238,10 @@ export default class Report extends Model {
         .default([])
         .label(Settings.fields.report.reportTags),
       reportSensitiveInformation: yup.object().nullable().default({}), // null?
-      authorizationGroups: yup.array().nullable().default([]),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Report.customFieldsSchema.nullable()
+      authorizationGroups: yup.array().nullable().default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Report.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static yupWarningSchema = yup.object().shape({

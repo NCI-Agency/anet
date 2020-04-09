@@ -1,6 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -110,7 +111,7 @@ const TaskEdit = ({ pageDispatchers }) => {
     return result
   }
   if (data) {
-    data.task.formCustomFields = JSON.parse(data.task.customFields)
+    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(data.task.customFields)
   }
   const task = new Task(data ? data.task : {})
 
