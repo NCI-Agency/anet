@@ -76,6 +76,10 @@ dependencies {
 	implementation 'org.postgresql:postgresql:42.2.12' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:3.8.8'
 
+	// For caching domain users (used in every request in the AuthenticationFilter)
+	implementation 'org.ehcache:ehcache:3.8.1'
+	implementation 'javax.cache:cache-api:1.1.0'
+
 	implementation 'javax.mail:mail:1.4.7'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'

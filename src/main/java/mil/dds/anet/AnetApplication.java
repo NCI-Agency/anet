@@ -176,7 +176,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
     // The Object Engine is the core place where we store all of the Dao's
     // You can always grab the engine from anywhere with AnetObjectEngine.getInstance()
-    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this);
+    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this, metricRegistry);
     environment.servlets().setSessionHandler(new SessionHandler());
 
     if (configuration.isDevelopmentMode()) {
