@@ -1,5 +1,6 @@
 /*
  * ava configuration file must be in the same directory as the package.json file
+ *
  * https://github.com/avajs/ava/blob/master/docs/06-configuration.md#alternative-configuration-files
  */
 
@@ -15,30 +16,28 @@ const testEnv = (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV |
 
 if (testEnv === "local") {
   config.serial = false
-} else {
+}
+
+if (testEnv === "remote") {
   /*
-   * We have 1 parallel execution in our BrowserStack plan. That's why there is no point of
-   * running tests concurrently when TEST_ENV is not local. In fact, when we try to run more
-   * than 6 tests in parallel on BrowserStack, tests fail with a message indicating that all
+   * We have 5 parallel tests in our BrowserStack plan. But, when we try to run more than
+   * 10 tests in parallel on BrowserStack, tests fail with a message indicating that all
    * parallel tests are in use.
    *
    * https://www.browserstack.com/question/617
    *
-   * Even on a free trial plan with 5 parallel executions, we cannot run more than 10 tests
-   * in parallel as we do when testing locally. When we run ava without `serial` or `concurrency`
-   * flags, the number of test files running at the same time is number of CPU cores.
+   * That's why we cannot run ava without `serial` or `concurrency` flags because,
+   * the number of test files running at the same time is number of CPU cores.
+   * Our best shot is to tell ava run one test file at a time and never keep more than
+   * 10 parallel tests in a single test file.
    *
    * https://github.com/avajs/ava/blob/master/docs/05-command-line.md#cli
    *
-   * That's why I used {serial:false, concurrency:1} config when runnig tests in parallel
-   * on BrowserStack. Results of my experiments on BrowserStack are as follows;
-   * Serial {serial: true} execution on browsertack took ~684 seconds.
-   * Free trial plan with 5 parallel executions {serial:false, concurrency:1} took ~429 seconds.
-   *
-   * Also keep in mind that report.js test are always serialized with test.serialize
+   * Also please note that all report.js tests and some permissions.js tests are always
+   * serialized with test.serialize for the time being.
    */
-  // config.serial = false
-  // config.concurrency = 1
+  config.serial = false
+  config.concurrency = 1
 }
 
 /*
