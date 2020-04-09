@@ -56,12 +56,15 @@ const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
 }
 SpecialField.propTypes = {
   name: PropTypes.string.isRequired,
-  widget: PropTypes.string,
+  widget: PropTypes.oneOf([
+    SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
+    SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  ]).isRequired,
   formikProps: PropTypes.object
 }
 
 const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
-  if (widget === "richTextEditor") {
+  if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
     const fieldValue = Object.get(values, name) // name might be a path for a nested prop
     return (
       <FastField
@@ -83,6 +86,14 @@ const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
       />
     )
   }
+}
+ReadonlySpecialField.propTypes = {
+  name: PropTypes.string.isRequired,
+  widget: PropTypes.oneOf([
+    SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
+    SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  ]).isRequired,
+  values: PropTypes.object
 }
 
 const TextField = fieldProps => {
@@ -428,6 +439,21 @@ CustomFieldsContainer.defaultProps = {
   vertical: false
 }
 
+export const getFieldPropsFromFieldConfig = fieldConfig => {
+  const {
+    aggregations,
+    type,
+    typeError,
+    placeholder,
+    helpText,
+    validations,
+    visibleWhen,
+    objectFields,
+    ...fieldProps
+  } = fieldConfig
+  return fieldProps
+}
+
 const CustomField = ({
   fieldConfig,
   fieldName,
@@ -436,14 +462,8 @@ const CustomField = ({
   updateInvisibleFields,
   vertical
 }) => {
-  const {
-    type,
-    typeError,
-    helpText,
-    validations,
-    visibleWhen,
-    ...fieldProps
-  } = fieldConfig
+  const { type, helpText } = fieldConfig
+  const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
   const [validateFormDebounced] = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
@@ -596,16 +616,8 @@ export const ReadonlyCustomFields = ({
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
-        const {
-          type,
-          typeError,
-          placeholder,
-          helpText,
-          validations,
-          visibleWhen,
-          objectFields,
-          ...fieldProps
-        } = fieldConfig
+        const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+        const { type } = fieldConfig
         let extraProps = {}
         if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
           extraProps = {
@@ -645,17 +657,18 @@ export const customFieldsJSONString = (
   forNoteText = false,
   prefix = DEFAULT_CUSTOM_FIELDS_PREFIX
 ) => {
-  if (Object.get(values, prefix)) {
+  const customFieldsValues = Object.get(values, prefix)
+  if (customFieldsValues && typeof customFieldsValues === "object") {
     const clonedValues = _cloneDeep(values)
-    const customFieldsValues = Object.get(clonedValues, prefix)
-    if (customFieldsValues.invisibleCustomFields) {
-      customFieldsValues.invisibleCustomFields.forEach(f =>
+    const filteredCustomFieldsValues = Object.get(clonedValues, prefix)
+    if (filteredCustomFieldsValues.invisibleCustomFields) {
+      filteredCustomFieldsValues.invisibleCustomFields.forEach(f =>
         _set(clonedValues, f.split("."), undefined)
       )
       if (forNoteText) {
-        delete customFieldsValues.invisibleCustomFields
+        delete filteredCustomFieldsValues.invisibleCustomFields
       }
     }
-    return JSON.stringify(customFieldsValues)
+    return JSON.stringify(filteredCustomFieldsValues)
   }
 }

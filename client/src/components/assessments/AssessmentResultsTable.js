@@ -1,6 +1,9 @@
-import AggregationWidget from "components/AggregationWidgets"
+import AggregationWidget from "components/AggregationWidget"
 import AddAssessmentModal from "components/assessments/AddAssessmentModal"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import {
+  getFieldPropsFromFieldConfig,
+  ReadonlyCustomFields
+} from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import { Formik } from "formik"
 import LinkTo from "components/LinkTo"
@@ -23,12 +26,14 @@ import "components/assessments/AssessmentResultsTable.css"
  *   entity.getPeriodAssessmentDetails()
  */
 
+const PERIOD_FORMAT = "MMM-YYYY"
+
 const AssessmentsTableHeader = ({ periods }) => (
   <thead>
     <tr key="periods">
       <>
         {periods.map(period => (
-          <th key={period.start}>{period.start.format("MMM-YYYY")}</th>
+          <th key={period.start}>{period.start.format(PERIOD_FORMAT)}</th>
         ))}
       </>
     </tr>
@@ -49,17 +54,7 @@ const MeasurementRow = ({
     aggregationType: measurementDef.aggregation?.aggregationType,
     vertical: true
   }
-  const widgetLayoutConfig = Object.without(
-    measurementDef,
-    "aggregation",
-    "type",
-    "typeError",
-    "placeholder",
-    "helpText",
-    "validations",
-    "visibleWhen",
-    "objectFields"
-  )
+  const fieldProps = getFieldPropsFromFieldConfig(measurementDef)
   return (
     <tr>
       {assessmentPeriods.map((assessmentPeriod, index) => (
@@ -70,7 +65,7 @@ const MeasurementRow = ({
               entity.getMeasurementsResults(assessmentPeriod)[measurementKey]
             }
             {...aggWidgetProps}
-            {...widgetLayoutConfig}
+            {...fieldProps}
           />
         </td>
       ))}
@@ -161,7 +156,7 @@ const MonthlyAssessmentRows = ({
               ? "Add a"
               : "Make a new"
             const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for the month of ${period.start.format(
-              "MMM-YYYY"
+              PERIOD_FORMAT
             )}`
             return (
               <td key={index}>
@@ -177,7 +172,7 @@ const MonthlyAssessmentRows = ({
                       entity={entity}
                       entityType={entityType}
                       title={`Assessment for ${entity.toString()} for ${period.start.format(
-                        "MMM-YYYY"
+                        PERIOD_FORMAT
                       )}`}
                       yupSchema={assessmentYupSchema}
                       assessmentConfig={assessmentConfig}

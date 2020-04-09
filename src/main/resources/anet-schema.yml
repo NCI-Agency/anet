@@ -100,10 +100,19 @@ definitions:
           widget:
             type: string
             enum: [likertScale, numberAggregation, default]
-          aggregationType:
-            type: string
-            enum: [sum, avg, min, max]
-
+        dependencies:
+          widget:
+            oneOf:
+            - properties:
+                widget:
+                  enum: [likertScale, default]
+            - properties:
+                type:
+                  enum: [numberAggregation]
+              aggregationType:
+                type: string
+                enum: [sum, avg, min, max]
+              required: [aggregationType]
 # TODO: The following properties should not be here as these are only dependency fields.
 # I can't figure out yet why the schema validation will not pass without them
       choices:
@@ -173,7 +182,7 @@ definitions:
                     enum: [default]
               - properties:
                   widget:
-                    enum: [richTextEditor]                    
+                    enum: [richTextEditor]
               - properties:
                   widget:
                     enum: [likertScale]

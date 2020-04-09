@@ -128,23 +128,23 @@ const LikertScale = ({
         <g transform={`translate(0 ${scaleYPosition})`}>
           <line
             x1={scale(valuesStats.min)}
-            y1="-15"
+            y1={-15}
             x2={scale(valuesStats.min)}
-            y2="15"
+            y2={15}
             style={{ stroke: "black", strokeWidth: 3 }}
           />
           <line
             x1={scale(valuesStats.max)}
-            y1="-15"
+            y1={-15}
             x2={scale(valuesStats.max)}
-            y2="15"
+            y2={15}
             style={{ stroke: "black", strokeWidth: 3 }}
           />
           <line
             x1={scale(valuesStats.min)}
-            y1="0"
+            y1={0}
             x2={scale(valuesStats.max)}
-            y2="0"
+            y2={0}
             style={{ stroke: "black", strokeWidth: 3 }}
           />
         </g>
@@ -154,7 +154,7 @@ const LikertScale = ({
         <g transform={`translate(0 ${scaleYPosition})`}>
           <circle
             cx={scale(valuesStats.avg)}
-            r="10"
+            r={10}
             style={{
               stroke: valuesStats.avgColor,
               strokeWidth: 7

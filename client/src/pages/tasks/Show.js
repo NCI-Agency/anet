@@ -100,24 +100,31 @@ const GQL_GET_TASK = gql`
         }
       }
       customFields
-      ${GRAPHQL_NOTES_FIELDS},
+      ${GRAPHQL_NOTES_FIELDS}
       publishedReports: reports(query: {
-        pageSize:0,
+        pageSize: 0
         state: [${Report.STATE.PUBLISHED}]
       }) {
         uuid
       }
     }
-    subTasks: taskList(query: {pageSize: 0, customFieldRef1Uuid: [$uuid], customFieldRef1Recursively: true}) {
+    subTasks: taskList(query: {
+      pageSize: 0
+      customFieldRef1Uuid: [$uuid]
+      customFieldRef1Recursively: true
+    }) {
       list {
         uuid
         shortName
         longName
-        customFieldRef1 { uuid, shortName }
+        customFieldRef1 {
+          uuid
+          shortName
+        }
         customFields
         ${GRAPHQL_NOTES_FIELDS}
         publishedReports: reports(query: {
-          pageSize:0,
+          pageSize: 0
           state: [${Report.STATE.PUBLISHED}]
         }) {
           uuid
@@ -144,6 +151,10 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
     pageDispatchers
   })
 
+  if (done) {
+    return result
+  }
+
   if (data) {
     data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
     data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
@@ -157,9 +168,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
       subTasks.push(new Task(subTask))
     })
 
-  if (done) {
-    return result
-  }
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
@@ -182,24 +190,24 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
+  const now = moment()
   const assessmentPeriods = [
     {
-      start: moment().subtract(2, "months").startOf("month"),
-      end: moment().subtract(2, "months").endOf("month"),
+      start: now.clone().subtract(2, "months").startOf("month"),
+      end: now.clone().subtract(2, "months").endOf("month"),
       allowNewAssessments: false
     },
     {
-      start: moment().subtract(1, "months").startOf("month"),
-      end: moment().subtract(1, "months").endOf("month"),
+      start: now.clone().subtract(1, "months").startOf("month"),
+      end: now.clone().subtract(1, "months").endOf("month"),
       allowNewAssessments: true
     },
     {
-      start: moment().startOf("month"),
-      end: moment().endOf("month"),
+      start: now.clone().startOf("month"),
+      end: now.clone().endOf("month"),
       allowNewAssessments: false
     }
   ]
-
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
