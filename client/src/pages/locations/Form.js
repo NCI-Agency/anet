@@ -135,6 +135,7 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                 />
 
                 <GeoLocation
+                  readOnly={false}
                   lat={values.lat}
                   lng={values.lng}
                   isSubmitting={isSubmitting}

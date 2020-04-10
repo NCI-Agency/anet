@@ -11,11 +11,29 @@ const GeoLocation = ({
   lng,
   setFieldTouched,
   setFieldValue,
-  isSubmitting
+  isSubmitting,
+  readOnly
 }) => {
   const setTouched = touched => {
     setFieldTouched("lat", touched, false)
     setFieldTouched("lng", touched, false)
+  }
+
+  if (readOnly) {
+    return (
+      <Field
+        name="location"
+        label="Latitude, Longitude"
+        component={FieldHelper.ReadonlyField}
+        humanValue={
+          <>
+            <span>{Location.parseCoordinate(lat) || "?"}</span>
+            <span>,&nbsp;</span>
+            <span>{Location.parseCoordinate(lng) || "?"}</span>
+          </>
+        }
+      />
+    )
   }
 
   return (
@@ -72,12 +90,14 @@ GeoLocation.propTypes = {
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   setFieldTouched: PropTypes.func,
   setFieldValue: PropTypes.func,
-  isSubmitting: PropTypes.bool
+  isSubmitting: PropTypes.bool,
+  readOnly: PropTypes.bool
 }
 
 GeoLocation.defaultProps = {
   lat: null,
-  lng: null
+  lng: null,
+  readOnly: true
 }
 
 export default GeoLocation
