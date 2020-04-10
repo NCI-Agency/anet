@@ -127,7 +127,7 @@ const ReportEdit = ({ pageDispatchers }) => {
   const report = new Report(data ? data.report : {})
   const reportInitialValues = Object.assign(
     report,
-    report.getTasksMeasurements()
+    report.getTasksInstantAssessments()
   )
 
   return (

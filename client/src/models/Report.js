@@ -382,8 +382,8 @@ export default class Report extends Model {
     }
   }
 
-  getTasksMeasurements() {
-    const notesToMeasurements = this.notes
+  getTasksInstantAssessments() {
+    const notesToAssessments = this.notes
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
@@ -397,18 +397,18 @@ export default class Report extends Model {
             ro => ro.relatedObjectType === Task.relatedObjectType
           )[0].relatedObjectUuid
         ],
-        measurementUuid: n.uuid,
-        measurement: JSON.parse(n.text)
+        assessmentUuid: n.uuid,
+        assessment: JSON.parse(n.text)
       }))
-    // When updating the measurements, we need for each task the uuid of the
-    // related engagement measurement
-    const taskToMeasurementUuid = {}
-    // Get initial tasks measurements values
-    const tasksMeasurements = {}
-    notesToMeasurements.forEach(m => {
-      taskToMeasurementUuid[m.taskUuid] = m.measurementUuid
-      tasksMeasurements[m.taskUuid] = m.measurement
+    // When updating the instant assessments, we need for each task the uuid of the
+    // related instant assessment
+    const taskToAssessmentUuid = {}
+    // Get initial tasks assessments values
+    const tasksAssessments = {}
+    notesToAssessments.forEach(m => {
+      taskToAssessmentUuid[m.taskUuid] = m.assessmentUuid
+      tasksAssessments[m.taskUuid] = m.assessment
     })
-    return { taskToMeasurementUuid, tasksMeasurements }
+    return { taskToAssessmentUuid, tasksAssessments }
   }
 }

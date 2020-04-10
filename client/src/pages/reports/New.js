@@ -28,7 +28,7 @@ const BaseReportNew = ({ pageDispatchers, currentUser }) => {
   }
   const reportInitialValues = Object.assign(
     report,
-    report.getTasksMeasurements()
+    report.getTasksInstantAssessments()
   )
 
   return (

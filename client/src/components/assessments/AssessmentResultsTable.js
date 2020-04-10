@@ -15,15 +15,16 @@ import "components/assessments/AssessmentResultsTable.css"
 
 /* The AssessmentResultsTable component displays the results of two types of
  * assessments made on a given entity and subentities:
- * - aggregation of the measurements made on the entity/subentities when
+ * - instant assessments => made on the entity/subentities when
  *   working on them in relation to another type of entity (example:
- *   assessments made on tasks, while filling  report related to the tasks);
- *   the configuration of these measurements can be retrieved using
- *   entity.getMeasurementsConfig()
- * - display of the last monthly assessment made on the entity/subentities
- *   as a conclusion about the given period of time;
+ *   assessments made on tasks, while filling  report related to the tasks) or
+ *   assessments made on the entity/subentity itself;
+ *   the configuration of these assessments can be retrieved using
+ *   entity.getInstantAssessmentConfig()
+ * - periodic assessments => made on the entity/subentities periodically,
+ *   as a measurement of the given period of time;
  *   the config and yupSchema for these assessments is to be found in
- *   entity.getPeriodAssessmentDetails()
+ *   entity.getPeriodicAssessmentDetails()
  */
 
 const PERIOD_FORMAT = "MMM-YYYY"
@@ -43,26 +44,26 @@ AssessmentsTableHeader.propTypes = {
   periods: PropTypes.array
 }
 
-const MeasurementRow = ({
-  measurementKey,
-  measurementDef,
+const InstantAssessmentRow = ({
+  questionKey,
+  questionConfig,
   entity,
   assessmentPeriods
 }) => {
   const aggWidgetProps = {
-    widget: measurementDef.aggregation?.widget || measurementDef.widget,
-    aggregationType: measurementDef.aggregation?.aggregationType,
+    widget: questionConfig.aggregation?.widget || questionConfig.widget,
+    aggregationType: questionConfig.aggregation?.aggregationType,
     vertical: true
   }
-  const fieldProps = getFieldPropsFromFieldConfig(measurementDef)
+  const fieldProps = getFieldPropsFromFieldConfig(questionConfig)
   return (
     <tr>
       {assessmentPeriods.map((assessmentPeriod, index) => (
         <td key={index}>
           <AggregationWidget
-            key={`assessment-${measurementKey}`}
+            key={`assessment-${questionKey}`}
             values={
-              entity.getMeasurementsResults(assessmentPeriod)[measurementKey]
+              entity.getInstantAssessmentResults(assessmentPeriod)[questionKey]
             }
             {...aggWidgetProps}
             {...fieldProps}
@@ -72,7 +73,7 @@ const MeasurementRow = ({
     </tr>
   )
 }
-MeasurementRow.propTypes = {
+InstantAssessmentRow.propTypes = {
   entity: PropTypes.object,
   assessmentPeriods: PropTypes.arrayOf(
     PropTypes.shape({
@@ -81,8 +82,8 @@ MeasurementRow.propTypes = {
       allowNewAssessments: PropTypes.bool
     })
   ),
-  measurementKey: PropTypes.string,
-  measurementDef: PropTypes.object
+  questionKey: PropTypes.string,
+  questionConfig: PropTypes.object
 }
 
 const MonthlyAssessmentRows = ({
@@ -93,9 +94,9 @@ const MonthlyAssessmentRows = ({
   onAddAssessment
 }) => {
   const {
-    assessmentConfig,
-    assessmentYupSchema
-  } = entity.getPeriodAssessmentDetails()
+    assessmentConfig: periodicAssessmentConfig,
+    assessmentYupSchema: periodicAssessmentYupSchema
+  } = entity.getPeriodicAssessmentDetails()
   const [showAssessmentModal, setShowAssessmentModal] = useState(false)
   const periodsLastAssessment = []
   const periodsAllowNewAssessment = []
@@ -110,7 +111,7 @@ const MonthlyAssessmentRows = ({
       })
     )
     periodsAllowNewAssessment.push(
-      assessmentConfig && canAddAssessment && period.allowNewAssessments
+      periodicAssessmentConfig && canAddAssessment && period.allowNewAssessments
     )
   })
   const rowHasLastAssessments = !_isEmpty(
@@ -127,7 +128,7 @@ const MonthlyAssessmentRows = ({
             const lastAssessmentParentFieldName = `lastAssessment-${entity.uuid}-${index}`
             return (
               <td key={index}>
-                {assessmentConfig && lastAssessment && (
+                {periodicAssessmentConfig && lastAssessment && (
                   <Formik
                     enableReinitialize
                     initialValues={{
@@ -137,7 +138,7 @@ const MonthlyAssessmentRows = ({
                     {({ values }) => (
                       <ReadonlyCustomFields
                         parentFieldName={lastAssessmentParentFieldName}
-                        fieldsConfig={assessmentConfig}
+                        fieldsConfig={periodicAssessmentConfig}
                         values={values}
                         vertical
                       />
@@ -174,8 +175,8 @@ const MonthlyAssessmentRows = ({
                       title={`Assessment for ${entity.toString()} for ${period.start.format(
                         PERIOD_FORMAT
                       )}`}
-                      yupSchema={assessmentYupSchema}
-                      assessmentConfig={assessmentConfig}
+                      yupSchema={periodicAssessmentYupSchema}
+                      assessmentConfig={periodicAssessmentConfig}
                       showModal={showAssessmentModal}
                       onCancel={() => setShowAssessmentModal(false)}
                       onSuccess={() => {
@@ -218,7 +219,7 @@ const EntityAssessmentResults = ({
   if (!entity) {
     return null
   }
-  const measurementsConfig = entity.getMeasurementsConfig()
+  const instantAssessmentConfig = entity.getInstantAssessmentConfig()
   return (
     <>
       <tr>
@@ -226,11 +227,11 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.keys(measurementsConfig || {}).map(key => (
-        <MeasurementRow
+      {Object.keys(instantAssessmentConfig || {}).map(key => (
+        <InstantAssessmentRow
           key={key}
-          measurementKey={key}
-          measurementDef={measurementsConfig[key]}
+          questionKey={key}
+          questionConfig={instantAssessmentConfig[key]}
           assessmentPeriods={assessmentPeriods}
           entity={entity}
         />
@@ -272,15 +273,17 @@ const AssessmentResultsTable = ({
   if (!entity) {
     return null
   }
-  const entityMeasurementsConfig = entity.getMeasurementsConfig()
-  const subentitiesMeasurementsConfig = subEntities
-    ?.map(s => s.getMeasurementsConfig())
+  const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const subentitiesInstantAssessmentConfig = subEntities
+    ?.map(s => s.getInstantAssessmentConfig())
     .filter(mc => !_isEmpty(mc))
-  const { assessmentConfig } = entity.getPeriodAssessmentDetails()
+  const {
+    assessmentConfig: periodicAssessmentConfig
+  } = entity.getPeriodicAssessmentDetails()
   const showAssessmentResults =
-    !_isEmpty(entityMeasurementsConfig) ||
-    !_isEmpty(subentitiesMeasurementsConfig) ||
-    !_isEmpty(assessmentConfig)
+    !_isEmpty(entityInstantAssessmentConfig) ||
+    !_isEmpty(subentitiesInstantAssessmentConfig) ||
+    !_isEmpty(periodicAssessmentConfig)
   return (
     <>
       {showAssessmentResults && (

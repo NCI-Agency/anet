@@ -353,8 +353,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial task measurements values
-  report = Object.assign(report, report.getTasksMeasurements())
+  // Get initial tasks instant assessments values
+  report = Object.assign(report, report.getTasksInstantAssessments())
 
   return (
     <Formik
@@ -660,17 +660,17 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 id="engagement-assessments"
               >
                 {values.tasks.map(task => {
-                  const taskMeasurementsConfig = Task.getMeasurementsConfig(
+                  const taskInstantAssessmentConfig = Task.getInstantAssessmentConfig(
                     task.customFields
                   )
-                  if (_isEmpty(taskMeasurementsConfig)) {
+                  if (_isEmpty(taskInstantAssessmentConfig)) {
                     return null
                   }
                   return (
                     <ReadonlyCustomFields
-                      key={`measurement-${values.uuid}-${task.uuid}`}
-                      fieldsConfig={taskMeasurementsConfig}
-                      parentFieldName={`tasksMeasurements.${task.uuid}`}
+                      key={`assessment-${values.uuid}-${task.uuid}`}
+                      fieldsConfig={taskInstantAssessmentConfig}
+                      parentFieldName={`tasksAssessments.${task.uuid}`}
                       values={values}
                     />
                   )

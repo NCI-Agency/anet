@@ -187,19 +187,19 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
-  static getMeasurementsConfig(customFields) {
+  static getInstantAssessmentConfig(customFields) {
     return JSON.parse(
       JSON.parse(customFields || "{}").assessmentDefinition || "{}"
     )
   }
 
-  getMeasurementsConfig() {
-    return Task.getMeasurementsConfig(this.customFields)
+  getInstantAssessmentConfig() {
+    return Task.getInstantAssessmentConfig(this.customFields)
   }
 
-  getMeasurementsResults(dateRange) {
+  getInstantAssessmentResults(dateRange) {
     const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
-    const measurementsNotes = this.notes
+    const assessmentsNotes = this.notes
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
@@ -213,19 +213,19 @@ export default class Task extends Model {
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
       )
       .map(n => JSON.parse(n.text))
-    const measurementsResults = {}
-    measurementsNotes.forEach(n =>
+    const assessmentsResults = {}
+    assessmentsNotes.forEach(n =>
       Object.keys(n).forEach(k => {
-        if (!Object.prototype.hasOwnProperty.call(measurementsResults, k)) {
-          measurementsResults[k] = []
+        if (!Object.prototype.hasOwnProperty.call(assessmentsResults, k)) {
+          assessmentsResults[k] = []
         }
-        measurementsResults[k].push(n[k])
+        assessmentsResults[k].push(n[k])
       })
     )
-    return measurementsResults
+    return assessmentsResults
   }
 
-  getPeriodAssessmentDetails() {
+  getPeriodicAssessmentDetails() {
     const assessmentConfig = this.fieldSettings().assessment?.customFields
     if (this.isTopLevelTask()) {
       return {

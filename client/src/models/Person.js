@@ -335,11 +335,11 @@ export default class Person extends Model {
     }
   }
 
-  getMeasurementsConfig() {
+  getInstantAssessmentConfig() {
     return {}
   }
 
-  getPeriodAssessmentDetails() {
+  getPeriodicAssessmentDetails() {
     if (this.isAdvisor()) {
       return {
         assessmentConfig: Person.advisorAssessmentConfig,
