@@ -94,7 +94,8 @@ const Leaflet = ({
   height,
   marginBottom,
   markers,
-  mapId: initialMapId
+  mapId: initialMapId,
+  onMapClick
 }) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
@@ -158,7 +159,13 @@ const Leaflet = ({
       Settings.imagery.mapOptions.homeView.zoomLevel
     )
     if (searchProvider) {
-      new GeoSearchControl({ provider: searchProvider }).addTo(newMap)
+      const gsc = new GeoSearchControl({ provider: searchProvider })
+      setTimeout(() => {
+        // workaround for preventing the marker from moving when search icon is clicked
+        // https://github.com/smeijer/leaflet-geosearch/issues/169#issuecomment-458573562
+        gsc.getContainer().onclick = e => e.stopPropagation()
+      })
+      gsc.addTo(newMap)
     }
     const layerControl = new Control.Layers({}, {}, { collapsed: false })
     layerControl.addTo(newMap)
@@ -171,6 +178,26 @@ const Leaflet = ({
 
     setDoInitializeMarkerLayer(true)
   }, [mapId])
+
+  useEffect(() => {
+    /*
+     * If map container is not fully visible and not focused, Google Chrome scrolls down
+     * to make whole container visible when it is focused. Thus when clicked on the map,
+     * a scroll event gets fired before click event. Leaflet calculates lon/lat coordinates
+     * with respect to the click event X and Y coordinates. Since the click event is fired
+     * after scroll, map coordinates shift with respect to click event X - Y coordinates
+     * and eventually marker is placed a certain amount (scrolled height to be precise)
+     * belove the clicked point. Firefox doesn't behave this way and everything works as expected.
+     *
+     * see https://github.com/Leaflet/Leaflet/issues/4125
+     *
+     * It works fine as long as map container is fully visible on screen.
+     */
+    if (map && onMapClick) {
+      map.on("click", event => onMapClick(event, map))
+      return () => map.off("click")
+    }
+  }, [onMapClick, map])
 
   useEffect(() => {
     if (
@@ -221,7 +248,8 @@ Leaflet.propTypes = {
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   markers: PropTypes.array,
-  mapId: PropTypes.string // pass this when you have more than one map on a page
+  mapId: PropTypes.string, // pass this when you have more than one map on a page
+  onMapClick: PropTypes.func
 }
 Leaflet.defaultProps = {
   width: "100%",

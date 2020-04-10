@@ -145,7 +145,12 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
               </Fieldset>
 
               <h3>Drag the marker below to set the location</h3>
-              <Leaflet markers={[marker]} />
+              <Leaflet
+                markers={[marker]}
+                onMapClick={(event, map) => {
+                  onMarkerMapClick(event, map, setFieldValue)
+                }}
+              />
 
               <ApprovalsDefinition
                 fieldName="planningApprovalSteps"
@@ -192,6 +197,12 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
 
   function onMarkerMove(event, map, setFieldValue) {
     const latLng = map.wrapLatLng(event.target.getLatLng())
+    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
+    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
+  }
+
+  function onMarkerMapClick(event, map, setFieldValue) {
+    const latLng = map.wrapLatLng(event.latlng)
     setFieldValue("lat", Location.parseCoordinate(latLng.lat))
     setFieldValue("lng", Location.parseCoordinate(latLng.lng))
   }
