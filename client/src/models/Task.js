@@ -48,14 +48,6 @@ export default class Task extends Model {
     Settings.fields.task.customFields
   )
 
-  static topLevelAssessmentCustomFieldsSchema = createAssessmentSchema(
-    Settings.fields.task.topLevel.assessment.customFields
-  )
-
-  static subLevelAssessmentCustomFieldsSchema = createAssessmentSchema(
-    Settings.fields.task.subLevel.assessment.customFields
-  )
-
   static yupSchema = yup
     .object()
     .shape({
@@ -187,9 +179,20 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
+  static getAssessmentsConfig(customFields) {
+    const assessments = JSON.parse(customFields || "{}").assessments || []
+    return Object.fromEntries(
+      assessments.map(a => [
+        `${a.assessmentType}-${a.periodicity}`,
+        JSON.parse(a.questions || {})
+      ])
+    )
+  }
+
   static getInstantAssessmentConfig(customFields) {
-    return JSON.parse(
-      JSON.parse(customFields || "{}").assessmentDefinition || "{}"
+    return (
+      Task.getAssessmentsConfig(customFields)["instant-null"] ||
+      JSON.parse(JSON.parse(customFields || "{}").assessmentDefinition || "{}")
     )
   }
 
@@ -226,17 +229,12 @@ export default class Task extends Model {
   }
 
   getPeriodicAssessmentDetails() {
-    const assessmentConfig = this.fieldSettings().assessment?.customFields
-    if (this.isTopLevelTask()) {
-      return {
-        assessmentConfig: assessmentConfig,
-        assessmentYupSchema: Task.topLevelAssessmentCustomFieldsSchema
-      }
-    } else {
-      return {
-        assessmentConfig: assessmentConfig,
-        assessmentYupSchema: Task.subLevelAssessmentCustomFieldsSchema
-      }
+    const assessmentConfig =
+      Task.getAssessmentsConfig(this.customFields)["periodic-monthly"] ||
+      this.fieldSettings().assessment?.customFields
+    return {
+      assessmentConfig: assessmentConfig,
+      assessmentYupSchema: createAssessmentSchema(assessmentConfig)
     }
   }
 }

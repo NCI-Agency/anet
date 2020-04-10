@@ -337,7 +337,7 @@ const BaseReportForm = ({
     .filter(t => t.customFields)
     .forEach(t => {
       tasksInstantAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
-        JSON.parse(JSON.parse(t.customFields).assessmentDefinition),
+        t.getInstantAssessmentConfig(),
         `tasksAssessments.${t.uuid}`
       )
     })
@@ -1068,16 +1068,10 @@ const BaseReportForm = ({
                 id="engagement-assessments"
               >
                 {values.tasks.map(task => {
-                  if (!task.customFields) {
+                  const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
+                  if (!taskInstantAssessmentConfig) {
                     return null
                   }
-                  const taskCustomFields = JSON.parse(task.customFields)
-                  if (!taskCustomFields.assessmentDefinition) {
-                    return null
-                  }
-                  const taskInstantAssessmentConfig = JSON.parse(
-                    taskCustomFields.assessmentDefinition
-                  )
                   return (
                     <CustomFieldsContainer
                       key={`assessment-${values.uuid}-${task.uuid}`}

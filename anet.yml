@@ -304,6 +304,47 @@ dictionary:
         label: Responsible positions
         placeholder: Search for a position...
       customFields:
+        assessments:
+          type: array_of_objects
+          label: Assessments definition
+          addButtonLabel: Add an assessment
+          objectLabel: Assessment
+          objectFields:
+            assessmentType:
+              type: enum
+              label: Assessment type
+              helpText: Select an assessement type for this assessment
+              choices:
+                periodic:
+                  label: Periodic
+                instant:
+                  label: Instant
+              validations:
+                - type: required
+                  params: [You must provide the assessment type]
+            periodicity:
+              type: enum
+              label: Periodicity
+              helpText: Select a periodicity for this periodic assessment
+              choices:
+                weekly:
+                  label: Weekly
+                monthly:
+                  label: Monthly
+                quarterly:
+                  label: quarterly
+                by_annually:
+                  label: By-annually
+              validations:
+                - type: required
+                  params: [You must provide the assessment periodicity]
+            questions:
+              type: text
+              label: Questions
+              placeholder: JSON that defines the assessment (you need to know what you are doing)
+              componentClass: textarea
+              style:
+                height: 200px
         assessmentDefinition:
           type: text
           label: Assessment definition
