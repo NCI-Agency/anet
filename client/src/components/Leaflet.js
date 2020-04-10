@@ -112,9 +112,10 @@ const Leaflet = ({
   const [map, setMap] = useState(null)
   const [markerLayer, setMarkerLayer] = useState(null)
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
+  const prevMarkersRef = useRef()
 
   const updateMarkerLayer = useCallback(
-    (newMarkers = []) => {
+    (newMarkers = [], maxZoom = 15) => {
       newMarkers.forEach(m => {
         const latLng = Location.hasCoordinates(m)
           ? [m.lat, m.lng]
@@ -129,14 +130,14 @@ const Leaflet = ({
           marker.bindPopup(m.name)
         }
         if (m.onMove) {
-          marker.on("move", event => m.onMove(event, map))
+          marker.on("moveend", event => m.onMove(event, map))
         }
         markerLayer.addLayer(marker)
       })
 
       if (newMarkers.length > 0) {
         if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
-          map.fitBounds(markerLayer.getBounds(), { maxZoom: 15 })
+          map.fitBounds(markerLayer.getBounds(), { maxZoom })
         }
       }
     },
@@ -170,6 +171,25 @@ const Leaflet = ({
 
     setDoInitializeMarkerLayer(true)
   }, [mapId])
+
+  useEffect(() => {
+    if (
+      !doInitializeMarkerLayer &&
+      markerLayer &&
+      JSON.stringify(prevMarkersRef.current) !== JSON.stringify(markers)
+    ) {
+      // setTimeout is a workaround for "Uncaught DOMException: Failed to execute 'removeChild' on 'Node':
+      // The node to be removed is no longer a child of this node." error
+      setTimeout(() => {
+        markerLayer.clearLayers()
+        updateMarkerLayer(markers, map.getZoom())
+      })
+    }
+  }, [doInitializeMarkerLayer, markerLayer, updateMarkerLayer, map, markers])
+
+  useEffect(() => {
+    prevMarkersRef.current = markers
+  }, [markers])
 
   useEffect(() => {
     if (doInitializeMarkerLayer) {
