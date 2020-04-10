@@ -139,6 +139,7 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                   lng={values.lng}
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
                 />
               </Fieldset>
 

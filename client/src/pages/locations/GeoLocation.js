@@ -9,9 +9,15 @@ import * as FieldHelper from "../../components/FieldHelper"
 const GeoLocation = ({
   lat,
   lng,
+  setFieldTouched,
   setFieldValue,
   isSubmitting
 }) => {
+  const setTouched = touched => {
+    setFieldTouched("lat", touched, false)
+    setFieldTouched("lng", touched, false)
+  }
+
   return (
     <FormGroup style={{ marginBottom: 0 }}>
       <Col sm={2} componentClass={ControlLabel} htmlFor="lat">
@@ -23,14 +29,20 @@ const GeoLocation = ({
           <Field
             name="lat"
             component={FieldHelper.InputFieldNoLabel}
-            onBlur={() => setFieldValue("lat", Location.parseCoordinate(lat))}
+            onBlur={() => {
+              setTouched(true)
+              setFieldValue("lat", Location.parseCoordinate(lat))
+            }}
           />
         </Col>
         <Col sm={3}>
           <Field
             name="lng"
             component={FieldHelper.InputFieldNoLabel}
-            onBlur={() => setFieldValue("lng", Location.parseCoordinate(lng))}
+            onBlur={() => {
+              setTouched(true)
+              setFieldValue("lng", Location.parseCoordinate(lng))
+            }}
           />
         </Col>
         {(lat || lng) && setFieldValue && (
@@ -40,6 +52,7 @@ const GeoLocation = ({
               bsStyle="link"
               bsSize="sm"
               onClick={() => {
+                setTouched(false) // prevent validation since lat, lng can be null together
                 setFieldValue("lat", null)
                 setFieldValue("lng", null)
               }}
@@ -57,6 +70,7 @@ const GeoLocation = ({
 GeoLocation.propTypes = {
   lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  setFieldTouched: PropTypes.func,
   setFieldValue: PropTypes.func,
   isSubmitting: PropTypes.bool
 }
