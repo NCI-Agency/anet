@@ -75,6 +75,15 @@ export default class Location extends Model {
 
   static autocompleteQuery = "uuid, name"
 
+  static parseCoordinate(latLng) {
+    const value = parseFloat(latLng)
+    if (!value && value !== 0) {
+      return null
+    }
+    // 6 decimal point (~10cm) precision https://stackoverflow.com/a/16743805/1209097
+    return parseFloat(value.toFixed(6))
+  }
+
   static hasCoordinates(location) {
     return (
       location &&
