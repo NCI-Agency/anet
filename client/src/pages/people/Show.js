@@ -192,7 +192,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
               notes={person.notes}
               relatedObject={
                 person.uuid && {
-                  relatedObjectType: "people",
+                  relatedObjectType: Person.relatedObjectType,
                   relatedObjectUuid: person.uuid
                 }
               }
@@ -430,9 +430,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 <Fieldset title="Person information" id="custom-fields">
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.person.customFields}
-                    formikProps={{
-                      values
-                    }}
+                    values={values}
                   />
                 </Fieldset>
               )}

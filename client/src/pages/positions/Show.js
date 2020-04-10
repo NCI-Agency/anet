@@ -184,7 +184,7 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
               notes={position.notes}
               relatedObject={
                 position.uuid && {
-                  relatedObjectType: "positions",
+                  relatedObjectType: Position.relatedObjectType,
                   relatedObjectUuid: position.uuid
                 }
               }

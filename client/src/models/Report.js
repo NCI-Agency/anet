@@ -5,7 +5,7 @@ import Model, {
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Position } from "models"
+import { Person, Position, Task } from "models"
 import moment from "moment"
 import REPORTS_ICON from "resources/reports.png"
 import utils from "utils"
@@ -15,6 +15,7 @@ export default class Report extends Model {
   static resourceName = "Report"
   static listName = "reportList"
   static getInstanceName = "report"
+  static relatedObjectType = "reports"
 
   static STATE = {
     DRAFT: "DRAFT",
@@ -386,13 +387,14 @@ export default class Report extends Model {
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.filter(ro => ro.relatedObjectType === "tasks")
-            .length
+          n.noteRelatedObjects.filter(
+            ro => ro.relatedObjectType === Task.relatedObjectType
+          ).length
       )
       .map(ta => ({
         taskUuid: [
           ta.noteRelatedObjects.filter(
-            ro => ro.relatedObjectType === "tasks"
+            ro => ro.relatedObjectType === Task.relatedObjectType
           )[0].relatedObjectUuid
         ],
         assessmentUuid: ta.uuid,

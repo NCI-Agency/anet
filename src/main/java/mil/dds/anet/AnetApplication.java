@@ -12,6 +12,8 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import freemarker.template.Configuration;
+import freemarker.template.Version;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
@@ -90,6 +92,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
   private static final ObjectMapper jsonMapper = new ObjectMapper();
+
+  public static final Version FREEMARKER_VERSION = Configuration.VERSION_2_3_30;
 
   private MetricRegistry metricRegistry;
 
@@ -178,7 +182,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
     // The Object Engine is the core place where we store all of the Dao's
     // You can always grab the engine from anywhere with AnetObjectEngine.getInstance()
-    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this);
+    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this, metricRegistry);
     environment.servlets().setSessionHandler(new SessionHandler());
 
     if (configuration.isDevelopmentMode()) {

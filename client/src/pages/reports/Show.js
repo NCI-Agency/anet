@@ -390,7 +390,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               notes={report.notes}
               relatedObject={
                 uuid && {
-                  relatedObjectType: "reports",
+                  relatedObjectType: Report.relatedObjectType,
                   relatedObjectUuid: uuid
                 }
               }
@@ -669,9 +669,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 <Fieldset title="Engagement information" id="custom-fields">
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
-                    formikProps={{
-                      values
-                    }}
+                    values={values}
                   />
                 </Fieldset>
               )}
@@ -693,11 +691,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   return (
                     <ReadonlyCustomFields
                       key={`assessment-${values.uuid}-${task.uuid}`}
-                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
                       fieldsConfig={taskAssessmentDefinition}
-                      formikProps={{
-                        values
-                      }}
+                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
+                      values={values}
                     />
                   )
                 })}

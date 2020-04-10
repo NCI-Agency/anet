@@ -8,6 +8,7 @@ export default class Organization extends Model {
   static resourceName = "Organization"
   static listName = "organizationList"
   static getInstanceName = "organization"
+  static relatedObjectType = "organizations"
 
   static STATUS = {
     ACTIVE: "ACTIVE",
