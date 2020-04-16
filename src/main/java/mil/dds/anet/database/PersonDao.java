@@ -3,6 +3,7 @@ package mil.dds.anet.database;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
@@ -29,6 +31,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -236,12 +239,17 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "CacheHitCount")).inc();
       }
     }
-    return person;
+    // defensively copy the person we return from the cache
+    return copyPerson(person);
   }
 
   private void putInCache(Person person) {
     if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
-      domainUsersCache.put(person.getDomainUsername(), person);
+      // defensively copy the person we will be caching
+      final Person copy = copyPerson(person);
+      if (copy != null) {
+        domainUsersCache.put(person.getDomainUsername(), copy);
+      }
     }
   }
 
@@ -265,6 +273,32 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         if (Objects.equals(DaoUtils.getUuid(entry.getValue()), DaoUtils.getUuid(person))) {
           return entry.getValue();
         }
+      }
+    }
+    return null;
+  }
+
+  // Make a defensive copy of a person and their position
+  private Person copyPerson(Person person) {
+    if (person != null) {
+      try {
+        final Person personCopy = new Person();
+        for (final String prop : allFields) {
+          PropertyUtils.setSimpleProperty(personCopy, prop,
+              PropertyUtils.getSimpleProperty(person, prop));
+        }
+        final Position position = person.getPosition();
+        if (position != null) {
+          final Position positionCopy = new Position();
+          for (final String prop : PositionDao.fields) {
+            PropertyUtils.setSimpleProperty(positionCopy, prop,
+                PropertyUtils.getSimpleProperty(position, prop));
+          }
+          personCopy.setPosition(positionCopy);
+        }
+        return personCopy;
+      } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        logger.warn("Could not copy person", e);
       }
     }
     return null;

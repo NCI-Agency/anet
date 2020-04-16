@@ -30,7 +30,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
-  private static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
+  public static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid"};
   public static String TABLE_NAME = "positions";
   public static String POSITIONS_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
