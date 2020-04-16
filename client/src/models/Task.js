@@ -196,7 +196,11 @@ export default class Task extends Model {
         const questions = a.questions || {}
         return [
           assessmentKey,
-          typeof questions === "object" ? questions : JSON.parse(questions)
+          typeof questions === "object"
+            ? questions
+            : typeof questions === "string"
+              ? JSON.parse(questions)
+              : {}
         ]
       })
     )
