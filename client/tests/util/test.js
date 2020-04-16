@@ -51,25 +51,12 @@ test.beforeEach(t => {
       .forBrowser("chrome")
       .setChromeOptions(new chrome.Options().headless())
       /*
-       * When running test in parallel:
-       * Without this line, even though all assertions pass, afterEach.always hook report intermittent errors.
-       * Usually first one or two tests execute successfully where rest of the tests raise errors.
-       * These erros are "ECONNREFUSED connect ECONNREFUSED 127.0.0.1:XXXXX" which are coming from webdriver.
-       * beforeEach hook creates a new driver for every test and they are
-       * supposed to run in isolation without affecting each other. At this point my best guess is that
-       * when driver.quit() is called, webdriver shuts down ChromeDriver server process thus causing
-       * subsequent requests to ChromeDriver server process fails.
-       *
-       * Further investigation of the issue lead me to following consequences;
        * If we don't explicitly define ServiceBuilder for ChromeDriver it uses default ServiceBuilder
        * which is a singleton, shared amongst different driver instances. As a result same
        * ChromeDriver server process is used by different drivers. When driver.quit() is called by
-       * one of divers that process is terminated. By explicitly defining a new ServiceBuilder
+       * one of drivers that process is terminated. As a result even though all assertions pass,
+       * afterEach.always hook report intermittent errors. By explicitly defining a new ServiceBuilder
        * here we enforce creation of seperate ChromeDriver server child processes for each driver instance.
-       *
-       * If it is not feasible to create seperate ChromeDriver server child processes for each driver;
-       * instead of driver.quit(), driver.close() can be used in afterEach.always hook and
-       * driver.quit() can be called on after.always hook.
        */
       .setChromeService(new chrome.ServiceBuilder())
   } else {
