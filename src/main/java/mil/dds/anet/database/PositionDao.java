@@ -206,6 +206,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
         // Need to ensure this timestamp is greater than previous INSERT.
         .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+    if (numRows > 0) {
+      return 1;
+    }
     return numRows;
   }
 
@@ -287,6 +290,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     }
 
     numRows += deletePersonEmptyInPositionEmpty();
+    if (numRows > 0) {
+      return 1;
+    }
     return numRows;
   }
 
@@ -325,6 +331,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     }
 
     numRows += deletePersonEmptyInPositionEmpty();
+    if (numRows > 0) {
+      return 1;
+    }
     return numRows;
   }
 
@@ -342,6 +351,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     numRows += updatePersonPositionHistory(loserUuid, winnerUuid);
 
     numRows += deletePersonEmptyInPositionEmpty();
+    if (numRows > 0) {
+      return 1;
+    }
     return numRows;
   }
 
