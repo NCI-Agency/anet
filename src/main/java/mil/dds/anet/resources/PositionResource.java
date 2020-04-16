@@ -79,7 +79,7 @@ public class PositionResource {
 
     if (pos.getPersonUuid() != null) {
       dao.setPersonInPosition(pos.getPersonUuid(), position.getUuid());
-    }else{
+    } else {
       dao.insertPersonEmptyInPosition(position.getUuid());
     }
 
