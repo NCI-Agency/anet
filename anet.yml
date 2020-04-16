@@ -225,35 +225,21 @@ dictionary:
           componentClass: textarea
           style:
             height: 400px
-        assessment:
-          customFields:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder:  Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the top 3 issues]
-            status:
-              type: enum
-              label: Project status
-              helpText: Select an assessement status for objective
-              choices:
-                GREEN:
-                  label: Green
-                  color: '#c2ffb3'
-                AMBER:
-                  label: Amber
-                  color: '#ffe396'
-                RED:
-                  label: Red
-                  color: '#ff8279'
-              validations:
-                - type: required
-                  params: [You must provide the assessment status]
+        assessments:
+          - assessmentType: periodic
+            periodicity: by_annualy
+            questions:
+              issues:
+                type: special_field
+                label: Top 3 issues
+                placeholder:  Enter the top 3 issues
+                widget: richTextEditor
+                style:
+                  height: 300px
+                validations:
+                  - type: required
+                    params: [You must provide the top 3 issues]
+
       subLevel:
         shortLabel: Effort
         shortName:
@@ -266,19 +252,50 @@ dictionary:
           componentClass: textarea
           style:
             height: 400px
-        assessment:
-          customFields:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder:  Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the top 3 issues]
-
+        assessments:
+          - assessmentType: periodic
+            periodicity: monthly
+            questions:
+              issues:
+                type: special_field
+                label: Top 3 issues
+                placeholder:  Enter the top 3 issues
+                widget: richTextEditor
+                style:
+                  height: 300px
+                validations:
+                  - type: required
+                    params: [You must provide the top 3 issues]
+              status:
+                type: enum
+                label: Project status
+                helpText: Select an assessement status for objective
+                choices:
+                  GREEN:
+                    label: Green
+                    color: '#c2ffb3'
+                  AMBER:
+                    label: Amber
+                    color: '#ffe396'
+                  RED:
+                    label: Red
+                    color: '#ff8279'
+                validations:
+                  - type: required
+                    params: [You must provide the assessment status]
+          - assessmentType: periodic
+            periodicity: weekly
+            questions:
+              issues:
+                type: special_field
+                label: Top 3 issues
+                placeholder:  Enter the top 3 issues
+                widget: richTextEditor
+                style:
+                  height: 300px
+                validations:
+                  - type: required
+                    params: [You must provide the top 3 issues]
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task
@@ -333,8 +350,8 @@ dictionary:
                   label: Monthly
                 quarterly:
                   label: quarterly
-                by_annually:
-                  label: By-annually
+                by_annualy:
+                  label: By-annualy
               validations:
                 - type: required
                   params: [You must provide the assessment periodicity]

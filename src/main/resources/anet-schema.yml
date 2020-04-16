@@ -201,6 +201,26 @@ definitions:
                           type: string
                 required: [levels]
 
+# definition for assessment configuration
+  assessmentDef:
+    type: object
+    additionalProperties: false
+    required: [assessmentType, periodicity, questions]
+    properties:
+      assessmentType:
+        title: type of assessment
+        type: string
+        enum: [instant, periodic]
+      periodicity:
+        title: period of the periodic assessment
+        type: string
+        enum: [weekly, monthly, quarterly, by_annualy]
+      questions:
+        title: questions to respond when assessing
+        type: object
+        additionalProperties:
+          "$ref": "#/definitions/customField"
+
 #########################################################
 ### schema root
 #########################################################
@@ -350,14 +370,10 @@ properties:
                 "$ref": "#/properties/fields/properties/task/properties/longLabel"
               longName:
                 "$ref": "#/properties/fields/properties/task/properties/longName"
-              assessment:
-                type: object
-                required: [customFields]
-                properties:
-                  customFields:
-                    type: object
-                    additionalProperties:
-                      "$ref": "#/definitions/customField"
+              assessments:
+                type: array
+                items:
+                  "$ref": "#/definitions/assessmentDef"
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion: 

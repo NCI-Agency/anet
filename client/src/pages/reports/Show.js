@@ -661,7 +661,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               >
                 {values.tasks.map(task => {
                   const taskInstantAssessmentConfig = Task.getInstantAssessmentConfig(
-                    task.customFields
+                    task
                   )
                   if (_isEmpty(taskInstantAssessmentConfig)) {
                     return null
