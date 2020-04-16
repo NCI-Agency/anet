@@ -362,13 +362,6 @@ dictionary:
               componentClass: textarea
               style:
                 height: 200px
-        assessmentDefinition:
-          type: text
-          label: Assessment definition
-          placeholder: JSON that defines the effort (you need to know what you are doing)
-          componentClass: textarea
-          style:
-            height: 200px
 
     report:
       intent: Engagement purpose

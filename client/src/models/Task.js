@@ -223,12 +223,7 @@ export default class Task extends Model {
   }
 
   static getInstantAssessmentConfig(task) {
-    return (
-      Task.getAssessmentsConfig(task).instant ||
-      JSON.parse(
-        JSON.parse(task.customFields || "{}").assessmentDefinition || "{}"
-      )
-    )
+    return Task.getAssessmentsConfig(task).instant
   }
 
   getInstantAssessmentConfig() {
