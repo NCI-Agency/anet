@@ -138,7 +138,9 @@ jobs:
     - run: ./gradlew -PtestEnv jar
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
     - run: ./gradlew -PtestEnv check test jacocoTestReport
-    - run: ./gradlew -PtestEnv run &
+    - run: |
+        ./gradlew -PtestEnv run &
+        sleep 15
     - uses: olegtarasov/get-tag@v2
       id: tagName
     - name: Set local identifier for BrowserStack

@@ -74,7 +74,7 @@ const BaseRelatedObjectNotes = ({
     const questions =
       relatedObject &&
       Settings.fields.principal.person.assessment &&
-      relatedObject.relatedObjectType === "people" &&
+      relatedObject.relatedObjectType === Person.relatedObjectType &&
       relatedObjectValue.role === Person.ROLE.PRINCIPAL
         ? Settings.fields.principal.person.assessment.questions.filter(
           question =>

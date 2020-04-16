@@ -1,5 +1,6 @@
 package mil.dds.anet;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
 import java.util.Collections;
@@ -69,10 +70,11 @@ public class AnetObjectEngine {
   private final String dbUrl;
   private final Injector injector;
 
-  public AnetObjectEngine(String dbUrl, Application<?> application) {
+  public AnetObjectEngine(String dbUrl, Application<?> application, MetricRegistry metricRegistry) {
     this.dbUrl = dbUrl;
     injector = InjectorLookup.getInjector(application).get();
     personDao = injector.getInstance(PersonDao.class);
+    personDao.setMetricRegistry(metricRegistry);
     taskDao = injector.getInstance(TaskDao.class);
     locationDao = injector.getInstance(LocationDao.class);
     orgDao = injector.getInstance(OrganizationDao.class);

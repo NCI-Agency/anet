@@ -5,6 +5,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import utils from "utils"
 import * as yup from "yup"
+import { gql } from "apollo-boost"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
@@ -29,6 +30,22 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
     ${GRAPHQL_NOTE_FIELDS}
   }
 `
+
+export const GQL_CREATE_NOTE = gql`
+  mutation($note: NoteInput!) {
+    createNote(note: $note) {
+      ${GRAPHQL_NOTE_FIELDS}
+    }
+  }
+`
+export const GQL_UPDATE_NOTE = gql`
+  mutation($note: NoteInput!) {
+    updateNote(note: $note) {
+      ${GRAPHQL_NOTE_FIELDS}
+    }
+  }
+`
+
 export const NOTE_TYPE = {
   FREE_TEXT: "FREE_TEXT",
   CHANGE_RECORD: "CHANGE_RECORD",
