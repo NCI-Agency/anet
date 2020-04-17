@@ -190,9 +190,11 @@ export default class Task extends Model {
   static parseAssessmentsConfig(assessmentsConfig) {
     return Object.fromEntries(
       assessmentsConfig.map(a => {
-        const assessmentKey = a.periodicity
-          ? `${a.assessmentType}_${a.periodicity}`
-          : a.assessmentType
+        // FIXME: do not hardcode once
+        const recurrence = a.recurrence || "once"
+        const assessmentKey = a.relatedObjectType
+          ? `${a.relatedObjectType}_${recurrence}`
+          : recurrence
         const questions = a.questions || {}
         return [
           assessmentKey,
@@ -226,8 +228,9 @@ export default class Task extends Model {
     )
   }
 
-  static getInstantAssessmentConfig(task) {
-    return Task.getAssessmentsConfig(task).instant
+  static getInstantAssessmentConfig(task, relatedObjectType = "report") {
+    // FIXME: do not hardcode once and report
+    return Task.getAssessmentsConfig(task)[`${relatedObjectType}_once`]
   }
 
   getInstantAssessmentConfig() {
@@ -262,10 +265,8 @@ export default class Task extends Model {
     return assessmentsResults
   }
 
-  getPeriodicAssessmentDetails(periodicity = "monthly") {
-    const assessmentConfig = Task.getAssessmentsConfig(this)[
-      `periodic_${periodicity}`
-    ]
+  getPeriodicAssessmentDetails(recurrence = "monthly") {
+    const assessmentConfig = Task.getAssessmentsConfig(this)[recurrence]
     return {
       assessmentConfig: assessmentConfig,
       assessmentYupSchema: createAssessmentSchema(assessmentConfig)

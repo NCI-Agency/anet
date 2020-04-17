@@ -226,8 +226,7 @@ dictionary:
           style:
             height: 400px
         assessments:
-          - assessmentType: periodic
-            periodicity: by_annualy
+          - recurrence: biannualy
             questions:
               issues:
                 type: special_field
@@ -253,8 +252,7 @@ dictionary:
           style:
             height: 400px
         assessments:
-          - assessmentType: periodic
-            periodicity: monthly
+          - recurrence: monthly
             questions:
               issues:
                 type: special_field
@@ -283,8 +281,7 @@ dictionary:
                 validations:
                   - type: required
                     params: [You must provide the assessment status]
-          - assessmentType: periodic
-            periodicity: weekly
+          - recurrence: weekly
             questions:
               issues:
                 type: special_field
@@ -327,34 +324,32 @@ dictionary:
           addButtonLabel: Add an assessment
           objectLabel: Assessment
           objectFields:
-            assessmentType:
+            recurrence:
               type: enum
-              label: Assessment type
-              helpText: Select an assessement type for this assessment
+              label: Recurrence
+              helpText: Select a recurrence for this periodic assessment
               choices:
-                periodic:
-                  label: Periodic
-                instant:
-                  label: Instant
-              validations:
-                - type: required
-                  params: [You must provide the assessment type]
-            periodicity:
-              type: enum
-              label: Periodicity
-              helpText: Select a periodicity for this periodic assessment
-              choices:
+                once:
+                  label: Once
                 weekly:
                   label: Weekly
+                biweekly:
+                  label: Bi-weekly
                 monthly:
                   label: Monthly
                 quarterly:
                   label: quarterly
-                by_annualy:
-                  label: By-annualy
-              validations:
-                - type: required
-                  params: [You must provide the assessment periodicity]
+                bi_annualy:
+                  label: Bi-annualy
+            relatedObjectType:
+              type: enum
+              label: Related object type
+              helpText: object type context in which the assessment will be made
+              choices:
+                report:
+                  label: Report
+                null:
+                  label: None
             questions:
               type: text
               label: Questions

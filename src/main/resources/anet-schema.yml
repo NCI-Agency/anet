@@ -205,16 +205,18 @@ definitions:
   assessmentDef:
     type: object
     additionalProperties: false
-    required: [assessmentType, periodicity, questions]
+    required: [questions]
     properties:
-      assessmentType:
-        title: type of assessment
+      recurrence:
+        title: recurrence of an assessment
         type: string
-        enum: [instant, periodic]
-      periodicity:
-        title: period of the periodic assessment
+        enum: [once, weekly, biweekly, monthly, quarterly, biannualy]
+        default: once
+      relatedObjectType:
+        title: object type context in which the assessment will be made
         type: string
-        enum: [weekly, monthly, quarterly, by_annualy]
+        enum: [report, null]
+        default: null
       questions:
         title: questions to respond when assessing
         type: object
