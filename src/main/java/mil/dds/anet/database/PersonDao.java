@@ -1,11 +1,21 @@
 package mil.dds.anet.database;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ObjectArrays;
+import java.lang.invoke.MethodHandles;
+import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import javax.cache.Cache;
+import javax.cache.Cache.Entry;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.spi.CachingProvider;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
@@ -19,9 +29,14 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY
   public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
@@ -38,6 +53,35 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
       DaoUtils.buildFieldAliases(TABLE_NAME, avatarFields, true);
   public static String PERSON_FIELDS_NOAS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
+
+  private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
+  private static final String DOMAIN_USERS_CACHE = "domainUsersCache";
+
+  private Cache<String, Person> domainUsersCache;
+  private MetricRegistry metricRegistry;
+
+  public PersonDao() {
+    try {
+      final CachingProvider cachingProvider = Caching.getCachingProvider();
+      final CacheManager manager = cachingProvider.getCacheManager(
+          PersonDao.class.getResource(EHCACHE_CONFIG).toURI(), PersonDao.class.getClassLoader());
+      domainUsersCache = manager.getCache(DOMAIN_USERS_CACHE, String.class, Person.class);
+      if (domainUsersCache == null) {
+        logger.warn("Caching config for {} not found in {}, proceeding without caching",
+            DOMAIN_USERS_CACHE, EHCACHE_CONFIG);
+      }
+    } catch (URISyntaxException e) {
+      logger.warn("Caching config {} not found, proceeding without caching", EHCACHE_CONFIG);
+    }
+  }
+
+  public MetricRegistry getMetricRegistry() {
+    return metricRegistry;
+  }
+
+  public void setMetricRegistry(MetricRegistry metricRegistry) {
+    this.metricRegistry = metricRegistry;
+  }
 
   @Override
   public Person getByUuid(String uuid) {
@@ -110,12 +154,13 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
       sql.append(":endOfTourDate, ");
     }
     sql.append(":biography, :domainUsername, :createdAt, :updatedAt, :customFields);");
-    getDbHandle().createUpdate(sql.toString()).bindBean(p)
+    final int nr = getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+    evictFromCache(p, nr > 0);
     return p;
   }
 
@@ -137,11 +182,15 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     }
     sql.append("WHERE uuid = :uuid");
 
-    return getDbHandle().createUpdate(sql.toString()).bindBean(p)
+    final int nr = getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+    evictFromCache(p, nr > 0);
+    // The domainUsername may have changed, evict original person as well
+    evictFromCache(findInCache(p), true);
+    return nr;
   }
 
   @Override
@@ -156,7 +205,11 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   @InTransaction
   public List<Person> findByDomainUsername(String domainUsername) {
-    return getDbHandle()
+    final Person person = getFromCache(domainUsername);
+    if (person != null) {
+      return Collections.singletonList(person);
+    }
+    final List<Person> people = getDbHandle()
         .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
             + PositionDao.POSITIONS_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
@@ -165,6 +218,56 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("domainUsername", domainUsername)
         .bind("inactiveStatus", DaoUtils.getEnumId(PersonStatus.INACTIVE)).map(new PersonMapper())
         .list();
+    // There should at most one match
+    people.stream().forEach(p -> putInCache(p));
+    return people;
+  }
+
+  private Person getFromCache(String domainUsername) {
+    if (domainUsersCache == null || domainUsername == null) {
+      return null;
+    }
+    final Person person = domainUsersCache.get(domainUsername);
+    if (metricRegistry != null) {
+      metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "LoadCount")).inc();
+      if (person == null) {
+        metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "CacheMissCount")).inc();
+      } else {
+        metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "CacheHitCount")).inc();
+      }
+    }
+    return person;
+  }
+
+  private void putInCache(Person person) {
+    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
+      domainUsersCache.put(person.getDomainUsername(), person);
+    }
+  }
+
+  /**
+   * Just to be on the safe side, we only cache objects retrieved inside
+   * {@link #findByDomainUsername(String)}.
+   *
+   * @param person the person to be evicted from the domain users cache
+   * @param evict if the person should be evicted from the cache (because the object has been
+   *        updated or deleted)
+   */
+  private void evictFromCache(Person person, boolean evict) {
+    if (domainUsersCache != null && evict && person != null && person.getDomainUsername() != null) {
+      domainUsersCache.remove(person.getDomainUsername());
+    }
+  }
+
+  private Person findInCache(Person person) {
+    if (domainUsersCache != null && person != null) {
+      for (final Entry<String, Person> entry : domainUsersCache) {
+        if (Objects.equals(DaoUtils.getUuid(entry.getValue()), DaoUtils.getUuid(person))) {
+          return entry.getValue();
+        }
+      }
+    }
+    return null;
   }
 
   @InTransaction
@@ -228,8 +331,12 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("loserUuid", loser.getUuid()).execute();
 
     // delete the person!
-    return getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
+    final int nr = getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
         .bind("loserUuid", loser.getUuid()).execute();
+    // E.g. positions may have been updated, so always evict
+    evictFromCache(winner, true);
+    evictFromCache(loser, true);
+    return nr;
   }
 
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
