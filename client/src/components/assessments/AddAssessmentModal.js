@@ -20,7 +20,7 @@ const AddAssessmentModal = ({
   entity,
   entityType,
   yupSchema,
-  assessmentType,
+  recurrence,
   assessmentPeriod,
   assessmentConfig,
   title,
@@ -125,10 +125,8 @@ const AddAssessmentModal = ({
       ]
     }
     const clonedValues = _cloneDeep(values)
-    clonedValues[
-      ENTITY_ASSESSMENT_PARENT_FIELD
-    ].__assessmentType = assessmentType
-    clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__assessmentPeriodStart =
+    clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__recurrence = recurrence
+    clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__periodStart =
       assessmentPeriod.start
     updatedNote.text = customFieldsJSONString(
       clonedValues,
@@ -147,7 +145,7 @@ AddAssessmentModal.propTypes = {
   ]).isRequired,
   entityType: PropTypes.func.isRequired,
   yupSchema: PropTypes.object.isRequired,
-  assessmentType: PropTypes.string.isRequired,
+  recurrence: PropTypes.string.isRequired,
   assessmentPeriod: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
   title: PropTypes.string,

@@ -176,7 +176,7 @@ const MonthlyAssessmentRows = ({
                         PERIOD_FORMAT
                       )}`}
                       yupSchema={periodicAssessmentYupSchema}
-                      assessmentType="monthly"
+                      recurrence="monthly"
                       assessmentPeriod={period}
                       assessmentConfig={periodicAssessmentConfig}
                       showModal={showAssessmentModal}
