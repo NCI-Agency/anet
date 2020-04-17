@@ -10,6 +10,7 @@ import Model, {
 } from "components/Model"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
+import _cloneDeep from "lodash/cloneDeep"
 import { Person, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
@@ -19,6 +20,8 @@ const AddAssessmentModal = ({
   entity,
   entityType,
   yupSchema,
+  assessmentType,
+  assessmentPeriod,
   assessmentConfig,
   title,
   showModal,
@@ -121,8 +124,14 @@ const AddAssessmentModal = ({
         }
       ]
     }
+    const clonedValues = _cloneDeep(values)
+    clonedValues[
+      ENTITY_ASSESSMENT_PARENT_FIELD
+    ].__assessmentType = assessmentType
+    clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__assessmentPeriodStart =
+      assessmentPeriod.start
     updatedNote.text = customFieldsJSONString(
-      values,
+      clonedValues,
       true,
       ENTITY_ASSESSMENT_PARENT_FIELD
     )
@@ -138,6 +147,8 @@ AddAssessmentModal.propTypes = {
   ]).isRequired,
   entityType: PropTypes.func.isRequired,
   yupSchema: PropTypes.object.isRequired,
+  assessmentType: PropTypes.string.isRequired,
+  assessmentPeriod: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
   title: PropTypes.string,
   showModal: PropTypes.bool,

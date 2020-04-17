@@ -176,6 +176,8 @@ const MonthlyAssessmentRows = ({
                         PERIOD_FORMAT
                       )}`}
                       yupSchema={periodicAssessmentYupSchema}
+                      assessmentType="monthly"
+                      assessmentPeriod={period}
                       assessmentConfig={periodicAssessmentConfig}
                       showModal={showAssessmentModal}
                       onCancel={() => setShowAssessmentModal(false)}
