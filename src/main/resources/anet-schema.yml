@@ -109,9 +109,9 @@ definitions:
             - properties:
                 type:
                   enum: [numberAggregation]
-              aggregationType:
-                type: string
-                enum: [sum, avg, min, max]
+                aggregationType:
+                  type: string
+                  enum: [sum, avg, min, max]
               required: [aggregationType]
 # TODO: The following properties should not be here as these are only dependency fields.
 # I can't figure out yet why the schema validation will not pass without them
@@ -210,7 +210,7 @@ definitions:
       recurrence:
         title: recurrence of an assessment
         type: string
-        enum: [once, weekly, biweekly, monthly, quarterly, biannualy]
+        enum: [once, daily, weekly, biweekly, monthly, quarterly, semiannualy, annually]
         default: once
       relatedObjectType:
         title: object type context in which the assessment will be made

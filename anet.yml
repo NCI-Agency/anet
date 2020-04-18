@@ -226,7 +226,7 @@ dictionary:
           style:
             height: 400px
         assessments:
-          - recurrence: biannualy
+          - recurrence: semiannualy
             questions:
               issues:
                 type: special_field
@@ -330,17 +330,19 @@ dictionary:
               helpText: Select a recurrence for this periodic assessment
               choices:
                 once:
-                  label: Once
+                  label: once
+                daily:
+                    label: daily
                 weekly:
-                  label: Weekly
+                  label: weekly
                 biweekly:
-                  label: Bi-weekly
+                  label: biweekly
                 monthly:
-                  label: Monthly
+                  label: monthly
                 quarterly:
                   label: quarterly
-                bi_annualy:
-                  label: Bi-annualy
+                semiannualy:
+                  label: semiannualy
             relatedObjectType:
               type: enum
               label: Related object type
