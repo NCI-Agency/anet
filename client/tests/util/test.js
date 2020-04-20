@@ -56,7 +56,7 @@ test.beforeEach(t => {
        * ChromeDriver server process is used by different drivers. When driver.quit() is called by
        * one of the drivers, that process is terminated. As a result even though all assertions pass,
        * the afterEach.always hook reports intermittent errors. By explicitly defining a new ServiceBuilder
-       * here we enforce the creation of a seperate ChromeDriver server child process for each driver instance.
+       * here we enforce the creation of a separate ChromeDriver server child process for each driver instance.
        */
       .setChromeService(new chrome.ServiceBuilder())
   } else {
