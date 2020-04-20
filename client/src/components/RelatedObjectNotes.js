@@ -32,6 +32,12 @@ const GQL_DELETE_NOTE = gql`
 
 export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 
+const EXCLUDED_ASSESSMENT_FIELDS = [
+  "__recurrence",
+  "__periodStart",
+  "invisibleCustomFields"
+]
+
 const BaseRelatedObjectNotes = ({
   currentUser,
   notesElemId,
@@ -345,7 +351,9 @@ const BaseRelatedObjectNotes = ({
                           </u>
                         </h4>
                         {Object.keys(jsonFields)
-                          .filter(field => field !== "text")
+                          .filter(
+                            field => !EXCLUDED_ASSESSMENT_FIELDS.includes(field)
+                          )
                           .map(field => (
                             <p key={field}>
                               <i>{field}</i>: <b>{jsonFields[field]}</b>
