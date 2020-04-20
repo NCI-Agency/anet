@@ -12,7 +12,8 @@ const config = {
   serial: true
 }
 
-const testEnv = (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
+const testEnv =
+  (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
 
 if (testEnv === "local") {
   config.serial = false
