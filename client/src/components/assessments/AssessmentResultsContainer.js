@@ -21,7 +21,6 @@ const now = moment()
 const ASSESSMENT_PERIODS_CONFIG = [
   {
     recurrence: "daily",
-    displayFormat: "DD-MM-YYYY",
     periods: [
       {
         start: now.clone().subtract(2, "days").startOf("day"),
@@ -42,7 +41,6 @@ const ASSESSMENT_PERIODS_CONFIG = [
   },
   {
     recurrence: "weekly",
-    displayFormat: "DD-MM-YYYY",
     periods: [
       {
         start: now.clone().subtract(2, "weeks").startOf("week"),
@@ -63,7 +61,6 @@ const ASSESSMENT_PERIODS_CONFIG = [
   },
   {
     recurrence: "biweekly",
-    displayFormat: "DD-MM-YYYY",
     periods: [
       {
         start: now.clone().subtract(4, "weeks").startOf("week"),
@@ -84,7 +81,6 @@ const ASSESSMENT_PERIODS_CONFIG = [
   },
   {
     recurrence: "monthly",
-    displayFormat: "MMM-YYYY",
     periods: [
       {
         start: now.clone().subtract(2, "months").startOf("month"),
@@ -105,7 +101,6 @@ const ASSESSMENT_PERIODS_CONFIG = [
   },
   {
     recurrence: "quarterly",
-    displayFormat: "DD-MM-YYYY",
     periods: [
       {
         start: now.clone().subtract(2, "quarters").startOf("quarter"),
@@ -126,7 +121,6 @@ const ASSESSMENT_PERIODS_CONFIG = [
   },
   {
     recurrence: "semiannualy",
-    displayFormat: "DD-MM-YYYY",
     periods: [
       {
         start: now.clone().subtract(4, "quarters").startOf("quarter"),
