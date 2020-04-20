@@ -146,7 +146,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getPendingApprovalOf() != null) {
-      qb.addWhereClause("reports.\"authorUuid\" != :approverUuid");
       qb.addWhereClause("reports.\"approvalStepUuid\" IN"
           + " (SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN"
           + " (SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :approverUuid))");
