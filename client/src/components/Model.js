@@ -333,21 +333,21 @@ export default class Model {
     return this.name || this.uuid
   }
 
-  getLastAssessment(dateRange) {
+  getLastAssessment(recurrence, period) {
     const notesToAssessments = this.notes
       .filter(n => {
         return (
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.length === 1 &&
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
+          n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length === 1
         )
       })
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(note => ({
-        uuid: note.uuid,
-        assessment: JSON.parse(note.text)
-      }))
-    return notesToAssessments?.[0]?.assessment
+      .map(note => JSON.parse(note.text))
+      .filter(
+        assessment =>
+          // FIXME: make a nicer implementation of the check on period start
+          assessment.__recurrence === recurrence &&
+          assessment.__periodStart === JSON.parse(JSON.stringify(period.start))
+      )
+    return notesToAssessments?.[0]
   }
 }

@@ -125,15 +125,7 @@ const PeriodicAssessmentRows = ({
   const periodsLastAssessment = []
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
-    // TODO: rethink assessments for a period: should we also save the period
-    // in the assessment? For now we assume that the dateRange is a month and
-    // that assessments for a given month will have been made in the next month.
-    periodsLastAssessment.push(
-      entity.getLastAssessment({
-        start: period.start.clone().add(1, "months"),
-        end: period.start.clone().add(1, "months").endOf("month")
-      })
-    )
+    periodsLastAssessment.push(entity.getLastAssessment(recurrence, period))
     periodsAllowNewAssessment.push(
       periodicAssessmentConfig && canAddAssessment && period.allowNewAssessments
     )
@@ -198,7 +190,7 @@ const PeriodicAssessmentRows = ({
                       entityType={entityType}
                       title={`Assessment for ${entity.toString()} for ${periodDisplay}`}
                       yupSchema={periodicAssessmentYupSchema}
-                      recurrence="monthly"
+                      recurrence={recurrence}
                       assessmentPeriod={period}
                       assessmentConfig={periodicAssessmentConfig}
                       showModal={showAssessmentModal}
