@@ -29,26 +29,41 @@ import "components/assessments/AssessmentResultsTable.css"
 
 const PERIOD_FORMAT = "MMM-YYYY"
 
-const AssessmentsTableHeader = ({ periods }) => (
+const periodsPropType = PropTypes.arrayOf(
+  PropTypes.shape({
+    start: PropTypes.object,
+    end: PropTypes.object,
+    allowNewAssessments: PropTypes.bool
+  })
+)
+const periodsConfigPropTypes = PropTypes.shape({
+  recurrence: PropTypes.string,
+  displayFormat: PropTypes.string,
+  periods: periodsPropType
+})
+
+const AssessmentsTableHeader = ({ periodsConfig }) => (
   <thead>
     <tr key="periods">
       <>
-        {periods.map(period => (
-          <th key={period.start}>{period.start.format(PERIOD_FORMAT)}</th>
+        {periodsConfig.periods.map(period => (
+          <th key={period.start}>
+            {period.start.format(periodsConfig.displayFormat)}
+          </th>
         ))}
       </>
     </tr>
   </thead>
 )
 AssessmentsTableHeader.propTypes = {
-  periods: PropTypes.array
+  periodsConfig: periodsConfigPropTypes
 }
 
 const InstantAssessmentRow = ({
   questionKey,
   questionConfig,
   entity,
-  assessmentPeriods
+  periods
 }) => {
   const aggWidgetProps = {
     widget: questionConfig.aggregation?.widget || questionConfig.widget,
@@ -58,13 +73,11 @@ const InstantAssessmentRow = ({
   const fieldProps = getFieldPropsFromFieldConfig(questionConfig)
   return (
     <tr>
-      {assessmentPeriods.map((assessmentPeriod, index) => (
+      {periods.map((period, index) => (
         <td key={index}>
           <AggregationWidget
             key={`assessment-${questionKey}`}
-            values={
-              entity.getInstantAssessmentResults(assessmentPeriod)[questionKey]
-            }
+            values={entity.getInstantAssessmentResults(period)[questionKey]}
             {...aggWidgetProps}
             {...fieldProps}
           />
@@ -75,32 +88,27 @@ const InstantAssessmentRow = ({
 }
 InstantAssessmentRow.propTypes = {
   entity: PropTypes.object,
-  assessmentPeriods: PropTypes.arrayOf(
-    PropTypes.shape({
-      start: PropTypes.object,
-      end: PropTypes.object,
-      allowNewAssessments: PropTypes.bool
-    })
-  ),
+  periods: periodsPropType,
   questionKey: PropTypes.string,
   questionConfig: PropTypes.object
 }
 
-const MonthlyAssessmentRows = ({
+const PeriodicAssessmentRows = ({
   entity,
   entityType,
-  assessmentPeriods,
+  periodsConfig,
   canAddAssessment,
   onAddAssessment
 }) => {
+  const { recurrence, periods } = periodsConfig
   const {
     assessmentConfig: periodicAssessmentConfig,
     assessmentYupSchema: periodicAssessmentYupSchema
-  } = entity.getPeriodicAssessmentDetails()
+  } = entity.getPeriodicAssessmentDetails(recurrence)
   const [showAssessmentModal, setShowAssessmentModal] = useState(false)
   const periodsLastAssessment = []
   const periodsAllowNewAssessment = []
-  assessmentPeriods.forEach(period => {
+  periods.forEach(period => {
     // TODO: rethink assessments for a period: should we also save the period
     // in the assessment? For now we assume that the dateRange is a month and
     // that assessments for a given month will have been made in the next month.
@@ -152,7 +160,7 @@ const MonthlyAssessmentRows = ({
       )}
       {rowHasAddAssessment && (
         <tr>
-          {assessmentPeriods.map((period, index) => {
+          {periods.map((period, index) => {
             const assessmentLabelPrefix = periodsLastAssessment[index]
               ? "Add a"
               : "Make a new"
@@ -196,16 +204,10 @@ const MonthlyAssessmentRows = ({
     </>
   )
 }
-MonthlyAssessmentRows.propTypes = {
+PeriodicAssessmentRows.propTypes = {
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
-  assessmentPeriods: PropTypes.arrayOf(
-    PropTypes.shape({
-      start: PropTypes.object,
-      end: PropTypes.object,
-      allowNewAssessments: PropTypes.bool
-    })
-  ),
+  periodsConfig: periodsConfigPropTypes,
   canAddAssessment: PropTypes.bool,
   onAddAssessment: PropTypes.func
 }
@@ -214,7 +216,7 @@ const EntityAssessmentResults = ({
   entity,
   entityType,
   style,
-  assessmentPeriods,
+  periodsConfig,
   canAddAssessment,
   onAddAssessment
 }) => {
@@ -222,10 +224,11 @@ const EntityAssessmentResults = ({
     return null
   }
   const instantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const { periods } = periodsConfig
   return (
     <>
       <tr>
-        <td colSpan={assessmentPeriods.length} className="entity-title-row">
+        <td colSpan={periods.length} className="entity-title-row">
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
@@ -234,14 +237,14 @@ const EntityAssessmentResults = ({
           key={key}
           questionKey={key}
           questionConfig={instantAssessmentConfig[key]}
-          assessmentPeriods={assessmentPeriods}
+          periods={periods}
           entity={entity}
         />
       ))}
-      <MonthlyAssessmentRows
+      <PeriodicAssessmentRows
         entity={entity}
         entityType={entityType}
-        assessmentPeriods={assessmentPeriods}
+        periodsConfig={periodsConfig}
         canAddAssessment={canAddAssessment}
         onAddAssessment={onAddAssessment}
       />
@@ -252,13 +255,7 @@ EntityAssessmentResults.propTypes = {
   style: PropTypes.object,
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
-  assessmentPeriods: PropTypes.arrayOf(
-    PropTypes.shape({
-      start: PropTypes.object,
-      end: PropTypes.object,
-      allowNewAssessments: PropTypes.bool
-    })
-  ),
+  periodsConfig: periodsConfigPropTypes,
   onAddAssessment: PropTypes.func,
   canAddAssessment: PropTypes.bool
 }
@@ -268,20 +265,21 @@ const AssessmentResultsTable = ({
   entityType,
   subEntities,
   style,
-  assessmentPeriods,
+  periodsConfig,
   canAddAssessment,
   onAddAssessment
 }) => {
   if (!entity) {
     return null
   }
+  const { recurrence } = periodsConfig
   const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
   const subentitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessmentConfig())
     .filter(mc => !_isEmpty(mc))
   const {
     assessmentConfig: periodicAssessmentConfig
-  } = entity.getPeriodicAssessmentDetails()
+  } = entity.getPeriodicAssessmentDetails(recurrence)
   const showAssessmentResults =
     !_isEmpty(entityInstantAssessmentConfig) ||
     !_isEmpty(subentitiesInstantAssessmentConfig) ||
@@ -290,9 +288,12 @@ const AssessmentResultsTable = ({
     <>
       {showAssessmentResults && (
         <div style={{ ...style }}>
-          <Fieldset title="Assessment results" id="entity-assessments-results">
+          <Fieldset
+            title={`Assessment results - ${recurrence}`}
+            id={`"entity-assessments-results-${recurrence}`}
+          >
             <Table condensed responsive className="assessments-table">
-              <AssessmentsTableHeader periods={assessmentPeriods} />
+              <AssessmentsTableHeader periodsConfig={periodsConfig} />
               <tbody>
                 {!_isEmpty(subEntities) && (
                   <>
@@ -301,7 +302,7 @@ const AssessmentResultsTable = ({
                         key={`subassessment-${subEntity.uuid}`}
                         entity={subEntity}
                         entityType={entityType}
-                        assessmentPeriods={assessmentPeriods}
+                        periodsConfig={periodsConfig}
                         canAddAssessment={false}
                       />
                     ))}
@@ -310,7 +311,7 @@ const AssessmentResultsTable = ({
                 <EntityAssessmentResults
                   entity={entity}
                   entityType={entityType}
-                  assessmentPeriods={assessmentPeriods}
+                  periodsConfig={periodsConfig}
                   canAddAssessment={canAddAssessment}
                   onAddAssessment={onAddAssessment}
                 />
@@ -327,13 +328,7 @@ AssessmentResultsTable.propTypes = {
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
-  assessmentPeriods: PropTypes.arrayOf(
-    PropTypes.shape({
-      start: PropTypes.object,
-      end: PropTypes.object,
-      allowNewAssessments: PropTypes.bool
-    })
-  ),
+  periodsConfig: periodsConfigPropTypes,
   onAddAssessment: PropTypes.func,
   canAddAssessment: PropTypes.bool
 }

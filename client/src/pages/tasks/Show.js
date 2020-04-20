@@ -3,7 +3,7 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
-import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
+import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -157,15 +157,33 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   }
 
   if (data) {
-    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
-    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
+    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(data.task.customFields) // TODO:
+    // Maybe
+    // move
+    // this
+    // code
+    // to
+    // Task()
+    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO:
+    // Maybe
+    // move
+    // this
+    // code
+    // to
+    // Task()
   }
   const task = new Task(data ? data.task : {})
 
   const subTasks = []
   data &&
     data.subTasks.list.forEach(subTask => {
-      subTask.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
+      subTask.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO:
+      // Maybe
+      // move
+      // this
+      // code
+      // to
+      // Task()
       subTasks.push(new Task(subTask))
     })
 
@@ -191,24 +209,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
-  const now = moment()
-  const assessmentPeriods = [
-    {
-      start: now.clone().subtract(2, "months").startOf("month"),
-      end: now.clone().subtract(2, "months").endOf("month"),
-      allowNewAssessments: false
-    },
-    {
-      start: now.clone().subtract(1, "months").startOf("month"),
-      end: now.clone().subtract(1, "months").endOf("month"),
-      allowNewAssessments: true
-    },
-    {
-      start: now.clone().startOf("month"),
-      end: now.clone().endOf("month"),
-      allowNewAssessments: false
-    }
-  ]
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -349,12 +349,10 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               </div>
             </Form>
 
-            <AssessmentResultsTable
-              style={{ flex: "0 0 100%" }}
+            <AssessmentResultsContainer
               entity={task}
               entityType={Task}
               subEntities={subTasks}
-              assessmentPeriods={assessmentPeriods}
               canAddAssessment={canEdit}
               onAddAssessment={refetch}
             />

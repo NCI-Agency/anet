@@ -228,6 +228,10 @@ export default class Task extends Model {
     )
   }
 
+  getAssessmentsConfig() {
+    return Task.getAssessmentsConfig(this)
+  }
+
   static getInstantAssessmentConfig(task, relatedObjectType = "report") {
     // FIXME: do not hardcode once and report
     return Task.getAssessmentsConfig(task)[`${relatedObjectType}_once`]
@@ -266,10 +270,11 @@ export default class Task extends Model {
   }
 
   getPeriodicAssessmentDetails(recurrence = "monthly") {
-    const assessmentConfig = Task.getAssessmentsConfig(this)[recurrence]
+    const assessmentConfig = this.getAssessmentsConfig()[recurrence]
     return {
       assessmentConfig: assessmentConfig,
-      assessmentYupSchema: createAssessmentSchema(assessmentConfig)
+      assessmentYupSchema:
+        assessmentConfig && createAssessmentSchema(assessmentConfig)
     }
   }
 }
