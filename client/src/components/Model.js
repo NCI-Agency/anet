@@ -55,6 +55,19 @@ export const NOTE_TYPE = {
 
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
 
+export const ASSESSMENTS_RECURRENCE_TYPE = {
+  ONCE: "once",
+  DAILY: "daily",
+  WEEKLY: "weekly",
+  BIWEEKLY: "biweekly",
+  MONTHLY: "monthly",
+  QUARTERLY: "quarterly",
+  SEMIANNUALY: "semiannualy"
+}
+const ASSESSMENTS_RELATED_OBJECT_TYPE = {
+  REPORT: "report"
+}
+
 export const yupDate = yup.date().transform(function(value, originalValue) {
   if (this.isType(value)) {
     return value
@@ -336,8 +349,7 @@ export default class Model {
   static parseAssessmentsConfig(assessmentsConfig) {
     return Object.fromEntries(
       assessmentsConfig.map(a => {
-        // FIXME: do not hardcode once
-        const recurrence = a.recurrence || "once"
+        const recurrence = a.recurrence || ASSESSMENTS_RECURRENCE_TYPE.ONCE
         const assessmentKey = a.relatedObjectType
           ? `${a.relatedObjectType}_${recurrence}`
           : recurrence
@@ -371,9 +383,12 @@ export default class Model {
     )
   }
 
-  getInstantAssessmentConfig(relatedObjectType = "report") {
-    // FIXME: do not hardcode once and report
-    return this.getAssessmentsConfig()[`${relatedObjectType}_once`]
+  getInstantAssessmentConfig(
+    relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+  ) {
+    return this.getAssessmentsConfig()[
+      `${relatedObjectType}_${ASSESSMENTS_RECURRENCE_TYPE.ONCE}`
+    ]
   }
 
   getLastAssessment(recurrence, period) {

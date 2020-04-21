@@ -1,4 +1,5 @@
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
+import { ASSESSMENTS_RECURRENCE_TYPE } from "components/Model"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -6,7 +7,7 @@ import React from "react"
 const now = moment()
 const ASSESSMENT_PERIODS_CONFIG = [
   {
-    recurrence: "daily",
+    recurrence: ASSESSMENTS_RECURRENCE_TYPE.DAILY,
     periods: [
       {
         start: now.clone().subtract(2, "days").startOf("day"),
@@ -26,7 +27,7 @@ const ASSESSMENT_PERIODS_CONFIG = [
     ]
   },
   {
-    recurrence: "weekly",
+    recurrence: ASSESSMENTS_RECURRENCE_TYPE.WEEKLY,
     periods: [
       {
         start: now.clone().subtract(2, "weeks").startOf("week"),
@@ -46,7 +47,7 @@ const ASSESSMENT_PERIODS_CONFIG = [
     ]
   },
   {
-    recurrence: "biweekly",
+    recurrence: ASSESSMENTS_RECURRENCE_TYPE.BIWEEKLY,
     periods: [
       {
         start: now.clone().subtract(4, "weeks").startOf("week"),
@@ -66,7 +67,7 @@ const ASSESSMENT_PERIODS_CONFIG = [
     ]
   },
   {
-    recurrence: "monthly",
+    recurrence: ASSESSMENTS_RECURRENCE_TYPE.MONTHLY,
     periods: [
       {
         start: now.clone().subtract(2, "months").startOf("month"),
@@ -86,7 +87,7 @@ const ASSESSMENT_PERIODS_CONFIG = [
     ]
   },
   {
-    recurrence: "quarterly",
+    recurrence: ASSESSMENTS_RECURRENCE_TYPE.QUARTERLY,
     periods: [
       {
         start: now.clone().subtract(2, "quarters").startOf("quarter"),
@@ -106,7 +107,7 @@ const ASSESSMENT_PERIODS_CONFIG = [
     ]
   },
   {
-    recurrence: "semiannualy",
+    recurrence: ASSESSMENTS_RECURRENCE_TYPE.SEMIANNUALY,
     periods: [
       {
         start: now.clone().subtract(4, "quarters").startOf("quarter"),
