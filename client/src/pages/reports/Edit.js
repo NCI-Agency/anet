@@ -10,7 +10,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import { Report } from "models"
+import { Report, Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -129,6 +129,7 @@ const ReportEdit = ({ pageDispatchers }) => {
     report,
     report.getTasksInstantAssessments()
   )
+  reportInitialValues.tasks = Task.fromArray(reportInitialValues.tasks)
 
   return (
     <div className="report-edit">

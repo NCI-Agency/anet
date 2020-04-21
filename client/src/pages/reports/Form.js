@@ -338,7 +338,7 @@ const BaseReportForm = ({
     .filter(t => t.customFields)
     .forEach(t => {
       tasksInstantAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
-        Task.getInstantAssessmentConfig(t),
+        t.getInstantAssessmentConfig(),
         `tasksAssessments.${t.uuid}`
       )
     })
@@ -1069,9 +1069,7 @@ const BaseReportForm = ({
                 id="engagement-assessments"
               >
                 {values.tasks.map(task => {
-                  const taskInstantAssessmentConfig = Task.getInstantAssessmentConfig(
-                    task
-                  )
+                  const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
                   if (!taskInstantAssessmentConfig) {
                     return null
                   }

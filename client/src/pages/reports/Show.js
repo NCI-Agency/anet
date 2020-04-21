@@ -299,6 +299,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
+    data.report.tasks = Task.fromArray(data.report.tasks)
     data.report.to = ""
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
       data.report.customFields
@@ -660,9 +661,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 id="engagement-assessments"
               >
                 {values.tasks.map(task => {
-                  const taskInstantAssessmentConfig = Task.getInstantAssessmentConfig(
-                    task
-                  )
+                  const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
                   if (_isEmpty(taskInstantAssessmentConfig)) {
                     return null
                   }

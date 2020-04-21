@@ -24,7 +24,7 @@ import "components/assessments/AssessmentResultsTable.css"
  * - periodic assessments => made on the entity/subentities periodically,
  *   as a measurement of the given period of time;
  *   the config and yupSchema for these assessments is to be found in
- *   entity.getPeriodicAssessmentDetails()
+ *   entity.getPeriodicAssessmentDetails(recurrence)
  */
 
 const PERIOD_START_SHORT_FORMAT = "D"

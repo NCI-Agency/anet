@@ -333,6 +333,49 @@ export default class Model {
     return this.name || this.uuid
   }
 
+  static parseAssessmentsConfig(assessmentsConfig) {
+    return Object.fromEntries(
+      assessmentsConfig.map(a => {
+        // FIXME: do not hardcode once
+        const recurrence = a.recurrence || "once"
+        const assessmentKey = a.relatedObjectType
+          ? `${a.relatedObjectType}_${recurrence}`
+          : recurrence
+        const questions = a.questions || {}
+        return [
+          assessmentKey,
+          typeof questions === "object"
+            ? questions
+            : typeof questions === "string"
+              ? JSON.parse(questions)
+              : {}
+        ]
+      })
+    )
+  }
+
+  generalAssessmentsConfig() {
+    // assessments configuration defined for more than one instance
+    return {}
+  }
+
+  instanceAssessmentsConfig() {
+    // assessments configuration defined for one specific instance
+    return {}
+  }
+
+  getAssessmentsConfig() {
+    return Object.assign(
+      Model.parseAssessmentsConfig(this.generalAssessmentsConfig()),
+      Model.parseAssessmentsConfig(this.instanceAssessmentsConfig())
+    )
+  }
+
+  getInstantAssessmentConfig(relatedObjectType = "report") {
+    // FIXME: do not hardcode once and report
+    return this.getAssessmentsConfig()[`${relatedObjectType}_once`]
+  }
+
   getLastAssessment(recurrence, period) {
     const notesToAssessments = this.notes
       .filter(n => {

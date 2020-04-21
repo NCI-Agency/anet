@@ -161,22 +161,14 @@ export default class Task extends Model {
     super(Model.fillObject(props, Task.yupSchema))
   }
 
-  static isTopLevelTask(task) {
-    return _isEmpty(task.customFieldRef1)
-  }
-
   isTopLevelTask() {
-    return Task.isTopLevelTask(this)
-  }
-
-  static fieldSettings(task) {
-    return Task.isTopLevelTask(task)
-      ? Settings.fields.task.topLevel
-      : Settings.fields.task.subLevel
+    return _isEmpty(this.customFieldRef1)
   }
 
   fieldSettings() {
-    return Task.fieldSettings(this)
+    return this.isTopLevelTask()
+      ? Settings.fields.task.topLevel
+      : Settings.fields.task.subLevel
   }
 
   iconUrl() {
@@ -187,58 +179,13 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
-  static parseAssessmentsConfig(assessmentsConfig) {
-    return Object.fromEntries(
-      assessmentsConfig.map(a => {
-        // FIXME: do not hardcode once
-        const recurrence = a.recurrence || "once"
-        const assessmentKey = a.relatedObjectType
-          ? `${a.relatedObjectType}_${recurrence}`
-          : recurrence
-        const questions = a.questions || {}
-        return [
-          assessmentKey,
-          typeof questions === "object"
-            ? questions
-            : typeof questions === "string"
-              ? JSON.parse(questions)
-              : {}
-        ]
-      })
-    )
+  generalAssessmentsConfig() {
+    return this.fieldSettings().assessments || []
   }
 
-  static getGeneralAssessmentsConfig(task) {
-    return Task.parseAssessmentsConfig(
-      Task.fieldSettings(task).assessments || []
-    )
-  }
-
-  static getInstanceAssessmentsConfig(task) {
+  instanceAssessmentsConfig() {
     // The given task instance might have a specific assessments config
-    return Task.parseAssessmentsConfig(
-      JSON.parse(task.customFields || "{}").assessments || []
-    )
-  }
-
-  static getAssessmentsConfig(task) {
-    return Object.assign(
-      Task.getGeneralAssessmentsConfig(task),
-      Task.getInstanceAssessmentsConfig(task)
-    )
-  }
-
-  getAssessmentsConfig() {
-    return Task.getAssessmentsConfig(this)
-  }
-
-  static getInstantAssessmentConfig(task, relatedObjectType = "report") {
-    // FIXME: do not hardcode once and report
-    return Task.getAssessmentsConfig(task)[`${relatedObjectType}_once`]
-  }
-
-  getInstantAssessmentConfig() {
-    return Task.getInstantAssessmentConfig(this)
+    return JSON.parse(this.customFields || "{}").assessments || []
   }
 
   getInstantAssessmentResults(dateRange) {
