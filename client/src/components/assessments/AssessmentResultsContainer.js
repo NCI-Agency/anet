@@ -3,20 +3,6 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 
-/* The AssessmentResultsTable component displays the results of two types of
- * assessments made on a given entity and subentities:
- * - instant assessments => made on the entity/subentities when
- *   working on them in relation to another type of entity (example:
- *   assessments made on tasks, while filling  report related to the tasks) or
- *   assessments made on the entity/subentity itself;
- *   the configuration of these assessments can be retrieved using
- *   entity.getInstantAssessmentConfig()
- * - periodic assessments => made on the entity/subentities periodically,
- *   as a measurement of the given period of time;
- *   the config and yupSchema for these assessments is to be found in
- *   entity.getPeriodicAssessmentDetails()
- */
-
 const now = moment()
 const ASSESSMENT_PERIODS_CONFIG = [
   {
