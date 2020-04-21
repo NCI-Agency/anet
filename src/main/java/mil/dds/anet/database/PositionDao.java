@@ -177,7 +177,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   @InTransaction
   public int setPersonInPosition(String personUuid, String positionUuid) {
     // If the position is already assigned to another person, remove the person from the position
-    AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(positionUuid);
+    removePersonFromPosition(positionUuid);
 
     // If this person is in a position already, we need to remove them.
     Position currPos = getDbHandle()

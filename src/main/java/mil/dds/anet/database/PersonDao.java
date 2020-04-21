@@ -157,13 +157,13 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
       sql.append(":endOfTourDate, ");
     }
     sql.append(":biography, :domainUsername, :createdAt, :updatedAt, :customFields);");
-    final int nr = getDbHandle().createUpdate(sql.toString()).bindBean(p)
+    getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
-    evictFromCache(p, nr > 0);
+    evictFromCache(p);
     return p;
   }
 
@@ -190,9 +190,9 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
-    evictFromCache(p, nr > 0);
+    evictFromCache(p);
     // The domainUsername may have changed, evict original person as well
-    evictFromCache(findInCache(p), true);
+    evictFromCache(findInCache(p));
     return nr;
   }
 
@@ -232,7 +232,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
    * @param personUuid the uuid of the person to be evicted from the cache
    */
   public void evictFromCacheByPersonUuid(String personUuid) {
-    evictFromCache(findInCacheByPersonUuid(personUuid), true);
+    evictFromCache(findInCacheByPersonUuid(personUuid));
   }
 
   /**
@@ -241,7 +241,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
    * @param positionUuid the uuid of the position for the person to be evicted from the cache
    */
   public void evictFromCacheByPositionUuid(String positionUuid) {
-    evictFromCache(findInCacheByPositionUuid(positionUuid), true);
+    evictFromCache(findInCacheByPositionUuid(positionUuid));
   }
 
   private Person getFromCache(String domainUsername) {
@@ -276,11 +276,9 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
    * {@link #findByDomainUsername(String)}.
    *
    * @param person the person to be evicted from the domain users cache
-   * @param evict if the person should be evicted from the cache (because the object has been
-   *        updated or deleted)
    */
-  private void evictFromCache(Person person, boolean evict) {
-    if (domainUsersCache != null && evict && person != null && person.getDomainUsername() != null) {
+  private void evictFromCache(Person person) {
+    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
       domainUsersCache.remove(person.getDomainUsername());
     }
   }
@@ -400,9 +398,9 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     // delete the person!
     final int nr = getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
         .bind("loserUuid", loser.getUuid()).execute();
-    // E.g. positions may have been updated, so always evict
-    evictFromCache(winner, true);
-    evictFromCache(loser, true);
+    // E.g. positions may have been updated, so evict from the cache
+    evictFromCache(winner);
+    evictFromCache(loser);
     return nr;
   }
 
