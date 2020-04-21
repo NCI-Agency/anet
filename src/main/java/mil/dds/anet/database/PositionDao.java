@@ -156,12 +156,18 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     }
 
     try {
-      return getDbHandle().createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, "
-          + "code = :code, \"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
-          + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+      final int nr = getDbHandle()
+          .createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, "
+              + "code = :code, \"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
+              + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("type", DaoUtils.getEnumId(p.getType()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+      // Evict the person holding this position from the domain users cache, as their position has
+      // changed
+      AnetObjectEngine.getInstance().getPersonDao()
+          .evictFromCacheByPositionUuid(DaoUtils.getUuid(p));
+      return nr;
     } catch (UnableToExecuteStatementException e) {
       checkForUniqueCodeViolation(e);
       throw e;
@@ -226,13 +232,17 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
             + "SET \"currentPersonUuid\" = :personUuid WHERE uuid = :positionUuid")
         .bind("personUuid", personUuid).bind("positionUuid", positionUuid).execute();
     // GraphQL mutations *have* to return something, so we return the number of inserted rows
-    return getDbHandle()
+    final int nr = getDbHandle()
         .createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
             + "VALUES (:positionUuid, :personUuid, :createdAt)")
         .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
         // Need to ensure this timestamp is greater than previous INSERT.
         .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+    // Evict this person from the domain users cache, as their position has changed
+    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
+
+    return nr;
   }
 
   @InTransaction
@@ -289,13 +299,16 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     getDbHandle().createUpdate(insertSql).bind("positionUuid", positionUuid)
         .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
 
-    return getDbHandle()
+    final int nr = getDbHandle()
         .createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
             + "VALUES (:positionUuid, NULL, :createdAt)")
         .bind("positionUuid", positionUuid)
         // Need to ensure this timestamp is greater than previous INSERT.
         .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+    // Evict the person (previously) holding this position from the domain users cache
+    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+    return nr;
   }
 
   public CompletableFuture<List<Position>> getAssociatedPositions(Map<String, Object> context,
@@ -428,8 +441,11 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         "DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?",
         positionUuid, positionUuid);
 
-    return getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
+    final int nr = getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
         .bind("positionUuid", positionUuid).execute();
+    // Evict the person (previously) holding this position from the domain users cache
+    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+    return nr;
   }
 
   public static String generateCurrentPositionFilter(String personJoinColumn,

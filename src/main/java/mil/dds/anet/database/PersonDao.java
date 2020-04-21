@@ -226,6 +226,24 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return people;
   }
 
+  /**
+   * Evict the person from the cache.
+   *
+   * @param personUuid the uuid of the person to be evicted from the cache
+   */
+  public void evictFromCacheByPersonUuid(String personUuid) {
+    evictFromCache(findInCacheByPersonUuid(personUuid), true);
+  }
+
+  /**
+   * Evict the person holding the position from the cache.
+   *
+   * @param positionUuid the uuid of the position for the person to be evicted from the cache
+   */
+  public void evictFromCacheByPositionUuid(String positionUuid) {
+    evictFromCache(findInCacheByPositionUuid(positionUuid), true);
+  }
+
   private Person getFromCache(String domainUsername) {
     if (domainUsersCache == null || domainUsername == null) {
       return null;
@@ -268,9 +286,24 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   }
 
   private Person findInCache(Person person) {
-    if (domainUsersCache != null && person != null) {
+    return findInCacheByPersonUuid(DaoUtils.getUuid(person));
+  }
+
+  private Person findInCacheByPersonUuid(String personUuid) {
+    if (domainUsersCache != null && personUuid != null) {
       for (final Entry<String, Person> entry : domainUsersCache) {
-        if (Objects.equals(DaoUtils.getUuid(entry.getValue()), DaoUtils.getUuid(person))) {
+        if (Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
+          return entry.getValue();
+        }
+      }
+    }
+    return null;
+  }
+
+  private Person findInCacheByPositionUuid(String positionUuid) {
+    if (domainUsersCache != null && positionUuid != null) {
+      for (final Entry<String, Person> entry : domainUsersCache) {
+        if (Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
           return entry.getValue();
         }
       }
