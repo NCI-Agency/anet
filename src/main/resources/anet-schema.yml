@@ -638,10 +638,10 @@ properties:
                                 type: string
                               color:
                                 type: string
-                  customFields:
-                    type: object
-                    additionalProperties:
-                      "$ref": "#/definitions/customField"
+              assessments:
+                type: array
+                items:
+                  "$ref": "#/definitions/assessmentDef"
 
           position:
             type: object

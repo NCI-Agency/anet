@@ -1,9 +1,5 @@
 import { Settings } from "api"
-import Model, {
-  createAssessmentSchema,
-  createCustomFieldsSchema,
-  yupDate
-} from "components/Model"
+import Model, { createCustomFieldsSchema, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
@@ -34,19 +30,10 @@ export default class Person extends Model {
 
   static nameDelimiter = ","
 
-  static advisorAssessmentConfig =
-    Settings.fields.advisor.person.assessment?.customFields
+  static advisorAssessmentConfig = Settings.fields.advisor.person.assessments
 
   static principalAssessmentConfig =
-    Settings.fields.principal.person.assessment?.customFields
-
-  static advisorAssessmentSchema = createAssessmentSchema(
-    Person.advisorAssessmentConfig
-  )
-
-  static principalAssessmentSchema = createAssessmentSchema(
-    Person.principalAssessmentConfig
-  )
+    Settings.fields.principal.person.assessments
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
@@ -335,26 +322,13 @@ export default class Person extends Model {
     }
   }
 
-  getInstantAssessmentConfig() {
-    return {}
-  }
-
-  getPeriodicAssessmentDetails() {
+  generalAssessmentsConfig() {
     if (this.isAdvisor()) {
-      return {
-        assessmentConfig: Person.advisorAssessmentConfig,
-        assessmentYupSchema: Person.advisorAssessmentSchema
-      }
+      return Person.advisorAssessmentConfig || []
     } else if (this.isPrincipal()) {
-      return {
-        assessmentConfig: Person.principalAssessmentConfig,
-        assessmentYupSchema: Person.principalAssessmentSchema
-      }
+      return Person.principalAssessmentConfig || []
     } else {
-      return {
-        assessmentConfig: null,
-        assessmentYupSchema: null
-      }
+      return []
     }
   }
 }

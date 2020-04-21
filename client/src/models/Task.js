@@ -1,7 +1,5 @@
 import { Settings } from "api"
 import Model, {
-  ASSESSMENTS_RECURRENCE_TYPE,
-  createAssessmentSchema,
   createCustomFieldsSchema,
   NOTE_TYPE,
   yupDate
@@ -215,16 +213,5 @@ export default class Task extends Model {
       })
     )
     return assessmentsResults
-  }
-
-  getPeriodicAssessmentDetails(
-    recurrence = ASSESSMENTS_RECURRENCE_TYPE.MONTHLY
-  ) {
-    const assessmentConfig = this.getAssessmentsConfig()[recurrence]
-    return {
-      assessmentConfig: assessmentConfig,
-      assessmentYupSchema:
-        assessmentConfig && createAssessmentSchema(assessmentConfig)
-    }
   }
 }

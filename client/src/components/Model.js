@@ -372,12 +372,12 @@ export default class Model {
 
   generalAssessmentsConfig() {
     // assessments configuration defined for more than one instance
-    return {}
+    return []
   }
 
   instanceAssessmentsConfig() {
     // assessments configuration defined for one specific instance
-    return {}
+    return []
   }
 
   getAssessmentsConfig() {
@@ -393,6 +393,17 @@ export default class Model {
     return this.getAssessmentsConfig()[
       `${relatedObjectType}_${ASSESSMENTS_RECURRENCE_TYPE.ONCE}`
     ]
+  }
+
+  getPeriodicAssessmentDetails(
+    recurrence = ASSESSMENTS_RECURRENCE_TYPE.MONTHLY
+  ) {
+    const assessmentConfig = this.getAssessmentsConfig()[recurrence]
+    return {
+      assessmentConfig: assessmentConfig,
+      assessmentYupSchema:
+        assessmentConfig && createAssessmentSchema(assessmentConfig)
+    }
   }
 
   getLastAssessment(recurrence, period) {
