@@ -7,7 +7,10 @@ import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
-import Model, { NOTE_TYPE } from "components/Model"
+import Model, {
+  INVISIBLE_CUSTOM_FIELDS_FIELD,
+  NOTE_TYPE
+} from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import { JSONPath } from "jsonpath-plus"
 import _isEmpty from "lodash/isEmpty"
@@ -35,7 +38,7 @@ export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 const EXCLUDED_ASSESSMENT_FIELDS = [
   "__recurrence",
   "__periodStart",
-  "invisibleCustomFields"
+  INVISIBLE_CUSTOM_FIELDS_FIELD
 ]
 
 const BaseRelatedObjectNotes = ({

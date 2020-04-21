@@ -54,6 +54,7 @@ export const NOTE_TYPE = {
 }
 
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
+export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
 
 export const ASSESSMENTS_RECURRENCE_TYPE = {
   ONCE: "once",
@@ -125,12 +126,12 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
     fieldYupSchema = fieldYupSchema.label(label)
   }
   // Field type specific validation not needed when the field is invisible or
-  // when invisibleCustomFields hasn't even been filled (like when the report
+  // when INVISIBLE_CUSTOM_FIELDS_FIELD hasn't even been filled (like when the report
   // has been created via sevrer side tests, or later maybe imported from an
   // external system (and never went through the edit/create form which normally
-  // fills the invisibleCustomFields)
+  // fills the INVISIBLE_CUSTOM_FIELDS_FIELD)
   fieldYupSchema = fieldYupSchema.when(
-    "invisibleCustomFields",
+    INVISIBLE_CUSTOM_FIELDS_FIELD,
     (invisibleCustomFields, schema) => {
       return invisibleCustomFields === null ||
         (invisibleCustomFields &&
@@ -156,7 +157,10 @@ export const createYupObjectShape = (
         ])
         .filter(([k, v]) => v !== null)
     )
-    objShape.invisibleCustomFields = yup.mixed().nullable().default(null)
+    objShape[INVISIBLE_CUSTOM_FIELDS_FIELD] = yup
+      .mixed()
+      .nullable()
+      .default(null)
   }
   return yup.object().shape(objShape)
 }

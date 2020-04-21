@@ -23,6 +23,7 @@ import Messages from "components/Messages"
 import {
   createYupObjectShape,
   DEFAULT_CUSTOM_FIELDS_PARENT,
+  INVISIBLE_CUSTOM_FIELDS_FIELD,
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -1269,7 +1270,7 @@ const BaseReportForm = ({
   function isEmptyTaskAssessment(assessment) {
     return (
       (Object.keys(assessment).length === 1 &&
-        Object.keys(assessment)[0] === "invisibleCustomFields") ||
+        Object.keys(assessment)[0] === INVISIBLE_CUSTOM_FIELDS_FIELD) ||
       _isEmpty(assessment)
     )
   }

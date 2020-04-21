@@ -6,7 +6,8 @@ import LikertScale from "components/graphs/LikertScale"
 import Model, {
   CUSTOM_FIELD_TYPE,
   createYupObjectShape,
-  DEFAULT_CUSTOM_FIELDS_PARENT
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  INVISIBLE_CUSTOM_FIELDS_FIELD
 } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
@@ -406,7 +407,7 @@ export const CustomFieldsContainer = props => {
   const { parentFieldName, formikProps } = props
   const [invisibleFields, setInvisibleFields] = useState([])
   const { setFieldValue } = formikProps
-  const invisibleFieldsFieldName = `${parentFieldName}.invisibleCustomFields`
+  const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
     setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
   }, [invisibleFieldsFieldName, invisibleFields, setFieldValue])
@@ -650,7 +651,7 @@ ReadonlyCustomFields.defaultProps = {
 }
 
 // customFields should contain the JSON of all the visible custom fields.
-// When used for notes text, it should not contain the invisibleCustomFields.
+// When used for notes text, it should not contain the INVISIBLE_CUSTOM_FIELDS_FIELD.
 export const customFieldsJSONString = (
   values,
   forNoteText = false,
@@ -660,12 +661,12 @@ export const customFieldsJSONString = (
   if (customFieldsValues && typeof customFieldsValues === "object") {
     const clonedValues = _cloneDeep(values)
     const filteredCustomFieldsValues = Object.get(clonedValues, parentFieldName)
-    if (filteredCustomFieldsValues.invisibleCustomFields) {
-      filteredCustomFieldsValues.invisibleCustomFields.forEach(f =>
+    if (filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD]) {
+      filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD].forEach(f =>
         _set(clonedValues, f.split("."), undefined)
       )
       if (forNoteText) {
-        delete filteredCustomFieldsValues.invisibleCustomFields
+        delete filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD]
       }
     }
     return JSON.stringify(filteredCustomFieldsValues)
