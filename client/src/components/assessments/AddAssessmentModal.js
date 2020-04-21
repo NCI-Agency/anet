@@ -24,81 +24,87 @@ const AddAssessmentModal = ({
   assessmentPeriod,
   assessmentConfig,
   title,
-  showModal,
-  onCancel,
+  addAssessmentLabel,
   onSuccess
 }) => {
+  const [showModal, setShowModal] = useState(false)
   const [assessmentError, setAssessmentError] = useState(null)
   const initialValues = useMemo(() => Model.fillObject({}, yupSchema), [
     yupSchema
   ])
+
   return (
-    <Modal show={showModal} onHide={closeModal}>
-      <Formik
-        enableReinitialize
-        onSubmit={onAssessmentSubmit}
-        validationSchema={yupSchema}
-        initialValues={initialValues}
-      >
-        {({
-          isSubmitting,
-          isValid,
-          setFieldValue,
-          setFieldTouched,
-          validateForm,
-          values,
-          submitForm
-        }) => {
-          return (
-            <Form>
-              <Modal.Header closeButton>
-                <Modal.Title>{title}</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: 5,
-                    height: "100%"
-                  }}
-                >
-                  <Messages error={assessmentError} />
-                  <CustomFieldsContainer
-                    fieldsConfig={assessmentConfig}
-                    parentFieldName={ENTITY_ASSESSMENT_PARENT_FIELD}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
+    <>
+      <Button bsStyle="primary" onClick={() => setShowModal(true)}>
+        {addAssessmentLabel}
+      </Button>
+      <Modal show={showModal} onHide={closeModal}>
+        <Formik
+          enableReinitialize
+          onSubmit={onAssessmentSubmit}
+          validationSchema={yupSchema}
+          initialValues={initialValues}
+        >
+          {({
+            isSubmitting,
+            isValid,
+            setFieldValue,
+            setFieldTouched,
+            validateForm,
+            values,
+            submitForm
+          }) => {
+            return (
+              <Form>
+                <Modal.Header closeButton>
+                  <Modal.Title>{title}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: 5,
+                      height: "100%"
                     }}
-                    vertical
-                  />
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button className="pull-left" onClick={closeModal}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={submitForm}
-                  bsStyle="primary"
-                  disabled={isSubmitting}
-                >
-                  Save
-                </Button>
-              </Modal.Footer>
-            </Form>
-          )
-        }}
-      </Formik>
-    </Modal>
+                  >
+                    <Messages error={assessmentError} />
+                    <CustomFieldsContainer
+                      fieldsConfig={assessmentConfig}
+                      parentFieldName={ENTITY_ASSESSMENT_PARENT_FIELD}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                      vertical
+                    />
+                  </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button className="pull-left" onClick={closeModal}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={submitForm}
+                    bsStyle="primary"
+                    disabled={isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </Modal.Footer>
+              </Form>
+            )
+          }}
+        </Formik>
+      </Modal>
+    </>
   )
 
   function closeModal() {
     setAssessmentError(null)
-    onCancel()
+    setShowModal(false)
   }
 
   function onAssessmentSubmit(values, form) {
@@ -111,6 +117,7 @@ const AddAssessmentModal = ({
   }
 
   function onSubmitSuccess(response, values, form) {
+    setShowModal(false)
     onSuccess()
   }
 
@@ -149,8 +156,7 @@ AddAssessmentModal.propTypes = {
   assessmentPeriod: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
   title: PropTypes.string,
-  showModal: PropTypes.bool,
-  onCancel: PropTypes.func.isRequired,
+  addAssessmentLabel: PropTypes.string,
   onSuccess: PropTypes.func.isRequired
 }
 AddAssessmentModal.defaultProps = {

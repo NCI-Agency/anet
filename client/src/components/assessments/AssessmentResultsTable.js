@@ -9,8 +9,8 @@ import { Formik } from "formik"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
-import { Button, Table } from "react-bootstrap"
+import React from "react"
+import { Table } from "react-bootstrap"
 import "components/assessments/AssessmentResultsTable.css"
 
 /* The AssessmentResultsTable component displays the results of two types of
@@ -121,7 +121,6 @@ const PeriodicAssessmentRows = ({
     assessmentConfig: periodicAssessmentConfig,
     assessmentYupSchema: periodicAssessmentYupSchema
   } = entity.getPeriodicAssessmentDetails(recurrence)
-  const [showAssessmentModal, setShowAssessmentModal] = useState(false)
   const periodsLastAssessment = []
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
@@ -178,29 +177,19 @@ const PeriodicAssessmentRows = ({
             return (
               <td key={index}>
                 {periodsAllowNewAssessment[index] && (
-                  <>
-                    <Button
-                      bsStyle="primary"
-                      onClick={() => setShowAssessmentModal(true)}
-                    >
-                      {addAssessmentLabel}
-                    </Button>
-                    <AddAssessmentModal
-                      entity={entity}
-                      entityType={entityType}
-                      title={`Assessment for ${entity.toString()} for ${periodDisplay}`}
-                      yupSchema={periodicAssessmentYupSchema}
-                      recurrence={recurrence}
-                      assessmentPeriod={period}
-                      assessmentConfig={periodicAssessmentConfig}
-                      showModal={showAssessmentModal}
-                      onCancel={() => setShowAssessmentModal(false)}
-                      onSuccess={() => {
-                        setShowAssessmentModal(false)
-                        onAddAssessment()
-                      }}
-                    />
-                  </>
+                  <AddAssessmentModal
+                    entity={entity}
+                    entityType={entityType}
+                    title={`Assessment for ${entity.toString()} for ${periodDisplay}`}
+                    addAssessmentLabel={addAssessmentLabel}
+                    yupSchema={periodicAssessmentYupSchema}
+                    recurrence={recurrence}
+                    assessmentPeriod={period}
+                    assessmentConfig={periodicAssessmentConfig}
+                    onSuccess={() => {
+                      onAddAssessment()
+                    }}
+                  />
                 )}
               </td>
             )
