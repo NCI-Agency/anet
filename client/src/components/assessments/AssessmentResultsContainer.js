@@ -11,18 +11,15 @@ const ASSESSMENT_PERIODS_CONFIG = [
     periods: [
       {
         start: now.clone().subtract(2, "days").startOf("day"),
-        end: now.clone().subtract(2, "days").endOf("day"),
-        allowNewAssessments: false
+        end: now.clone().subtract(2, "days").endOf("day")
       },
       {
         start: now.clone().subtract(1, "days").startOf("day"),
-        end: now.clone().subtract(1, "days").endOf("day"),
-        allowNewAssessments: true
+        end: now.clone().subtract(1, "days").endOf("day")
       },
       {
         start: now.clone().startOf("day"),
-        end: now.clone().endOf("day"),
-        allowNewAssessments: false
+        end: now.clone().endOf("day")
       }
     ]
   },
@@ -31,38 +28,33 @@ const ASSESSMENT_PERIODS_CONFIG = [
     periods: [
       {
         start: now.clone().subtract(2, "weeks").startOf("week"),
-        end: now.clone().subtract(2, "weeks").endOf("week"),
-        allowNewAssessments: false
+        end: now.clone().subtract(2, "weeks").endOf("week")
       },
       {
         start: now.clone().subtract(1, "weeks").startOf("week"),
-        end: now.clone().subtract(1, "weeks").endOf("week"),
-        allowNewAssessments: true
+        end: now.clone().subtract(1, "weeks").endOf("week")
       },
       {
         start: now.clone().startOf("week"),
-        end: now.clone().endOf("week"),
-        allowNewAssessments: false
+        end: now.clone().endOf("week")
       }
     ]
   },
   {
+    // FIXME: biweekly should be each 2 weeks from the beginning of the year
     recurrence: ASSESSMENTS_RECURRENCE_TYPE.BIWEEKLY,
     periods: [
       {
         start: now.clone().subtract(4, "weeks").startOf("week"),
-        end: now.clone().subtract(4, "weeks").endOf("week"),
-        allowNewAssessments: false
+        end: now.clone().subtract(4, "weeks").endOf("week")
       },
       {
         start: now.clone().subtract(2, "weeks").startOf("week"),
-        end: now.clone().subtract(2, "weeks").endOf("week"),
-        allowNewAssessments: true
+        end: now.clone().subtract(2, "weeks").endOf("week")
       },
       {
         start: now.clone().startOf("week"),
-        end: now.clone().endOf("week"),
-        allowNewAssessments: false
+        end: now.clone().endOf("week")
       }
     ]
   },
@@ -71,18 +63,15 @@ const ASSESSMENT_PERIODS_CONFIG = [
     periods: [
       {
         start: now.clone().subtract(2, "months").startOf("month"),
-        end: now.clone().subtract(2, "months").endOf("month"),
-        allowNewAssessments: false
+        end: now.clone().subtract(2, "months").endOf("month")
       },
       {
         start: now.clone().subtract(1, "months").startOf("month"),
-        end: now.clone().subtract(1, "months").endOf("month"),
-        allowNewAssessments: true
+        end: now.clone().subtract(1, "months").endOf("month")
       },
       {
         start: now.clone().startOf("month"),
-        end: now.clone().endOf("month"),
-        allowNewAssessments: false
+        end: now.clone().endOf("month")
       }
     ]
   },
@@ -91,18 +80,15 @@ const ASSESSMENT_PERIODS_CONFIG = [
     periods: [
       {
         start: now.clone().subtract(2, "quarters").startOf("quarter"),
-        end: now.clone().subtract(2, "quarters").endOf("quarter"),
-        allowNewAssessments: false
+        end: now.clone().subtract(2, "quarters").endOf("quarter")
       },
       {
         start: now.clone().subtract(1, "quarters").startOf("quarter"),
-        end: now.clone().subtract(1, "quarters").endOf("quarter"),
-        allowNewAssessments: true
+        end: now.clone().subtract(1, "quarters").endOf("quarter")
       },
       {
         start: now.clone().startOf("quarter"),
-        end: now.clone().endOf("quarter"),
-        allowNewAssessments: false
+        end: now.clone().endOf("quarter")
       }
     ]
   },
@@ -111,22 +97,27 @@ const ASSESSMENT_PERIODS_CONFIG = [
     periods: [
       {
         start: now.clone().subtract(4, "quarters").startOf("quarter"),
-        end: now.clone().subtract(4, "quarters").endOf("quarter"),
-        allowNewAssessments: false
+        end: now.clone().subtract(4, "quarters").endOf("quarter")
       },
       {
         start: now.clone().subtract(2, "quarters").startOf("quarter"),
-        end: now.clone().subtract(2, "quarters").endOf("quarter"),
-        allowNewAssessments: true
+        end: now.clone().subtract(2, "quarters").endOf("quarter")
       },
       {
         start: now.clone().startOf("quarter"),
-        end: now.clone().endOf("quarter"),
-        allowNewAssessments: false
+        end: now.clone().endOf("quarter")
       }
     ]
   }
 ]
+// set default allowNewAssessments when this one is not configured for a period
+ASSESSMENT_PERIODS_CONFIG.forEach(periodConfig =>
+  periodConfig.periods.forEach(period => {
+    if (period.allowNewAssessments === undefined) {
+      period.allowNewAssessments = period.end < now.clone().startOf("day")
+    }
+  })
+)
 
 const AssessmentResultsContainer = ({
   entity,
