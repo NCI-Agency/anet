@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Objects;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
@@ -25,6 +26,7 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
+import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
@@ -450,6 +452,46 @@ public class PersonResourceTest extends AbstractResourceTest {
         POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(),
         new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(winnerPos.getPerson()).isEqualTo(winner);
+
+    // Re-create loser and put into the position.
+    loser = new Person();
+    loser.setRole(Role.ADVISOR);
+    loser.setName("Loser for Merging");
+    loserUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput", loser,
+        new TypeReference<GraphQlResponse<Person>>() {});
+    assertThat(loserUuid).isNotNull();
+    loser = graphQLHelper.getObjectById(admin, "person", FIELDS, loserUuid,
+        new TypeReference<GraphQlResponse<Person>>() {});
+    variables = new HashMap<>();
+    variables.put("winnerUuid", winnerUuid);
+    variables.put("loserUuid", loserUuid);
+    Instant now = Instant.now();
+    nrUpdated = graphQLHelper.updateObject(admin,
+        "mutation ($winnerUuid: String!, $loserUuid: String!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid) }",
+        variables);
+    assertThat(nrUpdated).isEqualTo(1);
+    // Assert that loser is gone.
+    try {
+      graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(),
+          new TypeReference<GraphQlResponse<Person>>() {});
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
+    }
+
+    // Assert that the winner is in the position and position history star date didn't changed with
+    // merge date.
+    winnerPos = graphQLHelper.getObjectById(admin, "position",
+        POSITION_FIELDS + " person {" + PERSON_FIELDS + " } previousPeople { startTime endTime}",
+        created.getUuid(), new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(winnerPos.getPerson()).isEqualTo(winner);
+    // Assert that the winner has only one active position history.
+    assertThat(winnerPos.getPreviousPeople().stream().filter(t -> Objects.isNull(t.getEndTime()))
+        .count() == 1);
+    // Asset that the winner's position history record start date was not updated with merge date.
+    Optional<PersonPositionHistory> personPositionHistory = winnerPos.getPreviousPeople().stream()
+        .filter(t -> Objects.isNull(t.getEndTime())).findFirst();
+    personPositionHistory
+        .ifPresent(positionHistory -> assertThat(positionHistory.getStartTime().isBefore(now)));
   }
 
   @Test
