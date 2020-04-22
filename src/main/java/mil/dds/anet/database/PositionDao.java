@@ -265,13 +265,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
   }
 
-  private int deletePeoplePositionsWithoutPositionAndPerson() {
-    return getDbHandle()
-        .createUpdate("/* positionEmptyPersonEmpty.delete */ DELETE FROM \"peoplePositions\" "
-            + "WHERE \"personUuid\" IS NULL and \"positionUuid\" IS NULL")
-        .execute();
-  }
-
   @InTransaction
   public int removePersonFromPosition(String positionUuid) {
     final Instant now = Instant.now();
@@ -311,8 +304,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     if (emptyPersonPosition == null) {
       numRows += insertPeoplePositionWithoutPerson(positionUuid, now);
     }
-
-    numRows += deletePeoplePositionsWithoutPositionAndPerson();
 
     // Evict the person (previously) holding this position from the domain users cache
     AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
@@ -354,7 +345,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
       numRows += insertPeoplePositionWithoutPosition(personUuid, now);
     }
 
-    numRows += deletePeoplePositionsWithoutPositionAndPerson();
     if (numRows > 0) {
       return 1;
     }
@@ -368,7 +358,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     Instant now = Instant.now();
     numRows += updatePersonOfPosition(positionUuid, winnerUuid, now);
     numRows += updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
-    numRows += deletePeoplePositionsWithoutPositionAndPerson();
+
     if (numRows > 0) {
       return 1;
     }
