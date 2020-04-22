@@ -478,7 +478,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     } catch (NotFoundException expectedException) {
     }
 
-    // Assert that the winner is in the position and position history star date didn't changed with
+    // Assert that the winner is in the position and position history start date didn't changed with
     // merge date.
     winnerPos = graphQLHelper.getObjectById(admin, "position",
         POSITION_FIELDS + " person {" + PERSON_FIELDS + " } previousPeople { startTime endTime}",
