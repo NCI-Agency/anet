@@ -183,22 +183,21 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Get timestamp *after* remove to preserve correct order
     final Instant now = Instant.now();
 
-    int numRows = 0;
     // If the position is already assigned to another person, remove the person from the position
-    numRows += removePersonFromPosition(positionUuid, now);
+    removePersonFromPosition(positionUuid, now);
     // If the person is already assigned to another position, remove the position from the person
-    numRows += removePositionFromPerson(personUuid, now);
+    removePositionFromPerson(personUuid, now);
 
-    numRows += updatePersonOfPosition(positionUuid, personUuid, now);
+    updatePersonOfPosition(positionUuid, personUuid, now);
 
-    numRows += getDbHandle()
+    getDbHandle()
         .createUpdate(
             "/* positionPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
                 + "WHERE \"positionUuid\" = :positionUuid AND " + " \"endedAt\" IS NULL")
         .bind("positionUuid", positionUuid)
         .bind("endedAt", DaoUtils.asLocalDateTime(now.plusMillis(2))).execute();
 
-    numRows += getDbHandle()
+    getDbHandle()
         .createUpdate(
             "/* personPosition.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
                 + "WHERE \"personUuid\" = :personUuid AND " + " \"endedAt\" IS NULL")
@@ -206,7 +205,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .execute();
 
     // GraphQL mutations *have* to return something, so we return the number of inserted rows
-    numRows += getDbHandle()
+    final int nr = getDbHandle()
         .createUpdate("/* positionPerson.insert */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
             + "VALUES (:positionUuid, :personUuid, :createdAt)")
@@ -217,10 +216,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Evict this person from the domain users cache, as their position has changed
     AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
 
-    if (numRows > 0) {
-      return 1;
-    }
-    return numRows;
+    return nr;
   }
 
   private int emptyPosition(String positionUuid, Instant now) {
@@ -255,7 +251,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   private int insertPeoplePositionWithoutPosition(String personUuid, Instant now) {
-
     return getDbHandle()
         .createUpdate("/* positionEmptyPerson.insert */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
@@ -272,8 +267,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   private int removePersonFromPosition(String positionUuid, Instant now) {
-    int numRows = 0;
-    numRows += emptyPosition(positionUuid, now);
+    final int nr = emptyPosition(positionUuid, now);
 
     PersonPositionHistory currentPositionPerson = getDbHandle()
         .createQuery("/* personFullPosition.find */ SELECT * FROM \"peoplePositions\" "
@@ -282,7 +276,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("positionUuid", positionUuid).map(new PersonPositionHistoryMapper()).findFirst()
         .orElse(null);
 
-    numRows += getDbHandle()
+    getDbHandle()
         .createUpdate(
             "/* personRemovePosition.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
                 + "WHERE \"positionUuid\" = :positionUuid AND \"personUuid\" IS NOT NULL AND "
@@ -302,21 +296,16 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .orElse(null);
 
     if (emptyPersonPosition == null) {
-      numRows += insertPeoplePositionWithoutPerson(positionUuid, now);
+      insertPeoplePositionWithoutPerson(positionUuid, now);
     }
 
     // Evict the person (previously) holding this position from the domain users cache
     AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
 
-    if (numRows > 0) {
-      return 1;
-    }
-    return numRows;
+    return nr;
   }
 
-  private int removePositionFromPerson(String personUuid, Instant now) {
-    int numRows = 0;
-
+  private void removePositionFromPerson(String personUuid, Instant now) {
     PersonPositionHistory currentPositionPerson = getDbHandle()
         .createQuery("/* positionFullPerson.find */ SELECT * FROM \"peoplePositions\" "
             + "WHERE \"personUuid\" = :personUuid AND \"positionUuid\" IS NOT NULL AND "
@@ -324,7 +313,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("personUuid", personUuid).map(new PersonPositionHistoryMapper()).findFirst()
         .orElse(null);
 
-    numRows += getDbHandle().createUpdate(
+    getDbHandle().createUpdate(
         "/* positionRemoveFullPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
             + "WHERE \"personUuid\" = :personUuid AND \"positionUuid\" IS NOT NULL AND "
             + "\"endedAt\" IS NULL")
@@ -342,27 +331,21 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .orElse(null);
 
     if (emptyPositionPerson == null) {
-      numRows += insertPeoplePositionWithoutPosition(personUuid, now);
+      insertPeoplePositionWithoutPosition(personUuid, now);
     }
 
-    if (numRows > 0) {
-      return 1;
-    }
-    return numRows;
+    // Evict this person from the domain users cache, as their position has changed
+    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
   }
 
   @InTransaction
   public int transferActivePositionAndPositionHistoryFromLoserToWinner(String positionUuid,
       String loserUuid, String winnerUuid) {
-    int numRows = 0;
     Instant now = Instant.now();
-    numRows += updatePersonOfPosition(positionUuid, winnerUuid, now);
-    numRows += updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
+    final int nr = updatePersonOfPosition(positionUuid, winnerUuid, now);
+    updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
 
-    if (numRows > 0) {
-      return 1;
-    }
-    return numRows;
+    return nr;
   }
 
   private int updatePersonOfPosition(String positionUuid, String personUuid, Instant now) {

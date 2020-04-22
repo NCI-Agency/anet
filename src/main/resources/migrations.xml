@@ -2711,13 +2711,6 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="delete-peoplePositions-without-position-and-person" author="sahindoganlutfi" dbms="mssql,postgresql">
-		<comment>Cleanup the NULL of the personUuid and positionUuid columns of the peoplePositions table.</comment>
-		<sql>
-			DELETE FROM "peoplePositions" WHERE "personUuid" IS NULL and "positionUuid" IS NULL;
-		</sql>
-	</changeSet>
-
 	<changeSet id="alter-fulltext-stoplist" author="gjvoosten" dbms="mssql" runInTransaction="false">
 		<!--
 		  Most columns in the full-text index (except for the reports columns,
@@ -3149,4 +3142,10 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="delete-peoplePositions-without-position-and-person" author="sahindoganlutfi">
+		<comment>Cleanup the NULL of the personUuid and positionUuid columns of the peoplePositions table.</comment>
+		<sql>
+			DELETE FROM "peoplePositions" WHERE "personUuid" IS NULL and "positionUuid" IS NULL;
+		</sql>
+	</changeSet>
 </databaseChangeLog>
