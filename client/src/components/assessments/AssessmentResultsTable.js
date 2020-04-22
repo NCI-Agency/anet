@@ -1,5 +1,9 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import AggregationWidget from "components/AggregationWidget"
+import AppContext from "components/AppContext"
 import AddAssessmentModal from "components/assessments/AddAssessmentModal"
+import ConfirmDelete from "components/ConfirmDelete"
 import {
   getFieldPropsFromFieldConfig,
   ReadonlyCustomFields
@@ -7,10 +11,14 @@ import {
 import Fieldset from "components/Fieldset"
 import { Formik } from "formik"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
+import { Person } from "models"
+import moment from "moment"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
-import { Table } from "react-bootstrap"
+import { Button, Panel, Table } from "react-bootstrap"
+import REMOVE_ICON from "resources/delete.png"
 import "components/assessments/AssessmentResultsTable.css"
 
 /* The AssessmentResultsTable component displays the results of two types of
@@ -109,71 +117,177 @@ InstantAssessmentRow.propTypes = {
   questionConfig: PropTypes.object
 }
 
-const PeriodicAssessmentRows = ({
+const BasePeriodicAssessment = ({
+  assessment,
+  assessmentConfig,
+  note,
+  currentUser
+}) => {
+  const byMe = Person.isEqual(currentUser, note.author)
+  const parentFieldName = `assessment-${note.uuid}`
+  return (
+    <Panel bsStyle="primary" style={{ borderRadius: "15px" }}>
+      <Panel.Heading
+        style={{
+          padding: "1px 1px",
+          borderTopLeftRadius: "15px",
+          borderTopRightRadius: "15px",
+          paddingRight: "10px",
+          paddingLeft: "10px",
+          // whiteSpace: "nowrap", TODO: disabled for now as not working well in IE11
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "flex-end"
+        }}
+      >
+        <>
+          <i>{moment(note.updatedAt).fromNow()}</i>{" "}
+          <LinkTo
+            modelType="Person"
+            model={note.author}
+            style={{ color: "white" }}
+          />
+          {byMe && (
+            <>
+              <Button
+                title="Edit assessment"
+                  // FIXME: implement edit assessment
+                  // onClick={() => showRelatedObjectNoteModal(note.uuid)}
+                bsSize="xsmall"
+                bsStyle="primary"
+              >
+                <Icon icon={IconNames.EDIT} />
+              </Button>
+              <ConfirmDelete
+                  // FIXME: implement delete assessment
+                onConfirmDelete={() => console.log("to be implemented")}
+                objectType="note"
+                objectDisplay={"#" + note.uuid}
+                title="Delete note"
+                bsSize="xsmall"
+                bsStyle="primary"
+              >
+                <img src={REMOVE_ICON} height={14} alt="Delete assessment" />
+              </ConfirmDelete>
+            </>
+          )}
+        </>
+      </Panel.Heading>
+      <Panel.Body>
+        <div
+          style={{
+            overflowWrap: "break-word",
+            /* IE: */ wordWrap: "break-word"
+          }}
+        >
+          <Formik
+            enableReinitialize
+            initialValues={{
+              [parentFieldName]: assessment
+            }}
+          >
+            {({ values }) => {
+              return (
+                <ReadonlyCustomFields
+                  parentFieldName={parentFieldName}
+                  fieldsConfig={assessmentConfig}
+                  values={values}
+                  vertical
+                />
+              )
+            }}
+          </Formik>
+        </div>
+      </Panel.Body>
+    </Panel>
+  )
+}
+BasePeriodicAssessment.propTypes = {
+  assessment: PropTypes.object,
+  assessmentConfig: PropTypes.object,
+  note: Model.notePropTypes,
+  currentUser: PropTypes.instanceOf(Person)
+}
+
+const PeriodicAssessment = props => (
+  <AppContext.Consumer>
+    {context => (
+      <BasePeriodicAssessment currentUser={context.currentUser} {...props} />
+    )}
+  </AppContext.Consumer>
+)
+
+const BasePeriodicAssessmentRows = ({
   entity,
   entityType,
   periodsConfig,
   canAddAssessment,
-  onAddAssessment
+  onAddAssessment,
+  currentUser
 }) => {
   const { recurrence, periods } = periodsConfig
   const {
     assessmentConfig: periodicAssessmentConfig,
     assessmentYupSchema: periodicAssessmentYupSchema
   } = entity.getPeriodicAssessmentDetails(recurrence)
-  const periodsLastAssessment = []
+  if (!periodicAssessmentConfig) {
+    return null
+  }
+
+  const periodsAssessments = []
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
-    periodsLastAssessment.push(entity.getLastAssessment(recurrence, period))
+    const periodAssessments = entity.getPeriodAssessments(
+      recurrence,
+      period,
+      currentUser
+    )
+    const myPeriodAssessments = periodAssessments.filter(
+      ({ note, assessment }) => Person.isEqual(currentUser, note.author)
+    )
+    periodsAssessments.push(periodAssessments)
+    // Only allow adding new assessments for a period if the user has the rights
+    // for it, if the period is configured to allow adding new assessments and
+    // if the current user didn't already made an assessment for the period
     periodsAllowNewAssessment.push(
-      periodicAssessmentConfig && canAddAssessment && period.allowNewAssessments
+      canAddAssessment &&
+        period.allowNewAssessments &&
+        _isEmpty(myPeriodAssessments)
     )
   })
-  const rowHasLastAssessments = !_isEmpty(
-    periodsLastAssessment.filter(x => !_isEmpty(x))
+  const hasPeriodicAssessmentsRow = !_isEmpty(
+    periodsAssessments.filter(x => !_isEmpty(x))
   )
-  const rowHasAddAssessment = !_isEmpty(
+  const hasAddAssessmentRow = !_isEmpty(
     periodsAllowNewAssessment.filter(x => x)
   )
-
   return (
     <>
-      {rowHasLastAssessments && (
+      {hasPeriodicAssessmentsRow && (
         <tr>
-          {periodsLastAssessment.map((lastAssessment, index) => {
-            const lastAssessmentParentFieldName = `lastAssessment-${entity.uuid}-${index}`
+          {periodsAssessments.map((periodAssessments, index) => {
             return (
               <td key={index}>
-                {periodicAssessmentConfig && lastAssessment && (
-                  <Formik
-                    enableReinitialize
-                    initialValues={{
-                      [lastAssessmentParentFieldName]: lastAssessment
-                    }}
-                  >
-                    {({ values }) => (
-                      <ReadonlyCustomFields
-                        parentFieldName={lastAssessmentParentFieldName}
-                        fieldsConfig={periodicAssessmentConfig}
-                        values={values}
-                        vertical
+                {periodAssessments &&
+                  periodAssessments.map(({ note, assessment }, i) => (
+                    <div key={note.uuid}>
+                      <PeriodicAssessment
+                        note={note}
+                        assessment={assessment}
+                        assessmentConfig={periodicAssessmentConfig}
                       />
-                    )}
-                  </Formik>
-                )}
+                    </div>
+                  ))}
               </td>
             )
           })}
         </tr>
       )}
-      {rowHasAddAssessment && (
+      {hasAddAssessmentRow && (
         <tr>
           {periods.map((period, index) => {
             const periodDisplay = periodToString(period)
-            const assessmentLabelPrefix = periodsLastAssessment[index]
-              ? "Add a"
-              : "Make a new"
-            const addAssessmentLabel = `${assessmentLabelPrefix} ${entity?.toString()} assessment for ${periodDisplay}`
+            const addAssessmentLabel = `Make a new ${entity?.toString()} assessment for ${periodDisplay}`
             return (
               <td key={index}>
                 {periodsAllowNewAssessment[index] && (
@@ -199,13 +313,25 @@ const PeriodicAssessmentRows = ({
     </>
   )
 }
-PeriodicAssessmentRows.propTypes = {
+BasePeriodicAssessmentRows.propTypes = {
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
   periodsConfig: periodsConfigPropType,
   canAddAssessment: PropTypes.bool,
-  onAddAssessment: PropTypes.func
+  onAddAssessment: PropTypes.func,
+  currentUser: PropTypes.instanceOf(Person)
 }
+
+const PeriodicAssessmentRows = props => (
+  <AppContext.Consumer>
+    {context => (
+      <BasePeriodicAssessmentRows
+        currentUser={context.currentUser}
+        {...props}
+      />
+    )}
+  </AppContext.Consumer>
+)
 
 const EntityAssessmentResults = ({
   entity,

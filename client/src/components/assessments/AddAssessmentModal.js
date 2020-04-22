@@ -17,6 +17,7 @@ import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
 const AddAssessmentModal = ({
+  note,
   entity,
   entityType,
   yupSchema,
@@ -146,6 +147,7 @@ const AddAssessmentModal = ({
   }
 }
 AddAssessmentModal.propTypes = {
+  note: Model.notePropTypes,
   entity: PropTypes.oneOfType([
     PropTypes.instanceOf(Person),
     PropTypes.instanceOf(Task)

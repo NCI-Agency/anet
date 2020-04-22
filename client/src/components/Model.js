@@ -406,21 +406,21 @@ export default class Model {
     }
   }
 
-  getLastAssessment(recurrence, period) {
-    const notesToAssessments = this.notes
+  getPeriodAssessments(recurrence, period, currentUser) {
+    return this.notes
       .filter(n => {
         return (
           n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length === 1
         )
       })
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(note => JSON.parse(note.text))
+      .map(note => ({ note: note, assessment: JSON.parse(note.text) }))
       .filter(
-        assessment =>
+        obj =>
           // FIXME: make a nicer implementation of the check on period start
-          assessment.__recurrence === recurrence &&
-          assessment.__periodStart === JSON.parse(JSON.stringify(period.start))
+          obj.assessment.__recurrence === recurrence &&
+          obj.assessment.__periodStart ===
+            JSON.parse(JSON.stringify(period.start))
       )
-    return notesToAssessments?.[0]
   }
 }
