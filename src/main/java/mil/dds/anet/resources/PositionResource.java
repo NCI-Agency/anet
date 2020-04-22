@@ -80,7 +80,7 @@ public class PositionResource {
     if (pos.getPersonUuid() != null) {
       dao.setPersonInPosition(pos.getPersonUuid(), position.getUuid());
     } else {
-      dao.insertPersonEmptyInPosition(position.getUuid());
+      dao.insertPeoplePositionWithoutPerson(position.getUuid());
     }
 
     AnetAuditLogger.log("Position {} created by {}", position, user);

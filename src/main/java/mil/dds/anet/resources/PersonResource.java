@@ -73,7 +73,7 @@ public class PersonResource {
           created.getPosition().getUuid());
     } else {
       AnetObjectEngine.getInstance().getPositionDao()
-          .insertPositionEmptyInPerson(created.getUuid());
+          .insertPeoplePositionWithoutPosition(created.getUuid());
     }
 
     AnetAuditLogger.log("Person {} created by {}", created, user);
@@ -231,21 +231,24 @@ public class PersonResource {
       throw new WebApplicationException("Winner already has a position", Status.NOT_ACCEPTABLE);
     }
 
-    // Remove the loser from their position.
     final Position loserPosition = loser.loadPosition();
-    if (loserPosition != null && !copyPosition) {
+    if (loserPosition == null) {
+      // Update Position History of Loser with Winner.
       AnetObjectEngine.getInstance().getPositionDao()
-          .removePersonFromPosition(loserPosition.getUuid());
-    } else if (loserPosition != null) {
+          .updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
+      AnetAuditLogger.log("Person position histories with {} updated with {} changed by {}",
+          loserUuid, winnerUuid, user);
+    } else if (copyPosition) {
+      // Transfer Active Position and Position History from Loser to Winner.
       AnetObjectEngine.getInstance().getPositionDao()
-          .updatePersonFromPosition(loserPosition.getUuid(), loserUuid, winnerUuid);
+          .transferActivePositionAndPositionHistoryFromLoserToWinner(loserPosition.getUuid(),
+              loserUuid, winnerUuid);
       AnetAuditLogger.log("Person {} put in position {} as part of merge by {}", winner,
           loserPosition, user);
     } else {
-      AnetObjectEngine.getInstance().getPositionDao().updatePersonPositionHistory(loserUuid,
-          winnerUuid);
-      AnetAuditLogger.log("Person position histories with {} updated with {} changed by {}",
-          loserUuid, winnerUuid, user);
+      // Remove the loser from their position.
+      AnetObjectEngine.getInstance().getPositionDao()
+          .removePersonFromPosition(loserPosition.getUuid());
     }
 
     int merged = dao.mergePeople(winner, loser);

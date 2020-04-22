@@ -176,48 +176,42 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int setPersonInPosition(String personUuid, String positionUuid) {
-    int numRows = 0;
-    // If the position is already assigned to another person, remove the person from the position
-    numRows += removePersonFromPosition(positionUuid);
-
-    // If the person is already assigned to another position, remove the position from the person
-    numRows += removePositionFromPerson(personUuid);
-
     // Get timestamp *after* remove to preserve correct order
     final Instant now = Instant.now();
 
-    numRows += getDbHandle()
-        .createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
-            + "SET \"currentPersonUuid\" = :personUuid WHERE uuid = :positionUuid")
-        .bind("personUuid", personUuid).bind("positionUuid", positionUuid).execute();
+    int numRows = 0;
+    // If the position is already assigned to another person, remove the person from the position
+    numRows += removePersonFromPosition(positionUuid, now);
+    // If the person is already assigned to another position, remove the position from the person
+    numRows += removePositionFromPerson(personUuid, now);
+
+    numRows += updatePersonOfPosition(positionUuid, personUuid, now);
 
     numRows += getDbHandle()
         .createUpdate(
-            "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
-                + " WHERE \"positionUuid\" = :positionUuid AND " + " \"endedAt\" IS NULL")
+            "/* positionPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
+                + "WHERE \"positionUuid\" = :positionUuid AND " + " \"endedAt\" IS NULL")
         .bind("positionUuid", positionUuid)
-        .bind("endedAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+        .bind("endedAt", DaoUtils.asLocalDateTime(now.plusMillis(2))).execute();
 
     numRows += getDbHandle()
         .createUpdate(
-            "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
-                + " WHERE \"personUuid\" = :personUuid AND " + " \"endedAt\" IS NULL")
-        .bind("personUuid", personUuid).bind("endedAt", DaoUtils.asLocalDateTime(now.plusMillis(1)))
+            "/* personPosition.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
+                + "WHERE \"personUuid\" = :personUuid AND " + " \"endedAt\" IS NULL")
+        .bind("personUuid", personUuid).bind("endedAt", DaoUtils.asLocalDateTime(now.plusMillis(2)))
         .execute();
 
     // GraphQL mutations *have* to return something, so we return the number of inserted rows
     numRows += getDbHandle()
-        .createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
+        .createUpdate("/* positionPerson.insert */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
             + "VALUES (:positionUuid, :personUuid, :createdAt)")
         .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
         // Need to ensure this timestamp is greater than previous INSERT.
-        .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
-
-
+        .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(2))).execute();
 
     // Evict this person from the domain users cache, as their position has changed
-      AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
+    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
 
     if (numRows > 0) {
       return 1;
@@ -225,8 +219,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     return numRows;
   }
 
-  private int cleanPosition(String positionUuid) {
-    Instant now = Instant.now();
+  private int emptyPosition(String positionUuid, Instant now) {
     return getDbHandle()
         .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
             + "SET \"currentPersonUuid\" = NULL , \"updatedAt\" = :updatedAt "
@@ -236,10 +229,14 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   @InTransaction
-  public int insertPersonEmptyInPosition(String positionUuid) {
-    Instant now = Instant.now();
+  public int insertPeoplePositionWithoutPerson(String positionUuid) {
+    final Instant now = Instant.now();
+    return insertPeoplePositionWithoutPerson(positionUuid, now);
+  }
+
+  private int insertPeoplePositionWithoutPerson(String positionUuid, Instant now) {
     return getDbHandle()
-        .createUpdate("/* positionEmptyPerson.insert */ INSERT INTO \"peoplePositions\" "
+        .createUpdate("/* personEmptyPosition.insert */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
             + "VALUES (:positionUuid, NULL, :createdAt)")
         .bind("positionUuid", positionUuid)
@@ -248,8 +245,13 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   @InTransaction
-  public int insertPositionEmptyInPerson(String personUuid) {
-    Instant now = Instant.now();
+  public int insertPeoplePositionWithoutPosition(String personUuid) {
+    final Instant now = Instant.now();
+    return insertPeoplePositionWithoutPosition(personUuid, now);
+  }
+
+  private int insertPeoplePositionWithoutPosition(String personUuid, Instant now) {
+
     return getDbHandle()
         .createUpdate("/* positionEmptyPerson.insert */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
@@ -259,53 +261,57 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
   }
 
-  private int deletePersonEmptyInPositionEmpty() {
+  private int deletePeoplePositionsWithoutPositionAndPerson() {
     return getDbHandle()
-        .createUpdate("/* positionEmptyPersonAndPosition.delete */ DELETE FROM \"peoplePositions\" "
-            + " WHERE \"personUuid\" IS NULL and \"positionUuid\" IS NULL")
+        .createUpdate("/* positionEmptyPersonEmpty.delete */ DELETE FROM \"peoplePositions\" "
+            + "WHERE \"personUuid\" IS NULL and \"positionUuid\" IS NULL")
         .execute();
   }
 
   @InTransaction
   public int removePersonFromPosition(String positionUuid) {
+    final Instant now = Instant.now();
+    return removePersonFromPosition(positionUuid, now);
+  }
+
+  private int removePersonFromPosition(String positionUuid, Instant now) {
     int numRows = 0;
-    Instant now = Instant.now();
-    numRows += cleanPosition(positionUuid);
+    numRows += emptyPosition(positionUuid, now);
 
     PersonPositionHistory currentPositionPerson = getDbHandle()
-        .createQuery("/* personEmptyPosition.find */ SELECT * FROM \"peoplePositions\""
-            + " WHERE \"positionUuid\" = :positionUuid AND \"personUuid\" IS NOT NULL AND "
-            + " \"endedAt\" IS NULL")
+        .createQuery("/* personFullPosition.find */ SELECT * FROM \"peoplePositions\" "
+            + "WHERE \"positionUuid\" = :positionUuid AND \"personUuid\" IS NOT NULL AND "
+            + "\"endedAt\" IS NULL")
         .bind("positionUuid", positionUuid).map(new PersonPositionHistoryMapper()).findFirst()
         .orElse(null);
 
     numRows += getDbHandle()
         .createUpdate(
-            "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
-                + " WHERE \"positionUuid\" = :positionUuid AND \"personUuid\" IS NOT NULL AND "
-                + " \"endedAt\" IS NULL")
+            "/* personRemovePosition.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
+                + "WHERE \"positionUuid\" = :positionUuid AND \"personUuid\" IS NOT NULL AND "
+                + "\"endedAt\" IS NULL")
         .bind("positionUuid", positionUuid).bind("endedAt", DaoUtils.asLocalDateTime(now))
         .execute();
 
     if (currentPositionPerson != null) {
-      removePositionFromPerson(currentPositionPerson.getPersonUuid());
+      removePositionFromPerson(currentPositionPerson.getPersonUuid(), now);
     }
 
     PersonPositionHistory emptyPersonPosition = getDbHandle()
-        .createQuery("/* personEmptyPosition.find */ SELECT * FROM \"peoplePositions\""
-            + " WHERE \"positionUuid\" = :positionUuid "
-            + " AND \"personUuid\" IS NULL AND \"endedAt\" IS NULL")
+        .createQuery("/* personPosition.find */ SELECT * FROM \"peoplePositions\" "
+            + "WHERE \"positionUuid\" = :positionUuid "
+            + "AND \"personUuid\" IS NULL AND \"endedAt\" IS NULL")
         .bind("positionUuid", positionUuid).map(new PersonPositionHistoryMapper()).findFirst()
         .orElse(null);
 
     if (emptyPersonPosition == null) {
-      numRows += insertPersonEmptyInPosition(positionUuid);
+      numRows += insertPeoplePositionWithoutPerson(positionUuid, now);
     }
 
-    numRows += deletePersonEmptyInPositionEmpty();
+    numRows += deletePeoplePositionsWithoutPositionAndPerson();
 
     // Evict the person (previously) holding this position from the domain users cache
-        AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
 
     if (numRows > 0) {
       return 1;
@@ -313,41 +319,38 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     return numRows;
   }
 
-  @InTransaction
-  public int removePositionFromPerson(String personUuid) {
+  private int removePositionFromPerson(String personUuid, Instant now) {
     int numRows = 0;
-    Instant now = Instant.now();
 
     PersonPositionHistory currentPositionPerson = getDbHandle()
-        .createQuery("/* personEmptyPosition.find */ SELECT * FROM \"peoplePositions\""
-            + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" IS NOT NULL AND "
-            + " \"endedAt\" IS NULL")
+        .createQuery("/* positionFullPerson.find */ SELECT * FROM \"peoplePositions\" "
+            + "WHERE \"personUuid\" = :personUuid AND \"positionUuid\" IS NOT NULL AND "
+            + "\"endedAt\" IS NULL")
         .bind("personUuid", personUuid).map(new PersonPositionHistoryMapper()).findFirst()
         .orElse(null);
 
-    numRows += getDbHandle()
-        .createUpdate(
-            "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
-                + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" IS NOT NULL AND "
-                + " \"endedAt\" IS NULL")
+    numRows += getDbHandle().createUpdate(
+        "/* positionRemoveFullPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
+            + "WHERE \"personUuid\" = :personUuid AND \"positionUuid\" IS NOT NULL AND "
+            + "\"endedAt\" IS NULL")
         .bind("personUuid", personUuid).bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
 
     if (currentPositionPerson != null) {
-      removePersonFromPosition(currentPositionPerson.getPositionUuid());
+      removePersonFromPosition(currentPositionPerson.getPositionUuid(), now);
     }
 
     PersonPositionHistory emptyPositionPerson = getDbHandle()
-        .createQuery("/* personEmptyPosition.find */ SELECT * FROM \"peoplePositions\""
-            + " WHERE \"personUuid\" = :personUuid "
-            + " AND \"positionUuid\" IS NULL AND \"endedAt\" IS NULL")
+        .createQuery("/* positionPerson.find */ SELECT * FROM \"peoplePositions\" "
+            + "WHERE \"personUuid\" = :personUuid "
+            + "AND \"positionUuid\" IS NULL AND \"endedAt\" IS NULL")
         .bind("personUuid", personUuid).map(new PersonPositionHistoryMapper()).findFirst()
         .orElse(null);
 
     if (emptyPositionPerson == null) {
-      numRows += insertPositionEmptyInPerson(personUuid);
+      numRows += insertPeoplePositionWithoutPosition(personUuid, now);
     }
 
-    numRows += deletePersonEmptyInPositionEmpty();
+    numRows += deletePeoplePositionsWithoutPositionAndPerson();
     if (numRows > 0) {
       return 1;
     }
@@ -355,29 +358,32 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   @InTransaction
-  public int updatePersonFromPosition(String positionUuid, String loserUuid, String winnerUuid) {
+  public int transferActivePositionAndPositionHistoryFromLoserToWinner(String positionUuid,
+      String loserUuid, String winnerUuid) {
     int numRows = 0;
     Instant now = Instant.now();
-    numRows += getDbHandle()
+    numRows += updatePersonOfPosition(positionUuid, winnerUuid, now);
+    numRows += updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
+    numRows += deletePeoplePositionsWithoutPositionAndPerson();
+    if (numRows > 0) {
+      return 1;
+    }
+    return numRows;
+  }
+
+  private int updatePersonOfPosition(String positionUuid, String personUuid, Instant now) {
+    return getDbHandle()
         .createUpdate("/* position.update */ UPDATE positions "
             + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
             + "WHERE uuid = :positionUuid")
-        .bind("personUuid", winnerUuid).bind("updatedAt", DaoUtils.asLocalDateTime(now))
+        .bind("personUuid", personUuid).bind("updatedAt", DaoUtils.asLocalDateTime(now))
         .bind("positionUuid", positionUuid).execute();
-
-    numRows += updatePersonPositionHistory(loserUuid, winnerUuid);
-
-    numRows += deletePersonEmptyInPositionEmpty();
-    if (numRows > 0) {
-      return 1;
-    }
-    return numRows;
   }
 
   @InTransaction
-  public int updatePersonPositionHistory(String loserUuid, String winnerUuid) {
+  public int updatePositionHistoryOfLoserWithWinner(String loserUuid, String winnerUuid) {
     return getDbHandle().createUpdate(
-        "/* positionPerson.update */ UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid "
+        "/* positionPerson.update */ UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid"
             + " WHERE \"personUuid\" = :loserUuid")
         .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
   }
