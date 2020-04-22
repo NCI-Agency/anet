@@ -2,7 +2,11 @@ package mil.dds.anet.database;
 
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -26,7 +30,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
-  private static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
+  public static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid"};
   public static String TABLE_NAME = "positions";
   public static String POSITIONS_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
@@ -73,7 +77,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   public Position getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
-
 
   static class SelfIdBatcher extends IdBatcher<Position> {
     private static final String sql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
@@ -153,12 +156,18 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     }
 
     try {
-      return getDbHandle().createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, "
-          + "code = :code, \"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
-          + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+      final int nr = getDbHandle()
+          .createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, "
+              + "code = :code, \"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
+              + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
           .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("type", DaoUtils.getEnumId(p.getType()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+      // Evict the person holding this position from the domain users cache, as their position has
+      // changed
+      AnetObjectEngine.getInstance().getPersonDao()
+          .evictFromCacheByPositionUuid(DaoUtils.getUuid(p));
+      return nr;
     } catch (UnableToExecuteStatementException e) {
       checkForUniqueCodeViolation(e);
       throw e;
@@ -169,12 +178,10 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   public int setPersonInPosition(String personUuid, String positionUuid) {
     int numRows = 0;
     // If the position is already assigned to another person, remove the person from the position
-    numRows +=
-        AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(positionUuid);
+    numRows += removePersonFromPosition(positionUuid);
 
     // If the person is already assigned to another position, remove the position from the person
-    numRows += AnetObjectEngine.getInstance().getPositionDao().removePositionFromPerson(personUuid);
-
+    numRows += removePositionFromPerson(personUuid);
 
     // Get timestamp *after* remove to preserve correct order
     final Instant now = Instant.now();
@@ -206,6 +213,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
         // Need to ensure this timestamp is greater than previous INSERT.
         .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+
+
+
+    // Evict this person from the domain users cache, as their position has changed
+      AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
+
     if (numRows > 0) {
       return 1;
     }
@@ -290,6 +303,10 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     }
 
     numRows += deletePersonEmptyInPositionEmpty();
+
+    // Evict the person (previously) holding this position from the domain users cache
+        AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+
     if (numRows > 0) {
       return 1;
     }
@@ -495,8 +512,11 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         "DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?",
         positionUuid, positionUuid);
 
-    return getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
+    final int nr = getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
         .bind("positionUuid", positionUuid).execute();
+    // Evict the person (previously) holding this position from the domain users cache
+    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+    return nr;
   }
 
   public static String generateCurrentPositionFilter(String personJoinColumn,

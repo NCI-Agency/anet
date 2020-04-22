@@ -79,6 +79,7 @@ dependencies {
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.8.1'
 	implementation 'javax.cache:cache-api:1.1.1'
+	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
 	implementation 'javax.mail:mail:1.4.7'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'

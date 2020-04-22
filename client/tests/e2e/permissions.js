@@ -1,7 +1,7 @@
 const uuidv4 = require("uuid/v4")
 const test = require("../util/test")
 
-test("checking super user permissions", async t => {
+test.serial("checking super user permissions", async t => {
   t.plan(10)
 
   const { pageHelpers, assertElementNotPresent, shortWaitMs } = t.context
@@ -150,7 +150,7 @@ test("checking admin permissions", async t => {
   await validateAdminLocationPermissions(t)
 })
 
-test("admins can edit superusers and their positions", async t => {
+test.serial("admins can edit superusers and their positions", async t => {
   t.plan(3)
 
   await t.context.get("/", "arthur")
