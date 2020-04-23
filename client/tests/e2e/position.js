@@ -17,8 +17,8 @@ test("Move someone in and out of a position", async t => {
 
   await t.context.pageHelpers.clickMyOrgLink()
 
-  const positionName = "EF 2.2 Advisor D"
-  const person = "ERINSON, Erin"
+  const positionName = "EF 2.2 Advisor C"
+  const person = "REINTON, Reina"
   const rank = "CIV"
   const personName = rank + " " + person
 
@@ -57,7 +57,7 @@ test("Move someone in and out of a position", async t => {
   await assertElementText(
     t,
     $notAssignedMsg,
-    "ERINSON, Erin is not assigned to a position."
+    `${person} is not assigned to a position.`
   )
 
   await t.context.pageHelpers.clickMyOrgLink()

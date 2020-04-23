@@ -50,6 +50,15 @@ test.beforeEach(t => {
     builder = builder
       .forBrowser("chrome")
       .setChromeOptions(new chrome.Options().headless())
+      /*
+       * If we don't explicitly define ServiceBuilder for ChromeDriver it uses a default ServiceBuilder
+       * which is a singleton, shared amongst different driver instances. As a result, the same
+       * ChromeDriver server process is used by different drivers. When driver.quit() is called by
+       * one of the drivers, that process is terminated. As a result even though all assertions pass,
+       * the afterEach.always hook reports intermittent errors. By explicitly defining a new ServiceBuilder
+       * here we enforce the creation of a separate ChromeDriver server child process for each driver instance.
+       */
+      .setChromeService(new chrome.ServiceBuilder())
   } else {
     capabilities.name = t.title.replace(/^beforeEach hook for /, "")
     builder = builder
