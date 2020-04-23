@@ -73,7 +73,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         logger.warn("Caching config for {} not found in {}, proceeding without caching",
             DOMAIN_USERS_CACHE, EHCACHE_CONFIG);
       }
-    } catch (URISyntaxException e) {
+    } catch (URISyntaxException | NullPointerException e) {
       logger.warn("Caching config {} not found, proceeding without caching", EHCACHE_CONFIG);
     }
   }
