@@ -36,6 +36,7 @@ import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
@@ -447,7 +448,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       // organizations
       OrganizationSearchQuery query = new OrganizationSearchQuery();
       query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
-      query.setParentOrgRecursively(true);
+      query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
       query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =

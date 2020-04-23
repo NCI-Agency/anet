@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.AdminDao;
@@ -258,7 +259,7 @@ public class AnetObjectEngine {
   public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
     query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
-    query.setParentOrgRecursively(true);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
     final List<Organization> orgList =
         AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
