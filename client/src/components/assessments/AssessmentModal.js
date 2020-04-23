@@ -6,44 +6,42 @@ import {
 import Model, {
   ENTITY_ASSESSMENT_PARENT_FIELD,
   GQL_CREATE_NOTE,
-  NOTE_TYPE
+  GQL_UPDATE_NOTE
 } from "components/Model"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
-import { Person, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
-const AddAssessmentModal = ({
+const AssessmentModal = ({
+  showModal,
   note,
-  entity,
-  entityType,
-  yupSchema,
-  recurrence,
-  assessmentPeriod,
+  assessment,
+  assessmentYupSchema,
   assessmentConfig,
+  assessmentPeriod,
+  recurrence,
   title,
-  addAssessmentLabel,
-  onSuccess
+  onSuccess,
+  onCancel
 }) => {
-  const [showModal, setShowModal] = useState(false)
   const [assessmentError, setAssessmentError] = useState(null)
-  const initialValues = useMemo(() => Model.fillObject({}, yupSchema), [
-    yupSchema
-  ])
-
+  const edit = !!note.uuid
+  const initialValues = useMemo(
+    () =>
+      ({ [ENTITY_ASSESSMENT_PARENT_FIELD]: assessment } ||
+      Model.fillObject({}, assessmentYupSchema)),
+    [assessment, assessmentYupSchema]
+  )
   return (
     <>
-      <Button bsStyle="primary" onClick={() => setShowModal(true)}>
-        {addAssessmentLabel}
-      </Button>
       <Modal show={showModal} onHide={closeModal}>
         <Formik
           enableReinitialize
           onSubmit={onAssessmentSubmit}
-          validationSchema={yupSchema}
+          validationSchema={assessmentYupSchema}
           initialValues={initialValues}
         >
           {({
@@ -105,7 +103,7 @@ const AddAssessmentModal = ({
 
   function closeModal() {
     setAssessmentError(null)
-    setShowModal(false)
+    onCancel()
   }
 
   function onAssessmentSubmit(values, form) {
@@ -118,20 +116,18 @@ const AddAssessmentModal = ({
   }
 
   function onSubmitSuccess(response, values, form) {
-    setShowModal(false)
-    onSuccess()
+    const operation = edit ? "updateNote" : "createNote"
+    onSuccess(response[operation])
   }
 
   function saveAssessment(values, form) {
     const updatedNote = {
-      type: NOTE_TYPE.ASSESSMENT,
-      noteRelatedObjects: [
-        {
-          relatedObjectType: entityType.relatedObjectType,
-          relatedObjectUuid: entity.uuid
-        }
-      ]
+      uuid: note.uuid,
+      author: note.author,
+      type: note.type,
+      noteRelatedObjects: note.noteRelatedObjects
     }
+    // values contains the assessment fields
     const clonedValues = _cloneDeep(values)
     clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__recurrence = recurrence
     clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__periodStart =
@@ -141,29 +137,26 @@ const AddAssessmentModal = ({
       true,
       ENTITY_ASSESSMENT_PARENT_FIELD
     )
-    return API.mutation(GQL_CREATE_NOTE, {
+    return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
       note: updatedNote
     })
   }
 }
-AddAssessmentModal.propTypes = {
+AssessmentModal.propTypes = {
+  showModal: PropTypes.bool,
   note: Model.notePropTypes,
-  entity: PropTypes.oneOfType([
-    PropTypes.instanceOf(Person),
-    PropTypes.instanceOf(Task)
-  ]).isRequired,
-  entityType: PropTypes.func.isRequired,
-  yupSchema: PropTypes.object.isRequired,
-  recurrence: PropTypes.string.isRequired,
-  assessmentPeriod: PropTypes.object.isRequired,
+  assessment: PropTypes.object,
+  assessmentYupSchema: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
+  assessmentPeriod: PropTypes.object.isRequired,
+  recurrence: PropTypes.string.isRequired,
   title: PropTypes.string,
-  addAssessmentLabel: PropTypes.string,
-  onSuccess: PropTypes.func.isRequired
+  onSuccess: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired
 }
-AddAssessmentModal.defaultProps = {
-  title: "Assessment",
-  showModal: false
+AssessmentModal.defaultProps = {
+  showModal: false,
+  title: "Assessment"
 }
 
-export default AddAssessmentModal
+export default AssessmentModal

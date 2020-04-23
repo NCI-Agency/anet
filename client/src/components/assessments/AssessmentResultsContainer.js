@@ -124,7 +124,7 @@ const AssessmentResultsContainer = ({
   entityType,
   subEntities,
   canAddAssessment,
-  onAddAssessment
+  onUpdateAssessment
 }) => {
   if (!entity) {
     return null
@@ -143,7 +143,7 @@ const AssessmentResultsContainer = ({
               subEntities={subEntities}
               periodsConfig={periodsConfig}
               canAddAssessment={canAddAssessment}
-              onAddAssessment={onAddAssessment}
+              onUpdateAssessment={onUpdateAssessment}
             />
           )
         )
@@ -155,7 +155,7 @@ AssessmentResultsContainer.propTypes = {
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
-  onAddAssessment: PropTypes.func,
+  onUpdateAssessment: PropTypes.func,
   canAddAssessment: PropTypes.bool
 }
 

@@ -425,7 +425,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
               entity={person}
               entityType={Person}
               canAddAssessment={canAddAssessment}
-              onAddAssessment={refetch}
+              onUpdateAssessment={refetch}
             />
           </div>
         )

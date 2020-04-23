@@ -354,7 +354,7 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               entityType={Task}
               subEntities={subTasks}
               canAddAssessment={canEdit}
-              onAddAssessment={refetch}
+              onUpdateAssessment={refetch}
             />
 
             <Fieldset title="Responsible positions">
