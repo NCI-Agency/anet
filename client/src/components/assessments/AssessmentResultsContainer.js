@@ -59,6 +59,41 @@ const ASSESSMENT_PERIODS_CONFIG = [
     ]
   },
   {
+    recurrence: ASSESSMENTS_RECURRENCE_TYPE.SEMIMONTHLY,
+    periods: [
+      {
+        start:
+          now.date() < 15
+            ? now.clone().subtract(2, "months").startOf("month")
+            : now.clone().subtract(2, "months").startOf("month").date(15),
+        end:
+          now.date() < 15
+            ? now.clone().subtract(2, "months").startOf("month").date(14)
+            : now.clone().subtract(2, "months").endOf("month")
+      },
+      {
+        start:
+          now.date() < 15
+            ? now.clone().subtract(1, "months").startOf("month")
+            : now.clone().subtract(1, "months").startOf("month").date(15),
+        end:
+          now.date() < 15
+            ? now.clone().subtract(1, "months").startOf("month").date(14)
+            : now.clone().subtract(1, "months").endOf("month")
+      },
+      {
+        start:
+          now.date() < 15
+            ? now.clone().startOf("month")
+            : now.clone().startOf("month").date(15),
+        end:
+          now.date() < 15
+            ? now.clone().startOf("month").date(14)
+            : now.clone().endOf("month")
+      }
+    ]
+  },
+  {
     recurrence: ASSESSMENTS_RECURRENCE_TYPE.MONTHLY,
     periods: [
       {
