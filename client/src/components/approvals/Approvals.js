@@ -3,9 +3,9 @@ import LinkTo from "components/LinkTo"
 import { Location, Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { Table } from "react-bootstrap"
+import { Checkbox, Table } from "react-bootstrap"
 
-const Approvals = ({ relatedObject }) => {
+const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
   const approvalSteps = relatedObject.approvalSteps
   const planningApprovalSteps = relatedObject.planningApprovalSteps
 
@@ -17,6 +17,11 @@ const Approvals = ({ relatedObject }) => {
       >
         {planningApprovalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
+            {restrictedApprovalLabel && (
+              <Checkbox inline checked={step.restrictedApproval} readOnly>
+                {restrictedApprovalLabel}
+              </Checkbox>
+            )}
             <Table>
               <thead>
                 <tr>
@@ -57,6 +62,11 @@ const Approvals = ({ relatedObject }) => {
       <Fieldset id="approvals" title="Report publication approval process">
         {approvalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
+            {restrictedApprovalLabel && (
+              <Checkbox inline checked={step.restrictedApproval} readOnly>
+                {restrictedApprovalLabel}
+              </Checkbox>
+            )}
             <Table>
               <thead>
                 <tr>
@@ -99,6 +109,7 @@ const Approvals = ({ relatedObject }) => {
 }
 
 Approvals.propTypes = {
+  restrictedApprovalLabel: PropTypes.string,
   relatedObject: PropTypes.oneOfType([
     PropTypes.instanceOf(Location),
     PropTypes.instanceOf(Organization),
