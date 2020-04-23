@@ -333,16 +333,17 @@ const BaseReportForm = ({
   }
 
   // Update the task instant assessment schema according to the selected report tasks
+  const tasksInstantAssessmentsConfig = {}
   const tasksInstantAssessmentsSchemaShape = {}
-  reportTasks
-    // TODO: even tasks without custom fields may have assessments
-    .filter(t => t.customFields)
-    .forEach(t => {
+  reportTasks.forEach(t => {
+    tasksInstantAssessmentsConfig[t.uuid] = t.getInstantAssessmentConfig()
+    if (!_isEmpty(tasksInstantAssessmentsConfig[t.uuid])) {
       tasksInstantAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
-        t.getInstantAssessmentConfig(),
+        tasksInstantAssessmentsConfig[t.uuid],
         `tasksAssessments.${t.uuid}`
       )
-    })
+    }
+  })
   const reportSchema = _isEmpty(tasksInstantAssessmentsSchemaShape)
     ? Report.yupSchema
     : Report.yupSchema.concat(
@@ -1070,7 +1071,8 @@ const BaseReportForm = ({
                 id="engagement-assessments"
               >
                 {values.tasks.map(task => {
-                  const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
+                  const taskInstantAssessmentConfig =
+                    tasksInstantAssessmentsConfig[task.uuid]
                   if (!taskInstantAssessmentConfig) {
                     return null
                   }
