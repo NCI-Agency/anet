@@ -220,6 +220,19 @@ public class Organization extends AbstractAnetBean {
         uuid, query);
   }
 
+  @GraphQLQuery(name = "ascendantOrgs")
+  public CompletableFuture<List<Organization>> loadAscendantOrgs(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
+    if (query == null) {
+      query = new OrganizationSearchQuery();
+    }
+    // Note: recursion, includes transitive parents!
+    query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
+        "organizations", "uuid", "organizations", "\"parentOrgUuid\"", RecurseStrategy.PARENTS));
+    return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
+        uuid, query);
+  }
 
   @GraphQLQuery(name = "tasks")
   public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
