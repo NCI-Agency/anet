@@ -17,6 +17,7 @@ public class ApprovalStepMapper implements RowMapper<ApprovalStep> {
     step.setRelatedObjectUuid(r.getString("relatedObjectUuid"));
     step.setName(r.getString("name"));
     step.setType(MapperUtils.getEnumIdx(r, "type", ApprovalStepType.class));
+    step.setRestrictedApproval(r.getBoolean("restrictedApproval"));
 
     return step;
   }

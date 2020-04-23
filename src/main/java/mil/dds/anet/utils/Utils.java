@@ -503,12 +503,8 @@ public class Utils {
   private static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
-    newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing group
-    if (!newStep.getName().equals(oldStep.getName())) {
-      approvalStepDao.update(newStep);
-    } else if (!Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid())) {
-      approvalStepDao.update(newStep);
-    }
+    newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing step
+    approvalStepDao.update(newStep);
 
     if (newStep.getApprovers() != null) {
       Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).join(),

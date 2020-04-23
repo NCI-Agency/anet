@@ -31,6 +31,9 @@ public class ApprovalStep extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   String name;
+  @GraphQLQuery
+  @GraphQLInputField
+  private boolean restrictedApproval;
 
   @GraphQLQuery(name = "approvers")
   public CompletableFuture<List<Position>> loadApprovers(
@@ -86,6 +89,14 @@ public class ApprovalStep extends AbstractAnetBean {
     this.type = type;
   }
 
+  public boolean isRestrictedApproval() {
+    return restrictedApproval;
+  }
+
+  public void setRestrictedApproval(boolean restrictedApproval) {
+    this.restrictedApproval = restrictedApproval;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof ApprovalStep)) {
@@ -94,12 +105,14 @@ public class ApprovalStep extends AbstractAnetBean {
     ApprovalStep as = (ApprovalStep) o;
     return Objects.equals(uuid, as.getUuid()) && Objects.equals(name, as.getName())
         && Objects.equals(nextStepUuid, as.getNextStepUuid()) && Objects.equals(type, as.getType())
-        && Objects.equals(relatedObjectUuid, as.getRelatedObjectUuid());
+        && Objects.equals(relatedObjectUuid, as.getRelatedObjectUuid())
+        && Objects.equals(restrictedApproval, as.isRestrictedApproval());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, approvers, name, nextStepUuid, relatedObjectUuid, type);
+    return Objects.hash(uuid, approvers, name, nextStepUuid, relatedObjectUuid, type,
+        restrictedApproval);
   }
 
   @Override

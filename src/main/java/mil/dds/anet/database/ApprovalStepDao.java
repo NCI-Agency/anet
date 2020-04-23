@@ -117,9 +117,9 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
 
   @Override
   public ApprovalStep insertInternal(ApprovalStep as) {
-    getDbHandle().createUpdate(
-        "/* insertApprovalStep */ INSERT into \"approvalSteps\" (uuid, name, \"nextStepUuid\", \"relatedObjectUuid\", type) "
-            + "VALUES (:uuid, :name, :nextStepUuid, :relatedObjectUuid, :type)")
+    getDbHandle().createUpdate("/* insertApprovalStep */ INSERT into \"approvalSteps\" "
+        + "(uuid, name, \"nextStepUuid\", \"relatedObjectUuid\", type, \"restrictedApproval\") "
+        + "VALUES (:uuid, :name, :nextStepUuid, :relatedObjectUuid, :type, :restrictedApproval)")
         .bindBean(as).bind("type", DaoUtils.getEnumId(as.getType())).execute();
 
     if (as.getApprovers() != null) {
@@ -161,8 +161,8 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
   public int updateInternal(ApprovalStep as) {
     return getDbHandle()
         .createUpdate("/* updateApprovalStep */ UPDATE \"approvalSteps\" SET name = :name, "
-            + "\"nextStepUuid\" = :nextStepUuid, \"relatedObjectUuid\" = :relatedObjectUuid "
-            + "WHERE uuid = :uuid")
+            + "\"nextStepUuid\" = :nextStepUuid, \"relatedObjectUuid\" = :relatedObjectUuid, "
+            + "\"restrictedApproval\" = :restrictedApproval WHERE uuid = :uuid")
         .bindBean(as).execute();
   }
 
