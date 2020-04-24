@@ -61,6 +61,7 @@ export const ASSESSMENTS_RECURRENCE_TYPE = {
   DAILY: "daily",
   WEEKLY: "weekly",
   BIWEEKLY: "biweekly",
+  SEMIMONTHLY: "semimonthly",
   MONTHLY: "monthly",
   QUARTERLY: "quarterly",
   SEMIANNUALY: "semiannualy"

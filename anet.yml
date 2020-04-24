@@ -337,6 +337,8 @@ dictionary:
                   label: weekly
                 biweekly:
                   label: biweekly
+                semimonthly:
+                  label: semimonthly
                 monthly:
                   label: monthly
                 quarterly:

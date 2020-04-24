@@ -210,7 +210,7 @@ definitions:
       recurrence:
         title: recurrence of an assessment
         type: string
-        enum: [once, daily, weekly, biweekly, monthly, quarterly, semiannualy, annually]
+        enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannualy, annually]
         default: once
       relatedObjectType:
         title: object type context in which the assessment will be made
