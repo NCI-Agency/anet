@@ -1,5 +1,7 @@
 import { Settings } from "api"
 import Model, {
+  ASSESSMENTS_RECURRENCE_TYPE,
+  ASSESSMENTS_RELATED_OBJECT_TYPE,
   createCustomFieldsSchema,
   NOTE_TYPE,
   yupDate
@@ -187,13 +189,15 @@ export default class Task extends Model {
     return JSON.parse(this.customFields || "{}").assessments || []
   }
 
-  getInstantAssessmentResults(dateRange) {
+  getInstantAssessmentResults(
+    dateRange,
+    relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+  ) {
     const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
     const assessmentsNotes = this.notes
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.length === 2 &&
           n.noteRelatedObjects.filter(
             ro =>
               ro.relatedObjectType === Report.relatedObjectType &&
@@ -202,16 +206,22 @@ export default class Task extends Model {
           (!dateRange ||
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
       )
-      .map(n => JSON.parse(n.text))
+      .map(note => ({ note: note, assessment: JSON.parse(note.text) }))
+      .filter(
+        obj =>
+          obj.assessment.__recurrence === ASSESSMENTS_RECURRENCE_TYPE.ONCE &&
+          obj.assessment.__relatedObjectType === relatedObjectType
+      )
     const assessmentsResults = {}
-    assessmentsNotes.forEach(n =>
-      Object.keys(n).forEach(k => {
+    assessmentsNotes.forEach(n => {
+      const a = n.assessment
+      Object.keys(a).forEach(k => {
         if (!Object.prototype.hasOwnProperty.call(assessmentsResults, k)) {
           assessmentsResults[k] = []
         }
-        assessmentsResults[k].push(n[k])
+        assessmentsResults[k].push(a[k])
       })
-    )
+    })
     return assessmentsResults
   }
 }

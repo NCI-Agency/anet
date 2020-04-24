@@ -66,7 +66,7 @@ export const ASSESSMENTS_RECURRENCE_TYPE = {
   QUARTERLY: "quarterly",
   SEMIANNUALY: "semiannualy"
 }
-const ASSESSMENTS_RELATED_OBJECT_TYPE = {
+export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
   REPORT: "report"
 }
 

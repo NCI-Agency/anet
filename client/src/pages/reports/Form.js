@@ -21,6 +21,8 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import {
+  ASSESSMENTS_RECURRENCE_TYPE,
+  ASSESSMENTS_RELATED_OBJECT_TYPE,
   createYupObjectShape,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   INVISIBLE_CUSTOM_FIELDS_FIELD,
@@ -1286,6 +1288,10 @@ const BaseReportForm = ({
           !isEmptyTaskAssessment(values.tasksAssessments[key])
       )
       .map(key => {
+        values[`tasksAssessments.${key}`].__recurrence =
+          ASSESSMENTS_RECURRENCE_TYPE.ONCE
+        values[`tasksAssessments.${key}`].__relatedObjectType =
+          ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [

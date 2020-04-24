@@ -38,6 +38,7 @@ export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 const EXCLUDED_ASSESSMENT_FIELDS = [
   "__recurrence",
   "__periodStart",
+  "__relatedObjectType",
   INVISIBLE_CUSTOM_FIELDS_FIELD
 ]
 
