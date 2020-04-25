@@ -94,7 +94,25 @@ definitions:
             params:
               type: array
           required: [type]
-
+      aggregation:
+        type: object
+        properties:
+          widget:
+            type: string
+            enum: [likertScale, numberAggregation, default]
+        dependencies:
+          widget:
+            oneOf:
+            - properties:
+                widget:
+                  enum: [likertScale, default]
+            - properties:
+                type:
+                  enum: [numberAggregation]
+              aggregationType:
+                type: string
+                enum: [sum, avg, min, max]
+              required: [aggregationType]
 # TODO: The following properties should not be here as these are only dependency fields.
 # I can't figure out yet why the schema validation will not pass without them
       choices:
@@ -109,7 +127,7 @@ definitions:
           "$ref": "#/definitions/customField"
       widget:
         type: string
-        enum: [likertScale, default]
+        enum: [likertScale, richTextEditor, default]
       levels:
         type: array
         uniqueItems: true
@@ -154,7 +172,7 @@ definitions:
             widget:
               title: custom widget for field
               type: string
-              enum: [likertScale, default]
+              enum: [likertScale, richTextEditor, default]
           required: [widget]
           dependencies:
             widget:
@@ -162,6 +180,9 @@ definitions:
               - properties:
                   widget:
                     enum: [default]
+              - properties:
+                  widget:
+                    enum: [richTextEditor]
               - properties:
                   widget:
                     enum: [likertScale]
@@ -317,18 +338,26 @@ properties:
           longName:
             "$ref": "#/definitions/inputField"
           topLevel:
-           type: object
-           additionalProperties: false
-           required: [shortLabel, shortName, longLabel, longName]
-           properties:
-             shortLabel:
-               "$ref": "#/properties/fields/properties/task/properties/shortLabel"
-             shortName:
-               "$ref": "#/properties/fields/properties/task/properties/shortName"
-             longLabel:
-               "$ref": "#/properties/fields/properties/task/properties/longLabel"
-             longName:
-               "$ref": "#/properties/fields/properties/task/properties/longName"
+            type: object
+            additionalProperties: false
+            required: [shortLabel, shortName, longLabel, longName]
+            properties:
+              shortLabel:
+                "$ref": "#/properties/fields/properties/task/properties/shortLabel"
+              shortName:
+                "$ref": "#/properties/fields/properties/task/properties/shortName"
+              longLabel:
+                "$ref": "#/properties/fields/properties/task/properties/longLabel"
+              longName:
+                "$ref": "#/properties/fields/properties/task/properties/longName"
+              assessment:
+                type: object
+                required: [customFields]
+                properties:
+                  customFields:
+                    type: object
+                    additionalProperties:
+                      "$ref": "#/definitions/customField"
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion: 

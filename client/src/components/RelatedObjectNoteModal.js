@@ -1,8 +1,11 @@
 import API from "api"
-import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
+import Model, {
+  GQL_CREATE_NOTE,
+  GQL_UPDATE_NOTE,
+  NOTE_TYPE
+} from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import PropTypes from "prop-types"
@@ -10,20 +13,6 @@ import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 import * as yup from "yup"
 
-const GQL_CREATE_NOTE = gql`
-  mutation($note: NoteInput!) {
-    createNote(note: $note) {
-      ${GRAPHQL_NOTE_FIELDS}
-    }
-  }
-`
-const GQL_UPDATE_NOTE = gql`
-  mutation($note: NoteInput!) {
-    updateNote(note: $note) {
-      ${GRAPHQL_NOTE_FIELDS}
-    }
-  }
-`
 const RelatedObjectNoteModal = ({
   note,
   showModal,

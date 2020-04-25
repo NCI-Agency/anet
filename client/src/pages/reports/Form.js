@@ -1285,21 +1285,19 @@ const BaseReportForm = ({
           !isEmptyTaskAssessment(values.taskAssessments[key])
       )
       .map(key => {
-        const taskAssessment = _cloneDeep(values.taskAssessments[key])
-        delete taskAssessment.invisibleCustomFields
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
             {
-              relatedObjectType: "tasks",
+              relatedObjectType: Task.relatedObjectType,
               relatedObjectUuid: key
             },
             {
-              relatedObjectType: "reports",
+              relatedObjectType: Report.relatedObjectType,
               relatedObjectUuid: reportUuid
             }
           ],
-          text: JSON.stringify(taskAssessment)
+          text: customFieldsJSONString(values, true, `taskAssessments.${key}`)
         }
         const initialAssessmentUuid = values.taskToAssessmentUuid[key]
         if (initialAssessmentUuid) {

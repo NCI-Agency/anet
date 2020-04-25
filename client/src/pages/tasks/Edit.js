@@ -120,7 +120,7 @@ const TaskEdit = ({ pageDispatchers }) => {
         notes={task.notes}
         relatedObject={
           task.uuid && {
-            relatedObjectType: "tasks",
+            relatedObjectType: Task.relatedObjectType,
             relatedObjectUuid: task.uuid
           }
         }
