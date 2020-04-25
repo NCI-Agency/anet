@@ -44,7 +44,7 @@ import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
-import { AuthorizationGroup, Location, Person, Report, Task } from "models"
+import { AuthorizationGroup, Location, Person, Report, Tag, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -73,8 +73,7 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        uuid
-        name
+        ${Location.autocompleteQuery}
       }
     }
     personList(
@@ -87,43 +86,12 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        uuid
-        name
-        rank
-        role
-        status
-        endOfTourDate
-        avatar(size: 32)
-        position {
-          uuid
-          name
-          type
-          status
-          organization {
-            uuid
-            shortName
-          }
-          location {
-            uuid
-            name
-          }
-        }
+        ${Person.autocompleteQuery}
       }
     }
     taskList(query: $taskQuery) {
       list {
-        uuid
-        shortName
-        longName
-        customFieldRef1 {
-          uuid
-          shortName
-        }
-        taskedOrganizations {
-          uuid
-          shortName
-        }
-        customFields
+        ${Task.autocompleteQuery}
       }
     }
     authorizationGroupList(
@@ -136,9 +104,7 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        uuid
-        name
-        description
+        ${AuthorizationGroup.autocompleteQuery}
       }
     }
     tagList(
@@ -147,9 +113,7 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        uuid
-        name
-        description
+        ${Tag.autocompleteQuery}
       }
     }
   }
