@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Test;
 public class MergePeopleTest extends AbstractResourceTest {
 
   private static final String PREVIOUS_POSITION_FIELDS =
-      " previousPositions { startTime endTime position { uuid name } }";
+      " allPreviousPositions { startTime endTime position { uuid name } }";
   private static final String PREVIOUS_PEOPLE_FIELDS =
-      " previousPeople { startTime endTime person { uuid name } }";
+      " allPreviousPeople { startTime endTime person { uuid name } }";
   private static final String PERSON_FIELDS = "uuid name" + PREVIOUS_POSITION_FIELDS;
   private static final String POSITION_FIELDS = "uuid name" + PREVIOUS_PEOPLE_FIELDS;
 

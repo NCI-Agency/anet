@@ -8,6 +8,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
@@ -18,7 +19,7 @@ import mil.dds.anet.views.UuidFetcher;
 /**
  * used to represent a person in a position at a particular time. Populated from results of the
  * peoplePositions table.
- * 
+ *
  * @author hpitelka
  */
 public class PersonPositionHistory extends AbstractAnetBean {
@@ -130,5 +131,10 @@ public class PersonPositionHistory extends AbstractAnetBean {
         .filter(
             pph -> (pph != null && pph.getPersonUuid() != null && pph.getPositionUuid() != null))
         .collect(Collectors.toList());
+  }
+
+  public static List<PersonPositionHistory> getHistory(List<PersonPositionHistory> history) {
+    // Remove all null entries
+    return history.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 }

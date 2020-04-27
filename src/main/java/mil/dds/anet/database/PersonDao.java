@@ -411,6 +411,13 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
+  public CompletableFuture<List<PersonPositionHistory>> getAllPositionHistory(
+      Map<String, Object> context, String personUuid) {
+    return new ForeignKeyFetcher<PersonPositionHistory>()
+        .load(context, FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY, personUuid)
+        .thenApply(PersonPositionHistory::getHistory);
+  }
+
   @InTransaction
   public void clearEmptyBiographies() {
     // Search all people with a not null biography field

@@ -452,6 +452,13 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
   }
 
+  public CompletableFuture<List<PersonPositionHistory>> getAllPositionHistory(
+      Map<String, Object> context, String positionUuid) {
+    return new ForeignKeyFetcher<PersonPositionHistory>()
+        .load(context, FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY, positionUuid)
+        .thenApply(PersonPositionHistory::getHistory);
+  }
+
   public CompletableFuture<Position> getCurrentPositionForPerson(Map<String, Object> context,
       String personUuid) {
     return new ForeignKeyFetcher<Position>()
