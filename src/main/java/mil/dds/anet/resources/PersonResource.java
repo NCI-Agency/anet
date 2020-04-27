@@ -240,19 +240,28 @@ public class PersonResource {
       // Update Position History of Loser with Winner.
       AnetObjectEngine.getInstance().getPositionDao()
           .updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
+
       AnetAuditLogger.log("Person position histories with {} updated with {} changed by {}",
           loserUuid, winnerUuid, user);
     } else if (copyPosition) {
       // Transfer Active Position and Position History from Loser to Winner.
       AnetObjectEngine.getInstance().getPositionDao()
-          .transferActivePositionAndPositionHistoryFromLoserToWinner(loserPosition.getUuid(),
-              loserUuid, winnerUuid);
+          .transferActivePositionFromLoserToWinner(loserPosition.getUuid(), winnerUuid);
+
+      // Update Position History of Loser with Winner.
+      AnetObjectEngine.getInstance().getPositionDao()
+          .updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
+
       AnetAuditLogger.log("Person {} put in position {} as part of merge by {}", winner,
           loserPosition, user);
     } else {
       // Remove the loser from their position.
       AnetObjectEngine.getInstance().getPositionDao()
           .removePersonFromPosition(loserPosition.getUuid());
+
+      // Update Position History of Loser with Winner.
+      AnetObjectEngine.getInstance().getPositionDao()
+          .updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
     }
 
     int merged = dao.mergePeople(winner, loser);
