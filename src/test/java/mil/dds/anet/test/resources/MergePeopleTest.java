@@ -35,18 +35,15 @@ public class MergePeopleTest extends AbstractResourceTest {
     // Assign to an AO
     String organizationUuid = graphQLHelper.createObject(admin, "createOrganization",
         "organization", "OrganizationInput", OrganizationTest.getTestAO(true),
-        new TypeReference<GraphQlResponse<Organization>>() {
-        });
+        new TypeReference<GraphQlResponse<Organization>>() {});
 
     test.setOrganization(createOrganizationWithUuid(organizationUuid));
 
     String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", test, new TypeReference<GraphQlResponse<Position>>() {
-        });
+        "PositionInput", test, new TypeReference<GraphQlResponse<Position>>() {});
 
     return graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, createdUuid,
-        new TypeReference<GraphQlResponse<Position>>() {
-        });
+        new TypeReference<GraphQlResponse<Position>>() {});
   }
 
   private Person createPerson(String personName) {
@@ -55,11 +52,9 @@ public class MergePeopleTest extends AbstractResourceTest {
     loser.setRole(Role.ADVISOR);
     loser.setName(personName);
     String personUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        loser, new TypeReference<GraphQlResponse<Person>>() {
-        });
+        loser, new TypeReference<GraphQlResponse<Person>>() {});
     return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, personUuid,
-        new TypeReference<GraphQlResponse<Person>>() {
-        });
+        new TypeReference<GraphQlResponse<Person>>() {});
   }
 
   private Person assignPositionPerson(Position position, Person person) {
@@ -71,14 +66,12 @@ public class MergePeopleTest extends AbstractResourceTest {
         "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
         variables);
     return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, person.getUuid(),
-        new TypeReference<GraphQlResponse<Person>>() {
-        });
+        new TypeReference<GraphQlResponse<Person>>() {});
   }
 
   private Person getPerson(String personUuid) {
     return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, personUuid,
-        new TypeReference<GraphQlResponse<Person>>() {
-        });
+        new TypeReference<GraphQlResponse<Person>>() {});
   }
 
   private void removePositionPerson(Position position) {
@@ -96,8 +89,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         "mutation ($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition) }",
         variables);
     return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, winnerUuid,
-        new TypeReference<GraphQlResponse<Person>>() {
-        });
+        new TypeReference<GraphQlResponse<Person>>() {});
   }
 
   @Test
@@ -108,7 +100,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personLoser = createPerson("Loser People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -116,7 +108,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personLoser.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personWinner = createPerson("Winner People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -124,7 +116,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personWinner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     personLoser = assignPositionPerson(positionLoser, personLoser);
     // Active peoplePosition with position must be created when the person is assigned.
@@ -143,10 +135,10 @@ public class MergePeopleTest extends AbstractResourceTest {
     // one without position empty endTime (winner created) -------------- endTime = Null
     assertThat(
         winner.getPreviousPositions().stream().filter(f -> Objects.isNull(f.getEndTime())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().size()).isGreaterThanOrEqualTo(3);
   }
 
@@ -158,7 +150,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personLoser = createPerson("Loser People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -166,7 +158,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personLoser.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personWinner = createPerson("Winner People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -174,7 +166,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personWinner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     personLoser = assignPositionPerson(positionLoser, personLoser);
     // Active peoplePosition with position must be created when the person is assigned.
@@ -194,7 +186,7 @@ public class MergePeopleTest extends AbstractResourceTest {
     // one with position empty endTime(loser assigned) -------------- endTime = Null
     assertThat(
         winner.getPreviousPositions().stream().filter(f -> Objects.isNull(f.getEndTime())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
         .count()).isEqualTo(1);
@@ -209,7 +201,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionWinner.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personLoser = createPerson("Loser People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -217,7 +209,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personLoser.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personWinner = createPerson("Winner People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -225,7 +217,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personWinner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     personWinner = assignPositionPerson(positionWinner, personWinner);
     // Active peoplePosition with position must be created when the person is assigned.
@@ -245,7 +237,7 @@ public class MergePeopleTest extends AbstractResourceTest {
     // one with position empty endTime(winner assigned) -------------- endTime = Null
     assertThat(
         winner.getPreviousPositions().stream().filter(f -> Objects.isNull(f.getEndTime())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
         .count()).isEqualTo(1);
@@ -261,7 +253,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Position positionWinner = createPosition("Winner Position One");
     // Active peoplePosition without person must be created when the position is created.
@@ -269,7 +261,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionWinner.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personLoser = createPerson("Loser People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -277,7 +269,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personLoser.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personWinner = createPerson("Winner People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -285,7 +277,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personWinner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     personWinner = assignPositionPerson(positionWinner, personWinner);
     // Active peoplePosition with position must be created when the person is assigned.
@@ -317,7 +309,7 @@ public class MergePeopleTest extends AbstractResourceTest {
     // one with position empty endTime(winner assigned) -------------- endTime = Null
     assertThat(
         winner.getPreviousPositions().stream().filter(f -> Objects.isNull(f.getEndTime())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
         .count()).isEqualTo(1);
@@ -333,7 +325,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personLoser.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personWinner = createPerson("Winner People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -341,7 +333,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personWinner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person winner = mergePeople(personLoser.getUuid(), personWinner.getUuid(), false);
     // There must be two position histories,
@@ -349,10 +341,10 @@ public class MergePeopleTest extends AbstractResourceTest {
     // one without position empty endTime (winner created) -------------- endTime = Null
     assertThat(
         winner.getPreviousPositions().stream().filter(f -> Objects.isNull(f.getEndTime())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().size()).isGreaterThanOrEqualTo(2);
   }
 
@@ -364,7 +356,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser1.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Position positionLoser2 = createPosition("Loser Position Two");
     // Active peoplePosition without person must be created when the position is created.
@@ -372,7 +364,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser2.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Position positionLoser3 = createPosition("Loser Position Three");
     // Active peoplePosition without person must be created when the position is created.
@@ -380,7 +372,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser3.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Position positionLoser4 = createPosition("Loser Position Four");
     // Active peoplePosition without person must be created when the position is created.
@@ -388,7 +380,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser4.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Position positionLoser5 = createPosition("Loser Position Five");
     // Active peoplePosition without person must be created when the position is created.
@@ -396,7 +388,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser5.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Position positionLoser6 = createPosition("Loser Position Six");
     // Active peoplePosition without person must be created when the position is created.
@@ -404,7 +396,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(positionLoser6.getPreviousPeople().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personLoser = createPerson("Loser People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -412,7 +404,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personLoser.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     Person personWinner = createPerson("Winner People One");
     // Active peoplePosition without position must be created when the person is created.
@@ -420,7 +412,7 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
     assertThat(personWinner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
 
     personLoser = assignPositionPerson(positionLoser1, personLoser);
     // Active peoplePosition with position must be created when the person is assigned.
@@ -566,7 +558,7 @@ public class MergePeopleTest extends AbstractResourceTest {
     // one without position empty endTime (winner created) -------------- endTime = Null
     assertThat(
         winner.getPreviousPositions().stream().filter(f -> Objects.isNull(f.getEndTime())).count())
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(winner.getPreviousPositions().stream()
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
         .count()).isEqualTo(1);
