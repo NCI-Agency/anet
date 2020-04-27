@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -271,6 +272,28 @@ public class PositionResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(jack.getUuid());
+
+    // Create Position
+    Position newTestPos = new Position();
+    newTestPos.setName("Super Position For Test");
+    newTestPos.setType(PositionType.ADVISOR);
+    newTestPos.setStatus(PositionStatus.ACTIVE);
+
+    // Assign to an AO
+    newTestPos.setOrganization(createOrganizationWithUuid(aoUuid));
+
+    String newTestPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
+        "PositionInput", newTestPos, new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(createdUuid).isNotNull();
+    Position newPos = graphQLHelper.getObjectById(jack, "position",
+        FIELDS + " previousPeople { startTime endTime}", newTestPosUuid,
+        new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(newPos.getName()).isEqualTo(newTestPos.getName());
+    // Position is new. So there must be only one record in her previous positions and it's endTime
+    // must be null
+    assertThat(newPos.getPreviousPeople().size() == 1);
+    assertThat(newPos.getPreviousPeople().stream().filter(t -> Objects.isNull(t.getEndTime()))
+        .count() == 1);
   }
 
   @Test
