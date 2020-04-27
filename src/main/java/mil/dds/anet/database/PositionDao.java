@@ -345,6 +345,11 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   private int updatePersonOfPosition(String positionUuid, String personUuid, Instant now) {
+    getDbHandle().createUpdate(
+        "/* positionPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
+            + "WHERE \"personUuid\" = :personUuid AND \"endedAt\" IS NULL AND positionUuid IS NULL")
+        .bind("personUuid", personUuid).bind("endedAt", now).execute();
+
     return getDbHandle()
         .createUpdate("/* position.update */ UPDATE positions "
             + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
@@ -364,9 +369,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Loser peoplePosition without position ended because winner has peoplePosition without
     // position
     // If not delete winner has peoplePosition without position duplicate record
-    getDbHandle()
-        .createUpdate("/* loserPositionPerson.update */ UPDATE SET \"endedAt\" = :endedAt"
-            + "\"personUuid\" = :loserUuid AND \"endedAt\" IS NULL AND positionUuid IS NULL")
+    getDbHandle().createUpdate(
+        "/* loserPositionPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
+            + "WHERE \"personUuid\" = :loserUuid AND \"endedAt\" IS NULL AND positionUuid IS NULL")
         .bind("loserUuid", loserUuid).bind("endedAt", now).execute();
 
     return getDbHandle().createUpdate(

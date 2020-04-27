@@ -138,20 +138,20 @@ public class PersonResource {
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
             p.getPosition().getUuid());
-        AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
+        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null
           && existingPos.getUuid().equals(p.getPosition().getUuid()) == false) {
         // Update the position for this person.
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
             p.getPosition().getUuid());
-        AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
+        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null && p.getPosition().getUuid() == null) {
         // Remove this person from their position.
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao()
             .removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position   by {}", p, user);
+        AnetAuditLogger.log("Person {} removed from position by {}", p, user);
       }
     }
 
@@ -265,7 +265,7 @@ public class PersonResource {
     }
 
     int merged = dao.mergePeople(winner, loser);
-    AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
+    AnetAuditLogger.log("Person {} merged into WINNER: {} by {}", loser, winner, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return merged;
   }
