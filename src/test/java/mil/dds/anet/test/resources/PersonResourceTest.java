@@ -200,6 +200,30 @@ public class PersonResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson.getBiography()).contains("<b>Hello world</b>");
     assertThat(retPerson.getBiography()).doesNotContain("<script>window.alert");
+
+    // Create a new Person Then check if there is a PersonPosition record with null position.
+    Person newPerson3 = new Person();
+    newPerson3.setName("Sahin Burak");
+    newPerson3.setRole(Role.ADVISOR);
+    newPerson3.setStatus(PersonStatus.ACTIVE);
+    // set HTML of biography
+    newPerson3.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson3.setGender("Female");
+    newPerson3.setCountry("Turkey");
+    newPerson3.setCode("1995");
+    newPerson3.setEndOfTourDate(
+        ZonedDateTime.of(2020, 6, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+    String newPerson3Uuid = graphQLHelper.createObject(admin, "createPerson", "person",
+        "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
+    newPerson3 = graphQLHelper.getObjectById(admin, "person",
+        PERSON_FIELDS + " previousPositions { startTime endTime}", newPerson3Uuid,
+        new TypeReference<GraphQlResponse<Person>>() {});
+    // Person is new. So there must be only one record in her previous positions and it's endTime
+    // must be null
+    assertThat(newPerson3.getPreviousPositions().size() == 1);
+    assertThat(newPerson3.getPreviousPositions().stream()
+        .filter(t -> Objects.isNull(t.getEndTime())).count() == 1);
+
   }
 
   @Test
