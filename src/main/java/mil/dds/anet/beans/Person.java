@@ -246,6 +246,11 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     this.previousPositions = previousPositions;
   }
 
+  @GraphQLInputField(name = "allPreviousPositions")
+  public void setAllPreviousPositions(List<PersonPositionHistory> previousPositions) {
+    this.previousPositions = previousPositions;
+  }
+
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "authoredReports")
   public AnetBeanList<Report> loadAuthoredReports(@GraphQLRootContext Map<String, Object> context,
