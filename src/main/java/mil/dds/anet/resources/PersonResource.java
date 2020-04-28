@@ -104,7 +104,7 @@ public class PersonResource {
       final Position subjectPos =
           create
               ? AnetObjectEngine.getInstance().getPositionDao()
-              .getByUuid(DaoUtils.getUuid(subject.getPosition()))
+                  .getByUuid(DaoUtils.getUuid(subject.getPosition()))
               : subject.loadPosition();
       if (subjectPos == null) {
         // Super Users can edit position-less people.
@@ -270,7 +270,8 @@ public class PersonResource {
       throw new WebApplicationException("Please provide a valid email address", Status.BAD_REQUEST);
     }
 
-    @SuppressWarnings("unchecked") final List<String> whitelistDomainNames =
+    @SuppressWarnings("unchecked")
+    final List<String> whitelistDomainNames =
         ((List<String>) this.config.getDictionaryEntry("domainNames")).stream()
             .map(String::toLowerCase).collect(Collectors.toList());
 
