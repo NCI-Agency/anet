@@ -90,7 +90,8 @@ public class GraphQlResourceTest extends AbstractResourceTest {
           assertThat(respGetXml.substring(0, 1)).isEqualTo("<");
           String xmlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
           assertThat(respGetXml.substring(0, xmlHeader.length())).isEqualTo(xmlHeader);
-          assertThat(respGetXml.substring(len - 2, len)).isEqualTo(">\n");
+          assertThat(respGetXml.substring(len - (System.lineSeparator().length() + 1), len))
+              .isEqualTo(">" + System.lineSeparator());
 
           // Test POST request over XML
           query.put("output", "xml");
