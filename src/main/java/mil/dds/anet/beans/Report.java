@@ -604,13 +604,33 @@ public class Report extends AbstractCustomizableAnetBean {
               });
       if (!existing.isPresent()) {
         // If there is no action for this step, create a new one and attach this step
-        final ReportAction action;
-        action = new ReportAction();
-        action.setStep(step);
+        final ReportAction action = new ReportAction();
+        action.setStep(getFilteredStep(step));
         newActions.add(action);
       }
     }
     return newActions;
+  }
+
+  private ApprovalStep getFilteredStep(ApprovalStep step) {
+    if (!step.isRestrictedApproval()) {
+      return step;
+    }
+    // Return a copy of the step, with the approvers filtered to those who can actually approve
+    final ApprovalStep filteredStep = new ApprovalStep();
+    filteredStep.setUuid(step.getUuid());
+    filteredStep.setName(step.getName());
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final Map<String, Object> staticContext = engine.getContext();
+    final List<Position> filteredApprovers = new ArrayList<>();
+    for (final Position approverPosition : step.loadApprovers(staticContext).join()) {
+      if (engine.canUserApproveStep(staticContext, approverPosition.getPersonUuid(), step,
+          getAdvisorOrgUuid())) {
+        filteredApprovers.add(approverPosition);
+      }
+    }
+    filteredStep.setApprovers(filteredApprovers);
+    return filteredStep;
   }
 
   private CompletableFuture<List<ApprovalStep>> getOrganizationWorkflow(Map<String, Object> context,
