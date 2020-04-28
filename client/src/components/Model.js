@@ -8,7 +8,6 @@ import PropTypes from "prop-types"
 import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
-import { gql } from "apollo-boost"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
