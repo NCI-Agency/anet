@@ -666,14 +666,16 @@ public class Report extends AbstractCustomizableAnetBean {
       return CompletableFuture.completedFuture(new ArrayList<>());
     } else {
       final Task task = taskIterator.next();
-      return matchTaskedOrgs(context, orgsToMatch, task).thenCompose(
-          taskedOrgsMatch -> getWorkflowForRelatedObject(context, engine, DaoUtils.getUuid(task))
-              .thenCompose(taskSteps -> getTaskWorkflow(context, engine, orgsToMatch, taskIterator)
-                  .thenCompose(nextTaskSteps -> {
-                    final List<ApprovalStep> ts = filterTaskSteps(taskSteps, taskedOrgsMatch);
-                    ts.addAll(filterTaskSteps(nextTaskSteps, taskedOrgsMatch));
-                    return CompletableFuture.completedFuture(ts);
-                  })));
+      return matchTaskedOrgs(context, orgsToMatch, task)
+          .thenCompose(taskedOrgsMatch -> (isFutureEngagement()
+              ? getPlanningWorkflowForRelatedObject(context, engine, DaoUtils.getUuid(task))
+              : getWorkflowForRelatedObject(context, engine, DaoUtils.getUuid(task))).thenCompose(
+                  taskSteps -> getTaskWorkflow(context, engine, orgsToMatch, taskIterator)
+                      .thenCompose(nextTaskSteps -> {
+                        final List<ApprovalStep> ts = filterTaskSteps(taskSteps, taskedOrgsMatch);
+                        ts.addAll(filterTaskSteps(nextTaskSteps, taskedOrgsMatch));
+                        return CompletableFuture.completedFuture(ts);
+                      })));
     }
   }
 
