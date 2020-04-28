@@ -104,7 +104,7 @@ public class PersonResource {
       final Position subjectPos =
           create
               ? AnetObjectEngine.getInstance().getPositionDao()
-                  .getByUuid(DaoUtils.getUuid(subject.getPosition()))
+              .getByUuid(DaoUtils.getUuid(subject.getPosition()))
               : subject.loadPosition();
       if (subjectPos == null) {
         // Super Users can edit position-less people.
@@ -246,22 +246,16 @@ public class PersonResource {
     } else if (copyPosition) {
       // Transfer Active Position and Position History from Loser to Winner.
       AnetObjectEngine.getInstance().getPositionDao()
-          .transferActivePositionFromLoserToWinner(loserPosition.getUuid(), winnerUuid);
-
-      // Update Position History of Loser with Winner.
-      AnetObjectEngine.getInstance().getPositionDao()
-          .updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
+          .transferActivePositionAndUpdatePositionHistoryFromLoserToWinner(loserPosition.getUuid(),
+              loserUuid, winnerUuid);
 
       AnetAuditLogger.log("Person {} put in position {} as part of merge by {}", winner,
           loserPosition, user);
     } else {
-      // Remove the loser from their position.
+      // Remove the loser from their position and Update Position History of Loser with Winner.
       AnetObjectEngine.getInstance().getPositionDao()
-          .removePersonFromPosition(loserPosition.getUuid());
-
-      // Update Position History of Loser with Winner.
-      AnetObjectEngine.getInstance().getPositionDao()
-          .updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid);
+          .removePersonFromPositionAndUpdatePositionHistoryFromLoserToWinner(
+              loserPosition.getUuid(), loserUuid, winnerUuid);
     }
 
     int merged = dao.mergePeople(winner, loser);
@@ -276,8 +270,7 @@ public class PersonResource {
       throw new WebApplicationException("Please provide a valid email address", Status.BAD_REQUEST);
     }
 
-    @SuppressWarnings("unchecked")
-    final List<String> whitelistDomainNames =
+    @SuppressWarnings("unchecked") final List<String> whitelistDomainNames =
         ((List<String>) this.config.getDictionaryEntry("domainNames")).stream()
             .map(String::toLowerCase).collect(Collectors.toList());
 

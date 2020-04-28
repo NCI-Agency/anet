@@ -261,6 +261,15 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   @InTransaction
+  public int removePersonFromPositionAndUpdatePositionHistoryFromLoserToWinner(String positionUuid,
+      String loserUuid, String winnerUuid) {
+    final Instant now = Instant.now();
+    final int nr = removePersonFromPosition(positionUuid, now);
+    updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid, now);
+    return nr;
+  }
+
+  @InTransaction
   public int removePersonFromPosition(String positionUuid) {
     final Instant now = Instant.now();
     return removePersonFromPosition(positionUuid, now);
@@ -339,6 +348,15 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   @InTransaction
+  public int transferActivePositionAndUpdatePositionHistoryFromLoserToWinner(String positionUuid,
+      String loserUuid, String winnerUuid) {
+    Instant now = Instant.now();
+    final int nr = updatePersonOfPosition(positionUuid, winnerUuid, now);
+    updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid, now);
+    return nr;
+  }
+
+  @InTransaction
   public int transferActivePositionFromLoserToWinner(String positionUuid, String winnerUuid) {
     Instant now = Instant.now();
     return updatePersonOfPosition(positionUuid, winnerUuid, now);
@@ -371,7 +389,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // If not delete winner has peoplePosition without position duplicate record
     getDbHandle().createUpdate(
         "/* loserPositionPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
-            + "WHERE \"personUuid\" = :loserUuid AND \"endedAt\" IS NULL AND positionUuid IS NULL")
+            + "WHERE \"personUuid\" = :loserUuid AND \"endedAt\" IS NULL AND \"positionUuid\" IS NULL")
         .bind("loserUuid", loserUuid).bind("endedAt", now).execute();
 
     return getDbHandle().createUpdate(
