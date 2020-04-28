@@ -5,11 +5,14 @@ import com.google.inject.Injector;
 import io.dropwizard.Application;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -213,26 +216,62 @@ public class AnetObjectEngine {
   }
 
   public boolean canUserApproveStep(Map<String, Object> context, String userUuid,
-      String approvalStepUuid) {
-    ApprovalStep as = asDao.getByUuid(approvalStepUuid);
-    final List<Position> approvers = as.loadApprovers(context).join();
-    for (Position approverPosition : approvers) {
-      // approverPosition.getPerson() has the currentPersonUuid already loaded, so this is safe.
+      String approvalStepUuid, String advisorOrgUuid) {
+    return canUserApproveStep(context, userUuid, asDao.getByUuid(approvalStepUuid), advisorOrgUuid);
+  }
+
+  public boolean canUserApproveStep(Map<String, Object> context, String userUuid,
+      ApprovalStep approvalStep, String advisorOrgUuid) {
+    final Set<String> taskedAdvisorOrgParentUuids =
+        getTaskedAdvisorOrgParentUuids(context, approvalStep, advisorOrgUuid);
+    final List<Position> approvers = approvalStep.loadApprovers(context).join();
+    for (final Position approverPosition : approvers) {
       if (Objects.equals(userUuid, approverPosition.getPersonUuid())) {
-        return true;
+        if (!approvalStep.isRestrictedApproval()) {
+          return true;
+        } else {
+          final Organization approverOrg = approverPosition.loadOrganization(context).join();
+          if (approverOrg != null) {
+            final Set<String> matchingOrgs = approverOrg.loadAscendantOrgs(context, null).join()
+                .stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet());
+            matchingOrgs.retainAll(taskedAdvisorOrgParentUuids);
+            if (!matchingOrgs.isEmpty()) {
+              return true;
+            }
+          }
+        }
       }
     }
     return false;
   }
 
+  private Set<String> getTaskedAdvisorOrgParentUuids(Map<String, Object> context,
+      ApprovalStep approvalStep, String advisorOrgUuid) {
+    if (!approvalStep.isRestrictedApproval()) {
+      return null;
+    } else {
+      final Task task = taskDao.getByUuid(approvalStep.getRelatedObjectUuid());
+      final Organization advisorOrg = orgDao.getByUuid(advisorOrgUuid);
+      if (task == null || advisorOrg == null) {
+        return new HashSet<>();
+      } else {
+        final Set<String> taskedAdvisorOrgParentUuids = task.loadTaskedOrganizations(context).join()
+            .stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet());
+        taskedAdvisorOrgParentUuids.retainAll(advisorOrg.loadAscendantOrgs(context, null).join()
+            .stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet()));
+        return taskedAdvisorOrgParentUuids;
+      }
+    }
+  }
+
   public boolean canUserRejectStep(Map<String, Object> context, String userUuid,
-      String approvalStepUuid) {
+      ApprovalStep approvalStep, String advisorOrgUuid) {
     final Person p = personDao.getByUuid(userUuid);
     // Admin users may reject any step
     if (AuthUtils.isAdmin(p)) {
       return true;
     }
-    return canUserApproveStep(context, userUuid, approvalStepUuid);
+    return canUserApproveStep(context, userUuid, approvalStep, advisorOrgUuid);
   }
 
   /*
