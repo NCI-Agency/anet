@@ -234,9 +234,9 @@ public class GraphQlResource {
             .variables(variables).dataLoaderRegistry(dataLoaderRegistry).context(context).build();
 
     final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
-        // .instrumentation(new DataLoaderDispatcherInstrumentation()) — use our own dispatcher
-        // instead
-        .build();
+        // Prevent adding .instrumentation(new DataLoaderDispatcherInstrumentation())
+        // — use our own dispatcher instead
+        .doNotAddDefaultInstrumentations().build();
     final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
     final Runnable dispatcher = () -> {
       while (!request.isDone()) {
