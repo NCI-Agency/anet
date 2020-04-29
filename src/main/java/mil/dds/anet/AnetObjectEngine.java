@@ -334,8 +334,7 @@ public class AnetObjectEngine {
     query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
-    final List<Organization> orgList =
-        AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+    final List<Organization> orgList = orgDao.search(query).getList();
     return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
   }
 
@@ -349,7 +348,7 @@ public class AnetObjectEngine {
     query.setCustomFieldRef1Uuid(Collections.singletonList(parentTaskUuid));
     query.setCustomFieldRef1Recursively(true);
     query.setPageSize(0);
-    final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+    final List<Task> taskList = taskDao.search(query).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
   }
 
