@@ -193,6 +193,8 @@ export default class Task extends Model {
     dateRange,
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
+    // FIXME: don't retrieve the published reports but also return the note's
+    // relatedObject and filter on its status
     const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
     const assessmentsNotes = this.notes
       .filter(
@@ -203,6 +205,7 @@ export default class Task extends Model {
               ro.relatedObjectType === Report.relatedObjectType &&
               publishedReportsUuids.includes(ro.relatedObjectUuid)
           ).length &&
+          // FIXME: make sure we actually filter on the report's engagementDate
           (!dateRange ||
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
       )

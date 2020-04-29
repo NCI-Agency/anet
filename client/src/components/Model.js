@@ -424,4 +424,31 @@ export default class Model {
             JSON.parse(JSON.stringify(period.start))
       )
   }
+
+  static getInstantAssessmentsDetailsForEntities(
+    entities,
+    assessmentsParentField
+  ) {
+    const assessmentsConfig = {}
+    const assessmentsSchemaShape = {}
+    entities.forEach(entity => {
+      assessmentsConfig[entity.uuid] = entity.getInstantAssessmentConfig()
+      if (!_isEmpty(assessmentsConfig[entity.uuid])) {
+        assessmentsSchemaShape[entity.uuid] = createYupObjectShape(
+          assessmentsConfig[entity.uuid],
+          `${assessmentsParentField}.${entity.uuid}`
+        )
+      }
+    })
+    return {
+      assessmentsConfig: assessmentsConfig,
+      assessmentsSchema: yup.object().shape({
+        [assessmentsParentField]: yup
+          .object()
+          .shape(assessmentsSchemaShape)
+          .nullable()
+          .default(null)
+      })
+    }
+  }
 }

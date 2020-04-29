@@ -23,7 +23,6 @@ import Messages from "components/Messages"
 import {
   ASSESSMENTS_RECURRENCE_TYPE,
   ASSESSMENTS_RELATED_OBJECT_TYPE,
-  createYupObjectShape,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   INVISIBLE_CUSTOM_FIELDS_FIELD,
   NOTE_TYPE
@@ -57,7 +56,6 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
-import * as yup from "yup"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
@@ -158,6 +156,7 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
     updateReportAssessments(report: $report, assessments: $notes)
   }
 `
+const TASKS_ASSESSMENTS_PARENT_FIELD = "tasksAssessments"
 
 const BaseReportForm = ({
   pageDispatchers,
@@ -299,28 +298,17 @@ const BaseReportForm = ({
   }
 
   // Update the task instant assessment schema according to the selected report tasks
-  const tasksInstantAssessmentsConfig = {}
-  const tasksInstantAssessmentsSchemaShape = {}
-  reportTasks.forEach(t => {
-    tasksInstantAssessmentsConfig[t.uuid] = t.getInstantAssessmentConfig()
-    if (!_isEmpty(tasksInstantAssessmentsConfig[t.uuid])) {
-      tasksInstantAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
-        tasksInstantAssessmentsConfig[t.uuid],
-        `tasksAssessments.${t.uuid}`
-      )
-    }
-  })
-  const reportSchema = _isEmpty(tasksInstantAssessmentsSchemaShape)
-    ? Report.yupSchema
-    : Report.yupSchema.concat(
-      yup.object().shape({
-        tasksAssessments: yup
-          .object()
-          .shape(tasksInstantAssessmentsSchemaShape)
-          .nullable()
-          .default(null)
-      })
-    )
+  const {
+    assessmentsConfig: tasksInstantAssessmentsConfig,
+    assessmentsSchema: tasksInstantAssessmentsSchema
+  } = Task.getInstantAssessmentsDetailsForEntities(
+    reportTasks,
+    TASKS_ASSESSMENTS_PARENT_FIELD
+  )
+  let reportSchema = Report.yupSchema
+  if (!_isEmpty(tasksInstantAssessmentsConfig)) {
+    reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
+  }
   let validateFieldDebounced
 
   return (
