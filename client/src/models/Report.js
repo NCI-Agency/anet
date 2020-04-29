@@ -50,7 +50,9 @@ export default class Report extends Model {
   }
 
   static TASKS_ASSESSMENTS_PARENT_FIELD = "tasksAssessments"
+  static TASKS_ASSESSMENTS_UUIDS_FIELD = "tasksAssessmentsUuids"
   static ATTENDEES_ASSESSMENTS_PARENT_FIELD = "attendeesAssessments"
+  static ATTENDEES_ASSESSMENTS_UUIDS_FIELD = "attendeesAssessmentsUuids"
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
@@ -385,33 +387,55 @@ export default class Report extends Model {
     }
   }
 
-  getTasksInstantAssessments() {
+  getRelatedObjectsEngagementAssessments(
+    entityType,
+    entitiesAssessmentsFieldName,
+    entitiesAssessmentsUuidsFieldName
+  ) {
     const notesToAssessments = this.notes
       .filter(
-        n =>
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.filter(
-            ro => ro.relatedObjectType === Task.relatedObjectType
-          ).length
+        n => n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length > 1
       )
       .map(n => ({
-        taskUuid: [
-          n.noteRelatedObjects.filter(
-            ro => ro.relatedObjectType === Task.relatedObjectType
-          )[0].relatedObjectUuid
+        entityUuids: [
+          n.noteRelatedObjects
+            .filter(ro => ro.relatedObjectType === entityType.relatedObjectType)
+            .map(ro => ro.relatedObjectUuid)
         ],
         assessmentUuid: n.uuid,
         assessment: JSON.parse(n.text)
       }))
-    // When updating the instant assessments, we need for each task the uuid of the
+    // When updating the instant assessments, we need for each entity the uuid of the
     // related instant assessment
-    const taskToAssessmentUuid = {}
-    // Get initial tasks assessments values
-    const tasksAssessments = {}
+    const entitiesAssessmentsUuids = {}
+    // Get initial entities assessments values
+    const entitiesAssessments = {}
     notesToAssessments.forEach(m => {
-      taskToAssessmentUuid[m.taskUuid] = m.assessmentUuid
-      tasksAssessments[m.taskUuid] = m.assessment
+      m.entityUuids.forEach(entityUuid => {
+        entitiesAssessmentsUuids[entityUuid] = m.assessmentUuid
+        entitiesAssessments[entityUuid] = m.assessment
+      })
     })
-    return { taskToAssessmentUuid, tasksAssessments }
+    return {
+      [entitiesAssessmentsUuidsFieldName]: entitiesAssessmentsUuids,
+      [entitiesAssessmentsFieldName]: entitiesAssessments
+    }
+  }
+
+  getTasksEngagementAssessments() {
+    const a = this.getRelatedObjectsEngagementAssessments(
+      Task,
+      Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+      Report.TASKS_ASSESSMENTS_UUIDS_FIELD
+    )
+    return a
+  }
+
+  getAttendeesEngagementAssessments() {
+    return this.getRelatedObjectsEngagementAssessments(
+      Person,
+      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
+      Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
+    )
   }
 }

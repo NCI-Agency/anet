@@ -1,13 +1,6 @@
 import { Settings } from "api"
-import Model, {
-  ASSESSMENTS_RECURRENCE_TYPE,
-  ASSESSMENTS_RELATED_OBJECT_TYPE,
-  createCustomFieldsSchema,
-  NOTE_TYPE,
-  yupDate
-} from "components/Model"
+import Model, { createCustomFieldsSchema, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Report } from "models"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
@@ -187,44 +180,5 @@ export default class Task extends Model {
   instanceAssessmentsConfig() {
     // The given task instance might have a specific assessments config
     return JSON.parse(this.customFields || "{}").assessments || []
-  }
-
-  getInstantAssessmentResults(
-    dateRange,
-    relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
-  ) {
-    // FIXME: don't retrieve the published reports but also return the note's
-    // relatedObject and filter on its status
-    const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
-    const assessmentsNotes = this.notes
-      .filter(
-        n =>
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.filter(
-            ro =>
-              ro.relatedObjectType === Report.relatedObjectType &&
-              publishedReportsUuids.includes(ro.relatedObjectUuid)
-          ).length &&
-          // FIXME: make sure we actually filter on the report's engagementDate
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
-      )
-      .map(note => ({ note: note, assessment: JSON.parse(note.text) }))
-      .filter(
-        obj =>
-          obj.assessment.__recurrence === ASSESSMENTS_RECURRENCE_TYPE.ONCE &&
-          obj.assessment.__relatedObjectType === relatedObjectType
-      )
-    const assessmentsResults = {}
-    assessmentsNotes.forEach(n => {
-      const a = n.assessment
-      Object.keys(a).forEach(k => {
-        if (!Object.prototype.hasOwnProperty.call(assessmentsResults, k)) {
-          assessmentsResults[k] = []
-        }
-        assessmentsResults[k].push(a[k])
-      })
-    })
-    return assessmentsResults
   }
 }

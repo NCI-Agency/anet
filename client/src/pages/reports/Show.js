@@ -356,8 +356,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial tasks instant assessments values
-  report = Object.assign(report, report.getTasksInstantAssessments())
+  // Get initial tasks/attendees instant assessments values
+  report = Object.assign(report, report.getTasksEngagementAssessments())
+  report = Object.assign(report, report.getAttendeesEngagementAssessments())
 
   return (
     <Formik

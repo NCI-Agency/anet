@@ -1262,7 +1262,7 @@ const BaseReportForm = ({
     })
   }
 
-  function isEmptyTaskAssessment(assessment) {
+  function isEmptyAssessment(assessment) {
     return (
       (Object.keys(assessment).length === 1 &&
         Object.keys(assessment)[0] === INVISIBLE_CUSTOM_FIELDS_FIELD) ||
@@ -1270,26 +1270,31 @@ const BaseReportForm = ({
     )
   }
 
-  function createTasksInstantAssessments(values, reportUuid) {
-    const selectedTasksUuids = values.tasks.map(t => t.uuid)
-    return Object.keys(values[Report.TASKS_ASSESSMENTS_PARENT_FIELD])
+  function createInstantAssessments(
+    entityType,
+    entities,
+    values,
+    asessmentsFieldName,
+    assessmentsUuidsFieldName,
+    reportUuid
+  ) {
+    const entitiesUuids = entities.map(e => e.uuid)
+    const entitiesAssessments = values[asessmentsFieldName]
+    return Object.keys(entitiesAssessments)
       .filter(
         key =>
-          selectedTasksUuids.includes(key) &&
-          !isEmptyTaskAssessment(
-            values[Report.TASKS_ASSESSMENTS_PARENT_FIELD][key]
-          )
+          entitiesUuids.includes(key) &&
+          !isEmptyAssessment(entitiesAssessments[key])
       )
       .map(key => {
-        values[Report.TASKS_ASSESSMENTS_PARENT_FIELD][key].__recurrence =
-          ASSESSMENTS_RECURRENCE_TYPE.ONCE
-        values[Report.TASKS_ASSESSMENTS_PARENT_FIELD][key].__relatedObjectType =
+        entitiesAssessments[key].__recurrence = ASSESSMENTS_RECURRENCE_TYPE.ONCE
+        entitiesAssessments[key].__relatedObjectType =
           ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
             {
-              relatedObjectType: Task.relatedObjectType,
+              relatedObjectType: entityType.relatedObjectType,
               relatedObjectUuid: key
             },
             {
@@ -1300,10 +1305,10 @@ const BaseReportForm = ({
           text: customFieldsJSONString(
             values,
             true,
-            `${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${key}`
+            `${asessmentsFieldName}.${key}`
           )
         }
-        const initialAssessmentUuid = values.taskToAssessmentUuid[key]
+        const initialAssessmentUuid = values[assessmentsUuidsFieldName][key]
         if (initialAssessmentUuid) {
           noteObj.uuid = initialAssessmentUuid
         }
@@ -1323,7 +1328,8 @@ const BaseReportForm = ({
       DEFAULT_CUSTOM_FIELDS_PARENT,
       Report.TASKS_ASSESSMENTS_PARENT_FIELD,
       Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
-      "taskToAssessmentUuid"
+      Report.TASKS_ASSESSMENTS_UUIDS_FIELD,
+      Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1366,10 +1372,23 @@ const BaseReportForm = ({
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
       const updateNotesVariables = { report }
-      updateNotesVariables.notes = createTasksInstantAssessments(
+      const tasksNotes = createInstantAssessments(
+        Task,
+        values.tasks,
         values,
+        Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+        Report.TASKS_ASSESSMENTS_UUIDS_FIELD,
         report.uuid
       )
+      const attendeesNotes = createInstantAssessments(
+        Person,
+        values.attendees,
+        values,
+        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
+        Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD,
+        report.uuid
+      )
+      updateNotesVariables.notes = tasksNotes.concat(attendeesNotes)
       return API.mutation(
         GQL_UPDATE_REPORT_ASSESSMENTS,
         updateNotesVariables

@@ -1,3 +1,4 @@
+import { Report } from "models"
 import encodeQuery from "querystring/encode"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
@@ -450,5 +451,49 @@ export default class Model {
           .default(null)
       })
     }
+  }
+
+  getInstantAssessmentResults(
+    dateRange,
+    relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+  ) {
+    // FIXME: don't retrieve the published reports but also return the note's
+    // relatedObject and filter on its status
+    const publishedReports = this.publishedReports
+    const publishedReportsUuids = publishedReports
+      ? publishedReports.map(r => r.uuid)
+      : undefined
+    const assessmentsNotes = this.notes
+      .filter(
+        n =>
+          n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.filter(
+            ro =>
+              ro.relatedObjectType === Report.relatedObjectType &&
+              (publishedReportsUuids !== undefined
+                ? publishedReportsUuids.includes(ro.relatedObjectUuid)
+                : true)
+          ).length &&
+          // FIXME: make sure we actually filter on the report's engagementDate
+          (!dateRange ||
+            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
+      )
+      .map(note => ({ note: note, assessment: JSON.parse(note.text) }))
+      .filter(
+        obj =>
+          obj.assessment.__recurrence === ASSESSMENTS_RECURRENCE_TYPE.ONCE &&
+          obj.assessment.__relatedObjectType === relatedObjectType
+      )
+    const assessmentsResults = {}
+    assessmentsNotes.forEach(n => {
+      const a = n.assessment
+      Object.keys(a).forEach(k => {
+        if (!Object.prototype.hasOwnProperty.call(assessmentsResults, k)) {
+          assessmentsResults[k] = []
+        }
+        assessmentsResults[k].push(a[k])
+      })
+    })
+    return assessmentsResults
   }
 }
