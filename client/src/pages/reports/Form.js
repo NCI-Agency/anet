@@ -11,6 +11,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -156,7 +157,6 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
     updateReportAssessments(report: $report, assessments: $notes)
   }
 `
-const TASKS_ASSESSMENTS_PARENT_FIELD = "tasksAssessments"
 
 const BaseReportForm = ({
   pageDispatchers,
@@ -170,8 +170,12 @@ const BaseReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  // We need the report tasks in order to be able to dynamically update the yup schema for the selected tasks instant assessments
+  // We need the report tasks/attendees in order to be able to dynamically
+  // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
+  const [reportAttendees, setReportAttendees] = useState(
+    initialValues.attendees
+  )
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
   const autoSaveSettings = {
@@ -297,17 +301,28 @@ const BaseReportForm = ({
     }))
   }
 
-  // Update the task instant assessment schema according to the selected report tasks
+  // Update the report schema according to the selected report tasks and attendees
+  // instant assessments schema
   const {
     assessmentsConfig: tasksInstantAssessmentsConfig,
     assessmentsSchema: tasksInstantAssessmentsSchema
   } = Task.getInstantAssessmentsDetailsForEntities(
     reportTasks,
-    TASKS_ASSESSMENTS_PARENT_FIELD
+    Report.TASKS_ASSESSMENTS_PARENT_FIELD
+  )
+  const {
+    assessmentsConfig: attendeesInstantAssessmentsConfig,
+    assessmentsSchema: attendeesInstantAssessmentsSchema
+  } = Person.getInstantAssessmentsDetailsForEntities(
+    reportAttendees,
+    Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
   )
   let reportSchema = Report.yupSchema
   if (!_isEmpty(tasksInstantAssessmentsConfig)) {
     reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
+  }
+  if (!_isEmpty(attendeesInstantAssessmentsConfig)) {
+    reportSchema = reportSchema.concat(attendeesInstantAssessmentsSchema)
   }
   let validateFieldDebounced
 
@@ -706,9 +721,12 @@ const BaseReportForm = ({
                   name="attendees"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
-                    updateAttendees(setFieldValue, "attendees", value)
+                    updateAttendees(
+                      setFieldValue,
+                      setFieldTouched,
+                      "attendees",
+                      value
+                    )
                   }}
                   widget={
                     <AdvancedMultiSelect
@@ -748,9 +766,12 @@ const BaseReportForm = ({
                         objectType={Person}
                         curValue={values.attendees}
                         onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
-                          updateAttendees(setFieldValue, "attendees", value)
+                          updateAttendees(
+                            setFieldValue,
+                            setFieldTouched,
+                            "attendees",
+                            value
+                          )
                         }}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
@@ -1022,29 +1043,43 @@ const BaseReportForm = ({
               </Fieldset>
 
               <Fieldset
-                title="Engagement assessments"
-                id="engagement-assessments"
+                title="Attendees engagement assessments"
+                id="attendees-engagement-assessments"
               >
-                {values.tasks.map(task => {
-                  const taskInstantAssessmentConfig =
-                    tasksInstantAssessmentsConfig[task.uuid]
-                  if (!taskInstantAssessmentConfig) {
-                    return null
+                <InstantAssessmentsContainerField
+                  entityType={Person}
+                  entities={values.attendees}
+                  entitiesInstantAssessmentsConfig={
+                    attendeesInstantAssessmentsConfig
                   }
-                  return (
-                    <CustomFieldsContainer
-                      key={`assessment-${values.uuid}-${task.uuid}`}
-                      parentFieldName={`tasksAssessments.${task.uuid}`}
-                      fieldsConfig={taskInstantAssessmentConfig}
-                      formikProps={{
-                        setFieldTouched,
-                        setFieldValue,
-                        values,
-                        validateForm
-                      }}
-                    />
-                  )
-                })}
+                  parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
+                  formikProps={{
+                    setFieldTouched,
+                    setFieldValue,
+                    values,
+                    validateForm
+                  }}
+                />
+              </Fieldset>
+
+              <Fieldset
+                title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                id="tasks-engagement-assessments"
+              >
+                <InstantAssessmentsContainerField
+                  entityType={Task}
+                  entities={values.tasks}
+                  entitiesInstantAssessmentsConfig={
+                    tasksInstantAssessmentsConfig
+                  }
+                  parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                  formikProps={{
+                    setFieldTouched,
+                    setFieldValue,
+                    values,
+                    validateForm
+                  }}
+                />
               </Fieldset>
 
               <div className="submit-buttons">
@@ -1100,7 +1135,9 @@ const BaseReportForm = ({
     return _upperFirst(getReportType(values))
   }
 
-  function updateAttendees(setFieldValue, field, attendees) {
+  function updateAttendees(setFieldValue, setFieldTouched, field, attendees) {
+    // validation will be done by setFieldValue
+    setFieldTouched(field, true, false) // onBlur doesn't work when selecting an option
     attendees.forEach(attendee => {
       if (!attendees.find(a2 => attendee.role === a2.role && a2.primary)) {
         attendee.primary = true
@@ -1110,6 +1147,7 @@ const BaseReportForm = ({
       }
     })
     setFieldValue(field, attendees, true)
+    setReportAttendees(attendees)
   }
 
   function countCharsLeft(elemId, maxChars, event) {
@@ -1234,16 +1272,18 @@ const BaseReportForm = ({
 
   function createTasksInstantAssessments(values, reportUuid) {
     const selectedTasksUuids = values.tasks.map(t => t.uuid)
-    return Object.keys(values.tasksAssessments)
+    return Object.keys(values[Report.TASKS_ASSESSMENTS_PARENT_FIELD])
       .filter(
         key =>
           selectedTasksUuids.includes(key) &&
-          !isEmptyTaskAssessment(values.tasksAssessments[key])
+          !isEmptyTaskAssessment(
+            values[Report.TASKS_ASSESSMENTS_PARENT_FIELD][key]
+          )
       )
       .map(key => {
-        values.tasksAssessments[key].__recurrence =
+        values[Report.TASKS_ASSESSMENTS_PARENT_FIELD][key].__recurrence =
           ASSESSMENTS_RECURRENCE_TYPE.ONCE
-        values.tasksAssessments[key].__relatedObjectType =
+        values[Report.TASKS_ASSESSMENTS_PARENT_FIELD][key].__relatedObjectType =
           ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
@@ -1257,7 +1297,11 @@ const BaseReportForm = ({
               relatedObjectUuid: reportUuid
             }
           ],
-          text: customFieldsJSONString(values, true, `tasksAssessments.${key}`)
+          text: customFieldsJSONString(
+            values,
+            true,
+            `${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${key}`
+          )
         }
         const initialAssessmentUuid = values.taskToAssessmentUuid[key]
         if (initialAssessmentUuid) {
@@ -1277,7 +1321,8 @@ const BaseReportForm = ({
       "tasks",
       "customFields", // initial JSON from the db
       DEFAULT_CUSTOM_FIELDS_PARENT,
-      "tasksAssessments",
+      Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
       "taskToAssessmentUuid"
     )
     if (Report.isFuture(values.engagementDate)) {

@@ -49,6 +49,9 @@ export default class Report extends Model {
     NEUTRAL: "NEUTRAL"
   }
 
+  static TASKS_ASSESSMENTS_PARENT_FIELD = "tasksAssessments"
+  static ATTENDEES_ASSESSMENTS_PARENT_FIELD = "attendeesAssessments"
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.report.customFields

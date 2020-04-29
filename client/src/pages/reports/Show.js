@@ -7,6 +7,7 @@ import {
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
@@ -300,6 +301,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       text: tag.name
     }))
     data.report.tasks = Task.fromArray(data.report.tasks)
+    data.report.attendees = Person.fromArray(data.report.attendees)
     data.report.to = ""
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
       data.report.customFields
@@ -657,23 +659,32 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 </Fieldset>
               )}
               <Fieldset
-                title="Engagement assessments"
-                id="engagement-assessments"
+                title="Attendees engagement assessments"
+                id="attendees-engagement-assessments"
               >
-                {values.tasks.map(task => {
-                  const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
-                  if (_isEmpty(taskInstantAssessmentConfig)) {
-                    return null
-                  }
-                  return (
-                    <ReadonlyCustomFields
-                      key={`assessment-${values.uuid}-${task.uuid}`}
-                      fieldsConfig={taskInstantAssessmentConfig}
-                      parentFieldName={`tasksAssessments.${task.uuid}`}
-                      values={values}
-                    />
-                  )
-                })}
+                <InstantAssessmentsContainerField
+                  entityType={Person}
+                  entities={values.attendees}
+                  parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
+                  formikProps={{
+                    values
+                  }}
+                  readonly
+                />
+              </Fieldset>
+              <Fieldset
+                title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                id="tasks-engagement-assessments"
+              >
+                <InstantAssessmentsContainerField
+                  entityType={Task}
+                  entities={values.tasks}
+                  parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                  formikProps={{
+                    values
+                  }}
+                  readonly
+                />
               </Fieldset>
               {report.showWorkflow() && (
                 <ReportFullWorkflow workflow={report.workflow} />

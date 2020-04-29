@@ -739,6 +739,22 @@ dictionary:
                   "3":
                     label: three
                     color: '#ff8279'
+          - recurrence: once
+            relatedObjectType: report
+            questions:
+              question1:
+                type: enum
+                label: Attendee involvement
+                choices:
+                  "1":
+                    label: low
+                    color: '#c2ffb3'
+                  "2":
+                    label: medium
+                    color: '#ffe396'
+                  "3":
+                    label: high
+                    color: '#ff8279'
 
       position:
         name: Afghan Tashkil
