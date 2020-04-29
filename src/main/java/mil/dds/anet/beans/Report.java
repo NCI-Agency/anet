@@ -489,6 +489,7 @@ public class Report extends AbstractCustomizableAnetBean {
   public CompletableFuture<List<ApprovalStep>> computeApprovalSteps(Map<String, Object> context,
       AnetObjectEngine engine) {
     final String advisorOrgUuid = getAdvisorOrgUuid();
+    // First organization workflow
     return getOrganizationWorkflow(context, engine, advisorOrgUuid).thenCompose(steps -> {
       if (Utils.isEmptyOrNull(steps)) {
         final String defaultOrgUuid = engine.getDefaultOrgUuid();
@@ -498,6 +499,7 @@ public class Report extends AbstractCustomizableAnetBean {
       }
       return CompletableFuture.completedFuture(steps);
     }).thenCompose(steps -> {
+      // Then tasks workflow
       return loadTasks(context).thenCompose(tasks -> {
         if (Utils.isEmptyOrNull(tasks)) {
           return CompletableFuture.completedFuture(steps);
@@ -514,17 +516,17 @@ public class Report extends AbstractCustomizableAnetBean {
         }
       });
     }).thenCompose(steps -> {
-      return loadLocation(context).thenCompose(location -> {
-        if (location == null) {
-          return CompletableFuture.completedFuture(steps);
-        } else {
-          return getLocationWorkflow(context, engine, location.getUuid())
-              .thenCompose(locationApprovalSteps -> {
-                steps.addAll(locationApprovalSteps);
-                return CompletableFuture.completedFuture(steps);
-              });
-        }
-      });
+      // Then location workflow
+      final String locationUuid = getLocationUuid();
+      if (locationUuid == null) {
+        return CompletableFuture.completedFuture(steps);
+      } else {
+        return getLocationWorkflow(context, engine, locationUuid)
+            .thenCompose(locationApprovalSteps -> {
+              steps.addAll(locationApprovalSteps);
+              return CompletableFuture.completedFuture(steps);
+            });
+      }
     });
   }
 
