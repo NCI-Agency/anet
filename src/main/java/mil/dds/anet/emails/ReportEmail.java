@@ -24,6 +24,9 @@ public class ReportEmail implements AnetEmailAction {
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
     Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    if (r == null) {
+      return null;
+    }
     sender = AnetObjectEngine.getInstance().getPersonDao().getByUuid(sender.getUuid());
 
     context.put("report", r);
