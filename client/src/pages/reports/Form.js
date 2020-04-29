@@ -1252,9 +1252,9 @@ const BaseReportForm = ({
           !isEmptyTaskAssessment(values.tasksAssessments[key])
       )
       .map(key => {
-        values[`tasksAssessments.${key}`].__recurrence =
+        values.tasksAssessments[key].__recurrence =
           ASSESSMENTS_RECURRENCE_TYPE.ONCE
-        values[`tasksAssessments.${key}`].__relatedObjectType =
+        values.tasksAssessments[key].__relatedObjectType =
           ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
