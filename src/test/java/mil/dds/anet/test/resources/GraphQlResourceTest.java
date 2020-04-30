@@ -45,7 +45,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
     final ReportSearchQuery jaQuery = new ReportSearchQuery();
     jaQuery.setPageSize(1);
     variables.put("reportUuid",
-        jack.loadAttendedReports(context, jaQuery).getList().get(0).getUuid());
+        jack.loadAttendedReports(context, jaQuery).join().getList().get(0).getUuid());
     variables.put("pageNum", 0);
     variables.put("pageSize", 10);
     variables.put("maxResults", 6);
