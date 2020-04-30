@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.WebApplicationException;
@@ -671,11 +672,11 @@ public class ReportResource {
   }
 
   @GraphQLQuery(name = "reportList")
-  public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLEnvironment Set<String> subFields,
+  public CompletableFuture<AnetBeanList<Report>> search(
+      @GraphQLRootContext Map<String, Object> context, @GraphQLEnvironment Set<String> subFields,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(subFields, query);
+    return dao.search(context, subFields, query);
   }
 
   /**
