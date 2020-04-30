@@ -77,7 +77,8 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
 
   static class PlanningApprovalStepsBatcher extends ForeignKeyBatcher<ApprovalStep> {
     private static final String sql =
-        "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"relatedObjectUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
+        "/* batch.getPlanningApprovalStepsByRelatedObject */ SELECT * from \"approvalSteps\""
+            + " WHERE \"relatedObjectUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
     private static final Map<String, Object> additionalParams = new HashMap<>();
 
     static {
@@ -91,7 +92,8 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
 
   static class ApprovalStepsBatcher extends ForeignKeyBatcher<ApprovalStep> {
     private static final String sql =
-        "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"relatedObjectUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
+        "/* batch.getApprovalStepsByRelatedObject */ SELECT * from \"approvalSteps\""
+            + " WHERE \"relatedObjectUuid\" IN ( <foreignKeys> ) AND \"approvalSteps\".type = :type";
     private static final Map<String, Object> additionalParams = new HashMap<>();
 
     static {
