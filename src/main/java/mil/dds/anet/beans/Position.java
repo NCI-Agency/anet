@@ -146,6 +146,18 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
     return person.getForeignObject();
   }
 
+  // for easy access through reflection
+  @JsonIgnore
+  public void setCurrentPersonUuid(String personUuid) {
+    setPersonUuid(personUuid);
+  }
+
+  // for easy access through reflection
+  @JsonIgnore
+  public String getCurrentPersonUuid() {
+    return getPersonUuid();
+  }
+
   @GraphQLQuery(name = "associatedPositions")
   public CompletableFuture<List<Position>> loadAssociatedPositions(
       @GraphQLRootContext Map<String, Object> context) {

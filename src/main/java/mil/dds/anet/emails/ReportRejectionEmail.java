@@ -25,6 +25,10 @@ public class ReportRejectionEmail implements AnetEmailAction {
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
     Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    if (r == null) {
+      return null;
+    }
+
     rejector = AnetObjectEngine.getInstance().getPersonDao().getByUuid(rejector.getUuid());
     comment = AnetObjectEngine.getInstance().getCommentDao().getByUuid(comment.getUuid());
 
