@@ -815,6 +815,7 @@ properties:
         type:
           type: string
           enum:
+            - board
             - kanban
             - decisives
 

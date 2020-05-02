@@ -1,12 +1,14 @@
-import { Report } from "models"
 import encodeQuery from "querystring/encode"
+import API from "api"
+import { gql } from "apollo-boost"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
+import * as Models from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
+import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
-import { gql } from "apollo-boost"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
@@ -310,6 +312,26 @@ export default class Model {
     return a && b && a.uuid === b.uuid
   }
 
+  static fetchByUuid(uuid, ENTITY_GQL_FIELDS) {
+    const fields = ENTITY_GQL_FIELDS[this.resourceName]
+    if (!fields) {
+      return null
+    }
+
+    return API.query(
+      gql`
+      query($uuid: String!) {
+        ${this.getInstanceName}(uuid: $uuid) {
+          ${fields}
+        }
+      }
+    `,
+      {
+        uuid: uuid
+      }
+    ).then(data => new Models[this.resourceName](data[this.getInstanceName]))
+  }
+
   constructor(props) {
     Object.forEach(this.constructor.schema, (key, value) => {
       if (Array.isArray(value) && value.length === 0) {
@@ -469,7 +491,7 @@ export default class Model {
           n.type === NOTE_TYPE.ASSESSMENT &&
           n.noteRelatedObjects.filter(
             ro =>
-              ro.relatedObjectType === Report.relatedObjectType &&
+              ro.relatedObjectType === Models.Report.relatedObjectType &&
               (publishedReportsUuids !== undefined
                 ? publishedReportsUuids.includes(ro.relatedObjectUuid)
                 : true)
