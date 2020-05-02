@@ -1,6 +1,8 @@
 package mil.dds.anet.search.pg;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -21,9 +23,11 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   @InTransaction
   @Override
-  public AnetBeanList<Report> runSearch(Set<String> subFields, ReportSearchQuery query) {
+  public CompletableFuture<AnetBeanList<Report>> runSearch(Map<String, Object> context,
+      Set<String> subFields, ReportSearchQuery query) {
     buildQuery(subFields, query);
-    return qb.buildAndRun(getDbHandle(), query, new ReportMapper());
+    return postProcessResults(context, query,
+        qb.buildAndRun(getDbHandle(), query, new ReportMapper()));
   }
 
   @Override

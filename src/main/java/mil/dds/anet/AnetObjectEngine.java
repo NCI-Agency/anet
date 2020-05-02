@@ -5,17 +5,21 @@ import com.google.inject.Injector;
 import io.dropwizard.Application;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.AdminDao;
@@ -40,7 +44,9 @@ import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.UuidFetcher;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
 public class AnetObjectEngine {
@@ -211,27 +217,95 @@ public class AnetObjectEngine {
     return ordered;
   }
 
-  public boolean canUserApproveStep(Map<String, Object> context, String userUuid,
-      String approvalStepUuid) {
-    ApprovalStep as = asDao.getByUuid(approvalStepUuid);
-    final List<Position> approvers = as.loadApprovers(context).join();
-    for (Position approverPosition : approvers) {
-      // approverPosition.getPerson() has the currentPersonUuid already loaded, so this is safe.
-      if (Objects.equals(userUuid, approverPosition.getPersonUuid())) {
-        return true;
-      }
-    }
-    return false;
+  public CompletableFuture<Boolean> canUserApproveStep(Map<String, Object> context, String userUuid,
+      String approvalStepUuid, String advisorOrgUuid) {
+    return new UuidFetcher<ApprovalStep>()
+        .load(context, IdDataLoaderKey.APPROVAL_STEPS, approvalStepUuid).thenCompose(
+            approvalStep -> canUserApproveStep(context, userUuid, approvalStep, advisorOrgUuid));
   }
 
-  public boolean canUserRejectStep(Map<String, Object> context, String userUuid,
-      String approvalStepUuid) {
-    final Person p = personDao.getByUuid(userUuid);
-    // Admin users may reject any step
-    if (AuthUtils.isAdmin(p)) {
-      return true;
+  public CompletableFuture<Boolean> canUserApproveStep(Map<String, Object> context, String userUuid,
+      ApprovalStep approvalStep, String advisorOrgUuid) {
+    return getTaskedAdvisorOrgParentUuids(context, approvalStep, advisorOrgUuid)
+        .thenCompose(taskedAdvisorOrgParentUuids -> approvalStep.loadApprovers(context)
+            .thenCompose(approvers -> {
+              @SuppressWarnings("unchecked")
+              final CompletableFuture<Boolean>[] allApprovers =
+                  (CompletableFuture<Boolean>[]) approvers.stream()
+                      .map(approverPosition -> checkApprovalStep(context, userUuid, approvalStep,
+                          taskedAdvisorOrgParentUuids, approverPosition))
+                      .toArray(CompletableFuture<?>[]::new);
+              return CompletableFuture.allOf(allApprovers).thenCompose(v -> {
+                for (final CompletableFuture<Boolean> cf : allApprovers) {
+                  if (cf.join()) {
+                    return CompletableFuture.completedFuture(true);
+                  }
+                }
+                return CompletableFuture.completedFuture(false);
+              });
+            }));
+  }
+
+  private CompletableFuture<Boolean> checkApprovalStep(Map<String, Object> context, String userUuid,
+      ApprovalStep approvalStep, Set<String> taskedAdvisorOrgParentUuids,
+      Position approverPosition) {
+    if (!Objects.equals(userUuid, approverPosition.getPersonUuid())) {
+      // User does not match approver
+      return CompletableFuture.completedFuture(false);
     }
-    return canUserApproveStep(context, userUuid, approvalStepUuid);
+    if (!approvalStep.isRestrictedApproval()) {
+      // Approval is not restricted
+      return CompletableFuture.completedFuture(true);
+    }
+    // Else check organization hierarchy
+    return approverPosition.loadOrganization(context).thenCompose(approverOrg -> {
+      if (approverOrg == null) {
+        return CompletableFuture.completedFuture(false);
+      }
+      return approverOrg.loadAscendantOrgs(context, null).thenCompose(aos -> {
+        final Set<String> matchingOrgs =
+            aos.stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet());
+        matchingOrgs.retainAll(taskedAdvisorOrgParentUuids);
+        return CompletableFuture.completedFuture(!matchingOrgs.isEmpty());
+      });
+    });
+  }
+
+  private CompletableFuture<Set<String>> getTaskedAdvisorOrgParentUuids(Map<String, Object> context,
+      ApprovalStep approvalStep, String advisorOrgUuid) {
+    if (!approvalStep.isRestrictedApproval()) {
+      return CompletableFuture.completedFuture(null);
+    }
+    return new UuidFetcher<Task>()
+        .load(context, IdDataLoaderKey.TASKS, approvalStep.getRelatedObjectUuid())
+        .thenCompose(task -> new UuidFetcher<Organization>()
+            .load(context, IdDataLoaderKey.ORGANIZATIONS, advisorOrgUuid)
+            .thenCompose(advisorOrg -> {
+              if (task == null || advisorOrg == null) {
+                return CompletableFuture.completedFuture(new HashSet<>());
+              }
+              return task.loadTaskedOrganizations(context).thenCompose(tos -> {
+                final Set<String> taskedAdvisorOrgParentUuids =
+                    tos.stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet());
+                return advisorOrg.loadAscendantOrgs(context, null).thenCompose(aaos -> {
+                  taskedAdvisorOrgParentUuids.retainAll(
+                      aaos.stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet()));
+                  return CompletableFuture.completedFuture(taskedAdvisorOrgParentUuids);
+                });
+              });
+            }));
+  }
+
+  public CompletableFuture<Boolean> canUserRejectStep(Map<String, Object> context, String userUuid,
+      ApprovalStep approvalStep, String advisorOrgUuid) {
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, userUuid)
+        .thenCompose(p -> {
+          // Admin users may reject any step
+          if (AuthUtils.isAdmin(p)) {
+            return CompletableFuture.completedFuture(true);
+          }
+          return canUserApproveStep(context, userUuid, approvalStep, advisorOrgUuid);
+        });
   }
 
   /*
@@ -258,10 +332,9 @@ public class AnetObjectEngine {
   public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
     query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
-    query.setParentOrgRecursively(true);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
-    final List<Organization> orgList =
-        AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+    final List<Organization> orgList = orgDao.search(query).getList();
     return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
   }
 
@@ -275,7 +348,7 @@ public class AnetObjectEngine {
     query.setCustomFieldRef1Uuid(Collections.singletonList(parentTaskUuid));
     query.setCustomFieldRef1Recursively(true);
     query.setPageSize(0);
-    final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+    final List<Task> taskList = taskDao.search(query).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
   }
 

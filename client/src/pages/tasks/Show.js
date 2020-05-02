@@ -72,6 +72,7 @@ const GQL_GET_TASK = gql`
       planningApprovalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -87,6 +88,7 @@ const GQL_GET_TASK = gql`
       approvalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -362,7 +364,10 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
 
-            <Approvals relatedObject={task} />
+            <Approvals
+              restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
+              relatedObject={task}
+            />
 
             <Fieldset title={`Reports for this ${fieldSettings.shortLabel}`}>
               <ReportCollection

@@ -36,6 +36,7 @@ import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
@@ -63,13 +64,12 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
-  // Must always retrieve these e.g. for ORDER BY
-  public static final String[] minimalFields =
-      {"uuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
+  // Must always retrieve these e.g. for ORDER BY or search post-processing
+  public static final String[] minimalFields = {"uuid", "approvalStepUuid",
+      "advisorOrganizationUuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
   public static final String[] additionalFields = {"state", "duration", "intent", "exsum",
-      "locationUuid", "approvalStepUuid", "advisorOrganizationUuid", "principalOrganizationUuid",
-      "authorUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text", "keyOutcomes",
-      "nextSteps", "customFields"};
+      "locationUuid", "principalOrganizationUuid", "authorUuid", "atmosphere", "cancelledReason",
+      "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
@@ -360,12 +360,18 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   @Override
   public AnetBeanList<Report> search(ReportSearchQuery query) {
-    return search(null, query);
+    return search(AnetObjectEngine.getInstance().getContext(), query).join();
   }
 
-  public AnetBeanList<Report> search(Set<String> subFields, ReportSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(subFields,
-        query);
+  public CompletableFuture<AnetBeanList<Report>> search(Map<String, Object> context,
+      ReportSearchQuery query) {
+    return search(context, null, query);
+  }
+
+  public CompletableFuture<AnetBeanList<Report>> search(Map<String, Object> context,
+      Set<String> subFields, ReportSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(context,
+        subFields, query);
   }
 
   /*
@@ -447,7 +453,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       // organizations
       OrganizationSearchQuery query = new OrganizationSearchQuery();
       query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
-      query.setParentOrgRecursively(true);
+      query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
       query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =

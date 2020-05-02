@@ -235,20 +235,22 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
 
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "authoredReports")
-  public AnetBeanList<Report> loadAuthoredReports(@GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<AnetBeanList<Report>> loadAuthoredReports(
+      @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAuthorUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
+    return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "attendedReports")
-  public AnetBeanList<Report> loadAttendedReports(@GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<AnetBeanList<Report>> loadAttendedReports(
+      @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAttendeeUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
+    return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
   @GraphQLQuery(name = "avatar")
