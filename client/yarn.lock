@@ -1295,7 +1295,7 @@
     "@emotion/utils" "0.11.3"
     "@emotion/weak-memoize" "0.2.5"
 
-"@emotion/core@^10.0.20", "@emotion/core@^10.0.28":
+"@emotion/core@10.0.28", "@emotion/core@^10.0.20":
   version "10.0.28"
   resolved "https://registry.yarnpkg.com/@emotion/core/-/core-10.0.28.tgz#bb65af7262a234593a9e952c041d0f1c9b9bef3d"
   integrity sha512-pH8UueKYO5jgg0Iq+AmCLxBsvuGtvlmiDCOuv8fGNYn3cowFpLN98L8zO56U0H1PjDIyAlXymgL3Wu7u7v6hbA==
@@ -1359,7 +1359,7 @@
     "@emotion/serialize" "^0.11.15"
     "@emotion/utils" "0.11.3"
 
-"@emotion/styled@^10.0.17", "@emotion/styled@^10.0.27":
+"@emotion/styled@10.0.27", "@emotion/styled@^10.0.17":
   version "10.0.27"
   resolved "https://registry.yarnpkg.com/@emotion/styled/-/styled-10.0.27.tgz#12cb67e91f7ad7431e1875b1d83a94b814133eaf"
   integrity sha512-iK/8Sh7+NLJzyp9a5+vIQIXTYxfT4yB/OJbjzQanB2RZpvmzBQOHZWhpAMZWYEKRNNbsD6WfBw5sVWkb6WzS/Q==
@@ -1655,7 +1655,7 @@
   dependencies:
     "@projectstorm/geometry" "^6.0.2"
 
-"@projectstorm/react-diagrams-core@^6.0.2":
+"@projectstorm/react-diagrams-core@6.0.2", "@projectstorm/react-diagrams-core@^6.0.2":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-core/-/react-diagrams-core-6.0.2.tgz#d18816e593791b7cc12f7dc142716faeb6bd0f89"
   integrity sha512-oT2UYqKmeahITwHecPOEca4mtDO2XDUWYfbbzLG1opwNSTR2ui+wuWMjJMOuNxjwBsvxXbPY9wy4G5xMttIrCA==
@@ -1663,14 +1663,14 @@
     "@projectstorm/geometry" "^6.0.2"
     "@projectstorm/react-canvas-core" "^6.0.2"
 
-"@projectstorm/react-diagrams-defaults@^6.0.2":
+"@projectstorm/react-diagrams-defaults@6.0.2", "@projectstorm/react-diagrams-defaults@^6.0.2":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-defaults/-/react-diagrams-defaults-6.0.2.tgz#7fbd599bc437153b64844b56feb3a02aeea389ad"
   integrity sha512-cAc2qqv92JD3mDm9H0Yxsy2xa8VPmSyjMwjQdX0WCrrWu9lB5tKCgpBn+zmjKePEIKFmd3aqqeIYjYo1OQlIag==
   dependencies:
     "@projectstorm/react-diagrams-core" "^6.0.2"
 
-"@projectstorm/react-diagrams-routing@^6.0.2":
+"@projectstorm/react-diagrams-routing@6.0.2":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-routing/-/react-diagrams-routing-6.0.2.tgz#b6469c3d849904395bde84fe602487405403035e"
   integrity sha512-xtmAqxmYwk3kFgFnkTBwVRh0QuOfyvZqUhvfOGgwbhoRRsJk2PlyFi9O16y0BOUOoHJJYxenoSGGgL8WGgjpKQ==
@@ -4940,7 +4940,7 @@ clone@^1.0.2:
   resolved "https://registry.yarnpkg.com/clone/-/clone-1.0.4.tgz#da309cc263df15994c688ca902179ca3c7cd7c7e"
   integrity sha1-2jCcwmPfFZlMaIypAheco8fNfH4=
 
-closest@^0.0.1:
+closest@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/closest/-/closest-0.0.1.tgz#26da6f80b3e0e17e71f80f12782819e9f653495c"
   integrity sha1-JtpvgLPg4X5x+A8SeCgZ6fZTSVw=
@@ -5944,7 +5944,7 @@ d3@5.15.1:
     d3-voronoi "1"
     d3-zoom "1"
 
-dagre@^0.8.5:
+dagre@0.8.5:
   version "0.8.5"
   resolved "https://registry.yarnpkg.com/dagre/-/dagre-0.8.5.tgz#ba30b0055dac12b6c1fcc247817442777d06afee"
   integrity sha512-/aTqmnRta7x7MCCpExk7HQL2O4owCT2h8NT//9I1OQ9vt29Pa0BzSAkR5lwFUcQ7491yVi/3CXU9jQ5o0Mn2Sw==
@@ -11268,7 +11268,7 @@ math-expression-evaluator@^1.2.14:
   resolved "https://registry.yarnpkg.com/math-expression-evaluator/-/math-expression-evaluator-1.2.22.tgz#c14dcb3d8b4d150e5dcea9c68c8dad80309b0d5e"
   integrity sha512-L0j0tFVZBQQLeEjmWOvDLoRciIY8gQGWahvkztXUal8jH8R5Rlqo9GCvgqvXcy9LQhEWdQCVvzqAbxgYNt4blQ==
 
-mathjs@^6.6.1:
+mathjs@6.6.1:
   version "6.6.1"
   resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-6.6.1.tgz#46675c9e97b8cb8cf9a66402b1360a6996abf103"
   integrity sha512-RCFCYkf1IV3u0DAeqj2Rqqwyi302kFxHoYbfp/Bxm6kUg0ALYH7YT0bYzsO8qgCLv9RS3bWMZnAgUbLgiDjLcw==
@@ -12638,14 +12638,14 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
-pathfinding@^0.4.18:
+pathfinding@0.4.18:
   version "0.4.18"
   resolved "https://registry.yarnpkg.com/pathfinding/-/pathfinding-0.4.18.tgz#a9990f6fa22b7ef196e5651b049165403a045fe8"
   integrity sha1-qZkPb6IrfvGW5WUbBJFlQDoEX+g=
   dependencies:
     heap "0.2.5"
 
-paths-js@^0.4.10:
+paths-js@0.4.10:
   version "0.4.10"
   resolved "https://registry.yarnpkg.com/paths-js/-/paths-js-0.4.10.tgz#a3575f409b4a36f8aa795ba4d051989021be58c7"
   integrity sha512-JZoqlRSHtx+bc+xKI9o4bropEbqZBF4ZfYImiB1T9RYpHB73h5I8XZ7FfSBbHbBMtdD1c04ujjAPH8wUuu4+Gw==
