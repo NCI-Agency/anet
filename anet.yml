@@ -225,35 +225,20 @@ dictionary:
           componentClass: textarea
           style:
             height: 400px
-        assessment:
-          customFields:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder:  Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the top 3 issues]
-            status:
-              type: enum
-              label: Project status
-              helpText: Select an assessement status for objective
-              choices:
-                GREEN:
-                  label: Green
-                  color: '#c2ffb3'
-                AMBER:
-                  label: Amber
-                  color: '#ffe396'
-                RED:
-                  label: Red
-                  color: '#ff8279'
-              validations:
-                - type: required
-                  params: [You must provide the assessment status]
+        assessments:
+          - recurrence: semiannualy
+            questions:
+              issues:
+                type: special_field
+                label: Top 3 issues
+                placeholder:  Enter the top 3 issues
+                widget: richTextEditor
+                style:
+                  height: 300px
+                validations:
+                  - type: required
+                    params: [You must provide the top 3 issues]
+
       subLevel:
         shortLabel: Effort
         shortName:
@@ -266,19 +251,48 @@ dictionary:
           componentClass: textarea
           style:
             height: 400px
-        assessment:
-          customFields:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder:  Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the top 3 issues]
-
+        assessments:
+          - recurrence: monthly
+            questions:
+              issues:
+                type: special_field
+                label: Top 3 issues
+                placeholder:  Enter the top 3 issues
+                widget: richTextEditor
+                style:
+                  height: 300px
+                validations:
+                  - type: required
+                    params: [You must provide the top 3 issues]
+              status:
+                type: enum
+                label: Project status
+                helpText: Select an assessement status for objective
+                choices:
+                  GREEN:
+                    label: Green
+                    color: '#c2ffb3'
+                  AMBER:
+                    label: Amber
+                    color: '#ffe396'
+                  RED:
+                    label: Red
+                    color: '#ff8279'
+                validations:
+                  - type: required
+                    params: [You must provide the assessment status]
+          - recurrence: weekly
+            questions:
+              issues:
+                type: special_field
+                label: Top 3 issues
+                placeholder:  Enter the top 3 issues
+                widget: richTextEditor
+                style:
+                  height: 300px
+                validations:
+                  - type: required
+                    params: [You must provide the top 3 issues]
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task
@@ -304,13 +318,49 @@ dictionary:
         label: Responsible positions
         placeholder: Search for a position...
       customFields:
-        assessmentDefinition:
-          type: text
-          label: Assessment definition
-          placeholder: JSON that defines the effort (you need to know what you are doing)
-          componentClass: textarea
-          style:
-            height: 200px
+        assessments:
+          type: array_of_objects
+          label: Assessments definition
+          addButtonLabel: Add an assessment
+          objectLabel: Assessment
+          objectFields:
+            recurrence:
+              type: enum
+              label: Recurrence
+              helpText: Select a recurrence for this periodic assessment
+              choices:
+                once:
+                  label: once
+                daily:
+                    label: daily
+                weekly:
+                  label: weekly
+                biweekly:
+                  label: biweekly
+                semimonthly:
+                  label: semimonthly
+                monthly:
+                  label: monthly
+                quarterly:
+                  label: quarterly
+                semiannualy:
+                  label: semiannualy
+            relatedObjectType:
+              type: enum
+              label: Related object type
+              helpText: object type context in which the assessment will be made
+              choices:
+                report:
+                  label: Report
+                null:
+                  label: None
+            questions:
+              type: text
+              label: Questions
+              placeholder: JSON that defines the assessment (you need to know what you are doing)
+              componentClass: textarea
+              style:
+                height: 200px
 
     report:
       intent: Engagement purpose
@@ -647,6 +697,64 @@ dictionary:
                 - value: "3"
                   label: three
                   color: '#ff8279'
+        assessments:
+          - recurrence: quarterly
+            questions:
+              test1:
+                type: enum
+                label: Test question 1
+                choices:
+                  "1":
+                    label: one
+                    color: '#c2ffb3'
+                  "2":
+                    label: two
+                    color: '#ffe396'
+                  "3":
+                    label: three
+                    color: '#ff8279'
+              test2:
+                type: enum
+                label: Test question 2
+                choices:
+                  "3":
+                    label: three
+                    color: '#ff8279'
+                  "4":
+                    label: four
+                    color: '#ffe396'
+                  "5":
+                    label: five
+                    color: '#c2ffb3'
+              test3:
+                type: enum
+                label: Test question 3
+                choices:
+                  "1":
+                    label: one
+                    color: '#c2ffb3'
+                  "2":
+                    label: two
+                    color: '#ff8279'
+                  "3":
+                    label: three
+                    color: '#ff8279'
+          - recurrence: once
+            relatedObjectType: report
+            questions:
+              question1:
+                type: enum
+                label: Attendee involvement
+                choices:
+                  "1":
+                    label: low
+                    color: '#c2ffb3'
+                  "2":
+                    label: medium
+                    color: '#ffe396'
+                  "3":
+                    label: high
+                    color: '#ff8279'
 
       position:
         name: Afghan Tashkil

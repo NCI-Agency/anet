@@ -1,24 +1,9 @@
 import { Settings } from "api"
-import Model, {
-  createYupObjectShape,
-  NOTE_TYPE,
-  yupDate
-} from "components/Model"
+import Model, { createCustomFieldsSchema, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Report } from "models"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import * as yup from "yup"
-
-function createTaskAssessmentSchema(customFieldsConfig) {
-  const taskAssessmentSchemaShape = createYupObjectShape(
-    customFieldsConfig,
-    "entityAssessment"
-  )
-  return yup.object().shape({
-    entityAssessment: taskAssessmentSchemaShape
-  })
-}
 
 export const {
   shortLabel,
@@ -53,16 +38,8 @@ export default class Task extends Model {
   }
 
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.task.customFields
-  )
-
-  static topLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
-    Settings.fields.task.topLevel.assessment.customFields
-  )
-
-  static subLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
-    Settings.fields.task.subLevel.assessment.customFields
   )
 
   static yupSchema = yup
@@ -163,10 +140,10 @@ export default class Task extends Model {
           })
         )
         .nullable()
-        .default([]),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Task.customFieldsSchema.nullable()
+        .default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Task.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
@@ -190,16 +167,6 @@ export default class Task extends Model {
       : Settings.fields.task.subLevel
   }
 
-  periodAssessmentYupSchema() {
-    return this.isTopLevelTask()
-      ? Task.topLevelAssessmentCustomFieldsSchema
-      : Task.subLevelAssessmentCustomFieldsSchema
-  }
-
-  periodAssessmentConfig() {
-    return this.fieldSettings().assessment?.customFields
-  }
-
   iconUrl() {
     return TASKS_ICON
   }
@@ -208,49 +175,12 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
-  getAssessmentResults(dateRange) {
-    const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
-    const taskAssessmentNotes = this.notes
-      .filter(
-        n =>
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.length === 2 &&
-          n.noteRelatedObjects.filter(
-            ro =>
-              ro.relatedObjectType === Report.relatedObjectType &&
-              publishedReportsUuids.includes(ro.relatedObjectUuid)
-          ).length &&
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
-      )
-      .map(ta => JSON.parse(ta.text))
-    const assessmentResults = {}
-    taskAssessmentNotes.forEach(o =>
-      Object.keys(o).forEach(k => {
-        if (!Object.prototype.hasOwnProperty.call(assessmentResults, k)) {
-          assessmentResults[k] = []
-        }
-        assessmentResults[k].push(o[k])
-      })
-    )
-    return assessmentResults
+  generalAssessmentsConfig() {
+    return this.fieldSettings().assessments || []
   }
 
-  getLastAssessment(dateRange) {
-    const notesToAssessments = this.notes
-      .filter(n => {
-        return (
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.length === 1 &&
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
-        )
-      })
-      .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(ta => ({
-        uuid: ta.uuid,
-        assessment: JSON.parse(ta.text)
-      }))
-    return notesToAssessments.length ? notesToAssessments[0].assessment : null
+  instanceAssessmentsConfig() {
+    // The given task instance might have a specific assessments config
+    return JSON.parse(this.customFields || "{}").assessments || []
   }
 }

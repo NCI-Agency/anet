@@ -1,5 +1,5 @@
 import { Settings } from "api"
-import Model, { createYupObjectShape, yupDate } from "components/Model"
+import Model, { createCustomFieldsSchema, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
@@ -30,8 +30,13 @@ export default class Person extends Model {
 
   static nameDelimiter = ","
 
+  static advisorAssessmentConfig = Settings.fields.advisor.person.assessments
+
+  static principalAssessmentConfig =
+    Settings.fields.principal.person.assessments
+
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.person.customFields
   )
 
@@ -142,10 +147,10 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Person.customFieldsSchema.nullable()
+        .default(() => Person.STATUS.ACTIVE)
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Person.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
@@ -314,6 +319,16 @@ export default class Person extends Model {
     return {
       lastName: lastName.trim().toUpperCase(),
       firstName: firstName.trim()
+    }
+  }
+
+  generalAssessmentsConfig() {
+    if (this.isAdvisor()) {
+      return Person.advisorAssessmentConfig || []
+    } else if (this.isPrincipal()) {
+      return Person.principalAssessmentConfig || []
+    } else {
+      return []
     }
   }
 }

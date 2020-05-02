@@ -1,6 +1,6 @@
 import { Settings } from "api"
 import Model, {
-  createYupObjectShape,
+  createCustomFieldsSchema,
   NOTE_TYPE,
   yupDate
 } from "components/Model"
@@ -49,8 +49,13 @@ export default class Report extends Model {
     NEUTRAL: "NEUTRAL"
   }
 
+  static TASKS_ASSESSMENTS_PARENT_FIELD = "tasksAssessments"
+  static TASKS_ASSESSMENTS_UUIDS_FIELD = "tasksAssessmentsUuids"
+  static ATTENDEES_ASSESSMENTS_PARENT_FIELD = "attendeesAssessments"
+  static ATTENDEES_ASSESSMENTS_UUIDS_FIELD = "attendeesAssessmentsUuids"
+
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.report.customFields
   )
 
@@ -238,10 +243,10 @@ export default class Report extends Model {
         .default([])
         .label(Settings.fields.report.reportTags),
       reportSensitiveInformation: yup.object().nullable().default({}), // null?
-      authorizationGroups: yup.array().nullable().default([]),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Report.customFieldsSchema.nullable()
+      authorizationGroups: yup.array().nullable().default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Report.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static yupWarningSchema = yup.object().shape({
@@ -382,32 +387,55 @@ export default class Report extends Model {
     }
   }
 
-  getTaskAssessments() {
+  getRelatedObjectsEngagementAssessments(
+    entityType,
+    entitiesAssessmentsFieldName,
+    entitiesAssessmentsUuidsFieldName
+  ) {
     const notesToAssessments = this.notes
       .filter(
-        n =>
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.filter(
-            ro => ro.relatedObjectType === Task.relatedObjectType
-          ).length
+        n => n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length > 1
       )
-      .map(ta => ({
-        taskUuid: [
-          ta.noteRelatedObjects.filter(
-            ro => ro.relatedObjectType === Task.relatedObjectType
-          )[0].relatedObjectUuid
+      .map(n => ({
+        entityUuids: [
+          n.noteRelatedObjects
+            .filter(ro => ro.relatedObjectType === entityType.relatedObjectType)
+            .map(ro => ro.relatedObjectUuid)
         ],
-        assessmentUuid: ta.uuid,
-        assessment: JSON.parse(ta.text)
+        assessmentUuid: n.uuid,
+        assessment: JSON.parse(n.text)
       }))
-    // When updating the assessments, we need for each task the uuid of the related assessment
-    const taskToAssessmentUuid = {}
-    // Get initial task assessments values
-    const taskAssessments = {}
-    notesToAssessments.forEach(ta => {
-      taskToAssessmentUuid[ta.taskUuid] = ta.assessmentUuid
-      taskAssessments[ta.taskUuid] = ta.assessment
+    // When updating the instant assessments, we need for each entity the uuid of the
+    // related instant assessment
+    const entitiesAssessmentsUuids = {}
+    // Get initial entities assessments values
+    const entitiesAssessments = {}
+    notesToAssessments.forEach(m => {
+      m.entityUuids.forEach(entityUuid => {
+        entitiesAssessmentsUuids[entityUuid] = m.assessmentUuid
+        entitiesAssessments[entityUuid] = m.assessment
+      })
     })
-    return { taskToAssessmentUuid, taskAssessments }
+    return {
+      [entitiesAssessmentsUuidsFieldName]: entitiesAssessmentsUuids,
+      [entitiesAssessmentsFieldName]: entitiesAssessments
+    }
+  }
+
+  getTasksEngagementAssessments() {
+    const a = this.getRelatedObjectsEngagementAssessments(
+      Task,
+      Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+      Report.TASKS_ASSESSMENTS_UUIDS_FIELD
+    )
+    return a
+  }
+
+  getAttendeesEngagementAssessments() {
+    return this.getRelatedObjectsEngagementAssessments(
+      Person,
+      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
+      Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
+    )
   }
 }

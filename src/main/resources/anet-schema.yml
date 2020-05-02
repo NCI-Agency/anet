@@ -109,9 +109,9 @@ definitions:
             - properties:
                 type:
                   enum: [numberAggregation]
-              aggregationType:
-                type: string
-                enum: [sum, avg, min, max]
+                aggregationType:
+                  type: string
+                  enum: [sum, avg, min, max]
               required: [aggregationType]
 # TODO: The following properties should not be here as these are only dependency fields.
 # I can't figure out yet why the schema validation will not pass without them
@@ -200,6 +200,28 @@ definitions:
                         label:
                           type: string
                 required: [levels]
+
+# definition for assessment configuration
+  assessmentDef:
+    type: object
+    additionalProperties: false
+    required: [questions]
+    properties:
+      recurrence:
+        title: recurrence of an assessment
+        type: string
+        enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannualy, annually]
+        default: once
+      relatedObjectType:
+        title: object type context in which the assessment will be made
+        type: string
+        enum: [report, null]
+        default: null
+      questions:
+        title: questions to respond when assessing
+        type: object
+        additionalProperties:
+          "$ref": "#/definitions/customField"
 
 #########################################################
 ### schema root
@@ -350,14 +372,10 @@ properties:
                 "$ref": "#/properties/fields/properties/task/properties/longLabel"
               longName:
                 "$ref": "#/properties/fields/properties/task/properties/longName"
-              assessment:
-                type: object
-                required: [customFields]
-                properties:
-                  customFields:
-                    type: object
-                    additionalProperties:
-                      "$ref": "#/definitions/customField"
+              assessments:
+                type: array
+                items:
+                  "$ref": "#/definitions/assessmentDef"
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion: 
@@ -620,6 +638,10 @@ properties:
                                 type: string
                               color:
                                 type: string
+              assessments:
+                type: array
+                items:
+                  "$ref": "#/definitions/assessmentDef"
 
           position:
             type: object

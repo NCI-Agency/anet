@@ -5,7 +5,9 @@ import Fieldset from "components/Fieldset"
 import LikertScale from "components/graphs/LikertScale"
 import Model, {
   CUSTOM_FIELD_TYPE,
-  createYupObjectShape
+  createYupObjectShape,
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  INVISIBLE_CUSTOM_FIELDS_FIELD
 } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
@@ -33,8 +35,6 @@ const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
 const RENDERERS = {}
-
-const DEFAULT_CUSTOM_FIELDS_PREFIX = "formCustomFields"
 
 const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
@@ -285,7 +285,7 @@ const ArrayObject = ({
         invisibleFields={invisibleFields}
         updateInvisibleFields={updateInvisibleFields}
         vertical={vertical}
-        fieldNamePrefix={`${fieldName}.${index}`}
+        parentFieldName={`${fieldName}.${index}`}
       />
     </Fieldset>
   )
@@ -344,7 +344,7 @@ const ReadonlyArrayObject = ({
     <Fieldset title={`${objLabel} ${index + 1}`}>
       <ReadonlyCustomFields
         fieldsConfig={fieldConfig.objectFields}
-        fieldNamePrefix={`${fieldName}.${index}`}
+        parentFieldName={`${fieldName}.${index}`}
         values={values}
         vertical={vertical}
       />
@@ -373,7 +373,7 @@ const FIELD_COMPONENTS = {
 function getInvisibleFields(
   invisibleFields,
   fieldsConfig,
-  fieldNamePrefix,
+  parentFieldName,
   formikValues
 ) {
   const prevInvisibleFields = _cloneDeep(invisibleFields)
@@ -382,7 +382,7 @@ function getInvisibleFields(
   let curInvisibleFields = []
   Object.keys(fieldsConfig).forEach(key => {
     const fieldConfig = fieldsConfig[key]
-    const fieldName = `${fieldNamePrefix}.${key}`
+    const fieldName = `${parentFieldName}.${key}`
     const isVisible =
       !fieldConfig.visibleWhen ||
       (fieldConfig.visibleWhen &&
@@ -404,10 +404,10 @@ function getInvisibleFields(
 }
 
 export const CustomFieldsContainer = props => {
-  const { fieldNamePrefix, formikProps } = props
+  const { parentFieldName, formikProps } = props
   const [invisibleFields, setInvisibleFields] = useState([])
   const { setFieldValue } = formikProps
-  const invisibleFieldsFieldName = `${fieldNamePrefix}.invisibleCustomFields`
+  const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
     setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
   }, [invisibleFieldsFieldName, invisibleFields, setFieldValue])
@@ -431,11 +431,11 @@ export const CustomFieldsContainer = props => {
 CustomFieldsContainer.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
-  fieldNamePrefix: PropTypes.string.isRequired,
+  parentFieldName: PropTypes.string.isRequired,
   vertical: PropTypes.bool
 }
 CustomFieldsContainer.defaultProps = {
-  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX,
+  parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical: false
 }
 
@@ -521,7 +521,7 @@ CustomField.propTypes = {
 const CustomFields = ({
   fieldsConfig,
   formikProps,
-  fieldNamePrefix,
+  parentFieldName,
   invisibleFields,
   updateInvisibleFields,
   vertical
@@ -539,10 +539,10 @@ const CustomFields = ({
       getInvisibleFields(
         invisibleFields,
         fieldsConfig,
-        fieldNamePrefix,
+        parentFieldName,
         formikValues
       ),
-    [invisibleFields, fieldsConfig, fieldNamePrefix, formikValues]
+    [invisibleFields, fieldsConfig, parentFieldName, formikValues]
   )
   const invisibleFieldsUnchanged = _isEqualWith(
     latestInvisibleFieldsProp.current,
@@ -566,7 +566,7 @@ const CustomFields = ({
     <>
       {Object.keys(fieldsConfig).map(key => {
         const fieldConfig = fieldsConfig[key]
-        const fieldName = `${fieldNamePrefix}.${key}`
+        const fieldName = `${parentFieldName}.${key}`
         return invisibleFields.includes(fieldName) ? null : (
           <CustomField
             key={key}
@@ -585,13 +585,13 @@ const CustomFields = ({
 CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
-  fieldNamePrefix: PropTypes.string.isRequired,
+  parentFieldName: PropTypes.string.isRequired,
   invisibleFields: PropTypes.array,
   updateInvisibleFields: PropTypes.func,
   vertical: PropTypes.bool
 }
 CustomFields.defaultProps = {
-  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX,
+  parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical: false
 }
 
@@ -608,7 +608,7 @@ const READONLY_FIELD_COMPONENTS = {
 
 export const ReadonlyCustomFields = ({
   fieldsConfig,
-  fieldNamePrefix, // key path in the values object to get to the level of fields given by the fieldsConfig
+  parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical
 }) => {
@@ -628,7 +628,7 @@ export const ReadonlyCustomFields = ({
         return (
           <ReadonlyFieldComponent
             key={key}
-            name={`${fieldNamePrefix}.${key}`}
+            name={`${parentFieldName}.${key}`}
             values={values}
             vertical={vertical}
             {...fieldProps}
@@ -641,32 +641,32 @@ export const ReadonlyCustomFields = ({
 }
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
-  fieldNamePrefix: PropTypes.string.isRequired,
+  parentFieldName: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool
 }
 ReadonlyCustomFields.defaultProps = {
-  fieldNamePrefix: DEFAULT_CUSTOM_FIELDS_PREFIX,
+  parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical: false
 }
 
 // customFields should contain the JSON of all the visible custom fields.
-// When used for notes text, it should not contain the invisibleCustomFields.
+// When used for notes text, it should not contain the INVISIBLE_CUSTOM_FIELDS_FIELD.
 export const customFieldsJSONString = (
   values,
   forNoteText = false,
-  prefix = DEFAULT_CUSTOM_FIELDS_PREFIX
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT
 ) => {
-  const customFieldsValues = Object.get(values, prefix)
+  const customFieldsValues = Object.get(values, parentFieldName)
   if (customFieldsValues && typeof customFieldsValues === "object") {
     const clonedValues = _cloneDeep(values)
-    const filteredCustomFieldsValues = Object.get(clonedValues, prefix)
-    if (filteredCustomFieldsValues.invisibleCustomFields) {
-      filteredCustomFieldsValues.invisibleCustomFields.forEach(f =>
+    const filteredCustomFieldsValues = Object.get(clonedValues, parentFieldName)
+    if (filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD]) {
+      filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD].forEach(f =>
         _set(clonedValues, f.split("."), undefined)
       )
       if (forNoteText) {
-        delete filteredCustomFieldsValues.invisibleCustomFields
+        delete filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD]
       }
     }
     return JSON.stringify(filteredCustomFieldsValues)

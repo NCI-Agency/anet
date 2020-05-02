@@ -1,6 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -9,7 +10,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import { Report } from "models"
+import { Person, Report, Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -119,10 +120,23 @@ const ReportEdit = ({ pageDispatchers }) => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+      data.report.customFields
+    )
   }
   const report = new Report(data ? data.report : {})
-  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
+  let reportInitialValues = Object.assign(
+    report,
+    report.getTasksEngagementAssessments()
+  )
+  reportInitialValues = Object.assign(
+    reportInitialValues,
+    report.getAttendeesEngagementAssessments()
+  )
+  reportInitialValues.tasks = Task.fromArray(reportInitialValues.tasks)
+  reportInitialValues.attendees = Person.fromArray(
+    reportInitialValues.attendees
+  )
 
   return (
     <div className="report-edit">
