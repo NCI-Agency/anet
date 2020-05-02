@@ -3,6 +3,7 @@ package mil.dds.anet.beans;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import io.leangen.graphql.annotations.GraphQLNonNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,7 +34,7 @@ public class ApprovalStep extends AbstractAnetBean {
   String name;
   @GraphQLQuery
   @GraphQLInputField
-  private boolean restrictedApproval;
+  Boolean restrictedApproval;
 
   @GraphQLQuery(name = "approvers")
   public CompletableFuture<List<Position>> loadApprovers(
@@ -90,10 +91,13 @@ public class ApprovalStep extends AbstractAnetBean {
   }
 
   public boolean isRestrictedApproval() {
-    return restrictedApproval;
+    return Boolean.TRUE.equals(restrictedApproval);
+  }
+  public Boolean getRestrictedApproval() {
+    return Boolean.TRUE.equals(restrictedApproval);
   }
 
-  public void setRestrictedApproval(boolean restrictedApproval) {
+  public void setRestrictedApproval(Boolean restrictedApproval) {
     this.restrictedApproval = restrictedApproval;
   }
 

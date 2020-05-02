@@ -6,7 +6,6 @@ import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 
