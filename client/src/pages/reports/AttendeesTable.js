@@ -1,5 +1,7 @@
 import LinkTo from "components/LinkTo"
+import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import { Person } from "models"
+import Report from "models/Report"
 import PropTypes from "prop-types"
 import React from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
@@ -22,7 +24,7 @@ RemoveButton.propTypes = {
 
 const AttendeeDividerRow = () => (
   <tr className="attendee-divider-row">
-    <td colSpan={6}>
+    <td colSpan={7}>
       <hr />
     </td>
   </tr>
@@ -36,8 +38,9 @@ const TableHeader = ({ showDelete, hide }) => (
       </th>
       <th className="col-xs-3">{!hide && "Name"}</th>
       <th className="col-xs-3">{!hide && "Position"}</th>
-      <th className="col-xs-2">{!hide && "Location"}</th>
+      <th className="col-xs-1">{!hide && "Location"}</th>
       <th className="col-xs-2">{!hide && "Organization"}</th>
+      <th className="col-xs-1" />
       {showDelete && <th className="col-xs-1" />}
     </tr>
   </thead>
@@ -94,6 +97,7 @@ RadioButton.propTypes = {
 }
 
 const AttendeesTable = ({
+  report,
   attendees,
   disabled,
   onChange,
@@ -111,7 +115,7 @@ const AttendeesTable = ({
         />
       </TableContainer>
       <TableContainer className="principalAttendeesTable">
-        <TableHeader hide />
+        <TableHeader hide showDelete={showDelete} />
         <TableBody
           attendees={attendees}
           role={Person.ROLE.PRINCIPAL}
@@ -157,8 +161,11 @@ const AttendeesTable = ({
             whenUnspecified=""
           />
         </td>
+        <td style={{ verticalAlign: "middle" }}>
+          <PlanningConflictForPerson person={person} report={report} />
+        </td>
         {showDelete && (
-          <td>
+          <td style={{ verticalAlign: "middle" }}>
             <RemoveButton
               title="Remove attendee"
               handleOnClick={() => onDelete(person)}
@@ -182,6 +189,7 @@ const AttendeesTable = ({
 }
 
 AttendeesTable.propTypes = {
+  report: PropTypes.instanceOf(Report),
   attendees: PropTypes.array,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,

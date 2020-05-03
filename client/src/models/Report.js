@@ -410,4 +410,24 @@ export default class Report extends Model {
     })
     return { taskToAssessmentUuid, taskAssessments }
   }
+
+  hasConflict(that) {
+    if (this.uuid === that.uuid) {
+      return false // same report is not a conflicting report
+    }
+    const thisStart = moment(this.engagementDate)
+    const thisEnd = moment(this.engagementDate).add(
+      this.duration || 0,
+      "minute"
+    )
+    const thatStart = moment(that.engagementDate)
+    const thatEnd = moment(that.engagementDate).add(
+      that.duration || 0,
+      "minute"
+    )
+    return (
+      thisStart.isSame(thatStart) ||
+      (thisEnd.isAfter(thatStart) && thisStart.isBefore(thatEnd))
+    )
+  }
 }
