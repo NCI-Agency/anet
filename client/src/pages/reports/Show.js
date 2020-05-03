@@ -15,11 +15,12 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
   AnchorLink,
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import PlanningConflictForReport from "components/PlanningConflictForReport"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
@@ -520,10 +521,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   name="engagementDate"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    report.engagementDate &&
-                    moment(report.engagementDate).format(
-                      Report.getEngagementDateFormat()
-                    )
+                    <>
+                      {report.engagementDate &&
+                        moment(report.engagementDate).format(
+                          Report.getEngagementDateFormat()
+                        )}
+                      <PlanningConflictForReport report={report} largeIcon />
+                    </>
                   }
                 />
 
@@ -616,7 +620,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
               </Fieldset>
               <Fieldset title="Meeting attendees">
-                <AttendeesTable attendees={report.attendees} disabled />
+                <AttendeesTable report={report} disabled />
               </Fieldset>
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
                 <TaskTable

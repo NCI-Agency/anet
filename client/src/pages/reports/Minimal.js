@@ -411,7 +411,7 @@ const ReportMinimal = ({ pageDispatchers }) => {
             </Fieldset>
 
             <Fieldset title="Meeting attendees">
-              <AttendeesTable attendees={report.attendees} disabled />
+              <AttendeesTable report={report} disabled />
             </Fieldset>
 
             <Fieldset title={Settings.fields.task.subLevel.longLabel}>
