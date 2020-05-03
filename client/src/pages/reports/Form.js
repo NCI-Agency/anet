@@ -742,6 +742,13 @@ const ReportForm = ({
                       renderSelected={
                         <AttendeesTable
                           attendees={values.attendees}
+                          report={
+                            new Report({
+                              uuid: values.uuid,
+                              engagementDate: values.engagementDate,
+                              duration: Number.parseInt(values.duration) || 0
+                            })
+                          }
                           onChange={value =>
                             setFieldValue("attendees", value, true)}
                           showDelete
