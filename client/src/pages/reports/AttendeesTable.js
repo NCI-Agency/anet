@@ -84,7 +84,6 @@ RadioButton.propTypes = {
 
 const AttendeesTable = ({
   report,
-  attendees,
   disabled,
   onChange,
   showDelete,
@@ -95,7 +94,7 @@ const AttendeesTable = ({
       <TableContainer className="advisorAttendeesTable">
         <TableHeader showDelete={showDelete} />
         <TableBody
-          attendees={attendees}
+          attendees={report.attendees}
           role={Person.ROLE.ADVISOR}
           handleAttendeeRow={renderAttendeeRow}
         />
@@ -103,7 +102,7 @@ const AttendeesTable = ({
       <TableContainer className="principalAttendeesTable">
         <TableHeader hide showDelete={showDelete} />
         <TableBody
-          attendees={attendees}
+          attendees={report.attendees}
           role={Person.ROLE.PRINCIPAL}
           handleAttendeeRow={renderAttendeeRow}
           enableDivider
@@ -164,20 +163,19 @@ const AttendeesTable = ({
   }
 
   function setPrimaryAttendee(person) {
-    attendees.forEach(attendee => {
+    report.attendees.forEach(attendee => {
       if (Person.isEqual(attendee, person)) {
         attendee.primary = true
       } else if (attendee.role === person.role) {
         attendee.primary = false
       }
     })
-    onChange(attendees)
+    onChange(report.attendees)
   }
 }
 
 AttendeesTable.propTypes = {
   report: PropTypes.instanceOf(Report),
-  attendees: PropTypes.array,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   showDelete: PropTypes.bool,
