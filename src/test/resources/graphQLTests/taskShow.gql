@@ -1,0 +1,137 @@
+task(uuid: "${taskUuid}") {
+  uuid
+  shortName
+  longName
+  status
+  customField
+  customFieldEnum1
+  customFieldEnum2
+  plannedCompletion
+  projectedCompletion
+  taskedOrganizations {
+    uuid
+    shortName
+    longName
+    identificationCode
+  }
+  customFieldRef1 {
+    uuid
+    shortName
+    longName
+  }
+  responsiblePositions {
+    uuid
+    name
+    code
+    type
+    status
+    organization {
+      uuid
+      shortName
+    }
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+  }
+  planningApprovalSteps {
+    uuid
+    name
+    restrictedApproval
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+  }
+  approvalSteps {
+    uuid
+    name
+    restrictedApproval
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+  }
+  customFields
+  notes {
+    uuid
+    createdAt
+    updatedAt
+    type
+    text
+    author {
+      uuid
+      name
+      rank
+      role
+    }
+    noteRelatedObjects {
+      noteUuid
+      relatedObjectType
+      relatedObjectUuid
+    }
+  }
+  publishedReports: reports(query: {
+    pageSize: 0
+    state: [PUBLISHED]
+  }) {
+    uuid
+  }
+}
+subTasks: taskList(query: {
+  pageSize: 0
+  customFieldRef1Uuid: ["${taskUuid}"]
+  customFieldRef1Recursively: true
+}) {
+  list {
+    uuid
+    shortName
+    longName
+    customFieldRef1 {
+      uuid
+      shortName
+    }
+    customFields
+    notes {
+      uuid
+      createdAt
+      updatedAt
+      type
+      text
+      author {
+        uuid
+        name
+        rank
+        role
+      }
+      noteRelatedObjects {
+        noteUuid
+        relatedObjectType
+        relatedObjectUuid
+      }
+    }
+    publishedReports: reports(query: {
+      pageSize: 0
+      state: [PUBLISHED]
+    }) {
+      uuid
+    }
+  }
+}

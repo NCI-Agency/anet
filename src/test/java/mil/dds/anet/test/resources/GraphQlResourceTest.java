@@ -41,6 +41,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
     variables.put("personUuid", jack.getUuid());
     variables.put("positionUuid", steve.loadPosition().getUuid());
     variables.put("orgUuid", steve.getPosition().getOrganizationUuid());
+    variables.put("taskUuid", "7b2ad5c3-018b-48f5-b679-61fbbda21693"); // 1.1.A
     variables.put("searchQuery", "hospital");
     final ReportSearchQuery jaQuery = new ReportSearchQuery();
     jaQuery.setPageSize(1);
