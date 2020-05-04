@@ -123,4 +123,18 @@ public class ApprovalStep extends AbstractAnetBean {
         nextStepUuid);
   }
 
+  @Override
+  protected ApprovalStep clone() {
+    final ApprovalStep clone = new ApprovalStep();
+    clone.setUuid(uuid);
+    clone.setName(name);
+    clone.setNextStepUuid(nextStepUuid);
+    clone.setType(type);
+    clone.setRelatedObjectUuid(relatedObjectUuid);
+    clone.setRestrictedApproval(restrictedApproval);
+    clone.setCreatedAt(createdAt);
+    clone.setUpdatedAt(updatedAt);
+    return clone;
+  }
+
 }
