@@ -3142,10 +3142,10 @@
 		</sql>
 	</changeSet>
 
-        <changeSet id="add-approvalSteps-restrictedApproval" author="gjvoosten">
-                <addColumn tableName="approvalSteps">
-                        <column name="restrictedApproval" type="boolean" defaultValue="false" />
-                </addColumn>
-        </changeSet>
+	<changeSet id="add-approvalSteps-restrictedApproval" author="gjvoosten">
+		<addColumn tableName="approvalSteps">
+			<column name="restrictedApproval" type="boolean" defaultValue="false" />
+		</addColumn>
+	</changeSet>
 
 </databaseChangeLog>
