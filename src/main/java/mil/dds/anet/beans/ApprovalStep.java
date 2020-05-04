@@ -31,9 +31,8 @@ public class ApprovalStep extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   String name;
-  @GraphQLQuery
-  @GraphQLInputField
-  private boolean restrictedApproval;
+  // annotated below
+  private Boolean restrictedApproval;
 
   @GraphQLQuery(name = "approvers")
   public CompletableFuture<List<Position>> loadApprovers(
@@ -89,11 +88,13 @@ public class ApprovalStep extends AbstractAnetBean {
     this.type = type;
   }
 
+  @GraphQLQuery
   public boolean isRestrictedApproval() {
-    return restrictedApproval;
+    return Boolean.TRUE.equals(restrictedApproval);
   }
 
-  public void setRestrictedApproval(boolean restrictedApproval) {
+  @GraphQLInputField
+  public void setRestrictedApproval(Boolean restrictedApproval) {
     this.restrictedApproval = restrictedApproval;
   }
 
@@ -103,10 +104,11 @@ public class ApprovalStep extends AbstractAnetBean {
       return false;
     }
     ApprovalStep as = (ApprovalStep) o;
-    return Objects.equals(uuid, as.getUuid()) && Objects.equals(name, as.getName())
-        && Objects.equals(nextStepUuid, as.getNextStepUuid()) && Objects.equals(type, as.getType())
-        && Objects.equals(relatedObjectUuid, as.getRelatedObjectUuid())
-        && Objects.equals(restrictedApproval, as.isRestrictedApproval());
+    return Objects.equals(getUuid(), as.getUuid()) && Objects.equals(getName(), as.getName())
+        && Objects.equals(getNextStepUuid(), as.getNextStepUuid())
+        && Objects.equals(getType(), as.getType())
+        && Objects.equals(getRelatedObjectUuid(), as.getRelatedObjectUuid())
+        && Objects.equals(isRestrictedApproval(), as.isRestrictedApproval());
   }
 
   @Override
