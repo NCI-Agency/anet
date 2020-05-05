@@ -56,13 +56,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
 
   if (status === "loading") {
     return (
-      <span
-        style={{
-          verticalAlign: "middle",
-          display: "inline-flex",
-          alignItems: "center"
-        }}
-      >
+      <span className="reportConflictLoadingIcon">
         <Spinner
           intent={Intent.WARNING}
           size={12}
@@ -100,24 +94,20 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
   }
 
   return (
-    <span
-      style={{
-        verticalAlign: "middle",
-        display: "inline-flex",
-        alignItems: "center"
-      }}
-    >
+    <span className="reportConflictIcon">
       <Tooltip
         content={
-          <>
-            {conflictingAttendees.length} of {attendees.length} attendees are
-            busy at the selected time!
+          <div className="reportConflictTooltipContainer">
+            <div>
+              {conflictingAttendees.length} of {attendees.length} attendees are
+              busy at the selected time!
+            </div>
             <ul>
               {conflictingAttendees.map(at => (
                 <li key={at.uuid}>{at.name}</li>
               ))}
             </ul>
-          </>
+          </div>
         }
         intent={Intent.WARNING}
       >

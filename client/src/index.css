@@ -1097,3 +1097,15 @@ header.searchPagination {
 		height: 100% !important;
 	}
 }
+
+/** wdio e2e tests rely on these class names */
+.reportConflictIcon, .reportConflictLoadingIcon {
+	vertical-align: middle;
+	display: inline-flex;
+	align-items: center
+}
+
+/** wdio e2e tests rely on this class name */
+.reportConflictTooltipContainer > div {
+	font-weight: bold;
+}
