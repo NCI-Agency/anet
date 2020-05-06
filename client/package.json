@@ -75,7 +75,7 @@
     "html-webpack-plugin": "4.2.1",
     "i18n-iso-countries": "5.2.0",
     "ignore-loader": "0.1.2",
-    "jest": "25.5.1",
+    "jest": "26.0.1",
     "js-yaml": "3.13.1",
     "json-loader": "0.5.7",
     "moment-timezone": "0.5.28",
