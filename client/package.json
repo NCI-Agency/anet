@@ -36,7 +36,7 @@
     "autoprefixer": "9.7.6",
     "ava": "3.8.1",
     "babel-eslint": "10.1.0",
-    "babel-jest": "25.5.1",
+    "babel-jest": "26.0.1",
     "babel-loader": "8.1.0",
     "babel-preset-react-app": "9.1.2",
     "cache-loader": "4.1.0",
