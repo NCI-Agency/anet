@@ -367,6 +367,7 @@ public class ReportResource {
   @GraphQLMutation(name = "submitReport")
   public Report submitReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
+    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
     if (r == null) {
@@ -375,7 +376,6 @@ public class ReportResource {
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
       if (advisor == null) {
@@ -427,7 +427,7 @@ public class ReportResource {
     }
 
     if (!Utils.isEmptyOrNull(steps)) {
-      dao.sendApprovalNeededEmail(r);
+      dao.sendApprovalNeededEmail(r, steps.get(0));
       logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
