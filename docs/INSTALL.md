@@ -6,25 +6,17 @@ This document covers the steps required to deploy ANET to a server environment.
 ## Environment
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
-	- 1x Windows Application Server (50GB HDD, 16 GB RAM, 4x CPU Cores)
-	- 1x Microsoft SQL Server (2016 or greater) Database Server. 
+	- 1x Application Server (50GB HDD, 16 GB RAM, 4x CPU Cores) with Windows 2016 or newer, or RHEL 7.6 or newer
+	- 1x Postgres 12 or newer Database Server.
 - **Software**: Software requirements: 
 	- Java JRE 1.8 installed on the Application Server
-	- Administration Privileges to run processes on restricted ports (80/443)
+	- Administration Privileges to run processes on restricted ports (443)
 	- Optional: A valid SSL certificate for the domain name of the application server.
-	- Microsoft SQL Server 2016 or greater. The MS SQL database should be configured to:
-		- allow connections on a static TCP/IP port `1433`
-		- fulltext module should be installed. This can be done by:
-			1. Open the Programs and Features control panel.
-			2. Select `Microsoft SQL Server 2016` and click `Change`.
-			3. When prompted to `Add/Repair/Remove`, select `Add` and provide intallation media.
-			4. Advance through the wizard until the Feature Selection screen. Then select `Full-Text
-and Semantic Extractions for Search`.
 	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported alhtough performance is degraded and support will be discontinued beyond Q3 2019
 	- A service manager, such as https://nssm.cc/ , can be used to install ANET as a service on Windows
 - **Network Accessibility**
-	- Users will acccess the Application Server over HTTP/HTTPS (`80`/`443`)
-	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
+	- Users will acccess the Application Server over HTTPS (`443`)
+	- The Application Server will access the SQL Server over port `5432` (or whatever port you have SQL configured to)
 	- The Application Server will need to access an Active Directory server for authentication
 	- The Application Server will need to access an SMTP server for email sending. 
 - **Service Accounts**
@@ -112,7 +104,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 		- ex: To Log in as `Jack Jackson` from the development data set, just type in a username of `jack` when prompted.
 		- ex: To simulate a new user type in the same name for both the username and password when prompted (ie un: `hunter`, pw: `hunter` will create a new user with Domain Username of `hunter`).
 	- GraphQL: When development mode is `true`, ANET will re-compute the GraphQL graph on every API call, this allows you to rapidly develop on changes without restarting the server.
-- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80). 
+- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80). This is not used in production environments but mostly for legacy needs
 - **smtp**: This section controls the configuration for how ANET sends emails.
 	- **hostname**: The Fully Qualified Domain Name of your SMTP Server
 	- **port**: The port to connect to your SMTP server on (default: 25)

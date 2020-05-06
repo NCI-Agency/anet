@@ -69,8 +69,6 @@ database:
 # See http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration
 server:
   applicationConnectors:
-    - type: http
-      port: 80
     - type: https
       port: 443
       keyStorePath: c:/anet/keystore.jks
