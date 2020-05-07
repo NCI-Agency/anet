@@ -1,0 +1,12 @@
+.assessments-table .form-group {
+  margin: 0;
+}
+
+.table-condensed > tbody > tr > td {
+  border: none;
+}
+
+.table-condensed > tbody > tr .entity-title-row {
+  border-top: 1px solid #ddd;
+  background-color: #f9f9f9;
+}

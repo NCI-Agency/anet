@@ -23,6 +23,10 @@ public class ReportEditedEmail implements AnetEmailAction {
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
     Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    if (r == null) {
+      return null;
+    }
+
     editor = AnetObjectEngine.getInstance().getPersonDao().getByUuid(editor.getUuid());
 
     context.put("report", r);

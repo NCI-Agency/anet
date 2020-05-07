@@ -1,5 +1,7 @@
 package mil.dds.anet.threads;
 
+import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
@@ -112,11 +114,10 @@ public class AnetEmailWorker implements Runnable {
 
     disabled = smtpConfig.isDisabled();
 
-    freemarkerConfig = new Configuration(Configuration.getVersion());
+    freemarkerConfig = new Configuration(FREEMARKER_VERSION);
     // auto-escape HTML in our .ftlh templates
     freemarkerConfig.setRecognizeStandardFileExtensions(true);
-    freemarkerConfig
-        .setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.getVersion()).build());
+    freemarkerConfig.setObjectWrapper(new DefaultObjectWrapperBuilder(FREEMARKER_VERSION).build());
     freemarkerConfig.loadBuiltInEncodingMap();
     freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
     freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
@@ -150,13 +151,14 @@ public class AnetEmailWorker implements Runnable {
 
       try {
         context = buildContext(email);
-        logger.info("{} Sending email to {} re: {}", disabled ? "[Disabled] " : "",
-            email.getToAddresses(), email.getAction().getSubject(context));
+        if (context != null) {
+          logger.info("{} Sending email to {} re: {}", disabled ? "[Disabled] " : "",
+              email.getToAddresses(), email.getAction().getSubject(context));
 
-        if (!disabled) {
-          sendEmail(email, context);
+          if (!disabled) {
+            sendEmail(email, context);
+          }
         }
-
         processedEmails.add(email.getId());
       } catch (Throwable t) {
         logger.error("Error sending email", t);

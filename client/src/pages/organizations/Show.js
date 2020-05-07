@@ -245,7 +245,7 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
               notes={organization.notes}
               relatedObject={
                 organization.uuid && {
-                  relatedObjectType: "organizations",
+                  relatedObjectType: Organization.relatedObjectType,
                   relatedObjectUuid: organization.uuid
                 }
               }

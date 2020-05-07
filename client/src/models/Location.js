@@ -7,6 +7,7 @@ export default class Location extends Model {
   static resourceName = "Location"
   static listName = "locationList"
   static getInstanceName = "location"
+  static relatedObjectType = "locations"
 
   static STATUS = {
     ACTIVE: "ACTIVE",

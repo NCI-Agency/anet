@@ -23,6 +23,10 @@ public class ApprovalNeededEmail implements AnetEmailAction {
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
     final Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    if (r == null) {
+      return null;
+    }
+
     final ApprovalStep step =
         r.loadApprovalStep(AnetObjectEngine.getInstance().getContext()).join();
     context.put("report", r);

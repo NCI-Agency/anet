@@ -318,9 +318,9 @@ INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, cu
 		(N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a');
 
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, customFields)
-	VALUES
-		(N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', '{ "assessmentDefinition": "{ \"assessment\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"Test Assessment 1\", \"helpText\": \"Please provide assessment for something important\", \"levels\": [ { \"color\": \"red\", \"endValue\": 2, \"label\": \"test\" }, { \"color\": \"#FFBF00\", \"endValue\": 8, \"label\": \"mid\" }, { \"color\": \"green\", \"endValue\": 10, \"label\": \"high\" } ] } }" }'),
-		(N'9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', '{ "assessmentDefinition": "{ \"frenchFlag\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"French Flag assessment\", \"helpText\": \"Please tell us which is the best color in the French flag\", \"levels\": [ { \"color\": \"blue\", \"endValue\": 3.3, \"label\": \"blue\" }, { \"color\": \"white\", \"endValue\": 6.6, \"label\": \"white\" }, { \"color\": \"red\", \"endValue\": 10, \"label\": \"red\" } ] } }" }');
+  VALUES
+    (N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', '{ "assessmentDefinition": "{ \"question1\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"Test Question 1\", \"helpText\": \"Please provide assessment for something important\", \"levels\": [ { \"color\": \"red\", \"endValue\": 2, \"label\": \"test\" }, { \"color\": \"#FFBF00\", \"endValue\": 8, \"label\": \"mid\" }, { \"color\": \"green\", \"endValue\": 10, \"label\": \"high\" } ], \"aggregation\": { \"widget\": \"likertScale\" } }, \"question2\": { \"type\": \"number\", \"label\": \"Test Question 2\", \"aggregation\": { \"widget\": \"numberAggregation\", \"aggregationType\": \"avg\" } }, \"question3\": { \"type\": \"number\", \"label\": \"Test Question 3\", \"aggregation\": { \"widget\": \"numberAggregation\", \"aggregationType\": \"sum\" } } }" }'),
+    (N'9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', '{ "assessmentDefinition": "{ \"frenchFlag\": { \"type\": \"special_field\", \"widget\": \"likertScale\", \"label\": \"French Flag assessment\", \"helpText\": \"Please tell us which is the best color in the French flag\", \"levels\": [ { \"color\": \"blue\", \"endValue\": 3.3, \"label\": \"blue\" }, { \"color\": \"white\", \"endValue\": 6.6, \"label\": \"white\" }, { \"color\": \"red\", \"endValue\": 10, \"label\": \"red\" } ] }, \"levels\": { \"type\": \"enumset\", \"label\": \"Achieved levels\", \"choices\": { \"lvl1\": { \"label\": \"Level 1\" },  \"lvl2\": { \"label\": \"Level 2\" }, \"lvl3\": { \"label\": \"Level 3\" } } }, \"description\": { \"type\": \"special_field\", \"label\": \"Detail levels\", \"widget\": \"richTextEditor\" } }" }');
 
 INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid)
 	VALUES
@@ -398,6 +398,8 @@ INSERT INTO taskResponsiblePositions (taskUuid, positionUuid)
 		((SELECT uuid FROM tasks WHERE shortName = '1.1.B'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Interagency Advising')),
 		((SELECT uuid FROM tasks WHERE shortName = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor C')),
 		((SELECT uuid FROM tasks WHERE shortName = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Mining')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.2.A'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
+		((SELECT uuid FROM tasks WHERE shortName = '1.2.B'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
 		((SELECT uuid FROM tasks WHERE shortName = '2.A'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 SuperUser')),
 		((SELECT uuid FROM tasks WHERE shortName = '2.B'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor B')),
 		((SELECT uuid FROM tasks WHERE shortName = '2.C'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Accounting')),
@@ -743,7 +745,10 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@dds.mil'), @reportUuid, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
-
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
 
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;
@@ -918,6 +923,40 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'reports', r.uuid
 	FROM reports r
 	WHERE r.text LIKE 'Today%';
+
+-- Add measurement assessments to tasks related to reports
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+  VALUES (@noteUuid, @authorUuid, 3, '{"question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+  SELECT @noteUuid, 'reports', r.uuid
+  FROM reports r
+  WHERE r.intent = 'A test report from Arthur';
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+  SELECT @noteUuid, 'tasks', t.uuid
+  FROM tasks t
+  WHERE t.shortName = '1.2.A';
+
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+  VALUES (@noteUuid, @authorUuid, 3, '{"description":"<p><strong>level 1</strong></p><p>easily achieved</p><p><strong>level 3</strong></p><p>easily achieved</p>","frenchFlag":7.670554793177809,"levels":["lvl1","lvl3"]}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+  SELECT @noteUuid, 'reports', r.uuid
+  FROM reports r
+  WHERE r.intent = 'A test report from Arthur';
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+  SELECT @noteUuid, 'tasks', t.uuid
+  FROM tasks t
+  WHERE t.shortName = '1.2.B';
+
+-- Add a monthly assessment for task 1.2.B
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+  VALUES (@noteUuid, @authorUuid, 3, '{"issues":"<p>no issues this month</p>"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+  SELECT @noteUuid, 'tasks', t.uuid
+  FROM tasks t
+  WHERE t.shortName = '1.2.B';
 
 -- LEAVE THIS AS LAST STATEMENT
 -- Truncate all the dates (on reports etc.) to dates that could have been generated by

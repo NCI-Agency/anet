@@ -18,5 +18,8 @@
   ],
   "vulnerabilityAlerts": {
     "labels": ["security"]
+  },
+  "pipenv": {
+    "enabled": true
   }
 }

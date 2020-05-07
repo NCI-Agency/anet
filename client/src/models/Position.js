@@ -15,6 +15,7 @@ export default class Position extends Model {
   static resourceName = "Position"
   static listName = "positionList"
   static getInstanceName = "position"
+  static relatedObjectType = "positions"
 
   static STATUS = {
     ACTIVE: "ACTIVE",

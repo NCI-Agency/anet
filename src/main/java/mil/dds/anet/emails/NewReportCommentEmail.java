@@ -23,6 +23,9 @@ public class NewReportCommentEmail implements AnetEmailAction {
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
     Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    if (r == null) {
+      return null;
+    }
     comment = AnetObjectEngine.getInstance().getCommentDao().getByUuid(comment.getUuid());
 
     context.put("report", r);
