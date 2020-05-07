@@ -386,7 +386,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
       Instant now) {
     // Loser peoplePosition without position ended because winner has peoplePosition without
     // position
-    // If not delete winner has peoplePosition without position duplicate record
+    // If not end winner has peoplePosition without position duplicate record
     getDbHandle().createUpdate(
         "/* loserPositionPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt "
             + "WHERE \"personUuid\" = :loserUuid AND \"endedAt\" IS NULL AND \"positionUuid\" IS NULL")

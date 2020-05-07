@@ -41,6 +41,7 @@ public class MergePeopleTest extends AbstractResourceTest {
 
     String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", test, new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(createdUuid).isNotNull();
 
     return graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, createdUuid,
         new TypeReference<GraphQlResponse<Position>>() {});
@@ -53,8 +54,8 @@ public class MergePeopleTest extends AbstractResourceTest {
     loser.setName(personName);
     String personUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
         loser, new TypeReference<GraphQlResponse<Person>>() {});
-    return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, personUuid,
-        new TypeReference<GraphQlResponse<Person>>() {});
+    assertThat(personUuid).isNotNull();
+    return getPerson(personUuid);
   }
 
   private Person assignPositionPerson(Position position, Person person) {
@@ -65,8 +66,8 @@ public class MergePeopleTest extends AbstractResourceTest {
     Integer nrUpdated = graphQLHelper.updateObject(admin,
         "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
         variables);
-    return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, person.getUuid(),
-        new TypeReference<GraphQlResponse<Person>>() {});
+    assertThat(nrUpdated).isEqualTo(1);
+    return getPerson(person.getUuid());
   }
 
   private Person getPerson(String personUuid) {
@@ -88,6 +89,7 @@ public class MergePeopleTest extends AbstractResourceTest {
     Integer nrUpdated = graphQLHelper.updateObject(admin,
         "mutation ($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition) }",
         variables);
+    assertThat(nrUpdated).isEqualTo(1);
     return graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, winnerUuid,
         new TypeReference<GraphQlResponse<Person>>() {});
   }
@@ -563,5 +565,144 @@ public class MergePeopleTest extends AbstractResourceTest {
         .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
             .isEqualTo(1);
     assertThat(winner.getPreviousPositions().size()).isEqualTo(14);
+  }
+
+  @Test
+  public void loserHasPositionWinnerHasNoPositionHasPositionHistoryCopyPositionNotSelected() {
+    Position positionLoser = createPosition("Loser Position One");
+    // Active peoplePosition without person must be created when the position is created.
+    assertThat(positionLoser.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(positionLoser.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
+            .isEqualTo(1);
+
+    Position positionWinnerOne = createPosition("Winner Position One");
+    // Active peoplePosition without person must be created when the position is created.
+    assertThat(positionWinnerOne.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(positionWinnerOne.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
+            .isEqualTo(1);
+
+    Position positionWinnerTwo = createPosition("Winner Position Two");
+    // Active peoplePosition without person must be created when the position is created.
+    assertThat(positionWinnerTwo.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(positionWinnerTwo.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
+            .isEqualTo(1);
+
+    Position positionWinner3 = createPosition("Winner Position Three");
+    // Active peoplePosition without person must be created when the position is created.
+    assertThat(positionWinner3.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(positionWinner3.getPreviousPeople().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPersonUuid())).count())
+            .isEqualTo(1);
+
+    Person personLoser = createPerson("Loser Has Position");
+    // Active peoplePosition without position must be created when the person is created.
+    assertThat(personLoser.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(personLoser.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
+            .isEqualTo(1);
+
+    Person personWinner = createPerson("Winner Has No Position");
+    // Active peoplePosition without position must be created when the person is created.
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
+            .isEqualTo(1);
+
+    personLoser = assignPositionPerson(positionLoser, personLoser);
+    // Active peoplePosition with position must be created when the person is assigned.
+    assertThat(personLoser.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(personLoser.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
+        .count()).isEqualTo(1);
+    // There must be two position histories, one without position and one with position.
+    assertThat(personLoser.getPreviousPositions().size()).isEqualTo(2);
+
+
+
+    personWinner = assignPositionPerson(positionWinnerOne, personWinner);
+    // Active peoplePosition with position must be created when the person is assigned.
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
+        .count()).isEqualTo(1);
+    // There must be two position histories, one without position and one with position.
+    assertThat(personWinner.getPreviousPositions().size()).isEqualTo(2);
+
+
+
+    personWinner = assignPositionPerson(positionWinnerTwo, personWinner);
+    // Active peoplePosition with position must be created when the person is assigned.
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
+        .count()).isEqualTo(1);
+    // There must be four position histories,
+    // one without position full endTime(winner created),
+    // one with position full endTime (winner pos1 assign)
+    // one without position full endTime (winner pos1 remove)
+    // one with position empty endTime(winner pos2) -------------- endTime = Null
+    assertThat(personWinner.getPreviousPositions().size()).isEqualTo(4);
+
+
+    personWinner = assignPositionPerson(positionWinner3, personWinner);
+    // Active peoplePosition with position must be created when the person is assigned.
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime())).count()).isEqualTo(1);
+    assertThat(personWinner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.nonNull(f.getPositionUuid()))
+        .count()).isEqualTo(1);
+    // There must be six position histories,
+    // one without position full endTime(winner created),
+    // one with position full endTime (winner pos1 assign)
+    // one without position full endTime (winner pos1 remove)
+    // one with position full endTime (winner pos2 assign)
+    // one without position full endTime (winner pos2 remove)
+    // one with position empty endTime(winner pos3) -------------- endTime = Null
+    assertThat(personWinner.getPreviousPositions().size()).isEqualTo(6);
+
+    removePositionPerson(positionWinner3);
+    personWinner = getPerson(personWinner.getUuid());
+    // There must be seven position histories,
+    // one without position full endTime(winner created),
+    // one with position full endTime (winner pos1 assign)
+    // one without position full endTime (winner pos1 remove)
+    // one with position full endTime (winner pos2 assign)
+    // one without position full endTime (winner pos2 remove)
+    // one with position full endTime (winner pos3 assign)
+    // one without position empty endTime(winner pos3 remove) -------------- endTime = Null
+    assertThat(personWinner.getPreviousPositions().size()).isEqualTo(7);
+
+
+    Person winner = mergePeople(personLoser.getUuid(), personWinner.getUuid(), false);
+    // There must be three position histories,
+    // one without position full endTime(loser created),
+    // one without position full endTime(winner created),
+    // one with position full endTime(loser assigned)
+    // one with position full endTime (winner pos1 assign)
+    // one without position full endTime (winner pos1 remove)
+    // one with position full endTime (winner pos2 assign)
+    // one without position full endTime (winner pos2 remove)
+    // one with position full endTime (winner pos3 assign)
+    // one without position full endTime (loser pos remove)
+    // one without position full endTime(winner pos3 remove) -------------- endTime = Null
+    assertThat(
+        winner.getPreviousPositions().stream().filter(f -> Objects.isNull(f.getEndTime())).count())
+            .isEqualTo(1);
+    assertThat(winner.getPreviousPositions().stream()
+        .filter(f -> Objects.isNull(f.getEndTime()) && Objects.isNull(f.getPositionUuid())).count())
+            .isEqualTo(1);
+    assertThat(winner.getPreviousPositions().size()).isEqualTo(10);
   }
 }
