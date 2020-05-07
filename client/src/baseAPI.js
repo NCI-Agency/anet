@@ -3,7 +3,6 @@ import { useQuery } from "@apollo/react-hooks"
 import ApolloClient from "apollo-boost"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import _isEmpty from "lodash/isEmpty"
-import { useState } from "react"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
@@ -106,12 +105,8 @@ const BaseAPI = {
   },
 
   useApiQuery(query, variables) {
-    const [error, setError] = useState(null)
-    const results = useQuery(query, {
-      variables,
-      onError: error => setError(BaseAPI._handleError(error))
-    })
-    results.error = error
+    const results = useQuery(query, { variables })
+    results.error = results.error && BaseAPI._handleError(results.error)
     return results
   },
 
