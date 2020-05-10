@@ -376,7 +376,14 @@ public class ReportResource {
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
+    if (!r.getAuthor().getUuid().equals(user.getUuid()) && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true) && !AuthUtils.isAdmin(user) ) {
+      throw new WebApplicationException("Cannot submit report unless the report's author, his/her super user or an admin", Status.FORBIDDEN);
+    }
+
+    if (r.getState() != Report.ReportState.DRAFT && r.getState() != Report.ReportState.REJECTED ) {
+      throw new WebApplicationException("Can't submit report unless it is either Draft or Rejected", Status.BAD_REQUEST);
+    }
+
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
       if (advisor == null) {
