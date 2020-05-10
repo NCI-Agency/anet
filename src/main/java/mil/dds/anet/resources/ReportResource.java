@@ -114,6 +114,7 @@ public class ReportResource {
   @GraphQLMutation(name = "createReport")
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
+    r.checkAndFixCustomFields();
     Person author = DaoUtils.getUserFromContext(context);
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
@@ -147,6 +148,7 @@ public class ReportResource {
   public Report updateReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r,
       @GraphQLArgument(name = "sendEditEmail", defaultValue = "true") boolean sendEmail) {
+    r.checkAndFixCustomFields();
     Person editor = DaoUtils.getUserFromContext(context);
     // perform all modifications to the report and its tasks and steps in a single transaction,
     // returning the original state of the report
