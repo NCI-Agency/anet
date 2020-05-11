@@ -547,8 +547,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(r.getUuid()).isNotNull();
 
-    // Submit the report
-    Report submitted = graphQLHelper.updateObject(jack, "submitReport", "uuid", FIELDS, "String",
+    // Submit the report (by admin who can do that, as author doesn't have a position)
+    Report submitted = graphQLHelper.updateObject(admin, "submitReport", "uuid", FIELDS, "String",
         r.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(submitted).isNotNull();
 

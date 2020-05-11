@@ -27,10 +27,10 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
 
   public void checkAndFixCustomFields() {
     try {
-      setCustomFields(Utils.sanitizeJSON(getCustomFields()));
+      setCustomFields(Utils.sanitizeJson(getCustomFields()));
     } catch (JsonProcessingException e) {
       setCustomFields(null);
-      logger.error("Unable to process Json, CustomFields payload discarded", e);
+      logger.error("Unable to process Json, customFields payload discarded", e);
     }
 
   }

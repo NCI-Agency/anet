@@ -219,38 +219,38 @@ public class Utils {
     return HTML_POLICY_DEFINITION.sanitize(input);
   }
 
-  public static String sanitizeJSON(String inputJson) throws JsonProcessingException {
-    String sanitizedJson = JsonSanitizer.sanitize(inputJson);
-    JsonNode jsonTree = mapper.readTree(sanitizedJson);
-    internalSanitizeJSONforHTML(jsonTree);
+  public static String sanitizeJson(String inputJson) throws JsonProcessingException {
+    final String sanitizedJson = JsonSanitizer.sanitize(inputJson);
+    final JsonNode jsonTree = mapper.readTree(sanitizedJson);
+    internalSanitizeJsonForHtml(jsonTree);
     return mapper.writeValueAsString(jsonTree);
   }
 
-  private static void internalSanitizeJSONforHTML(JsonNode jsonNode) {
+  private static void internalSanitizeJsonForHtml(JsonNode jsonNode) {
     if (jsonNode.isObject()) {
-      ObjectNode objectNode = (ObjectNode) jsonNode;
-      Iterator<Map.Entry<String, JsonNode>> iter = objectNode.fields();
-      while (iter.hasNext()) {
-        Map.Entry<String, JsonNode> entry = iter.next();
-        if (entry.getValue().isTextual()) {
-          objectNode.put(entry.getKey(), sanitizeHtml(entry.getValue().asText()));
-        } else {
-          internalSanitizeJSONforHTML(entry.getValue());
-        }
-        String sanitizedKey = sanitizeHtml(entry.getKey());
+      final ObjectNode objectNode = (ObjectNode) jsonNode;
+      for (final Iterator<Map.Entry<String, JsonNode>> entryIter = objectNode.fields(); entryIter
+          .hasNext();) {
+        final Map.Entry<String, JsonNode> entry = entryIter.next();
+        final JsonNode newValue = entry.getValue().isTextual()
+            ? objectNode.textNode(sanitizeHtml(entry.getValue().asText()))
+            : entry.getValue();
+        final String sanitizedKey = sanitizeHtml(entry.getKey());
         if (!entry.getKey().equals(sanitizedKey)) {
           objectNode.remove(entry.getKey());
-          objectNode.set(sanitizedKey, entry.getValue());
         }
+        objectNode.set(sanitizedKey, newValue);
+        internalSanitizeJsonForHtml(entry.getValue());
       }
     } else if (jsonNode.isArray()) {
-      ArrayNode arrayNode = (ArrayNode) jsonNode;
+      final ArrayNode arrayNode = (ArrayNode) jsonNode;
       for (int i = 0; i < arrayNode.size(); i++) {
         if (arrayNode.get(i).isTextual()) {
+          final String sanitizedValue = sanitizeHtml(arrayNode.get(i).asText());
           arrayNode.remove(i);
-          arrayNode.insert(i, sanitizeHtml(arrayNode.get(i).asText()));
+          arrayNode.insert(i, sanitizedValue);
         } else {
-          internalSanitizeJSONforHTML(arrayNode.get(i));
+          internalSanitizeJsonForHtml(arrayNode.get(i));
         }
       }
     }

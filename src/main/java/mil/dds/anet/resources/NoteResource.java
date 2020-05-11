@@ -109,7 +109,7 @@ public class NoteResource {
       n.setText(Utils.isEmptyHtml(n.getText()) ? null : Utils.sanitizeHtml(n.getText()));
     } else {
       try {
-        n.setText(Utils.sanitizeJSON(n.getText()));
+        n.setText(Utils.sanitizeJson(n.getText()));
       } catch (JsonProcessingException e) {
         n.setText(null);
         logger.error("Unable to process Json, payload discarded", e);
