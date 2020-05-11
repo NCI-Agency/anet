@@ -151,13 +151,14 @@ public class AnetEmailWorker implements Runnable {
 
       try {
         context = buildContext(email);
-        logger.info("{} Sending email to {} re: {}", disabled ? "[Disabled] " : "",
-            email.getToAddresses(), email.getAction().getSubject(context));
+        if (context != null) {
+          logger.info("{} Sending email to {} re: {}", disabled ? "[Disabled] " : "",
+              email.getToAddresses(), email.getAction().getSubject(context));
 
-        if (!disabled) {
-          sendEmail(email, context);
+          if (!disabled) {
+            sendEmail(email, context);
+          }
         }
-
         processedEmails.add(email.getId());
       } catch (Throwable t) {
         logger.error("Error sending email", t);

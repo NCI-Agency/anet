@@ -422,7 +422,7 @@ const BaseReportForm = ({
           primaryAdvisor.position.organization.uuid !== currentOrg?.uuid
         ) {
           tasksFilters.assignedToReportOrg = {
-            label: `Assigned to ${primaryAdvisor.position.organization}`,
+            label: `Assigned to ${primaryAdvisor.position.organization.shortName}`,
             queryVars: {
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
               hasCustomFieldRef1: true,
