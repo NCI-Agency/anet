@@ -141,12 +141,6 @@ const BaseNav = ({
         Daily rollup
       </SidebarLink>
 
-      {process.env.NODE_ENV === "development" && (
-        <SidebarLink linkTo="/graphiql" handleOnClick={resetPages}>
-          GraphQL
-        </SidebarLink>
-      )}
-
       {currentUser.isAdmin() && (
         <LinkContainer to="/admin" onClick={clearSearchQuery}>
           <NavItem>Admin</NavItem>
@@ -161,6 +155,9 @@ const BaseNav = ({
           <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
             <NavItem>Authorization groups</NavItem>
           </LinkContainer>
+          <SidebarLink linkTo="/admin/graphiql" handleOnClick={resetPages}>
+            GraphQL
+          </SidebarLink>
         </BSNav>
       )}
 

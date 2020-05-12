@@ -114,6 +114,7 @@ public class ReportResource {
   @GraphQLMutation(name = "createReport")
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
+    r.checkAndFixCustomFields();
     Person author = DaoUtils.getUserFromContext(context);
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
@@ -147,6 +148,7 @@ public class ReportResource {
   public Report updateReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r,
       @GraphQLArgument(name = "sendEditEmail", defaultValue = "true") boolean sendEmail) {
+    r.checkAndFixCustomFields();
     Person editor = DaoUtils.getUserFromContext(context);
     // perform all modifications to the report and its tasks and steps in a single transaction,
     // returning the original state of the report
@@ -374,7 +376,19 @@ public class ReportResource {
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
+    if (!Objects.equals(r.getAuthorUuid(), user.getUuid())
+        && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true)
+        && !AuthUtils.isAdmin(user)) {
+      throw new WebApplicationException(
+          "Cannot submit report unless you are the report's author, his/her super user or an admin",
+          Status.FORBIDDEN);
+    }
+
+    if (r.getState() != Report.ReportState.DRAFT && r.getState() != Report.ReportState.REJECTED) {
+      throw new WebApplicationException(
+          "Cannot submit report unless it is either Draft or Rejected", Status.BAD_REQUEST);
+    }
+
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
       if (advisor == null) {
