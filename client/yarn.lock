@@ -1217,7 +1217,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.0", "@babel/runtime@^7.4.2", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.2", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.9.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.9.2.tgz#d90df0583a3a252f09aaa619665367bae518db06"
   integrity sha512-NE2DtOdufG7R5vnfQUTehdTfNycfUANEtCa9PssN9O/xmTzP4E08UI797ixaei6hBEVL9BI/PsdJS5x7mWoB9Q==
@@ -2514,10 +2514,10 @@
     browserstack-local "^1.4.5"
     got "^11.0.2"
 
-"@wdio/cli@6.1.9":
-  version "6.1.9"
-  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-6.1.9.tgz#2836990956acf690e0918346690309caa332c8c8"
-  integrity sha512-jcu6C+ssFJNqdLNn68jjyYw1+4qtWLl9V8XMupN8bSOiWtRW44Swltme+gjkMhZDatF8mFv1dEYfRMxbPsSqzw==
+"@wdio/cli@6.1.11":
+  version "6.1.11"
+  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-6.1.11.tgz#a819c6eb42d9397d04ca7cb30182a74dabcc0a01"
+  integrity sha512-xH/val+A2rimVgWnT7P7V7/DH7+r1bQ88a3LjM1UJIEnjVBhglx+fysjFCnRV205IhkW5lej0XLUlIJmMFdhiA==
   dependencies:
     "@wdio/config" "6.1.2"
     "@wdio/logger" "6.0.16"
@@ -2533,7 +2533,7 @@
     lodash.pickby "^4.6.0"
     lodash.union "^4.6.0"
     log-update "^4.0.0"
-    webdriverio "6.1.9"
+    webdriverio "6.1.11"
     yargs "^15.0.1"
     yarn-install "^1.0.0"
 
@@ -2546,14 +2546,14 @@
     deepmerge "^4.0.0"
     glob "^7.1.2"
 
-"@wdio/local-runner@6.1.9":
-  version "6.1.9"
-  resolved "https://registry.yarnpkg.com/@wdio/local-runner/-/local-runner-6.1.9.tgz#c51944c38d3e6ed6cd3569265d81a513a760012b"
-  integrity sha512-EeBZESQIK5uVzrHkHSYlcBHYx2DPLwyWXKNMKkMdvR49BD7Z14CyH4TfWBytl/6ekLM9/B73EEXWRLWEVGC/0A==
+"@wdio/local-runner@6.1.11":
+  version "6.1.11"
+  resolved "https://registry.yarnpkg.com/@wdio/local-runner/-/local-runner-6.1.11.tgz#28ccbaf02694b3d492207946b7fda0ae3bbf862e"
+  integrity sha512-cM8suZ5m35nIf02KmZqC5zi7bhb/k9jmbZJ0RaRLSSCrQK0CaWiSiUSJxx8FSymueStsob7dKQg3jzdUcOzQeQ==
   dependencies:
     "@wdio/logger" "6.0.16"
     "@wdio/repl" "6.1.8"
-    "@wdio/runner" "6.1.9"
+    "@wdio/runner" "6.1.11"
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
@@ -2577,10 +2577,10 @@
     expect-webdriverio "^1.1.5"
     mocha "^7.0.1"
 
-"@wdio/protocols@6.1.2":
-  version "6.1.2"
-  resolved "https://registry.yarnpkg.com/@wdio/protocols/-/protocols-6.1.2.tgz#b81094454977b3dd5b674417e681ba3d1c65ea16"
-  integrity sha512-H39nUuCVu6u2msjFAabVcWjz91+Ef3nerb61J4iwKzxGNvC1h4hOTmigRNFtjOIrWQ/76f4Ss1sZ1dEwhOIRrQ==
+"@wdio/protocols@6.1.11":
+  version "6.1.11"
+  resolved "https://registry.yarnpkg.com/@wdio/protocols/-/protocols-6.1.11.tgz#96f3508497310fac0e9ea80daead2b1f26e57c4e"
+  integrity sha512-opauqB8kxsUOHrNxHv24D+DjULOvxQUfwSIGL4pv6u/b/Jzni4Nmjy4wcIb8TFXvWWvp7JfFQM1DntM0gQ0d3g==
 
 "@wdio/repl@6.1.8":
   version "6.1.8"
@@ -2596,18 +2596,18 @@
   dependencies:
     fs-extra "^9.0.0"
 
-"@wdio/runner@6.1.9":
-  version "6.1.9"
-  resolved "https://registry.yarnpkg.com/@wdio/runner/-/runner-6.1.9.tgz#c115a158c564792c3c1f2f293e2b9d8d0a92e08f"
-  integrity sha512-iBWkv2I4YHD6w+LzFoL5P+kfPH8RJIxgE7Thl/Ux2ElKbBuKwxO/+gyq7W4Vz7LkZADycEfFke7AEmmSJkgbVQ==
+"@wdio/runner@6.1.11":
+  version "6.1.11"
+  resolved "https://registry.yarnpkg.com/@wdio/runner/-/runner-6.1.11.tgz#1996536d18759592b8e55443acd3916fe5f22131"
+  integrity sha512-Hw+sL63ALE7/CsxVEt3uwUtERcDZn2gbUhwuHUdNoePtj2kD1UQwpof8LATrymT3oVaiMYB3j3hcB8hvoTGQRA==
   dependencies:
     "@wdio/config" "6.1.2"
     "@wdio/logger" "6.0.16"
     "@wdio/utils" "6.1.8"
     deepmerge "^4.0.0"
     gaze "^1.1.2"
-    webdriver "6.1.8"
-    webdriverio "6.1.9"
+    webdriver "6.1.11"
+    webdriverio "6.1.11"
 
 "@wdio/spec-reporter@6.1.9":
   version "6.1.9"
@@ -6258,14 +6258,14 @@ detect-port@^1.3.0:
     address "^1.0.1"
     debug "^2.6.0"
 
-devtools@6.1.9:
-  version "6.1.9"
-  resolved "https://registry.yarnpkg.com/devtools/-/devtools-6.1.9.tgz#566807107d5f2f462336305714f670394473928c"
-  integrity sha512-L/swy1hth+2ltn/8Wnvd8BjZORNftINOgIRQ86NpL7ieSOz3RaOjf8T70prZwsQ6Hgk9ZW0WDuR/Rj3gMHTgsA==
+devtools@6.1.11:
+  version "6.1.11"
+  resolved "https://registry.yarnpkg.com/devtools/-/devtools-6.1.11.tgz#a2b09034a4ee630749fff756ec436abd03e20a79"
+  integrity sha512-jqCkkIcFTUq7xAPRwUApq8IMUn6v5XWoroaIec27ALXehFdGpEmO4p6Uehbn2580HOa2JYB+FdR9yzTw+MAuQA==
   dependencies:
     "@wdio/config" "6.1.2"
     "@wdio/logger" "6.0.16"
-    "@wdio/protocols" "6.1.2"
+    "@wdio/protocols" "6.1.11"
     "@wdio/utils" "6.1.8"
     chrome-launcher "^0.13.1"
     puppeteer-core "^3.0.0"
@@ -11569,14 +11569,13 @@ min-indent@^1.0.0:
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.0.tgz#cfc45c37e9ec0d8f0a0ec3dd4ef7f7c3abe39256"
   integrity sha1-z8RcN+nsDY8KDsPdTvf3w6vjklY=
 
-mini-create-react-context@^0.3.0:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/mini-create-react-context/-/mini-create-react-context-0.3.2.tgz#79fc598f283dd623da8e088b05db8cddab250189"
-  integrity sha512-2v+OeetEyliMt5VHMXsBhABoJ0/M4RCe7fatd/fBy6SMiKazUSEt3gxxypfnk2SHMkdBYvorHRoQxuGoiwbzAw==
+mini-create-react-context@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/mini-create-react-context/-/mini-create-react-context-0.4.0.tgz#df60501c83151db69e28eac0ef08b4002efab040"
+  integrity sha512-b0TytUgFSbgFJGzJqXPKCFCBWigAjpjo+Fl7Vf7ZbKRDptszpppKxXH6DRXEABZ/gcEQczeb0iZ7JvL8e8jjCA==
   dependencies:
-    "@babel/runtime" "^7.4.0"
-    gud "^1.0.0"
-    tiny-warning "^1.0.2"
+    "@babel/runtime" "^7.5.5"
+    tiny-warning "^1.0.3"
 
 mini-css-extract-plugin@^0.7.0:
   version "0.7.0"
@@ -13751,29 +13750,29 @@ react-router-bootstrap@0.25.0:
   dependencies:
     prop-types "^15.5.10"
 
-react-router-dom@5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-5.1.2.tgz#06701b834352f44d37fbb6311f870f84c76b9c18"
-  integrity sha512-7BPHAaIwWpZS074UKaw1FjVdZBSVWEk8IuDXdB+OkLb8vd/WRQIpA4ag9WQk61aEfQs47wHyjWUoUGGZxpQXew==
+react-router-dom@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-5.2.0.tgz#9e65a4d0c45e13289e66c7b17c7e175d0ea15662"
+  integrity sha512-gxAmfylo2QUjcwxI63RhQ5G85Qqt4voZpUXSEqCwykV0baaOTQDR1f0PmY8AELqIyVc0NEZUj0Gov5lNGcXgsA==
   dependencies:
     "@babel/runtime" "^7.1.2"
     history "^4.9.0"
     loose-envify "^1.3.1"
     prop-types "^15.6.2"
-    react-router "5.1.2"
+    react-router "5.2.0"
     tiny-invariant "^1.0.2"
     tiny-warning "^1.0.0"
 
-react-router@5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/react-router/-/react-router-5.1.2.tgz#6ea51d789cb36a6be1ba5f7c0d48dd9e817d3418"
-  integrity sha512-yjEuMFy1ONK246B+rsa0cUam5OeAQ8pyclRDgpxuSCrAlJ1qN9uZ5IgyKC7gQg0w8OM50NXHEegPh/ks9YuR2A==
+react-router@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/react-router/-/react-router-5.2.0.tgz#424e75641ca8747fbf76e5ecca69781aa37ea293"
+  integrity sha512-smz1DUuFHRKdcJC0jobGo8cVbhO3x50tCL4icacOlcwDOEQPq4TMqwx3sY1TP+DvtTgz4nm3thuo7A+BK2U0Dw==
   dependencies:
     "@babel/runtime" "^7.1.2"
     history "^4.9.0"
     hoist-non-react-statics "^3.1.0"
     loose-envify "^1.3.1"
-    mini-create-react-context "^0.3.0"
+    mini-create-react-context "^0.4.0"
     path-to-regexp "^1.7.0"
     prop-types "^15.6.2"
     react-is "^16.6.0"
@@ -15787,7 +15786,7 @@ tiny-invariant@^1.0.2:
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.1.0.tgz#634c5f8efdc27714b7f386c35e6760991d230875"
   integrity sha512-ytxQvrb1cPc9WBEI/HSeYYoGD0kWnGEOR8RY6KomWLBVhqz0RgTwVO9dLrGz7dC+nN9llyI7OKAgRq8Vq4ZBSw==
 
-tiny-warning@^1.0.0, tiny-warning@^1.0.2:
+tiny-warning@^1.0.0, tiny-warning@^1.0.2, tiny-warning@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
   integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
@@ -16543,22 +16542,22 @@ wdio-chromedriver-service@6.0.3:
   dependencies:
     fs-extra "^9.0.0"
 
-webdriver@6.1.8:
-  version "6.1.8"
-  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-6.1.8.tgz#792f390fcbedd97325cac25ae5df92d4d38fe3e7"
-  integrity sha512-S1SkzMAn/iYGzm86wrjlm/RhkbBShFYecKmHwH08/Xt3vwq9uYRN2u2+d58snVGs07y9y5uROjK7ktvYDo8rlg==
+webdriver@6.1.11:
+  version "6.1.11"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-6.1.11.tgz#26c9c61defee06948cd4e7869ecd7b9cc02dc36f"
+  integrity sha512-CWCsTSz4J5uSQD8PHtDyHCdzqWr/8GD9feesJSiftHvauegikTFCC8nUtI68EfYlNO5gYpnI0eF90prKTz8SnA==
   dependencies:
     "@wdio/config" "6.1.2"
     "@wdio/logger" "6.0.16"
-    "@wdio/protocols" "6.1.2"
+    "@wdio/protocols" "6.1.11"
     "@wdio/utils" "6.1.8"
     got "^11.0.2"
     lodash.merge "^4.6.1"
 
-webdriverio@6.1.9:
-  version "6.1.9"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-6.1.9.tgz#9fda9685584eb594101a742b198370e66ebecd7e"
-  integrity sha512-1ayARHlnq2uSLdLnAf5r9GNUXBMAR8Jsd0TjnQOzC5czZHy/N1S9T3lqWzMYo5Kut4MNikXHFZqTT3y0B2U1Iw==
+webdriverio@6.1.11:
+  version "6.1.11"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-6.1.11.tgz#40d214678111ac3436bac525ff10bce16b1f4561"
+  integrity sha512-b6nP19da0HlqqD3ApYZc3yCraMwUjWLX+ghaT0kCIA8lBbVCEhXhJNAgPrEZJUfYJPKmYe7f0Gibn821fCMCQQ==
   dependencies:
     "@wdio/config" "6.1.2"
     "@wdio/logger" "6.0.16"
@@ -16566,7 +16565,7 @@ webdriverio@6.1.9:
     "@wdio/utils" "6.1.8"
     archiver "^4.0.1"
     css-value "^0.0.1"
-    devtools "6.1.9"
+    devtools "6.1.11"
     grapheme-splitter "^1.0.2"
     lodash.clonedeep "^4.5.0"
     lodash.isobject "^3.0.2"
@@ -16575,7 +16574,7 @@ webdriverio@6.1.9:
     resq "^1.6.0"
     rgb2hex "^0.1.0"
     serialize-error "^6.0.0"
-    webdriver "6.1.8"
+    webdriver "6.1.11"
 
 webidl-conversions@^5.0.0:
   version "5.0.0"
