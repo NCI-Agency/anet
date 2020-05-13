@@ -2,13 +2,13 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
-import { PeriodPropType, periodToString } from "components/assessments/utils"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { Formik } from "formik"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import { Person } from "models"
 import moment from "moment"
+import { AssessmentPeriodPropType, periodToString } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Panel } from "react-bootstrap"
@@ -117,7 +117,7 @@ BasePeriodicAssessment.propTypes = {
   assessmentYupSchema: PropTypes.object.isRequired,
   note: Model.notePropTypes.isRequired,
   entity: PropTypes.object.isRequired,
-  period: PeriodPropType.isRequired,
+  period: AssessmentPeriodPropType.isRequired,
   recurrence: PropTypes.string.isRequired,
   onUpdateAssessment: PropTypes.func,
   currentUser: PropTypes.instanceOf(Person)

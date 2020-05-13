@@ -2,13 +2,17 @@ import AggregationWidget from "components/AggregationWidget"
 import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import PeriodicAssessment from "components/assessments/PeriodicAssessment"
-import { PeriodPropType, periodToString } from "components/assessments/utils"
 import { getFieldPropsFromFieldConfig } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { NOTE_TYPE } from "components/Model"
 import { Person } from "models"
 import _isEmpty from "lodash/isEmpty"
+import {
+  AssessmentPeriodPropType,
+  PeriodsTableHeader,
+  periodToString
+} from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
@@ -28,26 +32,11 @@ import "components/assessments/AssessmentResultsTable.css"
  *   entity.getPeriodicAssessmentDetails(recurrence)
  */
 
-const PeriodsPropType = PropTypes.arrayOf(PeriodPropType)
+const PeriodsPropType = PropTypes.arrayOf(AssessmentPeriodPropType)
 const PeriodsConfigPropType = PropTypes.shape({
   recurrence: PropTypes.string,
   periods: PeriodsPropType
 })
-
-const AssessmentsTableHeader = ({ periodsConfig }) => (
-  <thead>
-    <tr key="periods">
-      <>
-        {periodsConfig.periods.map(period => (
-          <th key={period.start}>{periodToString(period)}</th>
-        ))}
-      </>
-    </tr>
-  </thead>
-)
-AssessmentsTableHeader.propTypes = {
-  periodsConfig: PeriodsConfigPropType
-}
 
 const InstantAssessmentRow = ({
   questionKey,
@@ -303,7 +292,7 @@ const AssessmentResultsTable = ({
             id={`"entity-assessments-results-${recurrence}`}
           >
             <Table condensed responsive className="assessments-table">
-              <AssessmentsTableHeader periodsConfig={periodsConfig} />
+              <PeriodsTableHeader periodsConfig={periodsConfig} />
               <tbody>
                 {!_isEmpty(subEntities) && (
                   <>

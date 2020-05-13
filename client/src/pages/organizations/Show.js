@@ -18,10 +18,11 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection, {
+  FORMAT_CALENDAR,
   FORMAT_MAP,
+  FORMAT_STATISTICS,
   FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
+  FORMAT_TABLE
 } from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
@@ -379,6 +380,7 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
                   viewFormats={[
+                    FORMAT_STATISTICS,
                     FORMAT_CALENDAR,
                     FORMAT_SUMMARY,
                     FORMAT_TABLE,

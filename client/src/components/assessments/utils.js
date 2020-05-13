@@ -23,6 +23,11 @@ export const periodToString = period => {
 
 export const PeriodPropType = PropTypes.shape({
   start: PropTypes.object,
+  end: PropTypes.object
+})
+
+export const AssessmentPeriodPropType = PropTypes.shape({
+  start: PropTypes.object,
   end: PropTypes.object,
   allowNewAssessments: PropTypes.bool
 })
