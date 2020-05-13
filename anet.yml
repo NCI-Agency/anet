@@ -385,6 +385,8 @@ dictionary:
               label: Assist
             other:
               label: Other
+          aggregation:
+            widget: default
         trainingEvent:
           type: enum
           label: Training event
@@ -394,6 +396,8 @@ dictionary:
               label: "Yes"
             NO:
               label: "No"
+          aggregation:
+            widget: default
         numberTrained:
           type: number
           typeError: Number trained must be a number
@@ -404,6 +408,8 @@ dictionary:
             - type: min
               params: [1]
           visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+          aggregation:
+            widget: default
         levelTrained:
           type: special_field
           widget: likertScale
@@ -420,6 +426,8 @@ dictionary:
             - color: lightGray
               endValue: 10
               label: advanced advanced advanced advanced
+          aggregation:
+            widget: likertScale
         systemProcess:
           type: enum
           label: System / process
@@ -429,6 +437,8 @@ dictionary:
               label: System
             NO:
               label: Process
+          aggregation:
+            widget: default
         echelons:
           type: text
           label: Issue echelon to fix

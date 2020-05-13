@@ -6,7 +6,7 @@ import React from "react"
 
 const now = moment()
 
-const ASSESSMENT_PERIOD_FACTORIES = {
+export const ASSESSMENT_PERIOD_FACTORIES = {
   [ASSESSMENTS_RECURRENCE_TYPE.DAILY]: (date, offset) => ({
     start: date.clone().subtract(offset, "days").startOf("day"),
     end: date.clone().subtract(offset, "days").endOf("day")
