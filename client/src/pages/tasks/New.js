@@ -30,14 +30,10 @@ const TaskNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
   const qs = utils.parseQueryString(routerLocation.search)
   if (qs.taskedOrgUuid) {
-    const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
-      uuid: qs.taskedOrgUuid
-    })
     return (
-      <TaskNewConditional
+      <TaskNewFetchTaskedOrg
+        taskedOrgUuid={qs.taskedOrgUuid}
         pageDispatchers={pageDispatchers}
-        {...queryResult}
-        orgUuid={qs.taskedOrgUuid}
       />
     )
   }
@@ -45,6 +41,24 @@ const TaskNew = ({ pageDispatchers }) => {
 }
 
 TaskNew.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
+
+const TaskNewFetchTaskedOrg = ({ taskedOrgUuid, pageDispatchers }) => {
+  const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
+    uuid: taskedOrgUuid
+  })
+  return (
+    <TaskNewConditional
+      pageDispatchers={pageDispatchers}
+      {...queryResult}
+      orgUuid={taskedOrgUuid}
+    />
+  )
+}
+
+TaskNewFetchTaskedOrg.propTypes = {
+  taskedOrgUuid: PropTypes.string.isRequired,
   pageDispatchers: PageDispatchersPropType
 }
 
