@@ -35,11 +35,8 @@ const GET_PERSON_WITH_REPORTS = gql`
     }
   }
 `
-const PlanningConflictForPerson = ({ person, report }) => {
-  if (!person || !person.uuid || !report || !report.engagementDate) {
-    return null
-  }
 
+const BasePlanningConflictForPerson = ({ person, report }) => {
   const { loading, error, data } = API.useApiQuery(GET_PERSON_WITH_REPORTS, {
     uuid: person.uuid,
     attendedReportsQuery: {
@@ -120,6 +117,18 @@ const PlanningConflictForPerson = ({ person, report }) => {
       interactionKind={PopoverInteractionKind.CLICK}
     />
   )
+}
+
+BasePlanningConflictForPerson.propTypes = {
+  person: PropTypes.instanceOf(Person).isRequired,
+  report: PropTypes.instanceOf(Report).isRequired
+}
+
+const PlanningConflictForPerson = ({ person, report }) => {
+  if (!person?.uuid || !report?.engagementDate) {
+    return null
+  }
+  return <BasePlanningConflictForPerson person={person} report={report} />
 }
 
 PlanningConflictForPerson.propTypes = {

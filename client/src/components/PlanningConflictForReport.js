@@ -5,7 +5,7 @@ import { gql } from "apollo-boost"
 import Report from "models/Report"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
   query($uuid: String, $attendedReportsQuery: ReportSearchQueryInput) {
@@ -29,32 +29,52 @@ const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
 `
 
 const PlanningConflictForReport = ({ report, text, largeIcon }) => {
-  const [status, setStatus] = useState("loading")
-  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState()
+  const [data, setData] = useState()
+
+  /*
+   * We cannot use API.useApiQuery here because this component is rendered by
+   * ReactDOM.render in ReportCalendar and ReportMap.
+   *
+   * If the component is unmounted before API.query is resolved or rejected,
+   * following warning is printed to the console;
+   *
+   * Warning: Can't perform a React state update on an unmounted component.
+   * This is a no-op, but it indicates a memory leak in your application.
+   * To fix, cancel all subscriptions and asynchronous tasks in a useEffect
+   * cleanup function.
+   *
+   * Since there is no way of canceling a Promise, _isMounted is a workaround.
+   *
+   * https://stackoverflow.com/questions/59780268/cleanup-memory-leaks-on-an-unmounted-component-in-react-hooks
+   */
+  const _isMounted = useRef(true)
 
   useEffect(() => {
     if (!report || !report.uuid || !report.engagementDate) {
-      setStatus("done")
-      return
+      setLoading(false)
+    } else {
+      API.query(GET_REPORT_WITH_ATTENDED_REPORTS, {
+        uuid: report.uuid,
+        attendedReportsQuery: {
+          engagementDateStart: moment(report.engagementDate)
+            .startOf("day")
+            .valueOf(),
+          engagementDateEnd: moment(report.engagementDate)
+            .endOf("day")
+            .valueOf()
+        }
+      })
+        .then(d => _isMounted.current && setData(d))
+        .catch(e => _isMounted.current && setError(e))
+        .finally(() => _isMounted.current && setLoading(false))
     }
 
-    API.query(GET_REPORT_WITH_ATTENDED_REPORTS, {
-      uuid: report.uuid,
-      attendedReportsQuery: {
-        engagementDateStart: moment(report.engagementDate)
-          .startOf("day")
-          .valueOf(),
-        engagementDateEnd: moment(report.engagementDate).endOf("day").valueOf()
-      }
-    })
-      .then(result => {
-        setStatus("done")
-        setData(result)
-      })
-      .catch(() => setStatus("error"))
+    return () => (_isMounted.current = false)
   }, [report])
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <span className="reportConflictLoadingIcon">
         <Spinner
@@ -67,7 +87,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
     )
   }
 
-  if (status === "error") {
+  if (error) {
     return (
       <Tooltip
         content="An error occured while checking planning conflicts!"
