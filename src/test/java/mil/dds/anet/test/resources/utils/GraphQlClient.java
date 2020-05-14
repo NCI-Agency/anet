@@ -59,8 +59,8 @@ public class GraphQlClient {
 
   private Builder httpQuery(String path, Person authUser) {
     try {
-      final String authString =
-          Base64.getEncoder().encodeToString((authUser.getDomainUsername() + ":").getBytes());
+      final String authString = Base64.getEncoder().encodeToString(
+          (authUser.getDomainUsername() + ":" + authUser.getDomainUsername()).getBytes());
       final URI uri = new URI("http", null, "localhost", localPort, path, null, null);
       return client.target(uri).request().header("Authorization", "Basic " + authString)
           .header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());

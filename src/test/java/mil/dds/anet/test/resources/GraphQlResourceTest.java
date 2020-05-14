@@ -137,8 +137,8 @@ public class GraphQlResourceTest extends AbstractResourceTest {
    * Helper method to build httpQuery with authentication and Accept headers.
    */
   private Builder httpQuery(String path, Person authUser) {
-    final String authString =
-        Base64.getEncoder().encodeToString((authUser.getDomainUsername() + ":").getBytes());
+    final String authString = Base64.getEncoder().encodeToString(
+        (authUser.getDomainUsername() + ":" + authUser.getDomainUsername()).getBytes());
     return client.target(String.format("http://localhost:%d%s", TestApp.app.getLocalPort(), path))
         .request().header("Authorization", "Basic " + authString)
         .header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
