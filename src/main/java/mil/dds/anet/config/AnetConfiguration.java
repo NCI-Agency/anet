@@ -2,12 +2,12 @@ package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
+import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -28,15 +28,13 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   private Map<String, Object> dictionary;
 
-  private boolean timeWaffleRequests;
-
   @Valid
   @NotNull
   @JsonProperty
   private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
 
   @NotNull
-  private Map<String, String> waffleConfig = new HashMap<String, String>();
+  private KeycloakConfiguration keycloakConfiguration = new KeycloakConfiguration();
 
   @Valid
   @NotNull
@@ -98,20 +96,12 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     this.views = builder.build();
   }
 
-  public boolean isTimeWaffleRequests() {
-    return timeWaffleRequests;
+  public KeycloakConfiguration getKeycloakConfiguration() {
+    return keycloakConfiguration;
   }
 
-  public void setTimeWaffleRequests(boolean timeWaffleRequests) {
-    this.timeWaffleRequests = timeWaffleRequests;
-  }
-
-  public Map<String, String> getWaffleConfig() {
-    return waffleConfig;
-  }
-
-  public void setWaffleConfig(Map<String, String> config) {
-    this.waffleConfig = config;
+  public void setKeycloakConfiguration(KeycloakConfiguration keycloakConfiguration) {
+    this.keycloakConfiguration = keycloakConfiguration;
   }
 
   public SmtpConfiguration getSmtp() {
