@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -73,6 +74,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   private Position position;
   // annotated below
   private List<PersonPositionHistory> previousPositions;
+  // annotated below
+  private List<PersonPositionHistory> allPeoplePositionHistory;
   // annotated below
   private Optional<byte[]> avatar;
   @GraphQLQuery
@@ -224,15 +227,14 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
         });
   }
 
-  @GraphQLQuery(name = "allPreviousPositions")
-  public CompletableFuture<List<PersonPositionHistory>> loadAllPreviousPositions(
-      @GraphQLRootContext Map<String, Object> context) {
-    if (previousPositions != null) {
-      return CompletableFuture.completedFuture(previousPositions);
+  public CompletableFuture<List<PersonPositionHistory>> loadAllPeoplePositionHistory() {
+    if (allPeoplePositionHistory != null) {
+      return CompletableFuture.completedFuture(allPeoplePositionHistory);
     }
+    Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
     return AnetObjectEngine.getInstance().getPersonDao().getAllPositionHistory(context, uuid)
         .thenApply(o -> {
-          previousPositions = o;
+          allPeoplePositionHistory = o;
           return o;
         });
   }
@@ -241,13 +243,16 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     return previousPositions;
   }
 
-  @GraphQLInputField(name = "previousPositions")
-  public void setPreviousPositions(List<PersonPositionHistory> previousPositions) {
-    this.previousPositions = previousPositions;
+  @JsonIgnore
+  public List<PersonPositionHistory> getAllPeoplePositionHistory() {
+    if (allPeoplePositionHistory == null) {
+      allPeoplePositionHistory = loadAllPeoplePositionHistory().join();
+    }
+    return allPeoplePositionHistory;
   }
 
-  @GraphQLInputField(name = "allPreviousPositions")
-  public void setAllPreviousPositions(List<PersonPositionHistory> previousPositions) {
+  @GraphQLInputField(name = "previousPositions")
+  public void setPreviousPositions(List<PersonPositionHistory> previousPositions) {
     this.previousPositions = previousPositions;
   }
 

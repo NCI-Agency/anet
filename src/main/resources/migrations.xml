@@ -3148,4 +3148,5 @@
 			DELETE FROM "peoplePositions" WHERE "personUuid" IS NULL and "positionUuid" IS NULL;
 		</sql>
 	</changeSet>
+
 </databaseChangeLog>

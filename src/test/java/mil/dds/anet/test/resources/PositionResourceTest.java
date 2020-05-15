@@ -284,16 +284,14 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     String newTestPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", newTestPos, new TypeReference<GraphQlResponse<Position>>() {});
-    Position newPos = graphQLHelper.getObjectById(jack, "position",
-        FIELDS + " allPreviousPeople { startTime endTime}", newTestPosUuid,
+    Position newPos = graphQLHelper.getObjectById(jack, "position", FIELDS, newTestPosUuid,
         new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newPos.getName()).isEqualTo(newTestPos.getName());
     // Position is new. So there must be only one record in her previous positions and it's endTime
     // must be null
-    assertThat(newPos.getPreviousPeople().size()).isEqualTo(1);
-    assertThat(
-        newPos.getPreviousPeople().stream().filter(t -> Objects.isNull(t.getEndTime())).count())
-            .isEqualTo(1);
+    assertThat(newPos.getAllPeoplePositionHistory().size()).isEqualTo(1);
+    assertThat(newPos.getAllPeoplePositionHistory().stream()
+        .filter(t -> Objects.isNull(t.getEndTime())).count()).isEqualTo(1);
   }
 
   @Test

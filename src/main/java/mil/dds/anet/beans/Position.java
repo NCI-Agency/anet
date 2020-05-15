@@ -48,6 +48,8 @@ public class Position extends AbstractAnetBean {
   // annotated below
   List<PersonPositionHistory> previousPeople;
   // annotated below
+  List<PersonPositionHistory> allPeoplePositionHistory;
+  // annotated below
   Boolean isApprover;
 
   public String getName() {
@@ -224,15 +226,14 @@ public class Position extends AbstractAnetBean {
         });
   }
 
-  @GraphQLQuery(name = "allPreviousPeople")
-  public CompletableFuture<List<PersonPositionHistory>> loadAllPreviousPeople(
-      @GraphQLRootContext Map<String, Object> context) {
-    if (previousPeople != null) {
-      return CompletableFuture.completedFuture(previousPeople);
+  public CompletableFuture<List<PersonPositionHistory>> loadAllPeoplePositionHistory() {
+    if (allPeoplePositionHistory != null) {
+      return CompletableFuture.completedFuture(allPeoplePositionHistory);
     }
+    Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
     return AnetObjectEngine.getInstance().getPositionDao().getAllPositionHistory(context, uuid)
         .thenApply(o -> {
-          previousPeople = o;
+          allPeoplePositionHistory = o;
           return o;
         });
   }
@@ -241,13 +242,16 @@ public class Position extends AbstractAnetBean {
     return previousPeople;
   }
 
-  @GraphQLInputField(name = "previousPeople")
-  public void setPreviousPeople(List<PersonPositionHistory> previousPeople) {
-    this.previousPeople = previousPeople;
+  @JsonIgnore
+  public List<PersonPositionHistory> getAllPeoplePositionHistory() {
+    if (allPeoplePositionHistory == null) {
+      allPeoplePositionHistory = loadAllPeoplePositionHistory().join();
+    }
+    return allPeoplePositionHistory;
   }
 
-  @GraphQLInputField(name = "allPreviousPeople")
-  public void setAllPreviousPeople(List<PersonPositionHistory> previousPeople) {
+  @GraphQLInputField(name = "previousPeople")
+  public void setPreviousPeople(List<PersonPositionHistory> previousPeople) {
     this.previousPeople = previousPeople;
   }
 

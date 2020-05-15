@@ -215,15 +215,13 @@ public class PersonResourceTest extends AbstractResourceTest {
         ZonedDateTime.of(2020, 6, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
     String newPerson3Uuid = graphQLHelper.createObject(admin, "createPerson", "person",
         "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
-    newPerson3 = graphQLHelper.getObjectById(admin, "person",
-        PERSON_FIELDS + " allPreviousPositions { startTime endTime}", newPerson3Uuid,
+    newPerson3 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, newPerson3Uuid,
         new TypeReference<GraphQlResponse<Person>>() {});
     // Person is new. So there must be only one record in her previous positions and it's endTime
     // must be null
-    assertThat(newPerson3.getPreviousPositions().size()).isEqualTo(1);
-    assertThat(newPerson3.getPreviousPositions().stream()
+    assertThat(newPerson3.getAllPeoplePositionHistory().size()).isEqualTo(1);
+    assertThat(newPerson3.getAllPeoplePositionHistory().stream()
         .filter(t -> Objects.isNull(t.getEndTime())).count()).isEqualTo(1);
-
   }
 
   @Test
