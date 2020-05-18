@@ -5,7 +5,6 @@ import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
 import React from "react"
 import { Col, ControlLabel, FormGroup } from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
 
 const aggregationPropTypes = {
   values: PropTypes.oneOfType([
@@ -75,23 +74,17 @@ const ReportsByTaskWidget = ({
 }) => {
   return (
     <div className="non-scrollable">
-      <ContainerDimensions>
-        {({ width, height }) => (
-          <BarChart
-            width={width}
-            height={height}
-            chartId={_uniqueId("ReportsByTaskWidget")}
-            data={values}
-            xProp="task.uuid"
-            yProp="reportsCount"
-            xLabel="task.shortName"
-            tooltip={d => `
-            <h4>${d.task.shortName}</h4>
-            <p>${d.reportsCount}</p>
-          `}
-          />
-        )}
-      </ContainerDimensions>
+      <BarChart
+        chartId={_uniqueId("ReportsByTaskWidget")}
+        data={values}
+        xProp="task.uuid"
+        yProp="reportsCount"
+        xLabel="task.shortName"
+        tooltip={d => `
+        <h4>${d.task.shortName}</h4>
+        <p>${d.reportsCount}</p>
+      `}
+      />
     </div>
   )
 }

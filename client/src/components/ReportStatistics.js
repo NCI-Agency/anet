@@ -9,6 +9,7 @@ import {
   PeriodsPropType,
   PeriodsTableHeader
 } from "periodUtils"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect } from "react"
 import { Table } from "react-bootstrap"
@@ -47,12 +48,12 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   atmosphere: {
     aggregation: { widget: "countPerValue" },
     label: Settings.fields.report.atmosphere
-  }
+  },
   // FIXME: right not the bar chart ends in an endless loop
-  //  tasks: {
-  //    aggregation: { widget: "reportsByTask" },
-  //    label: pluralize(Settings.fields.task.subLevel.shortLabel)
-  //  }
+  tasks: {
+    aggregation: { widget: "reportsByTask" },
+    label: pluralize(Settings.fields.task.subLevel.shortLabel)
+  }
 }
 
 const GQL_GET_REPORT_LIST = gql`
