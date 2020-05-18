@@ -67,7 +67,7 @@ const BasePlanningConflictForPerson = ({ person, report }) => {
   }
 
   const conflictingReports = (data?.person?.attendedReports?.list || [])
-    .filter(ar => report.hasConflict(ar))
+    .filter(ar => Report.hasConflict(report, ar))
     .sort((a, b) =>
       a.engagementDate === b.engagementDate
         ? (a.duration || 0) - (b.duration || 0)
@@ -94,16 +94,7 @@ const BasePlanningConflictForPerson = ({ person, report }) => {
               model={report}
               style={{ display: "block" }}
             >
-              {moment(report.engagementDate).format(
-                Report.getEngagementDateFormat()
-              )}
-              {" >>> "}
-              {report.duration > 0
-                ? moment(report.engagementDate)
-                  .add(report.duration, "minutes")
-                  .format(Report.getEngagementDateFormat())
-                : "..."}
-              &nbsp;({report.state})
+              {Report.getFormattedEngagementDate(report)}&nbsp;({report.state})
             </LinkTo>
           ))}
         </Callout>

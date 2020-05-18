@@ -9,7 +9,7 @@ class EditReport extends Page {
 
   get deleteButton() {
     return browser.$(
-      "//div[@class='submit-buttons']//button[text()='Delete this report']"
+      "//div[@class='submit-buttons']//button[text()='Delete this planned engagement']"
     )
   }
 

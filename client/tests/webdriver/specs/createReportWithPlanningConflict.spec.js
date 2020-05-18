@@ -9,14 +9,24 @@ describe("When creating a Report with conflicts", () => {
   let secondReportUUID
   const report01 = {
     intent: "111111111111",
-    engagementDate: moment().hours(1).minutes(0).seconds(0).milliseconds(0),
+    engagementDate: moment()
+      .add(1, "day")
+      .hours(1)
+      .minutes(0)
+      .seconds(0)
+      .milliseconds(0),
     duration: "60",
     advisors: ["CIV REINTON, Reina"],
     principals: ["CIV TOPFERNESS, Christopf"]
   }
   const report02 = {
     intent: "2222222222",
-    engagementDate: moment().hours(1).minutes(10).seconds(0).milliseconds(0),
+    engagementDate: moment()
+      .add(1, "day")
+      .hours(1)
+      .minutes(10)
+      .seconds(0)
+      .milliseconds(0),
     duration: "10",
     advisors: ["CIV REINTON, Reina", "CIV ANDERSON, Andrew"],
     principals: ["CIV TOPFERNESS, Christopf", "Maj ROGWELL, Roger"]
@@ -46,8 +56,8 @@ describe("When creating a Report with conflicts", () => {
     CreateReport.submitForm()
     ShowReport.waitForShowReportToLoad()
 
-    const statusText = "This is a DRAFT report and hasn't been submitted."
-    expect(ShowReport.reportStatusText).to.equal(statusText)
+    const text = "This is a DRAFT planned engagement and hasn't been submitted."
+    expect(ShowReport.reportStatusText).to.equal(text)
     expect(ShowReport.intent).to.equal(report01.intent)
 
     firstReportUUID = ShowReport.uuid
@@ -86,8 +96,8 @@ describe("When creating a Report with conflicts", () => {
     CreateReport.submitForm()
     ShowReport.waitForShowReportToLoad()
 
-    const statusText = "This is a DRAFT report and hasn't been submitted."
-    expect(ShowReport.reportStatusText).to.equal(statusText)
+    const text = "This is a DRAFT planned engagement and hasn't been submitted."
+    expect(ShowReport.reportStatusText).to.equal(text)
     expect(ShowReport.intent).to.equal(report02.intent)
 
     secondReportUUID = ShowReport.uuid
@@ -100,7 +110,8 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.uuid.length).to.equal(36)
 
-    const statusText = "This is a DRAFT report and hasn't been submitted."
+    const statusText =
+      "This is a DRAFT planned engagement and hasn't been submitted."
     expect(ShowReport.reportStatusText).to.equal(statusText)
 
     expect(ShowReport.intent).to.equal(report01.intent)
@@ -140,7 +151,8 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.uuid.length).to.equal(36)
 
-    const statusText = "This is a DRAFT report and hasn't been submitted."
+    const statusText =
+      "This is a DRAFT planned engagement and hasn't been submitted."
     expect(ShowReport.reportStatusText).to.equal(statusText)
 
     expect(ShowReport.intent).to.equal(report02.intent)
