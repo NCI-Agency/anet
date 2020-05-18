@@ -5,14 +5,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { FormGroup } from "react-bootstrap"
 
-const STATE_LABELS = {
-  [Report.STATE.DRAFT]: "Draft",
-  [Report.STATE.PENDING_APPROVAL]: "Pending Approval",
-  [Report.STATE.APPROVED]: "Approved",
-  [Report.STATE.PUBLISHED]: "Published",
-  [Report.STATE.CANCELLED]: "Cancelled",
-  [Report.STATE.REJECTED]: "Changes requested"
-}
 const CANCELLATION_REASON_LABELS = {
   [Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR]: "Advisor",
   [Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL]: "Principal",
@@ -55,7 +47,7 @@ const ReportStateFilter = ({
     toQuery
   )
 
-  const labels = value.state.map(s => STATE_LABELS[s])
+  const labels = value.state.map(s => Report.STATE_LABELS[s])
   const onlyCancelled = isOnlyCancelled(value)
   let stateDisplay = labels.join(" or ")
   if (onlyCancelled && value.cancelledReason) {
@@ -79,9 +71,9 @@ const ReportStateFilter = ({
           onChange={handleChangeState}
           multiple
         >
-          {Object.keys(STATE_LABELS).map(key => (
+          {Object.keys(Report.STATE_LABELS).map(key => (
             <option key={key} value={key}>
-              {STATE_LABELS[key]}
+              {Report.STATE_LABELS[key]}
             </option>
           ))}
         </select>

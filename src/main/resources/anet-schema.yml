@@ -99,13 +99,13 @@ definitions:
         properties:
           widget:
             type: string
-            enum: [likertScale, numberAggregation, default]
+            enum: [likertScale, numberAggregation, countPerValue, default]
         dependencies:
           widget:
             oneOf:
             - properties:
                 widget:
-                  enum: [likertScale, default]
+                  enum: [likertScale, countPerValue, default]
             - properties:
                 type:
                   enum: [numberAggregation]

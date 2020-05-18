@@ -386,7 +386,7 @@ dictionary:
             other:
               label: Other
           aggregation:
-            widget: default
+            widget: countPerValue
         trainingEvent:
           type: enum
           label: Training event

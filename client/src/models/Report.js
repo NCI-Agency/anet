@@ -26,6 +26,15 @@ export default class Report extends Model {
     CANCELLED: "CANCELLED"
   }
 
+  static STATE_LABELS = {
+    [Report.STATE.DRAFT]: "Draft",
+    [Report.STATE.PENDING_APPROVAL]: "Pending Approval",
+    [Report.STATE.APPROVED]: "Approved",
+    [Report.STATE.PUBLISHED]: "Published",
+    [Report.STATE.CANCELLED]: "Cancelled",
+    [Report.STATE.REJECTED]: "Changes requested"
+  }
+
   static ENGAGEMENT_STATUS = {
     HAPPENED: "HAPPENED",
     FUTURE: "FUTURE",

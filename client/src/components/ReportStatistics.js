@@ -1,16 +1,13 @@
-/* eslint-disable */
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
+import { WIDGET_AGGREGATIONS } from "components/aggregations/utils"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
-import ListAggregation from "components/aggregations/ListAggregation"
-import ReportsByTaskAggregation from "components/aggregations/ReportsByTaskAggregation"
 import _get from "lodash/get"
 import { Report } from "models"
-import pluralize from "pluralize"
 import {
   PeriodsConfigPropType,
   PeriodsPropType,
-  PeriodsTableHeader,
+  PeriodsTableHeader
 } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useEffect } from "react"
@@ -18,14 +15,40 @@ import { Table } from "react-bootstrap"
 
 const REPORT_FIELDS_FOR_STATISTICS = {
   state: {
-    aggregation: { widget: "default" },
+    aggregation: { widget: "countPerValue" },
     label: "State",
+    choices: {
+      [Report.STATE.DRAFT]: {
+        label: Report.STATE_LABELS[Report.STATE.DRAFT],
+        color: "#bdbdaf"
+      },
+      [Report.STATE.PENDING_APPROVAL]: {
+        label: Report.STATE_LABELS[Report.STATE.PENDING_APPROVAL],
+        color: "#848478"
+      },
+      [Report.STATE.APPROVED]: {
+        label: Report.STATE_LABELS[Report.STATE.APPROVED],
+        color: "#75eb75"
+      },
+      [Report.STATE.PUBLISHED]: {
+        label: Report.STATE_LABELS[Report.STATE.PUBLISHED],
+        color: "#5cb85c"
+      },
+      [Report.STATE.CANCELLED]: {
+        label: Report.STATE_LABELS[Report.STATE.CANCELLED],
+        color: "#ec971f"
+      },
+      [Report.STATE.REJECTED]: {
+        label: Report.STATE_LABELS[Report.STATE.REJECTED],
+        color: "#c23030"
+      }
+    }
   },
   atmosphere: {
-    aggregation: { widget: "default" },
-    label: Settings.fields.report.atmosphere,
-  },
-  // TODO: right not the bar chart ends in an endless loop
+    aggregation: { widget: "countPerValue" },
+    label: Settings.fields.report.atmosphere
+  }
+  // FIXME: right not the bar chart ends in an endless loop
   //  tasks: {
   //    aggregation: { widget: "reportsByTask" },
   //    label: pluralize(Settings.fields.task.subLevel.shortLabel)
@@ -54,25 +77,17 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 
-// TODO: Move this in a more general aggregations related file
-const AGGREGATIONS = {
-  likertScale: ListAggregation,
-  numberAggregation: ListAggregation,
-  reportsByTask: ReportsByTaskAggregation,
-  default: ListAggregation,
-}
-
 const FieldStatisticsRow = ({
   fieldConfig,
   fieldName,
   periods,
-  periodsData,
+  periodsData
 }) => {
   if (!fieldConfig.aggregation) {
     return null
   }
   const AggregationComponent =
-    AGGREGATIONS[fieldConfig.aggregation.widget || fieldConfig.widget]
+    WIDGET_AGGREGATIONS[fieldConfig.aggregation.widget || fieldConfig.widget]
   return (
     <tr>
       {periods.map((period, index) => (
@@ -92,29 +107,29 @@ FieldStatisticsRow.propTypes = {
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
   periods: PeriodsPropType,
-  periodsData: PropTypes.arrayOf(PropTypes.array),
+  periodsData: PropTypes.arrayOf(PropTypes.array)
 }
 
 const ReportStatistics = ({
   pageDispatchers,
   periodsConfig,
   setTotalCount,
-  queryParams,
+  queryParams
 }) => {
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
-    reportQuery,
+    reportQuery
   })
   const { done, result } = useBoilerplate({
     loading,
     error,
-    pageDispatchers,
+    pageDispatchers
   })
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
   useEffect(() => setTotalCount && setTotalCount(totalCount), [
     setTotalCount,
-    totalCount,
+    totalCount
   ])
   if (done) {
     return result
@@ -177,7 +192,7 @@ ReportStatistics.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   periodsConfig: PeriodsConfigPropType,
   setTotalCount: PropTypes.func,
-  queryParams: PropTypes.object,
+  queryParams: PropTypes.object
 }
 
 export default ReportStatistics
