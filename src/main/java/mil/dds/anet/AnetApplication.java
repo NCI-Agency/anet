@@ -12,14 +12,14 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import de.ahus1.keycloak.dropwizard.AbstractKeycloakAuthenticator;
+import de.ahus1.keycloak.dropwizard.KeycloakBundle;
+import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import io.dropwizard.Application;
-import io.dropwizard.auth.AuthDynamicFeature;
-import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
-import io.dropwizard.auth.chained.ChainedAuthFilter;
+import io.dropwizard.auth.Authorizer;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -32,22 +32,21 @@ import io.dropwizard.views.ViewBundle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
+import java.security.Principal;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import mil.dds.anet.auth.AnetAuthenticationFilter;
-import mil.dds.anet.auth.AnetDevAuthenticator;
-import mil.dds.anet.auth.TimedNegotiateSecurityFilter;
-import mil.dds.anet.auth.UrlParamsAuthFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.ApprovalStepResource;
@@ -76,13 +75,12 @@ import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.keycloak.KeycloakSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 import ru.vyarus.guicey.jdbi3.JdbiBundle;
-import waffle.servlet.NegotiateSecurityFilter;
 
 public class AnetApplication extends Application<AnetConfiguration> {
 
@@ -151,6 +149,48 @@ public class AnetApplication extends Application<AnetConfiguration> {
       }
     });
 
+    // Add Dropwizard-Keycloak
+    bootstrap.addBundle(new KeycloakBundle<AnetConfiguration>() {
+      @Override
+      protected KeycloakConfiguration getKeycloakConfiguration(AnetConfiguration configuration) {
+        return configuration.getKeycloakConfiguration();
+      }
+
+      @Override
+      protected Class<? extends Principal> getUserClass() {
+        return Person.class;
+      }
+
+      @Override
+      protected AbstractKeycloakAuthenticator<Person> createAuthenticator(
+          KeycloakConfiguration configuration) {
+        return new AbstractKeycloakAuthenticator<Person>(configuration) {
+          @Override
+          protected Person prepareAuthentication(KeycloakSecurityContext securityContext,
+              HttpServletRequest request, KeycloakConfiguration keycloakConfiguration) {
+            final PersonDao dao = AnetObjectEngine.getInstance().getPersonDao();
+            final String username = securityContext.getToken().getPreferredUsername();
+            final List<Person> p = dao.findByDomainUsername(username);
+            if (p.isEmpty()) {
+              throw new WebApplicationException("Unauthorized", Status.UNAUTHORIZED);
+            }
+            return p.get(0);
+          }
+        };
+      }
+
+      @Override
+      protected Authorizer<Person> createAuthorizer() {
+        return new Authorizer<Person>() {
+          @Override
+          public boolean authorize(Person principal, String role) {
+            // We don't use @RolesAllowed type authorizations
+            return false;
+          }
+        };
+      }
+    });
+
     // Add Dropwizard-Guicey
     bootstrap.addBundle(GuiceBundle.builder()
         .bundles(
@@ -183,43 +223,14 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this, metricRegistry);
     environment.servlets().setSessionHandler(new SessionHandler());
 
-    if (configuration.isDevelopmentMode()) {
-      // In development mode chain URL params (used during testing) and basic HTTP Authentication
-      final UrlParamsAuthFilter<Person> urlParamsAuthFilter =
-          new UrlParamsAuthFilter.Builder<Person>()
-              .setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
-              // Acting only as Authz.
-              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)).setRealm("ANET")
-              .buildAuthFilter();
-      final BasicCredentialAuthFilter<Person> basicAuthFilter =
-          new BasicCredentialAuthFilter.Builder<Person>()
-              .setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
-              // Acting only as Authz.
-              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)).setRealm("ANET")
-              .buildAuthFilter();
-      environment.jersey().register(new AuthDynamicFeature(new ChainedAuthFilter<>(
-          Arrays.asList(new AuthFilter[] {urlParamsAuthFilter, basicAuthFilter}))));
-    } else {
-      // In Production require Windows AD Authentication.
-      final Filter nsf =
-          configuration.isTimeWaffleRequests() ? new TimedNegotiateSecurityFilter(metricRegistry)
-              : new NegotiateSecurityFilter();
-      final FilterRegistration nsfReg =
-          environment.servlets().addFilter("NegotiateSecurityFilter", nsf);
-      nsfReg.setInitParameters(configuration.getWaffleConfig());
-      nsfReg.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
-      environment.jersey()
-          .register(new AuthDynamicFeature(new AnetAuthenticationFilter(engine, metricRegistry)));
-    }
-
     if (configuration.getRedirectToHttps()) {
       forwardToHttps(environment.getApplicationContext());
     }
 
     // If you want to use @Auth to inject a custom Principal type into your resource
     environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Person.class));
-    // If you want to use @RolesAllowed to do authorization.
-    environment.jersey().register(RolesAllowedDynamicFeature.class);
+    // We no longer use @RolesAllowed to do authorization
+    // environment.jersey().register(RolesAllowedDynamicFeature.class);
     environment.jersey().register(new WebExceptionMapper());
 
     if (configuration.isTestMode()) {

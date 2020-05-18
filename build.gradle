@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.4.0"
 	id "com.github.node-gradle.node" version "2.2.3"
-	id "com.diffplug.gradle.spotless" version "3.29.0"
+	id "com.diffplug.gradle.spotless" version "3.30.0"
 }
 
 apply plugin: 'java'
@@ -85,11 +85,13 @@ dependencies {
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
-	implementation 'com.github.waffle:waffle-jna:1.9.1'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.10.1'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20191001.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.0'
+
+	// Authentication
+	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.1.1'
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
