@@ -24,6 +24,11 @@ class CreateReport extends Page {
     return browser.$(".bp3-datepicker-footer > button:first-child")
   }
 
+  get tomorrow() {
+    const tomorrow = moment().add(1, "day").format("ddd MMM DD YYYY")
+    return browser.$(`div[aria-label="${tomorrow}"]`)
+  }
+
   get hour() {
     return browser.$("input.bp3-timepicker-input.bp3-timepicker-hour")
   }
@@ -114,16 +119,15 @@ class CreateReport extends Page {
 
     if (moment.isMoment(fields.engagementDate)) {
       this.engagementDate.click()
-      this.today.waitForDisplayed()
-      this.today.waitForClickable()
-      this.today.click()
-      this.engagementDate.click()
-
+      this.tomorrow.waitForDisplayed()
+      this.tomorrow.waitForClickable()
+      browser.pause(300) // wait for calendar popup animation
+      this.tomorrow.click()
+      browser.waitUntil(() => !!browser.$("#engagementDate").getValue())
       this.hour.waitForDisplayed()
       this.hour.waitForClickable()
       this.hour.click()
       browser.keys(fields.engagementDate.format("HH"))
-
       this.minute.waitForDisplayed()
       this.minute.waitForClickable()
       this.minute.click()
@@ -131,7 +135,7 @@ class CreateReport extends Page {
       this.engagementDate.click()
 
       this.title.click()
-      this.today.waitForDisplayed({ reverse: true })
+      this.tomorrow.waitForDisplayed({ reverse: true })
     }
 
     if (fields.duration !== undefined) {

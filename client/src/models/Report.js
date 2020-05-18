@@ -411,23 +411,69 @@ export default class Report extends Model {
     return { taskToAssessmentUuid, taskAssessments }
   }
 
-  hasConflict(that) {
-    if (this.uuid === that.uuid) {
+  static hasConflict(report01, report02) {
+    if (report01.uuid === report02.uuid) {
       return false // same report is not a conflicting report
     }
-    const thisStart = moment(this.engagementDate)
-    const thisEnd = moment(this.engagementDate).add(
-      this.duration || 0,
-      "minute"
-    )
-    const thatStart = moment(that.engagementDate)
-    const thatEnd = moment(that.engagementDate).add(
-      that.duration || 0,
-      "minute"
-    )
+
+    let start01
+    let end01
+
+    if (
+      !Settings.engagementsIncludeTimeAndDuration ||
+      report01.duration === null
+    ) {
+      // It is an all-day event
+      start01 = moment(report01.engagementDate).startOf("day")
+      end01 = moment(report01.engagementDate).endOf("day")
+    } else {
+      start01 = moment(report01.engagementDate)
+      end01 = moment(report01.engagementDate).add(report01.duration, "minute")
+    }
+
+    let start02
+    let end02
+
+    if (
+      !Settings.engagementsIncludeTimeAndDuration ||
+      report02.duration === null
+    ) {
+      // It is an all-day event
+      start02 = moment(report02.engagementDate).startOf("day")
+      end02 = moment(report02.engagementDate).endOf("day")
+    } else {
+      start02 = moment(report02.engagementDate)
+      end02 = moment(report02.engagementDate).add(report02.duration, "minute")
+    }
+
     return (
-      thisStart.isSame(thatStart) ||
-      (thisEnd.isAfter(thatStart) && thisStart.isBefore(thatEnd))
+      start01.isSame(start02) ||
+      (end01.isAfter(start02) && start01.isBefore(end02))
+    )
+  }
+
+  static getFormattedEngagementDate(report) {
+    if (!report?.engagementDate) {
+      return ""
+    }
+
+    const start = moment(report.engagementDate)
+    if (!report.duration) {
+      return Settings.engagementsIncludeTimeAndDuration
+        ? start.format(Settings.dateFormats.forms.displayLong.date) +
+            " (all day)"
+        : start.format(Report.getEngagementDateFormat())
+    }
+
+    const end = moment(report.engagementDate).add(report.duration, "minutes")
+
+    return (
+      start.format(Report.getEngagementDateFormat()) +
+      end.format(
+        start.isSame(end, "day")
+          ? " - HH:mm"
+          : " >>> " + Report.getEngagementDateFormat()
+      )
     )
   }
 }

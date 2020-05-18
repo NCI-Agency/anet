@@ -106,7 +106,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
   const attendees = currentReport?.attendees || []
 
   const conflictingAttendees = attendees.filter(at =>
-    at.attendedReports.list.some(ar => currentReport.hasConflict(ar))
+    at.attendedReports.list.some(ar => Report.hasConflict(currentReport, ar))
   )
 
   if (!conflictingAttendees.length) {
