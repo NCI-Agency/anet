@@ -1,10 +1,10 @@
 import {
   DefaultAggWidget,
-  NumberAggWidget,
   PieWidget,
   ReportsByTaskWidget
 } from "components/aggregations/AggregationWidgets"
 import { getFieldPropsFromFieldConfig } from "components/CustomFields"
+import IqrBoxPlot from "components/graphs/IqrBoxPlot"
 import LikertScale from "components/graphs/LikertScale"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import PropTypes from "prop-types"
@@ -15,12 +15,12 @@ const AGGERGATION_WIDGET_TYPE = {
   LIKERT_SCALE: "likertScale",
   PIE: "pie",
   REPORTS_BY_TASK: "reportsByTask",
-  NUMBER_AGGREGATION: "numberAggregation",
+  IQR_BOX_PLOT: "iqrBoxPlot",
   DEFAULT: "default"
 }
 export const DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
   [CUSTOM_FIELD_TYPE.TEXT]: AGGERGATION_WIDGET_TYPE.DEFAULT,
-  [CUSTOM_FIELD_TYPE.NUMBER]: AGGERGATION_WIDGET_TYPE.DEFAULT,
+  [CUSTOM_FIELD_TYPE.NUMBER]: AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT,
   [CUSTOM_FIELD_TYPE.DATE]: AGGERGATION_WIDGET_TYPE.DEFAULT,
   [CUSTOM_FIELD_TYPE.DATETIME]: AGGERGATION_WIDGET_TYPE.DEFAULT,
   [CUSTOM_FIELD_TYPE.ENUM]: AGGERGATION_WIDGET_TYPE.PIE,
@@ -32,7 +32,7 @@ export const DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
 const WIDGET_COMPONENTS = {
   [AGGERGATION_WIDGET_TYPE.LIKERT_SCALE]: LikertScale,
   [AGGERGATION_WIDGET_TYPE.PIE]: PieWidget,
-  [AGGERGATION_WIDGET_TYPE.NUMBER_AGGREGATION]: NumberAggWidget,
+  [AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT]: IqrBoxPlot,
   [AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK]: ReportsByTaskWidget,
   [AGGERGATION_WIDGET_TYPE.COUNT_PER_VALUE]: PieWidget,
   default: DefaultAggWidget

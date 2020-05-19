@@ -97,9 +97,12 @@ definitions:
       aggregation:
         type: object
         properties:
+          aggregationType:
+            type: string
+            enum: [countPerValue, numbersList, valuesList]
           widget:
             type: string
-            enum: [likertScale, numberAggregation, countPerValue, default]
+            enum: [pie, iqrBoxPlot, likertScale, default]
         dependencies:
           widget:
             oneOf:
@@ -108,7 +111,7 @@ definitions:
                   enum: [likertScale, countPerValue, default]
             - properties:
                 type:
-                  enum: [numberAggregation]
+                  enum: [iqrBoxPlot]
                 aggregationType:
                   type: string
                   enum: [sum, avg, min, max]

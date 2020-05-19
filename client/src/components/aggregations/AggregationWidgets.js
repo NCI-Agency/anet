@@ -19,26 +19,6 @@ const aggregationPropTypes = {
   aggregationType: PropTypes.string
 }
 
-const arrayOfNumbers = arr =>
-  arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
-
-const NUMBER_AGG = {
-  sum: arr => arr.reduce((a, b) => a + b),
-  avg: arr => arr.reduce((a, b) => a + b) / arr.length,
-  min: arr => Math.min(...arr),
-  max: arr => Math.max(...arr)
-}
-
-export const NumberAggWidget = ({
-  values,
-  aggregationType,
-  ...otherWidgetProps
-}) =>
-  values?.length ? (
-    <div>{NUMBER_AGG[aggregationType](arrayOfNumbers(values))}</div>
-  ) : null
-NumberAggWidget.propTypes = aggregationPropTypes
-
 export const PieWidget = ({
   values,
   aggregationType,
