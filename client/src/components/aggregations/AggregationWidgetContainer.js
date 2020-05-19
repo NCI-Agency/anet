@@ -45,7 +45,6 @@ const AggregationWidgetContainer = ({
   vertical,
   ...otherWidgetProps
 }) => {
-  const aggregationType = fieldConfig.aggregation?.aggregationType
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const label = fieldProps.label
   const widget =
@@ -59,7 +58,6 @@ const AggregationWidgetContainer = ({
   const widgetElem = (
     <WidgetComponent
       values={values}
-      aggregationType={aggregationType}
       vertical={vertical}
       {...fieldProps}
       {...otherWidgetProps}

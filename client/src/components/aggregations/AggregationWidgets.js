@@ -4,7 +4,7 @@ import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
 import React from "react"
 
-const aggregationPropTypes = {
+const aggregationWidgetPropTypes = {
   values: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.arrayOf(
@@ -15,16 +15,10 @@ const aggregationPropTypes = {
         PropTypes.object
       ])
     )
-  ]),
-  aggregationType: PropTypes.string
+  ])
 }
 
-export const PieWidget = ({
-  values,
-  aggregationType,
-  legend,
-  ...otherWidgetProps
-}) => {
+export const PieWidget = ({ values, legend, ...otherWidgetProps }) => {
   return (
     <>
       <Pie
@@ -46,14 +40,10 @@ export const PieWidget = ({
 }
 PieWidget.propTypes = {
   legend: PropTypes.object,
-  ...aggregationPropTypes
+  ...aggregationWidgetPropTypes
 }
 
-export const ReportsByTaskWidget = ({
-  values,
-  aggregationType,
-  ...otherWidgetProps
-}) => {
+export const ReportsByTaskWidget = ({ values, ...otherWidgetProps }) => {
   return (
     <div className="non-scrollable">
       <BarChart
@@ -70,9 +60,9 @@ export const ReportsByTaskWidget = ({
     </div>
   )
 }
-ReportsByTaskWidget.propTypes = aggregationPropTypes
+ReportsByTaskWidget.propTypes = aggregationWidgetPropTypes
 
 export const DefaultAggWidget = ({ values, ...otherWidgetProps }) => (
   <div>{`[${values}]`}</div>
 )
-DefaultAggWidget.propTypes = aggregationPropTypes
+DefaultAggWidget.propTypes = aggregationWidgetPropTypes
