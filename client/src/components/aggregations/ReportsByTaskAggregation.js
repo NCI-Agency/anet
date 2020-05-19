@@ -1,5 +1,5 @@
 import { Settings } from "api"
-import AggregationWidget from "components/AggregationWidget"
+import AggregationWidgetContainer from "components/aggregations/AggregationWidgetContainer"
 import PropTypes from "prop-types"
 import React from "react"
 
@@ -42,7 +42,7 @@ const getReportsByTasks = reportsList => {
 const ReportsByTaskAggregation = ({ fieldName, fieldConfig, data }) => {
   const values = getReportsByTasks(data)
   return (
-    <AggregationWidget
+    <AggregationWidgetContainer
       key={`assessment-${fieldName}`}
       fieldConfig={fieldConfig}
       values={values}

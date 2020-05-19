@@ -1,4 +1,4 @@
-import AggregationWidget from "components/AggregationWidget"
+import AggregationWidgetContainer from "components/aggregations/AggregationWidgetContainer"
 import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import PeriodicAssessment from "components/assessments/PeriodicAssessment"
@@ -47,7 +47,7 @@ const InstantAssessmentRow = ({
     <tr>
       {periods.map((period, index) => (
         <td key={index}>
-          <AggregationWidget
+          <AggregationWidgetContainer
             key={`assessment-${questionKey}`}
             values={entity.getInstantAssessmentResults(period)[questionKey]}
             fieldConfig={questionConfig}

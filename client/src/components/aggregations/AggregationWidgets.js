@@ -1,11 +1,8 @@
 import BarChart from "components/BarChart"
-import { getFieldPropsFromFieldConfig } from "components/CustomFields"
-import LikertScale from "components/graphs/LikertScale"
 import Pie from "components/graphs/Pie"
 import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
 import React from "react"
-import { Col, ControlLabel, FormGroup } from "react-bootstrap"
 
 const aggregationPropTypes = {
   values: PropTypes.oneOfType([
@@ -32,13 +29,17 @@ const NUMBER_AGG = {
   max: arr => Math.max(...arr)
 }
 
-const NumberAggWidget = ({ values, aggregationType, ...otherWidgetProps }) =>
+export const NumberAggWidget = ({
+  values,
+  aggregationType,
+  ...otherWidgetProps
+}) =>
   values?.length ? (
     <div>{NUMBER_AGG[aggregationType](arrayOfNumbers(values))}</div>
   ) : null
 NumberAggWidget.propTypes = aggregationPropTypes
 
-const PieWidget = ({
+export const PieWidget = ({
   values,
   aggregationType,
   legend,
@@ -68,7 +69,7 @@ PieWidget.propTypes = {
   ...aggregationPropTypes
 }
 
-const ReportsByTaskWidget = ({
+export const ReportsByTaskWidget = ({
   values,
   aggregationType,
   ...otherWidgetProps
@@ -91,69 +92,7 @@ const ReportsByTaskWidget = ({
 }
 ReportsByTaskWidget.propTypes = aggregationPropTypes
 
-const DefaultAggWidget = ({ values, ...otherWidgetProps }) => (
+export const DefaultAggWidget = ({ values, ...otherWidgetProps }) => (
   <div>{`[${values}]`}</div>
 )
 DefaultAggWidget.propTypes = aggregationPropTypes
-
-const WIDGET_COMPONENTS = {
-  likertScale: LikertScale,
-  numberAggregation: NumberAggWidget,
-  reportsByTask: ReportsByTaskWidget,
-  countPerValue: PieWidget,
-  default: DefaultAggWidget
-}
-
-const AggregationWidget = ({
-  fieldConfig,
-  values,
-  vertical,
-  ...otherWidgetProps
-}) => {
-  const aggregationType = fieldConfig.aggregation?.aggregationType
-  const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
-  const label = fieldProps.label
-  const widget = fieldConfig.aggregation?.widget || fieldConfig.widget
-  const WidgetComponent =
-    (widget && WIDGET_COMPONENTS[widget]) || WIDGET_COMPONENTS.default
-  const widgetElem = (
-    <WidgetComponent
-      values={values}
-      aggregationType={aggregationType}
-      vertical={vertical}
-      {...fieldProps}
-      {...otherWidgetProps}
-    />
-  )
-  return (
-    <FormGroup>
-      {vertical ? (
-        <>
-          {label !== null && <ControlLabel>{label}</ControlLabel>}
-          {widgetElem}
-        </>
-      ) : (
-        <>
-          {label !== null && (
-            <Col sm={2} componentClass={ControlLabel}>
-              {label}
-            </Col>
-          )}
-          <Col sm={10}>
-            <div>{widgetElem}</div>
-          </Col>
-        </>
-      )}
-    </FormGroup>
-  )
-}
-AggregationWidget.propTypes = {
-  values: PropTypes.any,
-  fieldConfig: PropTypes.object,
-  vertical: PropTypes.bool
-}
-AggregationWidget.defaultProps = {
-  vertical: true
-}
-
-export default AggregationWidget
