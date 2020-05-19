@@ -2,7 +2,6 @@ import AggregationWidget from "components/AggregationWidget"
 import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import PeriodicAssessment from "components/assessments/PeriodicAssessment"
-import { getFieldPropsFromFieldConfig } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { NOTE_TYPE } from "components/Model"
@@ -44,12 +43,6 @@ const InstantAssessmentRow = ({
   entity,
   periods
 }) => {
-  const aggWidgetProps = {
-    widget: questionConfig.aggregation?.widget || questionConfig.widget,
-    aggregationType: questionConfig.aggregation?.aggregationType,
-    vertical: true
-  }
-  const fieldProps = getFieldPropsFromFieldConfig(questionConfig)
   return (
     <tr>
       {periods.map((period, index) => (
@@ -57,8 +50,7 @@ const InstantAssessmentRow = ({
           <AggregationWidget
             key={`assessment-${questionKey}`}
             values={entity.getInstantAssessmentResults(period)[questionKey]}
-            {...aggWidgetProps}
-            {...fieldProps}
+            fieldConfig={questionConfig}
           />
         </td>
       ))}

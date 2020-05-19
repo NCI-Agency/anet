@@ -1,4 +1,5 @@
 import BarChart from "components/BarChart"
+import { getFieldPropsFromFieldConfig } from "components/CustomFields"
 import LikertScale from "components/graphs/LikertScale"
 import Pie from "components/graphs/Pie"
 import _uniqueId from "lodash/uniqueId"
@@ -95,7 +96,7 @@ const DefaultAggWidget = ({ values, ...otherWidgetProps }) => (
 )
 DefaultAggWidget.propTypes = aggregationPropTypes
 
-const WIDGETS = {
+const WIDGET_COMPONENTS = {
   likertScale: LikertScale,
   numberAggregation: NumberAggWidget,
   reportsByTask: ReportsByTaskWidget,
@@ -104,18 +105,23 @@ const WIDGETS = {
 }
 
 const AggregationWidget = ({
-  label,
-  widget,
+  fieldConfig,
   values,
-  aggregationType,
   vertical,
   ...otherWidgetProps
 }) => {
-  const Widget = (widget && WIDGETS[widget]) || WIDGETS.default
+  const aggregationType = fieldConfig.aggregation?.aggregationType
+  const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+  const label = fieldProps.label
+  const widget = fieldConfig.aggregation?.widget || fieldConfig.widget
+  const WidgetComponent =
+    (widget && WIDGET_COMPONENTS[widget]) || WIDGET_COMPONENTS.default
   const widgetElem = (
-    <Widget
+    <WidgetComponent
       values={values}
       aggregationType={aggregationType}
+      vertical={vertical}
+      {...fieldProps}
       {...otherWidgetProps}
     />
   )
@@ -142,17 +148,12 @@ const AggregationWidget = ({
   )
 }
 AggregationWidget.propTypes = {
-  label: PropTypes.string,
-  widget: PropTypes.string,
-  vertical: PropTypes.bool,
-  ...aggregationPropTypes
+  values: PropTypes.any,
+  fieldConfig: PropTypes.object,
+  vertical: PropTypes.bool
 }
 AggregationWidget.defaultProps = {
-  label: "",
-  widget: "",
-  values: [],
-  aggregationType: "",
-  vertical: false
+  vertical: true
 }
 
 export default AggregationWidget

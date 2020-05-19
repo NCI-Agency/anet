@@ -1,5 +1,4 @@
 import AggregationWidget from "components/AggregationWidget"
-import { getFieldPropsFromFieldConfig } from "components/CustomFields"
 import _clone from "lodash/clone"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
@@ -49,19 +48,12 @@ const CountPerValueAggregation = ({ fieldName, fieldConfig, data }) => {
   )
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
 
-  const aggWidgetProps = {
-    widget: fieldConfig.aggregation?.widget || fieldConfig.widget,
-    aggregationType: fieldConfig.aggregation?.aggregationType,
-    vertical: true
-  }
-  const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   return (
     <AggregationWidget
       key={`assessment-${fieldName}`}
+      fieldConfig={fieldConfig}
       values={counters}
       legend={legend}
-      {...aggWidgetProps}
-      {...fieldProps}
     />
   )
 }
