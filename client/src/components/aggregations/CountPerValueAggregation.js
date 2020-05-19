@@ -29,11 +29,10 @@ const CHART_COLORS = [
 ]
 const CountPerValueAggregation = ({ fieldName, fieldConfig, data }) => {
   const counters = data.reduce((counter, entity) => {
-    const value = Object.get(entity, fieldName)
+    const value = Object.get(entity, fieldName) || null
     counter[value] = ++counter[value] || 1
     return counter
   }, {})
-
   const legendColors = _clone(CHART_COLORS)
   const legend = fieldConfig?.choices || {}
   const legendKeys = !_isEmpty(legend)
