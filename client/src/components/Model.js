@@ -463,7 +463,7 @@ export default class Model {
     const publishedReportsUuids = publishedReports
       ? publishedReports.map(r => r.uuid)
       : undefined
-    const assessmentsNotes = this.notes
+    return this.notes
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
@@ -478,22 +478,11 @@ export default class Model {
           (!dateRange ||
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
       )
-      .map(note => ({ note: note, assessment: JSON.parse(note.text) }))
+      .map(note => JSON.parse(note.text))
       .filter(
         obj =>
-          obj.assessment.__recurrence === ASSESSMENTS_RECURRENCE_TYPE.ONCE &&
-          obj.assessment.__relatedObjectType === relatedObjectType
+          obj.__recurrence === ASSESSMENTS_RECURRENCE_TYPE.ONCE &&
+          obj.__relatedObjectType === relatedObjectType
       )
-    const assessmentsResults = {}
-    assessmentsNotes.forEach(n => {
-      const a = n.assessment
-      Object.keys(a).forEach(k => {
-        if (!Object.prototype.hasOwnProperty.call(assessmentsResults, k)) {
-          assessmentsResults[k] = []
-        }
-        assessmentsResults[k].push(a[k])
-      })
-    })
-    return assessmentsResults
   }
 }

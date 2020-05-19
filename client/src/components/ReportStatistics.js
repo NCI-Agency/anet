@@ -1,9 +1,6 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
-import {
-  AGGREGATION_TYPE_COMPONENTS,
-  DEFAULT_AGGREGATION_TYPE_PER_FIELD_TYPE
-} from "components/aggregations/utils"
+import { getAggregationComponentForFieldConfig } from "components/aggregations/utils"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import _get from "lodash/get"
 import { Report } from "models"
@@ -89,17 +86,12 @@ const FieldStatisticsRow = ({
   periods,
   periodsData
 }) => {
-  if (
-    !fieldConfig.aggregation &&
-    !DEFAULT_AGGREGATION_TYPE_PER_FIELD_TYPE[fieldConfig.type]
-  ) {
+  const AggregationComponent = getAggregationComponentForFieldConfig(
+    fieldConfig
+  )
+  if (!AggregationComponent) {
     return null
   }
-  const AggregationComponent =
-    AGGREGATION_TYPE_COMPONENTS[
-      fieldConfig.aggregation?.aggregationType ||
-        DEFAULT_AGGREGATION_TYPE_PER_FIELD_TYPE[fieldConfig.type]
-    ]
   return (
     <tr>
       {periods.map((period, index) => (
