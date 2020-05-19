@@ -698,6 +698,28 @@
     },
     "notBefore" : 0,
     "groups" : [ ]
+  }, {
+    "id" : "77e31312-5435-495a-bf9e-95e06e6c08a8",
+    "createdTimestamp" : 1589883972285,
+    "username" : "testcreateperson",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "d8c7d1c7-9d2f-417f-be5f-1a30d7304541",
+      "type" : "password",
+      "createdDate" : 1589883989276,
+      "secretData" : "{\"value\":\"5hfa+W3/ki+6s9SIaUXaGHq/WKgBLMQ+fdUec4jsNdCEpsjREwsRP9cIP7p5yimsq8KYdha7imSk9BAzLz2bxw==\",\"salt\":\"f4zTmzHhWtA5z+DytcUjuA==\"}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "view-profile", "manage-account" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
   } ],
   "scopeMappings" : [ {
     "clientScope" : "offline_access",

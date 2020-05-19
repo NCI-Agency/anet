@@ -134,7 +134,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson2.setName("Namey McNameface");
     newPerson2.setRole(Role.ADVISOR);
     newPerson2.setStatus(PersonStatus.ACTIVE);
-    newPerson2.setDomainUsername("namey_" + Instant.now().toEpochMilli());
+    newPerson2.setDomainUsername("testcreateperson");
     newPerson2.setPosition(newPos);
     String newPerson2Uuid = graphQLHelper.createObject(admin, "createPerson", "person",
         "PersonInput", newPerson2, new TypeReference<GraphQlResponse<Person>>() {});
