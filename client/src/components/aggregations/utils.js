@@ -1,34 +1,9 @@
 import { Settings } from "api"
-import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
-import { CUSTOM_FIELD_TYPE } from "components/Model"
 import _clone from "lodash/clone"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 
-const AGGREGATION_TYPE = {
-  REPORTS_BY_TASK: "countReportsByTask",
-  COUNT_PER_DATE: "countPerDate",
-  COUNT_PER_VALUE: "countPerValue",
-  NUMBERS_LIST: "numbersList",
-  VALUES_LIST: "valuesList",
-  LIKERT_SCALE_AND_PIE_AGG: "likertScaleAndPieAgg"
-}
-
-const DEFAULT_AGGREGATION_TYPE_PER_FIELD_TYPE = {
-  [CUSTOM_FIELD_TYPE.TEXT]: AGGREGATION_TYPE.VALUES_LIST,
-  [CUSTOM_FIELD_TYPE.NUMBER]: AGGREGATION_TYPE.NUMBERS_LIST,
-  [CUSTOM_FIELD_TYPE.DATE]: AGGREGATION_TYPE.COUNT_PER_DATE,
-  [CUSTOM_FIELD_TYPE.DATETIME]: AGGREGATION_TYPE.COUNT_PER_DATE,
-  [CUSTOM_FIELD_TYPE.ENUM]: AGGREGATION_TYPE.COUNT_PER_VALUE,
-  [CUSTOM_FIELD_TYPE.ENUMSET]: AGGREGATION_TYPE.COUNT_PER_VALUE,
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: AGGREGATION_TYPE.VALUES_LIST,
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: {
-    [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]:
-      AGGREGATION_TYPE.LIKERT_SCALE_AND_PIE_AGG
-  }
-}
-
-const countPerDateAggregation = (fieldName, fieldConfig, data) => {
+export const countPerDateAggregation = (fieldName, fieldConfig, data) => {
   const values = data.reduce((counter, entity) => {
     const dateFieldValue = Object.get(entity, fieldName)
     const value = dateFieldValue
@@ -63,7 +38,7 @@ const CHART_COLORS = [
   "#5574A6",
   "#3B3EAC"
 ]
-const countPerValueAggregation = (fieldName, fieldConfig, data) => {
+export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
   const counters = data.reduce((counter, entity) => {
     const value = Object.get(entity, fieldName) || null
     counter[value] = ++counter[value] || 1
@@ -88,7 +63,7 @@ const countPerValueAggregation = (fieldName, fieldConfig, data) => {
 const arrayOfNumbers = arr =>
   arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
 
-const numbersListAggregation = (fieldName, fieldConfig, data) => {
+export const numbersListAggregation = (fieldName, fieldConfig, data) => {
   const values = data.map(item => Object.get(item, fieldName))
   const numberValues = arrayOfNumbers(values)
   return { values: numberValues }
@@ -130,15 +105,15 @@ const getReportsByTasks = reportsList => {
   })
 }
 
-const reportsByTaskAggregation = (fieldName, fieldConfig, data) => ({
+export const reportsByTaskAggregation = (fieldName, fieldConfig, data) => ({
   values: getReportsByTasks(data)
 })
 
-const valuesListAggregation = (fieldName, fieldConfig, data) => ({
+export const valuesListAggregation = (fieldName, fieldConfig, data) => ({
   values: data.map(item => Object.get(item, fieldName))
 })
 
-const countPerLevelAggregation = (fieldName, fieldConfig, data) => {
+export const countPerLevelAggregation = (fieldName, fieldConfig, data) => {
   const levels = fieldConfig.levels
   if (_isEmpty(levels)) {
     return null
@@ -161,30 +136,11 @@ const countPerLevelAggregation = (fieldName, fieldConfig, data) => {
   return { values: counters, legend: legend }
 }
 
-const likertScaleAndPieAggregation = (fieldName, fieldConfig, data) => {
+export const likertScaleAndPieAggregation = (fieldName, fieldConfig, data) => {
   return {
     values: {
       likertScaleValues: valuesListAggregation(fieldName, fieldConfig, data),
       pieValues: countPerLevelAggregation(fieldName, fieldConfig, data)
     }
   }
-}
-
-const AGGREGATION_TYPE_FUNCTION = {
-  [AGGREGATION_TYPE.REPORTS_BY_TASK]: reportsByTaskAggregation,
-  [AGGREGATION_TYPE.COUNT_PER_VALUE]: countPerValueAggregation,
-  [AGGREGATION_TYPE.COUNT_PER_DATE]: countPerDateAggregation,
-  [AGGREGATION_TYPE.NUMBERS_LIST]: numbersListAggregation,
-  [AGGREGATION_TYPE.VALUES_LIST]: valuesListAggregation,
-  [AGGREGATION_TYPE.LIKERT_SCALE_AND_PIE_AGG]: likertScaleAndPieAggregation
-}
-
-export const getAggregationFunctionForFieldConfig = fieldConfig => {
-  const aggregationType =
-    fieldConfig.aggregation?.aggregationType ||
-    DEFAULT_AGGREGATION_TYPE_PER_FIELD_TYPE[fieldConfig.type][
-      fieldConfig.widget
-    ] ||
-    DEFAULT_AGGREGATION_TYPE_PER_FIELD_TYPE[fieldConfig.type]
-  return aggregationType ? AGGREGATION_TYPE_FUNCTION[aggregationType] : null
 }

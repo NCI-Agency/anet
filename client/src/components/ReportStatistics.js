@@ -1,7 +1,8 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
-import AggregationWidgetContainer from "components/aggregations/AggregationWidgetContainer"
-import { getAggregationFunctionForFieldConfig } from "components/aggregations/utils"
+import AggregationWidgetContainer, {
+  getAggregationWidget
+} from "components/aggregations/AggregationWidgetContainer"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import _get from "lodash/get"
 import { Report } from "models"
@@ -87,8 +88,8 @@ const FieldStatisticsRow = ({
   periods,
   periodsData
 }) => {
-  const aggregationFunction = getAggregationFunctionForFieldConfig(fieldConfig)
-  if (!aggregationFunction) {
+  const aggregationWidget = getAggregationWidget(fieldConfig)
+  if (!aggregationWidget) {
     return null
   }
   return (

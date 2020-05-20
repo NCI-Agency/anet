@@ -1,5 +1,6 @@
-import AggregationWidgetContainer from "components/aggregations/AggregationWidgetContainer"
-import { getAggregationFunctionForFieldConfig } from "components/aggregations/utils"
+import AggregationWidgetContainer, {
+  getAggregationWidget
+} from "components/aggregations/AggregationWidgetContainer"
 import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import PeriodicAssessment from "components/assessments/PeriodicAssessment"
@@ -44,10 +45,8 @@ const InstantAssessmentRow = ({
   entity,
   periods
 }) => {
-  const aggregationFunction = getAggregationFunctionForFieldConfig(
-    questionConfig
-  )
-  if (!aggregationFunction) {
+  const aggregationWidget = getAggregationWidget(questionConfig)
+  if (!aggregationWidget) {
     return null
   }
 
