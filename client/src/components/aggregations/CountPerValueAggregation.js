@@ -51,6 +51,7 @@ const CountPerValueAggregation = ({ fieldName, fieldConfig, data }) => {
     <AggregationWidgetContainer
       key={`assessment-${fieldName}`}
       fieldConfig={fieldConfig}
+      fieldName={fieldName}
       values={counters}
       legend={legend}
     />

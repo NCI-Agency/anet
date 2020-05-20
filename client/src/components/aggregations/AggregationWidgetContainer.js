@@ -1,4 +1,5 @@
 import {
+  CalendarWidget,
   DefaultAggWidget,
   PieWidget,
   ReportsByTaskWidget
@@ -16,14 +17,15 @@ const AGGERGATION_WIDGET_TYPE = {
   PIE: "pie",
   REPORTS_BY_TASK: "reportsByTask",
   IQR_BOX_PLOT: "iqrBoxPlot",
+  CALENDAR: "calendar",
   DEFAULT: "default"
 }
 
 const DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
   [CUSTOM_FIELD_TYPE.TEXT]: AGGERGATION_WIDGET_TYPE.DEFAULT,
   [CUSTOM_FIELD_TYPE.NUMBER]: AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT,
-  [CUSTOM_FIELD_TYPE.DATE]: AGGERGATION_WIDGET_TYPE.DEFAULT,
-  [CUSTOM_FIELD_TYPE.DATETIME]: AGGERGATION_WIDGET_TYPE.DEFAULT,
+  [CUSTOM_FIELD_TYPE.DATE]: AGGERGATION_WIDGET_TYPE.CALENDAR,
+  [CUSTOM_FIELD_TYPE.DATETIME]: AGGERGATION_WIDGET_TYPE.CALENDAR,
   [CUSTOM_FIELD_TYPE.ENUM]: AGGERGATION_WIDGET_TYPE.PIE,
   [CUSTOM_FIELD_TYPE.ENUMSET]: AGGERGATION_WIDGET_TYPE.PIE,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: AGGERGATION_WIDGET_TYPE.DEFAULT,
@@ -36,11 +38,13 @@ const WIDGET_COMPONENTS = {
   [AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT]: IqrBoxPlot,
   [AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK]: ReportsByTaskWidget,
   [AGGERGATION_WIDGET_TYPE.COUNT_PER_VALUE]: PieWidget,
+  [AGGERGATION_WIDGET_TYPE.CALENDAR]: CalendarWidget,
   default: DefaultAggWidget
 }
 
 const AggregationWidgetContainer = ({
   fieldConfig,
+  fieldName,
   values,
   vertical,
   ...otherWidgetProps
@@ -60,6 +64,8 @@ const AggregationWidgetContainer = ({
       values={values}
       vertical={vertical}
       {...fieldProps}
+      fieldConfig={fieldConfig}
+      fieldName={fieldName}
       {...otherWidgetProps}
     />
   )
@@ -88,6 +94,7 @@ const AggregationWidgetContainer = ({
 AggregationWidgetContainer.propTypes = {
   values: PropTypes.any,
   fieldConfig: PropTypes.object,
+  fieldName: PropTypes.string,
   vertical: PropTypes.bool
 }
 AggregationWidgetContainer.defaultProps = {

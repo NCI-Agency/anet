@@ -420,6 +420,10 @@ dictionary:
             - color: lightGray
               endValue: 10
               label: advanced advanced advanced advanced
+        trainingDate:
+          type: date
+          label: Training date
+          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         systemProcess:
           type: enum
           label: System / process
