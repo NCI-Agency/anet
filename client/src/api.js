@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/react-hooks"
 import ApolloClient from "apollo-boost"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import _isEmpty from "lodash/isEmpty"
+import { keycloak } from "keycloak"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
@@ -137,6 +138,8 @@ const API = {
         "Basic " +
           Buffer.from(`${creds.user}:${creds.pass}`).toString("base64")
       ]
+    } else if (keycloak.token) {
+      return ["Authorization", "Bearer " + keycloak.token]
     }
     return null
   },

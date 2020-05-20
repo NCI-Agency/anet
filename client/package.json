@@ -122,6 +122,7 @@
     "hopscotch": "0.3.1",
     "html-react-parser": "0.13.0",
     "jsonpath-plus": "4.0.0",
+    "keycloak-js": "^10.0.1",
     "leaflet": "1.6.0",
     "leaflet-defaulticon-compatibility": "0.1.1",
     "leaflet-geosearch": "2.7.0",
