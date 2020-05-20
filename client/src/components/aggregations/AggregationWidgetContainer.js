@@ -4,6 +4,7 @@ import {
   PieWidget,
   ReportsByTaskWidget
 } from "components/aggregations/AggregationWidgets"
+import { getAggregationFunctionForFieldConfig } from "components/aggregations/utils"
 import { getFieldPropsFromFieldConfig } from "components/CustomFields"
 import IqrBoxPlot from "components/graphs/IqrBoxPlot"
 import LikertScale from "components/graphs/LikertScale"
@@ -43,14 +44,22 @@ const WIDGET_COMPONENTS = {
 }
 
 const AggregationWidgetContainer = ({
+  data,
   fieldConfig,
   fieldName,
-  values,
   vertical,
   ...otherWidgetProps
 }) => {
+  const aggregationFunction = getAggregationFunctionForFieldConfig(fieldConfig)
+  const { values, ...otherAggregationDetails } = aggregationFunction(
+    fieldName,
+    fieldConfig,
+    data
+  )
+
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const label = fieldProps.label
+
   const widget =
     fieldConfig.aggregation?.widget ||
     (fieldConfig.widget &&
@@ -63,10 +72,11 @@ const AggregationWidgetContainer = ({
     <WidgetComponent
       values={values}
       vertical={vertical}
-      {...fieldProps}
       fieldConfig={fieldConfig}
       fieldName={fieldName}
+      {...fieldProps}
       {...otherWidgetProps}
+      {...otherAggregationDetails}
     />
   )
   return (
@@ -92,7 +102,7 @@ const AggregationWidgetContainer = ({
   )
 }
 AggregationWidgetContainer.propTypes = {
-  values: PropTypes.any,
+  data: PropTypes.any,
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
   vertical: PropTypes.bool
