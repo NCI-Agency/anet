@@ -26,7 +26,7 @@ import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
-const SPECIAL_WIDGET_TYPES = {
+export const SPECIAL_WIDGET_TYPES = {
   LIKERT_SCALE: "likertScale",
   RICH_TEXT_EDITOR: "richTextEditor"
 }

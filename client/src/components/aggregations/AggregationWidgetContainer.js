@@ -1,11 +1,15 @@
 import {
   CalendarWidget,
   DefaultAggWidget,
+  LikertScaleAndPieWidget,
   PieWidget,
   ReportsByTaskWidget
 } from "components/aggregations/AggregationWidgets"
 import { getAggregationFunctionForFieldConfig } from "components/aggregations/utils"
-import { getFieldPropsFromFieldConfig } from "components/CustomFields"
+import {
+  getFieldPropsFromFieldConfig,
+  SPECIAL_WIDGET_TYPES
+} from "components/CustomFields"
 import IqrBoxPlot from "components/graphs/IqrBoxPlot"
 import LikertScale from "components/graphs/LikertScale"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
@@ -16,6 +20,7 @@ import { Col, ControlLabel, FormGroup } from "react-bootstrap"
 const AGGERGATION_WIDGET_TYPE = {
   LIKERT_SCALE: "likertScale",
   PIE: "pie",
+  LIKERT_SCALE_AND_PIE: "likertScaleAndPie",
   REPORTS_BY_TASK: "reportsByTask",
   IQR_BOX_PLOT: "iqrBoxPlot",
   CALENDAR: "calendar",
@@ -30,12 +35,16 @@ const DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
   [CUSTOM_FIELD_TYPE.ENUM]: AGGERGATION_WIDGET_TYPE.PIE,
   [CUSTOM_FIELD_TYPE.ENUMSET]: AGGERGATION_WIDGET_TYPE.PIE,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: AGGERGATION_WIDGET_TYPE.DEFAULT,
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: AGGERGATION_WIDGET_TYPE.DEFAULT
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: {
+    [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]:
+      AGGERGATION_WIDGET_TYPE.LIKERT_SCALE_AND_PIE
+  }
 }
 
 const WIDGET_COMPONENTS = {
   [AGGERGATION_WIDGET_TYPE.LIKERT_SCALE]: LikertScale,
   [AGGERGATION_WIDGET_TYPE.PIE]: PieWidget,
+  [AGGERGATION_WIDGET_TYPE.LIKERT_SCALE_AND_PIE]: LikertScaleAndPieWidget,
   [AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT]: IqrBoxPlot,
   [AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK]: ReportsByTaskWidget,
   [AGGERGATION_WIDGET_TYPE.COUNT_PER_VALUE]: PieWidget,
@@ -62,9 +71,9 @@ const AggregationWidgetContainer = ({
 
   const widget =
     fieldConfig.aggregation?.widget ||
-    (fieldConfig.widget &&
-      WIDGET_COMPONENTS[fieldConfig.widget] &&
-      fieldConfig.widget) ||
+    DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE[fieldConfig.type][
+      fieldConfig.widget
+    ] ||
     DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE[fieldConfig.type]
   const WidgetComponent =
     (widget && WIDGET_COMPONENTS[widget]) || WIDGET_COMPONENTS.default

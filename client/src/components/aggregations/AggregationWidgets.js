@@ -3,6 +3,7 @@ import dayGridPlugin from "@fullcalendar/daygrid"
 import "@fullcalendar/daygrid/main.css"
 import FullCalendar from "@fullcalendar/react"
 import BarChart from "components/BarChart"
+import LikertScale from "components/graphs/LikertScale"
 import Pie from "components/graphs/Pie"
 import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
@@ -49,6 +50,17 @@ PieWidget.propTypes = {
   legend: PropTypes.object,
   ...aggregationWidgetPropTypes
 }
+
+export const LikertScaleAndPieWidget = ({ values, ...otherWidgetProps }) => {
+  const { likertScaleValues, pieValues } = values
+  return (
+    <>
+      <LikertScale {...likertScaleValues} {...otherWidgetProps} />
+      <PieWidget {...pieValues} {...otherWidgetProps} />
+    </>
+  )
+}
+LikertScaleAndPieWidget.propTypes = aggregationWidgetPropTypes
 
 export const ReportsByTaskWidget = ({ values, ...otherWidgetProps }) => {
   return (
