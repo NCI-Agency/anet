@@ -118,20 +118,21 @@ export const countPerLevelAggregation = (fieldName, fieldConfig, data) => {
   if (_isEmpty(levels)) {
     return null
   }
-  const levelsEndValues = levels
-    .map(level => level.endValue)
-    .sort((a, b) => a - b)
+  const levelsEndValues = levels.map(level => level.endValue)
+  levelsEndValues.sort((a, b) => a - b)
   const counters = data.reduce((counter, entity) => {
     const value = Object.get(entity, fieldName) || null
     const levelEndValue =
-      value !== null ? levelsEndValues.filter(x => x >= value)[0] : null
+      value !== null
+        ? levelsEndValues.filter(endVal => endVal >= value)[0]
+        : null
     counter[levelEndValue] = ++counter[levelEndValue] || 1
     return counter
   }, {})
   const legend = levels.reduce((res, level) => {
     res[level.endValue] = level
     return res
-  })
+  }, {})
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
   return { values: counters, legend: legend }
 }
