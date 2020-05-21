@@ -1,16 +1,10 @@
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useRef } from "react"
 import { Button } from "react-bootstrap"
 import DOWNLOAD_ICON from "resources/download.png"
 
-const SVGCanvas = ({
-  width,
-  height,
-  exportTitle,
-  zoomFn,
-  svgRef,
-  children
-}) => {
+const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
+  const svgRef = useRef(null)
   const exportSvg = () => {
     var svgBlob = new Blob(
       ['<?xml version="1.0" standalone="no"?>', svgRef.current.outerHTML],
@@ -79,7 +73,6 @@ SVGCanvas.propTypes = {
   height: PropTypes.number.isRequired,
   exportTitle: PropTypes.string,
   zoomFn: PropTypes.func,
-  svgRef: PropTypes.object.isRequired,
   children: PropTypes.node
 }
 

@@ -26,7 +26,12 @@ const aggregationWidgetPropTypes = {
   vertical: PropTypes.bool
 }
 
-export const PieWidget = ({ values, legend, ...otherWidgetProps }) => {
+export const PieWidget = ({
+  values,
+  legend,
+  showLegend,
+  ...otherWidgetProps
+}) => {
   return (
     <>
       <Pie
@@ -37,27 +42,52 @@ export const PieWidget = ({ values, legend, ...otherWidgetProps }) => {
         segmentFill={entity => legend[entity.data.key]?.color}
         segmentLabel={d => d.data.value}
       />
-      <br />
-      {Object.map(legend, (key, choice) => (
-        <React.Fragment key={key}>
-          <span style={{ backgroundColor: choice.color }}>{choice.label} </span>
-        </React.Fragment>
-      ))}
+      {showLegend && (
+        <>
+          <br />
+          {Object.map(legend, (key, choice) => (
+            <React.Fragment key={key}>
+              <span style={{ backgroundColor: choice.color }}>
+                {choice.label}{" "}
+              </span>
+            </React.Fragment>
+          ))}
+        </>
+      )}
     </>
   )
 }
 PieWidget.propTypes = {
   legend: PropTypes.object,
+  showLegend: PropTypes.bool,
   ...aggregationWidgetPropTypes
 }
 
 export const LikertScaleAndPieWidget = ({ values, ...otherWidgetProps }) => {
   const { likertScaleValues, pieValues } = values
   return (
-    <>
-      <LikertScale {...likertScaleValues} {...otherWidgetProps} />
-      <PieWidget {...pieValues} {...otherWidgetProps} />
-    </>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "nowrap"
+      }}
+    >
+      <div
+        style={{
+          flexGrow: "0"
+        }}
+      >
+        <PieWidget {...pieValues} {...otherWidgetProps} />
+      </div>
+      <div
+        style={{
+          flexGrow: "1"
+        }}
+      >
+        <LikertScale {...likertScaleValues} {...otherWidgetProps} />
+      </div>
+    </div>
   )
 }
 LikertScaleAndPieWidget.propTypes = aggregationWidgetPropTypes
