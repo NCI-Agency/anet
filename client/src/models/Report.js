@@ -412,7 +412,7 @@ export default class Report extends Model {
             .map(ro => ro.relatedObjectUuid)
         ],
         assessmentUuid: n.uuid,
-        assessment: JSON.parse(n.text)
+        assessment: utils.parseJsonSafe(n.text)
       }))
     // When updating the instant assessments, we need for each entity the uuid of the
     // related instant assessment

@@ -14,18 +14,18 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection, {
+  FORMAT_CALENDAR,
   FORMAT_MAP,
   FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
+  FORMAT_TABLE
 } from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -37,6 +37,7 @@ import React, { useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
 const GQL_GET_PERSON = gql`
@@ -120,7 +121,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
     return result
   }
   if (data) {
-    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
   }

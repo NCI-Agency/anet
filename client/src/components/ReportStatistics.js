@@ -15,6 +15,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect } from "react"
 import { Table } from "react-bootstrap"
+import utils from "utils"
 
 const REPORT_FIELDS_FOR_STATISTICS = {
   state: {
@@ -151,7 +152,8 @@ const ReportStatistics = ({
         elem.engagementDate >= dateRange.start
     )
     reportsForDateRange.map(
-      report => (report[CUSTOM_FIELDS_KEY] = JSON.parse(report.customFields))
+      report =>
+        (report[CUSTOM_FIELDS_KEY] = utils.parseJsonSafe(report.customFields))
     )
     return reportsForDateRange
   }

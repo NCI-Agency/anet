@@ -97,7 +97,7 @@ const BaseRelatedObjectNotes = ({
     )
     const partnerAssessmentsSummary = partnerAssessments.reduce(
       (counters, assessment) => {
-        const assessmentJson = JSON.parse(assessment.text)
+        const assessmentJson = utils.parseJsonSafe(assessment.text)
 
         questions.forEach(question => {
           if (!counters[question.id]) counters[question.id] = {}
@@ -252,7 +252,8 @@ const BaseRelatedObjectNotes = ({
               note.type !== NOTE_TYPE.ASSESSMENT &&
               (byMe || currentUser.isAdmin())
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-            const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
+            const jsonFields =
+              isJson && note.text ? utils.parseJsonSafe(note.text) : {}
             const noteText = isJson
               ? jsonFields.text
               : parseHtmlWithLinkTo(note.text)

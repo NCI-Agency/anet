@@ -3,8 +3,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -15,6 +15,7 @@ import moment from "moment"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import utils from "utils"
 import PersonForm from "./Form"
 
 const GQL_GET_PERSON = gql`
@@ -75,7 +76,7 @@ const PersonEdit = ({ pageDispatchers }) => {
     const parsedFullName = Person.parseFullName(data.person.name)
     data.person.firstName = parsedFullName.firstName
     data.person.lastName = parsedFullName.lastName
-    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
   }

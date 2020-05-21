@@ -11,6 +11,7 @@ import { Field, Form, Formik } from "formik"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
+import utils from "utils"
 import * as yup from "yup"
 
 const RelatedObjectNoteModal = ({
@@ -44,7 +45,8 @@ const RelatedObjectNoteModal = ({
           submitForm
         }) => {
           const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-          const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
+          const jsonFields =
+            isJson && note.text ? utils.parseJsonSafe(note.text) : {}
           const noteText = isJson ? jsonFields.text : note.text
           const typeName =
             note.type === NOTE_TYPE.PARTNER_ASSESSMENT ||

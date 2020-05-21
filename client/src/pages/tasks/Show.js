@@ -27,6 +27,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -157,33 +158,23 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   }
 
   if (data) {
-    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(data.task.customFields) // TODO:
-    // Maybe
-    // move
-    // this
-    // code
-    // to
-    // Task()
-    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO:
-    // Maybe
-    // move
-    // this
-    // code
-    // to
-    // Task()
+    // TODO: Maybe move this code to Task()
+    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.task.customFields
+    )
+    data.task.notes.forEach(
+      note => (note.customFields = utils.parseJsonSafe(note.text))
+    )
   }
   const task = new Task(data ? data.task : {})
 
   const subTasks = []
   data &&
     data.subTasks.list.forEach(subTask => {
-      subTask.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO:
-      // Maybe
-      // move
-      // this
-      // code
-      // to
-      // Task()
+      // TODO: Maybe move this code to Task()
+      subTask.notes.forEach(
+        note => (note.customFields = utils.parseJsonSafe(note.text))
+      )
       subTasks.push(new Task(subTask))
     })
 

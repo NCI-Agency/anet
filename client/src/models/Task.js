@@ -179,6 +179,6 @@ export default class Task extends Model {
 
   instanceAssessmentsConfig() {
     // The given task instance might have a specific assessments config
-    return JSON.parse(this.customFields || "{}").assessments || []
+    return utils.parseJsonSafe(this.customFields || "{}").assessments || []
   }
 }

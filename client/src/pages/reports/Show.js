@@ -303,7 +303,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     data.report.tasks = Task.fromArray(data.report.tasks)
     data.report.attendees = Person.fromArray(data.report.attendees)
     data.report.to = ""
-    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.report.customFields
     )
     report = new Report(data.report)

@@ -3,8 +3,8 @@ import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -14,6 +14,7 @@ import { Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import utils from "utils"
 import TaskForm from "./Form"
 
 const GQL_GET_TASK = gql`
@@ -111,7 +112,9 @@ const TaskEdit = ({ pageDispatchers }) => {
     return result
   }
   if (data) {
-    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(data.task.customFields)
+    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.task.customFields
+    )
   }
   const task = new Task(data ? data.task : {})
 

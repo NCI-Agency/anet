@@ -365,7 +365,7 @@ export default class Model {
           typeof questions === "object"
             ? questions
             : typeof questions === "string"
-              ? JSON.parse(questions)
+              ? utils.parseJsonSafe(questions)
               : {}
         ]
       })
@@ -416,7 +416,7 @@ export default class Model {
         )
       })
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(note => ({ note: note, assessment: JSON.parse(note.text) }))
+      .map(note => ({ note: note, assessment: utils.parseJsonSafe(note.text) }))
       .filter(
         obj =>
           // FIXME: make a nicer implementation of the check on period start
@@ -478,7 +478,7 @@ export default class Model {
           (!dateRange ||
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
       )
-      .map(note => JSON.parse(note.text))
+      .map(note => utils.parseJsonSafe(note.text))
       .filter(
         obj =>
           obj.__recurrence === ASSESSMENTS_RECURRENCE_TYPE.ONCE &&

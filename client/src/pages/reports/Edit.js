@@ -3,8 +3,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -14,6 +14,7 @@ import { Person, Report, Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import utils from "utils"
 import ReportForm from "./Form"
 
 const GQL_GET_REPORT = gql`
@@ -120,7 +121,7 @@ const ReportEdit = ({ pageDispatchers }) => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
-    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = JSON.parse(
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.report.customFields
     )
   }
