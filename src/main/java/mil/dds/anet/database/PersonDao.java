@@ -431,4 +431,16 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     }
   }
 
+  public String clearCache() {
+    if (domainUsersCache != null) {
+      domainUsersCache.removeAll();
+      if (!domainUsersCache.iterator().hasNext()) {
+        AnetAuditLogger.log("DomainUsersCache is cleared successfully");
+        return "DomainUsersCache is cleared successfully";
+      }
+    }
+    AnetAuditLogger.log("DomainUsersCache is already empty or null");
+    return "DomainUsersCache is already empty or null";
+  }
+
 }

@@ -66,4 +66,11 @@ public class AdminResource {
     return config.getDictionary();
   }
 
+  @GraphQLQuery(name = "clearCache")
+  public String clearCache(@GraphQLRootContext Map<String, Object> context) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+    return AnetObjectEngine.getInstance().getPersonDao().clearCache();
+  }
+
 }
