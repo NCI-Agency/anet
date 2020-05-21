@@ -1,17 +1,9 @@
 package mil.dds.anet;
 
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import io.dropwizard.Application;
@@ -29,13 +21,10 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -88,8 +77,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-  private static final ObjectMapper jsonMapper = new ObjectMapper();
 
   public static final Version FREEMARKER_VERSION = Configuration.VERSION_2_3_30;
 
@@ -167,12 +154,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final String dbUrl = configuration.getDataSourceFactory().getUrl();
     logger.info("datasource url: {}", dbUrl);
 
-    // Check the dictionary
-    final JsonNode dictionary = getDictionary(configuration);
-    try {
-      logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionary));
-    } catch (JsonProcessingException exception) {
-    }
+    // Load and check the dictionary
+    configuration.loadDictionary();
 
     // We want to use our own custom DB logger in order to clean up the logs a bit.
     final Injector injector = InjectorLookup.getInjector(this).get();
@@ -317,34 +300,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
         scheduler.schedule(deactivationWarningWorker, 20, TimeUnit.SECONDS);
       }
     }
-  }
-
-  protected static JsonNode getDictionary(AnetConfiguration configuration)
-      throws IllegalArgumentException {
-    try (final InputStream inputStream =
-        AnetApplication.class.getResourceAsStream("/anet-schema.yml")) {
-      if (inputStream == null) {
-        logger.error("ANET schema [anet-schema.yml] not found");
-      } else {
-        JsonSchemaFactory factory =
-            JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-                .objectMapper(yamlMapper).build();
-
-        JsonSchema schema = factory.getSchema(inputStream);
-        final JsonNode dictionary = jsonMapper.valueToTree(configuration.getDictionary());
-        Set<ValidationMessage> errors = schema.validate(dictionary);
-        for (ValidationMessage error : errors) {
-          logger.error(error.getMessage());
-        }
-        if (!errors.isEmpty()) {
-          throw new IllegalArgumentException("Invalid dictionary in the configuration");
-        }
-        return dictionary;
-      }
-    } catch (IOException e) {
-      logger.error("Error closing ANET schema", e);
-    }
-    throw new IllegalArgumentException("Missing dictionary in the configuration");
   }
 
   /*

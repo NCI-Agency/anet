@@ -1,23 +1,44 @@
 package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableMap;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import mil.dds.anet.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 public class AnetConfiguration extends Configuration implements AssetsBundleConfiguration {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private boolean testMode;
   private boolean developmentMode;
   private boolean redirectToHttps = false;
+
+  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+  private static final ObjectMapper jsonMapper = new ObjectMapper();
 
   @Valid
   @NotNull
@@ -36,7 +57,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
 
   @NotNull
-  private Map<String, String> waffleConfig = new HashMap<String, String>();
+  private Map<String, String> waffleConfig = new HashMap<>();
 
   @Valid
   @NotNull
@@ -144,6 +165,50 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   public void setDictionary(Map<String, Object> dictionary) {
     this.dictionary = Collections.unmodifiableMap(dictionary);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void loadDictionary() {
+    // Read and set anet-dictionary
+    Yaml yaml = new Yaml();
+    InputStream in = AnetConfiguration.class.getResourceAsStream("/anet-dictionary.yml");
+    Map<String, Object> dictionary = yaml.loadAs(in, Map.class);
+    this.setDictionary(dictionary);
+
+    // Check the dictionary
+    final JsonNode jsonNodeDictionary = checkDictionary();
+    try {
+      logger.info("dictionary: {}", yamlMapper.writeValueAsString(jsonNodeDictionary));
+    } catch (JsonProcessingException exception) {
+      logger.info("Could not serialize dictionary");
+    }
+  }
+
+  public JsonNode checkDictionary() throws IllegalArgumentException {
+    try (final InputStream inputStream =
+        AnetConfiguration.class.getResourceAsStream("/anet-schema.yml")) {
+      if (inputStream == null) {
+        logger.error("ANET schema [anet-schema.yml] not found");
+      } else {
+        JsonSchemaFactory factory =
+            JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
+                .objectMapper(yamlMapper).build();
+
+        JsonSchema schema = factory.getSchema(inputStream);
+        final JsonNode dictionary = jsonMapper.valueToTree(getDictionary());
+        Set<ValidationMessage> errors = schema.validate(dictionary);
+        for (ValidationMessage error : errors) {
+          logger.error(error.getMessage());
+        }
+        if (!errors.isEmpty()) {
+          throw new IllegalArgumentException("Invalid dictionary in the configuration");
+        }
+        return dictionary;
+      }
+    } catch (IOException e) {
+      logger.error("Error closing ANET schema", e);
+    }
+    throw new IllegalArgumentException("Missing dictionary in the configuration");
   }
 
   @SuppressWarnings("unchecked")

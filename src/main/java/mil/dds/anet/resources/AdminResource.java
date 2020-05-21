@@ -57,4 +57,13 @@ public class AdminResource {
     return config.getDictionary();
   }
 
+  @GraphQLQuery(name = "reloadDictionary")
+  public Map<String, Object> reloadDictionary(@GraphQLRootContext Map<String, Object> context) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+    config.loadDictionary();
+    AnetAuditLogger.log("Dictionary updated by {}", user);
+    return config.getDictionary();
+  }
+
 }
