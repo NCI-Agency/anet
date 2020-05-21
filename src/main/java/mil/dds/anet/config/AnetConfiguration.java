@@ -14,8 +14,10 @@ import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +26,7 @@ import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import mil.dds.anet.utils.Utils;
+import org.apache.xmlbeans.impl.common.ReaderInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -172,15 +175,21 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     // Read and set anet-dictionary
     Yaml yaml = new Yaml();
     InputStream in = AnetConfiguration.class.getResourceAsStream("/anet-dictionary.yml");
-    Map<String, Object> dictionary = yaml.loadAs(in, Map.class);
-    this.setDictionary(dictionary);
-
-    // Check the dictionary
-    final JsonNode jsonNodeDictionary = checkDictionary();
+    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
     try {
-      logger.info("dictionary: {}", yamlMapper.writeValueAsString(jsonNodeDictionary));
-    } catch (JsonProcessingException exception) {
-      logger.info("Could not serialize dictionary");
+      reader.readLine(); // by-pass first line -> dictionary:
+      InputStream in2 = new ReaderInputStream(reader, "UTF-8");
+      Map<String, Object> dictionary = yaml.loadAs(in2, Map.class);
+      this.setDictionary(dictionary);
+      // Check the dictionary
+      final JsonNode jsonNodeDictionary = checkDictionary();
+      try {
+        logger.info("dictionary: {}", yamlMapper.writeValueAsString(jsonNodeDictionary));
+      } catch (JsonProcessingException exception) {
+        logger.info("Could not serialize dictionary");
+      }
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Invalid dictionary in the configuration");
     }
   }
 

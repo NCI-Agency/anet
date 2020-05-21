@@ -1,3 +1,4 @@
+dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
 
   engagementsIncludeTimeAndDuration: true
