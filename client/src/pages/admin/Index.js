@@ -6,15 +6,15 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 
 const GQL_GET_ADMIN_SETTINGS = gql`
@@ -30,7 +30,16 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
     saveAdminSettings(settings: $settings)
   }
 `
-
+const CLEAR_CACHE = gql`
+  {
+    clearCache
+  }
+`
+const RELOAD_DICTIONARY = gql`
+  {
+    reloadDictionary
+  }
+`
 const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
@@ -49,7 +58,9 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   }
 
   const settings = {}
-  data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
+  data.adminSettings.forEach(
+    (setting) => (settings[setting.key] = setting.value)
+  )
 
   return (
     <div>
@@ -88,13 +99,42 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
           )
         }}
       </Formik>
+      <Fieldset title="Site actions" />
+      <Fieldset>
+        <Grid fluid>
+          <Row style={{ padding: "8px 0" }}>
+            <Col md={2}>Online Users</Col>
+            <Col md={10}>TODO ... </Col>
+          </Row>
+          <Row style={{ padding: "8px 0" }}>
+            <Col md={2}>Recent Users</Col>
+            <Col md={10}>TODO ... </Col>
+          </Row>
+          <Row style={{ padding: "8px 0" }}>
+            <Col md={2}>Clear Cache</Col>
+            <Col md={10}>
+              <Button bsStyle="primary" type="button" onClick={clearCache}>
+                Clear
+              </Button>
+            </Col>
+          </Row>
+          <Row style={{ padding: "8px 0" }}>
+            <Col md={2}>Reload Dictionary</Col>
+            <Col md={10}>
+              <Button bsStyle="primary" type="button" onClick={reloadDictionary}>
+                Reload
+              </Button>
+            </Col>
+          </Row>
+        </Grid>
+      </Fieldset>
     </div>
   )
 
   function onSubmit(values, form) {
     return save(values, form)
-      .then(response => onSubmitSuccess(response, values, form))
-      .catch(error => {
+      .then((response) => onSubmitSuccess(response, values, form))
+      .catch((error) => {
         setSaveError(error)
         setSaveSuccess()
         form.setSubmitting(false)
@@ -118,6 +158,22 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
     const settings = Object.map(values, (key, value) => ({ key, value }))
     return API.mutation(GQL_SAVE_ADMIN_SETTINGS, { settings })
   }
+
+  function clearCache() {
+      return API.query(CLEAR_CACHE, {})
+          .then(data => {
+            jumpToTop()
+            setSaveSuccess(data.clearCache)
+          })
+  }
+
+  function reloadDictionary() {
+    return API.query(RELOAD_DICTIONARY, {})
+        .then(data => {
+            jumpToTop()
+            setSaveSuccess(data.reloadDictionary)
+        })
+  }
 }
 
 BaseAdminIndex.propTypes = {
@@ -125,9 +181,11 @@ BaseAdminIndex.propTypes = {
   loadAppData: PropTypes.func
 }
 
-const AdminIndex = props => (
+const AdminIndex = (props) => (
   <AppContext.Consumer>
-    {context => <BaseAdminIndex loadAppData={context.loadAppData} {...props} />}
+    {(context) => (
+      <BaseAdminIndex loadAppData={context.loadAppData} {...props} />
+    )}
   </AppContext.Consumer>
 )
 

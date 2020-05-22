@@ -30,6 +30,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
@@ -435,12 +436,12 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     if (domainUsersCache != null) {
       domainUsersCache.removeAll();
       if (!domainUsersCache.iterator().hasNext()) {
-        logger.info("DomainUsersCache is cleared successfully");
-        return "DomainUsersCache is cleared successfully";
+        logger.info(AnetConstants.USERCACHE_MESSAGE);
+        return AnetConstants.USERCACHE_MESSAGE;
       }
     }
-    logger.warn("DomainUsersCache is already empty or null");
-    return "DomainUsersCache is already empty or null";
+    logger.warn(AnetConstants.USERCACHE_ERROR_MESSAGE);
+    return AnetConstants.USERCACHE_ERROR_MESSAGE;
   }
 
 }
