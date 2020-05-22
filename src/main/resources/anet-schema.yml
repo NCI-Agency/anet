@@ -206,8 +206,13 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required: [projectVersion, SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
+  projectVersion:
+    type: string
+    title: ANET version
+    description: Server version of ANET project
+
   SUPPORT_EMAIL_ADDR:
     type: string
     title: The support email address

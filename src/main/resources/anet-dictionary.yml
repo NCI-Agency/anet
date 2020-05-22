@@ -1,4 +1,6 @@
 dictionary:
+  projectVersion: %APP_VERSION_TOKEN%
+
   SUPPORT_EMAIL_ADDR: support@example.com
 
   engagementsIncludeTimeAndDuration: true

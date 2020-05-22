@@ -7,11 +7,9 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -26,7 +24,6 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
-import org.yaml.snakeyaml.Yaml;
 
 @Path("/api/admin")
 public class AdminResource {
@@ -86,15 +83,7 @@ public class AdminResource {
    */
   @GraphQLQuery(name = "projectVersion")
   public String getProjectVersion() {
-    Yaml yaml = new Yaml();
-    InputStream in = AdminResource.class.getResourceAsStream("/version.properties");
-    Properties prop = new Properties();
-    try {
-      prop.load(in);
-    } catch (IOException e) {
-      throw new WebApplicationException(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE);
-    }
-    return prop.getProperty("version");
+    return (String)config.getDictionary().get("projectVersion");
   }
 
   /**
