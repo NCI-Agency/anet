@@ -46,7 +46,7 @@
     "clean-webpack-plugin": "3.0.0",
     "colors": "1.4.0",
     "config": "3.3.1",
-    "copy-webpack-plugin": "5.1.1",
+    "copy-webpack-plugin": "6.0.1",
     "countries-list": "2.5.4",
     "cross-fetch": "3.0.4",
     "cross-spawn": "7.0.2",
