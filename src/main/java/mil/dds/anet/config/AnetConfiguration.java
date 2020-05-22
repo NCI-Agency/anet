@@ -186,7 +186,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       try {
         logger.info("dictionary: {}", yamlMapper.writeValueAsString(jsonNodeDictionary));
       } catch (JsonProcessingException exception) {
-        logger.info("Could not serialize dictionary");
+        logger.error("Could not serialize dictionary");
       }
     } catch (IOException e) {
       throw new IllegalArgumentException("Invalid dictionary in the configuration");
