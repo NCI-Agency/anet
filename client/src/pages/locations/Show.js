@@ -29,7 +29,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
-import GeoLocation from "./GeoLocation"
+import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "./GeoLocation"
 
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
@@ -145,7 +145,11 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
                   humanValue={Location.humanNameOfStatus}
                 />
 
-                <GeoLocation lat={location.lat} lng={location.lng} />
+                <GeoLocation
+                  lat={location.lat}
+                  lng={location.lng}
+                  displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+                />
               </Fieldset>
 
               <Leaflet markers={[marker]} />

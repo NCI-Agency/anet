@@ -2,9 +2,14 @@ import React from "react"
 import PropTypes from "prop-types"
 import { Button, Col, ControlLabel, FormGroup } from "react-bootstrap"
 import { Field } from "formik"
-import { Location } from "../../models"
-import REMOVE_ICON from "../../resources/delete.png"
-import * as FieldHelper from "../../components/FieldHelper"
+import { Location } from "models"
+import REMOVE_ICON from "resources/delete.png"
+import * as FieldHelper from "components/FieldHelper"
+
+export const GEO_LOCATION_DISPLAY_TYPE = {
+  FORM_FIELD: "FORM_FIELD",
+  GENERIC: "GENERIC"
+}
 
 const GeoLocation = ({
   lat,
@@ -12,28 +17,37 @@ const GeoLocation = ({
   setFieldTouched,
   setFieldValue,
   isSubmitting,
-  readOnly
+  editable,
+  displayType
 }) => {
   const setTouched = touched => {
     setFieldTouched("lat", touched, false)
     setFieldTouched("lng", touched, false)
   }
 
-  if (readOnly) {
-    return (
-      <Field
-        name="location"
-        label="Latitude, Longitude"
-        component={FieldHelper.ReadonlyField}
-        humanValue={
-          <>
-            <span>{Location.parseCoordinate(lat) || "?"}</span>
-            <span>,&nbsp;</span>
-            <span>{Location.parseCoordinate(lng) || "?"}</span>
-          </>
-        }
-      />
+  if (!editable) {
+    const humanValue = (
+      <>
+        <span>{Location.parseCoordinate(lat) || "?"}</span>
+        <span>,&nbsp;</span>
+        <span>{Location.parseCoordinate(lng) || "?"}</span>
+      </>
     )
+
+    if (displayType === GEO_LOCATION_DISPLAY_TYPE.GENERIC) return humanValue
+
+    if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
+      return (
+        <Field
+          name="location"
+          label="Latitude, Longitude"
+          component={FieldHelper.ReadonlyField}
+          humanValue={humanValue}
+        />
+      )
+    }
+
+    throw new Error(`Unknown displayType: '${displayType}' for GeoLocation`)
   }
 
   return (
@@ -91,13 +105,18 @@ GeoLocation.propTypes = {
   setFieldTouched: PropTypes.func,
   setFieldValue: PropTypes.func,
   isSubmitting: PropTypes.bool,
-  readOnly: PropTypes.bool
+  editable: PropTypes.bool,
+  displayType: PropTypes.oneOf([
+    GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD,
+    GEO_LOCATION_DISPLAY_TYPE.GENERIC
+  ])
 }
 
 GeoLocation.defaultProps = {
   lat: null,
   lng: null,
-  readOnly: true
+  editable: false,
+  displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC
 }
 
 export default GeoLocation
