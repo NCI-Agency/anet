@@ -83,7 +83,7 @@ public class AdminResource {
    */
   @GraphQLQuery(name = "projectVersion")
   public String getProjectVersion() {
-    return (String)config.getDictionary().get("projectVersion");
+    return (String) config.getDictionary().get("projectVersion");
   }
 
   /**

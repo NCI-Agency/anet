@@ -142,7 +142,7 @@ project.version = proc.text.trim();
 processResources {
 	filesMatching('**/anet-dictionary.yml') {
 		filter {
-			it.replace('%APP_VERSION_TOKEN%', project.version)
+			it.replace('APP_VERSION_TOKEN', project.version)
 		}
 	}
 }

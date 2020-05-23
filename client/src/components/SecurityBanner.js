@@ -1,3 +1,4 @@
+import { Settings } from "api"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import { Person } from "models"
@@ -16,6 +17,13 @@ const aCss = {
   fontSize: "0.7em"
 }
 
+const versionCss = {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    margin: 0
+}
+
 const BaseSecurityBanner = ({ currentUser, appSettings }) => (
   <div
     className="banner"
@@ -30,6 +38,7 @@ const BaseSecurityBanner = ({ currentUser, appSettings }) => (
     >
       (edit)
     </LinkTo>
+    <h6 style={{ ...versionCss }}>Version : {Settings.projectVersion}</h6>
   </div>
 )
 BaseSecurityBanner.propTypes = {
