@@ -121,7 +121,26 @@ const ReportStatistics = ({
   setTotalCount,
   queryParams
 }) => {
+  const dateSortAsc = datesArray => datesArray.sort((a, b) => a - b)
+  const statisticsStartDate = dateSortAsc(
+    periodsConfig.periods.map(p => p.start)
+  )[0]
+  const statisticsEndDate = dateSortAsc(periodsConfig.periods.map(p => p.end))[
+    periodsConfig.periods.length - 1
+  ]
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
+  if (
+    !queryParams.engagementDateStart ||
+    queryParams.engagementDateStart < statisticsStartDate
+  ) {
+    reportQuery.engagementDateStart = statisticsStartDate
+  }
+  if (
+    !queryParams.engagementDateEnd ||
+    queryParams.engagementDateEnd > statisticsEndDate
+  ) {
+    reportQuery.engagementDateEnd = statisticsEndDate
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
   })
