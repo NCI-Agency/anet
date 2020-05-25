@@ -8,4 +8,5 @@ export const initOptions = {
   onLoad: "login-required"
 }
 
-export const keycloak = Keycloak(initOptions)
+export const keycloak =
+  typeof Keycloak === "function" ? Keycloak(initOptions) : {}
