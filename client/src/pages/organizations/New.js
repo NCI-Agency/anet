@@ -30,14 +30,10 @@ const OrganizationNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
   const qs = utils.parseQueryString(routerLocation.search)
   if (qs.parentOrgUuid) {
-    const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
-      uuid: qs.parentOrgUuid
-    })
     return (
-      <OrganizationNewConditional
-        pageDispatchers={pageDispatchers}
-        {...queryResult}
+      <OrganizationNewFetchParentOrg
         orgUuid={qs.parentOrgUuid}
+        pageDispatchers={pageDispatchers}
       />
     )
   }
@@ -45,6 +41,24 @@ const OrganizationNew = ({ pageDispatchers }) => {
 }
 
 OrganizationNew.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
+
+const OrganizationNewFetchParentOrg = ({ orgUuid, pageDispatchers }) => {
+  const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
+    uuid: orgUuid
+  })
+  return (
+    <OrganizationNewConditional
+      pageDispatchers={pageDispatchers}
+      {...queryResult}
+      orgUuid={orgUuid}
+    />
+  )
+}
+
+OrganizationNewFetchParentOrg.propTypes = {
+  orgUuid: PropTypes.string.isRequired,
   pageDispatchers: PageDispatchersPropType
 }
 
