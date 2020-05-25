@@ -20,6 +20,8 @@ test.serial("checking super user permissions", async t => {
   // his/her own organization
   await editAndSavePositionFromCurrentUserPage(t, true)
 
+  await t.context.logout()
+
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMyOrgLink()
   const $jacobLink = await findSuperUserLink(t, "CIV JACOBSON, Jacob")
@@ -68,6 +70,8 @@ test.serial("checking super user permissions", async t => {
   )
   await $locationLink.click()
   await validateSuperUserLocationPermissions(t)
+
+  await t.context.logout()
 })
 
 validateUserCannotEditOtherUser(
@@ -100,6 +104,8 @@ test("checking regular user permissions", async t => {
     "Jack should not be able to edit his own position",
     shortWaitMs
   )
+
+  await t.context.logout()
 })
 
 validateUserCannotEditOtherUser(
@@ -148,6 +154,8 @@ test("checking admin permissions", async t => {
   )
   await $locationLink.click()
   await validateAdminLocationPermissions(t)
+
+  await t.context.logout()
 })
 
 test.serial("admins can edit superusers and their positions", async t => {
@@ -167,6 +175,8 @@ test.serial("admins can edit superusers and their positions", async t => {
 
   // User is admin, and can therefore edit a super user position type
   await editAndSavePositionFromCurrentUserPage(t, true)
+
+  await t.context.logout()
 })
 
 function validateUserCannotEditOtherUser(
@@ -211,6 +221,8 @@ function validateUserCannotEditOtherUser(
       `${user} should not be able edit the "${otherUserPosition}" position`,
       shortWaitMs
     )
+
+    await t.context.logout()
   })
 }
 

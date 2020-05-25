@@ -239,6 +239,8 @@ test.serial("Draft and submit a report", async t => {
   const serverResponse = await httpRequestSmtpServer("GET")
   const jsonResponse = JSON.parse(serverResponse)
   await assert.strictEqual(jsonResponse.length, 0) // Domain not in active users
+
+  await t.context.logout()
 })
 
 test.serial("Publish report chain", async t => {
@@ -363,6 +365,8 @@ test.serial("Publish report chain", async t => {
   const serverResponse = await httpRequestSmtpServer("GET")
   const jsonResponse = JSON.parse(serverResponse)
   await assert.strictEqual(jsonResponse.length, 0) // Domains not in active users
+
+  await t.context.logout()
 })
 
 async function approveReport(t, user) {
@@ -410,7 +414,10 @@ async function approveReport(t, user) {
   )
   await $ApproveButton.click()
   await t.context.driver.wait(until.stalenessOf($ApproveButton), mediumWaitMs)
+
+  await t.context.logout()
 }
+
 test.serial(
   "Verify that validation and other reports/new interactions work",
   async t => {
@@ -686,6 +693,8 @@ test.serial(
     var serverResponse = await httpRequestSmtpServer("GET")
     var jsonResponse = JSON.parse(serverResponse)
     await assert.strictEqual(jsonResponse.length, 0) // No email should be sent
+
+    await t.context.logout()
   }
 )
 
