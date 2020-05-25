@@ -63,7 +63,8 @@ SidebarLink.propTypes = {
 
 const BaseNav = ({
   currentUser,
-  organizations,
+  advisorOrganizations,
+  principalOrganizations,
   appSettings,
   resetPages,
   clearSearchQuery
@@ -87,6 +88,9 @@ const BaseNav = ({
     orgUuid = path.split("/")[2]
     myOrgUuid = myOrg && myOrg.uuid
   }
+
+  const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
+  const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
 
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
@@ -123,9 +127,33 @@ const BaseNav = ({
       <NavDropdown
         title={Settings.fields.advisor.org.allOrgName}
         id="advisor-organizations"
-        active={inOrg && orgUuid !== myOrgUuid}
+        active={
+          inOrg &&
+          advisorOrganizationUuids.includes(orgUuid) &&
+          orgUuid !== myOrgUuid
+        }
       >
-        {Organization.map(organizations, org => (
+        {Organization.map(advisorOrganizations, org => (
+          <Link
+            to={Organization.pathFor(org)}
+            key={org.uuid}
+            onClick={clearSearchQuery}
+          >
+            <MenuItem>{org.shortName}</MenuItem>
+          </Link>
+        ))}
+      </NavDropdown>
+
+      <NavDropdown
+        title={Settings.fields.principal.org.allOrgName}
+        id="principal-organizations"
+        active={
+          inOrg &&
+          principalOrganizationUuids.includes(orgUuid) &&
+          orgUuid !== myOrgUuid
+        }
+      >
+        {Organization.map(principalOrganizations, org => (
           <Link
             to={Organization.pathFor(org)}
             key={org.uuid}
@@ -208,14 +236,16 @@ const BaseNav = ({
 BaseNav.propTypes = {
   currentUser: PropTypes.instanceOf(Person),
   appSettings: PropTypes.object,
-  organizations: PropTypes.array,
+  advisorOrganizations: PropTypes.array,
+  principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired
 }
 
 BaseNav.defaultProps = {
   appSettings: {},
-  organizations: []
+  advisorOrganizations: [],
+  principalOrganizations: []
 }
 
 const mapDispatchToProps = (dispatch, ownProps) =>

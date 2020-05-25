@@ -85,12 +85,26 @@ const GQL_GET_APP_DATA = gql`
       value
     }
 
-    organizationTopLevelOrgs: organizationList(
+    topLevelAdvisorOrgs: organizationList(
       query: {
         pageSize: 0
         hasParentOrg: false
         status: ACTIVE
         type: ADVISOR_ORG
+      }
+    ) {
+      list {
+        uuid
+        shortName
+      }
+    }
+
+    topLevelPrincipalOrgs: organizationList(
+      query: {
+        pageSize: 0
+        hasParentOrg: false
+        status: ACTIVE
+        type: PRINCIPAL_ORG
       }
     ) {
       list {
@@ -141,7 +155,10 @@ const App = ({ pageDispatchers, pageProps }) => {
         pageProps={pageProps}
         pageHistory={history}
         location={routerLocation}
-        sidebarData={appState.organizations}
+        sidebarData={{
+          advisorOrganizations: appState.advisorOrganizations,
+          principalOrganizations: appState.principalOrganizations
+        }}
       >
         <ToastContainer />
         <ReactTooltip id="tooltip-top" place="top" className="tooltip-top" />
@@ -150,20 +167,33 @@ const App = ({ pageDispatchers, pageProps }) => {
     </AppContext.Provider>
   )
 
+  function sortOrganizations(organizations) {
+    organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
+  }
   function processData(data) {
     const currentUser = new Person(data.me)
-    let organizations =
-      (data.organizationTopLevelOrgs && data.organizationTopLevelOrgs.list) ||
-      []
-    organizations = Organization.fromArray(organizations)
-    organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
+
+    let advisorOrganizations =
+      (data.topLevelAdvisorOrgs && data.topLevelAdvisorOrgs.list) || []
+    advisorOrganizations = Organization.fromArray(advisorOrganizations)
+    sortOrganizations(advisorOrganizations)
+
+    let principalOrganizations =
+      (data.topLevelPrincipalOrgs && data.topLevelPrincipalOrgs.list) || []
+    principalOrganizations = Organization.fromArray(principalOrganizations)
+    sortOrganizations(principalOrganizations)
 
     const settings = {}
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
     )
 
-    return { currentUser, settings, organizations }
+    return {
+      currentUser,
+      settings,
+      advisorOrganizations,
+      principalOrganizations
+    }
   }
 }
 
