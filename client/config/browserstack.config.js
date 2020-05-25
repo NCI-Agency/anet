@@ -30,7 +30,12 @@ const capabilities = {
   browser_version: "81.0",
   "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
-    args: ["--start-maximized"]
+    args: [
+      "--start-maximized",
+      // make sure we get the login form when we should and not a cached page:
+      "--disk-cache-dir=NUL"
+      // (note: on Windows we use NUL, on *NIX it would be /dev/null)
+    ]
   },
   os: "Windows",
   os_version: "10",

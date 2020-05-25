@@ -11,6 +11,10 @@ describe("Create authorization group form page", () => {
     CreateAuthorizationGroup.form.waitForDisplayed()
   })
 
+  afterEach("On the create authorization group page...", () => {
+    CreateAuthorizationGroup.logout()
+  })
+
   describe("When creating an authorization group", () => {
     it("Should save an authorization group with only a name", () => {
       CreateAuthorizationGroup.name.waitForDisplayed()

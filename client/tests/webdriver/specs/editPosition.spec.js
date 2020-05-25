@@ -13,6 +13,11 @@ describe("Create position page", () => {
     EditPosition.form.waitForDisplayed()
   })
 
+  afterEach("On the create position page...", () => {
+    // No Logout link, so just call logout directly
+    browser.url("/api/logout")
+  })
+
   describe("When changing the position type from principal to advisor and putting back", () => {
     it("Should update the position type to advisor and back to principal", () => {
       EditPosition.typePrincipalButton.waitForDisplayed()

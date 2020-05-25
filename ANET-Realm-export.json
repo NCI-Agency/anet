@@ -419,6 +419,28 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "47d80354-e35b-403e-a587-7982b9dbe2cb",
+    "createdTimestamp" : 1590405859146,
+    "username" : "bonny",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "51275415-1296-42ef-a759-4ab695afe21b",
+      "type" : "password",
+      "createdDate" : 1590405868906,
+      "secretData" : "{\"value\":\"hNQ8DwbEYR7iie0ekUCHI1SQL3lLw+W3MRs+OPUMxtEs+zfMAxgeRON+B6QHHMlHojVE9prFCWqH6kXDv86e7A==\",\"salt\":\"ds+Z4AeV4hajGQJxt5PNVA==\"}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "view-profile", "manage-account" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "06547ee2-dcc3-420c-96cb-5f3bb3793b4d",
     "createdTimestamp" : 1589458882558,
     "username" : "elizabeth",
@@ -743,8 +765,8 @@
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
     "secret" : "12869b4c-74ac-43f9-b71e-ff74e07babf9",
-    "redirectUris" : [ "http://localhost:3000/*", "/*" ],
-    "webOrigins" : [ "*" ],
+    "redirectUris" : [ "http://localhost:8180/*", "http://localhost:3000/*", "/*" ],
+    "webOrigins" : [ "+" ],
     "notBefore" : 0,
     "bearerOnly" : false,
     "consentRequired" : false,
@@ -830,7 +852,7 @@
     "clientAuthenticatorType" : "client-secret",
     "secret" : "0514fdaf-f809-43fe-b03f-2421e88270de",
     "redirectUris" : [ "/*" ],
-    "webOrigins" : [ "*" ],
+    "webOrigins" : [ "+" ],
     "notBefore" : 0,
     "bearerOnly" : false,
     "consentRequired" : false,

@@ -6,13 +6,54 @@ class Page {
     onboardUser: "bonny"
   }
 
-  _buildUrl(pathName, credentials) {
-    const credSep = pathName.includes("?") ? "&" : "?"
-    return `${browser.options.baseUrl}${pathName}${credSep}user=${credentials}&pass=${credentials}`
+  get loginForm() {
+    return browser.$("#kc-form-login")
+  }
+
+  get loginFormUsername() {
+    return browser.$("#username")
+  }
+
+  get loginFormPassword() {
+    return browser.$("#password")
+  }
+
+  get loginFormSubmitButton() {
+    return browser.$("#kc-login")
+  }
+
+  loginFormSubmit() {
+    this.loginFormSubmitButton.click()
+  }
+
+  get logoutLink() {
+    return browser.$("=Logout")
+  }
+
+  waitForLoginForm() {
+    this.loginForm.waitForExist()
+    this.loginForm.waitForDisplayed()
+  }
+
+  login(credentials) {
+    this.waitForLoginForm()
+    this.loginFormUsername.setValue(credentials)
+    this.loginFormPassword.setValue(credentials)
+    this.loginFormSubmit()
+  }
+
+  logout() {
+    this.logoutLink.waitForExist()
+    this.logoutLink.waitForDisplayed()
+    this.logoutLink.click()
+    this.waitForLoginForm()
   }
 
   _open(pathName, credentials) {
-    browser.url(this._buildUrl(pathName, credentials))
+    browser.url(pathName)
+    if (this.loginForm.isExisting()) {
+      this.login(credentials)
+    }
     browser.$("div.loader").waitForExist({
       timeout: 30000,
       reverse: true,

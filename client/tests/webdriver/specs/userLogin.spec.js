@@ -6,6 +6,7 @@ describe("Anet home page", function() {
     Home.open()
     const title = browser.getTitle()
     expect(title).to.equal("ANET")
+    Home.logout()
   })
 })
 
@@ -17,6 +18,7 @@ describe("Anet default user login", () => {
 
     const securityText = Home.securityBanner.getText()
     expect(securityText).to.equal(defaultUserValue)
+    Home.logout()
   })
 })
 
@@ -28,6 +30,7 @@ describe("Anet super user login", () => {
 
     const securityText = Home.securityBanner.getText()
     expect(securityText).to.equal(superUserValue)
+    Home.logout()
   })
 })
 
@@ -39,5 +42,6 @@ describe("Anet admin user login", () => {
 
     const securityText = Home.securityBanner.getText()
     expect(securityText).to.equal(adminUserValue)
+    Home.logout()
   })
 })

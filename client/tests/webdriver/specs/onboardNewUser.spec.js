@@ -4,7 +4,7 @@ import OnboardPage from "../pages/onboard.page"
 import CreatePerson from "../pages/createNewPerson.page"
 
 describe("Onboard new user login", () => {
-  it('Should show onboard welcome"', () => {
+  it("Should show onboard welcome", () => {
     OnboardPage.openAsOnboardUser()
     const welcomeText = "Welcome to ANET"
     OnboardPage.waitForWelcomeMessage(welcomeText)
@@ -37,5 +37,7 @@ describe("Onboard new user login", () => {
     expect(errorMessage.getText()).to.equal(
       "The End of tour date must be in the future"
     )
+    // No Logout link, so just call logout directly
+    browser.url("/api/logout")
   })
 })

@@ -57,6 +57,9 @@ DELETE FROM tags;
 DELETE FROM authorizationGroups;
 DELETE FROM notes;
 
+-- On-boarding user
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'bonny', 2, 0, NULL, NULL, NULL, NULL, 'bonny', NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 --Advisors
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'JACKSON, Jack', 0, 0, 'hunter+jack@dds.mil', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', 'jack', 'Germany', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
