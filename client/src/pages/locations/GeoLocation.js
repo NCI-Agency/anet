@@ -20,11 +20,6 @@ const GeoLocation = ({
   editable,
   displayType
 }) => {
-  const setTouched = touched => {
-    setFieldTouched("lat", touched, false)
-    setFieldTouched("lng", touched, false)
-  }
-
   if (!editable) {
     const humanValue = (
       <>
@@ -33,8 +28,6 @@ const GeoLocation = ({
         <span>{Location.parseCoordinate(lng) || "?"}</span>
       </>
     )
-
-    if (displayType === GEO_LOCATION_DISPLAY_TYPE.GENERIC) return humanValue
 
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
       return (
@@ -47,7 +40,12 @@ const GeoLocation = ({
       )
     }
 
-    throw new Error(`Unknown displayType: '${displayType}' for GeoLocation`)
+    return humanValue
+  }
+
+  const setTouched = touched => {
+    setFieldTouched("lat", touched, false)
+    setFieldTouched("lng", touched, false)
   }
 
   return (
@@ -77,7 +75,7 @@ const GeoLocation = ({
             }}
           />
         </Col>
-        {(lat || lng) && setFieldValue && (
+        {(lat || lng) && (
           <Col sm={1}>
             <Button
               style={{ width: "auto", margin: "8px 0 0 0", padding: "0" }}
@@ -99,11 +97,19 @@ const GeoLocation = ({
   )
 }
 
+function fnRequiredWhenEditable(props, propName, componentName) {
+  if (props.editable === true && typeof props[propName] !== "function") {
+    return new Error(
+      `Invalid prop '${propName}' is supplied to ${componentName}. '${propName}' isRequired when ${componentName} is editable and '${propName}' must be a function!`
+    )
+  }
+}
+
 GeoLocation.propTypes = {
   lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  setFieldTouched: PropTypes.func,
-  setFieldValue: PropTypes.func,
+  setFieldTouched: fnRequiredWhenEditable,
+  setFieldValue: fnRequiredWhenEditable,
   isSubmitting: PropTypes.bool,
   editable: PropTypes.bool,
   displayType: PropTypes.oneOf([
@@ -115,6 +121,7 @@ GeoLocation.propTypes = {
 GeoLocation.defaultProps = {
   lat: null,
   lng: null,
+  isSubmitting: false,
   editable: false,
   displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC
 }

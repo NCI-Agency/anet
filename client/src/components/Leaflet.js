@@ -194,8 +194,9 @@ const Leaflet = ({
      * It works fine as long as map container is fully visible on screen.
      */
     if (map && onMapClick) {
-      map.on("click", event => onMapClick(event, map))
-      return () => map.off("click")
+      const clickHandler = event => onMapClick(event, map)
+      map.on("click", clickHandler)
+      return () => map.off("click", clickHandler)
     }
   }, [onMapClick, map])
 
