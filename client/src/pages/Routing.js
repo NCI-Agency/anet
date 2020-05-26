@@ -6,8 +6,9 @@ import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
 import MergePeople from "pages/admin/MergePeople"
-import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
+import BoardDashboard from "pages/dashboards/BoardDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
+import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import GraphiQL from "pages/GraphiQL"
 import Help from "pages/Help"
 import Home from "pages/Home"
@@ -158,6 +159,14 @@ const BaseRouting = ({ currentUser }) => (
       render={({ match: { url } }) => (
         <Switch>
           <Route path={`${url}/:dashboard`} component={DecisivesDashboard} />
+        </Switch>
+      )}
+    />
+    <Route
+      path={PAGE_URLS.BOARD}
+      render={({ match: { url } }) => (
+        <Switch>
+          <Route path={`${url}/:dashboard`} component={BoardDashboard} />
         </Switch>
       )}
     />

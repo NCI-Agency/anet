@@ -11,7 +11,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class Location extends AbstractAnetBean {
+public class Location extends AbstractAnetBean implements RelatableObject {
 
   /** Pseudo uuid to represent 'no location'. */
   public static final String DUMMY_LOCATION_UUID = "-1";

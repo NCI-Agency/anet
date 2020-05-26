@@ -115,7 +115,7 @@ BasePeriodicAssessment.propTypes = {
   assessment: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
   assessmentYupSchema: PropTypes.object.isRequired,
-  note: Model.notePropTypes.isRequired,
+  note: Model.notePropType.isRequired,
   entity: PropTypes.object.isRequired,
   period: AssessmentPeriodPropType.isRequired,
   recurrence: PropTypes.string.isRequired,

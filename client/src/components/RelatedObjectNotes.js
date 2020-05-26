@@ -7,6 +7,7 @@ import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
+import Messages from "components/Messages"
 import Model, {
   INVISIBLE_CUSTOM_FIELDS_FIELD,
   NOTE_TYPE
@@ -56,9 +57,7 @@ const BaseRelatedObjectNotes = ({
     utils.treatFunctionsAsEqual
   )
 
-  // TODO: display somewhere the error state
-  // eslint-disable-next-line no-unused-vars
-  const [error, setError] = useState(null) // lgtm[js/unused-local-variable]
+  const [error, setError] = useState(null)
   const [hidden, setHidden] = useState(true)
   const [
     showRelatedObjectNoteModalKey,
@@ -147,6 +146,7 @@ const BaseRelatedObjectNotes = ({
             <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
           </Button>
         </div>
+        <Messages error={error} />
         <br />
         <div
           style={{
@@ -182,6 +182,7 @@ const BaseRelatedObjectNotes = ({
             type: noteType,
             noteRelatedObjects: [{ ...relatedObject }]
           }}
+          currentObject={relatedObject}
           questions={questions}
           showModal={showRelatedObjectNoteModalKey === "new"}
           onCancel={cancelRelatedObjectNoteModal}
@@ -294,10 +295,12 @@ const BaseRelatedObjectNotes = ({
                       </Button>
                       <RelatedObjectNoteModal
                         note={note}
+                        currentObject={relatedObject}
                         questions={questions}
                         showModal={showRelatedObjectNoteModalKey === note.uuid}
                         onCancel={cancelRelatedObjectNoteModal}
                         onSuccess={hideEditRelatedObjectNoteModal}
+                        onDelete={hideDeleteRelatedObjectNoteModal}
                       />
                       <ConfirmDelete
                         onConfirmDelete={() => deleteNote(note.uuid)}
@@ -412,11 +415,19 @@ const BaseRelatedObjectNotes = ({
 
   function hideEditRelatedObjectNoteModal(note) {
     const newNotes = notes.filter(item => item.uuid !== note.uuid) // remove old note
-    newNotes.unshift(note) // add updated note at the front
+    const roUuids = note?.noteRelatedObjects.map(nro => nro.relatedObjectUuid)
+    if (roUuids?.includes(relatedObject?.relatedObjectUuid)) {
+      newNotes.unshift(note) // add updated note at the front
+    }
     setError(null)
     setShowRelatedObjectNoteModalKey(null)
     setNoteType(null)
     setNotes(newNotes)
+  }
+
+  function hideDeleteRelatedObjectNoteModal(uuid) {
+    setShowRelatedObjectNoteModalKey(null)
+    deleteNote(uuid)
   }
 
   function deleteNote(uuid) {
@@ -434,11 +445,8 @@ const BaseRelatedObjectNotes = ({
 BaseRelatedObjectNotes.propTypes = {
   currentUser: PropTypes.instanceOf(Person),
   notesElemId: PropTypes.string.isRequired,
-  notes: PropTypes.arrayOf(Model.notePropTypes),
-  relatedObject: PropTypes.shape({
-    relatedObjectType: PropTypes.string.isRequired,
-    relatedObjectUuid: PropTypes.string.isRequired
-  }),
+  notes: PropTypes.arrayOf(Model.notePropType),
+  relatedObject: Model.relatedObjectPropType,
   relatedObjectValue: PropTypes.shape({
     role: PropTypes.string.isRequired,
     rank: PropTypes.string.isRequired,

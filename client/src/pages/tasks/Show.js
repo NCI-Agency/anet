@@ -215,7 +215,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 task.uuid && {
                   relatedObjectType: Task.relatedObjectType,
-                  relatedObjectUuid: task.uuid
+                  relatedObjectUuid: task.uuid,
+                  relatedObject: task
                 }
               }
             />

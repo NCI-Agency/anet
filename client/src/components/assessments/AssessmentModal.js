@@ -144,7 +144,7 @@ const AssessmentModal = ({
 }
 AssessmentModal.propTypes = {
   showModal: PropTypes.bool,
-  note: Model.notePropTypes,
+  note: Model.notePropType,
   assessment: PropTypes.object,
   assessmentYupSchema: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
