@@ -122,14 +122,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Create leadership people in the AO who can approve this report
     Person approver1 = new Person();
-    approver1.setDomainUsername("testApprover1");
+    approver1.setDomainUsername("testapprover1");
     approver1.setEmailAddress("hunter+testApprover1@dds.mil");
     approver1.setName("Test Approver 1");
     approver1.setRole(Role.ADVISOR);
     approver1.setStatus(PersonStatus.ACTIVE);
     approver1 = findOrPutPersonInDb(approver1);
     Person approver2 = new Person();
-    approver2.setDomainUsername("testApprover2");
+    approver2.setDomainUsername("testapprover2");
     approver2.setEmailAddress("hunter+testApprover2@dds.mil");
     approver2.setName("Test Approver 2");
     approver2.setRole(Person.Role.ADVISOR);
@@ -516,7 +516,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     author.setName("A New Guy");
     author.setRole(Role.ADVISOR);
     author.setStatus(PersonStatus.ACTIVE);
-    author.setDomainUsername("newGuy");
+    author.setDomainUsername("newguy");
     author.setEmailAddress("newGuy@dds.mil");
     String authorUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
         author, new TypeReference<GraphQlResponse<Person>>() {});
