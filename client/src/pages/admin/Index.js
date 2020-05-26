@@ -58,9 +58,7 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   }
 
   const settings = {}
-  data.adminSettings.forEach(
-    (setting) => (settings[setting.key] = setting.value)
-  )
+  data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
 
   return (
     <div>
@@ -121,7 +119,11 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
           <Row style={{ padding: "8px 0" }}>
             <Col md={2}>Reload Dictionary</Col>
             <Col md={10}>
-              <Button bsStyle="primary" type="button" onClick={reloadDictionary}>
+              <Button
+                bsStyle="primary"
+                type="button"
+                onClick={reloadDictionary}
+              >
                 Reload
               </Button>
             </Col>
@@ -133,8 +135,8 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
 
   function onSubmit(values, form) {
     return save(values, form)
-      .then((response) => onSubmitSuccess(response, values, form))
-      .catch((error) => {
+      .then(response => onSubmitSuccess(response, values, form))
+      .catch(error => {
         setSaveError(error)
         setSaveSuccess()
         form.setSubmitting(false)
@@ -160,19 +162,17 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   }
 
   function clearCache() {
-      return API.query(CLEAR_CACHE, {})
-          .then(data => {
-            jumpToTop()
-            setSaveSuccess(data.clearCache)
-          })
+    return API.query(CLEAR_CACHE, {}).then(data => {
+      jumpToTop()
+      setSaveSuccess(data.clearCache)
+    })
   }
 
   function reloadDictionary() {
-    return API.query(RELOAD_DICTIONARY, {})
-        .then(data => {
-            jumpToTop()
-            setSaveSuccess(data.reloadDictionary)
-        })
+    return API.query(RELOAD_DICTIONARY, {}).then(data => {
+      jumpToTop()
+      setSaveSuccess(data.reloadDictionary)
+    })
   }
 }
 
@@ -181,11 +181,9 @@ BaseAdminIndex.propTypes = {
   loadAppData: PropTypes.func
 }
 
-const AdminIndex = (props) => (
+const AdminIndex = props => (
   <AppContext.Consumer>
-    {(context) => (
-      <BaseAdminIndex loadAppData={context.loadAppData} {...props} />
-    )}
+    {context => <BaseAdminIndex loadAppData={context.loadAppData} {...props} />}
   </AppContext.Consumer>
 )
 

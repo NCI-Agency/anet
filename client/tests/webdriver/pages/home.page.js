@@ -6,7 +6,10 @@ class Home extends Page {
   }
 
   get securityBanner() {
-    return browser.$("#topbar .banner")
+    const banner = browser.$("#topbar .banner")
+    banner.waitForExist()
+    banner.waitForDisplayed()
+    return banner
   }
 
   get searchBar() {
@@ -15,17 +18,6 @@ class Home extends Page {
 
   get submitSearch() {
     return browser.$("#topbar #searchBarSubmit")
-  }
-
-  waitForSecurityBannerValue(value) {
-    this.securityBanner.waitForExist()
-    this.securityBanner.waitForDisplayed()
-    return browser.waitUntil(
-      () => {
-        return this.securityBanner.getText() === value
-      },
-      { timeout: 5000, timeoutMsg: "Expected different banner text after 5s" }
-    )
   }
 }
 

@@ -18,10 +18,10 @@ const aCss = {
 }
 
 const versionCss = {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    margin: 0
+  position: "absolute",
+  top: 10,
+  right: 10,
+  margin: 0
 }
 
 const BaseSecurityBanner = ({ currentUser, appSettings }) => (
