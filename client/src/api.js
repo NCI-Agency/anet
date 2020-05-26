@@ -1,4 +1,3 @@
-import querystring from "querystring"
 import { useQuery } from "@apollo/react-hooks"
 import ApolloClient from "apollo-boost"
 import { InMemoryCache } from "apollo-cache-inmemory"
@@ -111,35 +110,9 @@ const API = {
     return results
   },
 
-  _getAuthParams: function() {
-    const query = querystring.parse(window.location.search.slice(1))
-    if (query.user && query.pass) {
-      window.ANET_DATA.creds = {
-        user: query.user,
-        pass: query.pass
-      }
-    }
-    return window.ANET_DATA.creds
-  },
-
-  addAuthParams: function(url) {
-    const creds = API._getAuthParams()
-    if (creds) {
-      url += "?" + querystring.stringify(creds)
-    }
-    return url
-  },
-
   _getAuthHeader: function() {
-    const creds = API._getAuthParams()
-    if (creds) {
-      return [
-        "Authorization",
-        "Basic " +
-          Buffer.from(`${creds.user}:${creds.pass}`).toString("base64")
-      ]
-    } else if (keycloak.token) {
-      return ["Authorization", "Bearer " + keycloak.token]
+    if (keycloak.token) {
+      return ["Authorization", `Bearer ${keycloak.token}`]
     }
     return null
   },
