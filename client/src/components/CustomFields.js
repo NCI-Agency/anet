@@ -468,8 +468,7 @@ const CustomField = ({
   const [validateFormDebounced] = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate: true) => {
-      const val =
-        typeof value === "object" && value.target ? value.target.value : value
+      const val = value?.target?.value || value
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
       setFieldValue(fieldName, val, sv)
