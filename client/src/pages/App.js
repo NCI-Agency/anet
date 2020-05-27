@@ -167,22 +167,25 @@ const App = ({ pageDispatchers, pageProps }) => {
     </AppContext.Provider>
   )
 
-  function sortOrganizations(organizations) {
-    organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
-  }
   function processData(data) {
+    function sortOrganizations(organizations) {
+      organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
+    }
+
+    function getSortedOrganizationsFromData(organizationsData) {
+      let organizations = (organizationsData && organizationsData.list) || []
+      organizations = Organization.fromArray(organizations)
+      sortOrganizations(organizations)
+      return organizations
+    }
+
     const currentUser = new Person(data.me)
-
-    let advisorOrganizations =
-      (data.topLevelAdvisorOrgs && data.topLevelAdvisorOrgs.list) || []
-    advisorOrganizations = Organization.fromArray(advisorOrganizations)
-    sortOrganizations(advisorOrganizations)
-
-    let principalOrganizations =
-      (data.topLevelPrincipalOrgs && data.topLevelPrincipalOrgs.list) || []
-    principalOrganizations = Organization.fromArray(principalOrganizations)
-    sortOrganizations(principalOrganizations)
-
+    const advisorOrganizations = getSortedOrganizationsFromData(
+      data.topLevelAdvisorOrgs
+    )
+    const principalOrganizations = getSortedOrganizationsFromData(
+      data.topLevelPrincipalOrgs
+    )
     const settings = {}
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
