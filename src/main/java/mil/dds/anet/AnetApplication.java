@@ -42,9 +42,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Person.PersonStatus;
+import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
@@ -172,7 +172,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
             final String username = securityContext.getToken().getPreferredUsername();
             final List<Person> p = dao.findByDomainUsername(username);
             if (p.isEmpty()) {
-              throw new WebApplicationException("Unauthorized", Status.UNAUTHORIZED);
+              // First time this user has ever logged in.
+              final Person person = new Person();
+              person.setDomainUsername(username);
+              person.setName("");
+              person.setRole(Role.ADVISOR);
+              person.setStatus(PersonStatus.NEW_USER);
+              return dao.insert(person);
             }
             return p.get(0);
           }
