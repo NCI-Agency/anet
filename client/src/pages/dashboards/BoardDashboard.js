@@ -153,7 +153,7 @@ const BoardDashboard = () => {
       })
       model.getNodes().forEach(node => node.registerListener(selectionListener))
     }
-  }, [model])
+  }, [editedNode, model])
 
   useEffect(() => {
     model && model.setLocked(!edit)
