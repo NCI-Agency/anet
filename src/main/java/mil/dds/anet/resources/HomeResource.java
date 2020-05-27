@@ -71,12 +71,29 @@ public class HomeResource {
     final KeycloakConfiguration keycloakConfiguration = config.getKeycloakConfiguration();
     final URI requestlUrl = UriBuilder.fromUri(request.getRequestURL().toString()).build();
     final String redirectUri =
-        URLEncoder.encode(String.format("%s://%s:%s/", requestlUrl.getScheme(),
-            requestlUrl.getHost(), requestlUrl.getPort()), StandardCharsets.UTF_8.toString());
+        URLEncoder.encode(getBaseRequestUrl(requestlUrl), StandardCharsets.UTF_8.toString());
     // Redirect to Keycloak to log out
     response.sendRedirect(String.format(
         "%s/realms/%s/protocol/openid-connect/logout?redirect_uri=%s",
         keycloakConfiguration.getAuthServerUrl(), keycloakConfiguration.getRealm(), redirectUri));
+  }
+
+  // Define these constants here
+  private static final String HTTP_SCHEME = "http";
+  private static final int HTTP_DEFAULT_PORT = 80;
+  private static final String HTTPS_SCHEME = "https";
+  private static final int HTTPS_DEFAULT_PORT = 443;
+
+  private String getBaseRequestUrl(URI requestlUrl) {
+    final String scheme = requestlUrl.getScheme();
+    final int port = requestlUrl.getPort();
+    final String host = requestlUrl.getHost();
+    return (port == -1 // no port in the request URL
+        // or using the default port of the scheme
+        || HTTP_SCHEME.equals(scheme) && HTTP_DEFAULT_PORT == port
+        || HTTPS_SCHEME.equals(scheme) && HTTPS_DEFAULT_PORT == port)
+            ? String.format("%s://%s/", scheme, host)
+            : String.format("%s://%s:%s/", scheme, host, port);
   }
 
 }
