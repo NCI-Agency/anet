@@ -25,7 +25,6 @@ import {
   ASSESSMENTS_RECURRENCE_TYPE,
   ASSESSMENTS_RELATED_OBJECT_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  INVISIBLE_CUSTOM_FIELDS_FIELD,
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -35,6 +34,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
@@ -1264,9 +1264,12 @@ const BaseReportForm = ({
 
   function isEmptyAssessment(assessment) {
     return (
-      (Object.keys(assessment).length === 1 &&
-        Object.keys(assessment)[0] === INVISIBLE_CUSTOM_FIELDS_FIELD) ||
-      _isEmpty(assessment)
+      Object.entries(assessment).filter(
+        ([key, value]) =>
+          !EXCLUDED_ASSESSMENT_FIELDS.includes(key) &&
+          value !== null &&
+          value !== undefined
+      ).length < 1
     )
   }
 

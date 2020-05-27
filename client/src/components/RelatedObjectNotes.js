@@ -36,7 +36,7 @@ const GQL_DELETE_NOTE = gql`
 
 export { GRAPHQL_NOTES_FIELDS } from "components/Model"
 
-const EXCLUDED_ASSESSMENT_FIELDS = [
+export const EXCLUDED_ASSESSMENT_FIELDS = [
   "__recurrence",
   "__periodStart",
   "__relatedObjectType",
