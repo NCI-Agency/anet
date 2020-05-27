@@ -191,7 +191,7 @@
     "testPathIgnorePatterns": [
       "<rootDir>/(build|docs|node_modules)/"
     ],
-    "testEnvironment": "node"
+    "testEnvironment": "jsdom"
   },
   "browserslist": [
     "> 1%",
