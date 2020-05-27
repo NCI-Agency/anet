@@ -29,7 +29,7 @@ const aggregationWidgetPropTypes = {
 export const PieWidget = ({
   values,
   legend,
-  showLegend,
+  showLegend = true,
   ...otherWidgetProps
 }) => {
   return (
@@ -78,7 +78,7 @@ export const LikertScaleAndPieWidget = ({ values, ...otherWidgetProps }) => {
           flexGrow: "0"
         }}
       >
-        <PieWidget {...pieValues} {...otherWidgetProps} />
+        <PieWidget {...pieValues} {...otherWidgetProps} showLegend={false} />
       </div>
       <div
         style={{
