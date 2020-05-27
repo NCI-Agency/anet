@@ -144,6 +144,8 @@ const BaseNav = ({
         ))}
       </NavDropdown>
 
+      <BSNav id="advisor-org-nav" />
+
       <NavDropdown
         title={Settings.fields.principal.org.allOrgName}
         id="principal-organizations"
@@ -164,7 +166,8 @@ const BaseNav = ({
         ))}
       </NavDropdown>
 
-      <BSNav id="org-nav" />
+      <BSNav id="principal-org-nav" />
+
       <SidebarLink linkTo="/rollup" handleOnClick={resetPages}>
         Daily rollup
       </SidebarLink>
