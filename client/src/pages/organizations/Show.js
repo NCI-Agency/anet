@@ -24,6 +24,7 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import { Organization, Person, Position, Report, Task } from "models"
@@ -31,7 +32,13 @@ import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
+import {
+  Checkbox,
+  ListGroup,
+  ListGroupItem,
+  Nav,
+  Button
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import DictionaryField from "../../HOC/DictionaryField"
@@ -127,6 +134,7 @@ const GQL_GET_ORGANIZATION = gql`
 const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
+  const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
@@ -192,6 +200,10 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
   if (filterPendingApproval) {
     reportQueryParams.state = Report.STATE.PENDING_APPROVAL
   }
+  if (includeChildrenOrgs) {
+    reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
+  }
+
   return (
     <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
@@ -389,15 +401,23 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                   ]}
                   reportsFilter={
                     !isSuperUser ? null : (
-                      <Button
-                        value="toggle-filter"
-                        className="btn btn-sm"
-                        onClick={togglePendingApprovalFilter}
-                      >
-                        {filterPendingApproval
-                          ? "Show all reports"
-                          : "Show pending approval"}
-                      </Button>
+                      <>
+                        <Button
+                          value="toggle-filter"
+                          className="btn btn-sm"
+                          onClick={togglePendingApprovalFilter}
+                        >
+                          {filterPendingApproval
+                            ? "Show all reports"
+                            : "Show pending approval"}
+                        </Button>
+                        <Checkbox
+                          checked={includeChildrenOrgs}
+                          onChange={toggleIncludeChildrenOrgs}
+                        >
+                          include reports from sub-orgs
+                        </Checkbox>
+                      </>
                     )
                   }
                 />
@@ -411,6 +431,10 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
 
   function togglePendingApprovalFilter() {
     setFilterPendingApproval(!filterPendingApproval)
+  }
+
+  function toggleIncludeChildrenOrgs() {
+    setIncludeChildrenOrgs(!includeChildrenOrgs)
   }
 }
 
