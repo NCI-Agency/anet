@@ -186,7 +186,12 @@ const ReportStatistics = ({
   const customFieldsConfig = Settings.fields.report.customFields
 
   return (
-    <Table condensed responsive className="assessments-table">
+    <Table
+      condensed
+      responsive
+      className="assessments-table"
+      style={{ tableLayout: "fixed" }}
+    >
       <PeriodsTableHeader periodsConfig={periodsConfig} />
       <tbody>
         <>
