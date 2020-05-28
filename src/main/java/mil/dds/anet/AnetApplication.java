@@ -157,6 +157,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // Load and check the dictionary
     configuration.loadDictionary();
 
+    // Load project version
+    configuration.loadVersion();
+
     // We want to use our own custom DB logger in order to clean up the logs a bit.
     final Injector injector = InjectorLookup.getInjector(this).get();
     injector.getInstance(StatementLogger.class);

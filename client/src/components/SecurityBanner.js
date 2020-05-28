@@ -1,4 +1,4 @@
-import { Settings } from "api"
+import { Version } from "api"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import { Person } from "models"
@@ -9,7 +9,8 @@ const SETTING_KEY_TEXT = "SECURITY_BANNER_TEXT"
 const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
 
 const css = {
-  zIndex: 101
+  zIndex: 101,
+  position: "relative"
 }
 
 const aCss = {
@@ -38,7 +39,7 @@ const BaseSecurityBanner = ({ currentUser, appSettings }) => (
     >
       (edit)
     </LinkTo>
-    <h6 style={{ ...versionCss }}>Version : {Settings.projectVersion}</h6>
+    <h6 style={{ ...versionCss }}>Version : {Version}</h6>
   </div>
 )
 BaseSecurityBanner.propTypes = {

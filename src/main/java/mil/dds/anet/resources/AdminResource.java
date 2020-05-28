@@ -5,15 +5,11 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
@@ -79,28 +75,11 @@ public class AdminResource {
   }
 
   /**
-   * Returns the project version saved during the gradle build time
+   * Returns the project version saved during project build (build.gradle project.version)
    */
   @GraphQLQuery(name = "projectVersion")
   public String getProjectVersion() {
-    return (String) config.getDictionary().get("projectVersion");
-  }
-
-  /**
-   * Returns the up-to-date project version on Github
-   */
-  @GraphQLQuery(name = "uptodateVersion")
-  public String getProjectGitVersion() {
-    String version;
-    try {
-      String command = "git describe";
-      Process p = Runtime.getRuntime().exec(command);
-      BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-      version = input.readLine();
-    } catch (IOException e) {
-      throw new WebApplicationException(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE);
-    }
-    return version;
+    return config.getVersion();
   }
 
 }

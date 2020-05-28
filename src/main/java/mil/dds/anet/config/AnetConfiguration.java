@@ -1,7 +1,6 @@
 package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -14,10 +13,8 @@ import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,11 +22,10 @@ import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.Utils;
-import org.apache.xmlbeans.impl.common.ReaderInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
 public class AnetConfiguration extends Configuration implements AssetsBundleConfiguration {
 
@@ -51,6 +47,8 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private String serverUrl;
 
   private Map<String, Object> dictionary;
+
+  private String version;
 
   private boolean timeWaffleRequests;
 
@@ -173,23 +171,20 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   @SuppressWarnings("unchecked")
   public void loadDictionary() {
     // Read and set anet-dictionary
-    Yaml yaml = new Yaml();
-    InputStream in = AnetConfiguration.class.getResourceAsStream("/anet-dictionary.yml");
-    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-    try {
-      reader.readLine(); // by-pass first line -> dictionary:
-      InputStream in2 = new ReaderInputStream(reader, "UTF-8");
-      Map<String, Object> dictionary = yaml.loadAs(in2, Map.class);
-      this.setDictionary(dictionary);
-      // Check the dictionary
-      final JsonNode jsonNodeDictionary = checkDictionary();
-      try {
+    try (final InputStream inputStream =
+        AnetConfiguration.class.getResourceAsStream("/anet-dictionary.yml")) {
+      if (inputStream == null) {
+        logger.error("ANET dictionary [anet-dictionary.yml] not found");
+      } else {
+        Map<String, Object> dictionary = yamlMapper.readValue(inputStream, Map.class);
+        Map<String, Object> settings = (Map) dictionary.get("dictionary");
+        this.setDictionary(settings);
+        // Check the dictionary
+        final JsonNode jsonNodeDictionary = checkDictionary();
         logger.info("dictionary: {}", yamlMapper.writeValueAsString(jsonNodeDictionary));
-      } catch (JsonProcessingException exception) {
-        logger.error("Could not serialize dictionary");
       }
     } catch (IOException e) {
-      throw new IllegalArgumentException("Invalid dictionary in the configuration");
+      logger.error("Error closing ANET dictionary", e);
     }
   }
 
@@ -306,6 +301,29 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     public void setSslTrust(String sslTrust) {
       this.sslTrust = sslTrust;
     }
+  }
+
+  public String loadVersion() {
+    try (final InputStream inputStream =
+        AnetConfiguration.class.getResourceAsStream("/version.properties")) {
+      if (inputStream == null) {
+        logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE);
+      } else {
+        Map<String, Object> version = yamlMapper.readValue(inputStream, Map.class);
+        this.setVersion((String) version.get("projectVersion"));
+      }
+    } catch (IOException e) {
+      logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE, e);
+    }
+    return this.getVersion();
+  }
+
+  public String getVersion() {
+    return version == null ? "-" : version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 
 }
