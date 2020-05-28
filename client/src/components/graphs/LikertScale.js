@@ -3,6 +3,7 @@ import * as d3 from "d3"
 import PropTypes from "prop-types"
 import Text from "react-svg-text"
 import useDimensions from "react-use-dimensions"
+import utils from "utils"
 
 const LikertScale = ({
   onChange,
@@ -85,11 +86,12 @@ const LikertScale = ({
 
   let activeColor = null
   let valuesStats = null
-  if (values?.length) {
+  const numberValues = utils.arrayOfNumbers(values)
+  if (numberValues?.length) {
     valuesStats = {
-      min: Math.min(...values),
-      max: Math.max(...values),
-      avg: values.reduce((a, b) => a + b, 0) / values.length
+      min: Math.min(...numberValues),
+      max: Math.max(...numberValues),
+      avg: numberValues.reduce((a, b) => a + b, 0) / numberValues.length
     }
     valuesStats.avgColor = levels.find(
       level => level.endValue > valuesStats.avg
@@ -139,7 +141,7 @@ const LikertScale = ({
           </React.Fragment>
         )
       })}
-      {values?.map((xValue, index) => (
+      {numberValues?.map((xValue, index) => (
         <g
           transform={`translate(${scale(xValue)} ${scaleYPosition})`}
           key={`values-${index}-${xValue}`}
@@ -155,7 +157,7 @@ const LikertScale = ({
         </g>
       ))}
 
-      {values?.length > 1 && (
+      {numberValues?.length > 1 && (
         <g transform={`translate(0 ${scaleYPosition})`}>
           <line
             x1={scale(valuesStats.min)}
@@ -181,7 +183,7 @@ const LikertScale = ({
         </g>
       )}
 
-      {values?.length > 0 && (
+      {numberValues?.length > 0 && (
         <g transform={`translate(0 ${scaleYPosition})`}>
           <circle
             cx={scale(valuesStats.avg)}
