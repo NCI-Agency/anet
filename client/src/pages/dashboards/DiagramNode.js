@@ -15,19 +15,37 @@ import {
   DefaultLinkModel,
   DefaultLinkWidget
 } from "@projectstorm/react-diagrams-defaults"
+import AggregationWidgetContainer, {
+  AGGERGATION_WIDGET_TYPE,
+  getAggregationWidget
+} from "components/aggregations/AggregationWidgetContainer"
+import { ASSESSMENT_PERIOD_FACTORIES } from "components/assessments/AssessmentResultsContainer"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
+import {
+  ASSESSMENTS_RECURRENCE_TYPE,
+  CUSTOM_FIELD_TYPE
+} from "components/Model"
+import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import * as Models from "models"
+import moment from "moment"
 import PropTypes from "prop-types"
 import * as React from "react"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 
 const ENTITY_GQL_FIELDS = {
   Report: "uuid, intent",
-  Person: "uuid, name, role, avatar(size: 64)",
+  Person: `uuid, name, role, avatar(size: 64), ${GRAPHQL_NOTES_FIELDS}`,
   Organization: "uuid, shortName",
   Position: "uuid, name",
   Location: "uuid, name",
-  Task: "uuid, shortName, longName"
+  Task: `uuid, shortName, longName, ${GRAPHQL_NOTES_FIELDS}`
+}
+
+const DIAGRAM_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: {
+    [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: AGGERGATION_WIDGET_TYPE.PIE
+  }
 }
 
 export class DiagramPortModel extends PortModel {
@@ -100,10 +118,17 @@ const Port = styled.div`
 `
 
 export const DiagramNodeWidget = ({ size, node, engine }) => {
-  const ModelClass =
-    node.options.anetObjectType && Models[node.options.anetObjectType]
-
-  const modelInstance = ModelClass && new ModelClass(node.options.anetObject)
+  const { anetObjectType, anetObject } = node.options
+  const ModelClass = anetObjectType && Models[anetObjectType]
+  const modelInstance = ModelClass && new ModelClass(anetObject)
+  const now = moment()
+  const period = ASSESSMENT_PERIOD_FACTORIES[
+    ASSESSMENTS_RECURRENCE_TYPE.MONTHLY
+  ](now, 0)
+  const instantAssessmentConfig =
+    anetObject && anetObject.getInstantAssessmentConfig()
+  const instantAssessmentResults =
+    instantAssessmentConfig && anetObject.getInstantAssessmentResults(period)
   return (
     <div
       className="diagram-node"
@@ -131,14 +156,35 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
             style={{ marginLeft: 8, marginTop: 8, pointerEvents: "none" }}
           />
         )}
-      {node.options.anetObjectType && node.options.anetObject && (
+      {anetObjectType && anetObject && (
         <div style={{ paddingTop: 5 }}>
           <LinkTo
-            modelType={node.options.anetObjectType}
-            model={node.options.anetObject}
+            modelType={anetObjectType}
+            model={anetObject}
             showAvatar={false}
             showIcon={false}
           />
+          <>
+            {instantAssessmentConfig &&
+              Object.keys(instantAssessmentConfig || {}).map(questionKey => {
+                const questionConfig = instantAssessmentConfig[questionKey]
+                const aggregationWidget = getAggregationWidget(
+                  questionConfig,
+                  DIAGRAM_AGGREGATION_WIDGET_PER_FIELD_TYPE,
+                  true
+                )
+                questionConfig.showLegend = false
+                return aggregationWidget ? (
+                  <AggregationWidgetContainer
+                    key={`assessment-${questionKey}`}
+                    fieldConfig={questionConfig}
+                    fieldName={questionKey}
+                    data={instantAssessmentResults}
+                    widget={aggregationWidget}
+                  />
+                ) : null
+              })}
+          </>
         </div>
       )}
       <PortWidget

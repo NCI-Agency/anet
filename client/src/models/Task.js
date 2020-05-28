@@ -1,5 +1,9 @@
 import { Settings } from "api"
-import Model, { createCustomFieldsSchema, yupDate } from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS,
+  yupDate
+} from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
@@ -146,6 +150,8 @@ export default class Task extends Model {
 
   static autocompleteQuery =
     "uuid, shortName, longName, customFieldRef1 { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

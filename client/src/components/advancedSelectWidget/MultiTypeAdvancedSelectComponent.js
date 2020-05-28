@@ -59,7 +59,7 @@ const widgetPropsPeople = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   filterDefs: peopleFilters,
   queryParams: {},
-  fields: Models.Person.autocompleteQuery,
+  fields: Models.Person.autocompleteQueryWithNotes,
   addon: PEOPLE_ICON
 }
 
@@ -99,7 +99,7 @@ const widgetPropsTask = {
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Models.Task.STATUS.ACTIVE },
-  fields: Models.Task.autocompleteQuery,
+  fields: Models.Task.autocompleteQueryWithNotes,
   addon: TASKS_ICON
 }
 

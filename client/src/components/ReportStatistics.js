@@ -102,6 +102,7 @@ const FieldStatisticsRow = ({
             fieldConfig={fieldConfig}
             fieldName={fieldName}
             data={periodsData[index]}
+            widget={aggregationWidget}
           />
         </td>
       ))}

@@ -24,7 +24,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Col, ControlLabel, FormGroup } from "react-bootstrap"
 
-const AGGERGATION_WIDGET_TYPE = {
+export const AGGERGATION_WIDGET_TYPE = {
   LIKERT_SCALE: "likertScale",
   PIE: "pie",
   LIKERT_SCALE_AND_PIE: "likertScaleAndPie",
@@ -89,12 +89,23 @@ const AGGREGATION_TYPE_FUNCTION = {
   [AGGREGATION_TYPE.LIKERT_SCALE_AND_PIE_AGG]: likertScaleAndPieAggregation
 }
 
-export const getAggregationWidget = fieldConfig =>
-  fieldConfig.aggregation?.widget ||
-  DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE[fieldConfig.type][
-    fieldConfig.widget
-  ] ||
-  DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE[fieldConfig.type]
+export const getAggregationWidget = (
+  fieldConfig,
+  defaultWidgetPerFieldType = DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE,
+  ignoreFieldConfigWidget = false
+) => {
+  const widget = !ignoreFieldConfigWidget && fieldConfig.aggregation?.widget
+  const defaultWidget = defaultWidgetPerFieldType[fieldConfig.type]
+  const defaultWidgetIsObject = typeof defaultWidget === "object"
+  return (
+    widget ||
+    (defaultWidget &&
+      defaultWidgetIsObject &&
+      defaultWidget[fieldConfig.widget]) ||
+    (!defaultWidgetIsObject && defaultWidget) ||
+    null
+  )
+}
 
 const getAggregationFunction = (fieldConfig, aggregationWidget) => {
   const aggregationType =
@@ -110,9 +121,10 @@ const AggregationWidgetContainer = ({
   fieldConfig,
   fieldName,
   vertical,
+  widget,
   ...otherWidgetProps
 }) => {
-  const aggregationWidget = getAggregationWidget(fieldConfig)
+  const aggregationWidget = widget || getAggregationWidget(fieldConfig)
   const aggregationFunction = getAggregationFunction(
     fieldConfig,
     aggregationWidget
@@ -168,10 +180,12 @@ AggregationWidgetContainer.propTypes = {
   data: PropTypes.any,
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  widget: PropTypes.string
 }
 AggregationWidgetContainer.defaultProps = {
-  vertical: true
+  vertical: true,
+  widget: ""
 }
 
 export default AggregationWidgetContainer

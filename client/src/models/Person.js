@@ -1,5 +1,9 @@
 import { Settings } from "api"
-import Model, { createCustomFieldsSchema, yupDate } from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS,
+  yupDate
+} from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
@@ -155,6 +159,8 @@ export default class Person extends Model {
 
   static autocompleteQuery =
     "uuid, name, rank, role, status, endOfTourDate, avatar(size: 32), position { uuid, name, type, code, status, organization { uuid, shortName }, location {uuid, name} }"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfRole(role) {
     if (role === Person.ROLE.ADVISOR) {

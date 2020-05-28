@@ -59,6 +59,7 @@ const InstantAssessmentRow = ({
             fieldConfig={questionConfig}
             fieldName={questionKey}
             data={entity.getInstantAssessmentResults(period)}
+            widget={aggregationWidget}
           />
         </td>
       ))}
