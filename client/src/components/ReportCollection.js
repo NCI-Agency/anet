@@ -1,6 +1,7 @@
 import { setPagination } from "actions"
 import { ASSESSMENT_PERIOD_FACTORIES } from "components/assessments/AssessmentResultsContainer"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import { ASSESSMENTS_RECURRENCE_TYPE } from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps
@@ -38,7 +39,7 @@ const ReportCollection = ({
 }) => {
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
-  const statisticsRecurrence = ["monthly"]
+  const statisticsRecurrence = [ASSESSMENTS_RECURRENCE_TYPE.MONTHLY]
   const now = moment()
 
   return (
