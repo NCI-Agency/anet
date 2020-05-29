@@ -124,7 +124,7 @@
     "jsonpath-plus": "4.0.0",
     "leaflet": "1.6.0",
     "leaflet-defaulticon-compatibility": "0.1.1",
-    "leaflet-geosearch": "2.7.0",
+    "leaflet-geosearch": "3.0.6",
     "leaflet-gesture-handling": "1.1.8",
     "leaflet.markercluster": "1.4.1",
     "locale-compare-polyfill": "0.0.2",
