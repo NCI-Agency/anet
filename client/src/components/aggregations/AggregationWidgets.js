@@ -6,8 +6,11 @@ import BarChart from "components/BarChart"
 import LikertScale from "components/graphs/LikertScale"
 import Pie from "components/graphs/Pie"
 import _uniqueId from "lodash/uniqueId"
+import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
+
+const DATE_FORMAT = "YYYY-MM-DD"
 
 const aggregationWidgetPropTypes = {
   values: PropTypes.oneOfType([
@@ -23,7 +26,8 @@ const aggregationWidgetPropTypes = {
   ]),
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType])
 }
 
 export const PieWidget = ({
@@ -115,6 +119,7 @@ export const CalendarWidget = ({
   values,
   fieldConfig,
   fieldName,
+  period,
   ...otherWidgetProps
 }) => {
   const calendarComponentRef = useRef(null)
@@ -135,6 +140,7 @@ export const CalendarWidget = ({
         right: ""
       }}
       defaultView="dayGridMonth"
+      defaultDate={period.start.format(DATE_FORMAT)}
       allDayDefault
       eventTimeFormat={{
         hour: "2-digit",

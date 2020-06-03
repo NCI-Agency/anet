@@ -20,6 +20,7 @@ import {
 import IqrBoxPlot from "components/graphs/IqrBoxPlot"
 import LikertScale from "components/graphs/LikertScale"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
+import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"
 import { Col, ControlLabel, FormGroup } from "react-bootstrap"
@@ -121,6 +122,7 @@ const AggregationWidgetContainer = ({
   fieldName,
   vertical,
   widget,
+  period,
   ...otherWidgetProps
 }) => {
   const aggregationWidget = widget || getAggregationWidget(fieldConfig)
@@ -148,6 +150,7 @@ const AggregationWidgetContainer = ({
       vertical={vertical}
       fieldConfig={fieldConfig}
       fieldName={fieldName}
+      period={period}
       {...fieldProps}
       {...otherWidgetProps}
       {...otherAggregationDetails}
@@ -180,7 +183,8 @@ AggregationWidgetContainer.propTypes = {
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
   vertical: PropTypes.bool,
-  widget: PropTypes.string
+  widget: PropTypes.string,
+  period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType])
 }
 AggregationWidgetContainer.defaultProps = {
   vertical: true,

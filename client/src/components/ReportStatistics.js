@@ -103,6 +103,7 @@ const FieldStatisticsRow = ({
             fieldName={fieldName}
             data={periodsData[index]}
             widget={aggregationWidget}
+            period={period}
           />
         </td>
       ))}
