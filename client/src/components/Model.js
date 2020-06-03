@@ -47,6 +47,8 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
       }
       ... on Report {
         intent
+        engagementDate
+        state
       }
       ... on Task {
         shortName
@@ -525,12 +527,6 @@ export default class Model {
     dateRange,
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
-    // FIXME: don't retrieve the published reports but also return the note's
-    // relatedObject and filter on its status
-    const publishedReports = this.publishedReports
-    const publishedReportsUuids = publishedReports
-      ? publishedReports.map(r => r.uuid)
-      : undefined
     return this.notes
       .filter(
         n =>
@@ -538,13 +534,11 @@ export default class Model {
           n.noteRelatedObjects.filter(
             ro =>
               ro.relatedObjectType === Models.Report.relatedObjectType &&
-              (publishedReportsUuids !== undefined
-                ? publishedReportsUuids.includes(ro.relatedObjectUuid)
-                : true)
-          ).length &&
-          // FIXME: make sure we actually filter on the report's engagementDate
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
+              ro.relatedObject.state === Models.Report.STATE.PUBLISHED &&
+              (!dateRange ||
+                (ro.relatedObject.engagementDate <= dateRange.end &&
+                  ro.relatedObject.engagementDate >= dateRange.start))
+          ).length
       )
       .map(note => utils.parseJsonSafe(note.text))
       .filter(

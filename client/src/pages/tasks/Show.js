@@ -21,7 +21,7 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Report, Task } from "models"
+import { Person, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -103,12 +103,6 @@ const GQL_GET_TASK = gql`
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
-      publishedReports: reports(query: {
-        pageSize: 0
-        state: [${Report.STATE.PUBLISHED}]
-      }) {
-        uuid
-      }
     }
     subTasks: taskList(query: {
       pageSize: 0
@@ -125,12 +119,6 @@ const GQL_GET_TASK = gql`
         }
         customFields
         ${GRAPHQL_NOTES_FIELDS}
-        publishedReports: reports(query: {
-          pageSize: 0
-          state: [${Report.STATE.PUBLISHED}]
-        }) {
-          uuid
-        }
       }
     }
   }
