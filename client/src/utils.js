@@ -164,9 +164,10 @@ export default {
   },
 
   arrayOfNumbers: function(arr) {
-    return arr
-      .filter(n => !isNaN(parseFloat(n)) && isFinite(n))
-      .map(n => Number(n))
+    return (
+      arr &&
+      arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
+    )
   }
 }
 
