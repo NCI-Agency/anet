@@ -769,6 +769,7 @@ dictionary:
 
       org:
         name: Afghan Government Organization
+        allOrgName: Principal Organizations
         longName:
           label: Official Organization Name
           placeholder: e.g. Afghan Ministry of Defense

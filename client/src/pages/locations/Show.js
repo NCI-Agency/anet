@@ -29,6 +29,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "./GeoLocation"
 
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
@@ -72,16 +73,6 @@ const GQL_GET_LOCATION = gql`
     }
   }
 `
-
-export const Coordinate = ({ coord }) => {
-  const parsedCoord =
-    typeof coord === "number" ? Math.round(coord * 1000) / 1000 : "?"
-  return <span>{parsedCoord}</span>
-}
-
-Coordinate.propTypes = {
-  coord: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-}
 
 const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
   const { uuid } = useParams()
@@ -155,15 +146,10 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
                   humanValue={Location.humanNameOfStatus}
                 />
 
-                <Field
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <>
-                      <Coordinate coord={location.lat} />,{" "}
-                      <Coordinate coord={location.lng} />
-                    </>
-                  }
+                <GeoLocation
+                  lat={location.lat}
+                  lng={location.lng}
+                  displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
                 />
               </Fieldset>
 

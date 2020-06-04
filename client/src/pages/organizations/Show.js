@@ -238,7 +238,13 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
           <div>
             <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
-            <SubNav subnavElemId="org-nav">{!isMyOrg && orgSubNav}</SubNav>
+            <SubNav subnavElemId="advisor-org-nav">
+              {!isMyOrg && isAdvisorOrg && orgSubNav}
+            </SubNav>
+
+            <SubNav subnavElemId="principal-org-nav">
+              {!isMyOrg && isPrincipalOrg && orgSubNav}
+            </SubNav>
 
             {currentUser.isSuperUser() && (
               <div className="pull-right">

@@ -576,8 +576,8 @@ properties:
                 description: Used in the UI where an advisor organization is shown.
               allOrgName:
                 type: string
-                title: The name used to represent 'all organizations'
-                description: Used in the UI to refer to all organizations collectively.
+                title: The name used to represent 'all advisor organizations'
+                description: Used in the UI to refer to all advisor organizations collectively.
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:
@@ -665,12 +665,16 @@ properties:
           org:
             type: object
             additionalProperties: false
-            required: [name, longName]
+            required: [name, allOrgName, longName]
             properties:
               name:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a principal organization is shown.
+              allOrgName:
+                type: string
+                title: The name used to represent 'all principal organizations'
+                description: Used in the UI to refer to all principal organizations collectively.
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:
