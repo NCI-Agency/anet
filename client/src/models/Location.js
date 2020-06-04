@@ -27,8 +27,32 @@ export default class Location extends Model {
         .string()
         .required()
         .default(() => Location.STATUS.ACTIVE),
-      lat: yup.number().nullable().default(null),
-      lng: yup.number().nullable().default(null),
+      lat: yup
+        .number()
+        .nullable()
+        .min(-90, "Latitude must be a number between -90 and +90")
+        .max(90, "Latitude must be a number between -90 and +90")
+        .test("lat", "Please enter latitude", function(lat) {
+          const { lng } = this.parent
+          if (lng || lng === 0) {
+            return !!lat || lat === 0
+          }
+          return true
+        })
+        .default(null),
+      lng: yup
+        .number()
+        .nullable()
+        .min(-180, "Longitude must be a number between -180 and +180")
+        .max(180, "Longitude must be a number between -180 and +180")
+        .test("lng", "Please enter longitude", function(lng) {
+          const { lat } = this.parent
+          if (lat || lat === 0) {
+            return !!lng || lng === 0
+          }
+          return true
+        })
+        .default(null),
       // FIXME: resolve code duplication in yup schema for approval steps
       planningApprovalSteps: yup
         .array()
@@ -74,6 +98,15 @@ export default class Location extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery = "uuid, name"
+
+  static parseCoordinate(latLng) {
+    const value = parseFloat(latLng)
+    if (!value && value !== 0) {
+      return null
+    }
+    // 6 decimal point (~10cm) precision https://stackoverflow.com/a/16743805/1209097
+    return parseFloat(value.toFixed(6))
+  }
 
   static hasCoordinates(location) {
     return (
