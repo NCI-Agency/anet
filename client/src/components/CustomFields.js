@@ -169,7 +169,7 @@ const enumHumanValue = (choices, fieldVal) => {
   if (Array.isArray(fieldVal)) {
     return fieldVal && fieldVal.map(k => choices[k].label).join(", ")
   } else {
-    return fieldVal && choices[fieldVal].label
+    return fieldVal && choices[fieldVal]?.label
   }
 }
 
