@@ -5,10 +5,12 @@ import FullCalendar from "@fullcalendar/react"
 import BarChart from "components/BarChart"
 import LikertScale from "components/graphs/LikertScale"
 import Pie from "components/graphs/Pie"
+import _isEmpty from "lodash/isEmpty"
 import _uniqueId from "lodash/uniqueId"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useRef } from "react"
+import React, { useRef, useState } from "react"
+import { Button, Collapse, Table } from "react-bootstrap"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
@@ -169,7 +171,39 @@ export const CalendarWidget = ({
 }
 CalendarWidget.propTypes = aggregationWidgetPropTypes
 
-export const DefaultAggWidget = ({ values, ...otherWidgetProps }) => (
-  <div>{`[${values}]`}</div>
-)
+export const DefaultAggWidget = ({ values, ...otherWidgetProps }) => {
+  const [showValues, setShowValues] = useState(false)
+  if (_isEmpty(values)) {
+    return null
+  }
+  return (
+    <div>
+      <Button
+        className="toggle-section-button"
+        style={{ marginBottom: "1rem" }}
+        onClick={toggleShowValues}
+        id="toggleShowValues"
+      >
+        {showValues ? "Hide" : "Show"} {values.length} values
+      </Button>
+      <Collapse in={showValues}>
+        <Table>
+          <tbody>
+            {values.map(val => {
+              const keyValue = _uniqueId("value_")
+              return (
+                <tr key={keyValue}>
+                  <td>val</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </Table>
+      </Collapse>
+    </div>
+  )
+  function toggleShowValues() {
+    setShowValues(!showValues)
+  }
+}
 DefaultAggWidget.propTypes = aggregationWidgetPropTypes
