@@ -41,7 +41,8 @@ const CHART_COLORS = [
 export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
   const counters = data.reduce((counter, entity) => {
     const value = Object.get(entity, fieldName) || null
-    counter[value] = ++counter[value] || 1
+    const values = Array.isArray(value) ? value : [value]
+    values.forEach(choice => (counter[choice] = ++counter[choice] || 1))
     return counter
   }, {})
   const legendColors = _clone(CHART_COLORS)
@@ -57,7 +58,7 @@ export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
       })
   )
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
-  return { values: counters, legend: legend }
+  return { values: counters, entitiesCount: data.length, legend: legend }
 }
 
 const arrayOfNumbers = arr =>
@@ -134,7 +135,7 @@ export const countPerLevelAggregation = (fieldName, fieldConfig, data) => {
     return res
   }, {})
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
-  return { values: counters, legend: legend }
+  return { values: counters, entitiesCount: data.length, legend: legend }
 }
 
 export const likertScaleAndPieAggregation = (fieldName, fieldConfig, data) => {

@@ -32,6 +32,7 @@ const aggregationWidgetPropTypes = {
 
 export const PieWidget = ({
   values,
+  entitiesCount,
   legend,
   showLegend = true,
   ...otherWidgetProps
@@ -42,7 +43,7 @@ export const PieWidget = ({
         width={70}
         height={70}
         data={values}
-        label={Object.values(values).reduce((acc, cur) => acc + cur, 0)}
+        label={entitiesCount}
         segmentFill={entity => legend[entity.data.key]?.color}
         segmentLabel={d => d.data.value}
       />
@@ -62,6 +63,7 @@ export const PieWidget = ({
   )
 }
 PieWidget.propTypes = {
+  entitiesCount: PropTypes.number,
   legend: PropTypes.object,
   showLegend: PropTypes.bool,
   ...aggregationWidgetPropTypes
