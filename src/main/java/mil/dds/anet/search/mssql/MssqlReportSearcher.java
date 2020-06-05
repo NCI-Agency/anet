@@ -1,12 +1,16 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class MssqlReportSearcher extends AbstractReportSearcher {
 
@@ -17,9 +21,19 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
     outerQb = new MssqlSearchQueryBuilder<Report, ReportSearchQuery>("MssqlReportSearch");
   }
 
+  @InTransaction
   @Override
-  public AnetBeanList<Report> runSearch(Set<String> subFields, ReportSearchQuery query) {
-    return runSearch(outerQb, subFields, query);
+  public CompletableFuture<AnetBeanList<Report>> runSearch(Map<String, Object> context,
+      Set<String> subFields, ReportSearchQuery query) {
+    buildQuery(subFields, query);
+    outerQb.addSelectClause("*");
+    outerQb.addTotalCount();
+    outerQb.addFromClause("( " + qb.build() + " ) l");
+    outerQb.addSqlArgs(qb.getSqlArgs());
+    outerQb.addListArgs(qb.getListArgs());
+    addOrderByClauses((AbstractSearchQueryBuilder<Report, ReportSearchQuery>) outerQb, query);
+    return postProcessResults(context, query,
+        (outerQb).buildAndRun(getDbHandle(), query, new ReportMapper()));
   }
 
   @Override
