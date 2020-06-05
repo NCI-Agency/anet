@@ -292,7 +292,12 @@ const AssessmentResultsTable = ({
             title={`Assessment results - ${recurrence}`}
             id={`"entity-assessments-results-${recurrence}`}
           >
-            <Table condensed responsive className="assessments-table">
+            <Table
+              condensed
+              responsive
+              className="assessments-table"
+              style={{ tableLayout: "fixed" }}
+            >
               <PeriodsTableHeader periodsConfig={periodsConfig} />
               <tbody>
                 {!_isEmpty(subEntities) && (
