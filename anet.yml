@@ -57,6 +57,7 @@ keycloakConfiguration:
   register-node-at-startup: true
   register-node-period: 600
   resource: ANET-Client
+  show-logout-link: true
   enable-basic-auth: true
   credentials:
     secret: 12869b4c-74ac-43f9-b71e-ff74e07babf9

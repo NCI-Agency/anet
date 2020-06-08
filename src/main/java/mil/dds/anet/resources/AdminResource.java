@@ -53,6 +53,8 @@ public class AdminResource {
   @Timed
   @Path("/dictionary")
   @Produces(MediaType.APPLICATION_JSON)
+  // The dictionary should be public, as it contains information needed for the client-side
+  // authentication
   public Map<String, Object> getDictionary() {
     return config.getDictionary();
   }

@@ -2,7 +2,6 @@ package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
-import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
@@ -34,7 +33,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
 
   @NotNull
-  private KeycloakConfiguration keycloakConfiguration = new KeycloakConfiguration();
+  private AnetKeycloakConfiguration keycloakConfiguration = new AnetKeycloakConfiguration();
 
   @Valid
   @NotNull
@@ -96,11 +95,11 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     this.views = builder.build();
   }
 
-  public KeycloakConfiguration getKeycloakConfiguration() {
+  public AnetKeycloakConfiguration getKeycloakConfiguration() {
     return keycloakConfiguration;
   }
 
-  public void setKeycloakConfiguration(KeycloakConfiguration keycloakConfiguration) {
+  public void setKeycloakConfiguration(AnetKeycloakConfiguration keycloakConfiguration) {
     this.keycloakConfiguration = keycloakConfiguration;
   }
 

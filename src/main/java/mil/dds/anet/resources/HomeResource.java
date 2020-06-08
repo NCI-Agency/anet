@@ -1,7 +1,6 @@
 package mil.dds.anet.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
 import io.dropwizard.auth.Auth;
 import java.io.IOException;
 import java.net.URI;
@@ -20,6 +19,7 @@ import javax.ws.rs.core.UriBuilder;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetKeycloakConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.views.IndexView;
 
@@ -68,7 +68,7 @@ public class HomeResource {
     request.logout(); // For completeness' sake
 
     // Log out of Keycloak
-    final KeycloakConfiguration keycloakConfiguration = config.getKeycloakConfiguration();
+    final AnetKeycloakConfiguration keycloakConfiguration = config.getKeycloakConfiguration();
     final URI requestlUrl = UriBuilder.fromUri(request.getRequestURL().toString()).build();
     final String redirectUri =
         URLEncoder.encode(getBaseRequestUrl(requestlUrl), StandardCharsets.UTF_8.toString());

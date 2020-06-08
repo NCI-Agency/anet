@@ -233,9 +233,11 @@ const BaseNav = ({
         </NavDropdown>
       )}
 
-      <NavItem href="/api/logout" onClick={resetPages}>
-        Logout
-      </NavItem>
+      {Settings.keycloakConfiguration.showLogoutLink && (
+        <NavItem href="/api/logout" onClick={resetPages}>
+          Logout
+        </NavItem>
+      )}
     </BSNav>
   )
 }

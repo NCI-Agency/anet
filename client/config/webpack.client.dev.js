@@ -44,8 +44,4 @@ const clientConfig = merge(common.clientConfig, {
   ]
 })
 
-clientConfig.entry = {
-  anet: [require.resolve("./polyfills"), "./src/index-dev.js"]
-}
-
 module.exports = clientConfig

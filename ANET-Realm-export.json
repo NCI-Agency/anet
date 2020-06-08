@@ -57,7 +57,6 @@
       "attributes" : { }
     } ],
     "client" : {
-      "ANET-Dev-Client" : [ ],
       "realm-management" : [ {
         "id" : "6deafe55-f5fa-47a3-b340-4c14cadc243d",
         "name" : "query-groups",
@@ -229,6 +228,7 @@
       "security-admin-console" : [ ],
       "admin-cli" : [ ],
       "ANET-Client" : [ ],
+      "ANET-Client-public" : [ ],
       "account-console" : [ ],
       "broker" : [ {
         "id" : "539edaa7-15e3-40e8-8c91-ba363753ad6a",
@@ -842,8 +842,8 @@
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
   }, {
     "id" : "37232f9f-8abf-41c3-9ab5-7732e1613a1c",
-    "clientId" : "ANET-Dev-Client",
-    "rootUrl" : "http://localhost:3000",
+    "clientId" : "ANET-Client-public",
+    "rootUrl" : "http://localhost:8080",
     "adminUrl" : "",
     "baseUrl" : "/",
     "surrogateAuthRequired" : false,
@@ -851,7 +851,7 @@
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
     "secret" : "0514fdaf-f809-43fe-b03f-2421e88270de",
-    "redirectUris" : [ "/*" ],
+    "redirectUris" : [ "http://localhost:8180/*", "http://localhost:3000/*", "/*" ],
     "webOrigins" : [ "+" ],
     "notBefore" : 0,
     "bearerOnly" : false,

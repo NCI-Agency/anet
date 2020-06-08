@@ -206,8 +206,14 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required: [keycloakConfiguration, SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
+  keycloakConfiguration:
+    type: object
+    additionalProperties: true
+    title: Client-side Keycloak configuration properties
+    description: Automatically defined based on the `keycloakConfiguration` settings in `anet.yml`
+
   SUPPORT_EMAIL_ADDR:
     type: string
     title: The support email address

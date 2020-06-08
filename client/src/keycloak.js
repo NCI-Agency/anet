@@ -1,12 +1,8 @@
 import * as Keycloak from "keycloak-js"
+import Settings from "settings"
 
-// Keycloak init options
-export const initOptions = {
-  url: "http://localhost:9080/auth",
-  realm: "ANET-Realm",
-  clientId: "ANET-Dev-Client",
-  onLoad: "login-required"
-}
+// Client-side Keycloak init options are defined in the dictionary by the server
+const { realm, url, clientId } = Settings.keycloakConfiguration
+export const initOptions = { realm, url, clientId, onLoad: "login-required" }
 
-export const keycloak =
-  typeof Keycloak === "function" ? Keycloak(initOptions) : {}
+export const keycloak = Keycloak(initOptions)

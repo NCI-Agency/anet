@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetKeycloakConfiguration;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
@@ -152,7 +154,25 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // Add Dropwizard-Keycloak
     bootstrap.addBundle(new KeycloakBundle<AnetConfiguration>() {
       @Override
-      protected KeycloakConfiguration getKeycloakConfiguration(AnetConfiguration configuration) {
+      public void run(AnetConfiguration configuration, Environment environment) {
+        // Add client-side Keycloak configuration to the dictionary
+        final Map<String, Object> clientConfig = new HashMap<>();
+        final AnetKeycloakConfiguration keycloakConfiguration =
+            getKeycloakConfiguration(configuration);
+        clientConfig.put("realm", keycloakConfiguration.getRealm());
+        clientConfig.put("url", keycloakConfiguration.getAuthServerUrl());
+        clientConfig.put("clientId", keycloakConfiguration.getResource() + "-public");
+        clientConfig.put("showLogoutLink", keycloakConfiguration.isShowLogoutLink());
+        final Map<String, Object> dictionary = new HashMap<>(configuration.getDictionary());
+        dictionary.put("keycloakConfiguration", clientConfig);
+        configuration.setDictionary(dictionary);
+
+        super.run(configuration, environment);
+      }
+
+      @Override
+      protected AnetKeycloakConfiguration getKeycloakConfiguration(
+          AnetConfiguration configuration) {
         return configuration.getKeycloakConfiguration();
       }
 

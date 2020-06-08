@@ -83,7 +83,7 @@ module.exports = {
   clientConfig: merge(commonConfig, {
     target: "web",
     entry: {
-      anet: [require.resolve("./polyfills"), "./src/index.js"]
+      anet: [require.resolve("./polyfills"), "./src/index-auth.js"]
     },
     // A strange workaround for a strange compile-time bug:   Error in
     // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
