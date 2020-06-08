@@ -13,6 +13,8 @@ import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -171,20 +173,16 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   @SuppressWarnings("unchecked")
   public void loadDictionary() {
     // Read and set anet-dictionary
-    try (final InputStream inputStream =
-        AnetConfiguration.class.getResourceAsStream("/anet-dictionary.yml")) {
-      if (inputStream == null) {
-        logger.error("ANET dictionary [anet-dictionary.yml] not found");
-      } else {
-        Map<String, Object> dictionary = yamlMapper.readValue(inputStream, Map.class);
-        Map<String, Object> settings = (Map) dictionary.get("dictionary");
-        this.setDictionary(settings);
-        // Check the dictionary
-        final JsonNode jsonNodeDictionary = checkDictionary();
-        logger.info("dictionary: {}", yamlMapper.writeValueAsString(jsonNodeDictionary));
-      }
+    File file = new File(System.getProperty("user.dir") + "/anet-dictionary.yml");
+    try (final InputStream inputStream = new FileInputStream(file)) {
+      Map<String, Object> dictionary = yamlMapper.readValue(inputStream, Map.class);
+      Map<String, Object> settings = (Map<String, Object>) dictionary.get("dictionary");
+      this.setDictionary(settings);
+      // Check the dictionary
+      final JsonNode jsonNodeDictionary = checkDictionary();
+      logger.info("dictionary: {}", yamlMapper.writeValueAsString(jsonNodeDictionary));
     } catch (IOException e) {
-      logger.error("Error closing ANET dictionary", e);
+      logger.error("ANET dictionary [anet-dictionary.yml] not found");
     }
   }
 
@@ -303,15 +301,12 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     }
   }
 
+  @SuppressWarnings("unchecked")
   public String loadVersion() {
     try (final InputStream inputStream =
         AnetConfiguration.class.getResourceAsStream("/version.properties")) {
-      if (inputStream == null) {
-        logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE);
-      } else {
-        Map<String, Object> version = yamlMapper.readValue(inputStream, Map.class);
-        this.setVersion((String) version.get("projectVersion"));
-      }
+      Map<String, Object> version = yamlMapper.readValue(inputStream, Map.class);
+      this.setVersion((String) version.get("projectVersion"));
     } catch (IOException e) {
       logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE, e);
     }
