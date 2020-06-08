@@ -12,6 +12,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Person, Position } from "models"
@@ -138,7 +139,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
             orgSearchQuery.parentOrgUuid = [
               currentUser.position.organization.uuid
             ]
-            orgSearchQuery.parentOrgRecursively = true
+            orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
           }
         }
         // Reset the organization property when changing the organization type

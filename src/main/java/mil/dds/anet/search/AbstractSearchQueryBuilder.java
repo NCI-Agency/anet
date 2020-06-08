@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -246,10 +247,13 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
 
   public final void addRecursiveBatchClause(AbstractSearchQueryBuilder<B, T> outerQb,
       String tableName, String[] foreignKeys, String withTableName, String recursiveTableName,
-      String recursiveForeignKey, String paramName, List<String> fieldValues) {
+      String recursiveForeignKey, String paramName, List<String> fieldValues,
+      RecurseStrategy recurseStrategy) {
+    final boolean findChildren = RecurseStrategy.CHILDREN.equals(recurseStrategy);
     addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName,
-        recursiveForeignKey, paramName, fieldValues, true);
-    addSelectClause(String.format("%1$s.parent_uuid AS \"batchUuid\"", withTableName));
+        recursiveForeignKey, paramName, fieldValues, findChildren);
+    addSelectClause(String.format("%1$s.%2$s AS \"batchUuid\"", withTableName,
+        findChildren ? "parent_uuid" : "uuid"));
   }
 
   private final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,

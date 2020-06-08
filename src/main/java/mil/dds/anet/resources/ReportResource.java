@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.WebApplicationException;
@@ -154,7 +155,7 @@ public class ReportResource {
 
     if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
       boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
-          existing.getApprovalStepUuid());
+          existing.getApprovalStepUuid(), existing.getAdvisorOrgUuid()).join();
       if (canApprove) {
         AnetEmail email = new AnetEmail();
         ReportEditedEmail action = new ReportEditedEmail();
@@ -346,7 +347,7 @@ public class ReportResource {
       case PENDING_APPROVAL:
         // Must be the author or the approver
         boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
-            report.getApprovalStepUuid());
+            report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
         if (!isAuthor && !canApprove) {
           throw new WebApplicationException(
               permError + "Must be the author of this report or the current approver.",
@@ -366,6 +367,7 @@ public class ReportResource {
   @GraphQLMutation(name = "submitReport")
   public Report submitReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
+    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
     if (r == null) {
@@ -374,7 +376,6 @@ public class ReportResource {
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
       if (advisor == null) {
@@ -426,7 +427,7 @@ public class ReportResource {
     }
 
     if (!Utils.isEmptyOrNull(steps)) {
-      dao.sendApprovalNeededEmail(r);
+      dao.sendApprovalNeededEmail(r, steps.get(0));
       logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
@@ -463,9 +464,10 @@ public class ReportResource {
     }
 
     // Verify that this user can approve for this step.
-    boolean canApprove =
-        engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
-    if (canApprove == false) {
+    final boolean canApprove = engine
+        .canUserApproveStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
+        .join();
+    if (!canApprove) {
       logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(),
           r.getUuid(), step.getUuid());
       throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
@@ -508,9 +510,10 @@ public class ReportResource {
       throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
     } else if (step != null) {
       // Verify that this user can reject for this step.
-      boolean canReject =
-          engine.canUserRejectStep(engine.getContext(), approver.getUuid(), step.getUuid());
-      if (canReject == false) {
+      final boolean canReject = engine
+          .canUserRejectStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
+          .join();
+      if (!canReject) {
         logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}",
             approver.getUuid(), r.getUuid(), step.getUuid());
         throw new WebApplicationException("User cannot request changes to report",
@@ -669,11 +672,11 @@ public class ReportResource {
   }
 
   @GraphQLQuery(name = "reportList")
-  public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLEnvironment Set<String> subFields,
+  public CompletableFuture<AnetBeanList<Report>> search(
+      @GraphQLRootContext Map<String, Object> context, @GraphQLEnvironment Set<String> subFields,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(subFields, query);
+    return dao.search(context, subFields, query);
   }
 
   /**

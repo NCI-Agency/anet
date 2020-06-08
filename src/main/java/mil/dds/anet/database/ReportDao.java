@@ -36,6 +36,7 @@ import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
@@ -63,13 +64,12 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
-  // Must always retrieve these e.g. for ORDER BY
-  public static final String[] minimalFields =
-      {"uuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
+  // Must always retrieve these e.g. for ORDER BY or search post-processing
+  public static final String[] minimalFields = {"uuid", "approvalStepUuid",
+      "advisorOrganizationUuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
   public static final String[] additionalFields = {"state", "duration", "intent", "exsum",
-      "locationUuid", "approvalStepUuid", "advisorOrganizationUuid", "principalOrganizationUuid",
-      "authorUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text", "keyOutcomes",
-      "nextSteps", "customFields"};
+      "locationUuid", "principalOrganizationUuid", "authorUuid", "atmosphere", "cancelledReason",
+      "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
@@ -360,12 +360,18 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   @Override
   public AnetBeanList<Report> search(ReportSearchQuery query) {
-    return search(null, query);
+    return search(AnetObjectEngine.getInstance().getContext(), query).join();
   }
 
-  public AnetBeanList<Report> search(Set<String> subFields, ReportSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(subFields,
-        query);
+  public CompletableFuture<AnetBeanList<Report>> search(Map<String, Object> context,
+      ReportSearchQuery query) {
+    return search(context, null, query);
+  }
+
+  public CompletableFuture<AnetBeanList<Report>> search(Map<String, Object> context,
+      Set<String> subFields, ReportSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(context,
+        subFields, query);
   }
 
   /*
@@ -447,7 +453,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       // organizations
       OrganizationSearchQuery query = new OrganizationSearchQuery();
       query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
-      query.setParentOrgRecursively(true);
+      query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
       query.setPageSize(0);
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =
@@ -776,10 +782,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(uuid, query));
   }
 
-  public void sendApprovalNeededEmail(Report r) {
+  public void sendApprovalNeededEmail(Report r, ApprovalStep approvalStep) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
-    final List<Position> approvers = step.loadApprovers(engine.getContext()).join();
+    final List<Position> approvers = approvalStep.loadApprovers(engine.getContext()).join();
     final AnetEmail approverEmail = new AnetEmail();
     final ApprovalNeededEmail action = new ApprovalNeededEmail();
     action.setReport(r);
@@ -812,9 +817,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
     // Update the report
-    final String nextStepUuid = getNextStepUuid(r, step);
-    r.setApprovalStepUuid(nextStepUuid);
-    if (nextStepUuid == null) {
+    final ApprovalStep nextStep = getNextStep(r, step);
+    r.setApprovalStepUuid(DaoUtils.getUuid(nextStep));
+    if (nextStep == null) {
       if (r.getCancelledReason() != null) {
         // Done with cancel, move to CANCELLED and set releasedAt
         r.setState(ReportState.CANCELLED);
@@ -825,34 +830,30 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       }
     }
     final int numRows = update(r, r.getAuthor());
-    if (numRows != 0 && nextStepUuid != null) {
-      sendApprovalNeededEmail(r);
+    if (numRows != 0 && nextStep != null) {
+      sendApprovalNeededEmail(r, nextStep);
     }
     return numRows;
   }
 
-  private String getNextStepUuid(Report report, ApprovalStep step) {
+  private ApprovalStep getNextStep(Report report, ApprovalStep step) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final String currentStepUuid = step.getUuid();
-    String nextStepUuid = step.getNextStepUuid();
-    if (nextStepUuid == null) {
-      // Find out if there's a next approval chain
-      final List<ApprovalStep> reportApprovalSteps =
-          report.computeApprovalSteps(engine.getContext(), engine).join();
-      final Iterator<ApprovalStep> iterator = reportApprovalSteps.iterator();
-      while (iterator.hasNext()) {
-        final ApprovalStep reportApprovalStep = iterator.next();
-        if (Objects.equals(DaoUtils.getUuid(reportApprovalStep), currentStepUuid)) {
-          // Found the current step, update the next step
-          if (iterator.hasNext()) {
-            final ApprovalStep reportApprovalStepNext = iterator.next();
-            nextStepUuid = DaoUtils.getUuid(reportApprovalStepNext);
-          }
-          break;
+    // Find out if there's a next approval chain
+    final List<ApprovalStep> reportApprovalSteps =
+        report.computeApprovalSteps(engine.getContext(), engine).join();
+    for (final Iterator<ApprovalStep> iterator = reportApprovalSteps.iterator(); iterator
+        .hasNext();) {
+      final ApprovalStep reportApprovalStep = iterator.next();
+      if (Objects.equals(DaoUtils.getUuid(reportApprovalStep), currentStepUuid)) {
+        // Found the current step, update the next step
+        if (iterator.hasNext()) {
+          return iterator.next();
         }
+        break;
       }
     }
-    return nextStepUuid;
+    return null;
   }
 
   public int publish(Report r, Person user) {
