@@ -440,8 +440,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         return AnetConstants.USERCACHE_MESSAGE;
       }
     }
-    logger.warn(AnetConstants.USERCACHE_ERROR_MESSAGE);
-    return AnetConstants.USERCACHE_ERROR_MESSAGE;
+    logger.warn(AnetConstants.USERCACHE_EMPTY_MESSAGE);
+    return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
 }
