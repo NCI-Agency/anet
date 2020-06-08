@@ -61,6 +61,7 @@ const GQL_GET_TASK = gql`
       planningApprovalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -76,6 +77,7 @@ const GQL_GET_TASK = gql`
       approvalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name

@@ -419,6 +419,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 fieldName="planningApprovalSteps"
                 values={values}
                 title="Engagement planning approval process"
+                restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
                 addButtonLabel="Add a Planning Approval Step"
                 setFieldTouched={setFieldTouched}
                 setFieldValue={setFieldValue}
@@ -429,6 +430,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                 fieldName="approvalSteps"
                 values={values}
                 title="Report publication approval process"
+                restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
                 addButtonLabel="Add a Publication Approval Step"
                 setFieldTouched={setFieldTouched}
                 setFieldValue={setFieldValue}

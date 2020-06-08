@@ -233,7 +233,7 @@ public class AnetEmailWorker implements Runnable {
       logger.error("Send failed", e);
       return;
     }
-    // Other errors are intentially thrown, as we want ANET to try again.
+    // Other errors are intentionally thrown, as we want ANET to try again.
   }
 
   public static void sendEmailAsync(AnetEmail email) {
