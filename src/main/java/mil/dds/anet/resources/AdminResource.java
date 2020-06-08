@@ -96,8 +96,9 @@ public class AdminResource {
   }
 
   @GraphQLQuery(name = "userActivities")
-  public Map<String, LinkedHashSet<Map<String, String>>> userActivities() throws IOException {
+  public Map<String, Object> userActivities() throws IOException {
     Map<String, LinkedHashSet<Map<String, String>>> userActivities = new HashMap<>();
+    Map<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
     File file = new File(System.getProperty("user.dir") + "/logs/userActivities.log");
     BufferedReader br = new BufferedReader(new FileReader(file));
     String st;
@@ -106,23 +107,43 @@ public class AdminResource {
       userActivities.computeIfAbsent(map.get("user"), k -> new LinkedHashSet<>())
           .add(new HashMap() {
             {
-              put("user", map.get("user"));
-              put("time", map.get("time"));
-              put("ip", map.get("ip"));
-              put("request", map.get("referer"));
+              put("user", map.get("user") == null ? "" : map.get("user"));
+              put("time", map.get("time") == null ? "" : map.get("time"));
+              put("ip", map.get("ip") == null ? "" : map.get("ip"));
+              put("request", map.get("referer") == null ? "" : map.get("referer"));
             }
           });
+      recentCalls.computeIfAbsent("recentCalls", k -> new LinkedHashSet<>()).add(new HashMap() {
+        {
+          put("user", map.get("user") == null ? "" : map.get("user"));
+          put("time", map.get("time") == null ? "" : map.get("time"));
+          put("ip", map.get("ip") == null ? "" : map.get("ip"));
+          put("request", map.get("referer") == null ? "" : map.get("referer"));
+          put("recentCalls", "recentCalls");
+        }
+      });
     }
     br.close();
+    Map<String, Object> allActivities = new HashMap<>();
     if (!userActivities.isEmpty()) {
-      return userActivities.entrySet().stream().map(s -> {
+      allActivities.put("users", userActivities.entrySet().stream().map(s -> {
         ArrayList<Map<String, String>> activities = new ArrayList(s.getValue());
         Collections.reverse(activities);
-        LinkedHashSet<Map<String, String>> sortedActivities = new LinkedHashSet<>(activities);
-        return sortedActivities;
-      }).collect(Collectors.toMap(k -> k.iterator().next().get("user"), Function.identity()));
+        LinkedHashSet<Map<String, String>> sortedActivitiesByUsers =
+            new LinkedHashSet<>(activities);
+        return sortedActivitiesByUsers;
+      }).collect(Collectors.toMap(k -> k.iterator().next().get("user"), Function.identity())));
     }
-    return userActivities;
+    if (!recentCalls.isEmpty()) {
+      allActivities.put("recentCalls", recentCalls.entrySet().stream().map(s -> {
+        ArrayList<Map<String, String>> activities = new ArrayList(s.getValue());
+        Collections.reverse(activities);
+        LinkedHashSet<Map<String, String>> sortedActivitiesByCall = new LinkedHashSet<>(activities);
+        return sortedActivitiesByCall;
+      }).collect(Collectors.toMap(k -> k.iterator().next().get("recentCalls"), Function.identity()))
+          .get("recentCalls"));
+    }
+    return allActivities;
   }
 
 }
