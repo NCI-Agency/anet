@@ -137,7 +137,10 @@ export const CUSTOM_FIELD_TYPE = {
 
 const CUSTOM_FIELD_TYPE_SCHEMA = {
   [CUSTOM_FIELD_TYPE.TEXT]: yup.string().nullable().default(""),
-  [CUSTOM_FIELD_TYPE.NUMBER]: yup.number().nullable().default(null),
+  [CUSTOM_FIELD_TYPE.NUMBER]: yup.number().nullable().default(null).typeError(
+    // eslint-disable-next-line no-template-curly-in-string
+    "${path} must be a ${type} type, but the final value was ${originalValue}"
+  ),
   [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
   [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
   [CUSTOM_FIELD_TYPE.ENUM]: yup.string().nullable().default(""),
