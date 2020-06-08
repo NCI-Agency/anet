@@ -458,6 +458,7 @@ distributions {
 		contents {
 			into('docs/') {
 				from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
+				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
 				from(markdownToHtml)
 			}
 			into('lib/') {
