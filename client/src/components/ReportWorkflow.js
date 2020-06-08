@@ -1,6 +1,7 @@
 import { Settings } from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -48,7 +49,10 @@ const ApprovalStepModal = ({ action }) => {
   const [showModal, setShowModal] = useState(false)
 
   const step = action.step
-  const actionTypeCss = ACTION_TYPE_DETAILS[action.type].cssClass
+  const noApprovers = _isEmpty(step.approvers)
+  const actionTypeCss = noApprovers
+    ? "btn-warning default"
+    : ACTION_TYPE_DETAILS[action.type].cssClass
 
   return step ? (
     <>
@@ -64,12 +68,13 @@ const ApprovalStepModal = ({ action }) => {
         </Modal.Header>
         <Modal.Body>
           <ul>
-            {step.approvers.map(position => (
-              <li key={position.uuid}>
-                <LinkTo modelType="Position" model={position} /> -{" "}
-                <LinkTo modelType="Person" model={position.person} />
-              </li>
-            ))}
+            {(noApprovers && "This step has no approvers!") ||
+              step.approvers.map(position => (
+                <li key={position.uuid}>
+                  <LinkTo modelType="Position" model={position} /> -{" "}
+                  <LinkTo modelType="Person" model={position.person} />
+                </li>
+              ))}
           </ul>
         </Modal.Body>
         <Modal.Footer>
