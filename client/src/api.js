@@ -7,7 +7,7 @@ import _isEmpty from "lodash/isEmpty"
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
 
-const BaseAPI = {
+const API = {
   _fetch(url, data, accept) {
     const params = {
       method: "POST",
@@ -19,7 +19,7 @@ const BaseAPI = {
       }
     }
 
-    const authHeader = BaseAPI._getAuthHeader()
+    const authHeader = API._getAuthHeader()
     if (authHeader) {
       params.headers[authHeader[0]] = authHeader[1]
     }
@@ -29,7 +29,7 @@ const BaseAPI = {
 
   queryExport(query, variables, output) {
     // Can't use client here as the response is not JSON
-    return BaseAPI._fetch(
+    return API._fetch(
       GRAPHQL_ENDPOINT,
       { query: query.loc.source.body, variables, output },
       "*/*"
@@ -45,7 +45,7 @@ const BaseAPI = {
    */
   logOnServer(severity, url, lineNr, message) {
     // Can't use client here as we need to send to a different endpoint
-    BaseAPI._fetch(LOGGING_ENDPOINT, [
+    API._fetch(LOGGING_ENDPOINT, [
       { severity: severity, url: url, lineNr: lineNr, message: message }
     ])
   },
@@ -91,22 +91,22 @@ const BaseAPI = {
   },
 
   mutation(mutation, variables) {
-    return BaseAPI.client
+    return API.client
       .mutate({ mutation, variables })
-      .then(BaseAPI._handleSuccess)
-      .catch(response => Promise.reject(BaseAPI._handleError(response)))
+      .then(API._handleSuccess)
+      .catch(response => Promise.reject(API._handleError(response)))
   },
 
   query(query, variables) {
-    return BaseAPI.client
+    return API.client
       .query({ query, variables })
-      .then(BaseAPI._handleSuccess)
-      .catch(response => Promise.reject(BaseAPI._handleError(response)))
+      .then(API._handleSuccess)
+      .catch(response => Promise.reject(API._handleError(response)))
   },
 
   useApiQuery(query, variables) {
     const results = useQuery(query, { variables })
-    results.error = results.error && BaseAPI._handleError(results.error)
+    results.error = results.error && API._handleError(results.error)
     return results
   },
 
@@ -122,7 +122,7 @@ const BaseAPI = {
   },
 
   addAuthParams: function(url) {
-    const creds = BaseAPI._getAuthParams()
+    const creds = API._getAuthParams()
     if (creds) {
       url += "?" + querystring.stringify(creds)
     }
@@ -130,7 +130,7 @@ const BaseAPI = {
   },
 
   _getAuthHeader: function() {
-    const creds = BaseAPI._getAuthParams()
+    const creds = API._getAuthParams()
     if (creds) {
       return [
         "Authorization",
@@ -154,7 +154,7 @@ const BaseAPI = {
       const headers = {
         Accept: "application/json"
       }
-      const authHeader = BaseAPI._getAuthHeader()
+      const authHeader = API._getAuthHeader()
       if (authHeader) {
         headers[authHeader[0]] = authHeader[1]
       }
@@ -165,7 +165,7 @@ const BaseAPI = {
 
 // Have to initialise this after creating the client
 // (see https://github.com/apollographql/apollo-client/issues/3900)
-BaseAPI.client.defaultOptions = {
+API.client.defaultOptions = {
   query: {
     fetchPolicy: "no-cache"
   },
@@ -177,4 +177,4 @@ BaseAPI.client.defaultOptions = {
   }
 }
 
-export default BaseAPI
+export default API

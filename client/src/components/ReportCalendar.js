@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
 import { PageDispatchersPropType } from "components/Page"
@@ -8,6 +8,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { useHistory } from "react-router-dom"
+import Settings from "settings"
 
 const GQL_GET_REPORT_LIST = gql`
   query($reportQuery: ReportSearchQueryInput) {

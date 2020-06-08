@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
@@ -21,8 +21,9 @@ import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
 import REMOVE_ICON from "resources/delete.png"
 import { parseHtmlWithLinkTo } from "utils_links"
-import "./BlueprintOverrides.css"
+import Settings from "settings"
 import utils from "utils"
+import "./BlueprintOverrides.css"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {

@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import LinkTo from "components/LinkTo"
 import _get from "lodash/get"
 import { Task } from "models"
@@ -6,6 +5,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
+import Settings from "settings"
 
 const TaskTable = ({
   id,
