@@ -31,13 +31,18 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
   }
 `
 const CLEAR_CACHE = gql`
-  {
+  query {
     clearCache
   }
 `
 const RELOAD_DICTIONARY = gql`
-  {
+  query {
     reloadDictionary
+  }
+`
+const USER_ACTIVITIES = gql`
+  query {
+    userActivities
   }
 `
 const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
@@ -101,10 +106,6 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
       <Fieldset>
         <Grid fluid>
           <Row style={{ padding: "8px 0" }}>
-            <Col md={2}>Online Users</Col>
-            <Col md={10}>TODO ... </Col>
-          </Row>
-          <Row style={{ padding: "8px 0" }}>
             <Col md={2}>Recent Users</Col>
             <Col md={10}>TODO ... </Col>
           </Row>
@@ -125,6 +126,18 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
                 onClick={reloadDictionary}
               >
                 Reload
+              </Button>
+            </Col>
+          </Row>
+          <Row style={{ padding: "8px 0" }}>
+            <Col md={2}>User Activities</Col>
+            <Col md={10}>
+              <Button
+                bsStyle="primary"
+                type="button"
+                onClick={userActivities}
+              >
+                Refresh
               </Button>
             </Col>
           </Row>
@@ -163,15 +176,39 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
 
   function clearCache() {
     return API.query(CLEAR_CACHE, {}).then(data => {
-      jumpToTop()
       setSaveSuccess(data.clearCache)
+      setSaveError()
+      jumpToTop()
+    })
+    .catch(error => {
+      setSaveError(error)
+      setSaveSuccess()
+      jumpToTop()
     })
   }
 
   function reloadDictionary() {
     return API.query(RELOAD_DICTIONARY, {}).then(data => {
-      jumpToTop()
       setSaveSuccess(data.reloadDictionary)
+      jumpToTop()
+    })
+    .catch(error => {
+      setSaveError(error)
+      setSaveSuccess()
+      jumpToTop()
+    })
+  }
+
+  function userActivities() {
+    return API.query(USER_ACTIVITIES, {}).then(data => {
+      // TODO: Place a table to present data
+      setSaveSuccess()
+      console.log(data.userActivities)
+    })
+    .catch(error => {
+      setSaveError(error)
+      setSaveSuccess()
+      jumpToTop()
     })
   }
 }
