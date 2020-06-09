@@ -24,6 +24,7 @@ import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"
 import { Col, ControlLabel, FormGroup } from "react-bootstrap"
+import utils from "utils"
 
 export const AGGERGATION_WIDGET_TYPE = {
   LIKERT_SCALE: "likertScale",
@@ -139,7 +140,10 @@ const AggregationWidgetContainer = ({
     data
   )
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
-  const label = fieldProps.label
+  let label = fieldProps.label
+  if (label === undefined) {
+    label = utils.sentenceCase(fieldName) // name is a required prop of field
+  }
   const WidgetComponent =
     (aggregationWidget && AGGREGATION_WIDGET_COMPONENTS[aggregationWidget]) ||
     AGGREGATION_WIDGET_COMPONENTS.default
@@ -179,11 +183,11 @@ const AggregationWidgetContainer = ({
 }
 AggregationWidgetContainer.propTypes = {
   data: PropTypes.any,
-  fieldConfig: PropTypes.object,
-  fieldName: PropTypes.string,
+  fieldConfig: PropTypes.object.isRequired,
+  fieldName: PropTypes.string.isRequired,
+  period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType]),
   vertical: PropTypes.bool,
-  widget: PropTypes.string,
-  period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType])
+  widget: PropTypes.string
 }
 AggregationWidgetContainer.defaultProps = {
   vertical: true,

@@ -3,6 +3,7 @@ import { gql } from "apollo-boost"
 import AggregationWidgetContainer, {
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
+import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import _get from "lodash/get"
 import { Report } from "models"
@@ -18,6 +19,9 @@ import { Table } from "react-bootstrap"
 import utils from "utils"
 
 const REPORT_FIELDS_FOR_STATISTICS = {
+  engagementDate: {
+    type: CUSTOM_FIELD_TYPE.DATE
+  },
   state: {
     aggregation: { aggregationType: "countPerValue", widget: "pie" },
     label: "State",
@@ -48,16 +52,16 @@ const REPORT_FIELDS_FOR_STATISTICS = {
       }
     }
   },
-  atmosphere: {
-    aggregation: { aggregationType: "countPerValue", widget: "pie" },
-    label: Settings.fields.report.atmosphere
-  },
   tasks: {
     aggregation: {
       aggregationType: "countReportsByTask",
       widget: "reportsByTask"
     },
     label: pluralize(Settings.fields.task.subLevel.shortLabel)
+  },
+  atmosphere: {
+    aggregation: { aggregationType: "countPerValue", widget: "pie" },
+    label: Settings.fields.report.atmosphere
   }
 }
 
