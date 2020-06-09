@@ -68,7 +68,7 @@
     "faker": "https://github.com/Marak/faker.js.git",
     "file-loader": "6.0.0",
     "git-describe": "4.0.4",
-    "graphql-cli": "3.0.14",
+    "graphql-cli": "4.0.0",
     "handlebars": "4.7.6",
     "handlebars-loader": "1.7.1",
     "html-loader": "1.1.0",
