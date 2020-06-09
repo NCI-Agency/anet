@@ -61,8 +61,18 @@ public class AdminResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void reloadDictionarySuperUserTest() {
-    reloadDictionary(getSuperUser());
+  public void userActivitiesSuperUserTest() {
+    userActivities(getSuperUser());
+  }
+
+  @Test
+  public void userActivitiesAdminTest() {
+    userActivities(admin);
+  }
+
+  @Test
+  public void userActivitiesRegularUserTest() {
+    userActivities(getRegularUser());
   }
 
   private void saveSettings(Person user) {
@@ -99,7 +109,7 @@ public class AdminResourceTest extends AbstractResourceTest {
 
     try {
       final String result =
-          graphQLHelper.getObject(user, "query { payload: clearCache }", new HashMap<>());
+          (String) graphQLHelper.getObject(user, "query { payload: clearCache }", new HashMap<>());
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.USERCACHE_MESSAGE);
       } else {
@@ -116,10 +126,29 @@ public class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final String result =
-          graphQLHelper.getObject(user, "query { payload: reloadDictionary }", new HashMap<>());
+      final String result = (String) graphQLHelper.getObject(user,
+          "query { payload: reloadDictionary }", new HashMap<>());
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.DICTIONARY_RELOAD_MESSAGE);
+      } else {
+        fail("Expected ForbiddenException");
+      }
+    } catch (ForbiddenException expectedException) {
+      if (isAdmin) {
+        fail("Unexpected ForbiddenException");
+      }
+    }
+  }
+
+  private void userActivities(Person user) {
+    final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
+
+    try {
+      final Map<String, Object> allActivities = (HashMap<String, Object>) graphQLHelper
+          .getObject(user, "query { payload: userActivities }", new HashMap<>());
+      if (isAdmin) {
+        assertThat(allActivities.containsKey("users")).isTrue();
+        assertThat(allActivities.containsKey("recentCalls")).isTrue();
       } else {
         fail("Expected ForbiddenException");
       }

@@ -61,9 +61,9 @@ public final class GraphQlHelper {
   /**
    * @return the result
    */
-  public String getObject(Person user, String getQuery, Map<String, Object> variables) {
+  public Object getObject(Person user, String getQuery, Map<String, Object> variables) {
     return graphQlClient.doGraphQlQuery(user, getQuery, variables,
-        new TypeReference<GraphQlResponse<String>>() {});
+        new TypeReference<GraphQlResponse<Object>>() {});
   }
 
   /**
