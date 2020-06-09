@@ -58,6 +58,12 @@ export default class Report extends Model {
     NEUTRAL: "NEUTRAL"
   }
 
+  static ATMOSPHERE_LABELS = {
+    [Report.ATMOSPHERE.POSITIVE]: "Positive",
+    [Report.ATMOSPHERE.NEGATIVE]: "Negative",
+    [Report.ATMOSPHERE.NEUTRAL]: "Neutral"
+  }
+
   static TASKS_ASSESSMENTS_PARENT_FIELD = "tasksAssessments"
   static TASKS_ASSESSMENTS_UUIDS_FIELD = "tasksAssessmentsUuids"
   static ATTENDEES_ASSESSMENTS_PARENT_FIELD = "attendeesAssessments"

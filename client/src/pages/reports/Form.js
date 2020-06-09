@@ -241,17 +241,17 @@ const BaseReportForm = ({
     {
       id: "positiveAtmos",
       value: Report.ATMOSPHERE.POSITIVE,
-      label: "Positive"
+      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
     },
     {
       id: "neutralAtmos",
       value: Report.ATMOSPHERE.NEUTRAL,
-      label: "Neutral"
+      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
     },
     {
       id: "negativeAtmos",
       value: Report.ATMOSPHERE.NEGATIVE,
-      label: "Negative"
+      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
     }
   ]
   const cancelledReasonOptions = [
@@ -692,7 +692,9 @@ const BaseReportForm = ({
                       validateFieldDebounced("atmosphereDetails")
                     }}
                     placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                      values.atmosphere === "POSITIVE" ? "(optional)" : ""
+                      values.atmosphere === Report.ATMOSPHERE.POSITIVE
+                        ? "(optional)"
+                        : ""
                     }`}
                     className="atmosphere-details"
                   />

@@ -23,8 +23,7 @@ const REPORT_FIELDS_FOR_STATISTICS = {
     type: CUSTOM_FIELD_TYPE.DATE
   },
   state: {
-    aggregation: { aggregationType: "countPerValue", widget: "pie" },
-    label: "State",
+    type: CUSTOM_FIELD_TYPE.ENUM,
     choices: {
       [Report.STATE.DRAFT]: {
         label: Report.STATE_LABELS[Report.STATE.DRAFT],
@@ -61,7 +60,18 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   },
   atmosphere: {
     aggregation: { aggregationType: "countPerValue", widget: "pie" },
-    label: Settings.fields.report.atmosphere
+    label: Settings.fields.report.atmosphere,
+    choices: {
+      [Report.ATMOSPHERE.POSITIVE]: {
+        label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
+      },
+      [Report.ATMOSPHERE.NEGATIVE]: {
+        label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
+      },
+      [Report.ATMOSPHERE.NEUTRAL]: {
+        label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
+      }
+    }
   }
 }
 
