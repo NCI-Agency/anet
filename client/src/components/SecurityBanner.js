@@ -1,4 +1,4 @@
-import { Version } from "api"
+import { Version } from "settings"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import { Person } from "models"
