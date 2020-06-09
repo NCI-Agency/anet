@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import AdvisorReportsModal from "components/AdvisorReports/AdvisorReportsModal"
 import AdvisorReportsRow from "components/AdvisorReports/AdvisorReportsRow"
 import AdvisorReportsTableHead from "components/AdvisorReports/AdvisorReportsTableHead"
@@ -6,6 +5,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
+import Settings from "settings"
 import "./OrganizationAdvisorsTable.css"
 
 const OrganizationAdvisorsTable = ({

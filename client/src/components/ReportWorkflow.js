@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
@@ -6,6 +5,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
+import Settings from "settings"
 import "./ReportWorkflow.css"
 
 const ACTION_TYPE_DETAILS = {

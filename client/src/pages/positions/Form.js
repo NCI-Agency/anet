@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import {
   LocationOverlayRow,
@@ -22,6 +22,7 @@ import { Button, HelpBlock } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_CREATE_POSITION = gql`
