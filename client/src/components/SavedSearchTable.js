@@ -1,5 +1,11 @@
 import { SEARCH_OBJECT_TYPES } from "actions"
-import ReportCollection from "components/ReportCollection"
+import ReportCollection, {
+  FORMAT_CALENDAR,
+  FORMAT_MAP,
+  FORMAT_STATISTICS,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE
+} from "components/ReportCollection"
 import PropTypes from "prop-types"
 import React from "react"
 
@@ -18,7 +24,19 @@ const SavedSearchTable = props => {
   query.pageNum = query.pageNum || 0
   query.pageSize = query.pageSize || 10
 
-  return <ReportCollection paginationKey="r_saved-search" queryParams={query} />
+  return (
+    <ReportCollection
+      paginationKey="r_saved-search"
+      queryParams={query}
+      viewFormats={[
+        FORMAT_SUMMARY,
+        FORMAT_TABLE,
+        FORMAT_CALENDAR,
+        FORMAT_MAP,
+        FORMAT_STATISTICS
+      ]}
+    />
+  )
 }
 
 SavedSearchTable.propTypes = {

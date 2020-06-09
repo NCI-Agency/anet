@@ -21,6 +21,7 @@ import {
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
+  FORMAT_STATISTICS,
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
@@ -222,7 +223,12 @@ const Collection = ({ queryParams }) => (
     <ReportCollection
       paginationKey="r_rollup"
       queryParams={queryParams}
-      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+      viewFormats={[
+        FORMAT_STATISTICS,
+        FORMAT_CALENDAR,
+        FORMAT_TABLE,
+        FORMAT_SUMMARY
+      ]}
     />
   </div>
 )

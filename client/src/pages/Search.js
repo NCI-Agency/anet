@@ -19,7 +19,13 @@ import {
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import ReportCollection from "components/ReportCollection"
+import ReportCollection, {
+  FORMAT_CALENDAR,
+  FORMAT_MAP,
+  FORMAT_STATISTICS,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE
+} from "components/ReportCollection"
 import {
   SearchDescription,
   SearchQueryPropType,
@@ -892,6 +898,13 @@ const Search = ({
             queryParams={reportsSearchQueryParams}
             setTotalCount={setNumReports}
             paginationKey="SEARCH_reports"
+            viewFormats={[
+              FORMAT_SUMMARY,
+              FORMAT_TABLE,
+              FORMAT_CALENDAR,
+              FORMAT_MAP,
+              FORMAT_STATISTICS
+            ]}
           />
         </Fieldset>
       )}

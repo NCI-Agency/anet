@@ -21,12 +21,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection, {
-  FORMAT_CALENDAR,
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -355,12 +350,6 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                     queryParams={{
                       authorUuid: uuid
                     }}
-                    viewFormats={[
-                      FORMAT_CALENDAR,
-                      FORMAT_SUMMARY,
-                      FORMAT_TABLE,
-                      FORMAT_MAP
-                    ]}
                     mapId="reports-authored"
                   />
                 </Fieldset>
