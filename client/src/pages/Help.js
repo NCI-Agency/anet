@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
@@ -13,6 +13,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
+import Settings from "settings"
 
 const GQL_GET_POSITION_LIST = gql`
   query($positionQuery: PositionSearchQueryInput) {

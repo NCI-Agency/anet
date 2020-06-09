@@ -1,5 +1,5 @@
-import { Settings } from "api"
 import pluralize from "pluralize"
+import Settings from "settings"
 import * as types from "../constants/ActionTypes"
 
 export const DEFAULT_PAGE_PROPS = {

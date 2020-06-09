@@ -1,14 +1,6 @@
-import BaseAPI from "baseAPI"
-
-const API = BaseAPI
-
 function loadFileAjaxSync(filePath, mimeType) {
   const xmlhttp = new XMLHttpRequest()
   xmlhttp.open("GET", filePath, false)
-  const authHeader = API._getAuthHeader()
-  if (authHeader) {
-    xmlhttp.setRequestHeader(authHeader[0], authHeader[1])
-  }
   if (mimeType !== null) {
     if (xmlhttp.overrideMimeType) {
       xmlhttp.overrideMimeType(mimeType)
@@ -26,4 +18,4 @@ const Settings = JSON.parse(
   loadFileAjaxSync("/api/admin/dictionary", "application/json")
 )
 
-export { Settings, API as default }
+export default Settings
