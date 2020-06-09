@@ -207,3 +207,42 @@ export const DefaultAggWidget = ({ values, ...otherWidgetProps }) => {
   }
 }
 DefaultAggWidget.propTypes = aggregationWidgetPropTypes
+
+export const ReportsMapWidget = ({
+  values,
+  entitiesCount,
+  legend,
+  showLegend = true,
+  ...otherWidgetProps
+}) => {
+  return (
+    <>
+      <Pie
+        width={70}
+        height={70}
+        data={values}
+        label={entitiesCount}
+        segmentFill={entity => legend[entity.data.key]?.color}
+        segmentLabel={d => d.data.value}
+      />
+      {showLegend && (
+        <>
+          <br />
+          {Object.map(legend, (key, choice) => (
+            <React.Fragment key={key}>
+              <span style={{ backgroundColor: choice.color }}>
+                {choice.label}{" "}
+              </span>
+            </React.Fragment>
+          ))}
+        </>
+      )}
+    </>
+  )
+}
+ReportsMapWidget.propTypes = {
+  entitiesCount: PropTypes.number,
+  legend: PropTypes.object,
+  showLegend: PropTypes.bool,
+  ...aggregationWidgetPropTypes
+}
