@@ -536,6 +536,7 @@ export default class Model {
           n.type === NOTE_TYPE.ASSESSMENT &&
           n.noteRelatedObjects.filter(
             ro =>
+              ro.relatedObject &&
               ro.relatedObjectType === Models.Report.relatedObjectType &&
               ro.relatedObject.state === Models.Report.STATE.PUBLISHED &&
               (!dateRange ||
