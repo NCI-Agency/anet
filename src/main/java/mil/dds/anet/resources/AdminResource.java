@@ -96,7 +96,10 @@ public class AdminResource {
   }
 
   @GraphQLQuery(name = "userActivities")
-  public Map<String, Object> userActivities() throws IOException {
+  public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context)
+      throws IOException {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
     Map<String, LinkedHashSet<Map<String, String>>> userActivities = new HashMap<>();
     Map<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
     File file = new File(System.getProperty("user.dir") + "/logs/userActivities.log");
@@ -104,44 +107,50 @@ public class AdminResource {
     String st;
     while ((st = br.readLine()) != null) {
       Map<String, String> map = jsonMapper.readValue(st, Map.class);
-      userActivities.computeIfAbsent(map.get("user"), k -> new LinkedHashSet<>())
-          .add(new HashMap() {
-            {
-              put("user", map.get("user") == null ? "" : map.get("user"));
-              put("time", map.get("time") == null ? "" : map.get("time"));
-              put("ip", map.get("ip") == null ? "" : map.get("ip"));
-              put("request", map.get("referer") == null ? "" : map.get("referer"));
-            }
-          });
-      recentCalls.computeIfAbsent("recentCalls", k -> new LinkedHashSet<>()).add(new HashMap() {
+      Map<String, String> entries = new HashMap<String, String>() {
         {
           put("user", map.get("user") == null ? "" : map.get("user"));
           put("time", map.get("time") == null ? "" : map.get("time"));
           put("ip", map.get("ip") == null ? "" : map.get("ip"));
           put("request", map.get("referer") == null ? "" : map.get("referer"));
-          put("recentCalls", "recentCalls");
+          // This entry is used while mapping the entries with "recentCalls" key
+          put("simpleEntry", "simpleEntry");
         }
-      });
+      };
+      // Group all entries through user value
+      userActivities.computeIfAbsent(map.get("user"), k -> new LinkedHashSet<>()).add(entries);
+      // In addition to keeping entries with the user key value,
+      // It is also necessary to hold all these entries with recentCalls key
+      // So we will have 2 result set : One is grouped by user values
+      // The other one is "recentCalls" which holds all entries without grouping them
+      recentCalls.computeIfAbsent("recentCalls", k -> new LinkedHashSet<>()).add(entries);
     }
     br.close();
     Map<String, Object> allActivities = new HashMap<>();
+    // Reverse the list , this means the entries will be ordered in descending order of entry time
     if (!userActivities.isEmpty()) {
-      allActivities.put("users", userActivities.entrySet().stream().map(s -> {
-        ArrayList<Map<String, String>> activities = new ArrayList(s.getValue());
+      allActivities.put("users", userActivities.values().stream().map(s -> {
+        // Convert LinkedHashSet to ArrayList to reverse the list
+        ArrayList<Map<String, String>> activities = new ArrayList<>(s);
         Collections.reverse(activities);
-        LinkedHashSet<Map<String, String>> sortedActivitiesByUsers =
-            new LinkedHashSet<>(activities);
-        return sortedActivitiesByUsers;
+        // Convert reversed ArrayList to LinkedHashSet and return
+        return new LinkedHashSet<>(activities);
       }).collect(Collectors.toMap(k -> k.iterator().next().get("user"), Function.identity())));
+    } else {
+      allActivities.put("users", "");
     }
+    // Reverse the list , this means the entries will be ordered in descending order of entry time
     if (!recentCalls.isEmpty()) {
-      allActivities.put("recentCalls", recentCalls.entrySet().stream().map(s -> {
-        ArrayList<Map<String, String>> activities = new ArrayList(s.getValue());
+      allActivities.put("recentCalls", recentCalls.values().stream().map(s -> {
+        // Convert LinkedHashSet to ArrayList to reverse the list
+        ArrayList<Map<String, String>> activities = new ArrayList<>(s);
         Collections.reverse(activities);
-        LinkedHashSet<Map<String, String>> sortedActivitiesByCall = new LinkedHashSet<>(activities);
-        return sortedActivitiesByCall;
-      }).collect(Collectors.toMap(k -> k.iterator().next().get("recentCalls"), Function.identity()))
-          .get("recentCalls"));
+        // Convert reversed ArrayList to LinkedHashSet and return
+        return new LinkedHashSet<>(activities);
+      }).collect(Collectors.toMap(k -> k.iterator().next().get("simpleEntry"), Function.identity()))
+          .get("simpleEntry"));
+    } else {
+      allActivities.put("recentCalls", "");
     }
     return allActivities;
   }
