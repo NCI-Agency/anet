@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
@@ -20,6 +19,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
+import Settings from "settings"
 
 const css = {
   zIndex: 1

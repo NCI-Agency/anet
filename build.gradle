@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.4.0"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.gradle.spotless" version "4.2.0"
+	id "com.diffplug.gradle.spotless" version "4.3.0"
 }
 
 apply plugin: 'java'
@@ -73,7 +73,7 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.2.jre8'
-	implementation 'org.postgresql:postgresql:42.2.12' // If using postgresql
+	implementation 'org.postgresql:postgresql:42.2.13' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:3.9.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)

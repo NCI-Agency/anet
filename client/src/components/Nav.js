@@ -1,5 +1,4 @@
 import { clearSearchQuery, resetPages } from "actions"
-import { Settings } from "api"
 import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
@@ -15,6 +14,7 @@ import {
 import { useLocation } from "react-router-dom"
 import { ScrollLink, scrollSpy } from "react-scroll"
 import { bindActionCreators } from "redux"
+import Settings from "settings"
 import utils from "utils"
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
