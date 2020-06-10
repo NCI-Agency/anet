@@ -114,6 +114,10 @@ export const valuesListAggregation = (fieldName, fieldConfig, data) => ({
   values: data.map(item => Object.get(item, fieldName))
 })
 
+export const objectsListAggregation = (fieldName, fieldConfig, data) => ({
+  values: data
+})
+
 export const countPerLevelAggregation = (fieldName, fieldConfig, data) => {
   const levels = fieldConfig.levels
   if (_isEmpty(levels)) {

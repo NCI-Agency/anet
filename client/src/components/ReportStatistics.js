@@ -1,6 +1,8 @@
 import API, { Settings } from "api"
 import { gql } from "apollo-boost"
 import AggregationWidgetContainer, {
+  AGGREGATION_TYPE,
+  AGGERGATION_WIDGET_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
@@ -21,6 +23,11 @@ import utils from "utils"
 const REPORT_FIELDS_FOR_STATISTICS = {
   engagementDate: {
     type: CUSTOM_FIELD_TYPE.DATE
+  },
+  location: {
+    aggregation: {
+      widget: AGGERGATION_WIDGET_TYPE.REPORTS_MAP
+    }
   },
   state: {
     type: CUSTOM_FIELD_TYPE.ENUM,
@@ -53,13 +60,13 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   },
   tasks: {
     aggregation: {
-      aggregationType: "countReportsByTask",
-      widget: "reportsByTask"
+      aggregationType: AGGREGATION_TYPE.REPORTS_BY_TASK,
+      widget: AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK
     },
     label: pluralize(Settings.fields.task.subLevel.shortLabel)
   },
   atmosphere: {
-    aggregation: { aggregationType: "countPerValue", widget: "pie" },
+    type: CUSTOM_FIELD_TYPE.ENUM,
     label: Settings.fields.report.atmosphere,
     choices: {
       [Report.ATMOSPHERE.POSITIVE]: {
@@ -85,6 +92,12 @@ const GQL_GET_REPORT_LIST = gql`
         uuid
         intent
         engagementDate
+        location {
+          uuid
+          name
+          lat
+          lng
+        }
         atmosphere
         state
         tasks {

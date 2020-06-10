@@ -5,11 +5,14 @@ import FullCalendar from "@fullcalendar/react"
 import BarChart from "components/BarChart"
 import LikertScale from "components/graphs/LikertScale"
 import Pie from "components/graphs/Pie"
+import Leaflet from "components/Leaflet"
+import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import _uniqueId from "lodash/uniqueId"
+import { Location, Report } from "models"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useRef, useState } from "react"
+import React, { useMemo, useRef, useState } from "react"
 import { Button, Collapse, Table } from "react-bootstrap"
 
 const DATE_FORMAT = "YYYY-MM-DD"
@@ -210,39 +213,49 @@ DefaultAggWidget.propTypes = aggregationWidgetPropTypes
 
 export const ReportsMapWidget = ({
   values,
-  entitiesCount,
-  legend,
-  showLegend = true,
+  mapId,
+  width,
+  height,
   ...otherWidgetProps
 }) => {
+  const markers = useMemo(() => {
+    if (!values.length) {
+      return []
+    }
+    const markerArray = []
+    values.forEach(report => {
+      if (Location.hasCoordinates(report.location)) {
+        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
+        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
+        markerArray.push({
+          id: report.uuid,
+          lat: report.location.lat,
+          lng: report.location.lng,
+          name: label
+        })
+      }
+    })
+    return markerArray
+  }, [values])
   return (
-    <>
-      <Pie
-        width={70}
-        height={70}
-        data={values}
-        label={entitiesCount}
-        segmentFill={entity => legend[entity.data.key]?.color}
-        segmentLabel={d => d.data.value}
+    <div className="non-scrollable">
+      <Leaflet
+        markers={markers}
+        width={width}
+        height={height}
+        mapId={mapId || _uniqueId("ReportsMapWidget")}
+        marginBottom={0}
       />
-      {showLegend && (
-        <>
-          <br />
-          {Object.map(legend, (key, choice) => (
-            <React.Fragment key={key}>
-              <span style={{ backgroundColor: choice.color }}>
-                {choice.label}{" "}
-              </span>
-            </React.Fragment>
-          ))}
-        </>
-      )}
-    </>
+    </div>
   )
 }
 ReportsMapWidget.propTypes = {
-  entitiesCount: PropTypes.number,
-  legend: PropTypes.object,
-  showLegend: PropTypes.bool,
-  ...aggregationWidgetPropTypes
+  ...aggregationWidgetPropTypes,
+  values: PropTypes.arrayOf(PropTypes.instanceOf(Report)).isRequired,
+  mapId: PropTypes.string,
+  width: PropTypes.number,
+  height: PropTypes.number
+}
+ReportsMapWidget.defaultProps = {
+  values: []
 }

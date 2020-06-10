@@ -1,15 +1,13 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import Leaflet from "components/Leaflet"
+import { ReportsMapWidget } from "components/aggregations/AggregationWidgets"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
-import _escape from "lodash/escape"
-import { Location } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useMemo } from "react"
+import React, { useEffect } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -50,26 +48,6 @@ const ReportMap = ({
     error,
     pageDispatchers
   })
-  const markers = useMemo(() => {
-    const reports = data ? data.reportList.list : []
-    if (!reports.length) {
-      return []
-    }
-    const markerArray = []
-    reports.forEach(report => {
-      if (Location.hasCoordinates(report.location)) {
-        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
-        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
-        markerArray.push({
-          id: report.uuid,
-          lat: report.location.lat,
-          lng: report.location.lng,
-          name: label
-        })
-      }
-    })
-    return markerArray
-  }, [data])
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
   useEffect(() => setTotalCount && setTotalCount(totalCount), [
@@ -79,10 +57,10 @@ const ReportMap = ({
   if (done) {
     return result
   }
-
+  const reports = data ? data.reportList.list : []
   return (
-    <Leaflet
-      markers={markers}
+    <ReportsMapWidget
+      values={reports}
       mapId={mapId}
       width={width}
       height={height}

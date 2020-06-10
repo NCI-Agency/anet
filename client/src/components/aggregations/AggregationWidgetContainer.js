@@ -3,6 +3,7 @@ import {
   countPerValueAggregation,
   likertScaleAndPieAggregation,
   numbersListAggregation,
+  objectsListAggregation,
   reportsByTaskAggregation,
   valuesListAggregation
 } from "components/aggregations/utils"
@@ -11,7 +12,8 @@ import {
   DefaultAggWidget,
   LikertScaleAndPieWidget,
   PieWidget,
-  ReportsByTaskWidget
+  ReportsByTaskWidget,
+  ReportsMapWidget
 } from "components/aggregations/AggregationWidgets"
 import {
   getFieldPropsFromFieldConfig,
@@ -33,6 +35,7 @@ export const AGGERGATION_WIDGET_TYPE = {
   REPORTS_BY_TASK: "reportsByTask",
   IQR_BOX_PLOT: "iqrBoxPlot",
   CALENDAR: "calendar",
+  REPORTS_MAP: "reportsMap",
   DEFAULT: "default"
 }
 
@@ -42,6 +45,7 @@ const AGGREGATION_WIDGET_COMPONENTS = {
   [AGGERGATION_WIDGET_TYPE.LIKERT_SCALE_AND_PIE]: LikertScaleAndPieWidget,
   [AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT]: IqrBoxPlot,
   [AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK]: ReportsByTaskWidget,
+  [AGGERGATION_WIDGET_TYPE.REPORTS_MAP]: ReportsMapWidget,
   [AGGERGATION_WIDGET_TYPE.CALENDAR]: CalendarWidget,
   [AGGERGATION_WIDGET_TYPE.DEFAULT]: DefaultAggWidget
 }
@@ -60,12 +64,13 @@ const DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
   }
 }
 
-const AGGREGATION_TYPE = {
+export const AGGREGATION_TYPE = {
   REPORTS_BY_TASK: "countReportsByTask",
   COUNT_PER_DATE: "countPerDate",
   COUNT_PER_VALUE: "countPerValue",
   NUMBERS_LIST: "numbersList",
   VALUES_LIST: "valuesList",
+  OBJECTS_LIST: "objectsList",
   LIKERT_SCALE_AND_PIE_AGG: "likertScaleAndPieAgg"
 }
 
@@ -75,6 +80,7 @@ const DEFAULT_AGGREGATION_TYPE_PER_WIDGET_TYPE = {
   [AGGERGATION_WIDGET_TYPE.LIKERT_SCALE_AND_PIE]:
     AGGREGATION_TYPE.LIKERT_SCALE_AND_PIE_AGG,
   [AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK]: AGGREGATION_TYPE.REPORTS_BY_TASK,
+  [AGGERGATION_WIDGET_TYPE.REPORTS_MAP]: AGGREGATION_TYPE.OBJECTS_LIST,
   [AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT]: AGGREGATION_TYPE.NUMBERS_LIST,
   [AGGERGATION_WIDGET_TYPE.CALENDAR]: AGGREGATION_TYPE.COUNT_PER_DATE,
   [AGGERGATION_WIDGET_TYPE.DEFAULT]: AGGREGATION_TYPE.VALUES_LIST
@@ -86,6 +92,7 @@ const AGGREGATION_TYPE_FUNCTION = {
   [AGGREGATION_TYPE.COUNT_PER_DATE]: countPerDateAggregation,
   [AGGREGATION_TYPE.NUMBERS_LIST]: numbersListAggregation,
   [AGGREGATION_TYPE.VALUES_LIST]: valuesListAggregation,
+  [AGGREGATION_TYPE.OBJECTS_LIST]: objectsListAggregation,
   [AGGREGATION_TYPE.LIKERT_SCALE_AND_PIE_AGG]: likertScaleAndPieAggregation
 }
 
