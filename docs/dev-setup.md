@@ -71,11 +71,11 @@ Provided with the ANET source code is the file `insertBaseData-mssql.sql`.  This
 | Henry Henderson | henry | EF2.1 | EF2.1 SuperUser | Super User
 | Steve Steveson | | MoD | Cost Adder | Principal
 
-To log in as one of the base data users, when prompted for a username and password, just enter their name as the username and leave the password blank.
+To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password.
 
 ### Developing
 1. Run `./gradlew dbMigrate` whenever you pull new changes to migrate the database.
-    For background info on some of these Liquibase commands, see: https://dropwizard.readthedocs.io/en/latest/manual/migrations.html
+    For background info on some of these Liquibase commands, see: https://www.dropwizard.io/en/latest/manual/migrations.html
     1. Before applying migrations, you can try them out with a dry-run: `./gradlew dbMigrate -Pdry-run`; this shows you the SQL commands that would be executed without actually applying the migrations
     1. You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
     1. You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
@@ -92,7 +92,7 @@ To log in as one of the base data users, when prompted for a username and passwo
 1. Go to [http://localhost:8080/](http://localhost:8080/) in your browser.
     1. When prompted for credentials:
         - **Username:** `erin`
-        - **Password:** Leave it blank
+        - **Password:** same as username
     1. You will get an error about a missing `index.ftl` file; this is expected and means the backend server is working. The error looks like:
         ```
         ERROR [2017-02-10 16:49:33,967] javax.ws.rs.ext.MessageBodyWriter: Template Error
@@ -105,10 +105,10 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ## Testing
 ### Initial Setup Test Database
-After successfully creating and building the MSSQL Docker container it is posisble to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
+After successfully creating and building the MSSQL Docker container it is possible to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
 1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
 1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
-1. Wait until the container is fully started, then run `./gradlew -PtestEnv dbMigrate`
+1. Wait until the container is fully started (can be done automatically with `./gradlew -PtestEnv dbWait`), then run `./gradlew -PtestEnv dbMigrate`
 1. Seed initial data - MSSQL: `./gradlew -PtestEnv dbLoad`.
 1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
 
@@ -212,12 +212,11 @@ The simulator can be started by running 'yarn run sim' in 'client'.
 1. Go to [http://localhost:3000/](http://localhost:3000/) in your browser.
     1. When prompted for credentials:
         - **Username:** `erin`
-        - **Password:** Leave it blank
+        - **Password:** same as username
 
 NB: You only need node.js and the npm dependencies for developing. When we deploy for production, everything is compiled to static files. No javascript dependencies are necessary on the server.
 
 ## Development Mode
-In the `anet.yml` file there is a flag for `developmentMode`.  This flag does several valuable things::
-1. On every graphql query, the entire graphql graph is reloaded and re-parsed.  This helps in backend evelopment by allowing you to make quick changes without having to restart the server.  (Note: this only helps if you're running ANET with gradle in debug mode).
-1. ANET will use AuthType Basic rather than windows authentication.  This allows you to develop on non-windows computers and also quickly impersonate other accounts for testing.  To log in with an account, enter the `domainUsername` value for that user in the 'Username' field when prompted by your browser.  Leave the password field blank. 
-1. You can easily simulate a "new user" in development mode by entering a new username into both the username and password field.  This will activate the same code path as if a user came to the production system with a valid Windows Authentication Principal but we don't find them in the `people` table.  If you enter an unknown username and no password, ANET will reject you. If you enter an unknown username and the same unknown username into the password field, it will create that account and drop you into the new user workflow. 
+In the `anet.yml` file there is a flag for `developmentMode`.  The only thing this flag currently does is:
+1. Run the account deactivation worker once on startup.
+1. To simulate a "new user" in development mode, create a new user in the Keycloak realm, then log on to ANET as that user.  This will activate the same code path as if a user came to the production system with a valid Windows Authentication Principal but we don't find them in the `people` table. This will start the new user workflow (onboarding). Note: if you enter an unknown username, ANET will reject you.
