@@ -154,23 +154,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // Add Dropwizard-Keycloak
     bootstrap.addBundle(new KeycloakBundle<AnetConfiguration>() {
       @Override
-      public void run(AnetConfiguration configuration, Environment environment) {
-        // Add client-side Keycloak configuration to the dictionary
-        final Map<String, Object> clientConfig = new HashMap<>();
-        final AnetKeycloakConfiguration keycloakConfiguration =
-            getKeycloakConfiguration(configuration);
-        clientConfig.put("realm", keycloakConfiguration.getRealm());
-        clientConfig.put("url", keycloakConfiguration.getAuthServerUrl());
-        clientConfig.put("clientId", keycloakConfiguration.getResource() + "-public");
-        clientConfig.put("showLogoutLink", keycloakConfiguration.isShowLogoutLink());
-        final Map<String, Object> dictionary = new HashMap<>(configuration.getDictionary());
-        dictionary.put("keycloakConfiguration", clientConfig);
-        configuration.setDictionary(dictionary);
-
-        super.run(configuration, environment);
-      }
-
-      @Override
       protected AnetKeycloakConfiguration getKeycloakConfiguration(
           AnetConfiguration configuration) {
         return configuration.getKeycloakConfiguration();
@@ -233,8 +216,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final String dbUrl = configuration.getDataSourceFactory().getUrl();
     logger.info("datasource url: {}", dbUrl);
 
-    // Check the dictionary
-    final JsonNode dictionary = getDictionary(configuration);
+    // Update and then check the dictionary
+    final JsonNode dictionary = updateAndCheckDictionary(configuration);
     try {
       logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionary));
     } catch (JsonProcessingException exception) {
@@ -356,8 +339,24 @@ public class AnetApplication extends Application<AnetConfiguration> {
     }
   }
 
-  protected static JsonNode getDictionary(AnetConfiguration configuration)
+  private static Map<String, Object> addKeycloakConfiguration(AnetConfiguration configuration) {
+    // Add client-side Keycloak configuration to the dictionary
+    final Map<String, Object> clientConfig = new HashMap<>();
+    final AnetKeycloakConfiguration keycloakConfiguration =
+        configuration.getKeycloakConfiguration();
+    clientConfig.put("realm", keycloakConfiguration.getRealm());
+    clientConfig.put("url", keycloakConfiguration.getAuthServerUrl());
+    clientConfig.put("clientId", keycloakConfiguration.getResource() + "-public");
+    clientConfig.put("showLogoutLink", keycloakConfiguration.isShowLogoutLink());
+    final Map<String, Object> dictionary = new HashMap<>(configuration.getDictionary());
+    dictionary.put("keycloakConfiguration", clientConfig);
+    configuration.setDictionary(dictionary);
+    return configuration.getDictionary();
+  }
+
+  protected static JsonNode updateAndCheckDictionary(AnetConfiguration configuration)
       throws IllegalArgumentException {
+    final Map<String, Object> updatedDictionary = addKeycloakConfiguration(configuration);
     try (final InputStream inputStream =
         AnetApplication.class.getResourceAsStream("/anet-schema.yml")) {
       if (inputStream == null) {
@@ -368,7 +367,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
                 .objectMapper(yamlMapper).build();
 
         JsonSchema schema = factory.getSchema(inputStream);
-        final JsonNode dictionary = jsonMapper.valueToTree(configuration.getDictionary());
+        final JsonNode dictionary = jsonMapper.valueToTree(updatedDictionary);
         Set<ValidationMessage> errors = schema.validate(dictionary);
         for (ValidationMessage error : errors) {
           logger.error(error.getMessage());

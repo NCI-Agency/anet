@@ -15,8 +15,8 @@ public class AnetCheckCommand extends CheckCommand<AnetConfiguration> {
   @Override
   protected void run(Bootstrap<AnetConfiguration> bootstrap, Namespace namespace,
       AnetConfiguration configuration) throws Exception {
-    // Check the dictionary
-    AnetApplication.getDictionary(configuration);
+    // Update and then check the dictionary
+    AnetApplication.updateAndCheckDictionary(configuration);
     super.run(bootstrap, namespace, configuration);
   }
 
