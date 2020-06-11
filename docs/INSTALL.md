@@ -120,7 +120,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
-- **keycloakConfiguration**: The configuration for Keycloak, i.e. the (federated) user authentication server for ANET.
+- **keycloakConfiguration**: The configuration for [Keycloak](keycloak.md), i.e. the (federated) user authentication server for ANET.
 - **database**: The configuration for your database. ANET supports either PostgreSQL or Microsoft SQL Server.  Additional Instructions can be found here instructions here: https://www.dropwizard.io/en/latest/manual/configuration.html#database for available configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
@@ -157,7 +157,7 @@ keycloakConfiguration:
     secret: 12869b4c-74ac-43f9-b71e-ff74e07babf9
 ```
 
-ANET needs *two* clients under the Keycloak realm with the name given under the **realm** property, a *confidential* one with the name given under the **resource** property (and you should copy the **secret** from the *Credentials* tab under the client in the Keycloak realm) and a *public* one with the `-public` added at the end of the name (so for the `ANET-Client` given in the example above, it would be `ANET-Client-public`). See https://www.keycloak.org/docs/latest/server_admin/index.html#_ldap for documentation on how to configure the Keycloak realm and clients.
+ANET needs *two* clients under the Keycloak realm with the name given under the **realm** property, a *confidential* one with the name given under the **resource** property (and you should copy the **secret** from the *Credentials* tab under the client in the Keycloak realm) and a *public* one with the `-public` added at the end of the name (so for the `ANET-Client` given in the example above, it would be `ANET-Client-public`). See [Keycloak authentication server](keycloak.md) for some guidance.
 
 - **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls the protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.
 

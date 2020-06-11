@@ -71,7 +71,7 @@ Provided with the ANET source code is the file `insertBaseData-mssql.sql`.  This
 | Henry Henderson | henry | EF2.1 | EF2.1 SuperUser | Super User
 | Steve Steveson | | MoD | Cost Adder | Principal
 
-To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password.
+To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password. See [Users defined locally in the realm](keycloak.md#dev-users) for other possible users.
 
 ### Developing
 1. Run `./gradlew dbMigrate` whenever you pull new changes to migrate the database.
@@ -81,7 +81,7 @@ To log in as one of the base data users, when prompted for a username and passwo
     1. You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
     1. You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
     1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
-1. Make sure the Keycloak authentication server is started (in a Docker container) in your local development environment: `./gradlew dockerCreateKeycloak dockerStartKeycloak`
+1. Make sure the [Keycloak authentication server](keycloak.md#dev) is started (in a Docker container) in your local development environment: `./gradlew dockerCreateKeycloak dockerStartKeycloak`
 1. Run `./gradlew run` to run the server via Gradle
     1. If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
     1. The following output indicates that the server is ready:
@@ -219,4 +219,5 @@ NB: You only need node.js and the npm dependencies for developing. When we deplo
 ## Development Mode
 In the `anet.yml` file there is a flag for `developmentMode`.  The only thing this flag currently does is:
 1. Run the account deactivation worker once on startup.
-1. To simulate a "new user" in development mode, create a new user in the Keycloak realm, then log on to ANET as that user.  This will activate the same code path as if a user came to the production system with a valid Windows Authentication Principal but we don't find them in the `people` table. This will start the new user workflow (onboarding). Note: if you enter an unknown username, ANET will reject you.
+
+To simulate a "new user" in development mode, create a new user in the Keycloak realm, then log on to ANET as that user.  This will activate the same code path as if a user came to the production system with a valid Windows Authentication Principal but we don't find them in the `people` table. This will start the new user workflow (onboarding). Note: if you enter an unknown username, ANET will reject you.

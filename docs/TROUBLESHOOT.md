@@ -20,7 +20,7 @@ _Possible Causes_
 _Symptoms_ When a user is accessing ANET, she/he is presented with an username/password prompt instead of seamless access to ANET
 
 _Possible Causes_
-1. Authentication is not properly configured. To resolve, please update the `keycloakConfiguration` section of `anet.yml` and the definition of the realm and of both clients in Keycloak
+1. Authentication is not properly configured. To resolve, please update the `keycloakConfiguration` section of `anet.yml` and the definition of the realm and of both clients in Keycloak; check [Keycloak authentication server](keycloak.md) for guidance.
 1. The server running ANET server does not have `allowed to authenticate` enabled in its object in Active Directory
 1. There is no trust relationship with authentication established between the domain of the ANET server and the domain of the user experiencing the issue
 
