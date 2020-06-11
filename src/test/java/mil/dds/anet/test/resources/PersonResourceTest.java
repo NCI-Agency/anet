@@ -39,8 +39,10 @@ import mil.dds.anet.beans.search.PersonSearchSortBy;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.test.resources.utils.PositionHistoryDao;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
@@ -54,6 +56,12 @@ public class PersonResourceTest extends AbstractResourceTest {
   // 200 x 200 avatar
   final File DEFAULT_AVATAR =
       new File(PersonResourceTest.class.getResource("/assets/default_avatar.png").getFile());
+  private static PositionHistoryDao positionHistoryDao;
+
+  @BeforeAll
+  public static void setUpClass() {
+    positionHistoryDao = new PositionHistoryDao();
+  }
 
   @Test
   public void testCreatePerson() throws IOException {
@@ -219,9 +227,11 @@ public class PersonResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Person>>() {});
     // Person is new. So there must be only one record in her previous positions and it's endTime
     // must be null
-    assertThat(newPerson3.getAllPeoplePositionHistory().size()).isEqualTo(1);
-    assertThat(newPerson3.getAllPeoplePositionHistory().stream()
-        .filter(t -> Objects.isNull(t.getEndTime())).count()).isEqualTo(1);
+    final List<PersonPositionHistory> newPerson3History =
+        positionHistoryDao.getAllPositionHistoryByPerson(newPerson3);
+    assertThat(newPerson3History.size()).isEqualTo(1);
+    assertThat(newPerson3History.stream().filter(t -> Objects.isNull(t.getEndTime())).count())
+        .isEqualTo(1);
   }
 
   @Test

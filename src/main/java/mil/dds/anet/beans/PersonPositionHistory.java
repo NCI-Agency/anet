@@ -133,8 +133,4 @@ public class PersonPositionHistory extends AbstractAnetBean {
         .collect(Collectors.toList());
   }
 
-  public static List<PersonPositionHistory> getHistory(List<PersonPositionHistory> history) {
-    // Remove all null entries
-    return history.stream().filter(Objects::nonNull).collect(Collectors.toList());
-  }
 }

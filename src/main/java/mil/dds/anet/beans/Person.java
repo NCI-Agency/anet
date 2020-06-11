@@ -75,8 +75,6 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
-  private List<PersonPositionHistory> allPeoplePositionHistory;
-  // annotated below
   private Optional<byte[]> avatar;
   @GraphQLQuery
   @GraphQLInputField
@@ -227,28 +225,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
         });
   }
 
-  public CompletableFuture<List<PersonPositionHistory>> loadAllPeoplePositionHistory() {
-    if (allPeoplePositionHistory != null) {
-      return CompletableFuture.completedFuture(allPeoplePositionHistory);
-    }
-    Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-    return AnetObjectEngine.getInstance().getPersonDao().getAllPositionHistory(context, uuid)
-        .thenApply(o -> {
-          allPeoplePositionHistory = o;
-          return o;
-        });
-  }
-
   public List<PersonPositionHistory> getPreviousPositions() {
     return previousPositions;
-  }
-
-  @JsonIgnore
-  public List<PersonPositionHistory> getAllPeoplePositionHistory() {
-    if (allPeoplePositionHistory == null) {
-      allPeoplePositionHistory = loadAllPeoplePositionHistory().join();
-    }
-    return allPeoplePositionHistory;
   }
 
   @GraphQLInputField(name = "previousPositions")
