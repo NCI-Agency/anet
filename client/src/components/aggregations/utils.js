@@ -1,7 +1,7 @@
-import { Settings } from "api"
 import _clone from "lodash/clone"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
+import Settings from "settings"
 
 export const countPerDateAggregation = (fieldName, fieldConfig, data) => {
   const values = data.reduce((counter, entity) => {

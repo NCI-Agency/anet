@@ -4,7 +4,7 @@ import {
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
@@ -43,6 +43,7 @@ import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { deserializeQueryParams } from "searchUtils"
+import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 import AttendeesTable from "./AttendeesTable"

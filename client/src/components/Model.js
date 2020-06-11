@@ -312,7 +312,7 @@ export default class Model {
     )
   }
 
-  static pathFor(instance, query) {
+  static pathFor(instance, query, resourceOverride) {
     if (!instance) {
       return console.error(
         `You didn't pass anything to ${this.name}.pathFor. If you want a new route, you can pass null.`
@@ -320,7 +320,7 @@ export default class Model {
     }
 
     if (process.env.NODE_ENV !== "production") {
-      if (!this.resourceName) {
+      if (!resourceOverride && !this.resourceName) {
         return console.error(
           `You must specify a resourceName on model ${this.name}.`
         )
@@ -329,7 +329,7 @@ export default class Model {
 
     const resourceName = utils.resourceize(this.resourceName)
     const uuid = instance.uuid
-    let url = ["", resourceName, uuid].join("/")
+    let url = ["", resourceOverride || resourceName, uuid].join("/")
 
     if (query) {
       url += "?" + encodeQuery(query)
@@ -338,9 +338,9 @@ export default class Model {
     return url
   }
 
-  static pathForNew(query) {
+  static pathForNew(query, resourceOverride) {
     const resourceName = utils.resourceize(this.resourceName)
-    let url = ["", resourceName, "new"].join("/")
+    let url = ["", resourceOverride || resourceName, "new"].join("/")
 
     if (query) {
       url += "?" + encodeQuery(query)

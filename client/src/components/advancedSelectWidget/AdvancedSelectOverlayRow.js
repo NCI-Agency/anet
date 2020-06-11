@@ -1,7 +1,7 @@
-import { Settings } from "api"
 import LinkTo from "components/LinkTo"
 import moment from "moment"
 import React from "react"
+import Settings from "settings"
 
 export const AuthorizationGroupOverlayRow = item => (
   <React.Fragment key={item.uuid}>

@@ -1,5 +1,4 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
-import { Settings } from "api"
 import AdvancedSelectFilter, {
   deserialize as deserializeAdvancedSelectFilter
 } from "components/advancedSearch/AdvancedSelectFilter"
@@ -44,6 +43,7 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 
 export const SearchQueryPropType = PropTypes.shape({
   text: PropTypes.string,

@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
@@ -36,6 +36,7 @@ import { useHistory } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 

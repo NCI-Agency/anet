@@ -1,6 +1,8 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import AvatarEditModal from "components/AvatarEditModal"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -16,7 +18,6 @@ import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
-import AvatarEditModal from "components/AvatarEditModal"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
@@ -33,7 +34,7 @@ import {
   Radio
 } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import Settings from "settings"
 
 const GQL_CREATE_PERSON = gql`
   mutation($person: PersonInput!) {

@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
@@ -9,6 +8,7 @@ import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
 import PEOPLE_ICON from "resources/people.png"
 import RS_ICON from "resources/rs_small.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 

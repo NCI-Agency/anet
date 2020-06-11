@@ -1,5 +1,5 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -14,6 +14,7 @@ import { Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import Settings from "settings"
 import utils from "utils"
 import TaskForm from "./Form"
 

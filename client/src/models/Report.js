@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import Model, {
   createCustomFieldsSchema,
   NOTE_TYPE,
@@ -8,6 +7,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Position, Task } from "models"
 import moment from "moment"
 import REPORTS_ICON from "resources/reports.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 

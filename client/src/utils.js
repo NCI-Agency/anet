@@ -1,6 +1,5 @@
 import { Icon } from "@blueprintjs/core"
 import { IconSvgPaths16, IconSvgPaths20 } from "@blueprintjs/icons"
-import { Settings } from "api"
 import * as changeCase from "change-case"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
@@ -8,6 +7,7 @@ import pluralize from "pluralize"
 import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
 import React from "react"
+import Settings from "settings"
 
 const WILDCARD = "*"
 const domainNames = Settings.domainNames.map(d => d.toLowerCase())

@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AggregationWidgetContainer, {
   AGGREGATION_TYPE,
@@ -19,6 +19,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect } from "react"
 import { Table } from "react-bootstrap"
+import Settings from "settings"
 import utils from "utils"
 
 const choicesFactory = (values, labels, colors) => {

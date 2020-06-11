@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -14,6 +14,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import Settings from "settings"
 
 const GQL_UPDATE_ASSOCIATED_POSITION = gql`
   mutation($position: PositionInput!) {

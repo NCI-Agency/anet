@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
@@ -6,6 +5,7 @@ import Model, {
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 

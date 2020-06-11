@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
@@ -9,6 +8,7 @@ import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
+import Settings from "settings"
 
 const BaseOrganizationLaydown = ({ currentUser, organization }) => {
   const [showInactivePositions, setShowInactivePositions] = useState(false)

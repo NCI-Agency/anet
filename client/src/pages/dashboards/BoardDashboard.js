@@ -17,7 +17,7 @@ import {
   PathFindingLinkFactory,
   DagreEngine
 } from "@projectstorm/react-diagrams-routing"
-import { Settings } from "api"
+import LinkTo from "components/LinkTo"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import { mapPageDispatchersToProps } from "components/Page"
 import FileSaver from "file-saver"
@@ -28,8 +28,8 @@ import { Badge, Button, Modal, Panel } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
+import Settings from "settings"
 import "./BoardDashboard.css"
-import LinkTo from "components/LinkTo"
 import {
   DiagramLinkFactory,
   DiagramNodeFactory,
