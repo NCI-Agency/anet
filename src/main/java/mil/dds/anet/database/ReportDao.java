@@ -27,6 +27,7 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
@@ -356,6 +357,41 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   public CompletableFuture<List<Tag>> getTagsForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
     return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
+  }
+
+  @InTransaction
+  public List<EngagementStatus> getEngagementStatus(String reportUuid) {
+    final List<EngagementStatus> engagementStatus = new ArrayList<>();
+    Number happenedCount = (Number) getDbHandle()
+        .createQuery(
+            "/* getHappened */ SELECT count(*) as ct from reports where uuid = :reportUuid "
+                + "AND reports.\"engagementDate\" <= :endOfHappened")
+        .bind("reportUuid", reportUuid)
+        .bind("endOfHappened", DaoUtils.asLocalDateTime(Utils.endOfToday()))
+        .map(new MapMapper(false)).one().get("ct");
+    if (happenedCount.longValue() > 0) {
+      engagementStatus.add(EngagementStatus.HAPPENED);
+    }
+    Number futureCount = (Number) getDbHandle()
+        .createQuery("/* getFuture */ SELECT count(*) as ct from reports where uuid = :reportUuid "
+            + "AND reports.\"engagementDate\" > :startOfFuture")
+        .bind("reportUuid", reportUuid)
+        .bind("startOfFuture", DaoUtils.asLocalDateTime(Utils.endOfToday()))
+        .map(new MapMapper(false)).one().get("ct");
+    if (futureCount.longValue() > 0) {
+      engagementStatus.add(EngagementStatus.FUTURE);
+    }
+    Number cancelledCount = (Number) getDbHandle()
+        .createQuery(
+            "/* getCancelled */ SELECT count(*) as ct from reports where uuid = :reportUuid "
+                + "AND reports.state = :cancelledState")
+        .bind("reportUuid", reportUuid)
+        .bind("cancelledState", DaoUtils.getEnumId(ReportState.CANCELLED)).map(new MapMapper(false))
+        .one().get("ct");
+    if (cancelledCount.longValue() > 0) {
+      engagementStatus.add(EngagementStatus.CANCELLED);
+    }
+    return engagementStatus;
   }
 
   @Override

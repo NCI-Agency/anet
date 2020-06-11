@@ -49,6 +49,13 @@ const REPORT_FIELDS_FOR_STATISTICS = {
       Report.STATE_COLORS
     )
   },
+  engagementStatus: {
+    type: CUSTOM_FIELD_TYPE.ENUMSET,
+    choices: choicesFactory(
+      Report.ENGAGEMENT_STATUS,
+      Report.ENGAGEMENT_STATUS_LABELS
+    )
+  },
   tasks: {
     aggregation: {
       aggregationType: AGGREGATION_TYPE.REPORTS_BY_TASK,
@@ -81,6 +88,7 @@ const GQL_GET_REPORT_LIST = gql`
         }
         atmosphere
         state
+        engagementStatus
         tasks {
           uuid
           shortName
