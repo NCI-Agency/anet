@@ -9,6 +9,7 @@ import LinkTo from "components/LinkTo"
 import { NOTE_TYPE } from "components/Model"
 import { Person } from "models"
 import _isEmpty from "lodash/isEmpty"
+import _uniqueId from "lodash/uniqueId"
 import {
   AssessmentPeriodPropType,
   PeriodsTableHeader,
@@ -60,6 +61,7 @@ const InstantAssessmentRow = ({
             fieldName={questionKey}
             data={entity.getInstantAssessmentResults(period)}
             widget={aggregationWidget}
+            widgetId={`${questionKey}-${_uniqueId("assessment")}`}
           />
         </td>
       ))}

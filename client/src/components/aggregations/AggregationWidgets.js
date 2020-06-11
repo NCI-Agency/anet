@@ -9,7 +9,7 @@ import Leaflet from "components/Leaflet"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import _uniqueId from "lodash/uniqueId"
-import { Location, Report } from "models"
+import { Location } from "models"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useMemo, useRef, useState } from "react"
@@ -243,7 +243,7 @@ export const ReportsMapWidget = ({
         markers={markers}
         width={width}
         height={height}
-        mapId={mapId || _uniqueId("ReportsMapWidget")}
+        mapId={mapId}
         marginBottom={0}
       />
     </div>
@@ -251,7 +251,6 @@ export const ReportsMapWidget = ({
 }
 ReportsMapWidget.propTypes = {
   ...aggregationWidgetPropTypes,
-  values: PropTypes.arrayOf(PropTypes.instanceOf(Report)).isRequired,
   mapId: PropTypes.string,
   width: PropTypes.number,
   height: PropTypes.number

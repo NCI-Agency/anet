@@ -28,6 +28,7 @@ import {
   CUSTOM_FIELD_TYPE
 } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import _uniqueId from "lodash/uniqueId"
 import * as Models from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -181,6 +182,7 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
                     fieldName={questionKey}
                     data={instantAssessmentResults}
                     widget={aggregationWidget}
+                    widgetId={`${questionKey}-${_uniqueId("assessment")}`}
                   />
                 ) : null
               })}

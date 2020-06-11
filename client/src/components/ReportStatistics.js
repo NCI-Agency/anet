@@ -8,6 +8,7 @@ import AggregationWidgetContainer, {
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import _get from "lodash/get"
+import _uniqueId from "lodash/uniqueId"
 import { Report } from "models"
 import {
   PeriodsConfigPropType,
@@ -131,6 +132,7 @@ const FieldStatisticsRow = ({
             data={periodsData[index]}
             widget={aggregationWidget}
             period={period}
+            widgetId={`${fieldName}-${_uniqueId("statistics")}`}
           />
         </td>
       ))}

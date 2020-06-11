@@ -127,9 +127,10 @@ const AggregationWidgetContainer = ({
   data,
   fieldConfig,
   fieldName,
+  period,
   vertical,
   widget,
-  period,
+  widgetId,
   ...otherWidgetProps
 }) => {
   const aggregationWidget = widget || getAggregationWidget(fieldConfig)
@@ -149,11 +150,14 @@ const AggregationWidgetContainer = ({
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   let label = fieldProps.label
   if (label === undefined) {
-    label = utils.sentenceCase(fieldName) // name is a required prop of field
+    label = utils.sentenceCase(fieldName) // name is a required prop
   }
   const WidgetComponent =
     (aggregationWidget && AGGREGATION_WIDGET_COMPONENTS[aggregationWidget]) ||
     AGGREGATION_WIDGET_COMPONENTS.default
+  if (WidgetComponent === ReportsMapWidget) {
+    otherWidgetProps.mapId = `map-${widgetId}`
+  }
   const widgetElem = (
     <WidgetComponent
       values={values}
@@ -194,7 +198,8 @@ AggregationWidgetContainer.propTypes = {
   fieldName: PropTypes.string.isRequired,
   period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType]),
   vertical: PropTypes.bool,
-  widget: PropTypes.string
+  widget: PropTypes.string,
+  widgetId: PropTypes.string.isRequired
 }
 AggregationWidgetContainer.defaultProps = {
   vertical: true,
