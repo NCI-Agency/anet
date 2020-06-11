@@ -35,10 +35,25 @@ export default class Report extends Model {
     [Report.STATE.REJECTED]: "Changes requested"
   }
 
+  static STATE_COLORS = {
+    [Report.STATE.DRAFT]: "#bdbdaf",
+    [Report.STATE.PENDING_APPROVAL]: "#848478",
+    [Report.STATE.APPROVED]: "#75eb75",
+    [Report.STATE.PUBLISHED]: "#5cb85c",
+    [Report.STATE.CANCELLED]: "#ec971f",
+    [Report.STATE.REJECTED]: "#c23030"
+  }
+
   static ENGAGEMENT_STATUS = {
     HAPPENED: "HAPPENED",
     FUTURE: "FUTURE",
     CANCELLED: "CANCELLED"
+  }
+
+  static ENGAGEMENT_STATUS_LABELS = {
+    [Report.ENGAGEMENT_STATUS.HAPPENED]: "Happened",
+    [Report.ENGAGEMENT_STATUS.FUTURE]: "Future",
+    [Report.ENGAGEMENT_STATUS.CANCELLED]: "Cancelled"
   }
 
   static CANCELLATION_REASON = {

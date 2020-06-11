@@ -21,6 +21,17 @@ import React, { useEffect } from "react"
 import { Table } from "react-bootstrap"
 import utils from "utils"
 
+const choicesFactory = (values, labels, colors) => {
+  const choices = {}
+  Object.forEach(values, val => {
+    choices[val] = { label: labels[val] }
+    if (colors) {
+      choices[val].color = colors[val]
+    }
+  })
+  return choices
+}
+
 const REPORT_FIELDS_FOR_STATISTICS = {
   engagementDate: {
     type: CUSTOM_FIELD_TYPE.DATE
@@ -32,32 +43,11 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   },
   state: {
     type: CUSTOM_FIELD_TYPE.ENUM,
-    choices: {
-      [Report.STATE.DRAFT]: {
-        label: Report.STATE_LABELS[Report.STATE.DRAFT],
-        color: "#bdbdaf"
-      },
-      [Report.STATE.PENDING_APPROVAL]: {
-        label: Report.STATE_LABELS[Report.STATE.PENDING_APPROVAL],
-        color: "#848478"
-      },
-      [Report.STATE.APPROVED]: {
-        label: Report.STATE_LABELS[Report.STATE.APPROVED],
-        color: "#75eb75"
-      },
-      [Report.STATE.PUBLISHED]: {
-        label: Report.STATE_LABELS[Report.STATE.PUBLISHED],
-        color: "#5cb85c"
-      },
-      [Report.STATE.CANCELLED]: {
-        label: Report.STATE_LABELS[Report.STATE.CANCELLED],
-        color: "#ec971f"
-      },
-      [Report.STATE.REJECTED]: {
-        label: Report.STATE_LABELS[Report.STATE.REJECTED],
-        color: "#c23030"
-      }
-    }
+    choices: choicesFactory(
+      Report.STATE,
+      Report.STATE_LABELS,
+      Report.STATE_COLORS
+    )
   },
   tasks: {
     aggregation: {
@@ -69,17 +59,7 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   atmosphere: {
     type: CUSTOM_FIELD_TYPE.ENUM,
     label: Settings.fields.report.atmosphere,
-    choices: {
-      [Report.ATMOSPHERE.POSITIVE]: {
-        label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
-      },
-      [Report.ATMOSPHERE.NEGATIVE]: {
-        label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
-      },
-      [Report.ATMOSPHERE.NEUTRAL]: {
-        label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
-      }
-    }
+    choices: choicesFactory(Report.ATMOSPHERE, Report.ATMOSPHERE_LABELS)
   }
 }
 
