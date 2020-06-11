@@ -5,7 +5,6 @@ import {
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
-import { Settings } from "api"
 import FilterableAdvisorReportsTable from "components/AdvisorReports/FilterableAdvisorReportsTable"
 import AppContext from "components/AppContext"
 import CancelledEngagementReports from "components/CancelledEngagementReports"
@@ -29,6 +28,7 @@ import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
+import Settings from "settings"
 
 export const NOT_APPROVED_REPORTS = "not-approved-reports"
 export const CANCELLED_REPORTS = "cancelled-reports"

@@ -4,7 +4,7 @@ import {
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
@@ -36,6 +36,7 @@ import {
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
+import Settings from "settings"
 
 const GQL_GET_SAVED_SEARCHES = gql`
   query {

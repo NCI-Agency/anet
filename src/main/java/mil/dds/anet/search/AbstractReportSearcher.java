@@ -5,11 +5,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
@@ -24,11 +27,9 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -44,18 +45,33 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     super(qb);
   }
 
-  @InTransaction
-  public AnetBeanList<Report> runSearch(
-      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, Set<String> subFields,
-      ReportSearchQuery query) {
-    buildQuery(subFields, query);
-    outerQb.addSelectClause("*");
-    outerQb.addTotalCount();
-    outerQb.addFromClause("( " + qb.build() + " ) l");
-    outerQb.addSqlArgs(qb.getSqlArgs());
-    outerQb.addListArgs(qb.getListArgs());
-    addOrderByClauses(outerQb, query);
-    return outerQb.buildAndRun(getDbHandle(), query, new ReportMapper());
+  protected CompletableFuture<AnetBeanList<Report>> postProcessResults(Map<String, Object> context,
+      ReportSearchQuery query, AnetBeanList<Report> result) {
+    if (query.getPendingApprovalOf() == null) {
+      return CompletableFuture.completedFuture(result);
+    }
+    // Post-process results to filter out the reports that can't be approved
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final List<Report> list = result.getList();
+    @SuppressWarnings({"unchecked"})
+    final CompletableFuture<Boolean>[] allReports = (CompletableFuture<Boolean>[]) list.stream()
+        .map(r -> (r.getApprovalStepUuid() == null || r.getAdvisorOrgUuid() == null)
+            ? CompletableFuture.completedFuture(false)
+            : engine.canUserApproveStep(context, query.getPendingApprovalOf(),
+                r.getApprovalStepUuid(), r.getAdvisorOrgUuid()))
+        .toArray(CompletableFuture<?>[]::new);
+    return CompletableFuture.allOf(allReports).thenCompose(v -> {
+
+      final Iterator<Report> iterator = list.iterator();
+      for (final CompletableFuture<Boolean> cf : allReports) {
+        iterator.next();
+        if (!cf.join()) {
+          iterator.remove();
+        }
+      }
+      result.setTotalCount(list.size());
+      return CompletableFuture.completedFuture(result);
+    });
   }
 
   @Override

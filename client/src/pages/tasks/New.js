@@ -1,5 +1,5 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import {
   PageDispatchersPropType,
@@ -11,6 +11,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation } from "react-router-dom"
+import Settings from "settings"
 import utils from "utils"
 import TaskForm from "./Form"
 

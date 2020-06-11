@@ -1,8 +1,8 @@
-import { Settings } from "api"
 import Model from "components/Model"
 import AFG_ICON from "resources/afg_small.png"
 import POSITIONS_ICON from "resources/positions.png"
 import RS_ICON from "resources/rs_small.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 

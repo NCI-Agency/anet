@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
@@ -14,6 +14,7 @@ import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import REMOVE_ICON from "resources/delete.png"
+import Settings from "settings"
 
 const GQL_GET_ORGANIZATION_LIST = gql`
   query($organizationQuery: OrganizationSearchQueryInput) {

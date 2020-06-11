@@ -23,6 +23,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.database.ApprovalStepDao;
@@ -474,6 +475,7 @@ public class Utils {
       logger.debug("Editing planning approval steps for {}", entity);
       for (ApprovalStep step : planningApprovalSteps) {
         Utils.validateApprovalStep(step);
+        step.setType(ApprovalStepType.PLANNING_APPROVAL);
         step.setRelatedObjectUuid(entity.getUuid());
       }
 
@@ -488,6 +490,7 @@ public class Utils {
       logger.debug("Editing approval steps for {}", entity);
       for (ApprovalStep step : approvalSteps) {
         Utils.validateApprovalStep(step);
+        step.setType(ApprovalStepType.REPORT_APPROVAL);
         step.setRelatedObjectUuid(entity.getUuid());
       }
 
@@ -503,12 +506,8 @@ public class Utils {
   private static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
-    newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing group
-    if (!newStep.getName().equals(oldStep.getName())) {
-      approvalStepDao.update(newStep);
-    } else if (!Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid())) {
-      approvalStepDao.update(newStep);
-    }
+    newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing step
+    approvalStepDao.update(newStep);
 
     if (newStep.getApprovers() != null) {
       Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).join(),

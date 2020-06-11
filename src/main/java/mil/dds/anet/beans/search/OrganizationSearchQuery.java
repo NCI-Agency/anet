@@ -23,12 +23,9 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
   @GraphQLQuery
   @GraphQLInputField
   private List<String> parentOrgUuid;
-  // Include descendants recursively from the specified parent.
-  // If true will include all orgs in the tree of the parentOrg
-  // Including the parent Org.
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean parentOrgRecursively;
+  private RecurseStrategy orgRecurseStrategy;
 
   public OrganizationSearchQuery() {
     super(OrganizationSearchSortBy.NAME);
@@ -66,18 +63,18 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
     this.parentOrgUuid = parentOrgUuid;
   }
 
-  public boolean getParentOrgRecursively() {
-    return Boolean.TRUE.equals(parentOrgRecursively);
+  public RecurseStrategy getOrgRecurseStrategy() {
+    return orgRecurseStrategy;
   }
 
-  public void setParentOrgRecursively(Boolean parentOrgRecursively) {
-    this.parentOrgRecursively = parentOrgRecursively;
+  public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
+    this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), status, type, hasParentOrg, parentOrgUuid,
-        parentOrgRecursively);
+        orgRecurseStrategy);
   }
 
   @Override
@@ -90,7 +87,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
         && Objects.equals(getType(), other.getType())
         && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
-        && Objects.equals(getParentOrgRecursively(), other.getParentOrgRecursively());
+        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy());
   }
 
 }

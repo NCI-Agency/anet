@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
 import { EngagementTrends } from "components/Trends"
@@ -6,6 +5,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Glyphicon, Panel } from "react-bootstrap"
+import Settings from "settings"
 
 const Kanban = ({ columns, allTasks }) => (
   <div
