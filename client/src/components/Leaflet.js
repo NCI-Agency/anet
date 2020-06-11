@@ -1,4 +1,6 @@
-import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
+import AppContext from "components/AppContext"
+import GeoLocation from "components/GeoLocation"
+import { Control, CRS, DivIcon, Icon, Map, Marker, TileLayer } from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
 import {
@@ -16,6 +18,9 @@ import "leaflet/dist/leaflet.css"
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import ReactDOM from "react-dom"
+import MARKER_FLAG_BLUE_2X from "resources/leaflet/marker-flag-blue-2x.png"
+import MARKER_FLAG_BLUE from "resources/leaflet/marker-flag-blue.png"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
@@ -64,6 +69,14 @@ const icon = new Icon({
   shadowSize: [41, 41]
 })
 
+const locationIcon = new Icon({
+  iconUrl: MARKER_FLAG_BLUE,
+  iconRetinaUrl: MARKER_FLAG_BLUE_2X,
+  iconSize: [64, 64],
+  iconAnchor: [18, 62],
+  popupAnchor: [2, -58]
+})
+
 const addLayers = (map, layerControl) => {
   let defaultLayer = null
   Settings.imagery.baseLayers.forEach(layerConfig => {
@@ -85,11 +98,12 @@ const addLayers = (map, layerControl) => {
   }
 }
 
-const Leaflet = ({
+const BaseLeaflet = ({
   width,
   height,
   marginBottom,
   markers,
+  allLocations,
   mapId: initialMapId,
   onMapClick
 }) => {
@@ -108,6 +122,7 @@ const Leaflet = ({
 
   const [map, setMap] = useState(null)
   const [markerLayer, setMarkerLayer] = useState(null)
+  const [layerControl, setLayerControl] = useState(null)
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
   const prevMarkersRef = useRef()
 
@@ -121,7 +136,8 @@ const Leaflet = ({
           icon: icon,
           draggable: m.draggable || false,
           autoPan: m.autoPan || false,
-          id: m.id
+          id: m.id,
+          zIndexOffset: 1000
         })
         if (m.name) {
           marker.bindPopup(m.name)
@@ -166,6 +182,7 @@ const Leaflet = ({
     const layerControl = new Control.Layers({}, {}, { collapsed: false })
     layerControl.addTo(newMap)
     addLayers(newMap, layerControl)
+    setLayerControl(layerControl)
 
     setMap(newMap)
 
@@ -238,20 +255,82 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
+  useEffect(() => {
+    if (!map || !layerControl || !allLocations?.length) {
+      return
+    }
+    const allMarkers = allLocations
+      .filter(loc => Location.hasCoordinates(loc))
+      .map(location => {
+        const popupContent = document.createElement("div")
+        popupContent.setAttribute("style", "width: 300px;text-align: center")
+
+        return new Marker([location.lat, location.lng], {
+          icon: locationIcon,
+          draggable: false,
+          autoPan: false,
+          id: location.uuid
+        })
+          .bindTooltip(location.name, {
+            direction: "top",
+            permanent: true,
+            offset: [0, -58]
+          })
+          .bindPopup(popupContent)
+          .on("popupopen", e => {
+            // TODO LinkTo component will be utilized here to provide routing
+            ReactDOM.render(
+              <>
+                <b>{location.name}</b> @{" "}
+                <GeoLocation lat={location.lat} lng={location.lng} />
+              </>,
+              e.popup.getContent()
+            )
+          })
+      })
+
+    const locationsLayer = new MarkerClusterGroup({
+      iconCreateFunction: function(cluster) {
+        return new DivIcon({
+          className: "all-locations-marker-cluster-icon-container",
+          html: `
+              <img src="${MARKER_FLAG_BLUE}" class="alm-cluster-icon" alt="" />
+              <div class="alm-cluster-text">${cluster.getChildCount()}</div>
+          `
+        })
+      }
+    }).addLayers(allMarkers)
+
+    layerControl.addOverlay(locationsLayer, "All Locations")
+    locationsLayer.addTo(map) // make "All Locations" selected by default
+
+    return () => {
+      layerControl.removeLayer(locationsLayer)
+      map.removeLayer(locationsLayer)
+    }
+  }, [map, layerControl, allLocations])
+
   return <div id={mapId} style={style} />
 }
-Leaflet.propTypes = {
+BaseLeaflet.propTypes = {
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   markers: PropTypes.array,
+  allLocations: PropTypes.arrayOf(PropTypes.object).isRequired,
   mapId: PropTypes.string, // pass this when you have more than one map on a page
   onMapClick: PropTypes.func
 }
-Leaflet.defaultProps = {
+BaseLeaflet.defaultProps = {
   width: "100%",
   height: "500px",
   marginBottom: "18px"
 }
+
+const Leaflet = props => (
+  <AppContext.Consumer>
+    {context => <BaseLeaflet allLocations={context.allLocations} {...props} />}
+  </AppContext.Consumer>
+)
 
 export default Leaflet
