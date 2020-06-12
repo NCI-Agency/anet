@@ -194,7 +194,9 @@ export default class Model {
   static listName = null
 
   static fromArray(array) {
-    if (!array) return []
+    if (!array) {
+      return []
+    }
 
     return array.map(object =>
       object instanceof this ? object : new this(object)
@@ -202,7 +204,9 @@ export default class Model {
   }
 
   static map(array, func) {
-    if (!array) return []
+    if (!array) {
+      return []
+    }
 
     return array.map((object, idx) =>
       object instanceof this ? func(object, idx) : func(new this(object), idx)
