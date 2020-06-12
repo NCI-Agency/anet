@@ -100,7 +100,9 @@ const BaseRelatedObjectNotes = ({
         const assessmentJson = utils.parseJsonSafe(assessment.text)
 
         questions.forEach(question => {
-          if (!counters[question.id]) counters[question.id] = {}
+          if (!counters[question.id]) {
+            counters[question.id] = {}
+          }
           const counter = counters[question.id]
           if (assessmentJson[question.id]) {
             counter[assessmentJson[question.id]] =

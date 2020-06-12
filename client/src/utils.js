@@ -189,7 +189,9 @@ Object.get = function(source, keypath) {
   while (keys[0]) {
     const key = keys.shift()
     source = source[key]
-    if (source === undefined || source === null) return source
+    if (source === undefined || source === null) {
+      return source
+    }
   }
   return source
 }
