@@ -65,7 +65,7 @@ SpecialField.propTypes = {
 
 const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
   if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
-    const fieldValue = Object.get(values, name) // name might be a path for a nested prop
+    const fieldValue = Object.get(values, name) || "" // name might be a path for a nested prop
     return (
       <FastField
         name={name}

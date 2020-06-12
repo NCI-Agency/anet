@@ -1271,7 +1271,8 @@ const BaseReportForm = ({
         ([key, value]) =>
           !EXCLUDED_ASSESSMENT_FIELDS.includes(key) &&
           value !== null &&
-          value !== undefined
+          value !== undefined &&
+          !utils.isEmptyHtml(value)
       ).length < 1
     )
   }
