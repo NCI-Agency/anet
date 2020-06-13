@@ -133,7 +133,9 @@ const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
     const csv = convertArrayOfObjectsToCSV({
       data: args.data
     })
-    if (csv === null) return
+    if (csv === null) {
+      return
+    }
 
     const filename = args.filename || "export-advisor-report.csv"
     var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
