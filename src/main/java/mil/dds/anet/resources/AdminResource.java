@@ -90,9 +90,16 @@ public class AdminResource {
   /**
    * Returns the project version saved during project build (build.gradle project.version)
    */
-  @GraphQLQuery(name = "projectVersion")
-  public String getProjectVersion() {
-    return config.getVersion();
+  @GET
+  @Timed
+  @Path("/projectVersion")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> getProjectVersion() {
+    return new HashMap() {
+      {
+        put("projectVersion", config.getVersion());
+      }
+    };
   }
 
   @GraphQLQuery(name = "userActivities")

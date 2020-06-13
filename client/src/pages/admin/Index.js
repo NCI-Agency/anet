@@ -12,10 +12,14 @@ import {
   useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
+import moment from "moment"
+import UserActivityTable from "pages/admin/UserActivityTable"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
+import { toast } from "react-toastify"
+import uuidv4 from "uuid/v4"
 
 const GQL_GET_ADMIN_SETTINGS = gql`
   query {
@@ -46,6 +50,10 @@ const USER_ACTIVITIES = gql`
   }
 `
 const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
+  const [userActivities, setUserActivities] = useState(null)
+  const [recentUsers, setRecentUsers] = useState(null)
+  const [actionLoading, setActionLoading] = useState(false)
+  const [lastLoaded, setLastLoaded] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -64,6 +72,22 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
 
   const settings = {}
   data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
+
+  const userActivitiesAndRecentUsersActionButton = (
+    <Button
+      disabled={actionLoading}
+      bsStyle="primary"
+      type="button"
+      onClick={loadUserActivitiesAndRecentUsers}
+    >
+      {Array.isArray(userActivities) || Array.isArray(recentUsers)
+        ? "Reload"
+        : "Load"}{" "}
+      User Activities & Recent Users
+    </Button>
+  )
+
+  const actionRowStyle = { display: "flex", alignItems: "center" }
 
   return (
     <div>
@@ -102,58 +126,83 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
           )
         }}
       </Formik>
-      <Fieldset title="Site actions" />
-      <Fieldset>
+      <Fieldset title="Site actions">
         <Grid fluid>
-          <Row style={{ padding: "8px 0" }}>
-            <Col md={2}>Recent Users</Col>
-            <Col md={10}>TODO ... </Col>
-          </Row>
-          <Row style={{ padding: "8px 0" }}>
-            <Col md={2}>Clear Cache</Col>
-            <Col md={10}>
-              <Button bsStyle="primary" type="button" onClick={clearCache}>
-                Clear
+          <Row style={{ paddingBottom: "24px", ...actionRowStyle }}>
+            <Col md={2}>
+              <Button
+                disabled={actionLoading}
+                bsStyle="primary"
+                type="button"
+                onClick={clearCache}
+                style={{ width: "100%" }}
+              >
+                Clear Cache
               </Button>
             </Col>
+            <Col md={10}>Clears the "Domain Users Cache"</Col>
           </Row>
-          <Row style={{ padding: "8px 0" }}>
-            <Col md={2}>Reload Dictionary</Col>
-            <Col md={10}>
+          <Row style={actionRowStyle}>
+            <Col md={2}>
               <Button
+                disabled={actionLoading}
                 bsStyle="primary"
                 type="button"
                 onClick={reloadDictionary}
+                style={{ width: "100%" }}
               >
-                Reload
+                Reload Dictionary
               </Button>
             </Col>
-          </Row>
-          <Row style={{ padding: "8px 0" }}>
-            <Col md={2}>User Activities</Col>
             <Col md={10}>
-              <Button
-                bsStyle="primary"
-                type="button"
-                onClick={userActivities}
-              >
-                Refresh
-              </Button>
+              Reloads the ANET Dictionary. After making changes in ANET
+              dictionary, reloading the dictionary makes those changes effective
+              immediately without restarting the server.
             </Col>
           </Row>
         </Grid>
       </Fieldset>
+      <Fieldset
+        title={getTitleText(userActivities, "User Activities")}
+        action={userActivitiesAndRecentUsersActionButton}
+      >
+        <UserActivityTable text="user activities" values={userActivities} />
+      </Fieldset>
+      <Fieldset
+        title={getTitleText(recentUsers, "Recent Users")}
+        action={userActivitiesAndRecentUsersActionButton}
+      >
+        <UserActivityTable text="recent users" values={recentUsers} />
+      </Fieldset>
     </div>
   )
 
+  function getTitleText(data, text) {
+    let title = text
+    if (data) {
+      title += ` (${data.length || 0})`
+    }
+    if (lastLoaded) {
+      title = (
+        <>
+          {title}{" "}
+          <span style={{ fontSize: "0.7em" }}>
+            Fetched @ {lastLoaded.format("HH:mm:ss")}
+          </span>
+        </>
+      )
+    }
+    return title
+  }
+
   function onSubmit(values, form) {
-    return save(values, form)
+    // settings as JSON
+    const settings = Object.map(values, (key, value) => ({ key, value }))
+    return API.mutation(GQL_SAVE_ADMIN_SETTINGS, { settings })
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
-        setSaveError(error)
-        setSaveSuccess()
+        handleError(error)
         form.setSubmitting(false)
-        jumpToTop()
       })
   }
 
@@ -168,48 +217,46 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
     refetch()
   }
 
-  function save(values, form) {
-    // settings as JSON
-    const settings = Object.map(values, (key, value) => ({ key, value }))
-    return API.mutation(GQL_SAVE_ADMIN_SETTINGS, { settings })
-  }
-
   function clearCache() {
-    return API.query(CLEAR_CACHE, {}).then(data => {
-      setSaveSuccess(data.clearCache)
-      setSaveError()
-      jumpToTop()
-    })
-    .catch(error => {
-      setSaveError(error)
-      setSaveSuccess()
-      jumpToTop()
-    })
+    setActionLoading(true)
+    return API.query(CLEAR_CACHE, {})
+      .then(result => toast.success(result?.clearCache))
+      .catch(handleError)
+      .finally(() => setActionLoading(false))
   }
 
   function reloadDictionary() {
-    return API.query(RELOAD_DICTIONARY, {}).then(data => {
-      setSaveSuccess(data.reloadDictionary)
-      jumpToTop()
-    })
-    .catch(error => {
-      setSaveError(error)
-      setSaveSuccess()
-      jumpToTop()
-    })
+    setActionLoading(true)
+    return API.query(RELOAD_DICTIONARY, {})
+      .then(result => toast.success(result?.reloadDictionary))
+      .catch(handleError)
+      .finally(() => setActionLoading(false))
   }
 
-  function userActivities() {
-    return API.query(USER_ACTIVITIES, {}).then(data => {
-      // TODO: Place a table to present data
-      setSaveSuccess()
-      console.log(data.userActivities)
-    })
-    .catch(error => {
-      setSaveError(error)
-      setSaveSuccess()
-      jumpToTop()
-    })
+  function loadUserActivitiesAndRecentUsers() {
+    setActionLoading(true)
+    return API.query(USER_ACTIVITIES, {})
+      .then(data => {
+        const recentCalls = data?.userActivities?.recentCalls || []
+        recentCalls.forEach(ua => (ua.uuid = uuidv4()))
+        setUserActivities(recentCalls)
+
+        const users = Object.map(data?.userActivities?.users || {}, (k, v) => ({
+          ...v[0],
+          uuid: uuidv4()
+        }))
+        setRecentUsers(users)
+        setLastLoaded(moment())
+        toast.success("User activities & recent users are loaded succesfully")
+      })
+      .catch(handleError)
+      .finally(() => setActionLoading(false))
+  }
+
+  function handleError(error) {
+    setSaveError(error)
+    setSaveSuccess()
+    jumpToTop()
   }
 }
 

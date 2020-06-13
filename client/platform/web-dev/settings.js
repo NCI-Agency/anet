@@ -18,4 +18,8 @@ const Settings = JSON.parse(
   loadFileAjaxSync("/api/admin/dictionary", "application/json")
 )
 
-export default Settings
+const ProjectVersion = JSON.parse(
+  loadFileAjaxSync("/api/admin/projectVersion", "application/json")
+)
+const Version = ProjectVersion.projectVersion
+export { Version, Settings as default }
