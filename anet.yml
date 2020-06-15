@@ -166,7 +166,8 @@ logging:
           currentLogFilename: ./logs/userActivities.log
           archivedLogFilenamePattern: ./logs/userActivities-%i.log.zip
           archivedFileCount: 1
-          logFormat: '{"time":"%d{yyyy-MM-dd HH:mm,UTC}", %m}%n'
+          logFormat: '{"time":"%d{yyyy-MM-dd HH:mm}", %m}%n'
+          timeZone: system
   appenders:
     - type: console
       threshold: TRACE
