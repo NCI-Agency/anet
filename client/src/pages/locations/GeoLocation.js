@@ -15,7 +15,7 @@ const GeoLocation = ({
   lat,
   lng,
   setFieldTouched,
-  setFieldValue,
+  setValues,
   isSubmitting,
   editable,
   displayType
@@ -61,7 +61,10 @@ const GeoLocation = ({
             component={FieldHelper.InputFieldNoLabel}
             onBlur={() => {
               setTouched(true)
-              setFieldValue("lat", Location.parseCoordinate(lat))
+              setValues({
+                lat: Location.parseCoordinate(lat),
+                lng: Location.parseCoordinate(lng)
+              })
             }}
           />
         </Col>
@@ -71,7 +74,10 @@ const GeoLocation = ({
             component={FieldHelper.InputFieldNoLabel}
             onBlur={() => {
               setTouched(true)
-              setFieldValue("lng", Location.parseCoordinate(lng))
+              setValues({
+                lat: Location.parseCoordinate(lat),
+                lng: Location.parseCoordinate(lng)
+              })
             }}
           />
         </Col>
@@ -83,8 +89,7 @@ const GeoLocation = ({
               buttonStyle="link"
               onClick={() => {
                 setTouched(false) // prevent validation since lat, lng can be null together
-                setFieldValue("lat", null)
-                setFieldValue("lng", null)
+                setValues({ lat: null, lng: null })
               }}
               disabled={isSubmitting}
             />
@@ -107,7 +112,7 @@ GeoLocation.propTypes = {
   lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   setFieldTouched: fnRequiredWhenEditable,
-  setFieldValue: fnRequiredWhenEditable,
+  setValues: fnRequiredWhenEditable,
   isSubmitting: PropTypes.bool,
   editable: PropTypes.bool,
   displayType: PropTypes.oneOf([
