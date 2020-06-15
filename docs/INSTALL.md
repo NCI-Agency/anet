@@ -105,7 +105,7 @@ On the ANET server:
 Alternatively, an experimental service update script is available in the `doc` folder. 
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file. This file follows the Dropwizard configuration format ( https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration ). Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `anet.yml` file. This file follows the Dropwizard configuration format ( https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration ). If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
 	- account deactivation worker: When development mode is `true`, the account deactivation worker is run directly at start-up (as well as at the set interval).
