@@ -71,6 +71,11 @@ public class AdminResource {
     return config.getDictionary();
   }
 
+  /**
+   * If anet-dictionary.yml file is changed manually while ANET is up and running This method can be
+   * used to reload the dictionary with new values In this way, ANET does not need to be restarted
+   * to load new values
+   */
   @GraphQLQuery(name = "reloadDictionary")
   public String reloadDictionary(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -80,6 +85,9 @@ public class AdminResource {
     return AnetConstants.DICTIONARY_RELOAD_MESSAGE;
   }
 
+  /**
+   * Clears Domain Users Cache
+   */
   @GraphQLQuery(name = "clearCache")
   public String clearCache(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -88,7 +96,9 @@ public class AdminResource {
   }
 
   /**
-   * Returns the project version saved during project build (build.gradle project.version)
+   * Returns the project version which is saved during project build (See project.version definition
+   * in build.gradle file) Right after project information is written into version.properties file
+   * on startup,it is read and set with AnetConfiguration loadVersion method
    */
   @GET
   @Timed
@@ -102,6 +112,9 @@ public class AdminResource {
     };
   }
 
+  /**
+   * Returns user logs in descending order of time
+   */
   @GraphQLQuery(name = "userActivities")
   public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context)
       throws IOException {

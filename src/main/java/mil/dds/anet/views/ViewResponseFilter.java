@@ -49,7 +49,13 @@ public class ViewResponseFilter implements ContainerResponseFilter {
       responseContext.getHeaders().put(HttpHeaders.CACHE_CONTROL,
           ImmutableList.of("no-store, no-cache, must-revalidate, post-check=0, pre-check=0"));
       responseContext.getHeaders().put(HttpHeaders.PRAGMA, ImmutableList.of("no-cache"));
+
+      // Only POST methods should be logged , otherwise GET methods results with exception
       if (!HttpMethod.GET.equals(requestContext.getMethod())) {
+
+        // This code snippet resolves the situation that caused empty user information to be written
+        // to the access.log file
+        // Start
         Request baseRequest = Request.getBaseRequest(request);
         Principal userPrincipal = new Principal() {
           @Override
@@ -61,6 +67,9 @@ public class ViewResponseFilter implements ContainerResponseFilter {
         };
         UserIdentity userId = new DefaultUserIdentity(null, userPrincipal, null);
         baseRequest.setAuthentication(new UserAuthentication(null, userId));
+        // End
+
+        // Log necessary information into userActivities.log file
         logger.info("\"ip\": \"{}\" , \"user\": \"{}\" , \"referer\": \"{}\"",
             request.getRemoteAddr(), userPrincipal.getName(),
             requestContext.getHeaderString("referer"));
