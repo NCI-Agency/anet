@@ -6,5 +6,5 @@ const anetConfig = jsyaml.safeLoad(
   fs.readFileSync(process.env.ANET_CONFIG, "utf8")
 )
 const Settings = anetConfig.dictionary
-
-export default Settings
+const Version = window.ANET_DATA.projectVersion
+export { Version, Settings as default }
