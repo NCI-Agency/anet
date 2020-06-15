@@ -64,11 +64,11 @@ keycloakConfiguration:
 
 ########################################################
 ### The below is the default Dropwizard Configuration
-### See http://www.dropwizard.io/1.0.6/docs/manual/configuration.html#man-configuration
+### See https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration
 ### For all of the possible configuration options. 
 #########################################################
 # Configuration for the database Server
-# See http://www.dropwizard.io/1.0.6/docs/manual/jdbi.html#configuration
+# See https://www.dropwizard.io/en/latest/manual/configuration.html#database
 database:
   driverClass: ${ANET_DB_DRIVER}
   user: ${ANET_DB_USERNAME}
@@ -80,7 +80,7 @@ database:
 
 
 # Configuration for the web servers HTTP connectors. 
-# See http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration
+# See https://www.dropwizard.io/en/latest/manual/configuration.html#connectors
 server:
   applicationConnectors:
     - type: http
