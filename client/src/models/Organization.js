@@ -1,6 +1,6 @@
-import { Settings } from "api"
 import Model from "components/Model"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 

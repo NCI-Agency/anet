@@ -1,11 +1,11 @@
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { DateInput, TimePrecision } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
-import { Settings } from "api"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import CALENDAR_ICON from "resources/calendar.png"
+import Settings from "settings"
 import "./BlueprintOverrides.css"
 
 const CalendarIcon = inputRef => (

@@ -3142,6 +3142,12 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-approvalSteps-restrictedApproval" author="gjvoosten">
+		<addColumn tableName="approvalSteps">
+			<column name="restrictedApproval" type="boolean" defaultValue="false" />
+		</addColumn>
+	</changeSet>
+
 	<changeSet id="create-emailDeactivationWarnings-table" author="jose-west">
 		<comment>Add a table to support a robust email deactivation warning mechanism.</comment>
 		<createTable tableName="emailDeactivationWarnings">

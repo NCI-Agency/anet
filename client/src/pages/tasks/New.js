@@ -1,5 +1,5 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import {
   PageDispatchersPropType,
@@ -11,6 +11,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation } from "react-router-dom"
+import Settings from "settings"
 import utils from "utils"
 import TaskForm from "./Form"
 
@@ -30,14 +31,10 @@ const TaskNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
   const qs = utils.parseQueryString(routerLocation.search)
   if (qs.taskedOrgUuid) {
-    const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
-      uuid: qs.taskedOrgUuid
-    })
     return (
-      <TaskNewConditional
+      <TaskNewFetchTaskedOrg
+        taskedOrgUuid={qs.taskedOrgUuid}
         pageDispatchers={pageDispatchers}
-        {...queryResult}
-        orgUuid={qs.taskedOrgUuid}
       />
     )
   }
@@ -45,6 +42,24 @@ const TaskNew = ({ pageDispatchers }) => {
 }
 
 TaskNew.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
+
+const TaskNewFetchTaskedOrg = ({ taskedOrgUuid, pageDispatchers }) => {
+  const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
+    uuid: taskedOrgUuid
+  })
+  return (
+    <TaskNewConditional
+      pageDispatchers={pageDispatchers}
+      {...queryResult}
+      orgUuid={taskedOrgUuid}
+    />
+  )
+}
+
+TaskNewFetchTaskedOrg.propTypes = {
+  taskedOrgUuid: PropTypes.string.isRequired,
   pageDispatchers: PageDispatchersPropType
 }
 

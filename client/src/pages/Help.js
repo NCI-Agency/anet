@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
@@ -13,6 +13,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
+import Settings from "settings"
 
 const GQL_GET_POSITION_LIST = gql`
   query($positionQuery: PositionSearchQueryInput) {
@@ -42,28 +43,18 @@ const BaseHelp = ({ appSettings, currentUser, pageDispatchers }) => {
     currentUser.position &&
     currentUser.position.organization
   ) {
-    // Retrieve super users
-    const positionQuery = {
-      pageSize: 0, // retrieve all these positions
-      type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR],
-      status: Position.STATUS.ACTIVE,
-      organizationUuid: currentUser.position.organization.uuid
-    }
-    const queryResult = API.useApiQuery(GQL_GET_POSITION_LIST, {
-      positionQuery
-    })
     return (
-      <BaseHelpConditional
+      <BaseHelpFetchSuperUsers
+        orgUuid={currentUser.position.organization.uuid}
         appSettings={appSettings}
         currentUser={currentUser}
         pageDispatchers={pageDispatchers}
-        {...queryResult}
-        orgUuid={currentUser.position.organization.uuid}
       />
     )
   }
   return (
     <BaseHelpConditional
+      appSettings={appSettings}
       currentUser={currentUser}
       pageDispatchers={pageDispatchers}
     />
@@ -71,6 +62,40 @@ const BaseHelp = ({ appSettings, currentUser, pageDispatchers }) => {
 }
 
 BaseHelp.propTypes = {
+  appSettings: PropTypes.object,
+  currentUser: PropTypes.instanceOf(Person),
+  pageDispatchers: PageDispatchersPropType
+}
+
+const BaseHelpFetchSuperUsers = ({
+  orgUuid,
+  appSettings,
+  currentUser,
+  pageDispatchers
+}) => {
+  // Retrieve super users
+  const positionQuery = {
+    pageSize: 0, // retrieve all these positions
+    type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR],
+    status: Position.STATUS.ACTIVE,
+    organizationUuid: orgUuid
+  }
+  const queryResult = API.useApiQuery(GQL_GET_POSITION_LIST, {
+    positionQuery
+  })
+  return (
+    <BaseHelpConditional
+      appSettings={appSettings}
+      currentUser={currentUser}
+      pageDispatchers={pageDispatchers}
+      {...queryResult}
+      orgUuid={orgUuid}
+    />
+  )
+}
+
+BaseHelpFetchSuperUsers.propTypes = {
+  orgUuid: PropTypes.string.isRequired,
   appSettings: PropTypes.object,
   currentUser: PropTypes.instanceOf(Person),
   pageDispatchers: PageDispatchersPropType

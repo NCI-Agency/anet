@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
@@ -29,6 +29,7 @@ import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {

@@ -31,6 +31,7 @@ jobs:
         java-version: 1.8
     - run: echo "::add-path::./.gradle/yarn/yarn-latest/bin"
     - run: echo "::add-path::./.gradle/nodejs/*/bin"
+    - run: echo "::set-env name=CHROMEDRIVER_FILEPATH::$CHROMEWEBDRIVER/chromedriver"
     - name: cache gradle
       uses: actions/cache@v1
       with:
@@ -112,6 +113,7 @@ jobs:
         java-version: 1.8
     - run: echo "::add-path::./.gradle/yarn/yarn-latest/bin"
     - run: echo "::add-path::./.gradle/nodejs/*/bin"
+    - run: echo "::set-env name=CHROMEDRIVER_FILEPATH::$CHROMEWEBDRIVER/chromedriver"
     - uses: actions/cache@v1
       with:
         path: ~/.gradle/caches
@@ -159,6 +161,7 @@ jobs:
         BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+        NODE_OPTIONS: '--max-old-space-size=8192 --throw-deprecation'
     - name: Notify slack success
       if: success()
       env:

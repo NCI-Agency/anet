@@ -31,6 +31,8 @@ public class ApprovalStep extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   String name;
+  // annotated below
+  private Boolean restrictedApproval;
 
   @GraphQLQuery(name = "approvers")
   public CompletableFuture<List<Position>> loadApprovers(
@@ -86,26 +88,53 @@ public class ApprovalStep extends AbstractAnetBean {
     this.type = type;
   }
 
+  @GraphQLQuery
+  public boolean isRestrictedApproval() {
+    return Boolean.TRUE.equals(restrictedApproval);
+  }
+
+  @GraphQLInputField
+  public void setRestrictedApproval(Boolean restrictedApproval) {
+    this.restrictedApproval = restrictedApproval;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof ApprovalStep)) {
       return false;
     }
     ApprovalStep as = (ApprovalStep) o;
-    return Objects.equals(uuid, as.getUuid()) && Objects.equals(name, as.getName())
-        && Objects.equals(nextStepUuid, as.getNextStepUuid()) && Objects.equals(type, as.getType())
-        && Objects.equals(relatedObjectUuid, as.getRelatedObjectUuid());
+    return Objects.equals(getUuid(), as.getUuid()) && Objects.equals(getName(), as.getName())
+        && Objects.equals(getNextStepUuid(), as.getNextStepUuid())
+        && Objects.equals(getType(), as.getType())
+        && Objects.equals(getRelatedObjectUuid(), as.getRelatedObjectUuid())
+        && Objects.equals(isRestrictedApproval(), as.isRestrictedApproval());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, approvers, name, nextStepUuid, relatedObjectUuid, type);
+    return Objects.hash(uuid, approvers, name, nextStepUuid, relatedObjectUuid, type,
+        restrictedApproval);
   }
 
   @Override
   public String toString() {
     return String.format("%s - %s, aoid: %s, nsid: %s", uuid, name, relatedObjectUuid,
         nextStepUuid);
+  }
+
+  @Override
+  protected ApprovalStep clone() {
+    final ApprovalStep clone = new ApprovalStep();
+    clone.setUuid(uuid);
+    clone.setName(name);
+    clone.setNextStepUuid(nextStepUuid);
+    clone.setType(type);
+    clone.setRelatedObjectUuid(relatedObjectUuid);
+    clone.setRestrictedApproval(restrictedApproval);
+    clone.setCreatedAt(createdAt);
+    clone.setUpdatedAt(updatedAt);
+    return clone;
   }
 
 }
