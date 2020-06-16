@@ -49,30 +49,30 @@ public class ViewResponseFilter implements ContainerResponseFilter {
       responseContext.getHeaders().put(HttpHeaders.CACHE_CONTROL,
           ImmutableList.of("no-store, no-cache, must-revalidate, post-check=0, pre-check=0"));
       responseContext.getHeaders().put(HttpHeaders.PRAGMA, ImmutableList.of("no-cache"));
-
       // Only POST methods should be logged , otherwise GET methods results with exception
       if (!HttpMethod.GET.equals(requestContext.getMethod())) {
+        if (requestContext.getSecurityContext().getUserPrincipal() != null) {
+          // This code snippet resolves the situation that caused empty user information to be
+          // written to the access.log file
+          // Start
+          Principal userPrincipal = new Principal() {
+            @Override
+            public String getName() {
+              final SecurityContext secContext = requestContext.getSecurityContext();
+              Principal p = secContext.getUserPrincipal();
+              return p.getName();
+            }
+          };
+          UserIdentity userId = new DefaultUserIdentity(null, userPrincipal, null);
+          Request baseRequest = Request.getBaseRequest(request);
+          baseRequest.setAuthentication(new UserAuthentication(null, userId));
+          // End
 
-        // This code snippet resolves the situation that caused empty user information to be written
-        // to the access.log file
-        // Start
-        Request baseRequest = Request.getBaseRequest(request);
-        Principal userPrincipal = new Principal() {
-          @Override
-          public String getName() {
-            final SecurityContext secContext = requestContext.getSecurityContext();
-            Principal p = secContext.getUserPrincipal();
-            return p.getName();
-          }
-        };
-        UserIdentity userId = new DefaultUserIdentity(null, userPrincipal, null);
-        baseRequest.setAuthentication(new UserAuthentication(null, userId));
-        // End
-
-        // Log necessary information into userActivities.log file
-        logger.info("\"ip\": \"{}\" , \"user\": \"{}\" , \"referer\": \"{}\"",
-            request.getRemoteAddr(), userPrincipal.getName(),
-            requestContext.getHeaderString("referer"));
+          // Log necessary information into userActivities.log file
+          logger.info("\"ip\": \"{}\" , \"user\": \"{}\" , \"referer\": \"{}\"",
+              request.getRemoteAddr(), userPrincipal.getName(),
+              requestContext.getHeaderString("referer"));
+        }
       }
     } else {
       responseContext.getHeaders().put(HttpHeaders.CACHE_CONTROL,

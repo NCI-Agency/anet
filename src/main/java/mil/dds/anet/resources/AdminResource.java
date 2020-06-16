@@ -72,9 +72,8 @@ public class AdminResource {
   }
 
   /**
-   * If anet-dictionary.yml file is changed manually while ANET is up and running This method can be
-   * used to reload the dictionary with new values In this way, ANET does not need to be restarted
-   * to load new values
+   * If anet-dictionary.yml file is changed manually while ANET is up and running ,this method can
+   * be used to reload the dictionary with new values without restarting the server
    */
   @GraphQLQuery(name = "reloadDictionary")
   public String reloadDictionary(@GraphQLRootContext Map<String, Object> context) {
@@ -140,9 +139,9 @@ public class AdminResource {
       // Group all entries through user value
       userActivities.computeIfAbsent(map.get("user"), k -> new LinkedHashSet<>()).add(entries);
       // In addition to keeping entries with the user key value,
-      // It is also necessary to hold all these entries with recentCalls key
-      // So we will have 2 result set : One is grouped by user values
-      // The other one is "recentCalls" which holds all entries without grouping them
+      // it is also necessary to hold all these entries with recentCalls key
+      // so we will have 2 result set : One is grouped by user values
+      // the other one is "recentCalls" which holds all entries without grouping them
       recentCalls.computeIfAbsent("recentCalls", k -> new LinkedHashSet<>()).add(entries);
     }
     br.close();
