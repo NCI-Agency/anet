@@ -30,7 +30,7 @@ public abstract class AbstractAuthorizationGroupSearcher
     qb.addTotalCount();
     qb.addFromClause("\"authorizationGroups\"");
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -57,8 +57,6 @@ public abstract class AbstractAuthorizationGroupSearcher
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(AuthorizationGroupSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
       AuthorizationGroupSearchQuery query) {

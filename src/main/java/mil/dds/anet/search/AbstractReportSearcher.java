@@ -87,7 +87,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
     // Base select and from clauses are added by child classes
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -274,8 +274,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(ReportSearchQuery query);
 
   protected abstract void addBatchClause(ReportSearchQuery query);
 
