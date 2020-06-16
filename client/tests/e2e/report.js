@@ -32,8 +32,8 @@ test.serial("Draft and submit a report", async t => {
 
   await pageHelpers.clickTodayButton()
 
-  const $intent = await $("#intent")
-  await $intent.click() // click intent to make sure the date picker is being closed
+  const $intent = await $('label[for="intent"]')
+  await $intent.click() // click intent label to make sure the date picker is being closed
 
   await pageHelpers.writeInForm("#duration", "30")
   await t.context.driver.sleep(shortWaitMs) // wait for the datepicker to pop up
@@ -448,7 +448,7 @@ test.serial(
       )
 
       await $input.sendKeys("user input")
-      await $input.sendKeys(t.context.Key.TAB) // fire blur event
+      await $searchBarInput.click() // fire blur event
       t.false(
         _includes(await $fieldGroup.getAttribute("class"), warningClass),
         `After typing in ${fieldName} field, warning state goes away`

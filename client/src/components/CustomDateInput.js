@@ -30,18 +30,21 @@ const CustomDateInput = ({
   withTime,
   value,
   onChange,
-  onBlur
+  onBlur,
+  fullWidth,
+  allDay
 }) => {
   const inputRef = useRef()
   const rightElement = showIcon && CalendarIcon(inputRef.current)
   const width = 8 + (showIcon ? 3 : 0) + (withTime ? 3 : 0)
-  const style = { width: `${width}em`, fontSize: "1.1em" }
-  const dateFormats = withTime
-    ? Settings.dateFormats.forms.input.withTime
-    : Settings.dateFormats.forms.input.date
+  const style = { width: fullWidth ? "100%" : `${width}em`, fontSize: "1.1em" }
+  const dateFormats =
+    withTime && !allDay
+      ? Settings.dateFormats.forms.input.withTime
+      : Settings.dateFormats.forms.input.date
   const inputFormat = dateFormats[0]
   const timePickerProps = !withTime
-    ? {}
+    ? undefined
     : {
       precision: TimePrecision.MINUTE,
       selectAllOnFocus: true
@@ -70,6 +73,7 @@ const CustomDateInput = ({
       timePickerProps={timePickerProps}
       popoverProps={{ usePortal: false }}
       disabled={disabled}
+      fill={fullWidth}
     />
   )
 }
@@ -84,12 +88,16 @@ CustomDateInput.propTypes = {
     PropTypes.instanceOf(Date)
   ]),
   onChange: PropTypes.func,
-  onBlur: PropTypes.func
+  onBlur: PropTypes.func,
+  fullWidth: PropTypes.bool,
+  allDay: PropTypes.bool
 }
 CustomDateInput.defaultProps = {
   disabled: false,
   showIcon: true,
-  withTime: false
+  withTime: false,
+  fullWidth: false,
+  allDay: true
 }
 
 export default CustomDateInput
