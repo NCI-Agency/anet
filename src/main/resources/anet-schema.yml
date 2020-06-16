@@ -360,7 +360,7 @@ properties:
                       "$ref": "#/definitions/customField"
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
-          projectedCompletion: 
+          projectedCompletion:
             "$ref": "#/definitions/inputField"
           plannedCompletion:
             "$ref": "#/definitions/inputField"
@@ -441,9 +441,7 @@ properties:
             title: The label for a person's domain username
             description: Used in the UI where a person's domain username is shown.
           emailAddress:
-            type: string
-            title: The label for a person's email address
-            description: Used in the UI where a person's email address is shown.
+            "$ref": "#/definitions/inputField"
           phoneNumber:
             type: string
             title: The label for a person's phone number
@@ -803,7 +801,7 @@ properties:
   decisives:
     type: array
 
-    
+
   automaticallyInactivateUsers:
     type: object
     required: [emailRemindersDaysPrior, checkIntervalInSecs]

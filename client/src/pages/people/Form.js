@@ -396,8 +396,13 @@ const BasePersonForm = ({
               <Fieldset title="Additional information">
                 <FastField
                   name="emailAddress"
-                  label={Settings.fields.person.emailAddress}
+                  label={Settings.fields.person.emailAddress.label}
                   type="email"
+                  placeholder={
+                    values.role === Person.ROLE.ADVISOR
+                      ? Settings.fields.person.emailAddress.placeholder
+                      : ""
+                  }
                   component={FieldHelper.InputField}
                 />
                 <FastField

@@ -234,7 +234,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 />
                 <Field
                   name="emailAddress"
-                  label={Settings.fields.person.emailAddress}
+                  label={Settings.fields.person.emailAddress.label}
                   component={FieldHelper.ReadonlyField}
                   humanValue={emailHumanValue}
                 />

@@ -85,7 +85,7 @@ export default class Person extends Model {
           )
         )
         .default("")
-        .label(Settings.fields.person.emailAddress),
+        .label(Settings.fields.person.emailAddress.label),
       country: yup
         .string()
         .nullable()

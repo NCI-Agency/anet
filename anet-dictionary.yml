@@ -252,7 +252,9 @@ dictionary:
       firstName: First name
       lastName: Last name
       domainUsername: Domain username
-      emailAddress: Email
+      emailAddress:
+        label: Email
+        placeholder: Only the following email domain names are allowed. ( cmil.mil ,mission.ita ,nato.int ,dds.mil ,*.isaf.nato.int )
       phoneNumber: Phone
       country: Nationality
       code: ID card number
