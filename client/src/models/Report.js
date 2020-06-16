@@ -106,7 +106,26 @@ export default class Report extends Model {
         .nullable()
         .required("You must provide the Date of Engagement")
         .default(null),
-      duration: yup.number().nullable().default(null),
+      duration: yup
+        .number()
+        .nullable()
+        .test(
+          "duration",
+          "Duration must be defined when engagement time is set!",
+          function(duration) {
+            const { engagementDate } = this.parent
+            if (
+              !engagementDate ||
+              moment(engagementDate).isSame(
+                moment(engagementDate).startOf("day")
+              )
+            ) {
+              return true
+            }
+            return !!duration
+          }
+        )
+        .default(null),
       // not actually in the database, but used for validation:
       cancelled: yup
         .boolean()

@@ -35,6 +35,9 @@ test.serial("Draft and submit a report", async t => {
   const $intent = await $("#intent")
   await $intent.click() // click intent to make sure the date picker is being closed
 
+  await pageHelpers.writeInForm("#duration", "30")
+  await t.context.driver.sleep(shortWaitMs) // wait for the datepicker to pop up
+
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
     "general hospit"
