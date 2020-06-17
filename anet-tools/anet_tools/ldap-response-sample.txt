@@ -1,0 +1,5 @@
+[('CN=Mika Hakkinen,CN=Users,DC=company,DC=com,DC=tr', {'mail': ['mika.hakkinen@mail.com.tr'], 'displayName': ['Hakkinen, Mika'], 'sAMAccountName': ['mika.hakkinen']}),
+('CN=Kimi Raikkonen,CN=Users,DC=company,DC=com,DC=tr', {'mail': ['kimi.raikkonen@mail.com.tr'], 'displayName': ['Raikkonen, Kimi'], 'sAMAccountName': ['kimi.raikkonen']}),
+('CN=Sebastian Vettel,CN=Users,DC=company,DC=com,DC=tr', {'mail': ['sebastian.vettel@mail.com.tr'], 'displayName': ['Vettel, Sebastian'], 'sAMAccountName': ['sebastian.vettel']}),
+('CN=Lewis Hamilton,CN=Users,DC=company,DC=com,DC=tr', {'mail': ['lewis.hamilton@mail.com.tr'], 'displayName': ['Hamilton, Lewis'], 'sAMAccountName': ['lewis.hamilton']}),
+('CN=Max Verstappen,CN=Users,DC=company,DC=com,DC=tr', {'mail': ['max.verstappen@mail.com.tr'], 'displayName': ['Verstappen, Max'], 'sAMAccountName': ['max.verstappen']})]
