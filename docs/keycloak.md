@@ -53,6 +53,11 @@ A Keycloak container running on e.g. a Red Hat platform that gets its users from
 ### Realm definition
 ![Realm definition](images/keycloak-ad-realm.png)
 
+### Mapping first name from AD to the realm
+To get newly on-boarded user's first names correctly mapped from AD to the realm, you may want to add a mapper **first name** to the realm:
+![Realm mappers](images/keycloak-ad-realm-mappers.png)
+![Realm first name mapper](images/keycloak-ad-realm-first-name-mapper.png)
+
 ### Confidential client definition (used by the server-side)
 ![Confidential client definition](images/keycloak-ad-client.png)
 

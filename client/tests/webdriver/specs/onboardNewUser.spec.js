@@ -3,6 +3,12 @@ import OnboardPage from "../pages/onboard.page"
 
 import CreatePerson from "../pages/createNewPerson.page"
 
+const ONBOARD_USER = {
+  lastName: "BONNSDOTTIR",
+  firstName: "Bonny",
+  emailAddress: "bonny@nato.int"
+}
+
 describe("Onboard new user login", () => {
   it("Should show onboard welcome", () => {
     OnboardPage.openAsOnboardUser()
@@ -15,6 +21,18 @@ describe("Onboard new user login", () => {
 
   it("Should click on create your account", () => {
     OnboardPage.createYourAccountBtn.click()
+    // Check that these are properly copied from the authentication server
+    CreatePerson.lastName.waitForDisplayed()
+    CreatePerson.lastName.waitForExist()
+    expect(CreatePerson.lastName.getValue()).to.equal(ONBOARD_USER.lastName)
+    CreatePerson.firstName.waitForDisplayed()
+    CreatePerson.firstName.waitForExist()
+    expect(CreatePerson.firstName.getValue()).to.equal(ONBOARD_USER.firstName)
+    CreatePerson.emailAddress.waitForDisplayed()
+    CreatePerson.emailAddress.waitForExist()
+    expect(CreatePerson.emailAddress.getValue()).to.equal(
+      ONBOARD_USER.emailAddress
+    )
   })
 
   it("Should not save if endOfTourDate is not in the future", () => {

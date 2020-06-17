@@ -73,11 +73,13 @@ import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.HttpsRedirectFilter;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
@@ -172,15 +174,23 @@ public class AnetApplication extends Application<AnetConfiguration> {
           protected Person prepareAuthentication(KeycloakSecurityContext securityContext,
               HttpServletRequest request, KeycloakConfiguration keycloakConfiguration) {
             final PersonDao dao = AnetObjectEngine.getInstance().getPersonDao();
-            final String username = securityContext.getToken().getPreferredUsername();
+            final AccessToken token = securityContext.getToken();
+            final String username = token.getPreferredUsername();
             final List<Person> p = dao.findByDomainUsername(username);
             if (p.isEmpty()) {
               // First time this user has ever logged in.
               final Person person = new Person();
-              person.setDomainUsername(username);
-              person.setName("");
               person.setRole(Role.ADVISOR);
               person.setStatus(PersonStatus.NEW_USER);
+              // Copy some data from the authentication token
+              person.setDomainUsername(username);
+              person.setName(getCombinedName(token));
+              person.setEmailAddress(token.getEmail());
+              /*
+               * Note: there's also token.getGender(), but that's not generally available in
+               * AD/LDAP, and token.getPhoneNumber(), but that requires scope="openid phone" on the
+               * authentication request, which is hard to accomplish with current Keycloak code.
+               */
               return dao.insert(person);
             }
             return p.get(0);
@@ -197,6 +207,30 @@ public class AnetApplication extends Application<AnetConfiguration> {
             return false;
           }
         };
+      }
+
+      private String getCombinedName(AccessToken token) {
+        final StringBuilder combinedName = new StringBuilder();
+        // Try to combine FAMILYNAME, GivenName MiddleName
+        final String fn = Utils.trimStringReturnNull(token.getFamilyName());
+        if (!Utils.isEmptyOrNull(fn)) {
+          combinedName.append(fn.toUpperCase());
+          final String gn = Utils.trimStringReturnNull(token.getGivenName());
+          if (!Utils.isEmptyOrNull(gn)) {
+            combinedName.append(", ");
+            combinedName.append(gn);
+          }
+          final String mn = Utils.trimStringReturnNull(token.getMiddleName());
+          if (!Utils.isEmptyOrNull(mn)) {
+            combinedName.append(" ");
+            combinedName.append(mn);
+          }
+        }
+        // Fall back to just the name
+        if (combinedName.length() == 0) {
+          combinedName.append(token.getName());
+        }
+        return combinedName.toString();
       }
     });
 

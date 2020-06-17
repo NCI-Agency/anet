@@ -425,6 +425,9 @@
     "enabled" : true,
     "totp" : false,
     "emailVerified" : false,
+    "firstName" : "Bonny",
+    "lastName" : "Bonnsdottir",
+    "email" : "bonny@nato.int",
     "credentials" : [ {
       "id" : "51275415-1296-42ef-a759-4ab695afe21b",
       "type" : "password",
