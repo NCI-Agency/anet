@@ -79,7 +79,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   static class SelfIdBatcher extends IdBatcher<Position> {
-
     private static final String sql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
         + "FROM positions WHERE positions.uuid IN ( <uuids> )";
 
@@ -96,7 +95,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   static class PersonPositionHistoryBatcher extends ForeignKeyBatcher<PersonPositionHistory> {
-
     private static final String sql =
         "/* batch.getPositionHistory */ SELECT * FROM \"peoplePositions\" "
             + "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
@@ -113,7 +111,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   static class PositionsBatcher extends ForeignKeyBatcher<Position> {
-
     private static final String sql =
         "/* batch.getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS + " FROM positions "
             + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> )";
@@ -130,7 +127,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   static class PositionSearchBatcher extends SearchQueryBatcher<Position, PositionSearchQuery> {
-
     public PositionSearchBatcher() {
       super(AnetObjectEngine.getInstance().getPositionDao());
     }
@@ -405,7 +401,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   static class AssociatedPositionsBatcher extends ForeignKeyBatcher<Position> {
-
     private static final String sql = "/* batch.getAssociatedPositionsForPosition */ SELECT "
         + POSITIONS_FIELDS
         + ", CASE WHEN positions.uuid = \"positionRelationships\".\"positionUuid_a\""

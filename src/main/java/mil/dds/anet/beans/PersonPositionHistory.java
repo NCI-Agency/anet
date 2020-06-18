@@ -131,5 +131,4 @@ public class PersonPositionHistory extends AbstractAnetBean {
             pph -> (pph != null && pph.getPersonUuid() != null && pph.getPositionUuid() != null))
         .collect(Collectors.toList());
   }
-
 }
