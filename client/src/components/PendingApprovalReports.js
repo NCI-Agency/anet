@@ -63,7 +63,9 @@ const Chart = ({
       return []
     }
     reportsList = reportsList.map(d => {
-      if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg
+      if (!d.advisorOrg) {
+        d.advisorOrg = noAdvisorOrg
+      }
       return d
     })
     return reportsList
