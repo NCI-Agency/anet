@@ -18,7 +18,7 @@ import mil.dds.anet.views.UuidFetcher;
 /**
  * used to represent a person in a position at a particular time. Populated from results of the
  * peoplePositions table.
- *
+ * 
  * @author hpitelka
  */
 public class PersonPositionHistory extends AbstractAnetBean {
