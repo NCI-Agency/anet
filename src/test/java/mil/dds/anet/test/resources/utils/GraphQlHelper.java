@@ -59,7 +59,7 @@ public final class GraphQlHelper {
   }
 
   /**
-   * @return the result
+   * @return the requested object of any type
    */
   public Object getObject(Person user, String getQuery, Map<String, Object> variables) {
     return graphQlClient.doGraphQlQuery(user, getQuery, variables,
