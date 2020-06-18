@@ -205,30 +205,29 @@ const LikertScale = ({
       )}
       <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
 
-      {onChange &&
-        (!readonly || (readonly && value && value >= scale.domain()[0])) && (
-          <g ref={cursorRef}>
-            <polygon
-              points="0,0 13,13 13,30 -13,30 -13,13"
-              style={{
-                stroke: "gray",
-                fill: "" + activeColor,
-                strokeWidth: 1,
-                cursor: readonly ? null : "pointer"
-              }}
-            />
-            <text
-              fill={activeColor?.l < 0.5 ? "white" : "black"}
-              fontWeight="bold"
-              x={-11}
-              y={25}
-              style={{ pointerEvents: "none" }}
-            >
-              {value && value >= scale.domain()[0]
-                ? Number(value).toFixed(value < scale.domain()[1] ? 1 : 0)
-                : null}
-            </text>
-          </g>
+      {onChange && (!readonly || (value && value >= scale.domain()[0])) && (
+        <g ref={cursorRef}>
+          <polygon
+            points="0,0 13,13 13,30 -13,30 -13,13"
+            style={{
+              stroke: "gray",
+              fill: "" + activeColor,
+              strokeWidth: 1,
+              cursor: readonly ? null : "pointer"
+            }}
+          />
+          <text
+            fill={activeColor?.l < 0.5 ? "white" : "black"}
+            fontWeight="bold"
+            x={-11}
+            y={25}
+            style={{ pointerEvents: "none" }}
+          >
+            {value && value >= scale.domain()[0]
+              ? Number(value).toFixed(value < scale.domain()[1] ? 1 : 0)
+              : null}
+          </text>
+        </g>
       )}
     </svg>
   )
