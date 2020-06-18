@@ -332,7 +332,7 @@ dictionary:
                 once:
                   label: once
                 daily:
-                    label: daily
+                  label: daily
                 weekly:
                   label: weekly
                 biweekly:
