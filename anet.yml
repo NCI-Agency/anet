@@ -267,7 +267,7 @@ dictionary:
               status:
                 type: enum
                 label: Project status
-                helpText: Select an assessement status for objective
+                helpText: Select an assessment status for objective
                 choices:
                   GREEN:
                     label: Green
