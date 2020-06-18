@@ -11,6 +11,7 @@ import Model, {
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
@@ -31,8 +32,9 @@ const AssessmentModal = ({
   const edit = !!note.uuid
   const initialValues = useMemo(
     () =>
-      ({ [ENTITY_ASSESSMENT_PARENT_FIELD]: assessment } ||
-      Model.fillObject({}, assessmentYupSchema)),
+      _isEmpty(assessment)
+        ? Model.fillObject({}, assessmentYupSchema)
+        : { [ENTITY_ASSESSMENT_PARENT_FIELD]: assessment },
     [assessment, assessmentYupSchema]
   )
   return (
@@ -121,11 +123,15 @@ const AssessmentModal = ({
   }
 
   function saveAssessment(values, form) {
+    const noteRelatedObjects = note.noteRelatedObjects.map(o => ({
+      relatedObjectType: o.relatedObjectType,
+      relatedObjectUuid: o.relatedObjectUuid
+    }))
     const updatedNote = {
       uuid: note.uuid,
       author: note.author,
       type: note.type,
-      noteRelatedObjects: note.noteRelatedObjects
+      noteRelatedObjects
     }
     // values contains the assessment fields
     const clonedValues = _cloneDeep(values)
