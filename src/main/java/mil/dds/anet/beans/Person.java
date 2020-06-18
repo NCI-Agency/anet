@@ -1,6 +1,5 @@
 package mil.dds.anet.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
