@@ -1,6 +1,6 @@
-import { Settings } from "api"
 import { Organization } from "models"
 import pluralize from "pluralize"
+import Settings from "settings"
 
 const taskShortLabelSingular = Settings.fields.task.shortLabel
 const taskShortLabelPlural = pluralize(taskShortLabelSingular)

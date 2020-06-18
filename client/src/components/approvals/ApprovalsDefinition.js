@@ -9,7 +9,7 @@ import { FastField, FieldArray } from "formik"
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Modal, Table } from "react-bootstrap"
+import { Button, Checkbox, Modal, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import POSITIONS_ICON from "resources/positions.png"
 
@@ -60,6 +60,7 @@ const ApprovalsDefinition = ({
   fieldName,
   values,
   title,
+  restrictedApprovalLabel,
   addButtonLabel,
   approversFilters,
   setFieldTouched,
@@ -138,6 +139,7 @@ const ApprovalsDefinition = ({
                   setFieldTouched,
                   step,
                   index,
+                  restrictedApprovalLabel,
                   approversFilters
                 )
               )}
@@ -155,6 +157,7 @@ const ApprovalsDefinition = ({
     setFieldTouched,
     step,
     index,
+    restrictedApprovalLabel,
     approversFilters
   ) {
     const approvers = step.approvers
@@ -174,6 +177,21 @@ const ApprovalsDefinition = ({
           component={FieldHelper.InputField}
           label="Step name"
         />
+        {restrictedApprovalLabel && (
+          <FastField
+            name={`${fieldName}.${index}.restrictedApproval`}
+            component={FieldHelper.SpecialField}
+            label=""
+            widget={
+              <Checkbox
+                inline
+                checked={values?.[fieldName]?.[index].restrictedApproval}
+              >
+                {restrictedApprovalLabel}
+              </Checkbox>
+            }
+          />
+        )}
         <FastField
           name={`${fieldName}.${index}.approvers`}
           label="Add an approver"
@@ -228,7 +246,7 @@ const ApprovalsDefinition = ({
         return
       }
     }
-    arrayHelpers.push({ name: "", approvers: [] })
+    arrayHelpers.push({ name: "", restrictedApproval: false, approvers: [] })
   }
 
   function removeApprovalStep(arrayHelpers, index, step) {
@@ -251,6 +269,7 @@ const ApprovalsDefinition = ({
 ApprovalsDefinition.propTypes = {
   fieldName: PropTypes.string.isRequired,
   title: PropTypes.string,
+  restrictedApprovalLabel: PropTypes.string,
   addButtonLabel: PropTypes.string,
   values: PropTypes.object,
   approversFilters: PropTypes.object,

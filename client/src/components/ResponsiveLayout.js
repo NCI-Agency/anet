@@ -109,7 +109,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
               className={`main-sidebar ${sidebarClass}`}
             >
               <div style={sidebar}>
-                <Nav organizations={sidebarData} />
+                <Nav {...sidebarData} />
               </div>
             </div>
           )}
@@ -144,7 +144,10 @@ ResponsiveLayout.propTypes = {
     minimalHeader: PropTypes.bool,
     useNavigation: PropTypes.bool
   }).isRequired,
-  sidebarData: PropTypes.array,
+  sidebarData: PropTypes.shape({
+    advisorOrganizations: PropTypes.array,
+    principalOrganizations: PropTypes.array
+  }),
   children: PropTypes.node
 }
 

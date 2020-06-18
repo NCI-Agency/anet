@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
@@ -26,6 +26,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -72,6 +73,7 @@ const GQL_GET_TASK = gql`
       planningApprovalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -87,6 +89,7 @@ const GQL_GET_TASK = gql`
       approvalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -362,7 +365,10 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
 
-            <Approvals relatedObject={task} />
+            <Approvals
+              restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
+              relatedObject={task}
+            />
 
             <Fieldset title={`Reports for this ${fieldSettings.shortLabel}`}>
               <ReportCollection

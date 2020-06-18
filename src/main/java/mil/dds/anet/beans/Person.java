@@ -75,8 +75,6 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
-  private List<PersonPositionHistory> allPeoplePositionHistory;
-  // annotated below
   private Optional<byte[]> avatar;
   @GraphQLQuery
   @GraphQLInputField
@@ -227,28 +225,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
         });
   }
 
-  public CompletableFuture<List<PersonPositionHistory>> loadAllPeoplePositionHistory() {
-    if (allPeoplePositionHistory != null) {
-      return CompletableFuture.completedFuture(allPeoplePositionHistory);
-    }
-    Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-    return AnetObjectEngine.getInstance().getPersonDao().getAllPositionHistory(context, uuid)
-        .thenApply(o -> {
-          allPeoplePositionHistory = o;
-          return o;
-        });
-  }
-
   public List<PersonPositionHistory> getPreviousPositions() {
     return previousPositions;
-  }
-
-  @JsonIgnore
-  public List<PersonPositionHistory> getAllPeoplePositionHistory() {
-    if (allPeoplePositionHistory == null) {
-      allPeoplePositionHistory = loadAllPeoplePositionHistory().join();
-    }
-    return allPeoplePositionHistory;
   }
 
   @GraphQLInputField(name = "previousPositions")
@@ -258,20 +236,22 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
 
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "authoredReports")
-  public AnetBeanList<Report> loadAuthoredReports(@GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<AnetBeanList<Report>> loadAuthoredReports(
+      @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAuthorUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
+    return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "attendedReports")
-  public AnetBeanList<Report> loadAttendedReports(@GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<AnetBeanList<Report>> loadAttendedReports(
+      @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setAttendeeUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().search(query);
+    return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
   @GraphQLQuery(name = "avatar")

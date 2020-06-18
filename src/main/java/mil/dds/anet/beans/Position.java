@@ -48,8 +48,6 @@ public class Position extends AbstractAnetBean {
   // annotated below
   List<PersonPositionHistory> previousPeople;
   // annotated below
-  List<PersonPositionHistory> allPeoplePositionHistory;
-  // annotated below
   Boolean isApprover;
 
   public String getName() {
@@ -226,28 +224,8 @@ public class Position extends AbstractAnetBean {
         });
   }
 
-  public CompletableFuture<List<PersonPositionHistory>> loadAllPeoplePositionHistory() {
-    if (allPeoplePositionHistory != null) {
-      return CompletableFuture.completedFuture(allPeoplePositionHistory);
-    }
-    Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-    return AnetObjectEngine.getInstance().getPositionDao().getAllPositionHistory(context, uuid)
-        .thenApply(o -> {
-          allPeoplePositionHistory = o;
-          return o;
-        });
-  }
-
   public List<PersonPositionHistory> getPreviousPeople() {
     return previousPeople;
-  }
-
-  @JsonIgnore
-  public List<PersonPositionHistory> getAllPeoplePositionHistory() {
-    if (allPeoplePositionHistory == null) {
-      allPeoplePositionHistory = loadAllPeoplePositionHistory().join();
-    }
-    return allPeoplePositionHistory;
   }
 
   @GraphQLInputField(name = "previousPeople")

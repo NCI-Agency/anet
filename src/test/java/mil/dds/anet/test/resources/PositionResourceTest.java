@@ -35,7 +35,9 @@ import mil.dds.anet.beans.search.PositionSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.test.resources.utils.PositionHistoryDao;
 import mil.dds.anet.utils.DaoUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
@@ -46,6 +48,12 @@ public class PositionResourceTest extends AbstractResourceTest {
       + " } organization { " + ORGANIZATION_FIELDS + " }";
   private static final String PREVIOUS_PEOPLE_FIELDS =
       " previousPeople { startTime endTime position { uuid } person { uuid name rank role } }";
+  private static PositionHistoryDao positionHistoryDao;
+
+  @BeforeAll
+  public static void setUpClass() {
+    positionHistoryDao = new PositionHistoryDao();
+  }
 
   @Test
   public void positionTest() {
@@ -289,9 +297,11 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(newPos.getName()).isEqualTo(newTestPos.getName());
     // Position is new. So there must be only one record in her previous positions and it's endTime
     // must be null
-    assertThat(newPos.getAllPeoplePositionHistory().size()).isEqualTo(1);
-    assertThat(newPos.getAllPeoplePositionHistory().stream()
-        .filter(t -> Objects.isNull(t.getEndTime())).count()).isEqualTo(1);
+    final List<PersonPositionHistory> newPosHistory =
+        positionHistoryDao.getAllPositionHistoryByPosition(newPos);
+    assertThat(newPosHistory.size()).isEqualTo(1);
+    assertThat(newPosHistory.stream().filter(t -> Objects.isNull(t.getEndTime())).count())
+        .isEqualTo(1);
   }
 
   @Test

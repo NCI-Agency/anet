@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -18,6 +17,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { FormGroup } from "react-bootstrap"
+import Settings from "settings"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
