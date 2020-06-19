@@ -571,8 +571,11 @@ const BaseReportForm = ({
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
                     onChange={event => {
+                      const safeVal =
+                        (event.target.value || "").replace(/[^0-9]+/g, "") ||
+                        null
                       setFieldTouched("duration", true, false)
-                      setFieldValue("duration", event.target.value, false)
+                      setFieldValue("duration", safeVal, false)
                       validateFieldDebounced("duration")
                     }}
                   />
