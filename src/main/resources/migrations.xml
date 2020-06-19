@@ -3148,4 +3148,22 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-gisPoint-column-to-locations" author="ysf">
+		<addColumn tableName="locations">
+			<column name="gisPoint" type="geometry" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="fill-gisPoint-column-with-existing-coordinates-psql" author="ysf" dbms="postgresql">
+		<sql>
+			UPDATE locations SET "gisPoint" = ST_SetSRID(ST_MakePoint(lng, lat), 3857);
+		</sql>
+	</changeSet>
+
+	<changeSet id="fill-gisPoint-column-with-existing-coordinates-mssql" author="ysf" dbms="mssql">
+		<sql>
+			UPDATE locations SET "gisPoint" = geometry::Point(lng, lat, 3857) WHERE lat IS NOT NULL AND lng IS NOT NULL;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

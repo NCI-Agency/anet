@@ -36,3 +36,5 @@ s/DATEADD\s*\(([^,]*),\s*(-?\d+),\s*CURRENT_TIMESTAMP\)/CURRENT_TIMESTAMP + INTE
 s/cast\((\S+) as datetime2\((\d+)\)\)/"date_trunc(" . ($2 eq '3' ? "'milliseconds'" : "'second'") . ", $1)"/ie;
 # Function to generate uuid's
 s/lower\(newid\(\)\)/uuid_generate_v4()/g;
+# convert point geometry functions
+s/geometry::Point\((-\d{2}\.\d{6}, \d{2}\.\d{6})/ST_SetSRID(ST_MakePoint($1)/g;

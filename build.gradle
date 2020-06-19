@@ -261,7 +261,18 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 	}
 }
 
+task dbDrop_postgis(dependsOn: "compileJava", type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "database"
+	description = "Drops PostGIS extension and related objects on PostgreSQL."
+	targetContainerId { dbContainerName }
+	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-c", "DROP EXTENSION IF EXISTS postgis CASCADE"] as String[] ]
+}
+
 task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
+	if(!isMssql) {
+		dependsOn 'dbDrop_postgis'
+		tasks.findByName('dbDrop_postgis').mustRunAfter('compileJava')
+	}
 	group = "database"
 	description = "Runs the ANET database drop-all (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
@@ -330,7 +341,7 @@ task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImag
 
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "database container"
-	image = isMssql ? "ncia/anet-mssql-linux:latest" : "postgres:latest"
+	image = isMssql ? "ncia/anet-mssql-linux:latest" : "postgis/postgis:latest"
 	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
