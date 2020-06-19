@@ -437,24 +437,24 @@ INSERT INTO approvers (approvalStepUuid, positionUuid)
 	AND approvalSteps.type = 1;
 
 -- Create locations
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'9c982685-5946-4dad-a7ee-0f5a12f5e170', 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'0855fb0a-995e-4a79-a132-4024ee2983ff', 'General Hospital', 47.571772, -52.741935, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'95446f93-249b-4aa9-b98a-7bd2c4680718', 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', 'Cabot Tower', 47.570010, -52.681770, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'c7a9f420-457a-490c-a810-b504c022cf1e', 'Fort Amherst', 47.563763, -52.680590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'7339f9e3-99d1-497a-9e3b-1269c4c287fe', 'Harbour Grace Police Station', 47.705133, -53.214422, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'St Johns Airport', 47.613442, -52.740936, geometry::Point(-52.740936, 47.613442, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'Murray''s Hotel', 47.561517, -52.708760, geometry::Point(-52.708760, 47.561517, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'9c982685-5946-4dad-a7ee-0f5a12f5e170', 'Wishingwells Park', 47.560040, -52.736962, geometry::Point(-52.736962, 47.560040, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'0855fb0a-995e-4a79-a132-4024ee2983ff', 'General Hospital', 47.571772, -52.741935, geometry::Point(-52.741935, 47.571772, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'95446f93-249b-4aa9-b98a-7bd2c4680718', 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, geometry::Point(-52.857241, 47.626718, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', 'Cabot Tower', 47.570010, -52.681770, geometry::Point(-52.681770, 47.570010, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'c7a9f420-457a-490c-a810-b504c022cf1e', 'Fort Amherst', 47.563763, -52.680590, geometry::Point(-52.680590, 47.563763, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'7339f9e3-99d1-497a-9e3b-1269c4c287fe', 'Harbour Grace Police Station', 47.705133, -53.214422, geometry::Point(-53.214422, 47.705133, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, name, lat, lng, geometry, createdAt, updatedAt)
+	VALUES (N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'Conception Bay South Police Station', 47.526784, -52.954739, geometry::Point(-52.954739, 47.526784, 3857), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
 	VALUES (N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, name, createdAt, updatedAt)
