@@ -23,15 +23,11 @@ const LikertScale = ({
   const MARGIN_LEFT = readonly ? 13 : 25
   const MARGIN_RIGHT = 13
   const scaleYPosition = containerHeight - 30
-
   const scale = d3
     .scaleLinear()
     .domain([0, 10])
     .range([MARGIN_LEFT, containerWidth - MARGIN_RIGHT])
-  const x =
-    value !== undefined && value !== null
-      ? scale(Number(value))
-      : MARGIN_LEFT / 2
+  const x = utils.isNumeric(value) ? scale(value) : MARGIN_LEFT / 2
 
   const calculateNewX = useCallback(
     eventX => {
@@ -198,8 +194,7 @@ const LikertScale = ({
             y={25}
             style={{ pointerEvents: "none" }}
           >
-            avg:{" "}
-            {Number(valuesStats.avg).toFixed(value < scale.domain()[1] ? 1 : 0)}
+            avg: {valuesStats.avg.toFixed(value < scale.domain()[1] ? 1 : 0)}
           </text>
         </g>
       )}
@@ -223,8 +218,8 @@ const LikertScale = ({
             y={25}
             style={{ pointerEvents: "none" }}
           >
-            {value && value >= scale.domain()[0]
-              ? Number(value).toFixed(value < scale.domain()[1] ? 1 : 0)
+            {utils.isNumeric(value) && value >= scale.domain()[0]
+              ? value.toFixed(value < scale.domain()[1] ? 1 : 0)
               : null}
           </text>
         </g>
