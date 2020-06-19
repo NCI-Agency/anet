@@ -77,8 +77,7 @@ const noTask = {
   longName: noTaskMessage
 }
 
-// TODO: use it also in components/ReportsByTasks
-const getReportsByTasks = reportsList => {
+export const getReportsByTasks = reportsList => {
   const simplifiedValues = reportsList.map(d => {
     return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
   })

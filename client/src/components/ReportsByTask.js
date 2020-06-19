@@ -1,6 +1,7 @@
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
+import { getReportsByTasks } from "components/aggregations/utils"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
@@ -54,41 +55,11 @@ const Chart = ({
     if (!data) {
       return []
     }
-    const noTaskMessage = `No ${Settings.fields.task.subLevel.shortLabel}`
-    const noTask = {
-      uuid: "-1",
-      shortName: noTaskMessage,
-      longName: noTaskMessage
-    }
     const reportsList = data.reportList.list || []
     if (!reportsList.length) {
       return []
     }
-    const simplifiedValues = reportsList.map(d => {
-      return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
-    })
-    let tasks = reportsList.map(d => d.tasks)
-    tasks = [].concat
-      .apply([], tasks)
-      .filter(
-        (item, index, d) =>
-          d.findIndex(t => {
-            return t.uuid === item.uuid
-          }) === index
-      )
-      .sort((a, b) => a.shortName.localeCompare(b.shortName))
-    // add No Task item, in order to relate to reports without Tasks
-    tasks.push(noTask)
-    return tasks.map(d => {
-      const r = {}
-      r.task = d
-      r.reportsCount =
-        d.uuid === noTask.uuid
-          ? simplifiedValues.filter(item => item.tasks.length === 0).length
-          : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
-            .length
-      return r
-    })
+    return getReportsByTasks(reportsList)
   }, [data])
   if (done) {
     return result
