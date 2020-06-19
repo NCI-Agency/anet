@@ -2,6 +2,7 @@ import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
 import ReactTooltip from "react-tooltip"
+import utils from "utils"
 import "./BarChart.css"
 
 const DailyRollupChart = ({
@@ -27,7 +28,7 @@ const DailyRollupChart = ({
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
     const chartBox = node.current.getBoundingClientRect()
-    const chartWidth = (isNumeric(width) ? width : chartBox.width) - 30
+    const chartWidth = (utils.isNumeric(width) ? width : chartBox.width) - 30
     let chart = d3.select(node.current)
     const xLabels = [].concat.apply(
       [],
@@ -167,10 +168,6 @@ const DailyRollupChart = ({
   }, [node, width, height, data, onBarClick, tooltip, barColors])
 
   return <svg id={chartId} ref={node} width={width} height={height} />
-
-  function isNumeric(value) {
-    return typeof value === "number"
-  }
 }
 
 DailyRollupChart.propTypes = {

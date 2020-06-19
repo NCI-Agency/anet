@@ -138,6 +138,10 @@ export default {
     return _isEmpty(text)
   },
 
+  isNumeric: function(value) {
+    return typeof value === "number"
+  },
+
   pushHash: function(hash) {
     const { history, location } = window
     hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""
