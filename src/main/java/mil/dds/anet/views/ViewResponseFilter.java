@@ -41,7 +41,7 @@ public class ViewResponseFilter implements ContainerResponseFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext,
-      ContainerResponseContext responseContext) throws IOException {
+      ContainerResponseContext responseContext) {
     // Don't cache requests other than GET, and don't cache selected media types
     final MediaType mediaType = responseContext.getMediaType();
     if (!HttpMethod.GET.equals(requestContext.getMethod()) || mediaType == null
@@ -49,30 +49,29 @@ public class ViewResponseFilter implements ContainerResponseFilter {
       responseContext.getHeaders().put(HttpHeaders.CACHE_CONTROL,
           ImmutableList.of("no-store, no-cache, must-revalidate, post-check=0, pre-check=0"));
       responseContext.getHeaders().put(HttpHeaders.PRAGMA, ImmutableList.of("no-cache"));
-      // Only POST methods should be logged , otherwise GET methods results with exception
-      if (!HttpMethod.GET.equals(requestContext.getMethod())) {
-        if (requestContext.getSecurityContext().getUserPrincipal() != null) {
-          // This code snippet resolves the situation that caused empty user information to be
-          // written to the access.log file
-          // Start
-          Principal userPrincipal = new Principal() {
-            @Override
-            public String getName() {
-              final SecurityContext secContext = requestContext.getSecurityContext();
-              Principal p = secContext.getUserPrincipal();
-              return p.getName();
-            }
-          };
-          UserIdentity userId = new DefaultUserIdentity(null, userPrincipal, null);
-          Request baseRequest = Request.getBaseRequest(request);
-          baseRequest.setAuthentication(new UserAuthentication(null, userId));
-          // End
+      // Log only requests other than GET and if userPrincipal exists
+      if (!HttpMethod.GET.equals(requestContext.getMethod())
+          && requestContext.getSecurityContext().getUserPrincipal() != null) {
+        // This code snippet resolves the situation that caused empty user information to be
+        // written to the access.log file
+        // Start
+        Principal userPrincipal = new Principal() {
+          @Override
+          public String getName() {
+            final SecurityContext secContext = requestContext.getSecurityContext();
+            Principal p = secContext.getUserPrincipal();
+            return p.getName();
+          }
+        };
+        UserIdentity userId = new DefaultUserIdentity(null, userPrincipal, null);
+        Request baseRequest = Request.getBaseRequest(request);
+        baseRequest.setAuthentication(new UserAuthentication(null, userId));
+        // End
 
-          // Log necessary information into userActivities.log file
-          logger.info("\"ip\": \"{}\" , \"user\": \"{}\" , \"referer\": \"{}\"",
-              request.getRemoteAddr(), userPrincipal.getName(),
-              requestContext.getHeaderString("referer"));
-        }
+        // Log necessary information into userActivities.log file
+        logger.info("\"ip\": \"{}\" , \"user\": \"{}\" , \"referer\": \"{}\"",
+            request.getRemoteAddr(), userPrincipal.getName(),
+            requestContext.getHeaderString("referer"));
       }
     } else {
       responseContext.getHeaders().put(HttpHeaders.CACHE_CONTROL,
