@@ -225,10 +225,10 @@ const Collection = ({ queryParams }) => (
       paginationKey="r_rollup"
       queryParams={queryParams}
       viewFormats={[
-        FORMAT_STATISTICS,
         FORMAT_CALENDAR,
         FORMAT_TABLE,
-        FORMAT_SUMMARY
+        FORMAT_SUMMARY,
+        FORMAT_STATISTICS
       ]}
     />
   </div>

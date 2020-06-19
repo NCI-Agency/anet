@@ -141,10 +141,10 @@ const Collection = ({ id, queryParams }) => (
       paginationKey={`r_${id}`}
       queryParams={queryParams}
       viewFormats={[
-        FORMAT_STATISTICS,
         FORMAT_CALENDAR,
         FORMAT_TABLE,
-        FORMAT_SUMMARY
+        FORMAT_SUMMARY,
+        FORMAT_STATISTICS
       ]}
     />
   </div>
