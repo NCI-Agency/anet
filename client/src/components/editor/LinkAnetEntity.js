@@ -5,12 +5,12 @@ import React, { useEffect, useState } from "react"
 
 // Entity type --> GQL query
 const ENTITY_GQL_FIELDS = {
-  Report: "uuid, intent",
-  Person: "uuid, name, role, avatar(size: 32)",
-  Organization: "uuid, shortName",
-  Position: "uuid, name",
-  Location: "uuid, name",
-  Task: "uuid, shortName, longName"
+  Report: "uuid intent",
+  Person: "uuid name role avatar(size: 32)",
+  Organization: "uuid shortName",
+  Position: "uuid name",
+  Location: "uuid name",
+  Task: "uuid shortName longName"
 }
 
 const LinkAnetEntity = ({ type, uuid, children }) => {

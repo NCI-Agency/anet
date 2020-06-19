@@ -362,7 +362,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   @InTransaction
   public List<EngagementStatus> getEngagementStatus(String reportUuid) {
     final List<EngagementStatus> engagementStatus = new ArrayList<>();
-    Number happenedCount = (Number) getDbHandle()
+    final Number happenedCount = (Number) getDbHandle()
         .createQuery(
             "/* getHappened */ SELECT count(*) as ct from reports where uuid = :reportUuid "
                 + "AND reports.\"engagementDate\" <= :endOfHappened")
@@ -372,7 +372,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     if (happenedCount.longValue() > 0) {
       engagementStatus.add(EngagementStatus.HAPPENED);
     }
-    Number futureCount = (Number) getDbHandle()
+    final Number futureCount = (Number) getDbHandle()
         .createQuery("/* getFuture */ SELECT count(*) as ct from reports where uuid = :reportUuid "
             + "AND reports.\"engagementDate\" > :startOfFuture")
         .bind("reportUuid", reportUuid)
@@ -381,7 +381,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     if (futureCount.longValue() > 0) {
       engagementStatus.add(EngagementStatus.FUTURE);
     }
-    Number cancelledCount = (Number) getDbHandle()
+    final Number cancelledCount = (Number) getDbHandle()
         .createQuery(
             "/* getCancelled */ SELECT count(*) as ct from reports where uuid = :reportUuid "
                 + "AND reports.state = :cancelledState")

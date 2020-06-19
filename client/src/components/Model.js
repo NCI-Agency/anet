@@ -367,8 +367,8 @@ export default class Model {
     return a && b && a.uuid === b.uuid
   }
 
-  static fetchByUuid(uuid, ENTITY_GQL_FIELDS) {
-    const fields = ENTITY_GQL_FIELDS[this.resourceName]
+  static fetchByUuid(uuid, entityGqlFields) {
+    const fields = entityGqlFields[this.resourceName]
     if (!fields) {
       return null
     }
@@ -429,6 +429,17 @@ export default class Model {
     return this.name || this.uuid
   }
 
+  static toConfigObject(value) {
+    switch (typeof value) {
+      case "object":
+        return value
+      case "string":
+        return utils.parseJsonSafe(value)
+      default:
+        return {}
+    }
+  }
+
   static parseAssessmentsConfig(assessmentsConfig) {
     return Object.fromEntries(
       assessmentsConfig.map(a => {
@@ -437,14 +448,7 @@ export default class Model {
           ? `${a.relatedObjectType}_${recurrence}`
           : recurrence
         const questions = a.questions || {}
-        return [
-          assessmentKey,
-          typeof questions === "object"
-            ? questions
-            : typeof questions === "string"
-              ? utils.parseJsonSafe(questions)
-              : {}
-        ]
+        return [assessmentKey, Model.toConfigObject(questions)]
       })
     )
   }
