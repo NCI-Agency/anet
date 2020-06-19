@@ -795,8 +795,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   @GraphQLQuery(name = "engagementStatus")
   public synchronized List<EngagementStatus> loadEngagementStatus() {
     if (engagementStatus == null) {
-      engagementStatus =
-          AnetObjectEngine.getInstance().getReportDao().getEngagementStatus(uuid);
+      engagementStatus = AnetObjectEngine.getInstance().getReportDao().getEngagementStatus(uuid);
     }
     return engagementStatus;
   }
