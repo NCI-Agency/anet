@@ -7,13 +7,15 @@ import AggregationWidgetContainer, {
 } from "components/aggregations/AggregationWidgetContainer"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+
 import _get from "lodash/get"
 import _uniqueId from "lodash/uniqueId"
 import { Report } from "models"
 import {
   PeriodsConfigPropType,
   PeriodsPropType,
-  PeriodsTableHeader
+  PeriodsTableHeader,
+  periodToString
 } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -161,6 +163,10 @@ const ReportStatistics = ({
   ) {
     reportQuery.engagementDateEnd = statisticsEndDate
   }
+  const totalPeriod = {
+    start: reportQuery.engagementDateStart,
+    end: reportQuery.engagementDateEnd
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
   })
@@ -181,7 +187,7 @@ const ReportStatistics = ({
 
   const reports = data ? Report.fromArray(data.reportList.list) : []
   if (_get(reports, "length", 0) === 0) {
-    return <em>No reports found</em>
+    return <em>{`No reports found for ${periodToString(totalPeriod)}`}</em>
   }
   const CUSTOM_FIELDS_KEY = "customFieldsJson"
   const getPeriodData = (reports, dateRange) => {
