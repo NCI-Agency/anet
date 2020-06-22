@@ -103,23 +103,21 @@ export const LikertScaleAndPieWidget = ({ values, ...otherWidgetProps }) => {
 }
 LikertScaleAndPieWidget.propTypes = aggregationWidgetPropTypes
 
-export const ReportsByTaskWidget = ({ values, ...otherWidgetProps }) => {
-  return (
-    <div className="non-scrollable">
-      <BarChart
-        chartId={_uniqueId("ReportsByTaskWidget")}
-        data={values}
-        xProp="task.uuid"
-        yProp="reportsCount"
-        xLabel="task.shortName"
-        tooltip={d => `
-        <h4>${d.task.shortName}</h4>
-        <p>${d.reportsCount}</p>
-      `}
-      />
-    </div>
-  )
-}
+export const ReportsByTaskWidget = ({ values, ...otherWidgetProps }) => (
+  <div className="non-scrollable">
+    <BarChart
+      chartId={_uniqueId("ReportsByTaskWidget")}
+      data={values}
+      xProp="task.uuid"
+      yProp="reportsCount"
+      xLabel="task.shortName"
+      tooltip={d => `
+      <h4>${d.task.shortName}</h4>
+      <p>${d.reportsCount}</p>
+    `}
+    />
+  </div>
+)
 ReportsByTaskWidget.propTypes = aggregationWidgetPropTypes
 
 export const CalendarWidget = ({

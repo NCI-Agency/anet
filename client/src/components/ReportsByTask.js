@@ -55,16 +55,11 @@ const Chart = ({
     if (!data) {
       return []
     }
-    const reportsList = data.reportList.list || []
-    if (!reportsList.length) {
-      return []
-    }
-    return getReportsByTasks(reportsList)
+    return getReportsByTasks(data.reportList.list || [])
   }, [data])
   if (done) {
     return result
   }
-
   return (
     <div className="non-scrollable">
       <ContainerDimensions>

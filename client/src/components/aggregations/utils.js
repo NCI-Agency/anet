@@ -78,6 +78,9 @@ const noTask = {
 }
 
 export const getReportsByTasks = reportsList => {
+  if (!reportsList.length) {
+    return []
+  }
   const simplifiedValues = reportsList.map(d => {
     return { reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid) }
   })
