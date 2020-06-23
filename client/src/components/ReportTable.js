@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import PlanningConflictForReport from "components/PlanningConflictForReport"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
@@ -171,9 +172,14 @@ const ReportTable = ({
                 </td>
                 {showStatus && <td>{report.state}</td>}
                 <td>
-                  {moment(report.engagementDate).format(
-                    Report.getEngagementDateFormat()
-                  )}
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <span>
+                      {moment(report.engagementDate).format(
+                        Report.getEngagementDateFormat()
+                      )}
+                    </span>
+                    <PlanningConflictForReport report={report} largeIcon />
+                  </div>
                 </td>
               </tr>
             ))}

@@ -2,6 +2,7 @@ import { expect } from "chai"
 import moment from "moment"
 import CreateReport from "../pages/report/createReport.page"
 import EditReport from "../pages/report/editReport.page"
+import MyReports from "../pages/report/myReports.page"
 import ShowReport from "../pages/report/showReport.page"
 
 describe("When creating a Report with conflicts", () => {
@@ -190,6 +191,56 @@ describe("When creating a Report with conflicts", () => {
 
     const principal02 = ShowReport.getAttendeeByName("Maj ROGWELL, Roger")
     expect(principal02.conflictButton.isExisting()).to.equal(false)
+  })
+
+  it("Should display report summary and report table with conflicts", () => {
+    MyReports.open()
+    MyReports.waitForMyDraftReportsSummaryTabToLoad()
+
+    const reportConflictIcon01 = MyReports.getDraftReportByEngagementDateString(
+      report01.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
+    ).reportConflictIcon
+    expect(reportConflictIcon01.isExisting()).to.equal(true)
+
+    reportConflictIcon01.moveTo()
+    expect(MyReports.reportConflictTooltipTitle).to.equal(
+      "3 of 3 attendees are busy at the selected time!"
+    )
+
+    const reportConflictIcon02 = MyReports.getDraftReportByEngagementDateString(
+      report02.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
+    ).reportConflictIcon
+    expect(reportConflictIcon02.isExisting()).to.equal(true)
+
+    reportConflictIcon02.moveTo()
+    expect(MyReports.reportConflictTooltipTitle).to.equal(
+      "3 of 5 attendees are busy at the selected time!"
+    )
+
+    MyReports.selectTableTab()
+    MyReports.waitForMyDraftReportsTableTabToLoad()
+
+    const reportConflictIcon03 = MyReports.getDraftReportByEngagementDateString(
+      report01.engagementDate.format("dddd, D MMMM YYYY @ HH:mm"),
+      "table"
+    ).reportConflictIcon
+    expect(reportConflictIcon03.isExisting()).to.equal(true)
+
+    reportConflictIcon03.moveTo()
+    expect(MyReports.reportConflictTooltipTitle).to.equal(
+      "3 of 3 attendees are busy at the selected time!"
+    )
+
+    const reportConflictIcon04 = MyReports.getDraftReportByEngagementDateString(
+      report02.engagementDate.format("dddd, D MMMM YYYY @ HH:mm"),
+      "table"
+    ).reportConflictIcon
+    expect(reportConflictIcon04.isExisting()).to.equal(true)
+
+    reportConflictIcon04.moveTo()
+    expect(MyReports.reportConflictTooltipTitle).to.equal(
+      "3 of 5 attendees are busy at the selected time!"
+    )
   })
 
   it("Should delete the first report", () => {

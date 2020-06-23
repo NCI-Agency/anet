@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import PlanningConflictForReport from "components/PlanningConflictForReport"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import Tag from "components/Tag"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -250,11 +251,14 @@ const ReportSummaryRow = ({ report }) => {
       <Row>
         <Col md={12}>
           {report.engagementDate && (
-            <Label bsStyle="default" className="engagement-date">
-              {moment(report.engagementDate).format(
-                Report.getEngagementDateFormat()
-              )}
-            </Label>
+            <>
+              <Label bsStyle="default" className="engagement-date">
+                {moment(report.engagementDate).format(
+                  Report.getEngagementDateFormat()
+                )}
+              </Label>
+              <PlanningConflictForReport report={report} largeIcon />
+            </>
           )}
         </Col>
       </Row>
