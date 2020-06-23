@@ -1,4 +1,4 @@
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import {
   LocationOverlayRow,
@@ -12,6 +12,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Person, Position } from "models"
@@ -21,6 +22,7 @@ import { Button, HelpBlock } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_CREATE_POSITION = gql`
@@ -138,7 +140,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
             orgSearchQuery.parentOrgUuid = [
               currentUser.position.organization.uuid
             ]
-            orgSearchQuery.parentOrgRecursively = true
+            orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
           }
         }
         // Reset the organization property when changing the organization type

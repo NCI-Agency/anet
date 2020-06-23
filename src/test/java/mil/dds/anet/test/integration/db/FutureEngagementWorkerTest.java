@@ -51,7 +51,7 @@ public class FutureEngagementWorkerTest {
   public static void setUpClass() throws Exception {
     final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
     if (app.getConfiguration().getSmtp().isDisabled()) {
-      fail("'ANET_SMTP_DISABLE' system environment variable must have value 'true' to run test.");
+      fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
     executeEmailServerTests = Boolean.parseBoolean(

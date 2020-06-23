@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
@@ -33,6 +33,7 @@ import React, { useState } from "react"
 import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
@@ -225,7 +226,13 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
           <div>
             <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
-            <SubNav subnavElemId="org-nav">{!isMyOrg && orgSubNav}</SubNav>
+            <SubNav subnavElemId="advisor-org-nav">
+              {!isMyOrg && isAdvisorOrg && orgSubNav}
+            </SubNav>
+
+            <SubNav subnavElemId="principal-org-nav">
+              {!isMyOrg && isPrincipalOrg && orgSubNav}
+            </SubNav>
 
             {currentUser.isSuperUser() && (
               <div className="pull-right">

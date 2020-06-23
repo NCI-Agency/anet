@@ -1,6 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
@@ -49,6 +49,7 @@ import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 import AttendeesTable from "./AttendeesTable"
@@ -595,8 +596,11 @@ const BaseReportForm = ({
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
                     onChange={event => {
+                      const safeVal =
+                        (event.target.value || "").replace(/[^0-9]+/g, "") ||
+                        null
                       setFieldTouched("duration", true, false)
-                      setFieldValue("duration", event.target.value, false)
+                      setFieldValue("duration", safeVal, false)
                       validateFieldDebounced("duration")
                     }}
                   />

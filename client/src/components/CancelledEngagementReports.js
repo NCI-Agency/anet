@@ -1,5 +1,5 @@
 import { IconNames } from "@blueprintjs/icons"
-import API, { Settings } from "api"
+import API from "api"
 import { gql } from "apollo-boost"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
@@ -15,6 +15,7 @@ import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
+import Settings from "settings"
 
 const GQL_GET_REPORT_LIST_BY_ORG = gql`
   query($reportQuery: ReportSearchQueryInput) {
@@ -73,7 +74,9 @@ const ChartByOrg = ({
       return []
     }
     reportsList = reportsList.map(d => {
-      if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg
+      if (!d.advisorOrg) {
+        d.advisorOrg = noAdvisorOrg
+      }
       return d
     })
     return reportsList
@@ -96,7 +99,9 @@ const ChartByOrg = ({
           return bIndex < 0
             ? a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName)
             : 1
-        } else return bIndex < 0 ? -1 : aIndex - bIndex
+        } else {
+          return bIndex < 0 ? -1 : aIndex - bIndex
+        }
       })
   }, [data])
   if (done) {
@@ -171,7 +176,9 @@ const ChartByReason = ({
       return []
     }
     reportsList = reportsList.map(d => {
-      if (!d.cancelledReason) d.cancelledReason = "NO_REASON_GIVEN"
+      if (!d.cancelledReason) {
+        d.cancelledReason = "NO_REASON_GIVEN"
+      }
       return d
     })
     return reportsList
