@@ -2,14 +2,16 @@ import { gql } from "@apollo/client"
 import API from "api"
 import Leaflet from "components/Leaflet"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import _escape from "lodash/escape"
+import PlanningConflictForReport from "components/PlanningConflictForReport"
 import { Location } from "models"
+import Report from "models/Report"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo } from "react"
+import ReactDOM from "react-dom"
 import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -21,6 +23,7 @@ const GQL_GET_REPORT_LIST = gql`
       list {
         uuid
         intent
+        engagementDate
         location {
           uuid
           name
@@ -51,24 +54,24 @@ const ReportMap = ({
     pageDispatchers
   })
   const markers = useMemo(() => {
-    const reports = data ? data.reportList.list : []
-    if (!reports.length) {
-      return []
-    }
-    const markerArray = []
-    reports.forEach(report => {
-      if (Location.hasCoordinates(report.location)) {
-        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
-        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
-        markerArray.push({
-          id: report.uuid,
-          lat: report.location.lat,
-          lng: report.location.lng,
-          name: label
-        })
-      }
-    })
-    return markerArray
+    return (data?.reportList?.list || [])
+      .filter(report => Location.hasCoordinates(report.location))
+      .map(report => ({
+        id: report.uuid,
+        lat: report.location.lat,
+        lng: report.location.lng,
+        name: `<div id="marker-cont-${report.uuid}" style="width: 300px;min-height: 80px"></div>`,
+        popupOpen: () => {
+          const el = document.getElementById(`marker-cont-${report.uuid}`)
+          ReactDOM.render(
+            <>
+              <div>{report.intent || ""}</div>@ <b>{report.location.name}</b>
+              <PlanningConflictForReport report={new Report(report)} />
+            </>,
+            el
+          )
+        }
+      }))
   }, [data])
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
