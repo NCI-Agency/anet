@@ -1,6 +1,7 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
+import createReadonlyBlockPlugin from "components/editor/plugins/readonlyBlockPlugin"
 import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertFromRaw, convertToRaw } from "draft-js"
 import {
@@ -25,6 +26,7 @@ import "draft-js-side-toolbar-plugin/lib/plugin.css"
 import "components/RichTextEditor.css"
 
 const newlinePlugin = createNewlinePlugin()
+const readonlyBlockPlugin = createReadonlyBlockPlugin()
 
 const BLOCK_TYPES = [
   { type: BLOCK_TYPE.HEADER_ONE },
@@ -172,7 +174,7 @@ class RichTextEditor extends Component {
   }
 
   render() {
-    const { className, value, onChange, onHandleBlur } = this.props
+    const { className, value, onChange, onHandleBlur, template } = this.props
     const { sideToolbarPlugin } = this.state
     const { SideToolbar } = sideToolbarPlugin
     return (
@@ -192,8 +194,9 @@ class RichTextEditor extends Component {
           }}
           onBlur={onHandleBlur}
           stateSaveInterval={100}
-          plugins={[sideToolbarPlugin, newlinePlugin]}
-          rawContentState={value ? fromHTML(value) : null}
+          plugins={[sideToolbarPlugin, newlinePlugin, readonlyBlockPlugin]}
+          handlePastedText={() => true}
+          rawContentState={value ? fromHTML(value) : template || null}
           showUndoControl
           showRedoControl
           spellCheck
@@ -226,7 +229,8 @@ RichTextEditor.propTypes = {
   className: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
-  onHandleBlur: PropTypes.func
+  onHandleBlur: PropTypes.func,
+  template: PropTypes.object
 }
 
 export default RichTextEditor

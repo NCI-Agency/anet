@@ -32,6 +32,7 @@ import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
 import TaskTable from "components/TaskTable"
+import { BLOCK_TYPE } from "draftail"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -502,6 +503,26 @@ const BaseReportForm = ({
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
+        const reportTextTemplate = {
+          blocks: [
+            {
+              data: { mandatory: true },
+              text: "Step 1",
+              type: BLOCK_TYPE.HEADER_ONE
+            },
+            {
+              data: { mandatory: true },
+              text: "Step 2",
+              type: BLOCK_TYPE.HEADER_ONE
+            },
+            {
+              data: {},
+              text: "Step 3",
+              type: BLOCK_TYPE.HEADER_ONE
+            }
+          ],
+          entityMap: {}
+        }
         return (
           <div className="report-form">
             <NavigationWarning isBlocking={dirty} />
@@ -960,6 +981,7 @@ const BaseReportForm = ({
                         // validation will be done by setFieldValue
                         setFieldTouched("reportText", true, false)
                       }}
+                      template={reportTextTemplate}
                     />
                   }
                 />

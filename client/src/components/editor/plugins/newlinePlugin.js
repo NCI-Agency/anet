@@ -1,3 +1,4 @@
+import { preventHandleOnReadonly } from "components/editor/plugins/readonlyBlockPlugin"
 import { ContentState, EditorState, Modifier, convertFromHTML } from "draft-js"
 
 const HTML_REGEX = new RegExp(/<[a-z][\s\S]*>/i)
@@ -8,7 +9,6 @@ const createNewLines = (newLines, nextState) => {
   const htmlMarkup = newLines.map(text => {
     return text.length <= 1 ? "" : `<p>${text}</p>`
   })
-
   // Create content blocks based on the html for the new content statue
   const blocksFromHTML = convertFromHTML(htmlMarkup.join(""))
   const newContentState = ContentState.createFromBlockArray(
@@ -27,6 +27,10 @@ const createNewLines = (newLines, nextState) => {
 
 const newlinePlugin = () => ({
   handlePastedText(text, html, editorState, { setEditorState }) {
+    const isHandled = preventHandleOnReadonly(editorState) === "handled"
+    if (isHandled) {
+      return "handled"
+    }
     const nextState = editorState
     if (!HTML_REGEX.test(html)) {
       const newLines = text.match(NEW_LINE_REGEX)
