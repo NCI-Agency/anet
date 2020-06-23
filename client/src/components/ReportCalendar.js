@@ -2,11 +2,13 @@ import { gql } from "@apollo/client"
 import API from "api"
 import Calendar from "components/Calendar"
 import { PageDispatchersPropType } from "components/Page"
+import PlanningConflictForReport from "components/PlanningConflictForReport"
 import _isEqual from "lodash/isEqual"
 import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
+import ReactDOM from "react-dom"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
 
@@ -60,8 +62,41 @@ const ReportCalendar = ({
         info.jsEvent.preventDefault()
       }}
       calendarComponentRef={calendarComponentRef}
+      eventRender={renderEvent}
     />
   )
+
+  function renderEvent(info) {
+    const viewType = info.view.type
+
+    if (viewType === "dayGridMonth" || viewType === "timeGridWeek") {
+      // Since PlanningConflictForReport sends a new graphql query for each report
+      // we are not displaying conflict in month and week views because it can
+      // result in hundreds, even thousands, of queries.
+      return
+    }
+
+    let el
+    if (viewType === "listDay") {
+      el = info.el.querySelector(".fc-list-item-title > a")
+    } else {
+      el = info.el.querySelector(".fc-title")
+      if (el) {
+        el.style.display = "inline-flex"
+        el.style.alignItems = "center"
+        el.style.verticalAlign = "bottom"
+      }
+    }
+
+    const rprt = new Report(info.event.extendedProps)
+
+    if (el && rprt && rprt.uuid && rprt.engagementDate) {
+      ReactDOM.render(
+        <PlanningConflictForReport report={rprt} text={info.event.title} />,
+        el
+      )
+    }
+  }
 
   function getEvents(fetchInfo, successCallback, failureCallback) {
     const reportQuery = Object.assign({}, queryParams, {
