@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -113,8 +114,6 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   private List<AuthorizationGroup> authorizationGroups;
   // annotated below
   private List<ReportAction> workflow;
-  // annotated below
-  private List<EngagementStatus> engagementStatus;
 
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
@@ -793,11 +792,13 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   }
 
   @GraphQLQuery(name = "engagementStatus")
-  public synchronized List<EngagementStatus> loadEngagementStatus() {
-    if (engagementStatus == null) {
-      engagementStatus = AnetObjectEngine.getInstance().getReportDao().getEngagementStatus(uuid);
+  public List<EngagementStatus> getEngagementStatus() {
+    LinkedList<EngagementStatus> statuses = new LinkedList<EngagementStatus>();
+    if (ReportState.CANCELLED.equals(getState())) {
+      statuses.add(EngagementStatus.CANCELLED);
     }
-    return engagementStatus;
+    statuses.add(isFutureEngagement() ? EngagementStatus.FUTURE : EngagementStatus.HAPPENED);
+    return statuses;
   }
 
   @Override

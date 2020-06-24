@@ -359,41 +359,6 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
   }
 
-  @InTransaction
-  public List<EngagementStatus> getEngagementStatus(String reportUuid) {
-    final List<EngagementStatus> engagementStatus = new ArrayList<>();
-    final Number happenedCount = (Number) getDbHandle()
-        .createQuery(
-            "/* getHappened */ SELECT count(*) as ct from reports where uuid = :reportUuid "
-                + "AND reports.\"engagementDate\" <= :endOfHappened")
-        .bind("reportUuid", reportUuid)
-        .bind("endOfHappened", DaoUtils.asLocalDateTime(Utils.endOfToday()))
-        .map(new MapMapper(false)).one().get("ct");
-    if (happenedCount.longValue() > 0) {
-      engagementStatus.add(EngagementStatus.HAPPENED);
-    }
-    final Number futureCount = (Number) getDbHandle()
-        .createQuery("/* getFuture */ SELECT count(*) as ct from reports where uuid = :reportUuid "
-            + "AND reports.\"engagementDate\" > :startOfFuture")
-        .bind("reportUuid", reportUuid)
-        .bind("startOfFuture", DaoUtils.asLocalDateTime(Utils.endOfToday()))
-        .map(new MapMapper(false)).one().get("ct");
-    if (futureCount.longValue() > 0) {
-      engagementStatus.add(EngagementStatus.FUTURE);
-    }
-    final Number cancelledCount = (Number) getDbHandle()
-        .createQuery(
-            "/* getCancelled */ SELECT count(*) as ct from reports where uuid = :reportUuid "
-                + "AND reports.state = :cancelledState")
-        .bind("reportUuid", reportUuid)
-        .bind("cancelledState", DaoUtils.getEnumId(ReportState.CANCELLED)).map(new MapMapper(false))
-        .one().get("ct");
-    if (cancelledCount.longValue() > 0) {
-      engagementStatus.add(EngagementStatus.CANCELLED);
-    }
-    return engagementStatus;
-  }
-
   @Override
   public AnetBeanList<Report> search(ReportSearchQuery query) {
     return search(AnetObjectEngine.getInstance().getContext(), query).join();
