@@ -138,10 +138,10 @@ Run `yarn run lint-fix` to automatically fix some kinds of lint errors.
 
 #### Client-side testing locally
 To run the tests locally, make sure you have the server using the test-database running as above.
-1. Run the client side E2E tests against the test database: yarn run test-e2e
-1. Run the client side wdio tests against the test database: yarn run test-wdio
-1. Run the client side jest tests against the test database: yarn run test-jest
-1. Or run all client side tests against the test database: yarn run test-all
+1. Run the client side E2E tests against the test database: `yarn run test-e2e`
+1. Run the client side wdio tests against the test database: `yarn run test-wdio`
+1. Run the client side jest tests against the test database: `yarn run test-jest`
+1. Or run all client side tests against the test database: `yarn run test-all`
 
 To run the tests locally, by having [`chromedriver`](https://www.npmjs.com/package/chromedriver) as an npm dependency, we automatically have access to run in Chrome. To use Firefox instead, see [`geckodriver`](https://www.npmjs.com/package/geckodriver).
 
@@ -169,25 +169,45 @@ To run the tests remotely, two things are needed:
 Look up your settings and put them in `client/config/default.json`:
 ```json
 {
-	"browserstack_user": "myusername123",
-	"browserstack_key": "mYbRoWsErStAcKkEy"
+  "browserstack_user": "myusername123",
+  "browserstack_key": "mYbRoWsErStAcKkEy"
 }
 ```
 If you want step-by-step screenshots from your tests (_Visual Logs_ on BrowserStack) you can also add:
 ```
-	"browserstack_debug": "true"
+  "browserstack_debug": "true"
 ```
 to your `default.json`.
 
-Then download the appropriate `BrowserStackLocal`, unpack it.
+Then [download](https://www.browserstack.com/local-testing/releases) the appropriate `BrowserStackLocal`, unpack it.
 
 When all is set up, run the remote tests:
-1. Run `BrowserStackLocal` with your key: ./BrowserStackLocal --key mYbRoWsErStAcKkEy
-1. Run the tests:
+1. Run `BrowserStackLocal` with your key:
+    ```
+    $ ./BrowserStackLocal --key mYbRoWsErStAcKkEy
+   ```
+1. Configure scripts with `TEST_ENV` envrironment variable for remote testing: 
     ```
     $ export TEST_ENV=remote
-    $ yarn run test-e2e
     ```
+1. Run;
+    1.  the client side E2E tests:
+        ```
+        $ yarn run test-e2e
+        ```
+    1. the client side wdio tests:
+        ```
+        $ yarn run test-wdio
+        ```
+    1. the client side wdio-ie tests:
+        ```
+        $ yarn run test-wdio-ie
+        ```
+       **About IE tests:** Internet Explorer is not fully supported by ANET and all features are **NOT** guaranteed to work with IE. For that reason, a warning banner is displayed when IE detected. `test-wdio-ie` runs tests for this scenario and these tests run only on remote testing. When testing locally, they gracefully abort.
+    1. all client side tests:
+        ```
+        $ yarn run test-all
+        ```
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ### Simulator
