@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
@@ -173,10 +174,10 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   @SuppressWarnings("unchecked")
   public void loadDictionary() {
     // Read and set anet-dictionary
-    File file = new File(System.getProperty("user.dir") + "/anet-dictionary.yml");
+    final File file = new File(System.getProperty("user.dir") + "/anet-dictionary.yml");
     try (final InputStream inputStream = new FileInputStream(file)) {
-      Map<String, Object> dictionary = yamlMapper.readValue(inputStream, Map.class);
-      Map<String, Object> settings = (Map<String, Object>) dictionary.get("dictionary");
+      final Map<String, Object> dictionary = yamlMapper.readValue(inputStream, Map.class);
+      final Map<String, Object> settings = (Map<String, Object>) dictionary.get("dictionary");
       this.setDictionary(settings);
       // Check the dictionary
       final JsonNode jsonNodeDictionary = checkDictionary();
@@ -186,19 +187,39 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public void reloadDictionary() {
+    final Map<String, Object> previousDictionary = this.getDictionary();
+    try {
+      final File file = new File(System.getProperty("user.dir") + "/anet-dictionary.yml");
+      try (final InputStream inputStream = new FileInputStream(file)) {
+        final Map<String, Object> dictionary = yamlMapper.readValue(inputStream, Map.class);
+        final Map<String, Object> settings = (Map<String, Object>) dictionary.get("dictionary");
+        this.setDictionary(settings);
+      } catch (IOException e) {
+        logger.error("ANET dictionary [anet-dictionary.yml] not found");
+      }
+      // Check the dictionary
+      checkDictionary();
+    } catch (IllegalArgumentException e) {
+      this.setDictionary(previousDictionary);
+      throw new WebApplicationException(("Invalid dictionary in the configuration"));
+    }
+  }
+
   public JsonNode checkDictionary() throws IllegalArgumentException {
     try (final InputStream inputStream =
         AnetConfiguration.class.getResourceAsStream("/anet-schema.yml")) {
       if (inputStream == null) {
         logger.error("ANET schema [anet-schema.yml] not found");
       } else {
-        JsonSchemaFactory factory =
+        final JsonSchemaFactory factory =
             JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
                 .objectMapper(yamlMapper).build();
 
-        JsonSchema schema = factory.getSchema(inputStream);
+        final JsonSchema schema = factory.getSchema(inputStream);
         final JsonNode dictionary = jsonMapper.valueToTree(getDictionary());
-        Set<ValidationMessage> errors = schema.validate(dictionary);
+        final Set<ValidationMessage> errors = schema.validate(dictionary);
         for (ValidationMessage error : errors) {
           logger.error(error.getMessage());
         }
@@ -305,7 +326,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   public String loadVersion() {
     try (final InputStream inputStream =
         AnetConfiguration.class.getResourceAsStream("/version.properties")) {
-      Map<String, Object> version = yamlMapper.readValue(inputStream, Map.class);
+      final Map<String, Object> version = yamlMapper.readValue(inputStream, Map.class);
       this.setVersion((String) version.get("projectVersion"));
     } catch (IOException e) {
       logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE, e);

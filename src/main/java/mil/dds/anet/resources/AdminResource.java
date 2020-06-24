@@ -79,7 +79,7 @@ public class AdminResource {
   public String reloadDictionary(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    config.loadDictionary();
+    config.reloadDictionary();
     AnetAuditLogger.log("Dictionary updated by {}", user);
     return AnetConstants.DICTIONARY_RELOAD_MESSAGE;
   }
@@ -119,14 +119,14 @@ public class AdminResource {
       throws IOException {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    Map<String, LinkedHashSet<Map<String, String>>> userActivities = new HashMap<>();
-    Map<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
-    File file = new File(System.getProperty("user.dir") + "/logs/userActivities.log");
-    BufferedReader br = new BufferedReader(new FileReader(file));
+    final Map<String, LinkedHashSet<Map<String, String>>> userActivities = new HashMap<>();
+    final Map<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
+    final File file = new File(System.getProperty("user.dir") + "/logs/userActivities.log");
+    final BufferedReader br = new BufferedReader(new FileReader(file));
     String st;
     while ((st = br.readLine()) != null) {
-      Map<String, String> map = jsonMapper.readValue(st, Map.class);
-      Map<String, String> entries = new HashMap<String, String>() {
+      final Map<String, String> map = jsonMapper.readValue(st, Map.class);
+      final Map<String, String> entries = new HashMap<String, String>() {
         {
           put("user", map.get("user") == null ? "" : map.get("user"));
           put("time", map.get("time") == null ? "" : map.get("time"));
@@ -145,12 +145,12 @@ public class AdminResource {
       recentCalls.computeIfAbsent("recentCalls", k -> new LinkedHashSet<>()).add(entries);
     }
     br.close();
-    Map<String, Object> allActivities = new HashMap<>();
+    final Map<String, Object> allActivities = new HashMap<>();
     // Reverse the list , this means the entries will be ordered in descending order of entry time
     if (!userActivities.isEmpty()) {
       allActivities.put("users", userActivities.values().stream().map(s -> {
         // Convert LinkedHashSet to ArrayList to reverse the list
-        ArrayList<Map<String, String>> activities = new ArrayList<>(s);
+        final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
         Collections.reverse(activities);
         // Convert reversed ArrayList to LinkedHashSet and return
         return new LinkedHashSet<>(activities);
@@ -162,7 +162,7 @@ public class AdminResource {
     if (!recentCalls.isEmpty()) {
       allActivities.put("recentCalls", recentCalls.values().stream().map(s -> {
         // Convert LinkedHashSet to ArrayList to reverse the list
-        ArrayList<Map<String, String>> activities = new ArrayList<>(s);
+        final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
         Collections.reverse(activities);
         // Convert reversed ArrayList to LinkedHashSet and return
         return new LinkedHashSet<>(activities);
