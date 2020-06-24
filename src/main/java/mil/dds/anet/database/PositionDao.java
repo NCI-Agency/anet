@@ -274,7 +274,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   private int removePersonFromPosition(String positionUuid, Instant now) {
     final int nr = emptyPosition(positionUuid, now);
 
-    PersonPositionHistory currentPositionPerson = getDbHandle()
+    final PersonPositionHistory currentPositionPerson = getDbHandle()
         .createQuery("/* personFullPosition.find */ SELECT * FROM \"peoplePositions\" "
             + "WHERE \"positionUuid\" = :positionUuid AND \"personUuid\" IS NOT NULL AND "
             + "\"endedAt\" IS NULL")
@@ -293,7 +293,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
       removePositionFromPerson(currentPositionPerson.getPersonUuid(), now);
     }
 
-    PersonPositionHistory emptyPersonPosition = getDbHandle()
+    final PersonPositionHistory emptyPersonPosition = getDbHandle()
         .createQuery("/* personPosition.find */ SELECT * FROM \"peoplePositions\" "
             + "WHERE \"positionUuid\" = :positionUuid "
             + "AND \"personUuid\" IS NULL AND \"endedAt\" IS NULL")
@@ -311,7 +311,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   private void removePositionFromPerson(String personUuid, Instant now) {
-    PersonPositionHistory currentPositionPerson = getDbHandle()
+    final PersonPositionHistory currentPositionPerson = getDbHandle()
         .createQuery("/* positionFullPerson.find */ SELECT * FROM \"peoplePositions\" "
             + "WHERE \"personUuid\" = :personUuid AND \"positionUuid\" IS NOT NULL AND "
             + "\"endedAt\" IS NULL")
@@ -328,7 +328,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
       removePersonFromPosition(currentPositionPerson.getPositionUuid(), now);
     }
 
-    PersonPositionHistory emptyPositionPerson = getDbHandle()
+    final PersonPositionHistory emptyPositionPerson = getDbHandle()
         .createQuery("/* positionPerson.find */ SELECT * FROM \"peoplePositions\" "
             + "WHERE \"personUuid\" = :personUuid "
             + "AND \"positionUuid\" IS NULL AND \"endedAt\" IS NULL")
@@ -346,7 +346,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   @InTransaction
   public int transferActivePositionAndUpdatePositionHistoryFromLoserToWinner(String positionUuid,
       String loserUuid, String winnerUuid) {
-    Instant now = Instant.now();
+    final Instant now = Instant.now();
     final int nr = updatePersonOfPosition(positionUuid, winnerUuid, now);
     updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid, now);
     return nr;
@@ -354,7 +354,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int transferActivePositionFromLoserToWinner(String positionUuid, String winnerUuid) {
-    Instant now = Instant.now();
+    final Instant now = Instant.now();
     return updatePersonOfPosition(positionUuid, winnerUuid, now);
   }
 
@@ -374,7 +374,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int updatePositionHistoryOfLoserWithWinner(String loserUuid, String winnerUuid) {
-    Instant now = Instant.now();
+    final Instant now = Instant.now();
     return updatePositionHistoryOfLoserWithWinner(loserUuid, winnerUuid, now);
   }
 

@@ -218,11 +218,11 @@ public class PersonResource {
       throw new WebApplicationException("You selected the same person twice",
           Status.NOT_ACCEPTABLE);
     }
-    Person winner = dao.getByUuid(winnerUuid);
+    final Person winner = dao.getByUuid(winnerUuid);
     if (winner == null) {
       throw new WebApplicationException("Winner not found", Status.NOT_FOUND);
     }
-    Person loser = dao.getByUuid(loserUuid);
+    final Person loser = dao.getByUuid(loserUuid);
     if (loser == null) {
       throw new WebApplicationException("Loser not found", Status.NOT_FOUND);
     }
@@ -258,7 +258,7 @@ public class PersonResource {
               loserPosition.getUuid(), loserUuid, winnerUuid);
     }
 
-    int merged = dao.mergePeople(winner, loser);
+    final int merged = dao.mergePeople(winner, loser);
     AnetAuditLogger.log("Person {} merged into WINNER: {} by {}", loser, winner, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return merged;

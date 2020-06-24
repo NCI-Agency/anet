@@ -58,18 +58,18 @@ public class MergePeopleTest extends AbstractResourceTest {
     final Person loser = new Person();
     loser.setRole(Role.ADVISOR);
     loser.setName(personName);
-    String personUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        loser, new TypeReference<GraphQlResponse<Person>>() {});
+    final String personUuid = graphQLHelper.createObject(admin, "createPerson", "person",
+        "PersonInput", loser, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(personUuid).isNotNull();
     return getPerson(personUuid);
   }
 
   private Person assignPositionPerson(Position position, Person person) {
     // Assign a person into the position
-    Map<String, Object> variables = new HashMap<>();
+    final Map<String, Object> variables = new HashMap<>();
     variables.put("uuid", position.getUuid());
     variables.put("person", person);
-    Integer nrUpdated = graphQLHelper.updateObject(admin,
+    final Integer nrUpdated = graphQLHelper.updateObject(admin,
         "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
         variables);
     assertThat(nrUpdated).isEqualTo(1);
@@ -82,17 +82,17 @@ public class MergePeopleTest extends AbstractResourceTest {
   }
 
   private void removePositionPerson(Position position) {
-    Integer nrDeleted =
+    final Integer nrDeleted =
         graphQLHelper.deleteObject(admin, "deletePersonFromPosition", position.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
   }
 
   private Person mergePeople(String loserUuid, String winnerUuid, Boolean copyPosition) {
-    Map<String, Object> variables = new HashMap<>();
+    final Map<String, Object> variables = new HashMap<>();
     variables.put("winnerUuid", winnerUuid);
     variables.put("loserUuid", loserUuid);
     variables.put("copyPosition", copyPosition);
-    Integer nrUpdated = graphQLHelper.updateObject(admin,
+    final Integer nrUpdated = graphQLHelper.updateObject(admin,
         "mutation ($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition) }",
         variables);
     assertThat(nrUpdated).isEqualTo(1);
