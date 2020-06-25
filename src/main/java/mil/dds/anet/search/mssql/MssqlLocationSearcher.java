@@ -27,6 +27,11 @@ public class MssqlLocationSearcher extends AbstractLocationSearcher {
   }
 
   @Override
+  protected void addWithinPolygon(LocationSearchQuery query) {
+    addWithinPolygonMssql("uuid", query.getWithinPolygon());
+  }
+
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     if (hasTextQuery(query) && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

@@ -44,8 +44,14 @@ public abstract class AbstractLocationSearcher
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
+    if (query.getWithinPolygon() != null) {
+      addWithinPolygon(query);
+    }
+
     addOrderByClauses(qb, query);
   }
+
+  protected abstract void addWithinPolygon(LocationSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     switch (query.getSortBy()) {
