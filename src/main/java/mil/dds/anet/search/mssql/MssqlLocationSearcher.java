@@ -27,6 +27,14 @@ public class MssqlLocationSearcher extends AbstractLocationSearcher {
   }
 
   @Override
+  protected void addWithinPolygon(LocationSearchQuery query) {
+    qb.addWhereClause(String.format(
+        "\"uuid\" IN (SELECT \"uuid\" FROM locations WHERE "
+            + "\"gisPoint\".STWithin(geometry::STGeomFromText('%1$s', 3857)) = 1)",
+        query.getWithinPolygon()));
+  }
+
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

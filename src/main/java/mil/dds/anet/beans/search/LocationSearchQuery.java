@@ -10,6 +10,10 @@ public class LocationSearchQuery extends AbstractSearchQuery<LocationSearchSortB
   @GraphQLInputField
   private LocationStatus status;
 
+  @GraphQLQuery
+  @GraphQLInputField
+  private String withinPolygon;
+
   public LocationSearchQuery() {
     super(LocationSearchSortBy.NAME);
   }
@@ -20,6 +24,14 @@ public class LocationSearchQuery extends AbstractSearchQuery<LocationSearchSortB
 
   public void setStatus(LocationStatus status) {
     this.status = status;
+  }
+
+  public String getWithinPolygon() {
+    return withinPolygon;
+  }
+
+  public void setWithinPolygon(String withinPolygon) {
+    this.withinPolygon = withinPolygon;
   }
 
 }
