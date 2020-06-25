@@ -539,6 +539,7 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'Kabul Police Academy') WHERE name = 'Chief of Police';
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'MoD Headquarters Kabul') WHERE name = 'Cost Adder - MoD';
+UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'Wishingwells Park') WHERE name = 'Planning Captain';
 
 --Write a couple reports!
 DECLARE @reportUuid varchar(36);
