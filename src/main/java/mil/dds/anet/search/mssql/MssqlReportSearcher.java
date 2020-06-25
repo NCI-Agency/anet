@@ -72,6 +72,14 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
+  protected void addWithinPolygon(ReportSearchQuery query) {
+    qb.addWhereClause(String.format(
+        "\"locationUuid\" IN (SELECT \"uuid\" FROM locations WHERE "
+            + "\"gisPoint\".STWithin(geometry::STGeomFromText('%1$s', 3857)) = 1)",
+        query.getWithinPolygon()));
+  }
+
+  @Override
   protected void addBatchClause(ReportSearchQuery query) {
     addBatchClause(outerQb, query);
   }
