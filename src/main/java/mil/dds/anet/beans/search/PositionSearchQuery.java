@@ -33,6 +33,9 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   @GraphQLQuery
   @GraphQLInputField
   private Boolean hasCounterparts;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String withinPolygon;
 
   public PositionSearchQuery() {
     super(PositionSearchSortBy.NAME);
@@ -101,6 +104,14 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
 
   public void setHasCounterparts(Boolean hasCounterparts) {
     this.hasCounterparts = hasCounterparts;
+  }
+
+  public String getWithinPolygon() {
+    return withinPolygon;
+  }
+
+  public void setWithinPolygon(String withinPolygon) {
+    this.withinPolygon = withinPolygon;
   }
 
   @Override
