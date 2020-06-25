@@ -104,7 +104,17 @@ const importerConfig = {
 
     return null
   },
-  htmlToBlock: nodeName => {
+  htmlToBlock: (nodeName, node) => {
+    if (
+      nodeName === "h1" ||
+      node.attributes?.classname?.nodeValue === "mandatory"
+    ) {
+      return {
+        type: BLOCK_TYPE.HEADER_ONE,
+        data: { mandatory: true }
+      }
+    }
+
     if (nodeName === "hr" || nodeName === "img") {
       // "atomic" blocks is how Draft.js structures block-level entities.
       return "atomic"
@@ -119,6 +129,13 @@ const importerConfig = {
 
 const exporterConfig = {
   blockToHTML: block => {
+    if (block.type === BLOCK_TYPE.HEADER_ONE && block.data.mandatory) {
+      return {
+        start: '<h1 class="mandatory">',
+        end: "</h1>"
+      }
+    }
+
     if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
       return <blockquote />
     }
@@ -174,7 +191,14 @@ class RichTextEditor extends Component {
   }
 
   render() {
-    const { className, value, onChange, onHandleBlur, template } = this.props
+    const {
+      className,
+      value,
+      onChange,
+      onHandleBlur,
+      template,
+      templateHTML
+    } = this.props
     const { sideToolbarPlugin } = this.state
     const { SideToolbar } = sideToolbarPlugin
     return (
@@ -196,7 +220,13 @@ class RichTextEditor extends Component {
           stateSaveInterval={100}
           plugins={[sideToolbarPlugin, newlinePlugin, readonlyBlockPlugin]}
           handlePastedText={() => true}
-          rawContentState={value ? fromHTML(value) : template || null}
+          rawContentState={
+            value
+              ? fromHTML(value)
+              : templateHTML
+                ? fromHTML(templateHTML)
+                : template || null
+          }
           showUndoControl
           showRedoControl
           spellCheck
@@ -230,7 +260,8 @@ RichTextEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
-  template: PropTypes.object
+  template: PropTypes.object,
+  templateHTML: PropTypes.string
 }
 
 export default RichTextEditor

@@ -1,25 +1,35 @@
-export const preventHandleOnReadonly = editorState => {
-  const selectionState = editorState.getSelection()
-  const anchorKey = selectionState.getAnchorKey()
-  const contentState = editorState.getCurrentContent()
-  const currentContentBlock = contentState.getBlockForKey(anchorKey)
-  const currentContentBlockData = currentContentBlock.getData().toObject()
-  if (currentContentBlockData.mandatory) {
-    return "handled"
-  }
-  return "not-handled"
-}
-
 const createReadonlyBlockPlugin = config => {
-  const handleKeyCommand = (command, editorState) => {
-    return preventHandleOnReadonly(editorState)
+  // TODO: rename plugin
+  const blockStyleFn = contentBlock => {
+    const contentBlockData = contentBlock.getData().toObject()
+    if (contentBlockData.mandatory) {
+      // Add mandatory class for content blocks marked as mandatory
+      return "mandatory"
+    }
   }
-  const handleBeforeInput = (chars, editorState) => {
-    return preventHandleOnReadonly(editorState)
+
+  const handleKeyCommand = (command, editorState) => {
+    if (["backspace", "delete"].includes(command)) {
+      const selectionState = editorState.getSelection()
+      const anchorKey = selectionState.getAnchorKey()
+      const contentState = editorState.getCurrentContent()
+      const currentContentBlock = contentState.getBlockForKey(anchorKey)
+      const currentContentBlockData = currentContentBlock.getData().toObject()
+      const currentContentBlockText = currentContentBlock.getText()
+      if (
+        currentContentBlockData.mandatory &&
+        currentContentBlockText.length === 1
+      ) {
+        // Prevent deleting the block itself
+        return "handled"
+      }
+    }
+
+    return "not-handled"
   }
   return {
-    handleKeyCommand: handleKeyCommand,
-    handleBeforeInput: handleBeforeInput
+    blockStyleFn: blockStyleFn,
+    handleKeyCommand: handleKeyCommand
   }
 }
 

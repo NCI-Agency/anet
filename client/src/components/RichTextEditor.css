@@ -15,3 +15,12 @@
 .Draftail-block--unstyled {
   margin: 0.75rem 0;
 }
+
+h1:empty {
+   content: 'Please enter a heading here';
+   background-color: red;
+}
+.mandatory {
+  background-color: green;
+  content: 'Please enter a heading here';
+}

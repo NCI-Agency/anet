@@ -503,10 +503,12 @@ const BaseReportForm = ({
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
+        const reportTextTemplateHTML =
+          '<h1 class="mandatory" style={ placeholder: "aaa" }>Key details 1</h1>'
         const reportTextTemplate = {
           blocks: [
             {
-              data: { mandatory: true },
+              data: { mandatory: true, class: "mandatory" },
               text: "Step 1",
               type: BLOCK_TYPE.HEADER_ONE
             },
@@ -518,6 +520,11 @@ const BaseReportForm = ({
             {
               data: {},
               text: "Step 3",
+              type: BLOCK_TYPE.HEADER_ONE
+            },
+            {
+              data: { class: "mandatory" },
+              text: "",
               type: BLOCK_TYPE.HEADER_ONE
             }
           ],
@@ -982,6 +989,7 @@ const BaseReportForm = ({
                         setFieldTouched("reportText", true, false)
                       }}
                       template={reportTextTemplate}
+                      templateHTML={reportTextTemplateHTML}
                     />
                   }
                 />
