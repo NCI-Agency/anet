@@ -1,7 +1,7 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
-import createReadonlyBlockPlugin from "components/editor/plugins/readonlyBlockPlugin"
+import createMandatoryBlockPlugin from "components/editor/plugins/mandatoryBlockPlugin"
 import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertFromRaw, convertToRaw } from "draft-js"
 import {
@@ -26,7 +26,7 @@ import "draft-js-side-toolbar-plugin/lib/plugin.css"
 import "components/RichTextEditor.css"
 
 const newlinePlugin = createNewlinePlugin()
-const readonlyBlockPlugin = createReadonlyBlockPlugin()
+const mandatoryBlockPlugin = createMandatoryBlockPlugin()
 
 const BLOCK_TYPES = [
   { type: BLOCK_TYPE.HEADER_ONE },
@@ -106,11 +106,18 @@ const importerConfig = {
   },
   htmlToBlock: (nodeName, node) => {
     if (
-      nodeName === "h1" ||
-      node.attributes?.classname?.nodeValue === "mandatory"
+      nodeName === "h1" &&
+      node.attributes?.class?.nodeValue === "mandatory"
     ) {
       return {
         type: BLOCK_TYPE.HEADER_ONE,
+        data: { mandatory: true }
+      }
+    }
+
+    if (nodeName === "p" && node.attributes?.class?.nodeValue === "mandatory") {
+      return {
+        type: BLOCK_TYPE.UNSTYLED,
         data: { mandatory: true }
       }
     }
@@ -218,7 +225,7 @@ class RichTextEditor extends Component {
           }}
           onBlur={onHandleBlur}
           stateSaveInterval={100}
-          plugins={[sideToolbarPlugin, newlinePlugin, readonlyBlockPlugin]}
+          plugins={[sideToolbarPlugin, newlinePlugin, mandatoryBlockPlugin]}
           handlePastedText={() => true}
           rawContentState={
             value
