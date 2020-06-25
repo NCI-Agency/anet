@@ -106,11 +106,18 @@ const importerConfig = {
   },
   htmlToBlock: (nodeName, node) => {
     if (
-      nodeName === "h1" ||
-      node.attributes?.classname?.nodeValue === "mandatory"
+      nodeName === "h1" &&
+      node.attributes?.class?.nodeValue === "mandatory"
     ) {
       return {
         type: BLOCK_TYPE.HEADER_ONE,
+        data: { mandatory: true }
+      }
+    }
+
+    if (nodeName === "p" && node.attributes?.class?.nodeValue === "mandatory") {
+      return {
+        type: BLOCK_TYPE.UNSTYLED,
         data: { mandatory: true }
       }
     }

@@ -504,7 +504,7 @@ const BaseReportForm = ({
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const reportTextTemplateHTML =
-          '<h1 class="mandatory" style={ placeholder: "aaa" }>Key details 1</h1>'
+          '<h1 class="mandatory" style={ placeholder: "aaa" }>Key details 1</h1><p class="mandatory"></p><h1 class="mandatory" style={ placeholder: "aaa" }>Key details 2</h1><p class="mandatory"></p>'
         const reportTextTemplate = {
           blocks: [
             {
