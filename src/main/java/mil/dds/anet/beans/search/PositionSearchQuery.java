@@ -34,6 +34,9 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   @GraphQLQuery
   @GraphQLInputField
   private String authorizationGroupUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String withinPolygon;
 
   public PositionSearchQuery() {
     super(PositionSearchSortBy.NAME);
@@ -102,6 +105,14 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
 
   public void setAuthorizationGroupUuid(String authorizationGroupUuid) {
     this.authorizationGroupUuid = authorizationGroupUuid;
+  }
+
+  public String getWithinPolygon() {
+    return withinPolygon;
+  }
+
+  public void setWithinPolygon(String withinPolygon) {
+    this.withinPolygon = withinPolygon;
   }
 
   @Override

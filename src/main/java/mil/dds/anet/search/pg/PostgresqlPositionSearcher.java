@@ -19,6 +19,13 @@ public class PostgresqlPositionSearcher extends AbstractPositionSearcher {
   }
 
   @Override
+  protected void addWithinPolygon(PositionSearchQuery query) {
+    qb.addWhereClause(String
+        .format("\"locationUuid\" IN (SELECT \"uuid\" FROM locations WHERE ST_Within(\"gisPoint\", "
+            + "ST_GeomFromText('%1$s', 3857)))", query.getWithinPolygon()));
+  }
+
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {
     if (query.isTextPresent() && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
