@@ -9,18 +9,18 @@ import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection, {
+  FORMAT_CALENDAR,
   FORMAT_MAP,
   FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
+  FORMAT_TABLE
 } from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
@@ -152,7 +152,7 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
                 />
               </Fieldset>
 
-              <Leaflet markers={[marker]} />
+              <Leaflet markers={[marker]} geoQueryModel="Location" />
             </Form>
 
             <Approvals relatedObject={location} />

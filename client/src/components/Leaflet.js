@@ -1,3 +1,4 @@
+import LeafletGeoQuery from "components/LeafletGeoQuery"
 import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
@@ -91,7 +92,8 @@ const Leaflet = ({
   marginBottom,
   markers,
   mapId: initialMapId,
-  onMapClick
+  onMapClick,
+  geoQueryModel
 }) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
@@ -159,6 +161,7 @@ const Leaflet = ({
       setTimeout(() => {
         // workaround for preventing the marker from moving when search icon is clicked
         // https://github.com/smeijer/leaflet-geosearch/issues/169#issuecomment-458573562
+        // TODO this workaround is no longer required as per https://github.com/smeijer/leaflet-geosearch/issues/169#issuecomment-633042225
         gsc.getContainer().onclick = e => e.stopPropagation()
       })
       gsc.addTo(newMap)
@@ -238,15 +241,27 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
-  return <div id={mapId} style={style} />
+  return (
+    <div id={mapId} style={style}>
+      {geoQueryModel && map && markerLayer && (
+        <LeafletGeoQuery
+          map={map}
+          markerLayer={markerLayer}
+          modelType={geoQueryModel}
+        />
+      )}
+    </div>
+  )
 }
+
 Leaflet.propTypes = {
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   markers: PropTypes.array,
   mapId: PropTypes.string, // pass this when you have more than one map on a page
-  onMapClick: PropTypes.func
+  onMapClick: PropTypes.func,
+  geoQueryModel: PropTypes.oneOf(["Location", "Report", "Position"])
 }
 Leaflet.defaultProps = {
   width: "100%",
