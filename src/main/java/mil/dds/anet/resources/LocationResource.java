@@ -99,4 +99,40 @@ public class LocationResource {
     return numRows;
   }
 
+  @GraphQLMutation(name = "mergeLocation")
+  public Location mergeLocation(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "looserUuid") String looserUuid,
+      @GraphQLArgument(name = "winnerLocation") Location winnerLocation) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertSuperUser(user);
+    final Location existing = dao.getByUuid(looserUuid);
+
+    // update the merged location and update approval steps.
+    final int nr = dao.update(winnerLocation);
+    if (nr == 0) {
+      throw new WebApplicationException("Couldn't process location merge", Status.NOT_FOUND);
+    }
+    final Location mergedLocation = dao.getByUuid(looserUuid);
+    final List<ApprovalStep> existingPlanningApprovalSteps =
+        existing.loadPlanningApprovalSteps(engine.getContext()).join();
+    final List<ApprovalStep> existing2PlanningApprovalSteps =
+        winnerLocation.loadPlanningApprovalSteps(engine.getContext()).join();
+    existingPlanningApprovalSteps.addAll(existing2PlanningApprovalSteps);
+    final List<ApprovalStep> existingApprovalSteps =
+        existing.loadApprovalSteps(engine.getContext()).join();
+    final List<ApprovalStep> existingApprovalSteps2 =
+        winnerLocation.loadApprovalSteps(engine.getContext()).join();
+    existingApprovalSteps.addAll(existingApprovalSteps2);
+    Utils.updateApprovalSteps(mergedLocation, mergedLocation.getPlanningApprovalSteps(),
+        existingPlanningApprovalSteps, mergedLocation.getApprovalSteps(), existingApprovalSteps);
+
+    final int numRow = dao.mergeLocation(existing, mergedLocation);
+    if (numRow == 0) {
+      throw new WebApplicationException("Couldn't process location merge", Status.NOT_FOUND);
+    }
+    AnetAuditLogger.log("Location {} merged on {} by {}", existing, mergedLocation, user);
+    // Return merged location uuid because of navigate that location.
+    return mergedLocation;
+  }
+
 }

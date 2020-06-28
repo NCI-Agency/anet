@@ -8,6 +8,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
 
@@ -51,6 +52,33 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
         + "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
         .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
+  }
+
+  @InTransaction
+  public int mergeLocation(Location loserLocation, Location mergedLocation) {
+    // Update old locations relations with merged location.
+    getDbHandle()
+        .createUpdate("/* updateNotesOfLoserLocationAfterMerge */ UPDATE \"noteRelatedObjects\" "
+            + "SET \"relatedObjectUuid\" = :relatedObjectUuid WHERE \"relatedObjectUuid\" = :oldRelatedObjectUuid")
+        .bind("oldRelatedObjectUuid", loserLocation.getUuid())
+        .bind("relatedObjectUuid", mergedLocation.getUuid()).execute();
+
+    getDbHandle()
+        .createUpdate("/* updateReportsOfLoserLocationAfterMerge */ UPDATE \"reports\" "
+            + "SET \"locationUuid\" = :locationUuid WHERE \"locationUuid\" = :oldLocationUuid")
+        .bind("oldLocationUuid", loserLocation.getUuid())
+        .bind("locationUuid", mergedLocation.getUuid()).execute();
+
+    // Update old location's positions with merged location info.
+    getDbHandle()
+        .createUpdate("/* updatePositionsOfLoserLocationAfterMerge */ UPDATE \"positions\" "
+            + "SET \"locationUuid\" = :locationUuid WHERE \"locationUuid\" = :oldLocationUuid")
+        .bind("oldLocationUuid", loserLocation.getUuid())
+        .bind("locationUuid", mergedLocation.getUuid()).execute();
+
+    // Delete old locations.
+    return getDbHandle().createUpdate("DELETE FROM \"locations\" WHERE \"uuid\" = :loserUuid")
+        .bind("loserUuid", loserLocation.getUuid()).execute();
   }
 
   @Override

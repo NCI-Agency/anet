@@ -6,7 +6,10 @@ import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -119,6 +122,48 @@ public class LocationResourceTest extends AbstractResourceTest {
       if (isSuperUser) {
         fail("Unexpected ForbiddenException");
       }
+    }
+  }
+
+  @Test
+  public void locationMergeTest() throws UnsupportedEncodingException {
+    final Location firstLocation = TestData.createLocation("The Merge Test Loc 1", 43.21, -87.65);
+    final Location secondLocation = TestData.createLocation("The Merge Test Loc 2", 41.11, -85.15);
+
+    final String firstLocationUuid = graphQLHelper.createObject(admin, "createLocation", "location",
+        "LocationInput", firstLocation, new TypeReference<GraphQlResponse<Location>>() {});
+    final String secondLocationUuid =
+        graphQLHelper.createObject(admin, "createLocation", "location", "LocationInput",
+            secondLocation, new TypeReference<GraphQlResponse<Location>>() {});
+    final Location firstCreatedLocation = graphQLHelper.getObjectById(admin, "location", FIELDS,
+        firstLocationUuid, new TypeReference<GraphQlResponse<Location>>() {});
+    final Location secondCreatedLocation = graphQLHelper.getObjectById(admin, "location", FIELDS,
+        secondLocationUuid, new TypeReference<GraphQlResponse<Location>>() {});
+
+    final Location mergedLocation = new Location();
+    mergedLocation.setUuid(firstLocationUuid);
+    mergedLocation.setLat(firstCreatedLocation.getLat());
+    mergedLocation.setLng(firstCreatedLocation.getLng());
+    mergedLocation.setStatus(Location.LocationStatus.ACTIVE);
+    mergedLocation.setName(secondCreatedLocation.getName());
+
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("looserUuid", secondCreatedLocation.getUuid());
+    variables.put("winnerLocation", mergedLocation);
+    final Location createdLocation = graphQLHelper.updateObject(admin,
+        "mutation ($looserUuid: String!, $winnerLocation: LocationInput!) { payload: mergeLocation "
+            + "(looserUuid: $looserUuid, winnerLocation: $winnerLocation) { uuid } }",
+        variables, new TypeReference<GraphQlResponse<Location>>() {});
+
+    assertThat(createdLocation).isNotNull();
+    assertThat(createdLocation.getUuid()).isNotNull();
+
+    // Assert that loser is gone.
+    try {
+      graphQLHelper.getObjectById(admin, "location", FIELDS, secondCreatedLocation.getUuid(),
+          new TypeReference<GraphQlResponse<Location>>() {});
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
     }
   }
 

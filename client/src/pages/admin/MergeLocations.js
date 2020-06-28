@@ -1,5 +1,7 @@
 import { Button, Callout, Tooltip } from "@blueprintjs/core"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import API from "api"
+import { gql } from "apollo-boost"
 import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ApprovalSteps, {
@@ -7,8 +9,10 @@ import ApprovalSteps, {
   PUBLICATION_APPROVAL
 } from "components/approvals/ApprovalSteps"
 import Leaflet from "components/Leaflet"
+import Messages from "components/Messages"
 import { GRAPHQL_NOTES_FIELDS } from "components/Model"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
@@ -19,6 +23,7 @@ import GeoLocation from "pages/locations/GeoLocation"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { connect } from "react-redux"
+import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 
@@ -28,6 +33,14 @@ const locationFilters = {
     queryVars: {}
   }
 }
+
+const GQL_MERGE_LOCATION = gql`
+  mutation($looserUuid: String!, $winnerLocation: LocationInput!) {
+    mergeLocation(looserUuid: $looserUuid, winnerLocation: $winnerLocation) {
+      uuid
+    }
+  }
+`
 
 const selectFields = `
   uuid
@@ -221,6 +234,8 @@ LocationField.propTypes = {
 }
 
 const MergeLocations = ({ pageDispatchers }) => {
+  const history = useHistory()
+  const [saveError, setSaveError] = useState(null)
   const [mergedLocation, setMergedLocation] = useState(new Location())
   const [location01, setLocation01] = useState()
   const [location02, setLocation02] = useState()
@@ -257,6 +272,7 @@ const MergeLocations = ({ pageDispatchers }) => {
 
   return (
     <div>
+      <Messages error={saveError} />
       <h2 className="form-header">Merge Locations Tool</h2>
       <div style={{ display: "flex" }}>
         <LocationColumn
@@ -416,9 +432,22 @@ const MergeLocations = ({ pageDispatchers }) => {
   )
 
   function mergeLocation(location01, location02, mergedLocation) {
-    console.log(location01)
-    console.log(location02)
-    console.log(mergedLocation)
+    mergedLocation.uuid = location01.uuid
+    API.mutation(GQL_MERGE_LOCATION, {
+      looserUuid: location02.uuid,
+      winnerLocation: mergedLocation
+    })
+      .then(res => {
+        if (res.mergeLocation) {
+          history.push(Location.pathFor({ uuid: res.mergeLocation.uuid }), {
+            success: "Locations merged. Displaying merged Location below."
+          })
+        }
+      })
+      .catch(error => {
+        setSaveError(error)
+        jumpToTop()
+      })
   }
 
   function setFieldValue(field, value) {
