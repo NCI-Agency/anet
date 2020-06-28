@@ -1106,3 +1106,24 @@ header.searchPagination {
 		display: none;
 	}
 }
+
+.merge-loc-fset .legend {
+    float: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.merge-loc-fset.reversed .legend {
+	flex-direction: row-reverse;
+}
+
+.merge-loc-fset .legend small {
+    float: none;
+    margin: 0;
+}
+
+.merge-loc-fset small > button {
+    margin: 0;
+}
