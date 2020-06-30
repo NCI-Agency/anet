@@ -143,6 +143,13 @@ const exporterConfig = {
       }
     }
 
+    if (block.type === BLOCK_TYPE.UNSTYLED && block.data.mandatory) {
+      return {
+        start: '<p class="mandatory">',
+        end: "</p>"
+      }
+    }
+
     if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
       return <blockquote />
     }
