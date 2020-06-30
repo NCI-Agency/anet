@@ -26,26 +26,22 @@ const css = {
 }
 
 class CustomUrlEsriProvider extends EsriProvider {
-  constructor(options = {}) {
+  constructor(searchUrl: string, options = {}) {
     super(options)
-  }
-
-  endpoint({ query, protocol } = {}) {
-    const { params } = this.options
-    const paramString = this.getParamString({
-      ...params,
-      f: "json",
-      text: query
-    })
-    return `${protocol}//${this.options.url}?${paramString}`
+    if (searchUrl) {
+      if (searchUrl.startsWith("http://") || searchUrl.startsWith("https://")) {
+        this.searchUrl = searchUrl
+      } else {
+        this.searchUrl = "https://" + searchUrl
+      }
+    }
   }
 }
 
 const geoSearcherProviders = {
   ESRI: () => {
-    return new CustomUrlEsriProvider({
-      url: Settings.imagery.geoSearcher.url,
-      params: { maxLocations: 10 }
+    return new CustomUrlEsriProvider(Settings.imagery.geoSearcher.url, {
+      params: { maxLocations: 5 }
     })
   },
   OSM: () => {
