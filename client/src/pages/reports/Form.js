@@ -32,7 +32,6 @@ import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
 import TaskTable from "components/TaskTable"
-import { BLOCK_TYPE } from "draftail"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -503,33 +502,6 @@ const BaseReportForm = ({
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
-        const reportTextTemplateHTML =
-          '<h1 class="mandatory" style={ placeholder: "aaa" }>Key details 1</h1><p class="mandatory"></p><h1 class="mandatory" style={ placeholder: "aaa" }>Key details 2</h1><p class="mandatory"></p>'
-        const reportTextTemplate = {
-          blocks: [
-            {
-              data: { mandatory: true, class: "mandatory" },
-              text: "Step 1",
-              type: BLOCK_TYPE.HEADER_ONE
-            },
-            {
-              data: { mandatory: true },
-              text: "Step 2",
-              type: BLOCK_TYPE.HEADER_ONE
-            },
-            {
-              data: {},
-              text: "Step 3",
-              type: BLOCK_TYPE.HEADER_ONE
-            },
-            {
-              data: { class: "mandatory" },
-              text: "",
-              type: BLOCK_TYPE.HEADER_ONE
-            }
-          ],
-          entityMap: {}
-        }
         return (
           <div className="report-form">
             <NavigationWarning isBlocking={dirty} />
@@ -978,7 +950,7 @@ const BaseReportForm = ({
 
                 <FastField
                   name="reportText"
-                  label={Settings.fields.report.reportText}
+                  label={Settings.fields.report.reportText.label}
                   component={FieldHelper.SpecialField}
                   onChange={value => setFieldValue("reportText", value, true)}
                   widget={
@@ -988,8 +960,9 @@ const BaseReportForm = ({
                         // validation will be done by setFieldValue
                         setFieldTouched("reportText", true, false)
                       }}
-                      template={reportTextTemplate}
-                      templateHTML={reportTextTemplateHTML}
+                      htmlTemplate={
+                        Settings.fields.report.reportText.placeholder
+                      }
                     />
                   }
                 />

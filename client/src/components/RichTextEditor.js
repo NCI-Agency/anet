@@ -203,8 +203,7 @@ class RichTextEditor extends Component {
       value,
       onChange,
       onHandleBlur,
-      template,
-      templateHTML
+      htmlTemplate
     } = this.props
     const { sideToolbarPlugin } = this.state
     const { SideToolbar } = sideToolbarPlugin
@@ -230,9 +229,9 @@ class RichTextEditor extends Component {
           rawContentState={
             value
               ? fromHTML(value)
-              : templateHTML
-                ? fromHTML(templateHTML)
-                : template || null
+              : htmlTemplate
+                ? fromHTML(htmlTemplate)
+                : null
           }
           showUndoControl
           showRedoControl
@@ -267,8 +266,7 @@ RichTextEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
-  template: PropTypes.object,
-  templateHTML: PropTypes.string
+  htmlTemplate: PropTypes.string
 }
 
 export default RichTextEditor

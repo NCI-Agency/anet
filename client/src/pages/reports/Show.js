@@ -625,7 +625,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 />
               </Fieldset>
               {report.reportText && (
-                <Fieldset title={Settings.fields.report.reportText}>
+                <Fieldset title={Settings.fields.report.reportText.label}>
                   {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
