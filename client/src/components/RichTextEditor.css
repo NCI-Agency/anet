@@ -16,11 +16,6 @@
   margin: 0.75rem 0;
 }
 
-h1:empty {
-   content: 'Please enter a heading here';
-   background-color: red;
-}
-.mandatory {
-  background-color: green;
-  content: 'Please enter a heading here';
+.Draftail-block--header-one.mandatory {
+  background-color: #f2f2f2;
 }
