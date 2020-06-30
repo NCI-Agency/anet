@@ -19,7 +19,6 @@ const replaceWithPlaceholder = (
 }
 
 const createMandatoryBlockPlugin = config => {
-  // TODO: rename plugin
   const blockStyleFn = contentBlock => {
     const contentBlockData = contentBlock.getData().toObject()
     if (contentBlockData.mandatory) {
