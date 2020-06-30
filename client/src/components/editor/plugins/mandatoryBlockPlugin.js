@@ -11,6 +11,7 @@ const replaceWithPlaceholder = (
     nextState.getCurrentContent(),
     nextState
       .getSelection()
+      .set("isBackward", false)
       .set("anchorOffset", startOffset)
       .set("focusOffset", endOffset),
     placeholder
@@ -35,35 +36,50 @@ const createMandatoryBlockPlugin = config => {
       const currentContentBlock = contentState.getBlockForKey(anchorKey)
       const currentContentBlockData = currentContentBlock.getData().toObject()
       const currentContentBlockText = currentContentBlock.getText()
-      const mandatoryBlock = currentContentBlockData.mandatory
-      const cursorOffset = selectionState.anchorOffset
+      const { mandatory, placeholder } = currentContentBlockData
+      const { anchorOffset, focusOffset } = selectionState
+      const startOffset = selectionState.getStartOffset()
+      const endOffset = selectionState.getEndOffset()
       const blockLength = currentContentBlockText.length
-      if (command === "backspace" && mandatoryBlock && cursorOffset === 0) {
+      if (
+        command === "backspace" &&
+        mandatory &&
+        anchorOffset === focusOffset &&
+        anchorOffset === 0
+      ) {
         // Prevent backspace when at the beginning of the block, to avoid
         // merge with the previous block
-        // FIXME: handleKeyCommand is not being used in this case for the first
-        // content block, and when
+        // Note: for the first content block, a backspace in this context
+        // doesn't use handleKeyCommand, but that's not a problem, it becomes an
+        // unstyled mandatory element
         return "handled"
       }
       if (
         command === "delete" &&
-        mandatoryBlock &&
-        cursorOffset === blockLength
+        mandatory &&
+        anchorOffset === focusOffset &&
+        anchorOffset === blockLength
       ) {
         // Prevent delete when at the end of the block, to avoid
         // merge with the next block
         return "handled"
       }
       if (
-        mandatoryBlock &&
-        blockLength === 1 &&
-        ((command === "delete" && cursorOffset === 0) ||
-          (command === "backspace" && cursorOffset === 1))
+        placeholder &&
+        mandatory &&
+        ((blockLength === 1 && command === "delete" && anchorOffset === 0) ||
+          (blockLength === 1 &&
+            command === "backspace" &&
+            anchorOffset === 1) ||
+          (blockLength === endOffset - startOffset &&
+            ["backspace", "delete"].includes(command)))
       ) {
-        // When a placeholder is given, instead of deleting last character,
-        // replace it with the placeholder
+        // When a placeholder is given, instead of deleting last left character or
+        // instead of deleting the whole text content, replace it with placeholder
         const nextState = editorState
-        setEditorState(replaceWithPlaceholder(nextState, "placeholder", 0, 1))
+        setEditorState(
+          replaceWithPlaceholder(nextState, placeholder, 0, blockLength)
+        )
         return "handled"
       }
     }

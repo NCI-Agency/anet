@@ -195,8 +195,9 @@ public class Utils {
           // Defeat link spammers.
           .requireRelNofollowOnLinks()
           // The align attribute on <p> elements can have any value below.
-          .allowAttributes("align").matching(true, "center", "left", "right", "justify", "char").onElements("p")
-          .allowAttributes("class").onElements("h1", "p")
+          .allowAttributes("align").matching(true, "center", "left", "right", "justify", "char")
+          .onElements("p").allowAttributes("class", "placeholder")
+          .onElements("h1", "h2", "h3", "h4", "h5", "h6", "p")
           .allowAttributes("border", "cellpadding", "cellspacing").onElements("table")
           .allowAttributes("colspan", "rowspan").onElements("td", "th").allowStyling()
           // These elements are allowed.

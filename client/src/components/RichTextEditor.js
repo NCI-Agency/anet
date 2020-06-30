@@ -16,6 +16,7 @@ import {
 } from "draft-js-buttons"
 import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
 import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -90,6 +91,37 @@ const ENTITY_CONTROL = {
   }
 }
 
+const BLOCK_TYPE_TAG_NAME = {
+  [BLOCK_TYPE.HEADER_ONE]: "h1",
+  [BLOCK_TYPE.HEADER_TWO]: "h2",
+  [BLOCK_TYPE.HEADER_THREE]: "h3",
+  [BLOCK_TYPE.UNSTYLED]: "p"
+}
+
+const htmlToBlockMiddleware = next => (nodeName, node, lastList) => {
+  if (nodeName === "hr" || nodeName === "img") {
+    // "atomic" blocks is how Draft.js structures block-level entities.
+    return "atomic"
+  }
+
+  const data = {}
+  if (node?.attributes?.class?.nodeValue === "mandatory") {
+    data.mandatory = true
+  }
+  const placeholder = node.attributes?.placeholder?.nodeValue
+  if (!_isEmpty(placeholder)) {
+    data.placeholder = placeholder
+  }
+  if (!_isEmpty(data)) {
+    const defaultBlock = next(nodeName, node, lastList)
+    const block =
+      typeof defaultBlock === "string" ? { type: defaultBlock } : defaultBlock
+    return { ...block, data }
+  }
+  return null
+}
+htmlToBlockMiddleware.__isMiddleware = true
+
 const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
     if (nodeName === "a") {
@@ -104,31 +136,7 @@ const importerConfig = {
 
     return null
   },
-  htmlToBlock: (nodeName, node) => {
-    if (
-      nodeName === "h1" &&
-      node.attributes?.class?.nodeValue === "mandatory"
-    ) {
-      return {
-        type: BLOCK_TYPE.HEADER_ONE,
-        data: { mandatory: true }
-      }
-    }
-
-    if (nodeName === "p" && node.attributes?.class?.nodeValue === "mandatory") {
-      return {
-        type: BLOCK_TYPE.UNSTYLED,
-        data: { mandatory: true }
-      }
-    }
-
-    if (nodeName === "hr" || nodeName === "img") {
-      // "atomic" blocks is how Draft.js structures block-level entities.
-      return "atomic"
-    }
-
-    return null
-  },
+  htmlToBlock: htmlToBlockMiddleware,
   htmlToStyle: (nodeName, node, currentStyle) => {
     return currentStyle
   }
@@ -136,17 +144,13 @@ const importerConfig = {
 
 const exporterConfig = {
   blockToHTML: block => {
-    if (block.type === BLOCK_TYPE.HEADER_ONE && block.data.mandatory) {
+    const tagName = BLOCK_TYPE_TAG_NAME[block.type]
+    if (tagName && block.data.mandatory) {
       return {
-        start: '<h1 class="mandatory">',
-        end: "</h1>"
-      }
-    }
-
-    if (block.type === BLOCK_TYPE.UNSTYLED && block.data.mandatory) {
-      return {
-        start: '<p class="mandatory">',
-        end: "</p>"
+        start: `<${tagName} class="mandatory" placeholder=${
+          block.data.placeholder || ""
+        }>`,
+        end: `</${tagName}>`
       }
     }
 
