@@ -158,16 +158,6 @@ logging:
           archivedLogFilenamePattern: ./logs/auditLogger-%d.log.zip
           archivedFileCount: 2
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-    "mil.dds.anet.views.ViewResponseFilter":
-      level: INFO
-      appenders:
-        - type: file
-          maxFileSize: 1MB
-          currentLogFilename: ./logs/userActivities.log
-          archivedLogFilenamePattern: ./logs/userActivities-%i.log.zip
-          archivedFileCount: 1
-          logFormat: '{"time":"%d{yyyy-MM-dd HH:mm}", %m}%n'
-          timeZone: system
   appenders:
     - type: console
       threshold: TRACE

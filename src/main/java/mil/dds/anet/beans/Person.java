@@ -1,12 +1,15 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -78,6 +81,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   @GraphQLQuery
   @GraphQLInputField
   private String code;
+
+  private ArrayList<HashMap<String, String>> userActivities;
 
   public Person() {
     this.pendingVerification = false; // Defaults
@@ -306,6 +311,19 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     this.code = code;
   }
 
+  @JsonIgnore
+  public ArrayList<HashMap<String, String>> getUserActivities() {
+    if (userActivities == null) {
+      return new ArrayList<>();
+    }
+    return userActivities;
+  }
+
+  @JsonIgnore
+  public void setUserActivities(ArrayList<HashMap<String, String>> userActivities) {
+    this.userActivities = userActivities;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Person)) {
@@ -319,7 +337,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
-        && (createdAt != null)
+        && Objects.equals(other.getUserActivities(), getUserActivities()) && (createdAt != null)
             ? (createdAt.equals(other.getCreatedAt()))
             : (other.getCreatedAt() == null) && (updatedAt != null)
                 ? (updatedAt.equals(other.getUpdatedAt()))

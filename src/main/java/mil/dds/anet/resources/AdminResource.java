@@ -6,10 +6,6 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.cache.Cache;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -75,7 +72,7 @@ public class AdminResource {
    * If anet-dictionary.yml file is changed manually while ANET is up and running ,this method can
    * be used to reload the dictionary with new values without restarting the server
    */
-  @GraphQLQuery(name = "reloadDictionary")
+  @GraphQLMutation(name = "reloadDictionary")
   public String reloadDictionary(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
@@ -87,7 +84,7 @@ public class AdminResource {
   /**
    * Clears Domain Users Cache
    */
-  @GraphQLQuery(name = "clearCache")
+  @GraphQLMutation(name = "clearCache")
   public String clearCache(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
@@ -115,59 +112,49 @@ public class AdminResource {
    * Returns user logs in descending order of time
    */
   @GraphQLQuery(name = "userActivities")
-  public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context)
-      throws IOException {
+  public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     final Map<String, LinkedHashSet<Map<String, String>>> userActivities = new HashMap<>();
     final Map<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
-    final File file = new File(System.getProperty("user.dir") + "/logs/userActivities.log");
-    final BufferedReader br = new BufferedReader(new FileReader(file));
-    String st;
-    while ((st = br.readLine()) != null) {
-      final Map<String, String> map = jsonMapper.readValue(st, Map.class);
-      final Map<String, String> entries = new HashMap<String, String>() {
-        {
-          put("user", map.get("user") == null ? "" : map.get("user"));
-          put("time", map.get("time") == null ? "" : map.get("time"));
-          put("ip", map.get("ip") == null ? "" : map.get("ip"));
-          put("request", map.get("referer") == null ? "" : map.get("referer"));
-          // This entry is used while mapping the entries with "recentCalls" key
-          put("simpleEntry", "simpleEntry");
-        }
-      };
-      // Group all entries through user value
-      userActivities.computeIfAbsent(map.get("user"), k -> new LinkedHashSet<>()).add(entries);
-      // In addition to keeping entries with the user key value,
-      // it is also necessary to hold all these entries with recentCalls key
-      // so we will have 2 result set : One is grouped by user values
-      // the other one is "recentCalls" which holds all entries without grouping them
-      recentCalls.computeIfAbsent("recentCalls", k -> new LinkedHashSet<>()).add(entries);
+    final Cache<String, Person> domainUsersCache =
+        AnetObjectEngine.getInstance().getPersonDao().getDomainUsersCache();
+
+    for (final Cache.Entry<String, Person> entry : domainUsersCache) {
+      entry.getValue().getUserActivities().removeAll(Collections.singleton(null));
+      entry.getValue().getUserActivities().forEach(k -> {
+        // Group all entries through user value
+        userActivities.computeIfAbsent(k.get("user"), l -> new LinkedHashSet<>()).add(k);
+        // In addition to keeping entries with the user key value,
+        // it is also necessary to hold all these entries with recentCalls key
+        // so we will have 2 result set : One is grouped by user values
+        // the other one is "recentCalls" which holds all entries without grouping them
+        recentCalls.computeIfAbsent("recentCalls", l -> new LinkedHashSet<>()).add(k);
+      });
     }
-    br.close();
     final Map<String, Object> allActivities = new HashMap<>();
-    // Reverse the list , this means the entries will be ordered in descending order of entry time
+    // Sort userActivities by time
     if (!userActivities.isEmpty()) {
       allActivities.put("users", userActivities.values().stream().map(s -> {
-        // Convert LinkedHashSet to ArrayList to reverse the list
         final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
-        Collections.reverse(activities);
-        // Convert reversed ArrayList to LinkedHashSet and return
-        return new LinkedHashSet<>(activities);
+        final List<Map<String, String>> sortedList =
+            activities.stream().sorted((o1, o2) -> o2.get("time").compareTo(o1.get("time")))
+                .collect(Collectors.toList());
+        return new LinkedHashSet<>(sortedList);
       }).collect(Collectors.toMap(k -> k.iterator().next().get("user"), Function.identity())));
     } else {
       allActivities.put("users", "");
     }
-    // Reverse the list , this means the entries will be ordered in descending order of entry time
+    // Sort recentCalls by time
     if (!recentCalls.isEmpty()) {
       allActivities.put("recentCalls", recentCalls.values().stream().map(s -> {
-        // Convert LinkedHashSet to ArrayList to reverse the list
         final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
-        Collections.reverse(activities);
-        // Convert reversed ArrayList to LinkedHashSet and return
-        return new LinkedHashSet<>(activities);
-      }).collect(Collectors.toMap(k -> k.iterator().next().get("simpleEntry"), Function.identity()))
-          .get("simpleEntry"));
+        final List<Map<String, String>> sortedList =
+            activities.stream().sorted((o1, o2) -> o2.get("time").compareTo(o1.get("time")))
+                .collect(Collectors.toList());
+        return new LinkedHashSet<>(sortedList);
+      }).collect(Collectors.toMap(k -> k.iterator().next().get("activity"), Function.identity()))
+          .get("activity"));
     } else {
       allActivities.put("recentCalls", "");
     }

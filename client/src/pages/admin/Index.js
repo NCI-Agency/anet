@@ -35,12 +35,12 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
   }
 `
 const CLEAR_CACHE = gql`
-  query {
+  mutation {
     clearCache
   }
 `
 const RELOAD_DICTIONARY = gql`
-  query {
+  mutation {
     reloadDictionary
   }
 `

@@ -108,8 +108,8 @@ public class AdminResourceTest extends AbstractResourceTest {
     engine.getPersonDao().findByDomainUsername(user.getDomainUsername());
 
     try {
-      final String result =
-          (String) graphQLHelper.getObject(user, "query { payload: clearCache }", new HashMap<>());
+      final String result = (String) graphQLHelper.getObject(user,
+          "mutation { payload: clearCache }", new HashMap<>());
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.USERCACHE_MESSAGE);
       } else {
@@ -127,7 +127,7 @@ public class AdminResourceTest extends AbstractResourceTest {
 
     try {
       final String result = (String) graphQLHelper.getObject(user,
-          "query { payload: reloadDictionary }", new HashMap<>());
+          "mutation { payload: reloadDictionary }", new HashMap<>());
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.DICTIONARY_RELOAD_MESSAGE);
       } else {

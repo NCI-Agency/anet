@@ -5,8 +5,10 @@ import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -85,6 +87,10 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
+  }
+
+  public Cache<String, Person> getDomainUsersCache() {
+    return domainUsersCache;
   }
 
   @Override
@@ -225,6 +231,20 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     // There should at most one match
     people.stream().forEach(p -> putInCache(p));
     return people;
+  }
+
+  public void logActivitiesByDomainUsername(String domainUsername,
+      HashMap<String, String> activity) {
+    final Person person = domainUsersCache.get(domainUsername);
+    if (person != null) {
+      ArrayList activities = person.getUserActivities();
+      if (activities.size() >= 100) {
+        activities.clear();
+      }
+      activities.add(activity);
+      person.setUserActivities(activities);
+      domainUsersCache.replace(domainUsername, person);
+    }
   }
 
   /**

@@ -3,9 +3,10 @@ package mil.dds.anet.views;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HttpMethod;
@@ -15,18 +16,15 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import org.eclipse.jetty.security.DefaultUserIdentity;
 import org.eclipse.jetty.security.UserAuthentication;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.UserIdentity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ViewResponseFilter implements ContainerResponseFilter {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Context
   HttpServletRequest request;
@@ -68,10 +66,25 @@ public class ViewResponseFilter implements ContainerResponseFilter {
         baseRequest.setAuthentication(new UserAuthentication(null, userId));
         // End
 
-        // Log necessary information into userActivities.log file
-        logger.info("\"ip\": \"{}\" , \"user\": \"{}\" , \"referer\": \"{}\"",
-            request.getRemoteAddr(), userPrincipal.getName(),
-            requestContext.getHeaderString("referer"));
+        // Store user activities in Person bean
+        if (requestContext.getSecurityContext().getUserPrincipal() instanceof Person) {
+          final Person person = (Person) requestContext.getSecurityContext().getUserPrincipal();
+          AnetObjectEngine.getInstance().getPersonDao()
+              .logActivitiesByDomainUsername(person.getDomainUsername(), new HashMap() {
+                {
+                  put("ip", request.getRemoteAddr() != null ? request.getRemoteAddr() : "-");
+                  put("user",
+                      person.getDomainUsername() != null ? person.getDomainUsername() : "-");
+                  put("request",
+                      requestContext.getHeaderString("referer") != null
+                          ? requestContext.getHeaderString("referer")
+                          : "-");
+                  put("time", LocalDateTime.now()
+                      .format((DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
+                  put("activity", "activity");
+                }
+              });
+        }
       }
     } else {
       responseContext.getHeaders().put(HttpHeaders.CACHE_CONTROL,
