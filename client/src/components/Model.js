@@ -252,8 +252,7 @@ export default class Model {
       _forEach(yupSchema.fields, (value, key) => {
         if (
           !Object.prototype.hasOwnProperty.call(obj, key) ||
-          obj[key] === null ||
-          obj[key] === undefined
+          utils.isNullOrUndefined(obj[key])
         ) {
           obj[key] = value.default()
         }

@@ -153,9 +153,7 @@ export const InputField = ({
     () => (
       <FormControl
         {...Object.without(field, "value")}
-        value={
-          field.value === null || field.value === undefined ? "" : field.value
-        }
+        value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
       />
     ),
@@ -196,9 +194,7 @@ export const InputFieldNoLabel = ({
     () => (
       <FormControl
         {...Object.without(field, "value")}
-        value={
-          field.value === null || field.value === undefined ? "" : field.value
-        }
+        value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
       />
     ),

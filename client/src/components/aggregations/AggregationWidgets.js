@@ -14,6 +14,7 @@ import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useMemo, useRef, useState } from "react"
 import { Button, Collapse, Table } from "react-bootstrap"
+import utils from "utils"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
@@ -190,9 +191,7 @@ export const DefaultAggWidget = ({
   ...otherWidgetProps
 }) => {
   const [showValues, setShowValues] = useState(false)
-  const filteredValues = values.filter(
-    value => !(value === null || value === undefined)
-  )
+  const filteredValues = values.filter(value => !utils.isNullOrUndefined(value))
   if (_isEmpty(filteredValues)) {
     return whenUnspecified
   }

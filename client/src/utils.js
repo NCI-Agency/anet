@@ -22,9 +22,14 @@ Object.keys(changeCase)
       !input ? "" : changeCase[c](input, options)
   })
 
+const isNullOrUndefined = value => {
+  return value === null || value === undefined
+}
+
 export default {
   ...wrappedChangeCase,
   pluralize,
+  isNullOrUndefined,
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
@@ -193,7 +198,7 @@ Object.get = function(source, keypath) {
   while (keys[0]) {
     const key = keys.shift()
     source = source[key]
-    if (source === undefined || source === null) {
+    if (isNullOrUndefined(source)) {
       return source
     }
   }
