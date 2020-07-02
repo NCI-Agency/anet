@@ -36,6 +36,9 @@ const aggregationWidgetPropTypes = {
   period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType]),
   whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
+const aggregationWidgetDefaultProps = {
+  whenUnspecified: null
+}
 
 export const PieWidget = ({
   values,
@@ -75,6 +78,7 @@ PieWidget.propTypes = {
   showLegend: PropTypes.bool,
   ...aggregationWidgetPropTypes
 }
+PieWidget.defaultProps = aggregationWidgetDefaultProps
 
 export const LikertScaleAndPieWidget = ({ values, ...otherWidgetProps }) => {
   const { likertScaleValues, pieValues } = values
@@ -110,6 +114,7 @@ export const LikertScaleAndPieWidget = ({ values, ...otherWidgetProps }) => {
   )
 }
 LikertScaleAndPieWidget.propTypes = aggregationWidgetPropTypes
+LikertScaleAndPieWidget.defaultProps = aggregationWidgetDefaultProps
 
 export const ReportsByTaskWidget = ({ values, ...otherWidgetProps }) => (
   <div className="non-scrollable">
@@ -127,6 +132,7 @@ export const ReportsByTaskWidget = ({ values, ...otherWidgetProps }) => (
   </div>
 )
 ReportsByTaskWidget.propTypes = aggregationWidgetPropTypes
+ReportsByTaskWidget.defaultProps = aggregationWidgetDefaultProps
 
 export const CalendarWidget = ({
   values,
@@ -134,7 +140,7 @@ export const CalendarWidget = ({
   fieldName,
   period,
   whenUnspecified,
-  hasPrevNext = false,
+  hasPrevNext,
   ...otherWidgetProps
 }) => {
   const calendarComponentRef = useRef(null)
@@ -188,6 +194,10 @@ CalendarWidget.propTypes = {
   hasPrevNext: PropTypes.bool,
   ...aggregationWidgetPropTypes
 }
+CalendarWidget.defaultProps = {
+  hasPrevNext: false,
+  ...aggregationWidgetDefaultProps
+}
 
 export const DefaultAggWidget = ({
   values,
@@ -230,6 +240,7 @@ export const DefaultAggWidget = ({
   }
 }
 DefaultAggWidget.propTypes = aggregationWidgetPropTypes
+DefaultAggWidget.defaultProps = aggregationWidgetDefaultProps
 
 export const ReportsMapWidget = ({
   values,
@@ -280,5 +291,6 @@ ReportsMapWidget.propTypes = {
   height: PropTypes.number
 }
 ReportsMapWidget.defaultProps = {
-  values: []
+  values: [],
+  ...aggregationWidgetDefaultProps
 }

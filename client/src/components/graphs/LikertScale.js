@@ -267,7 +267,8 @@ LikertScale.defaultProps = {
     }
   ],
   height: "65",
-  width: "100%"
+  width: "100%",
+  whenUnspecified: null
 }
 
 export default LikertScale
