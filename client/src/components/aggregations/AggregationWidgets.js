@@ -134,6 +134,7 @@ export const CalendarWidget = ({
   fieldName,
   period,
   whenUnspecified,
+  hasPrevNext = false,
   ...otherWidgetProps
 }) => {
   const calendarComponentRef = useRef(null)
@@ -153,7 +154,7 @@ export const CalendarWidget = ({
     <FullCalendar
       plugins={[dayGridPlugin]}
       header={{
-        left: "prev,next",
+        left: hasPrevNext ? "prev,next" : "",
         center: "title",
         right: ""
       }}
@@ -183,7 +184,10 @@ export const CalendarWidget = ({
     />
   )
 }
-CalendarWidget.propTypes = aggregationWidgetPropTypes
+CalendarWidget.propTypes = {
+  hasPrevNext: PropTypes.bool,
+  ...aggregationWidgetPropTypes
+}
 
 export const DefaultAggWidget = ({
   values,
