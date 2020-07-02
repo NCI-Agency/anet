@@ -7,8 +7,8 @@ import AggregationWidgetContainer, {
 } from "components/aggregations/AggregationWidgetContainer"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
-
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import _uniqueId from "lodash/uniqueId"
 import { Report } from "models"
 import {
@@ -106,7 +106,8 @@ const FieldStatisticsRow = ({
   fieldConfig,
   fieldName,
   periods,
-  periodsData
+  periodsData,
+  rowIndex
 }) => {
   const aggregationWidget = getAggregationWidget(fieldConfig)
   if (!aggregationWidget) {
@@ -116,15 +117,21 @@ const FieldStatisticsRow = ({
     <tr>
       {periods.map((period, index) => (
         <td key={index}>
-          <AggregationWidgetContainer
-            key={`statistics-${fieldName}`}
-            fieldConfig={fieldConfig}
-            fieldName={fieldName}
-            data={periodsData[index]}
-            widget={aggregationWidget}
-            period={period}
-            widgetId={`${fieldName}-${_uniqueId("statistics")}`}
-          />
+          {_isEmpty(periodsData[index]) ? (
+            rowIndex === 0 ? (
+              <em>No reports found</em>
+            ) : null
+          ) : (
+            <AggregationWidgetContainer
+              key={`statistics-${fieldName}`}
+              fieldConfig={fieldConfig}
+              fieldName={fieldName}
+              data={periodsData[index]}
+              widget={aggregationWidget}
+              period={period}
+              widgetId={`${fieldName}-${_uniqueId("statistics")}`}
+            />
+          )}
         </td>
       ))}
     </tr>
@@ -134,7 +141,8 @@ FieldStatisticsRow.propTypes = {
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
   periods: PeriodsPropType,
-  periodsData: PropTypes.arrayOf(PropTypes.array)
+  periodsData: PropTypes.arrayOf(PropTypes.array),
+  rowIndex: PropTypes.number
 }
 
 const ReportStatistics = ({
@@ -220,13 +228,14 @@ const ReportStatistics = ({
       <PeriodsTableHeader periodsConfig={periodsConfig} />
       <tbody>
         <>
-          {Object.keys(REPORT_FIELDS_FOR_STATISTICS || {}).map(key => (
+          {Object.keys(REPORT_FIELDS_FOR_STATISTICS || {}).map((key, index) => (
             <FieldStatisticsRow
               key={key}
               fieldName={key}
               fieldConfig={REPORT_FIELDS_FOR_STATISTICS[key]}
               periods={periods}
               periodsData={dataPerPeriod}
+              rowIndex={index}
             />
           ))}
           {Object.keys(customFieldsConfig || {}).map(key => (
