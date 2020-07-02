@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react"
 import * as d3 from "d3"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import Text from "react-svg-text"
 import useDimensions from "react-use-dimensions"
@@ -12,7 +13,8 @@ const LikertScale = ({
   levels,
   width,
   height,
-  readonly
+  readonly,
+  whenUnspecified
 }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
@@ -83,6 +85,9 @@ const LikertScale = ({
   let activeColor = null
   let valuesStats = null
   const numberValues = utils.arrayOfNumbers(values)
+  if (numberValues !== undefined && _isEmpty(numberValues)) {
+    return whenUnspecified
+  }
   if (numberValues?.length) {
     valuesStats = {
       min: Math.min(...numberValues),
@@ -93,7 +98,6 @@ const LikertScale = ({
       level => level.endValue > valuesStats.avg
     )?.color
   }
-
   return (
     <svg
       height={height}
@@ -242,7 +246,8 @@ LikertScale.propTypes = {
   ).isRequired,
   width: PropTypes.string.isRequired,
   height: PropTypes.string.isRequired,
-  readonly: PropTypes.bool
+  readonly: PropTypes.bool,
+  whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
 LikertScale.defaultProps = {

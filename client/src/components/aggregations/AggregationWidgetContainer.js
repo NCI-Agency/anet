@@ -133,6 +133,11 @@ const AggregationWidgetContainer = ({
   widgetId,
   ...otherWidgetProps
 }) => {
+  const WHEN_UNSPECIFIED = (
+    <div>
+      <em>Not specified</em>
+    </div>
+  )
   const aggregationWidget = widget || getAggregationWidget(fieldConfig)
   const aggregationFunction = getAggregationFunction(
     fieldConfig,
@@ -165,6 +170,7 @@ const AggregationWidgetContainer = ({
       fieldConfig={fieldConfig}
       fieldName={fieldName}
       period={period}
+      whenUnspecified={WHEN_UNSPECIFIED}
       {...fieldProps}
       {...otherWidgetProps}
       {...otherAggregationDetails}

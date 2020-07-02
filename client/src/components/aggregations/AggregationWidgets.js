@@ -32,7 +32,8 @@ const aggregationWidgetPropTypes = {
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
   vertical: PropTypes.bool,
-  period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType])
+  period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType]),
+  whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
 export const PieWidget = ({
@@ -91,13 +92,19 @@ export const LikertScaleAndPieWidget = ({ values, ...otherWidgetProps }) => {
       >
         <PieWidget {...pieValues} {...otherWidgetProps} showLegend={false} />
       </div>
-      <div
-        style={{
-          flexGrow: "1"
-        }}
-      >
-        <LikertScale {...likertScaleValues} {...otherWidgetProps} />
-      </div>
+      {!_isEmpty(likertScaleValues) && (
+        <div
+          style={{
+            flexGrow: "1"
+          }}
+        >
+          <LikertScale
+            {...likertScaleValues}
+            {...otherWidgetProps}
+            whenUnspecified=""
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -125,17 +132,22 @@ export const CalendarWidget = ({
   fieldConfig,
   fieldName,
   period,
+  whenUnspecified,
   ...otherWidgetProps
 }) => {
   const calendarComponentRef = useRef(null)
-  const events = Object.entries(values).map(([key, value]) => {
-    return {
-      title: `${value} events`,
-      start: key,
-      end: key
+  const events = Object.entries(Object.without(values, null)).map(
+    ([key, value]) => {
+      return {
+        title: `${value} events`,
+        start: key,
+        end: key
+      }
     }
-  })
-
+  )
+  if (_isEmpty(events)) {
+    return whenUnspecified
+  }
   return (
     <FullCalendar
       plugins={[dayGridPlugin]}
@@ -172,10 +184,17 @@ export const CalendarWidget = ({
 }
 CalendarWidget.propTypes = aggregationWidgetPropTypes
 
-export const DefaultAggWidget = ({ values, ...otherWidgetProps }) => {
+export const DefaultAggWidget = ({
+  values,
+  whenUnspecified,
+  ...otherWidgetProps
+}) => {
   const [showValues, setShowValues] = useState(false)
-  if (_isEmpty(values)) {
-    return null
+  const filteredValues = values.filter(
+    value => !(value === null || value === undefined)
+  )
+  if (_isEmpty(filteredValues)) {
+    return whenUnspecified
   }
   return (
     <div>
@@ -185,16 +204,16 @@ export const DefaultAggWidget = ({ values, ...otherWidgetProps }) => {
         onClick={toggleShowValues}
         id="toggleShowValues"
       >
-        {showValues ? "Hide" : "Show"} {values.length} values
+        {showValues ? "Hide" : "Show"} {filteredValues.length} values
       </Button>
       <Collapse in={showValues}>
         <Table>
           <tbody>
-            {values.map(val => {
+            {filteredValues.map(val => {
               const keyValue = _uniqueId("value_")
               return (
                 <tr key={keyValue}>
-                  <td>val</td>
+                  <td>{val}</td>
                 </tr>
               )
             })}
@@ -214,6 +233,7 @@ export const ReportsMapWidget = ({
   mapId,
   width,
   height,
+  whenUnspecified,
   ...otherWidgetProps
 }) => {
   const markers = useMemo(() => {
@@ -235,6 +255,9 @@ export const ReportsMapWidget = ({
     })
     return markerArray
   }, [values])
+  if (_isEmpty(markers)) {
+    return whenUnspecified
+  }
   return (
     <div className="non-scrollable">
       <Leaflet

@@ -1,9 +1,18 @@
 import React, { useEffect, useRef } from "react"
 import * as d3 from "d3"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import useDimensions from "react-use-dimensions"
 
-const IqrBoxPlot = ({ onChange, values, levels, width, height, readonly }) => {
+const IqrBoxPlot = ({
+  onChange,
+  values,
+  levels,
+  width,
+  height,
+  readonly,
+  whenUnspecified
+}) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
   const [containerRef, containerBox] = useDimensions()
@@ -50,80 +59,79 @@ const IqrBoxPlot = ({ onChange, values, levels, width, height, readonly }) => {
   const fillColor = d3.color("lightGray")
   fillColor.opacity = 0.4
 
-  if (values.length === 0) {
-    return null
-  } else {
-    return (
-      <svg
-        height={height}
-        width={width}
-        xmlns="http://www.w3.org/2000/svg"
-        ref={containerRef}
-      >
-        {values?.length > 1 && (
-          <g transform={`translate(0 ${scaleYPosition})`}>
-            <line
-              x1={scale(valuesStats.min)}
-              y1={0}
-              x2={scale(valuesStats.q1)}
-              y2={0}
-              style={{ stroke: "black", strokeWidth: 3 }}
-            />
-            <line
-              x1={scale(valuesStats.q1)}
-              y1={-15}
-              x2={scale(valuesStats.q1)}
-              y2={15}
-              style={{ stroke: "black", strokeWidth: 3 }}
-            />
-            <line
-              x1={scale(valuesStats.q2)}
-              y1={-15}
-              x2={scale(valuesStats.q2)}
-              y2={15}
-              style={{ stroke: "black", strokeWidth: 3 }}
-            />
-            <line
-              x1={scale(valuesStats.q3)}
-              y1={-15}
-              x2={scale(valuesStats.q3)}
-              y2={15}
-              style={{ stroke: "black", strokeWidth: 3 }}
-            />
-            <line
-              x1={scale(valuesStats.q1)}
-              y1={0}
-              x2={scale(valuesStats.q3)}
-              y2={0}
-              style={{ stroke: "black", strokeWidth: 3 }}
-            />
-            <line
-              x1={scale(valuesStats.q3)}
-              y1={0}
-              x2={scale(valuesStats.max)}
-              y2={0}
-              style={{ stroke: "black", strokeWidth: 3 }}
-            />
-          </g>
-        )}
-        <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
-
-        {onChange && (
-          <g ref={cursorRef}>
-            <polygon
-              points="0,0 13,13 13,30 -13,30 -13,13"
-              style={{
-                stroke: "gray",
-                fill: "",
-                strokeWidth: 1,
-                cursor: readonly ? null : "pointer"
-              }}
-            />
-          </g>
-        )}
-      </svg>
-    )
+  if (_isEmpty(values)) {
+    return whenUnspecified
   }
+  return (
+    <svg
+      height={height}
+      width={width}
+      xmlns="http://www.w3.org/2000/svg"
+      ref={containerRef}
+    >
+      {values?.length > 1 && (
+        <g transform={`translate(0 ${scaleYPosition})`}>
+          <line
+            x1={scale(valuesStats.min)}
+            y1={0}
+            x2={scale(valuesStats.q1)}
+            y2={0}
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+          <line
+            x1={scale(valuesStats.q1)}
+            y1={-15}
+            x2={scale(valuesStats.q1)}
+            y2={15}
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+          <line
+            x1={scale(valuesStats.q2)}
+            y1={-15}
+            x2={scale(valuesStats.q2)}
+            y2={15}
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+          <line
+            x1={scale(valuesStats.q3)}
+            y1={-15}
+            x2={scale(valuesStats.q3)}
+            y2={15}
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+          <line
+            x1={scale(valuesStats.q1)}
+            y1={0}
+            x2={scale(valuesStats.q3)}
+            y2={0}
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+          <line
+            x1={scale(valuesStats.q3)}
+            y1={0}
+            x2={scale(valuesStats.max)}
+            y2={0}
+            style={{ stroke: "black", strokeWidth: 3 }}
+          />
+        </g>
+      )}
+      <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
+
+      {onChange && (
+        <g ref={cursorRef}>
+          <polygon
+            points="0,0 13,13 13,30 -13,30 -13,13"
+            style={{
+              stroke: "gray",
+              fill: "",
+              strokeWidth: 1,
+              cursor: readonly ? null : "pointer"
+            }}
+          />
+        </g>
+      )}
+    </svg>
+  )
 }
 
 IqrBoxPlot.propTypes = {
@@ -139,7 +147,8 @@ IqrBoxPlot.propTypes = {
   ).isRequired,
   width: PropTypes.string.isRequired,
   height: PropTypes.string.isRequired,
-  readonly: PropTypes.bool
+  readonly: PropTypes.bool,
+  whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
 IqrBoxPlot.defaultProps = {
