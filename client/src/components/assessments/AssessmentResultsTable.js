@@ -44,7 +44,9 @@ const InstantAssessmentRow = ({
   questionKey,
   questionConfig,
   entity,
-  periods
+  periods,
+  periodsData,
+  rowIndex
 }) => {
   const aggregationWidget = getAggregationWidget(questionConfig)
   if (!aggregationWidget) {
@@ -55,14 +57,20 @@ const InstantAssessmentRow = ({
     <tr>
       {periods.map((period, index) => (
         <td key={index}>
-          <AggregationWidgetContainer
-            key={`assessment-${questionKey}`}
-            fieldConfig={questionConfig}
-            fieldName={questionKey}
-            data={entity.getInstantAssessmentResults(period)}
-            widget={aggregationWidget}
-            widgetId={`${questionKey}-${_uniqueId("assessment")}`}
-          />
+          {_isEmpty(periodsData[index]) ? (
+            rowIndex === 0 ? (
+              <em>No assessments</em>
+            ) : null
+          ) : (
+            <AggregationWidgetContainer
+              key={`assessment-${questionKey}`}
+              fieldConfig={questionConfig}
+              fieldName={questionKey}
+              data={periodsData[index]}
+              widget={aggregationWidget}
+              widgetId={`${questionKey}-${_uniqueId("assessment")}`}
+            />
+          )}
         </td>
       ))}
     </tr>
@@ -71,8 +79,10 @@ const InstantAssessmentRow = ({
 InstantAssessmentRow.propTypes = {
   entity: PropTypes.object,
   periods: PeriodsPropType,
+  periodsData: PropTypes.arrayOf(PropTypes.array),
   questionKey: PropTypes.string,
-  questionConfig: PropTypes.object
+  questionConfig: PropTypes.object,
+  rowIndex: PropTypes.number
 }
 
 const BasePeriodicAssessmentRows = ({
@@ -229,6 +239,10 @@ const EntityAssessmentResults = ({
   }
   const instantAssessmentConfig = entity.getInstantAssessmentConfig()
   const { periods } = periodsConfig
+  const dataPerPeriod = []
+  periodsConfig.periods.forEach(period =>
+    dataPerPeriod.push(entity.getInstantAssessmentResults(period))
+  )
   return (
     <>
       <tr>
@@ -236,13 +250,15 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.keys(instantAssessmentConfig || {}).map(key => (
+      {Object.keys(instantAssessmentConfig || {}).map((key, index) => (
         <InstantAssessmentRow
           key={key}
           questionKey={key}
           questionConfig={instantAssessmentConfig[key]}
           periods={periods}
+          periodsData={dataPerPeriod}
           entity={entity}
+          rowIndex={index}
         />
       ))}
       <PeriodicAssessmentRows
