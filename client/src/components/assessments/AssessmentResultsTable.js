@@ -7,11 +7,15 @@ import PeriodicAssessment from "components/assessments/PeriodicAssessment"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { NOTE_TYPE } from "components/Model"
+import PeriodsNavigation from "components/PeriodsNavigation"
 import { Person } from "models"
 import _isEmpty from "lodash/isEmpty"
 import _uniqueId from "lodash/uniqueId"
 import {
-  AssessmentPeriodPropType,
+  AssessmentPeriodsConfigPropType,
+  getPeriodsConfig,
+  PeriodsDetailsPropType,
+  PeriodsPropType,
   PeriodsTableHeader,
   periodToString
 } from "periodUtils"
@@ -33,12 +37,6 @@ import "components/assessments/AssessmentResultsTable.css"
  *   the config and yupSchema for these assessments is to be found in
  *   entity.getPeriodicAssessmentDetails(recurrence)
  */
-
-const PeriodsPropType = PropTypes.arrayOf(AssessmentPeriodPropType)
-const PeriodsConfigPropType = PropTypes.shape({
-  recurrence: PropTypes.string,
-  periods: PeriodsPropType
-})
 
 const InstantAssessmentRow = ({
   questionKey,
@@ -209,7 +207,7 @@ const BasePeriodicAssessmentRows = ({
 BasePeriodicAssessmentRows.propTypes = {
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
-  periodsConfig: PeriodsConfigPropType,
+  periodsConfig: AssessmentPeriodsConfigPropType,
   canAddAssessment: PropTypes.bool,
   onUpdateAssessment: PropTypes.func,
   currentUser: PropTypes.instanceOf(Person)
@@ -275,7 +273,7 @@ EntityAssessmentResults.propTypes = {
   style: PropTypes.object,
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
-  periodsConfig: PeriodsConfigPropType,
+  periodsConfig: AssessmentPeriodsConfigPropType,
   onUpdateAssessment: PropTypes.func,
   canAddAssessment: PropTypes.bool
 }
@@ -285,14 +283,21 @@ const AssessmentResultsTable = ({
   entityType,
   subEntities,
   style,
-  periodsConfig,
+  periodsDetails,
   canAddAssessment,
   onUpdateAssessment
 }) => {
+  const [offset, setOffset] = useState(0)
   if (!entity) {
     return null
   }
-  const { recurrence } = periodsConfig
+  const { recurrence, numberOfPeriods } = periodsDetails
+  const periodsConfig = getPeriodsConfig(
+    recurrence,
+    numberOfPeriods,
+    offset,
+    true
+  )
   const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
   const subentitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessmentConfig())
@@ -310,6 +315,7 @@ const AssessmentResultsTable = ({
             title={`Assessment results - ${recurrence}`}
             id={`"entity-assessments-results-${recurrence}`}
           >
+            <PeriodsNavigation offset={offset} onChange={setOffset} />
             <Table
               condensed
               responsive
@@ -351,7 +357,7 @@ AssessmentResultsTable.propTypes = {
   entity: PropTypes.object,
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
-  periodsConfig: PeriodsConfigPropType,
+  periodsDetails: PeriodsDetailsPropType,
   onUpdateAssessment: PropTypes.func,
   canAddAssessment: PropTypes.bool
 }

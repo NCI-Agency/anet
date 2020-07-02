@@ -22,7 +22,6 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import {
-  ASSESSMENTS_RECURRENCE_TYPE,
   ASSESSMENTS_RELATED_OBJECT_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   NOTE_TYPE
@@ -46,6 +45,7 @@ import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Tag, Task } from "models"
 import moment from "moment"
+import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
@@ -1297,7 +1297,7 @@ const BaseReportForm = ({
           !isEmptyAssessment(entitiesAssessments[key])
       )
       .map(key => {
-        entitiesAssessments[key].__recurrence = ASSESSMENTS_RECURRENCE_TYPE.ONCE
+        entitiesAssessments[key].__recurrence = RECURRENCE_TYPE.ONCE
         entitiesAssessments[key].__relatedObjectType =
           ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {

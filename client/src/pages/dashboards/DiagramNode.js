@@ -19,18 +19,15 @@ import AggregationWidgetContainer, {
   AGGERGATION_WIDGET_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
-import { ASSESSMENT_PERIOD_FACTORIES } from "components/assessments/AssessmentResultsContainer"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import {
-  ASSESSMENTS_RECURRENCE_TYPE,
-  CUSTOM_FIELD_TYPE
-} from "components/Model"
+import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import _uniqueId from "lodash/uniqueId"
 import * as Models from "models"
 import moment from "moment"
+import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import * as React from "react"
 
@@ -123,9 +120,7 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
   const ModelClass = anetObjectType && Models[anetObjectType]
   const modelInstance = ModelClass && new ModelClass(anetObject)
   const now = moment()
-  const period = ASSESSMENT_PERIOD_FACTORIES[
-    ASSESSMENTS_RECURRENCE_TYPE.MONTHLY
-  ](now, 0)
+  const period = PERIOD_FACTORIES[RECURRENCE_TYPE.MONTHLY](now, 0)
   const instantAssessmentConfig =
     anetObject && anetObject.getInstantAssessmentConfig()
   const instantAssessmentResults =

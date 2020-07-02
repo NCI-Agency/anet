@@ -7,19 +7,19 @@ import AggregationWidgetContainer, {
 } from "components/aggregations/AggregationWidgetContainer"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
-import _get from "lodash/get"
+import PeriodsNavigation from "components/PeriodsNavigation"
 import _isEmpty from "lodash/isEmpty"
 import _uniqueId from "lodash/uniqueId"
 import { Report } from "models"
 import {
-  PeriodsConfigPropType,
+  getPeriodsConfig,
+  PeriodsDetailsPropType,
   PeriodsPropType,
-  PeriodsTableHeader,
-  periodToString
+  PeriodsTableHeader
 } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
@@ -147,10 +147,13 @@ FieldStatisticsRow.propTypes = {
 
 const ReportStatistics = ({
   pageDispatchers,
-  periodsConfig,
+  periodsDetails,
   setTotalCount,
   queryParams
 }) => {
+  const [offset, setOffset] = useState(0)
+  const { recurrence, numberOfPeriods } = periodsDetails
+  const periodsConfig = getPeriodsConfig(recurrence, numberOfPeriods, offset)
   const dateSortAsc = datesArray => datesArray.sort((a, b) => a - b)
   const statisticsStartDate = dateSortAsc(
     periodsConfig.periods.map(p => p.start)
@@ -171,10 +174,6 @@ const ReportStatistics = ({
   ) {
     reportQuery.engagementDateEnd = statisticsEndDate
   }
-  const totalPeriod = {
-    start: reportQuery.engagementDateStart,
-    end: reportQuery.engagementDateEnd
-  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
   })
@@ -194,9 +193,6 @@ const ReportStatistics = ({
   }
 
   const reports = data ? Report.fromArray(data.reportList.list) : []
-  if (_get(reports, "length", 0) === 0) {
-    return <em>{`No reports found for ${periodToString(totalPeriod)}`}</em>
-  }
   const CUSTOM_FIELDS_KEY = "customFieldsJson"
   const getPeriodData = (reports, dateRange) => {
     const reportsForDateRange = reports.filter(
@@ -219,43 +215,48 @@ const ReportStatistics = ({
   const customFieldsConfig = Settings.fields.report.customFields
 
   return (
-    <Table
-      condensed
-      responsive
-      className="assessments-table"
-      style={{ tableLayout: "fixed" }}
-    >
-      <PeriodsTableHeader periodsConfig={periodsConfig} />
-      <tbody>
-        <>
-          {Object.keys(REPORT_FIELDS_FOR_STATISTICS || {}).map((key, index) => (
-            <FieldStatisticsRow
-              key={key}
-              fieldName={key}
-              fieldConfig={REPORT_FIELDS_FOR_STATISTICS[key]}
-              periods={periods}
-              periodsData={dataPerPeriod}
-              rowIndex={index}
-            />
-          ))}
-          {Object.keys(customFieldsConfig || {}).map(key => (
-            <FieldStatisticsRow
-              key={key}
-              fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
-              fieldConfig={customFieldsConfig[key]}
-              periods={periods}
-              periodsData={dataPerPeriod}
-            />
-          ))}
-        </>
-      </tbody>
-    </Table>
+    <>
+      <PeriodsNavigation offset={offset} onChange={setOffset} />
+      <Table
+        condensed
+        responsive
+        className="assessments-table"
+        style={{ tableLayout: "fixed" }}
+      >
+        <PeriodsTableHeader periodsConfig={periodsConfig} />
+        <tbody>
+          <>
+            {Object.keys(REPORT_FIELDS_FOR_STATISTICS || {}).map(
+              (key, index) => (
+                <FieldStatisticsRow
+                  key={key}
+                  fieldName={key}
+                  fieldConfig={REPORT_FIELDS_FOR_STATISTICS[key]}
+                  periods={periods}
+                  periodsData={dataPerPeriod}
+                  rowIndex={index}
+                />
+              )
+            )}
+            {Object.keys(customFieldsConfig || {}).map(key => (
+              <FieldStatisticsRow
+                key={key}
+                fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
+                fieldConfig={customFieldsConfig[key]}
+                periods={periods}
+                periodsData={dataPerPeriod}
+              />
+            ))}
+          </>
+        </tbody>
+      </Table>
+    </>
   )
 }
 
 ReportStatistics.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  periodsConfig: PeriodsConfigPropType,
+  periodsDetails: PeriodsDetailsPropType,
   setTotalCount: PropTypes.func,
   queryParams: PropTypes.object
 }

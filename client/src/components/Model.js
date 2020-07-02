@@ -5,6 +5,7 @@ import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment"
+import { RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import utils from "utils"
 import * as yup from "yup"
@@ -102,16 +103,6 @@ export const NOTE_TYPE = {
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
 export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
 
-export const ASSESSMENTS_RECURRENCE_TYPE = {
-  ONCE: "once",
-  DAILY: "daily",
-  WEEKLY: "weekly",
-  BIWEEKLY: "biweekly",
-  SEMIMONTHLY: "semimonthly",
-  MONTHLY: "monthly",
-  QUARTERLY: "quarterly",
-  SEMIANNUALY: "semiannualy"
-}
 export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
   REPORT: "report"
 }
@@ -442,7 +433,7 @@ export default class Model {
   static parseAssessmentsConfig(assessmentsConfig) {
     return Object.fromEntries(
       assessmentsConfig.map(a => {
-        const recurrence = a.recurrence || ASSESSMENTS_RECURRENCE_TYPE.ONCE
+        const recurrence = a.recurrence || RECURRENCE_TYPE.ONCE
         const assessmentKey = a.relatedObjectType
           ? `${a.relatedObjectType}_${recurrence}`
           : recurrence
@@ -473,13 +464,11 @@ export default class Model {
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
     return this.getAssessmentsConfig()[
-      `${relatedObjectType}_${ASSESSMENTS_RECURRENCE_TYPE.ONCE}`
+      `${relatedObjectType}_${RECURRENCE_TYPE.ONCE}`
     ]
   }
 
-  getPeriodicAssessmentDetails(
-    recurrence = ASSESSMENTS_RECURRENCE_TYPE.MONTHLY
-  ) {
+  getPeriodicAssessmentDetails(recurrence = RECURRENCE_TYPE.MONTHLY) {
     const assessmentConfig = this.getAssessmentsConfig()[recurrence]
     return {
       assessmentConfig: assessmentConfig,
@@ -554,7 +543,7 @@ export default class Model {
       .map(note => utils.parseJsonSafe(note.text))
       .filter(
         obj =>
-          obj.__recurrence === ASSESSMENTS_RECURRENCE_TYPE.ONCE &&
+          obj.__recurrence === RECURRENCE_TYPE.ONCE &&
           obj.__relatedObjectType === relatedObjectType
       )
   }

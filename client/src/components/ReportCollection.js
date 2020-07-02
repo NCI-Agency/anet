@@ -1,7 +1,5 @@
 import { setPagination } from "actions"
-import { ASSESSMENT_PERIOD_FACTORIES } from "components/assessments/AssessmentResultsContainer"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
-import { ASSESSMENTS_RECURRENCE_TYPE } from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps
@@ -11,7 +9,7 @@ import ReportMap from "components/ReportMap"
 import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
-import moment from "moment"
+import { RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -39,9 +37,7 @@ const ReportCollection = ({
 }) => {
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
-  const statisticsRecurrence = [ASSESSMENTS_RECURRENCE_TYPE.MONTHLY]
-  const now = moment()
-
+  const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
   return (
     <div className="report-collection">
       <div>
@@ -125,22 +121,9 @@ const ReportCollection = ({
                   pageDispatchers={pageDispatchers}
                   queryParams={queryParams}
                   setTotalCount={setTotalCount}
-                  periodsConfig={{
+                  periodsDetails={{
                     recurrence: recurrence,
-                    periods: [
-                      {
-                        // Second Most recent completed period
-                        ...ASSESSMENT_PERIOD_FACTORIES[recurrence](now, 2)
-                      },
-                      {
-                        // Most recent completed period
-                        ...ASSESSMENT_PERIOD_FACTORIES[recurrence](now, 1)
-                      },
-                      {
-                        // Ongoing period
-                        ...ASSESSMENT_PERIOD_FACTORIES[recurrence](now, 0)
-                      }
-                    ]
+                    numberOfPeriods: 3
                   }}
                 />
               ))}
