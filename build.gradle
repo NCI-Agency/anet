@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.4.0"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.gradle.spotless" version "4.4.0"
+	id "com.diffplug.gradle.spotless" version "4.5.0"
 }
 
 apply plugin: 'java'
@@ -74,7 +74,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.2.jre8'
 	implementation 'org.postgresql:postgresql:42.2.14' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:3.10.0'
+	implementation 'org.liquibase:liquibase-core:3.10.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.8.1'
@@ -93,7 +93,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	implementation 'com.networknt:json-schema-validator:1.0.41'
+	implementation 'com.networknt:json-schema-validator:1.0.42'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:4.1.2'
