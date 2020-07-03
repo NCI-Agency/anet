@@ -792,7 +792,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   }
 
   @GraphQLQuery(name = "engagementStatus")
-  public List<EngagementStatus> getEngagementStatus() {
+  public List<EngagementStatus> loadEngagementStatus() {
     LinkedList<EngagementStatus> statuses = new LinkedList<EngagementStatus>();
     if (ReportState.CANCELLED.equals(getState())) {
       statuses.add(EngagementStatus.CANCELLED);
