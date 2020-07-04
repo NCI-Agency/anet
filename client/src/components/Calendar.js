@@ -1,15 +1,10 @@
-import "@fullcalendar/core/main.css"
+import FullCalendar from "@fullcalendar/react" // needs to be imported first
 import dayGridPlugin from "@fullcalendar/daygrid"
-import "@fullcalendar/daygrid/main.css"
 import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
 import listPlugin from "@fullcalendar/list"
-import "@fullcalendar/list/main.css"
-import FullCalendar from "@fullcalendar/react"
 import timeGridPlugin from "@fullcalendar/timegrid"
-import "@fullcalendar/timegrid/main.css"
 import PropTypes from "prop-types"
 import React from "react"
-import "./Calendar.css"
 
 const Calendar = ({ events, eventClick, calendarComponentRef }) => (
   <FullCalendar
