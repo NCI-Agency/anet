@@ -2,7 +2,7 @@ const os = require("os")
 
 const nullDevice = os.platform() === "win32" ? "NUL" : "/dev/null"
 
-var config = {
+const config = {
   //
   // ====================
   // Runner Configuration
@@ -22,10 +22,9 @@ var config = {
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
   specs: ["./tests/webdriver/**/*.spec.js"],
-  // Patterns to exclude.
-  exclude: [
-    // 'path/to/excluded/files'
-  ],
+  // IE tests are excluded by default. They are exclusively included in IE dedicated config.
+  // Please see `wdio.config.ie.js` for details.
+  exclude: ["./tests/webdriver/specs/ie/*.spec.js"],
   //
   // ============
   // Capabilities
