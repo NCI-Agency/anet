@@ -70,6 +70,9 @@ const REPORT_FIELDS_FOR_STATISTICS = {
     type: CUSTOM_FIELD_TYPE.ENUM,
     label: Settings.fields.report.atmosphere,
     choices: choicesFactory(Report.ATMOSPHERE, Report.ATMOSPHERE_LABELS)
+  },
+  "primaryAdvisor.rank": {
+    type: CUSTOM_FIELD_TYPE.ENUM
   }
 }
 
@@ -92,6 +95,10 @@ const GQL_GET_REPORT_LIST = gql`
         atmosphere
         state
         engagementStatus
+        primaryAdvisor {
+          uuid
+          rank
+        }
         tasks {
           uuid
           shortName
