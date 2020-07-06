@@ -627,7 +627,7 @@ table hr.attendee-divider {
 }
 
 /* Colour indication of reports in the ReportCalendar */
-.fc-dayGrid-view .event-draft, .fc-timeGrid-view .event-draft {
+.fc-daygrid-event.event-draft, .fc-timegrid-event.event-draft {
 	border-color: #bdbdaf;
 	background: repeating-linear-gradient(
 		45deg,
@@ -637,7 +637,7 @@ table hr.attendee-divider {
 		#bdbdaf 4rem
 	);
 }
-.fc-dayGrid-view .event-pending_approval, .fc-timeGrid-view .event-pending_approval {
+.fc-daygrid-event.event-pending_approval, .fc-timegrid-event.event-pending_approval {
 	border-color: #848478;
 	background: repeating-linear-gradient(
 		45deg,
@@ -647,11 +647,11 @@ table hr.attendee-divider {
 		#848478 4rem
 	);
 }
-.fc-dayGrid-view .event-published, .fc-timeGrid-view .event-published {
+.fc-daygrid-event.event-published, .fc-timegrid-event.event-published {
 	border-color: #5cb85c;
 	background-color: #5cb85c;
 }
-.fc-dayGrid-view .event-rejected, .fc-timeGrid-view .event-rejected {
+.fc-daygrid-event.event-rejected, .fc-timegrid-event.event-rejected {
 	border-color: #c23030;
 	background: repeating-linear-gradient(
 		45deg,
@@ -661,11 +661,11 @@ table hr.attendee-divider {
 		#c23030 4rem
 	);
 }
-.fc-dayGrid-view .event-cancelled, .fc-timeGrid-view .event-cancelled {
+.fc-daygrid-event.event-cancelled, .fc-timegrid-event.event-cancelled {
 	border-color: #ec971f;
 	background-color: #ec971f;
 }
-.fc-dayGrid-view .event-approved, .fc-timeGrid-view .event-approved {
+.fc-daygrid-event.event-approved, .fc-timegrid-event.event-approved {
 	border-color: #75eb75;
 	background: repeating-linear-gradient(
 		45deg,
@@ -677,7 +677,7 @@ table hr.attendee-divider {
 }
 
 /* Colour indication of future reports in the ReportCalendar */
-.fc-dayGrid-view .event-future-draft, .fc-timeGrid-view .event-future-draft {
+.fc-daygrid-event.event-future-draft, .fc-timegrid-event.event-future-draft {
 	border-color: #bdbdaf;
 	background: repeating-linear-gradient(
 		45deg,
@@ -687,7 +687,7 @@ table hr.attendee-divider {
 		#bdbdaf 4rem
 	);
 }
-.fc-dayGrid-view .event-future-pending_approval, .fc-timeGrid-view .event-future-pending_approval {
+.fc-daygrid-event.event-future-pending_approval, .fc-timegrid-event.event-future-pending_approval {
 	border-color: #848478;
 	background: repeating-linear-gradient(
 		45deg,
@@ -697,11 +697,11 @@ table hr.attendee-divider {
 		#848478 4rem
 	);
 }
-.fc-dayGrid-view .event-future-published, .fc-timeGrid-view .event-future-published {
+.fc-daygrid-event.event-future-published, .fc-timegrid-event.event-future-published {
 	border-color: #2965cc;
 	background-color: #2965cc;
 }
-.fc-dayGrid-view .event-future-rejected, .fc-timeGrid-view .event-future-rejected {
+.fc-daygrid-event.event-future-rejected, .fc-timegrid-event.event-future-rejected {
 	border-color: #c23030;
 	background: repeating-linear-gradient(
 		45deg,
@@ -711,11 +711,11 @@ table hr.attendee-divider {
 		#c23030 4rem
 	);
 }
-.fc-dayGrid-view .event-future-cancelled, .fc-timeGrid-view .event-future-cancelled {
+.fc-daygrid-event.event-future-cancelled, .fc-timegrid-event.event-future-cancelled {
 	border-color: #ec971f;
 	background-color: #ec971f;
 }
-.fc-dayGrid-view .event-future-approved, .fc-timeGrid-view .event-future-approved {
+.fc-daygrid-event.event-future-approved, .fc-timegrid-event.event-future-approved {
 	border-color: #2965cc;
 	background-color: #2965cc;
 }

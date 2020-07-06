@@ -5,28 +5,29 @@ import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import PropTypes from "prop-types"
 import React from "react"
+import "./Calendar.css"
 
 const Calendar = ({ events, eventClick, calendarComponentRef }) => (
   <FullCalendar
     plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-    header={{
-      left: "prev,next today filterDraft",
+    headerToolbar={{
+      left: "prev,next today",
       center: "title",
       right: "dayGridMonth,timeGridWeek,timeGridDay,listDay"
     }}
     buttonText={{
       listDay: "list day"
     }}
-    defaultView="dayGridMonth"
+    initialView="dayGridMonth"
     views={{
       timeGridWeek: {
-        eventLimitClick: "day"
+        moreLinkClick: "day"
       },
       dayGrid: {
-        eventLimitClick: "popover"
+        moreLinkClick: "popover"
       }
     }}
-    allDayDefault={false}
+    defaultAllDay={false}
     eventTimeFormat={{
       hour: "2-digit",
       minute: "2-digit",
@@ -43,11 +44,11 @@ const Calendar = ({ events, eventClick, calendarComponentRef }) => (
     }}
     height="auto" // assume a natural height, no scrollbars will be used
     aspectRatio={3} // ratio of width-to-height
-    timeGridEventMinHeight={20}
     ref={calendarComponentRef}
+    dayMaxEvents
     events={events}
     eventOverlap
-    eventLimit
+    eventDisplay="block"
     eventClick={eventClick}
     dateClick={info => {
       const calendarApi = calendarComponentRef.current.getApi()
