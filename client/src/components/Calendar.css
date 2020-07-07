@@ -52,3 +52,10 @@ a.fc-list-day-text, a.fc-list-day-text:hover, a.fc-list-day-text:focus {
   max-height: 95%;
   overflow-y: auto;
 }
+
+/* Make sure that when scrolling on a time grid, the all-day events don't overlap
+the sticky days header. Workaround for
+https://github.com/fullcalendar/fullcalendar/issues/5596 */
+.fc .fc-timegrid .fc-daygrid-body {
+  z-index: 1;
+}
