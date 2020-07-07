@@ -46,3 +46,9 @@ a.fc-list-day-text, a.fc-list-day-text:hover, a.fc-list-day-text:focus {
 .fc-event {
   min-height: 20px;
 }
+
+/* workaround for https://github.com/fullcalendar/fullcalendar/issues/5532 */
+.fc-more-popover {
+  max-height: 95%;
+  overflow-y: auto;
+}
