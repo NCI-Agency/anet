@@ -1,4 +1,4 @@
-import { SEARCH_OBJECT_LABELS } from "actions"
+import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import {
   LocationOverlayRow,
   OrganizationOverlayRow,
@@ -114,26 +114,26 @@ const widgetTypeMapping = {
 
 const MultiTypeAdvancedSelectComponent = ({
   onConfirm,
-  objectType: objectTypeArg
+  objectType: entityTypeArg
 }) => {
-  const [objectType, setObjectType] = useState(
-    objectTypeArg || ENTITY_TYPES.REPORTS
-  )
+  const [entityType, setEntityType] = useState(entityTypeArg)
   const [advancedSelectProps, setAdvancedSelectProps] = useState(
-    widgetTypeMapping[objectType]
+    widgetTypeMapping[entityType]
   )
-
-  function changeObjectType(newObjectType) {
-    setObjectType(newObjectType)
-    setAdvancedSelectProps(widgetTypeMapping[newObjectType])
+  function changeEntityType(newEntityType) {
+    setEntityType(newEntityType)
+    setAdvancedSelectProps(widgetTypeMapping[newEntityType])
   }
-
+  let searchPlaceholder = ""
   return (
     <>
-      <ButtonToggleGroup value={objectType} onChange={changeObjectType}>
+      <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
         {Object.entries(ENTITY_TYPES).map((key, value) => {
           const entityName = key[1]
-          const entityLabel = SEARCH_OBJECT_LABELS[key[0]]
+          const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key[0]]]
+          if (entityName === entityType) {
+            searchPlaceholder = "Find " + entityLabel.toLowerCase()
+          }
           return (
             <Button key={entityName} value={entityName}>
               {entityLabel}
@@ -146,13 +146,13 @@ const MultiTypeAdvancedSelectComponent = ({
         autofocus="true"
         fieldName="entitySelect"
         fieldLabel="Search in ANET:"
-        placeholder={"Find " + objectType.toLowerCase()}
+        placeholder={searchPlaceholder}
         value={{}}
         showEmbedded
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
         filterDefs={advancedSelectProps.filterDefs}
-        onChange={value => onConfirm(value, objectType)}
+        onChange={value => onConfirm(value, entityType)}
         objectType={advancedSelectProps.objectType}
         queryParams={advancedSelectProps.queryParams}
         fields={advancedSelectProps.fields}
@@ -165,6 +165,9 @@ const MultiTypeAdvancedSelectComponent = ({
 MultiTypeAdvancedSelectComponent.propTypes = {
   onConfirm: PropTypes.func,
   objectType: PropTypes.string
+}
+MultiTypeAdvancedSelectComponent.defaultProps = {
+  objectType: ENTITY_TYPES.REPORTS
 }
 
 export default MultiTypeAdvancedSelectComponent
