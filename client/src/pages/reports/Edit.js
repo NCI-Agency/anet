@@ -126,12 +126,9 @@ const ReportEdit = ({ pageDispatchers }) => {
     )
   }
   const report = new Report(data ? data.report : {})
-  let reportInitialValues = Object.assign(
+  const reportInitialValues = Object.assign(
     report,
-    report.getTasksEngagementAssessments()
-  )
-  reportInitialValues = Object.assign(
-    reportInitialValues,
+    report.getTasksEngagementAssessments(),
     report.getAttendeesEngagementAssessments()
   )
   reportInitialValues.tasks = Task.fromArray(reportInitialValues.tasks)
