@@ -59,3 +59,9 @@ https://github.com/fullcalendar/fullcalendar/issues/5596 */
 .fc .fc-timegrid .fc-daygrid-body {
   z-index: 1;
 }
+
+/* give the calendar a higher z-index than the TopBar, to make sure the more link
+popover is not displayed behind the top bar */
+.fc .fc-view-harness {
+  z-index: 1200;
+}
