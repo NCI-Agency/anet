@@ -329,12 +329,12 @@ export default class Person extends Model {
   }
 
   generalAssessmentsConfig() {
+    let config
     if (this.isAdvisor()) {
-      return Person.advisorAssessmentConfig || []
+      config = Person.advisorAssessmentConfig
     } else if (this.isPrincipal()) {
-      return Person.principalAssessmentConfig || []
-    } else {
-      return []
+      config = Person.principalAssessmentConfig
     }
+    return config || []
   }
 }
