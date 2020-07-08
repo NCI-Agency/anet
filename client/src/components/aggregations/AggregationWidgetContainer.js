@@ -118,9 +118,7 @@ const getAggregationFunction = (fieldConfig, aggregationWidget) => {
   const aggregationType =
     fieldConfig.aggregation?.aggregationType ||
     DEFAULT_AGGREGATION_TYPE_PER_WIDGET_TYPE[aggregationWidget]
-  return aggregationType
-    ? AGGREGATION_TYPE_FUNCTION[aggregationType] || null
-    : null
+  return AGGREGATION_TYPE_FUNCTION[aggregationType]
 }
 
 const AggregationWidgetContainer = ({
@@ -154,8 +152,10 @@ const AggregationWidgetContainer = ({
   )
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   let label = fieldProps.label
+  // label not provided, calculate it from fieldName, which is a required prop
+  // (label of null would mean we don't want to display a label)
   if (label === undefined) {
-    label = utils.sentenceCase(fieldName) // name is a required prop
+    label = utils.sentenceCase(fieldName)
   }
   const WidgetComponent =
     (aggregationWidget && AGGREGATION_WIDGET_COMPONENTS[aggregationWidget]) ||
