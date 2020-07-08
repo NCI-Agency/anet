@@ -24,7 +24,10 @@ const PeriodsNavigation = ({ offset, onChange }) => (
 )
 PeriodsNavigation.propTypes = {
   offset: PropTypes.number,
-  onChange: PropTypes.func
+  onChange: PropTypes.func.isRequired
+}
+PeriodsNavigation.defaultProps = {
+  offset: 0
 }
 
 export default PeriodsNavigation
