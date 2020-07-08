@@ -114,7 +114,7 @@ const FieldStatisticsRow = ({
   fieldName,
   periods,
   periodsData,
-  rowIndex
+  isFirstRow
 }) => {
   const aggregationWidget = getAggregationWidget(fieldConfig)
   if (!aggregationWidget) {
@@ -125,7 +125,7 @@ const FieldStatisticsRow = ({
       {periods.map((period, index) => (
         <td key={index}>
           {_isEmpty(periodsData[index]) ? (
-            rowIndex === 0 ? (
+            isFirstRow ? (
               <em>No reports found</em>
             ) : null
           ) : (
@@ -147,9 +147,22 @@ const FieldStatisticsRow = ({
 FieldStatisticsRow.propTypes = {
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
-  periods: PeriodsPropType,
-  periodsData: PropTypes.arrayOf(PropTypes.array),
-  rowIndex: PropTypes.number
+  periods: PeriodsPropType.isRequired,
+  periodsData: PropTypes.arrayOf(PropTypes.array).isRequired,
+  isFirstRow: PropTypes.bool
+}
+
+const NoStatisticsRow = ({ periods }) => (
+  <tr>
+    {periods.map((period, index) => (
+      <td key={index}>
+        <em>No reports found</em>
+      </td>
+    ))}
+  </tr>
+)
+NoStatisticsRow.propTypes = {
+  periods: PeriodsPropType.isRequired
 }
 
 const ReportStatistics = ({
@@ -161,23 +174,25 @@ const ReportStatistics = ({
   const [offset, setOffset] = useState(0)
   const { recurrence, numberOfPeriods } = periodsDetails
   const periodsConfig = getPeriodsConfig(recurrence, numberOfPeriods, offset)
+  const { periods } = periodsConfig
   const dateSortAsc = datesArray => datesArray.sort((a, b) => a - b)
-  const statisticsStartDate = dateSortAsc(
-    periodsConfig.periods.map(p => p.start)
-  )[0]
-  const statisticsEndDate = dateSortAsc(periodsConfig.periods.map(p => p.end))[
-    periodsConfig.periods.length - 1
-  ]
+  const statisticsStartDate =
+    !_isEmpty(periods) && dateSortAsc(periods.map(p => p.start))[0]
+  const statisticsEndDate =
+    !_isEmpty(periods) &&
+    dateSortAsc(periods.map(p => p.end))[periods.length - 1]
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   if (
-    !queryParams.engagementDateStart ||
-    queryParams.engagementDateStart < statisticsStartDate
+    statisticsStartDate &&
+    (!queryParams.engagementDateStart ||
+      queryParams.engagementDateStart < statisticsStartDate)
   ) {
     reportQuery.engagementDateStart = statisticsStartDate
   }
   if (
-    !queryParams.engagementDateEnd ||
-    queryParams.engagementDateEnd > statisticsEndDate
+    statisticsEndDate &&
+    (!queryParams.engagementDateEnd ||
+      queryParams.engagementDateEnd > statisticsEndDate)
   ) {
     reportQuery.engagementDateEnd = statisticsEndDate
   }
@@ -198,6 +213,9 @@ const ReportStatistics = ({
   if (done) {
     return result
   }
+  if (_isEmpty(periods)) {
+    return null
+  }
 
   const reports = data ? Report.fromArray(data.reportList.list) : []
   const CUSTOM_FIELDS_KEY = "customFieldsJson"
@@ -213,12 +231,9 @@ const ReportStatistics = ({
     )
     return reportsForDateRange
   }
-  const { periods } = periodsConfig
   const dataPerPeriod = []
-  periodsConfig.periods.forEach(period =>
-    dataPerPeriod.push(getPeriodData(reports, period))
-  )
-
+  periods.forEach(period => dataPerPeriod.push(getPeriodData(reports, period)))
+  const hasStatistics = !_isEmpty(dataPerPeriod.filter(data => !_isEmpty(data)))
   const customFieldsConfig = Settings.fields.report.customFields
 
   return (
@@ -233,27 +248,31 @@ const ReportStatistics = ({
         <PeriodsTableHeader periodsConfig={periodsConfig} />
         <tbody>
           <>
-            {Object.keys(REPORT_FIELDS_FOR_STATISTICS || {}).map(
-              (key, index) => (
+            {!hasStatistics && <NoStatisticsRow periods={periods} />}
+            {hasStatistics &&
+              Object.keys(REPORT_FIELDS_FOR_STATISTICS).map((key, index) => (
                 <FieldStatisticsRow
                   key={key}
                   fieldName={key}
                   fieldConfig={REPORT_FIELDS_FOR_STATISTICS[key]}
                   periods={periods}
                   periodsData={dataPerPeriod}
-                  rowIndex={index}
+                  isFirstRow={index === 0}
                 />
-              )
-            )}
-            {Object.keys(customFieldsConfig || {}).map(key => (
-              <FieldStatisticsRow
-                key={key}
-                fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
-                fieldConfig={customFieldsConfig[key]}
-                periods={periods}
-                periodsData={dataPerPeriod}
-              />
-            ))}
+              ))}
+            {hasStatistics &&
+              Object.keys(customFieldsConfig || {}).map((key, index) => (
+                <FieldStatisticsRow
+                  key={key}
+                  fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
+                  fieldConfig={customFieldsConfig[key]}
+                  periods={periods}
+                  periodsData={dataPerPeriod}
+                  isFirstRow={
+                    _isEmpty(REPORT_FIELDS_FOR_STATISTICS) && index === 0
+                  }
+                />
+              ))}
           </>
         </tbody>
       </Table>
@@ -263,7 +282,7 @@ const ReportStatistics = ({
 
 ReportStatistics.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  periodsDetails: PeriodsDetailsPropType,
+  periodsDetails: PeriodsDetailsPropType.isRequired,
   setTotalCount: PropTypes.func,
   queryParams: PropTypes.object
 }
