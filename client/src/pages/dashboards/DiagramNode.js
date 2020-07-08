@@ -118,7 +118,7 @@ const Port = styled.div`
 export const DiagramNodeWidget = ({ size, node, engine }) => {
   const { anetObjectType, anetObject } = node.options
   const ModelClass = anetObjectType && Models[anetObjectType]
-  const modelInstance = ModelClass && new ModelClass(anetObject)
+  const modelInstance = anetObject && ModelClass && new ModelClass(anetObject)
   const now = moment()
   const period = PERIOD_FACTORIES[RECURRENCE_TYPE.MONTHLY](now, 0)
   const instantAssessmentConfig =

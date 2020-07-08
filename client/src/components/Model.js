@@ -360,7 +360,7 @@ export default class Model {
   static fetchByUuid(uuid, entityGqlFields) {
     const fields = entityGqlFields[this.resourceName]
     if (!fields) {
-      return null
+      return Promise.resolve(null)
     }
 
     return API.query(
