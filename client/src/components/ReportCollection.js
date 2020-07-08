@@ -113,7 +113,7 @@ const ReportCollection = ({
               marginBottom={marginBottom}
             />
           )}
-          {viewFormat === FORMAT_STATISTICS && statisticsRecurrence.length && (
+          {viewFormat === FORMAT_STATISTICS && (
             <>
               {statisticsRecurrence.map(recurrence => (
                 <ReportStatistics
