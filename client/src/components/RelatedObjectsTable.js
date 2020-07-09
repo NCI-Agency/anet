@@ -6,6 +6,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
+import utils from "utils"
 
 const RelatedObjectsTable = ({
   currentObject,
@@ -83,7 +84,7 @@ RelatedObjectsTable.propTypes = {
   relatedObjects: Model.noteRelatedObjectsPropType.isRequired,
   onSelect: PropTypes.func.isRequired,
   showDelete: PropTypes.bool,
-  onDelete: PropTypes.func
+  onDelete: utils.fnRequiredWhen.bind(null, "showDelete")
 }
 
 RelatedObjectsTable.defaultProps = {

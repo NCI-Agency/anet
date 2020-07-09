@@ -26,10 +26,19 @@ const isNullOrUndefined = value => {
   return value === null || value === undefined
 }
 
+const fnRequiredWhen = (boolPropName, props, propName, componentName) => {
+  if (props[boolPropName] && typeof props[propName] !== "function") {
+    return new Error(
+      `Prop "${componentName}.${propName}" is a required function if "${boolPropName}" is true`
+    )
+  }
+}
+
 export default {
   ...wrappedChangeCase,
   pluralize,
   isNullOrUndefined,
+  fnRequiredWhen,
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
