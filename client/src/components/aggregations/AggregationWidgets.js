@@ -214,7 +214,7 @@ export const DefaultAggWidget = ({
       <Button
         className="toggle-section-button"
         style={{ marginBottom: "1rem" }}
-        onClick={toggleShowValues}
+        onClick={() => setShowValues(!showValues)}
         id="toggleShowValues"
       >
         {showValues ? "Hide" : "Show"} {filteredValues.length} values
@@ -235,9 +235,6 @@ export const DefaultAggWidget = ({
       </Collapse>
     </div>
   )
-  function toggleShowValues() {
-    setShowValues(!showValues)
-  }
 }
 DefaultAggWidget.propTypes = aggregationWidgetPropTypes
 DefaultAggWidget.defaultProps = aggregationWidgetDefaultProps

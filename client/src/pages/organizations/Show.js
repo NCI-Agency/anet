@@ -399,7 +399,8 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                         <Button
                           value="toggle-filter"
                           className="btn btn-sm"
-                          onClick={togglePendingApprovalFilter}
+                          onClick={() =>
+                            setFilterPendingApproval(!filterPendingApproval)}
                         >
                           {filterPendingApproval
                             ? "Show all reports"
@@ -407,7 +408,8 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                         </Button>
                         <Checkbox
                           checked={includeChildrenOrgs}
-                          onChange={toggleIncludeChildrenOrgs}
+                          onChange={() =>
+                            setIncludeChildrenOrgs(!includeChildrenOrgs)}
                         >
                           include reports from sub-orgs
                         </Checkbox>
@@ -422,14 +424,6 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
       }}
     </Formik>
   )
-
-  function togglePendingApprovalFilter() {
-    setFilterPendingApproval(!filterPendingApproval)
-  }
-
-  function toggleIncludeChildrenOrgs() {
-    setIncludeChildrenOrgs(!includeChildrenOrgs)
-  }
 }
 
 BaseOrganizationShow.propTypes = {
