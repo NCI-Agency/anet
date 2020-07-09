@@ -3,6 +3,7 @@ import {
   ReadonlyCustomFields
 } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
@@ -62,18 +63,19 @@ const InstantAssessmentsContainerField = ({
 }
 InstantAssessmentsContainerField.propTypes = {
   entityType: PropTypes.func.isRequired,
-  entities: PropTypes.array,
+  entities: PropTypes.arrayOf(PropTypes.instanceOf(Model)),
   entitiesInstantAssessmentsConfig: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
   formikProps: PropTypes.shape({
     setFieldTouched: PropTypes.func,
     setFieldValue: PropTypes.func,
-    values: PropTypes.object,
+    values: PropTypes.object.isRequired,
     validateForm: PropTypes.func
   }),
   readonly: PropTypes.bool
 }
 InstantAssessmentsContainerField.defaultProps = {
+  entities: [],
   readonly: false
 }
 export default InstantAssessmentsContainerField
