@@ -68,7 +68,7 @@ export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
     key =>
       (legend[key] = {
         label: legend[key]?.label || key,
-        color: legend[key]?.color || legendColors.pop()
+        color: legend[key]?.color || legendColors.shift()
       })
   )
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
