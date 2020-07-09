@@ -34,7 +34,7 @@ const IqrBoxPlot = ({
     const index = quartileNumber * (sortedData.length / 4)
     const idx = Math.floor(index)
     return idx === index
-      ? (sortedData[index - 1] + sortedData[index]) / 2
+      ? (sortedData[idx - 1] + sortedData[idx]) / 2
       : sortedData[idx]
   }
 
