@@ -44,19 +44,18 @@ const InstantAssessmentRow = ({
   entity,
   periods,
   periodsData,
-  rowIndex
+  isFirstRow
 }) => {
   const aggregationWidget = getAggregationWidget(questionConfig)
-  if (!aggregationWidget) {
+  if (_isEmpty(periods) || !aggregationWidget) {
     return null
   }
-
   return (
     <tr>
       {periods.map((period, index) => (
         <td key={index}>
           {_isEmpty(periodsData[index]) ? (
-            rowIndex === 0 ? (
+            isFirstRow ? (
               <em>No assessments</em>
             ) : null
           ) : (
@@ -75,12 +74,12 @@ const InstantAssessmentRow = ({
   )
 }
 InstantAssessmentRow.propTypes = {
-  entity: PropTypes.object,
-  periods: PeriodsPropType,
-  periodsData: PropTypes.arrayOf(PropTypes.array),
-  questionKey: PropTypes.string,
-  questionConfig: PropTypes.object,
-  rowIndex: PropTypes.number
+  entity: PropTypes.object.isRequired,
+  periods: PeriodsPropType.isRequired,
+  periodsData: PropTypes.arrayOf(PropTypes.array).isRequired,
+  questionKey: PropTypes.string.isRequired,
+  questionConfig: PropTypes.object.isRequired,
+  isFirstRow: PropTypes.bool
 }
 
 const BasePeriodicAssessmentRows = ({
@@ -93,6 +92,10 @@ const BasePeriodicAssessmentRows = ({
 }) => {
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
   const { recurrence, periods } = periodsConfig
+  if (_isEmpty(periods)) {
+    return null
+  }
+
   const {
     assessmentConfig,
     assessmentYupSchema
@@ -205,11 +208,11 @@ const BasePeriodicAssessmentRows = ({
   )
 }
 BasePeriodicAssessmentRows.propTypes = {
-  entity: PropTypes.object,
+  entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
-  periodsConfig: AssessmentPeriodsConfigPropType,
+  periodsConfig: AssessmentPeriodsConfigPropType.isRequired,
   canAddAssessment: PropTypes.bool,
-  onUpdateAssessment: PropTypes.func,
+  onUpdateAssessment: PropTypes.func.isRequired,
   currentUser: PropTypes.instanceOf(Person)
 }
 
@@ -238,7 +241,7 @@ const EntityAssessmentResults = ({
   const instantAssessmentConfig = entity.getInstantAssessmentConfig()
   const { periods } = periodsConfig
   const dataPerPeriod = []
-  periodsConfig.periods.forEach(period =>
+  periods.forEach(period =>
     dataPerPeriod.push(entity.getInstantAssessmentResults(period))
   )
   return (
@@ -256,7 +259,7 @@ const EntityAssessmentResults = ({
           periods={periods}
           periodsData={dataPerPeriod}
           entity={entity}
-          rowIndex={index}
+          isFirstRow={index === 0}
         />
       ))}
       <PeriodicAssessmentRows
@@ -271,10 +274,10 @@ const EntityAssessmentResults = ({
 }
 EntityAssessmentResults.propTypes = {
   style: PropTypes.object,
-  entity: PropTypes.object,
+  entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
-  periodsConfig: AssessmentPeriodsConfigPropType,
-  onUpdateAssessment: PropTypes.func,
+  periodsConfig: AssessmentPeriodsConfigPropType.isRequired,
+  onUpdateAssessment: PropTypes.func.isRequired,
   canAddAssessment: PropTypes.bool
 }
 
@@ -298,6 +301,9 @@ const AssessmentResultsTable = ({
     offset,
     true
   )
+  if (_isEmpty(periodsConfig?.periods)) {
+    return null
+  }
   const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
   const subentitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessmentConfig())
@@ -354,11 +360,11 @@ const AssessmentResultsTable = ({
 }
 AssessmentResultsTable.propTypes = {
   style: PropTypes.object,
-  entity: PropTypes.object,
+  entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
-  periodsDetails: PeriodsDetailsPropType,
-  onUpdateAssessment: PropTypes.func,
+  periodsDetails: PeriodsDetailsPropType.isRequired,
+  onUpdateAssessment: PropTypes.func.isRequired,
   canAddAssessment: PropTypes.bool
 }
 

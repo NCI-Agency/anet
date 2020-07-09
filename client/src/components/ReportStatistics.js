@@ -117,7 +117,7 @@ const FieldStatisticsRow = ({
   isFirstRow
 }) => {
   const aggregationWidget = getAggregationWidget(fieldConfig)
-  if (!aggregationWidget) {
+  if (_isEmpty(periods) || !aggregationWidget) {
     return null
   }
   return (

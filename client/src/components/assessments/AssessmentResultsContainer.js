@@ -1,4 +1,5 @@
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
+import Model from "components/Model"
 import { PERIOD_FACTORIES } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"
@@ -38,7 +39,7 @@ const AssessmentResultsContainer = ({
   )
 }
 AssessmentResultsContainer.propTypes = {
-  entity: PropTypes.object,
+  entity: PropTypes.instanceOf(Model),
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
   onUpdateAssessment: PropTypes.func,
