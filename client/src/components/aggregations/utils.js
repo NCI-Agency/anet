@@ -92,7 +92,7 @@ const noTask = {
 }
 
 export const getReportsByTasks = reportsList => {
-  if (!reportsList.length) {
+  if (_isEmpty(reportsList)) {
     return []
   }
   const simplifiedValues = reportsList.map(d => {
@@ -115,7 +115,7 @@ export const getReportsByTasks = reportsList => {
     r.task = d
     r.reportsCount =
       d.uuid === noTask.uuid
-        ? simplifiedValues.filter(item => item.tasks.length === 0).length
+        ? simplifiedValues.filter(item => _isEmpty(item.tasks)).length
         : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
           .length
     return r
