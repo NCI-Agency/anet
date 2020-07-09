@@ -128,7 +128,7 @@ const RelatedObjectNoteModal = ({
                 <Button className="pull-left" onClick={close}>
                   Cancel
                 </Button>
-                {_isEmpty(relatedObjects) ? (
+                {_isEmpty(relatedObjects) && onDelete && (
                   <ConfirmDelete
                     onConfirmDelete={() => onDelete(note.uuid)}
                     objectType="note"
@@ -136,7 +136,8 @@ const RelatedObjectNoteModal = ({
                     bsStyle="warning"
                     buttonLabel="Delete note"
                   />
-                ) : (
+                )}
+                {!_isEmpty(relatedObjects) && (
                   <Button
                     onClick={submitForm}
                     bsStyle="primary"
