@@ -1,27 +1,18 @@
-import AggregationWidgetContainer, {
-  getAggregationWidget
-} from "components/aggregations/AggregationWidgetContainer"
-import AppContext from "components/AppContext"
-import AssessmentModal from "components/assessments/AssessmentModal"
-import PeriodicAssessment from "components/assessments/PeriodicAssessment"
+import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
+import { InstantAssessmentsRow } from "components/assessments/InstantAssessmentResults"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { NOTE_TYPE } from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
-import { Person } from "models"
 import _isEmpty from "lodash/isEmpty"
-import _uniqueId from "lodash/uniqueId"
 import {
   AssessmentPeriodsConfigPropType,
   getPeriodsConfig,
   PeriodsDetailsPropType,
-  PeriodsPropType,
-  PeriodsTableHeader,
-  periodToString
+  PeriodsTableHeader
 } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Table } from "react-bootstrap"
+import { Table } from "react-bootstrap"
 import "components/assessments/AssessmentResultsTable.css"
 
 /* The AssessmentResultsTable component displays the results of two types of
@@ -37,195 +28,6 @@ import "components/assessments/AssessmentResultsTable.css"
  *   the config and yupSchema for these assessments is to be found in
  *   entity.getPeriodicAssessmentDetails(recurrence)
  */
-
-const InstantAssessmentRow = ({
-  questionKey,
-  questionConfig,
-  entity,
-  periods,
-  periodsData,
-  isFirstRow
-}) => {
-  const aggregationWidget = getAggregationWidget(questionConfig)
-  if (_isEmpty(periods) || !aggregationWidget) {
-    return null
-  }
-  return (
-    <tr>
-      {periods.map((period, index) => (
-        <td key={index}>
-          {_isEmpty(periodsData[index]) ? (
-            isFirstRow ? (
-              <em>No assessments</em>
-            ) : null
-          ) : (
-            <AggregationWidgetContainer
-              key={`assessment-${questionKey}`}
-              fieldConfig={questionConfig}
-              fieldName={questionKey}
-              data={periodsData[index]}
-              widget={aggregationWidget}
-              widgetId={`${questionKey}-${_uniqueId("assessment")}`}
-            />
-          )}
-        </td>
-      ))}
-    </tr>
-  )
-}
-InstantAssessmentRow.propTypes = {
-  entity: PropTypes.object.isRequired,
-  periods: PeriodsPropType.isRequired,
-  periodsData: PropTypes.arrayOf(PropTypes.array).isRequired,
-  questionKey: PropTypes.string.isRequired,
-  questionConfig: PropTypes.object.isRequired,
-  isFirstRow: PropTypes.bool
-}
-
-const BasePeriodicAssessmentRows = ({
-  entity,
-  entityType,
-  periodsConfig,
-  canAddAssessment,
-  onUpdateAssessment,
-  currentUser
-}) => {
-  const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
-  const { recurrence, periods } = periodsConfig
-  if (_isEmpty(periods)) {
-    return null
-  }
-
-  const {
-    assessmentConfig,
-    assessmentYupSchema
-  } = entity.getPeriodicAssessmentDetails(recurrence)
-  if (!assessmentConfig) {
-    return null
-  }
-
-  const periodsAssessments = []
-  const periodsAllowNewAssessment = []
-  periods.forEach(period => {
-    const periodAssessments = entity.getPeriodAssessments(
-      recurrence,
-      period,
-      currentUser
-    )
-    const myPeriodAssessments = periodAssessments.filter(
-      ({ note, assessment }) => Person.isEqual(currentUser, note.author)
-    )
-    periodsAssessments.push(periodAssessments)
-    // Only allow adding new assessments for a period if the user has the rights
-    // for it, if the period is configured to allow adding new assessments and
-    // if the current user didn't already made an assessment for the period
-    periodsAllowNewAssessment.push(
-      canAddAssessment &&
-        period.allowNewAssessments &&
-        _isEmpty(myPeriodAssessments)
-    )
-  })
-  const hasPeriodicAssessmentsRow = !_isEmpty(
-    periodsAssessments.filter(x => !_isEmpty(x))
-  )
-  const hasAddAssessmentRow = !_isEmpty(
-    periodsAllowNewAssessment.filter(x => x)
-  )
-  return (
-    <>
-      {hasPeriodicAssessmentsRow && (
-        <tr>
-          {periodsAssessments.map((periodAssessments, index) => {
-            return (
-              <td key={index}>
-                {periodAssessments &&
-                  periodAssessments.map(({ note, assessment }, i) => (
-                    <div key={note.uuid}>
-                      <PeriodicAssessment
-                        note={note}
-                        assessment={assessment}
-                        assessmentYupSchema={assessmentYupSchema}
-                        assessmentConfig={assessmentConfig}
-                        entity={entity}
-                        period={periods[index]}
-                        recurrence={recurrence}
-                        onUpdateAssessment={onUpdateAssessment}
-                      />
-                    </div>
-                  ))}
-              </td>
-            )
-          })}
-        </tr>
-      )}
-      {hasAddAssessmentRow && (
-        <tr>
-          {periods.map((period, index) => {
-            const periodDisplay = periodToString(period)
-            const addAssessmentLabel = `Make a new ${entity?.toString()} assessment for ${periodDisplay}`
-            const modalKey = `${entity.uuid}-${periodDisplay}`
-            return (
-              <td key={index}>
-                {periodsAllowNewAssessment[index] && (
-                  <>
-                    <Button
-                      bsStyle="primary"
-                      onClick={() => setShowAssessmentModalKey(modalKey)}
-                    >
-                      {addAssessmentLabel}
-                    </Button>
-                    <AssessmentModal
-                      showModal={showAssessmentModalKey === modalKey}
-                      note={{
-                        type: NOTE_TYPE.ASSESSMENT,
-                        noteRelatedObjects: [
-                          {
-                            relatedObjectType: entityType.relatedObjectType,
-                            relatedObjectUuid: entity.uuid
-                          }
-                        ]
-                      }}
-                      title={`Assessment for ${entity.toString()} for ${periodDisplay}`}
-                      addAssessmentLabel={addAssessmentLabel}
-                      assessmentYupSchema={assessmentYupSchema}
-                      recurrence={recurrence}
-                      assessmentPeriod={period}
-                      assessmentConfig={assessmentConfig}
-                      onSuccess={() => {
-                        setShowAssessmentModalKey(null)
-                        onUpdateAssessment()
-                      }}
-                      onCancel={() => setShowAssessmentModalKey(null)}
-                    />
-                  </>
-                )}
-              </td>
-            )
-          })}
-        </tr>
-      )}
-    </>
-  )
-}
-BasePeriodicAssessmentRows.propTypes = {
-  entity: PropTypes.object.isRequired,
-  entityType: PropTypes.func.isRequired,
-  periodsConfig: AssessmentPeriodsConfigPropType.isRequired,
-  canAddAssessment: PropTypes.bool,
-  onUpdateAssessment: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
-}
-
-const PeriodicAssessmentRows = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePeriodicAssessmentRows
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 const EntityAssessmentResults = ({
   entity,
@@ -252,7 +54,7 @@ const EntityAssessmentResults = ({
         </td>
       </tr>
       {Object.keys(instantAssessmentConfig || {}).map((key, index) => (
-        <InstantAssessmentRow
+        <InstantAssessmentsRow
           key={key}
           questionKey={key}
           questionConfig={instantAssessmentConfig[key]}
@@ -262,7 +64,7 @@ const EntityAssessmentResults = ({
           isFirstRow={index === 0}
         />
       ))}
-      <PeriodicAssessmentRows
+      <PeriodicAssessmentsRows
         entity={entity}
         entityType={entityType}
         periodsConfig={periodsConfig}
