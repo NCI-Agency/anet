@@ -1,7 +1,31 @@
 import _clone from "lodash/clone"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
+import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
+import PropTypes from "prop-types"
 import Settings from "settings"
+
+export const aggregationWidgetPropTypes = {
+  values: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.arrayOf(
+      PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+        PropTypes.array,
+        PropTypes.object
+      ])
+    )
+  ]),
+  fieldConfig: PropTypes.object,
+  fieldName: PropTypes.string,
+  vertical: PropTypes.bool,
+  period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType]),
+  whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
+}
+export const aggregationWidgetDefaultProps = {
+  whenUnspecified: null
+}
 
 export const countPerDateAggregation = (fieldName, fieldConfig, data) => {
   const values = data.reduce((counter, entity) => {

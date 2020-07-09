@@ -1,3 +1,9 @@
+import CalendarWidget from "components/aggregations/CalendarWidget"
+import DefaultAggWidget from "components/aggregations/DefaultAggWidget"
+import LikertScaleAndPieWidget from "components/aggregations/LikertScaleAndPieWidget"
+import PieWidget from "components/aggregations/PieWidget"
+import ReportsByTaskWidget from "components/aggregations/ReportsByTaskWidget"
+import ReportsMapWidget from "components/aggregations/ReportsMapWidget"
 import {
   countPerDateAggregation,
   countPerValueAggregation,
@@ -7,14 +13,6 @@ import {
   reportsByTaskAggregation,
   valuesListAggregation
 } from "components/aggregations/utils"
-import {
-  CalendarWidget,
-  DefaultAggWidget,
-  LikertScaleAndPieWidget,
-  PieWidget,
-  ReportsByTaskWidget,
-  ReportsMapWidget
-} from "components/aggregations/AggregationWidgets"
 import {
   getFieldPropsFromFieldConfig,
   SPECIAL_WIDGET_TYPES
