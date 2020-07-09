@@ -55,7 +55,7 @@ const Chart = ({
     if (!data) {
       return []
     }
-    return getReportsByTasks(data.reportList.list || [])
+    return getReportsByTasks(data.reportList.list)
   }, [data])
   if (done) {
     return result
