@@ -1,6 +1,7 @@
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
+import { momentObj } from "react-moment-proptypes"
 
 const now = moment()
 
@@ -15,6 +16,13 @@ export const RECURRENCE_TYPE = {
   SEMIANNUALY: "semiannualy"
 }
 
+const PERIOD_FORMAT = {
+  START_SHORT: "D",
+  START_MIDDLE: "D MMMM",
+  START_LONG: "D MMMM YYYY",
+  END_LONG: "D MMMM YYYY"
+}
+
 export const PERIOD_FACTORIES = {
   [RECURRENCE_TYPE.DAILY]: (date, offset) => ({
     start: date.clone().subtract(offset, "days").startOf("day"),
@@ -24,7 +32,7 @@ export const PERIOD_FACTORIES = {
     start: date.clone().subtract(offset, "weeks").startOf("week"),
     end: date.clone().subtract(offset, "weeks").endOf("week")
   }),
-  // FIXME: biweekly should be each 2 weeks from the beginning of the year
+  // FIXME: biweekly calculation should be changed, first agree on what it means
   [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => ({
     start: date
       .clone()
@@ -85,50 +93,46 @@ export const getPeriodsConfig = (
   }
 }
 
-export const PeriodPropType = PropTypes.shape({
-  start: PropTypes.object,
-  end: PropTypes.object
-})
-export const AssessmentPeriodPropType = PropTypes.shape({
-  start: PropTypes.object,
-  end: PropTypes.object,
-  allowNewAssessments: PropTypes.bool
+export const PeriodsDetailsPropType = PropTypes.shape({
+  recurrence: PropTypes.string.isRequired,
+  numberOfPeriods: PropTypes.number.isRequired
 })
 
+export const PeriodPropType = PropTypes.shape({
+  start: momentObj.isRequired,
+  end: momentObj.isRequired
+})
 export const PeriodsPropType = PropTypes.arrayOf(PeriodPropType)
 export const PeriodsConfigPropType = PropTypes.shape({
-  recurrence: PropTypes.string,
-  periods: PeriodsPropType
+  recurrence: PropTypes.string.isRequired,
+  periods: PeriodsPropType.isRequired
 })
-export const PeriodsDetailsPropType = PropTypes.shape({
-  recurrence: PropTypes.string,
-  numberOfPeriods: PropTypes.number
+
+export const AssessmentPeriodPropType = PropTypes.shape({
+  start: momentObj.isRequired,
+  end: momentObj.isRequired,
+  allowNewAssessments: PropTypes.bool
 })
 export const AssessmentPeriodsPropType = PropTypes.arrayOf(
   AssessmentPeriodPropType
 )
 export const AssessmentPeriodsConfigPropType = PropTypes.shape({
-  recurrence: PropTypes.string,
-  periods: AssessmentPeriodsPropType
+  recurrence: PropTypes.string.isRequired,
+  periods: AssessmentPeriodsPropType.isRequired
 })
-
-const PERIOD_START_SHORT_FORMAT = "D"
-const PERIOD_START_MIDDLE_FORMAT = "D MMMM"
-const PERIOD_START_LONG_FORMAT = "D MMMM YYYY"
-const PERIOD_END_FORMAT = "D MMMM YYYY"
 
 export const periodToString = period => {
   if (period.start.isSame(period.end, "day")) {
-    return period.end.format(PERIOD_END_FORMAT)
+    return period.end.format(PERIOD_FORMAT.END_LONG)
   } else {
     const periodStartFormat =
       period.start.year() !== period.end.year()
-        ? PERIOD_START_LONG_FORMAT
+        ? PERIOD_FORMAT.START_LONG
         : period.start.month() !== period.end.month()
-          ? PERIOD_START_MIDDLE_FORMAT
-          : PERIOD_START_SHORT_FORMAT
+          ? PERIOD_FORMAT.START_MIDDLE
+          : PERIOD_FORMAT.START_SHORT
     return `${period.start.format(periodStartFormat)} - ${period.end.format(
-      PERIOD_END_FORMAT
+      PERIOD_FORMAT.END_LONG
     )}`
   }
 }
