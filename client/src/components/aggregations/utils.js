@@ -16,28 +16,42 @@ export const countPerDateAggregation = (fieldName, fieldConfig, data) => {
 }
 
 // TODO: maybe use a library for a list of colors
+// For now, used this list of colors: https://gist.github.com/mikebmou/1323655
 const CHART_COLORS = [
-  "#3366CC",
-  "#DC3912",
-  "#FF9900",
+  "#3366cc",
+  "#dc3912",
+  "#ff9900",
   "#109618",
   "#990099",
-  "#3B3EAC",
-  "#0099C6",
-  "#DD4477",
-  "#66AA00",
-  "#B82E2E",
+  "#0099c6",
+  "#dd4477",
+  "#66aa00",
+  "#b82e2e",
   "#316395",
+  "#3366cc",
   "#994499",
-  "#22AA99",
-  "#AAAA11",
-  "#6633CC",
-  "#E67300",
-  "#8B0707",
+  "#22aa99",
+  "#aaaa11",
+  "#6633cc",
+  "#e67300",
+  "#8b0707",
+  "#651067",
   "#329262",
-  "#5574A6",
-  "#3B3EAC"
+  "#5574a6",
+  "#3b3eac",
+  "#b77322",
+  "#16d620",
+  "#b91383",
+  "#f4359e",
+  "#9c5935",
+  "#a9c413",
+  "#2a778d",
+  "#668d1c",
+  "#bea413",
+  "#0c5922",
+  "#743411"
 ]
+
 export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
   const counters = data.reduce((counter, entity) => {
     const value = Object.get(entity, fieldName) || null
