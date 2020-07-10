@@ -116,6 +116,9 @@ views:
   .ftl:
     number_format: computer
 
+# Set name of dictionary to be loaded
+anetDictionaryName: "anet-dictionary.yml"
+
 logging:
   level: INFO
   loggers:

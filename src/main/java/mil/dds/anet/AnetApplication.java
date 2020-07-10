@@ -154,9 +154,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final String dbUrl = configuration.getDataSourceFactory().getUrl();
     logger.info("datasource url: {}", dbUrl);
 
-    // Load and check the dictionary
-    configuration.loadDictionary();
-
     // Load project version
     configuration.loadVersion();
 

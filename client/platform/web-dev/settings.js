@@ -17,9 +17,6 @@ function loadFileAjaxSync(filePath, mimeType) {
 const Settings = JSON.parse(
   loadFileAjaxSync("/api/admin/dictionary", "application/json")
 )
+const Version = "Dev-Mode"
 
-const ProjectVersion = JSON.parse(
-  loadFileAjaxSync("/api/admin/projectVersion", "application/json")
-)
-const Version = ProjectVersion.projectVersion
 export { Version, Settings as default }

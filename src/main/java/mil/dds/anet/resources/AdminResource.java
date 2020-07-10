@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,12 +74,23 @@ public class AdminResource {
    * be used to reload the dictionary with new values without restarting the server
    */
   @GraphQLMutation(name = "reloadDictionary")
-  public String reloadDictionary(@GraphQLRootContext Map<String, Object> context) {
+  public String reloadDictionary(@GraphQLRootContext Map<String, Object> context)
+      throws IOException {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    config.reloadDictionary();
+    config.loadDictionary();
     AnetAuditLogger.log("Dictionary updated by {}", user);
     return AnetConstants.DICTIONARY_RELOAD_MESSAGE;
+  }
+
+  /**
+   * Returns the project version which is saved during project build (See project.version definition
+   * in build.gradle file) Right after project information is written into version.properties file
+   * on startup,it is read and set with AnetConfiguration loadVersion method
+   */
+  @GraphQLQuery(name = "projectVersion")
+  public String getProjectVersion() {
+    return config.getVersion();
   }
 
   /**
@@ -89,23 +101,6 @@ public class AdminResource {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     return AnetObjectEngine.getInstance().getPersonDao().clearCache();
-  }
-
-  /**
-   * Returns the project version which is saved during project build (See project.version definition
-   * in build.gradle file) Right after project information is written into version.properties file
-   * on startup,it is read and set with AnetConfiguration loadVersion method
-   */
-  @GET
-  @Timed
-  @Path("/projectVersion")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Map<String, Object> getProjectVersion() {
-    return new HashMap() {
-      {
-        put("projectVersion", config.getVersion());
-      }
-    };
   }
 
   /**
