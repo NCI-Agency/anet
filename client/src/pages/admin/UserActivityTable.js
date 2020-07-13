@@ -35,7 +35,7 @@ const UserActivityTable = ({ text, values }) => {
         <tbody>
           {values.map((ua, idx) => {
             return (
-              <tr key={ua.uuid}>
+              <tr key={ua.listKey}>
                 <td>{idx + 1}</td>
                 <td className="nobr">{ua.time}</td>
                 <td className="nobr">{ua.user}</td>

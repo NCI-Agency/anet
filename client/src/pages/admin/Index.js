@@ -178,21 +178,17 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   )
 
   function getTitleText(data, text) {
-    let title = text
-    if (data) {
-      title += ` (${data.length || 0})`
-    }
-    if (lastLoaded) {
-      title = (
-        <>
-          {title}{" "}
+    return (
+      <>
+        {text}
+        {data ? ` (${data.length || 0})` : ""}
+        {lastLoaded && (
           <span style={{ fontSize: "0.7em" }}>
-            Fetched @ {lastLoaded.format("HH:mm:ss")}
+            &nbsp;Fetched @ {lastLoaded.format("HH:mm:ss")}
           </span>
-        </>
-      )
-    }
-    return title
+        )}
+      </>
+    )
   }
 
   function onSubmit(values, form) {
@@ -210,7 +206,7 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
     form.resetForm()
-    setSaveError()
+    setSaveError(null)
     setSaveSuccess("Admin settings saved")
     jumpToTop()
     loadAppData()
@@ -238,12 +234,19 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
     return API.query(USER_ACTIVITIES, {})
       .then(data => {
         const recentCalls = data?.userActivities?.recentCalls || []
-        recentCalls.forEach(ua => (ua.uuid = uuidv4()))
+
+        /*
+         * We need a stable identity to be used as Key by react.
+         * Since this data is not coming from database it doesn't have a uuid by itself.
+         * "listKey" is used by react as stable identity while displaying these as list in UserActivityTable
+         */
+        recentCalls.forEach(ua => (ua.listKey = uuidv4()))
         setUserActivities(recentCalls)
 
+        // "listKey" is used by react as stable identity while displaying these as list in UserActivityTable
         const users = Object.map(data?.userActivities?.users || {}, (k, v) => ({
           ...v[0],
-          uuid: uuidv4()
+          listKey: uuidv4()
         }))
         setRecentUsers(users)
         setLastLoaded(moment())
@@ -255,7 +258,7 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
 
   function handleError(error) {
     setSaveError(error)
-    setSaveSuccess()
+    setSaveSuccess(null)
     jumpToTop()
   }
 }
