@@ -24,8 +24,7 @@ const PieWidget = ({
         segmentLabel={d => d.data.value}
       />
       {showLegend && (
-        <>
-          <br />
+        <div className="pieLegend">
           {Object.map(legend, (key, choice) => (
             <React.Fragment key={key}>
               <span style={{ backgroundColor: choice.color }}>
@@ -33,7 +32,7 @@ const PieWidget = ({
               </span>
             </React.Fragment>
           ))}
-        </>
+        </div>
       )}
     </>
   )

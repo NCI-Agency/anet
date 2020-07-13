@@ -176,23 +176,25 @@ const AggregationWidgetContainer = ({
   )
   return (
     <FormGroup>
-      {vertical ? (
-        <>
-          {label !== null && <ControlLabel>{label}</ControlLabel>}
-          {widgetElem}
-        </>
-      ) : (
-        <>
-          {label !== null && (
-            <Col sm={2} componentClass={ControlLabel}>
-              {label}
+      <div id={widgetId}>
+        {vertical ? (
+          <>
+            {label !== null && <ControlLabel>{label}</ControlLabel>}
+            {widgetElem}
+          </>
+        ) : (
+          <>
+            {label !== null && (
+              <Col sm={2} componentClass={ControlLabel}>
+                {label}
+              </Col>
+            )}
+            <Col sm={10}>
+              <div>{widgetElem}</div>
             </Col>
-          )}
-          <Col sm={10}>
-            <div>{widgetElem}</div>
-          </Col>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </FormGroup>
   )
 }
