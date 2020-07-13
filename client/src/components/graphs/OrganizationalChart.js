@@ -18,6 +18,7 @@ import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import COLLAPSE_ICON from "resources/organizations.png"
 import EXPAND_ICON from "resources/plus.png"
 import Settings from "settings"
+import { flextree } from "d3-flextree"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
@@ -94,7 +95,7 @@ const OrganizationalChart = ({
   const svgRef = useRef(null)
   const linkRef = useRef(null)
   const nodeRef = useRef(null)
-  const tree = useRef(d3.tree())
+  const tree = useRef(flextree())
   const [root, setRoot] = useState(null)
   const [height, setHeight] = useState(initialHeight)
   const nodeSize = [200, 100 + 11 * personnelDepth]
