@@ -82,7 +82,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   @GraphQLInputField
   private String code;
 
-  private ArrayList<HashMap<String, String>> userActivities;
+  private List<Map<String, String>> userActivities;
 
   public Person() {
     this.pendingVerification = false; // Defaults
@@ -312,7 +312,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   }
 
   @JsonIgnore
-  public ArrayList<HashMap<String, String>> getUserActivities() {
+  public List<Map<String, String>> getUserActivities() {
     if (userActivities == null) {
       return new ArrayList<>();
     }
@@ -320,7 +320,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   }
 
   @JsonIgnore
-  public void setUserActivities(ArrayList<HashMap<String, String>> userActivities) {
+  public void setUserActivities(List<Map<String, String>> userActivities) {
     this.userActivities = userActivities;
   }
 

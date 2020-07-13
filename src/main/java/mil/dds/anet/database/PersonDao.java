@@ -233,11 +233,10 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return people;
   }
 
-  public void logActivitiesByDomainUsername(String domainUsername,
-      HashMap<String, String> activity) {
+  public void logActivitiesByDomainUsername(String domainUsername, Map<String, String> activity) {
     final Person person = domainUsersCache.get(domainUsername);
     if (person != null) {
-      ArrayList activities = person.getUserActivities();
+      List activities = person.getUserActivities();
       if (activities.size() >= 100) {
         activities.clear();
       }

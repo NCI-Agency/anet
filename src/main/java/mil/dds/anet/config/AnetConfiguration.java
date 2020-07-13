@@ -178,7 +178,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   }
 
   public void setDictionary(Map<String, Object> dictionary) {
-    this.dictionary = dictionary;
+    this.dictionary = Collections.unmodifiableMap(dictionary);
   }
 
   @SuppressWarnings("unchecked")
