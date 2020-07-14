@@ -34,11 +34,17 @@ const fnRequiredWhen = (boolPropName, props, propName, componentName) => {
   }
 }
 
+const ellipsize = (value, maxLength) =>
+  value.length > maxLength
+    ? value.substring(0, maxLength - 1) + "\u2026"
+    : value
+
 export default {
   ...wrappedChangeCase,
   pluralize,
   isNullOrUndefined,
   fnRequiredWhen,
+  ellipsize,
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },

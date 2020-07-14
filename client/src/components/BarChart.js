@@ -51,10 +51,11 @@ const BarChart = ({
 
     const xScale = d3.scaleBand().domain(
       data.map(function(d) {
-        xLabels[getPropValue(d, xProp)] = getPropValue(d, label).substring(
-          0,
+        xLabels[getPropValue(d, xProp)] = utils.ellipsize(
+          getPropValue(d, label),
           10
-        ) // TODO: Make responsive
+        )
+        // TODO: Make responsive
         return getPropValue(d, xProp)
       })
     )

@@ -18,6 +18,7 @@ import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import COLLAPSE_ICON from "resources/organizations.png"
 import EXPAND_ICON from "resources/plus.png"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
@@ -372,7 +373,7 @@ const OrganizationalChart = ({
         const result = `${d.person ? d.person.rank : ""} ${
           d.person ? d.person.name : "unfilled"
         } ${d.name}`
-        return result.length > 31 ? result.substring(0, 28) + "..." : result
+        return utils.ellipsize(result, 31)
       })
   }, [data, expanded, history, personnelDepth, root, link, node])
 
