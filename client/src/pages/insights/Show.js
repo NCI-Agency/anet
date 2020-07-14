@@ -101,7 +101,8 @@ const BaseInsightsShow = ({
     display: "flex",
     flexDirection: "column",
     flex: "1 1 auto",
-    height: "100%"
+    height: "100%",
+    overflow: "auto"
   }
   const mosaicLayoutStyle = {
     display: "flex",

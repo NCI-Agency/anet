@@ -235,7 +235,8 @@ function populate(instance, scheme, context) {
   return populator
 }
 
-const specialUser = { name: "erin", password: "erin" }
+// Our initial admin, should always be there
+const specialUser = { name: "arthur", password: "arthur" }
 
 export {
   runGQL,
