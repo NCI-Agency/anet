@@ -1,18 +1,11 @@
-import React, { useEffect, useRef } from "react"
+import { TRAFFIC_LIGHTS_LEVELS } from "components/graphs/utils"
 import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
+import React, { useEffect, useRef } from "react"
 import useDimensions from "react-use-dimensions"
 
-const IqrBoxPlot = ({
-  onChange,
-  values,
-  levels,
-  width,
-  height,
-  readonly,
-  whenUnspecified
-}) => {
+const IqrBoxPlot = ({ values, levels, width, height, whenUnspecified }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
   const [containerRef, containerBox] = useDimensions()
@@ -116,27 +109,12 @@ const IqrBoxPlot = ({
         </g>
       )}
       <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
-
-      {onChange && (
-        <g ref={cursorRef}>
-          <polygon
-            points="0,0 13,13 13,30 -13,30 -13,13"
-            style={{
-              stroke: "gray",
-              fill: "",
-              strokeWidth: 1,
-              cursor: readonly ? null : "pointer"
-            }}
-          />
-        </g>
-      )}
     </svg>
   )
 }
 
 IqrBoxPlot.propTypes = {
   values: PropTypes.arrayOf(PropTypes.number),
-  onChange: PropTypes.func,
   levels: PropTypes.arrayOf(
     PropTypes.shape({
       color: PropTypes.string,
@@ -147,25 +125,11 @@ IqrBoxPlot.propTypes = {
   ).isRequired,
   width: PropTypes.string.isRequired,
   height: PropTypes.string.isRequired,
-  readonly: PropTypes.bool,
   whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
 IqrBoxPlot.defaultProps = {
-  levels: [
-    {
-      color: "red",
-      endValue: 3
-    },
-    {
-      color: "#FFBF00",
-      endValue: 7
-    },
-    {
-      color: "green",
-      endValue: 10
-    }
-  ],
+  levels: TRAFFIC_LIGHTS_LEVELS,
   height: "65",
   width: "100%",
   whenUnspecified: null

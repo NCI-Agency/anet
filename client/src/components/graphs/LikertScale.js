@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useRef } from "react"
+import { TRAFFIC_LIGHTS_LEVELS } from "components/graphs/utils"
 import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
+import React, { useCallback, useEffect, useRef } from "react"
 import Text from "react-svg-text"
 import useDimensions from "react-use-dimensions"
 import utils from "utils"
@@ -252,20 +253,7 @@ LikertScale.propTypes = {
 
 LikertScale.defaultProps = {
   value: null,
-  levels: [
-    {
-      color: "red",
-      endValue: 3
-    },
-    {
-      color: "#FFBF00",
-      endValue: 7
-    },
-    {
-      color: "green",
-      endValue: 10
-    }
-  ],
+  levels: TRAFFIC_LIGHTS_LEVELS,
   height: "65",
   width: "100%",
   editable: false,
