@@ -7253,7 +7253,6 @@ extsprintf@^1.2.0:
 
 "faker@https://github.com/Marak/faker.js.git":
   version "4.1.0"
-  uid bfe2c9906abd29b7d3d925e6d7cc41530c3a42b8
   resolved "https://github.com/Marak/faker.js.git#bfe2c9906abd29b7d3d925e6d7cc41530c3a42b8"
 
 fast-deep-equal@^2.0.1:
@@ -15375,10 +15374,10 @@ webpack-log@^2.0.0:
     ansi-colors "^3.0.0"
     uuid "^3.3.2"
 
-webpack-merge@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-5.0.3.tgz#d3bba03cc11bf43719bd058342842b16528f6779"
-  integrity sha512-DDbqWyHYBUxoxjysYRnfP30puLciPTZ0BQ3v3/l2OrafinwKurCQhzKUa3L7u8w469tcVWDxAbqQM13KXeij8g==
+webpack-merge@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-5.0.9.tgz#d5e0e0ae564ae704836d747893bdd2741544bf31"
+  integrity sha512-P4teh6O26xIDPugOGX61wPxaeP918QOMjmzhu54zTVcLtOS28ffPWtnv+ilt3wscwBUCL2WNMnh97XkrKqt9Fw==
   dependencies:
     clone-deep "^4.0.1"
     wildcard "^2.0.0"
