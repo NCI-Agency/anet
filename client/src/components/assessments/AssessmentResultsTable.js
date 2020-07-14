@@ -121,7 +121,7 @@ const AssessmentResultsTable = ({
         <div style={{ ...style }}>
           <Fieldset
             title={`Assessment results - ${recurrence}`}
-            id={`"entity-assessments-results-${recurrence}`}
+            id={`entity-assessments-results-${recurrence}`}
           >
             <PeriodsNavigation offset={offset} onChange={setOffset} />
             <Table
