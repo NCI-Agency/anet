@@ -11,36 +11,46 @@ describe("My organization page", () => {
 
   describe("When checking the report statistics part of the page", () => {
     it("Should see different types of fields statistics", () => {
+      // Note: checks like length.above are being made because the wdio tests
+      // might also be run after the jacocoTestReport, without resetting the
+      // database, and in that case we have more reports in the statistics
       MyOrg.engagementDateStatistics.waitForDisplayed()
       const daysWithEvent = MyOrg.engagementDateStatistics.$$(
         ".fc-event-container"
       )
-      expect(daysWithEvent.length).to.equal(1)
+      // There is at least one date with events in the calendar
+      expect(daysWithEvent).to.have.length.above(0)
 
+      // Location statistics map is being loaded
       MyOrg.locationStatistics.waitForDisplayed()
 
       MyOrg.engagementStatus.waitForDisplayed()
+      // There are 4 engagement status options
       const engagementStatusLegend = MyOrg.engagementStatus
         .$(".pieLegend")
         .$$("span")
-      expect(engagementStatusLegend.length).to.equal(4)
+      expect(engagementStatusLegend).to.have.length(4)
 
       MyOrg.tasks.waitForDisplayed()
-      const tasksBars = MyOrg.tasks.$("svg g").$$(".bars-group")
-      expect(tasksBars.length).to.equal(4)
+      // There are 4 tasks on the x-axis
+      const tasks = MyOrg.tasks.$("svg g").$$(".bars-group")
+      expect(tasks).to.have.length(4)
       let countTasksBars = 0
-      tasksBars.forEach(bar => {
-        if (bar.$("rect").getAttribute("data-tip").includes("<p>1</p>")) {
+      tasks.forEach(bar => {
+        if (+bar.$("rect").getAttribute("height") > 0) {
           countTasksBars++
         }
       })
-      expect(countTasksBars).to.equal(3)
+      // There is at least one bar
+      expect(countTasksBars).to.be.above(0)
 
       MyOrg.trainingEvent.waitForDisplayed()
+      // There are 3 training event options
       const trainingEventLegend = MyOrg.trainingEvent.$(".pieLegend").$$("span")
-      expect(trainingEventLegend.length).to.equal(3)
+      expect(trainingEventLegend).to.have.length(3)
+      // Total number of reports is bigger than 0
       const trainignEventTotal = MyOrg.trainingEvent.$("svg g text")
-      expect(trainignEventTotal.getText()).to.equal("1")
+      expect(+trainignEventTotal.getText()).to.be.above(0)
 
       MyOrg.numberTrained.waitForDisplayed()
       const numberTrained = MyOrg.numberTrained.$("div em")
