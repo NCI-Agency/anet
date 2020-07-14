@@ -13,7 +13,7 @@ const LikertScale = ({
   levels,
   width,
   height,
-  readonly,
+  editable,
   whenUnspecified
 }) => {
   const cursorRef = useRef(null)
@@ -22,7 +22,7 @@ const LikertScale = ({
   const containerHeight = containerBox.height || 0
   const containerWidth = containerBox.width || 0
   const containerX = containerBox.x || 0
-  const MARGIN_LEFT = readonly ? 13 : 25
+  const MARGIN_LEFT = editable ? 25 : 13
   const MARGIN_RIGHT = 13
   const scaleYPosition = containerHeight - 30
   const scale = d3
@@ -50,7 +50,7 @@ const LikertScale = ({
   )
 
   useEffect(() => {
-    if (readonly) {
+    if (!editable) {
       return
     }
     const handleDrag = d3.drag().on("drag", function() {
@@ -64,7 +64,7 @@ const LikertScale = ({
     onChange,
     scale,
     scaleYPosition,
-    readonly,
+    editable,
     MARGIN_LEFT,
     calculateNewX,
     xToValue
@@ -105,7 +105,7 @@ const LikertScale = ({
       xmlns="http://www.w3.org/2000/svg"
       ref={containerRef}
       onClick={e => {
-        if (!readonly && e.clientX) {
+        if (editable && e.clientX) {
           const newX = calculateNewX(e.clientX - containerX)
           onChange(xToValue(newX))
         }
@@ -204,7 +204,7 @@ const LikertScale = ({
       )}
       <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
 
-      {onChange && (!readonly || (value && value >= scale.domain()[0])) && (
+      {onChange && (editable || (value && value >= scale.domain()[0])) && (
         <g ref={cursorRef}>
           <polygon
             points="0,0 13,13 13,30 -13,30 -13,13"
@@ -212,7 +212,7 @@ const LikertScale = ({
               stroke: "gray",
               fill: "" + activeColor,
               strokeWidth: 1,
-              cursor: readonly ? null : "pointer"
+              cursor: editable ? "pointer" : null
             }}
           />
           <text
@@ -235,7 +235,7 @@ const LikertScale = ({
 LikertScale.propTypes = {
   value: PropTypes.number,
   values: PropTypes.arrayOf(PropTypes.number),
-  onChange: PropTypes.func,
+  onChange: utils.fnRequiredWhen.bind(null, "editable"),
   levels: PropTypes.arrayOf(
     PropTypes.shape({
       color: PropTypes.string,
@@ -246,7 +246,7 @@ LikertScale.propTypes = {
   ).isRequired,
   width: PropTypes.string.isRequired,
   height: PropTypes.string.isRequired,
-  readonly: PropTypes.bool,
+  editable: PropTypes.bool,
   whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
@@ -268,6 +268,7 @@ LikertScale.defaultProps = {
   ],
   height: "65",
   width: "100%",
+  editable: false,
   whenUnspecified: null
 }
 

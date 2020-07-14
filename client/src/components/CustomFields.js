@@ -44,6 +44,10 @@ const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
       // validation will be done by setFieldValue
       formikProps.setFieldTouched(name, true, false)
     }
+  } else if (widget === SPECIAL_WIDGET_TYPES.LIKERT_SCALE) {
+    // Can't set it on the widgetProps directly as the onChange is required when
+    // editable (and onChange is set only while processing the SpecialField)
+    otherFieldProps.editable = true
   }
   return (
     <FastField
