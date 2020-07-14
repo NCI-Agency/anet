@@ -30,7 +30,7 @@ export async function getRandomObject(
   type,
   variables,
   fields = "uuid",
-  ignoredUuids = []
+  ignoreCallback = randomObject => false
 ) {
   const [listEndpoint, queryType] = getListEndpoint(type)
   const objectQuery = Object.assign({}, variables, {
@@ -77,7 +77,7 @@ export async function getRandomObject(
       return null
     }
     const randomObject = list[0]
-    if (ignoredUuids.includes(randomObject?.uuid)) {
+    if (ignoreCallback(randomObject)) {
       attempt++
     } else {
       return randomObject
