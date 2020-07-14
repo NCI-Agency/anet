@@ -427,14 +427,13 @@ export default class Report extends Model {
         n => n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length > 1
       )
       .map(n => ({
-        entityUuids: [
-          n.noteRelatedObjects
-            .filter(ro => ro.relatedObjectType === entityType.relatedObjectType)
-            .map(ro => ro.relatedObjectUuid)
-        ],
+        entityUuids: n.noteRelatedObjects
+          .filter(ro => ro.relatedObjectType === entityType.relatedObjectType)
+          .map(ro => ro.relatedObjectUuid),
         assessmentUuid: n.uuid,
         assessment: utils.parseJsonSafe(n.text)
       }))
+      .filter(n => !_isEmpty(n.entityUuids))
     // When updating the instant assessments, we need for each entity the uuid of the
     // related instant assessment
     const entitiesAssessmentsUuids = {}
@@ -453,12 +452,11 @@ export default class Report extends Model {
   }
 
   getTasksEngagementAssessments() {
-    const a = this.getRelatedObjectsEngagementAssessments(
+    return this.getRelatedObjectsEngagementAssessments(
       Task,
       Report.TASKS_ASSESSMENTS_PARENT_FIELD,
       Report.TASKS_ASSESSMENTS_UUIDS_FIELD
     )
-    return a
   }
 
   getAttendeesEngagementAssessments() {
