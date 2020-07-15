@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import AvatarEditModal from "components/AvatarEditModal"

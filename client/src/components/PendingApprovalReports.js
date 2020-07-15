@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { gql } from "apollo-boost"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
