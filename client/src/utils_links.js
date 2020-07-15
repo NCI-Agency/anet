@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import LinkAnet from "components/editor/LinkAnet"
 import parse from "html-react-parser"
 import { PAGE_URLS } from "pages/util"
