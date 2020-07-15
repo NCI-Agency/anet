@@ -1,11 +1,11 @@
-import encodeQuery from "querystring/encode"
+import { gql } from "@apollo/client"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
+import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
-import { gql } from "apollo-boost"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
