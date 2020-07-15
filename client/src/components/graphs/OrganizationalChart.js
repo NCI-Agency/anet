@@ -85,6 +85,7 @@ const sortPositions = (positions, truncateLimit) => {
 const OrganizationalChart = ({
   pageDispatchers,
   org,
+  exportTitle,
   width,
   height: initialHeight
 }) => {
@@ -387,7 +388,7 @@ const OrganizationalChart = ({
       ref={svgRef}
       width={width}
       height={height}
-      exportTitle={`${data.shortName} organization chart`}
+      exportTitle={exportTitle || `${data.organization.shortName} organization chart`}
       zoomFn={increment =>
         setPersonnelDepth(Math.max(0, personnelDepth + increment))}
     >
@@ -402,6 +403,7 @@ const OrganizationalChart = ({
 OrganizationalChart.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   org: PropTypes.object.isRequired,
+  exportTitle: PropTypes.string,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired
 }
