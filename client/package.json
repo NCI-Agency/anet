@@ -94,7 +94,7 @@
     "xhr2": "0.2.0"
   },
   "dependencies": {
-    "@apollo/client": "3.0.0",
+    "@apollo/client": "3.0.1",
     "@blueprintjs/core": "3.29.0",
     "@blueprintjs/datetime": "3.18.3",
     "@fullcalendar/core": "4.4.2",
