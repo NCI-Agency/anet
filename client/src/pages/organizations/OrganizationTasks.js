@@ -10,10 +10,10 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
-import { Person, Task } from "models"
+import { Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
@@ -33,12 +33,8 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 
-const BaseOrganizationTasks = ({
-  pageDispatchers,
-  queryParams,
-  currentUser,
-  organization
-}) => {
+const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
+  const { currentUser } = useContext(AppContext)
   const [pageNum, setPageNum] = useState(0)
   const taskQuery = Object.assign({}, queryParams, { pageNum })
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
@@ -120,19 +116,10 @@ const BaseOrganizationTasks = ({
   )
 }
 
-BaseOrganizationTasks.propTypes = {
+OrganizationTasks.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person),
   organization: PropTypes.object.isRequired,
   queryParams: PropTypes.object
 }
-
-const OrganizationTasks = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOrganizationTasks currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationTasks)
