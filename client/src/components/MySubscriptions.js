@@ -59,7 +59,7 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
   }
 `
 
-const BaseMySubscriptions = ({ pageDispatchers }) => {
+const MySubscriptions = ({ pageDispatchers }) => {
   const [pageNum, setPageNum] = useState(0)
   const subscriptionsQuery = {
     pageNum: pageNum,
@@ -173,8 +173,8 @@ const BaseMySubscriptions = ({ pageDispatchers }) => {
   )
 }
 
-BaseMySubscriptions.propTypes = {
+MySubscriptions.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapPageDispatchersToProps)(BaseMySubscriptions)
+export default connect(null, mapPageDispatchersToProps)(MySubscriptions)
