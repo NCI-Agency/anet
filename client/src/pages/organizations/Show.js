@@ -140,9 +140,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  if (done) {
-    return result
-  }
 
   const organization = new Organization(data ? data.organization : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -224,6 +221,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
         )
         return (
           <div>
+            {done && result}
             <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
             <SubNav subnavElemId="advisor-org-nav">

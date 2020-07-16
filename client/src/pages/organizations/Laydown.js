@@ -39,7 +39,7 @@ const OrganizationLaydown = ({ organization }) => {
               <span className="title-text">Organization Diagram</span>
             </h2>
           </div>
-          <div style={{ backgroundColor: "white" }}>
+          <div>
             <ContainerDimensions>
               {({ width, height }) => (
                 <OrganizationalChart

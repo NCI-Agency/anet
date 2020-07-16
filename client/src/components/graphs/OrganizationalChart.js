@@ -7,65 +7,63 @@ import {
   useBoilerplate
 } from "components/Page"
 import * as d3 from "d3"
-import _xor from "lodash/xor"
 import { Symbol } from "milsymbol"
+
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useCallback
+} from "react"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
-import COLLAPSE_ICON from "resources/organizations.png"
-import EXPAND_ICON from "resources/plus.png"
 import Settings from "settings"
 import { flextree } from "d3-flextree"
+
+const GQL_ORGANIZATION_FIELDS = /* GraphQL */ `
+  uuid
+  shortName
+  longName
+  type
+  positions {
+    name
+    uuid
+    person {
+      rank
+      name
+      uuid
+      avatar(size: 32)
+    }
+  }
+`
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
     organization(uuid: $uuid) {
-      uuid
-      shortName
-      longName
-      type
-      positions {
-        name
-        uuid
-        person {
-          rank
-          name
-          uuid
-          avatar(size: 32)
-        }
-      }
+      ${GQL_ORGANIZATION_FIELDS}
       childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
         uuid
       }
+      parentOrg {
+        ${GQL_ORGANIZATION_FIELDS}
+      }
       descendantOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
-        uuid
-        shortName
-        longName
-        type
+        ${GQL_ORGANIZATION_FIELDS}
         childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
           uuid
         }
         parentOrg {
           uuid
         }
-        positions {
-          name
-          uuid
-          person {
-            rank
-            name
-            uuid
-            avatar(size: 32)
-          }
-        }
       }
     }
   }
 `
-const transitionDuration = 200
+const transitionDuration = 500
 
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
@@ -78,10 +76,6 @@ const sortPositions = (positions, truncateLimit) => {
     : allResults
 }
 
-// TODO: enable once innerhtml in svg is polyfilled
-// const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
-// const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
-
 const OrganizationalChart = ({
   pageDispatchers,
   org,
@@ -89,17 +83,14 @@ const OrganizationalChart = ({
   width,
   height: initialHeight
 }) => {
-  const [expanded, setExpanded] = useState([])
-  const [personnelDepth, setPersonnelDepth] = useState(5)
   const history = useHistory()
   const canvasRef = useRef(null)
   const svgRef = useRef(null)
   const linkRef = useRef(null)
   const nodeRef = useRef(null)
-  const tree = useRef(flextree())
+  const treeLayout = useRef(null)
   const [root, setRoot] = useState(null)
   const [height, setHeight] = useState(initialHeight)
-  const nodeSize = [200, 100 + 11 * personnelDepth]
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
     uuid: org.uuid
   })
@@ -114,88 +105,91 @@ const OrganizationalChart = ({
   const link = d3.select(linkRef.current)
   const node = d3.select(nodeRef.current)
 
+  const getDescendant = useCallback(
+    uuid =>
+      uuid && data?.organization?.descendantOrgs.find(org => org.uuid === uuid),
+    [data]
+  )
+  const isParent = useCallback(
+    node => node?.uuid === data?.organization?.parentOrg?.uuid,
+    [data]
+  )
+  const isMain = useCallback(node => node?.uuid === data?.organization?.uuid, [
+    JSON.stringify(data)
+  ])
+
+  const getDistance = useCallback(
+    node => {
+      if (isParent(node)) {
+        return 1
+      } else {
+        let distance = 0
+        let nodeIt = node
+        while (nodeIt && !isMain(nodeIt)) {
+          distance++
+          nodeIt = getDescendant(nodeIt.parentOrg?.uuid)
+        }
+        return distance
+      }
+    },
+    [getDescendant, isParent, isMain]
+  )
+
   useEffect(() => {
-    data &&
-      setRoot(
-        d3.hierarchy(data.organization, d =>
-          expanded.includes(d.uuid)
-            ? data.organization.descendantOrgs.filter(
-              org => org.parentOrg?.uuid === d.uuid
-            )
-            : null
-        )
+    if (data) {
+      treeLayout.current = flextree()
+        .children(d => {
+          if (isParent(d)) {
+            return [data.organization]
+          }
+          return data.organization.descendantOrgs.filter(
+            org => org.parentOrg?.uuid === d.uuid
+          )
+        })
+        .nodeSize(node => [
+          200 / (getDistance(node.data) + 0.5),
+          200 / (getDistance(node.data) + 0.5)
+        ])
+        .spacing(10)
+      const tree = treeLayout.current.hierarchy(
+        data.organization.parentOrg || data.organization
       )
-  }, [data, expanded])
+      treeLayout.current(tree)
+      setRoot(tree)
+      console.log(tree)
+      console.log(treeLayout)
+    }
+  }, [data, getDistance, isParent, isMain])
 
   useEffect(() => {
     if (!data || !root) {
       return
     }
 
-    const calculateBounds = rootArg => {
-      const boundingBox = rootArg.descendants().reduce(
-        (box, nodeArg) => {
-          return {
-            xmin: Math.min(box.xmin, nodeArg.x || 0),
-            xmax: Math.max(box.xmax, nodeArg.x || 0),
-            ymin: Math.min(box.ymin, nodeArg.y || 0),
-            ymax: Math.max(box.ymax, nodeArg.y || 0)
-          }
-        },
-        {
-          xmin: Number.MAX_SAFE_INTEGER,
-          xmax: Number.MIN_SAFE_INTEGER,
-          ymin: Number.MAX_SAFE_INTEGER,
-          ymax: Number.MIN_SAFE_INTEGER
-        }
-      )
-      return {
-        box: boundingBox,
-        size: [
-          boundingBox.xmax - boundingBox.xmin + nodeSize[0],
-          boundingBox.ymax - boundingBox.ymin + nodeSize[1]
-        ],
-        center: [
-          (boundingBox.xmax + boundingBox.xmin + nodeSize[0] - 50) / 2,
-          (boundingBox.ymax + boundingBox.ymin + nodeSize[1] - 50) / 2
-        ]
-      }
-    }
+    canvas.attr("transform", `translate(${width / 2},50)`)
 
-    tree.current.nodeSize(nodeSize)
-    const bounds = calculateBounds(root)
-    const scale = Math.min(
-      1.2,
-      1 / Math.max(bounds.size[0] / width, bounds.size[1] / height)
-    )
-    canvas.attr(
-      "transform",
-      `translate(${width / 2 - scale * bounds.center[0]},${
-        height / 2 - scale * bounds.center[1]
-      }) scale(${scale})`
-    )
-
-    setHeight(scale * bounds.size[1] + 50)
-  }, [nodeSize, canvas, data, height, width, root])
-
-  useEffect(() => {
-    data && setExpanded([data.organization.uuid])
-  }, [data])
+    setHeight(1000)
+  }, [canvas, data, height, width, root])
 
   useLayoutEffect(() => {
-    if (!(link && node && data?.organization && tree.current && root)) {
+    if (!(link && node && data?.organization && treeLayout.current && root)) {
       return
     }
 
-    const linkSelect = link.selectAll("path").data(tree.current(root).links())
+    const linkSelect = link
+      .selectAll("path")
+      .data(treeLayout.current(root).links())
 
-    linkSelect.attr(
-      "d",
-      d3
-        .linkVertical()
-        .x(d => d.x)
-        .y(d => d.y)
-    )
+    linkSelect
+      .transition()
+      .duration(transitionDuration)
+      .attr(
+        "d",
+        d3
+          .linkVertical()
+          .x(d => d.x)
+          .y(d => d.y)
+      )
 
     linkSelect
       .enter()
@@ -221,34 +215,33 @@ const OrganizationalChart = ({
       .duration(transitionDuration)
       .attr("transform", d => `translate(${d.x},${d.y})`)
 
+    nodeSelect.exit().remove()
+
     const nodeEnter = nodeSelect
       .enter()
       .append("g")
       .attr("class", "org")
       .attr("transform", d => `translate(${d.x},${d.y})`)
 
-    nodeSelect.exit().remove()
+    nodeEnter.append("rect").attr("rx", 7).attr("ry", 7)
+
+    nodeSelect
+      .selectAll("rect")
+      .attr("x", d => -200 / (getDistance(d.data) + 0.5) / 2)
+      .attr("y", 15)
+      .attr("width", d => 200 / (getDistance(d.data) + 0.5))
+      .attr("height", d => 200 / (getDistance(d.data) + 0.5) - 40)
+      // .attr("width", d => d.size[0]})
+      // .attr("height", d => d.size[1] - 20)
+      .style("fill", d =>
+        isMain(d.data) ? "rgba(255, 255, 255, 1)" : "rgba(230, 230, 230, 0.5)"
+      )
+      .style("stroke", d => (isMain(d.data) ? "black" : "none"))
 
     const iconNodeG = nodeEnter
       .append("g")
       .attr("class", "orgDetails")
       .attr("transform", "translate(-8,-15)")
-
-    iconNodeG
-      .filter(d => d.data.childrenOrgs.length > 0)
-      .append("image")
-      .attr("class", "orgChildIcon")
-      .attr("width", 12)
-      .attr("height", 12)
-      .attr("x", -15)
-      .attr("y", 5)
-      .on("click", d => setExpanded(expanded => _xor(expanded, [d.data.uuid])))
-
-    node
-      .selectAll("image.orgChildIcon")
-      .attr("href", d =>
-        expanded.includes(d.data.uuid) ? COLLAPSE_ICON : EXPAND_ICON
-      )
 
     iconNodeG
       .append("g")
@@ -294,8 +287,8 @@ const OrganizationalChart = ({
           : d.data.longName
       )
 
-    const headG = nodeSelect.selectAll("g.head").data(
-      d => sortPositions(d.data.positions, Math.min(1, personnelDepth)) || [],
+    const headG = nodeEnter.selectAll("g.head").data(
+      d => sortPositions(d.data.positions, 1) || [],
       d => d.uuid
     )
 
@@ -344,8 +337,8 @@ const OrganizationalChart = ({
           : position.name
       )
 
-    const positionsG = nodeSelect.selectAll("g.position").data(
-      d => sortPositions(d.data.positions, personnelDepth).slice(1),
+    const positionsG = nodeEnter.selectAll("g.position").data(
+      d => sortPositions(d.data.positions, 10).slice(1),
       d => d.uuid
     )
 
@@ -377,26 +370,28 @@ const OrganizationalChart = ({
         } ${d.name}`
         return result.length > 31 ? result.substring(0, 28) + "..." : result
       })
-  }, [data, expanded, history, personnelDepth, root, link, node])
-
-  if (done) {
-    return result
-  }
+  }, [data, history, root, link, node, isMain, getDistance])
 
   return (
-    <SVGCanvas
-      ref={svgRef}
-      width={width}
-      height={height}
-      exportTitle={exportTitle || `${data.organization.shortName} organization chart`}
-      zoomFn={increment =>
-        setPersonnelDepth(Math.max(0, personnelDepth + increment))}
-    >
-      <g ref={canvasRef}>
-        <g ref={linkRef} style={{ fill: "none", stroke: "#555" }} />
-        <g ref={nodeRef} style={{ cursor: "pointer", pointerEvents: "all" }} />
-      </g>
-    </SVGCanvas>
+    <>
+      {done && result}
+      <SVGCanvas
+        ref={svgRef}
+        width={width}
+        height={height}
+        exportTitle={
+          exportTitle || `${data.organization.shortName} organization chart`
+        }
+      >
+        <g ref={canvasRef}>
+          <g ref={linkRef} style={{ fill: "none", stroke: "#555" }} />
+          <g
+            ref={nodeRef}
+            style={{ cursor: "pointer", pointerEvents: "all" }}
+          />
+        </g>
+      </SVGCanvas>
+    </>
   )
 }
 
