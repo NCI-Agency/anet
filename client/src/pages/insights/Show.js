@@ -24,7 +24,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
@@ -90,12 +90,8 @@ export const INSIGHT_DETAILS = {
   }
 }
 
-const BaseInsightsShow = ({
-  pageDispatchers,
-  appSettings,
-  searchQuery,
-  setSearchQuery
-}) => {
+const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
+  const { appSettings } = useContext(AppContext)
   const { insight } = useParams()
   const flexStyle = {
     display: "flex",
@@ -213,11 +209,10 @@ const BaseInsightsShow = ({
   }
 }
 
-BaseInsightsShow.propTypes = {
+InsightsShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   searchQuery: SearchQueryPropType,
-  setSearchQuery: PropTypes.func.isRequired,
-  appSettings: PropTypes.object
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -231,13 +226,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     ...pageDispatchers
   }
 }
-
-const InsightsShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseInsightsShow appSettings={context.appSettings} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)

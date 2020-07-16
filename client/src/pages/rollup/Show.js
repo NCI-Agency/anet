@@ -30,7 +30,7 @@ import { Organization, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useMemo, useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Button, HelpBlock, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
@@ -252,7 +252,8 @@ Map.propTypes = {
   queryParams: PropTypes.object
 }
 
-const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
+const RollupShow = ({ pageDispatchers, searchQuery }) => {
+  const { appSettings } = useContext(AppContext)
   const history = useHistory()
   const routerLocation = useLocation()
   const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
@@ -648,8 +649,7 @@ const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
   }
 }
 
-BaseRollupShow.propTypes = {
-  appSettings: PropTypes.object,
+RollupShow.propTypes = {
   searchQuery: SearchQueryPropType,
   pageDispatchers: PageDispatchersPropType
 }
@@ -657,11 +657,5 @@ BaseRollupShow.propTypes = {
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
-
-const RollupShow = props => (
-  <AppContext.Consumer>
-    {context => <BaseRollupShow appSettings={context.appSettings} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapPageDispatchersToProps)(RollupShow)

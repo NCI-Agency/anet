@@ -1,7 +1,6 @@
 import AppContext from "components/AppContext"
 import * as Models from "models"
-import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { Button, DropdownButton, MenuItem } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 
@@ -15,7 +14,8 @@ const ADMIN_ACTIONS = [
   Models.AuthorizationGroup
 ]
 
-const BaseCreateButton = ({ currentUser }) => {
+const CreateButton = () => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
 
   const modelClasses = DEFAULT_ACTIONS.concat(
@@ -64,17 +64,5 @@ const BaseCreateButton = ({ currentUser }) => {
     history.push(modelClass.pathForNew())
   }
 }
-
-BaseCreateButton.propTypes = {
-  currentUser: PropTypes.instanceOf(Models.Person)
-}
-
-const CreateButton = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseCreateButton currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default CreateButton
