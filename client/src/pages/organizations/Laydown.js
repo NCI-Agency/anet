@@ -28,18 +28,12 @@ const OrganizationLaydown = ({ organization }) => {
 
   return (
     <Element name="laydown">
-      <Element
+      <Fieldset
         id="orgChart"
         name="orgChart"
         className="scroll-anchor-container"
+        style={{ background: "none" }}
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div>
-            <h2 className="legend">
-              <span className="title-text">Organization Diagram</span>
-            </h2>
-          </div>
-          <div>
             <ContainerDimensions>
               {({ width, height }) => (
                 <OrganizationalChart
@@ -51,9 +45,7 @@ const OrganizationLaydown = ({ organization }) => {
                 />
               )}
             </ContainerDimensions>
-          </div>
-        </div>
-      </Element>
+      </Fieldset>
 
       <Fieldset
         id="supportedPositions"
