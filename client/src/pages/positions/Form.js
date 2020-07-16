@@ -15,9 +15,9 @@ import { jumpToTop } from "components/Page"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-import { Location, Organization, Person, Position } from "models"
+import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -38,7 +38,8 @@ const GQL_UPDATE_POSITION = gql`
   }
 `
 
-const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
+const PositionForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -370,24 +371,15 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
   }
 }
 
-BasePositionForm.propTypes = {
+PositionForm.propTypes = {
   initialValues: PropTypes.instanceOf(Position).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BasePositionForm.defaultProps = {
+PositionForm.defaultProps = {
   title: "",
   edit: false
 }
-
-const PositionForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePositionForm currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default PositionForm

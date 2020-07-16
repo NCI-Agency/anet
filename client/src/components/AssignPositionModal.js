@@ -10,7 +10,13 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from "react"
 import {
   Button,
   Col,
@@ -34,13 +40,8 @@ const GQL_PUT_PERSON_IN_POSITION = gql`
   }
 `
 
-const BaseAssignPositionModal = ({
-  person,
-  currentUser,
-  showModal,
-  onCancel,
-  onSuccess
-}) => {
+const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
+  const { currentUser } = useContext(AppContext)
   const latestPersonProp = useRef(person)
   const personPropUnchanged = _isEqualWith(
     latestPersonProp.current,
@@ -235,20 +236,11 @@ const BaseAssignPositionModal = ({
     onCancel()
   }
 }
-BaseAssignPositionModal.propTypes = {
+AssignPositionModal.propTypes = {
   person: PropTypes.instanceOf(Person).isRequired,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
-  onSuccess: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  onSuccess: PropTypes.func.isRequired
 }
-
-const AssignPositionModal = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseAssignPositionModal currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default AssignPositionModal

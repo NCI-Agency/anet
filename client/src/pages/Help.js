@@ -10,7 +10,7 @@ import {
 } from "components/Page"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
 import Settings from "settings"
@@ -37,14 +37,15 @@ const screenshotCss = {
   boxShadow: "0px 0px 10px #aaa"
 }
 
-const BaseHelp = ({ appSettings, currentUser, pageDispatchers }) => {
+const Help = ({ pageDispatchers }) => {
+  const { appSettings, currentUser } = useContext(AppContext)
   if (
     currentUser.uuid &&
     currentUser.position &&
     currentUser.position.organization
   ) {
     return (
-      <BaseHelpFetchSuperUsers
+      <HelpFetchSuperUsers
         orgUuid={currentUser.position.organization.uuid}
         appSettings={appSettings}
         currentUser={currentUser}
@@ -53,7 +54,7 @@ const BaseHelp = ({ appSettings, currentUser, pageDispatchers }) => {
     )
   }
   return (
-    <BaseHelpConditional
+    <HelpConditional
       appSettings={appSettings}
       currentUser={currentUser}
       pageDispatchers={pageDispatchers}
@@ -61,13 +62,11 @@ const BaseHelp = ({ appSettings, currentUser, pageDispatchers }) => {
   )
 }
 
-BaseHelp.propTypes = {
-  appSettings: PropTypes.object,
-  currentUser: PropTypes.instanceOf(Person),
+Help.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-const BaseHelpFetchSuperUsers = ({
+const HelpFetchSuperUsers = ({
   orgUuid,
   appSettings,
   currentUser,
@@ -84,7 +83,7 @@ const BaseHelpFetchSuperUsers = ({
     positionQuery
   })
   return (
-    <BaseHelpConditional
+    <HelpConditional
       appSettings={appSettings}
       currentUser={currentUser}
       pageDispatchers={pageDispatchers}
@@ -94,14 +93,14 @@ const BaseHelpFetchSuperUsers = ({
   )
 }
 
-BaseHelpFetchSuperUsers.propTypes = {
+HelpFetchSuperUsers.propTypes = {
   orgUuid: PropTypes.string.isRequired,
   appSettings: PropTypes.object,
   currentUser: PropTypes.instanceOf(Person),
   pageDispatchers: PageDispatchersPropType
 }
 
-const BaseHelpConditional = ({
+const HelpConditional = ({
   loading,
   error,
   data,
@@ -198,7 +197,7 @@ const BaseHelpConditional = ({
   )
 }
 
-BaseHelpConditional.propTypes = {
+HelpConditional.propTypes = {
   loading: PropTypes.bool,
   error: PropTypes.object,
   data: PropTypes.object,
@@ -207,17 +206,5 @@ BaseHelpConditional.propTypes = {
   currentUser: PropTypes.instanceOf(Person),
   pageDispatchers: PageDispatchersPropType
 }
-
-const Help = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseHelp
-        appSettings={context.appSettings}
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(Help)

@@ -11,7 +11,7 @@ import RECURSE_STRATEGY from "components/SearchFilters"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
@@ -67,13 +67,13 @@ AssociatedPositionsTable.propTypes = {
   associatedPositions: PropTypes.array
 }
 
-const BaseEditAssociatedPositionsModal = ({
+const EditAssociatedPositionsModal = ({
   position,
   showModal,
   onCancel,
-  onSuccess,
-  currentUser
+  onSuccess
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [error, setError] = useState(null)
   const assignedRole =
     position.type === Position.TYPE.PRINCIPAL
@@ -192,23 +192,11 @@ const BaseEditAssociatedPositionsModal = ({
     })
   }
 }
-BaseEditAssociatedPositionsModal.propTypes = {
+EditAssociatedPositionsModal.propTypes = {
   position: PropTypes.object.isRequired,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
-  onSuccess: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  onSuccess: PropTypes.func.isRequired
 }
-
-const EditAssociatedPositionsModal = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseEditAssociatedPositionsModal
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default EditAssociatedPositionsModal

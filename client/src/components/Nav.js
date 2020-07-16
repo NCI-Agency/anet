@@ -1,10 +1,10 @@
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
-import { Organization, Person } from "models"
+import { Organization } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
+import React, { useContext, useEffect } from "react"
 import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
 import { connect } from "react-redux"
 import {
@@ -61,14 +61,13 @@ SidebarLink.propTypes = {
   id: PropTypes.string
 }
 
-const BaseNav = ({
-  currentUser,
+const Nav = ({
   advisorOrganizations,
   principalOrganizations,
-  appSettings,
   resetPages,
   clearSearchQuery
 }) => {
+  const { appSettings, currentUser } = useContext(AppContext)
   useEffect(() => scrollSpy.update(), [])
 
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -236,17 +235,14 @@ const BaseNav = ({
   )
 }
 
-BaseNav.propTypes = {
-  currentUser: PropTypes.instanceOf(Person),
-  appSettings: PropTypes.object,
+Nav.propTypes = {
   advisorOrganizations: PropTypes.array,
   principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired
 }
 
-BaseNav.defaultProps = {
-  appSettings: {},
+Nav.defaultProps = {
   advisorOrganizations: [],
   principalOrganizations: []
 }
@@ -259,18 +255,6 @@ const mapDispatchToProps = (dispatch, ownProps) =>
     },
     dispatch
   )
-
-const Nav = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseNav
-        appSettings={context.appSettings}
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false
