@@ -3,7 +3,6 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
-import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
@@ -24,16 +23,15 @@ import ReportCollection, {
   FORMAT_CALENDAR
 } from "components/ReportCollection"
 import SubNav from "components/SubNav"
-import { Field, Form, Formik } from "formik"
-import { Organization, Position, Report, Task } from "models"
+import { Form, Formik } from "formik"
+import { Organization, Report, Task } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
-import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
+import { Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
-import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
 
@@ -144,24 +142,12 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const organization = new Organization(data ? data.organization : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const IdentificationCodeFieldWithLabel = DictionaryField(Field)
-  const LongNameWithLabel = DictionaryField(Field)
 
   const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAdvisorOrg = organization.type === Organization.TYPE.ADVISOR_ORG
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
-  const orgSettings = isPrincipalOrg
-    ? Settings.fields.principal.org
-    : Settings.fields.advisor.org
 
-  const superUsers = organization.positions.filter(
-    pos =>
-      pos.status !== Position.STATUS.INACTIVE &&
-      (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) &&
-      (pos.type === Position.TYPE.SUPER_USER ||
-        pos.type === Position.TYPE.ADMINISTRATOR)
-  )
   const myOrg =
     currentUser && currentUser.position
       ? currentUser.position.organization

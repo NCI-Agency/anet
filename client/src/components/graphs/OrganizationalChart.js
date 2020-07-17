@@ -115,24 +115,37 @@ const OrganizationalChart = ({
     [data]
   )
   const isMain = useCallback(node => node?.uuid === data?.organization?.uuid, [
-    JSON.stringify(data)
+    data
   ])
 
-  const getDistance = useCallback(
+  const getScale = useCallback(
     node => {
       if (isParent(node)) {
-        return 1
+        return 0.7
       } else {
-        let distance = 0
+        let scale = 1.3
         let nodeIt = node
         while (nodeIt && !isMain(nodeIt)) {
-          distance++
+          scale = scale / 1.4
           nodeIt = getDescendant(nodeIt.parentOrg?.uuid)
         }
-        return distance
+        return scale
       }
     },
     [getDescendant, isParent, isMain]
+  )
+
+  const getSize = useCallback(
+    node => {
+      if (isMain(node)) {
+        return [400, 400]
+      } else if (isParent(node)) {
+        return [200, 200]
+      } else {
+        return [200 * getScale(node), 200 * getScale(node)]
+      }
+    },
+    [getScale, isMain, isParent]
   )
 
   useEffect(() => {
@@ -146,10 +159,7 @@ const OrganizationalChart = ({
             org => org.parentOrg?.uuid === d.uuid
           )
         })
-        .nodeSize(node => [
-          200 / (getDistance(node.data) + 0.5),
-          200 / (getDistance(node.data) + 0.5)
-        ])
+        .nodeSize(node => getSize(node.data))
         .spacing(10)
       const tree = treeLayout.current.hierarchy(
         data.organization.parentOrg || data.organization
@@ -159,7 +169,7 @@ const OrganizationalChart = ({
       console.log(tree)
       console.log(treeLayout)
     }
-  }, [data, getDistance, isParent, isMain])
+  }, [data, isParent, getSize, isMain])
 
   useEffect(() => {
     if (!data || !root) {
@@ -213,7 +223,13 @@ const OrganizationalChart = ({
     nodeSelect
       .transition()
       .duration(transitionDuration)
-      .attr("transform", d => `translate(${d.x},${d.y})`)
+      .attr(
+        "transform",
+        d =>
+          `translate(${d.x},${d.y}) scale(${getScale(d.data)} ${getScale(
+            d.data
+          )})`
+      )
 
     nodeSelect.exit().remove()
 
@@ -221,16 +237,35 @@ const OrganizationalChart = ({
       .enter()
       .append("g")
       .attr("class", "org")
-      .attr("transform", d => `translate(${d.x},${d.y})`)
+      .attr(
+        "transform",
+        d =>
+          `translate(${d.x},${d.y}) scale(${getScale(d.data)} ${getScale(
+            d.data
+          )})`
+      )
 
-    nodeEnter.append("rect").attr("rx", 7).attr("ry", 7)
+    nodeEnter
+      .append("rect")
+      .attr("rx", 7)
+      .attr("ry", 7)
+      .attr("x", d => -getSize(d.data)[0] / 2)
+      .attr("y", 15)
+      .attr("width", d => getSize(d.data)[0])
+      .attr("height", d => getSize(d.data)[1] - 100 * getScale(d.data))
+      // .attr("width", d => d.size[0]})
+      // .attr("height", d => d.size[1] - 20)
+      .style("fill", d =>
+        isMain(d.data) ? "rgba(255, 255, 255, 1)" : "rgba(230, 230, 230, 0.5)"
+      )
+      .style("stroke", d => (isMain(d.data) ? "black" : "none"))
 
     nodeSelect
       .selectAll("rect")
-      .attr("x", d => -200 / (getDistance(d.data) + 0.5) / 2)
+      .attr("x", d => -getSize(d.data)[0] / 2)
       .attr("y", 15)
-      .attr("width", d => 200 / (getDistance(d.data) + 0.5))
-      .attr("height", d => 200 / (getDistance(d.data) + 0.5) - 40)
+      .attr("width", d => getSize(d.data)[0])
+      .attr("height", d => getSize(d.data)[1] - 100 * getScale(d.data))
       // .attr("width", d => d.size[0]})
       // .attr("height", d => d.size[1] - 20)
       .style("fill", d =>
@@ -370,7 +405,7 @@ const OrganizationalChart = ({
         } ${d.name}`
         return result.length > 31 ? result.substring(0, 28) + "..." : result
       })
-  }, [data, history, root, link, node, isMain, getDistance])
+  }, [data, history, root, link, node, isMain, getSize])
 
   return (
     <>
