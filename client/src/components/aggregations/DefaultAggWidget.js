@@ -31,7 +31,7 @@ const DefaultAggWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
               const keyValue = _uniqueId("value_")
               return (
                 <tr key={keyValue}>
-                  <td>{val}</td>
+                  <td>{JSON.stringify(val)}</td>
                 </tr>
               )
             })}
