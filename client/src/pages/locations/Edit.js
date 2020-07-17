@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,

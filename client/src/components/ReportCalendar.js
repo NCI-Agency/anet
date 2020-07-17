@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import Calendar from "components/Calendar"
 import { PageDispatchersPropType } from "components/Page"
 import _isEqual from "lodash/isEqual"

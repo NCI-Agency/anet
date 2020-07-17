@@ -1,7 +1,7 @@
+import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   AuthorizationGroupOverlayRow,
@@ -48,7 +48,7 @@ import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -159,14 +159,14 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
   }
 `
 
-const BaseReportForm = ({
+const ReportForm = ({
   pageDispatchers,
-  currentUser,
   edit,
   title,
   initialValues,
   showSensitiveInfo: ssi
 }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
@@ -1416,25 +1416,18 @@ const BaseReportForm = ({
   }
 }
 
-BaseReportForm.propTypes = {
+ReportForm.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  showSensitiveInfo: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  showSensitiveInfo: PropTypes.bool
 }
 
-BaseReportForm.defaultProps = {
+ReportForm.defaultProps = {
   title: "",
   edit: false,
   showSensitiveInfo: false
 }
-
-const ReportForm = props => (
-  <AppContext.Consumer>
-    {context => <BaseReportForm currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(ReportForm)

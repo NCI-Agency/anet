@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
   PageDispatchersPropType,

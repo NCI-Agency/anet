@@ -4,9 +4,8 @@ import GeneralBanner from "components/GeneralBanner"
 import Header from "components/Header"
 import NoPositionBanner from "components/NoPositionBanner"
 import SecurityBanner from "components/SecurityBanner"
-import { Person } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 
 const GENERAL_BANNER_LEVEL = "GENERAL_BANNER_LEVEL"
@@ -19,14 +18,13 @@ const visible = {
   USERS_AND_SUPER_USERS: 3
 }
 
-const BaseTopBar = ({
-  currentUser,
-  appSettings,
+const TopBar = ({
   handleTopbarHeight,
   resetPages,
   minimalHeader,
   toggleMenuAction
 }) => {
+  const { appSettings, currentUser } = useContext(AppContext)
   const [bannerVisibility, setBannerVisibility] = useState(false)
   const [height, setHeight] = useState(0)
   const topbarDiv = useRef()
@@ -102,26 +100,12 @@ const BaseTopBar = ({
     </div>
   )
 }
-BaseTopBar.propTypes = {
-  currentUser: PropTypes.instanceOf(Person),
-  appSettings: PropTypes.object,
+TopBar.propTypes = {
   handleTopbarHeight: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired,
   minimalHeader: PropTypes.bool,
   toggleMenuAction: PropTypes.func
 }
-
-const TopBar = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseTopBar
-        appSettings={context.appSettings}
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 const mapDispatchToProps = dispatch => ({
   resetPages: () => dispatch(resetPages())

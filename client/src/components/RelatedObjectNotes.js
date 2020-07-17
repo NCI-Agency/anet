@@ -1,8 +1,8 @@
-import API from "api"
-import { gql } from "apollo-boost"
+import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
+import API from "api"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Pie from "components/graphs/Pie"
@@ -19,7 +19,7 @@ import _isEqualWith from "lodash/isEqualWith"
 import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Panel } from "react-bootstrap"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
@@ -44,13 +44,13 @@ export const EXCLUDED_ASSESSMENT_FIELDS = [
   INVISIBLE_CUSTOM_FIELDS_FIELD
 ]
 
-const BaseRelatedObjectNotes = ({
-  currentUser,
+const RelatedObjectNotes = ({
   notesElemId,
   relatedObject,
   relatedObjectValue,
   notes: notesProp
 }) => {
+  const { currentUser } = useContext(AppContext)
   const latestNotesProp = useRef(notesProp)
   const notesPropUnchanged = _isEqualWith(
     latestNotesProp.current,
@@ -445,8 +445,7 @@ const BaseRelatedObjectNotes = ({
       })
   }
 }
-BaseRelatedObjectNotes.propTypes = {
-  currentUser: PropTypes.instanceOf(Person),
+RelatedObjectNotes.propTypes = {
   notesElemId: PropTypes.string.isRequired,
   notes: PropTypes.arrayOf(Model.notePropType),
   relatedObject: Model.relatedObjectPropType,
@@ -456,17 +455,9 @@ BaseRelatedObjectNotes.propTypes = {
     name: PropTypes.string.isRequired
   })
 }
-BaseRelatedObjectNotes.defaultProps = {
+RelatedObjectNotes.defaultProps = {
   notesElemId: "notes-view",
   notes: []
 }
-
-const RelatedObjectNotes = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseRelatedObjectNotes currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default RelatedObjectNotes

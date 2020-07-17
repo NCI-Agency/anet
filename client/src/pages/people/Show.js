@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
@@ -27,8 +27,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -93,7 +92,8 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const BasePersonShow = ({ pageDispatchers, currentUser }) => {
+const PersonShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
@@ -531,15 +531,8 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
   }
 }
 
-BasePersonShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+PersonShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const PersonShow = props => (
-  <AppContext.Consumer>
-    {context => <BasePersonShow currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(PersonShow)

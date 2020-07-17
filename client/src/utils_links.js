@@ -44,7 +44,10 @@ export function getEntityInfoFromUrl(url) {
 }
 
 // Enhanced HTML so that links will be converted to LinkTo components
-export function parseHtmlWithLinkTo(html, report) {
+export function parseHtmlWithLinkTo(html) {
+  if (!html) {
+    return null
+  }
   return parse(html, {
     replace: domNode => {
       if (domNode.attribs && domNode.attribs.href) {
