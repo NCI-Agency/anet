@@ -69,8 +69,8 @@ public class ViewResponseFilter implements ContainerResponseFilter {
         // Store user activities in Person bean
         if (requestContext.getSecurityContext().getUserPrincipal() instanceof Person) {
           final Person person = (Person) requestContext.getSecurityContext().getUserPrincipal();
-          AnetObjectEngine.getInstance().getPersonDao()
-              .logActivitiesByDomainUsername(person.getDomainUsername(), new HashMap() {
+          AnetObjectEngine.getInstance().getPersonDao().logActivitiesByDomainUsername(
+              person.getDomainUsername(), new HashMap<String, String>() {
                 {
                   put("ip", request.getRemoteAddr() != null ? request.getRemoteAddr() : "-");
                   put("user",

@@ -1,7 +1,6 @@
 package mil.dds.anet.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -35,8 +34,6 @@ public class AdminResource {
 
   private final AdminDao dao;
   private final AnetConfiguration config;
-
-  private static final ObjectMapper jsonMapper = new ObjectMapper();
 
   public AdminResource(AnetObjectEngine engine, AnetConfiguration config) {
     this.dao = engine.getAdminDao();

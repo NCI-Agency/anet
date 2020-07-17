@@ -41,6 +41,8 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
   private static final ObjectMapper jsonMapper = new ObjectMapper();
 
+  private final Object versionLock = new Object();
+
   @Valid
   @NotNull
   private SmtpConfiguration smtp;
@@ -319,24 +321,21 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public String loadVersion() {
-    try (final InputStream inputStream =
-        AnetConfiguration.class.getResourceAsStream("/version.properties")) {
-      final Map<String, Object> version = yamlMapper.readValue(inputStream, Map.class);
-      this.setVersion((String) version.get("projectVersion"));
-    } catch (IOException e) {
-      logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE, e);
-    }
-    return this.getVersion();
-  }
-
   public String getVersion() {
-    return version == null ? "-" : version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
+    synchronized (versionLock) {
+      if (version == null) {
+        try (final InputStream inputStream =
+            this.getClass().getResourceAsStream("/version.properties")) {
+          @SuppressWarnings("unchecked")
+          final Map<String, String> props = yamlMapper.readValue(inputStream, Map.class);
+          version = props.getOrDefault("projectVersion", "unknown");
+        } catch (IOException e) {
+          logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE, e);
+          version = "!error!";
+        }
+      }
+      return version;
+    }
   }
 
 }

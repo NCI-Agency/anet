@@ -5,10 +5,8 @@ import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -236,7 +234,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   public void logActivitiesByDomainUsername(String domainUsername, Map<String, String> activity) {
     final Person person = domainUsersCache.get(domainUsername);
     if (person != null) {
-      List activities = person.getUserActivities();
+      List<Map<String, String>> activities = person.getUserActivities();
       if (activities.size() >= 100) {
         activities.clear();
       }
