@@ -7,7 +7,6 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
-import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.visibility.NoIntrospectionGraphqlFieldVisibility;
 import io.dropwizard.auth.Auth;
