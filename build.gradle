@@ -89,7 +89,7 @@ dependencies {
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.10.1'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
-	implementation 'com.mikesamuel:json-sanitizer:1.2.0'
+	implementation 'com.mikesamuel:json-sanitizer:1.2.1'
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
