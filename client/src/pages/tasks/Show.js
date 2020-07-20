@@ -8,6 +8,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { NOTE_TYPE } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -160,14 +161,22 @@ const TaskShow = ({ pageDispatchers }) => {
 
   if (data) {
     data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
-    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
+    data.task.notes.forEach(
+      note =>
+        note.type !== NOTE_TYPE.FREE_TEXT &&
+        (note.customFields = JSON.parse(note.text))
+    ) // TODO: Maybe move this code to Task()
   }
   const task = new Task(data ? data.task : {})
 
   const subTasks = []
   data &&
     data.subTasks.list.forEach(subTask => {
-      subTask.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
+      subTask.notes.forEach(
+        note =>
+          note.type !== NOTE_TYPE.FREE_TEXT &&
+          (note.customFields = JSON.parse(note.text))
+      ) // TODO: Maybe move this code to Task()
       subTasks.push(new Task(subTask))
     })
 
