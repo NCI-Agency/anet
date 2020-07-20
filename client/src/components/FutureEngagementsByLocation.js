@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { IconNames } from "@blueprintjs/icons"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import API from "api"
 import HorizontalBarChart from "components/HorizontalBarChart"
 import MosaicLayout from "components/MosaicLayout"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
@@ -16,6 +16,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
+import Settings from "settings"
 
 const GQL_GET_REPORT_LIST = gql`
   query($reportQuery: ReportSearchQueryInput) {

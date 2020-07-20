@@ -1,11 +1,11 @@
+import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import API from "api"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -34,13 +34,14 @@ import { Comment, Person, Position, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
 import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { deserializeQueryParams } from "searchUtils"
+import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 import AttendeesTable from "./AttendeesTable"
@@ -267,7 +268,8 @@ const GQL_APPROVE_REPORT = gql`
   }
 `
 
-const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
+const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -1298,10 +1300,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   }
 }
 
-BaseReportShow.propTypes = {
+ReportShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  setSearchQuery: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -1311,11 +1312,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     ...pageDispatchers
   }
 }
-
-const ReportShow = props => (
-  <AppContext.Consumer>
-    {context => <BaseReportShow currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapDispatchToProps)(ReportShow)

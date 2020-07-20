@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import OrganizationAdvisorsTable from "components/AdvisorReports/OrganizationAdvisorsTable"
 import Toolbar from "components/AdvisorReports/Toolbar"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
@@ -133,7 +133,9 @@ const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
     const csv = convertArrayOfObjectsToCSV({
       data: args.data
     })
-    if (csv === null) return
+    if (csv === null) {
+      return
+    }
 
     const filename = args.filename || "export-advisor-report.csv"
     var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })

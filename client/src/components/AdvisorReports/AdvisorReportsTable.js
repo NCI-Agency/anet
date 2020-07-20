@@ -1,5 +1,5 @@
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import { gql } from "@apollo/client"
+import API from "api"
 import AdvisorReportsRow from "components/AdvisorReports/AdvisorReportsRow"
 import AdvisorReportsTableHead from "components/AdvisorReports/AdvisorReportsTableHead"
 import {
@@ -12,6 +12,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
   query($orgUuid: String!) {

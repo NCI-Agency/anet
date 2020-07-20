@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import API from "api"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -13,6 +13,7 @@ import { Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import Settings from "settings"
 import TaskForm from "./Form"
 
 const GQL_GET_TASK = gql`
@@ -59,6 +60,7 @@ const GQL_GET_TASK = gql`
       planningApprovalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -74,6 +76,7 @@ const GQL_GET_TASK = gql`
       approvalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name

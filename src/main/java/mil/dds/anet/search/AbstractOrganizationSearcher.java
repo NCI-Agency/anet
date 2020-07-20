@@ -3,6 +3,7 @@ package mil.dds.anet.search;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
@@ -65,9 +66,11 @@ public abstract class AbstractOrganizationSearcher extends
   }
 
   protected void addParentOrgUuidQuery(OrganizationSearchQuery query) {
-    if (query.getParentOrgRecursively()) {
+    if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
       qb.addRecursiveClause(null, "organizations", "\"uuid\"", "parent_orgs", "organizations",
-          "\"parentOrgUuid\"", "parentOrgUuid", query.getParentOrgUuid(), true);
+          "\"parentOrgUuid\"", "parentOrgUuid", query.getParentOrgUuid(),
+          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
     } else {
       qb.addInListClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",
           query.getParentOrgUuid());

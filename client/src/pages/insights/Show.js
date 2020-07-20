@@ -5,7 +5,6 @@ import {
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
-import { Settings } from "api"
 import FilterableAdvisorReportsTable from "components/AdvisorReports/FilterableAdvisorReportsTable"
 import AppContext from "components/AppContext"
 import CancelledEngagementReports from "components/CancelledEngagementReports"
@@ -25,10 +24,11 @@ import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
+import Settings from "settings"
 
 export const NOT_APPROVED_REPORTS = "not-approved-reports"
 export const CANCELLED_REPORTS = "cancelled-reports"
@@ -90,18 +90,15 @@ export const INSIGHT_DETAILS = {
   }
 }
 
-const BaseInsightsShow = ({
-  pageDispatchers,
-  appSettings,
-  searchQuery,
-  setSearchQuery
-}) => {
+const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
+  const { appSettings } = useContext(AppContext)
   const { insight } = useParams()
   const flexStyle = {
     display: "flex",
     flexDirection: "column",
     flex: "1 1 auto",
-    height: "100%"
+    height: "100%",
+    overflow: "auto"
   }
   const mosaicLayoutStyle = {
     display: "flex",
@@ -212,11 +209,10 @@ const BaseInsightsShow = ({
   }
 }
 
-BaseInsightsShow.propTypes = {
+InsightsShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   searchQuery: SearchQueryPropType,
-  setSearchQuery: PropTypes.func.isRequired,
-  appSettings: PropTypes.object
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -230,13 +226,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     ...pageDispatchers
   }
 }
-
-const InsightsShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseInsightsShow appSettings={context.appSettings} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)

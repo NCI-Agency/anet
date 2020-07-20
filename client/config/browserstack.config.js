@@ -21,13 +21,8 @@ const bsTz = tzParts[tzParts.length - 1]
 
 const capabilities = {
   maxInstances: 1,
-  // Ideally, we'd like to test with:
-  //   browserName: 'IE',
-  //   browser_version: '11.0',
-  // but that is so prone to unexpected failures as to be unusable.
-  // So test with latest stable Chrome instead.
   browserName: "Chrome",
-  browser_version: "80.0",
+  browser_version: "81.0",
   "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: ["--start-maximized"]

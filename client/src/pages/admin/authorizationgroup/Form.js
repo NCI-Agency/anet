@@ -1,5 +1,5 @@
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import { gql } from "@apollo/client"
+import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
@@ -15,6 +15,7 @@ import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
+import Settings from "settings"
 
 const GQL_CREATE_AUTHORIZATION_GROUP = gql`
   mutation($authorizationGroup: AuthorizationGroupInput!) {

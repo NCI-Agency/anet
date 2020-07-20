@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import * as FieldHelper from "components/FieldHelper"
@@ -8,14 +8,14 @@ import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { FastField, Field, Form, Formik } from "formik"
+import { FastField, Form, Formik } from "formik"
 import _escape from "lodash/escape"
-import { Location, Person, Position } from "models"
+import { Location, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
-import { Coordinate } from "./Show"
+import GeoLocation from "./GeoLocation"
 
 const GQL_CREATE_LOCATION = gql`
   mutation($location: LocationInput!) {
@@ -30,7 +30,8 @@ const GQL_UPDATE_LOCATION = gql`
   }
 `
 
-const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
+const LocationForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const canEditName =
@@ -97,8 +98,8 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
         }
         if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
-            lat: values.lat,
-            lng: values.lng
+            lat: parseFloat(values.lat),
+            lng: parseFloat(values.lng)
           })
         }
         const action = (
@@ -134,20 +135,23 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <Field
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <>
-                      <Coordinate coord={values.lat} />,{" "}
-                      <Coordinate coord={values.lng} />
-                    </>
-                  }
+                <GeoLocation
+                  editable
+                  lat={values.lat}
+                  lng={values.lng}
+                  isSubmitting={isSubmitting}
+                  setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
                 />
               </Fieldset>
 
               <h3>Drag the marker below to set the location</h3>
-              <Leaflet markers={[marker]} />
+              <Leaflet
+                markers={[marker]}
+                onMapClick={(event, map) => {
+                  onMarkerMapClick(event, map, setFieldValue)
+                }}
+              />
 
               <ApprovalsDefinition
                 fieldName="planningApprovalSteps"
@@ -193,9 +197,15 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
   )
 
   function onMarkerMove(event, map, setFieldValue) {
+    const latLng = map.wrapLatLng(event.target.getLatLng())
+    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
+    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
+  }
+
+  function onMarkerMapClick(event, map, setFieldValue) {
     const latLng = map.wrapLatLng(event.latlng)
-    setFieldValue("lat", latLng.lat)
-    setFieldValue("lng", latLng.lng)
+    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
+    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
   }
 
   function onCancel() {
@@ -238,25 +248,16 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
   }
 }
 
-BaseLocationForm.propTypes = {
+LocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BaseLocationForm.defaultProps = {
+LocationForm.defaultProps = {
   initialValues: new Location(),
   title: "",
   edit: false
 }
-
-const LocationForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseLocationForm currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default LocationForm

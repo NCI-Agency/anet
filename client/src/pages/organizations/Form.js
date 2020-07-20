@@ -1,5 +1,5 @@
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import { gql } from "@apollo/client"
+import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
@@ -16,14 +16,15 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import TaskTable from "components/TaskTable"
 import { FastField, Form, Formik } from "formik"
-import { Organization, Person, Position, Task } from "models"
+import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
@@ -40,7 +41,8 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
+const OrganizationForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -419,24 +421,15 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
   }
 }
 
-BaseOrganizationForm.propTypes = {
+OrganizationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Organization).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BaseOrganizationForm.defaultProps = {
+OrganizationForm.defaultProps = {
   title: "",
   edit: false
 }
-
-const OrganizationForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOrganizationForm currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default OrganizationForm

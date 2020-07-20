@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.FkBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -212,12 +213,26 @@ public class Organization extends AbstractAnetBean {
       query = new OrganizationSearchQuery();
     }
     // Note: recursion, includes transitive children!
-    query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
-        "organizations", "\"parentOrgUuid\"", "organizations", "\"parentOrgUuid\""));
+    query.setBatchParams(
+        new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>("organizations",
+            "\"parentOrgUuid\"", "organizations", "\"parentOrgUuid\"", RecurseStrategy.CHILDREN));
     return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
         uuid, query);
   }
 
+  @GraphQLQuery(name = "ascendantOrgs")
+  public CompletableFuture<List<Organization>> loadAscendantOrgs(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
+    if (query == null) {
+      query = new OrganizationSearchQuery();
+    }
+    // Note: recursion, includes transitive parents!
+    query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
+        "organizations", "uuid", "organizations", "\"parentOrgUuid\"", RecurseStrategy.PARENTS));
+    return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
+        uuid, query);
+  }
 
   @GraphQLQuery(name = "tasks")
   public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {

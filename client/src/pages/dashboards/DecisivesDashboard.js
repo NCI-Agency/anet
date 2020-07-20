@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -5,8 +6,7 @@ import {
   SEARCH_OBJECT_TYPES,
   setSearchQuery
 } from "actions"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import API from "api"
 import LinkTo from "components/LinkTo"
 import {
   PageDispatchersPropType,
@@ -23,6 +23,7 @@ import { Panel, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
+import Settings from "settings"
 
 const GQL_GET_REPORT_LISTS = gql`
   query(

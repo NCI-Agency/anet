@@ -1,5 +1,5 @@
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import { gql } from "@apollo/client"
+import API from "api"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
@@ -14,6 +14,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Col, Grid, Label, Row } from "react-bootstrap"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_REPORT_LIST = gql`

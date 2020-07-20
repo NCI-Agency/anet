@@ -3,7 +3,7 @@ const webpack = require("webpack")
 const common = require("./webpack.common.js")
 const paths = require("./paths")
 
-module.exports = merge(common.simConfig, {
+module.exports = merge.merge(common.simConfig, {
   devtool: "eval-source-map",
   output: {
     pathinfo: true,

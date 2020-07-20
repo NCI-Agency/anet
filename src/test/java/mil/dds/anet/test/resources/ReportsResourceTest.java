@@ -101,7 +101,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   @Test
   public void createReport() {
     // Create a report writer
-    final Person author = getJackJackson();
+    final Person author = getNickNicholson();
 
     // Create a principal for the report
     final Person principalPerson = getSteveSteveson();

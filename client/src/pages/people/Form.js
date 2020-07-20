@@ -1,6 +1,8 @@
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import { gql } from "@apollo/client"
+import API from "api"
 import AppContext from "components/AppContext"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import AvatarEditModal from "components/AvatarEditModal"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -15,13 +17,12 @@ import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
-import AvatarEditModal from "components/AvatarEditModal"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useRef, useState } from "react"
+import React, { useContext, useRef, useState } from "react"
 import {
   Alert,
   Button,
@@ -32,7 +33,7 @@ import {
   Radio
 } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import Settings from "settings"
 
 const GQL_CREATE_PERSON = gql`
   mutation($person: PersonInput!) {
@@ -47,14 +48,8 @@ const GQL_UPDATE_PERSON = gql`
   }
 `
 
-const BasePersonForm = ({
-  loadAppData,
-  currentUser,
-  edit,
-  title,
-  saveText,
-  initialValues
-}) => {
+const PersonForm = ({ edit, title, saveText, initialValues }) => {
+  const { loadAppData, currentUser } = useContext(AppContext)
   const history = useHistory()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -632,31 +627,17 @@ const BasePersonForm = ({
   }
 }
 
-BasePersonForm.propTypes = {
+PersonForm.propTypes = {
   initialValues: PropTypes.instanceOf(Person).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  saveText: PropTypes.string,
-  currentUser: PropTypes.instanceOf(Person),
-  loadAppData: PropTypes.func
+  saveText: PropTypes.string
 }
 
-BasePersonForm.defaultProps = {
+PersonForm.defaultProps = {
   title: "",
   edit: false,
   saveText: "Save Person"
 }
-
-const PersonForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePersonForm
-        currentUser={context.currentUser}
-        loadAppData={context.loadAppData}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default PersonForm

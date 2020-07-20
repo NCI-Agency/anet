@@ -1,5 +1,5 @@
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import { gql } from "@apollo/client"
+import API from "api"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
   PageDispatchersPropType,
@@ -17,6 +17,7 @@ import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import COLLAPSE_ICON from "resources/organizations.png"
 import EXPAND_ICON from "resources/plus.png"
+import Settings from "settings"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {

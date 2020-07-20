@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import PropTypes from "prop-types"

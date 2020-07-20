@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import API from "api"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import * as FieldHelper from "components/FieldHelper"
@@ -21,6 +21,7 @@ import { Alert, Button, Checkbox, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
+import Settings from "settings"
 import * as yup from "yup"
 
 const GQL_MERGE_PEOPLE = gql`

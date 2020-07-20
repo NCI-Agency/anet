@@ -22,23 +22,25 @@ public class AdminDao {
   @Inject
   private Provider<Handle> handle;
   private Map<String, String> cachedSettings = null;
+  private static final Object cachedSettingsLock = new Object();
 
   protected Handle getDbHandle() {
     return handle.get();
   }
 
   private void initCache() {
-    cachedSettings = new HashMap<String, String>();
-    List<AdminSetting> settings = getAllSettings();
-    for (AdminSetting s : settings) {
-      cachedSettings.put(s.getKey(), s.getValue());
+    synchronized (cachedSettingsLock) {
+      if (cachedSettings == null) {
+        cachedSettings = new HashMap<String, String>();
+        for (final AdminSetting s : getAllSettings()) {
+          cachedSettings.put(s.getKey(), s.getValue());
+        }
+      }
     }
   }
 
   public String getSetting(AdminSettingKeys key) {
-    if (cachedSettings == null) {
-      initCache();
-    }
+    initCache();
     return cachedSettings.get(key.toString());
   }
 
@@ -53,18 +55,14 @@ public class AdminDao {
    */
   @InTransaction
   public int saveSetting(AdminSetting setting) {
-    if (cachedSettings == null) {
-      initCache();
+    initCache();
+    final String sql;
+    synchronized (cachedSettingsLock) {
+      sql = cachedSettings.containsKey(setting.getKey())
+          ? "/* updateAdminSetting */ UPDATE \"adminSettings\" SET value = :value WHERE \"key\" = :key"
+          : "/* insertAdminSetting */ INSERT INTO \"adminSettings\" (\"key\", value) VALUES (:key, :value)";
+      cachedSettings.put(setting.getKey(), setting.getValue());
     }
-    String sql;
-    if (cachedSettings.containsKey(setting.getKey())) {
-      sql =
-          "/* updateAdminSetting */ UPDATE \"adminSettings\" SET value = :value WHERE \"key\" = :key";
-    } else {
-      sql =
-          "/* insertAdminSetting */ INSERT INTO \"adminSettings\" (\"key\", value) VALUES (:key, :value)";
-    }
-    cachedSettings.put(setting.getKey(), setting.getValue());
     return getDbHandle().createUpdate(sql).bind("key", setting.getKey())
         .bind("value", setting.getValue()).execute();
   }

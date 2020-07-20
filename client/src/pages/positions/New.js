@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -30,16 +30,10 @@ const PositionNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
   const qs = utils.parseQueryString(routerLocation.search)
   if (qs.organizationUuid) {
-    // If an organizationUuid was given in query parameters,
-    // then look that org up and pre-populate the field.
-    const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
-      uuid: qs.organizationUuid
-    })
     return (
-      <PositionNewConditional
-        pageDispatchers={pageDispatchers}
-        {...queryResult}
+      <PositionNewFetchOrg
         orgUuid={qs.organizationUuid}
+        pageDispatchers={pageDispatchers}
       />
     )
   }
@@ -47,6 +41,26 @@ const PositionNew = ({ pageDispatchers }) => {
 }
 
 PositionNew.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
+
+const PositionNewFetchOrg = ({ orgUuid, pageDispatchers }) => {
+  // If an organizationUuid was given in query parameters,
+  // then look that org up and pre-populate the field.
+  const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
+    uuid: orgUuid
+  })
+  return (
+    <PositionNewConditional
+      pageDispatchers={pageDispatchers}
+      {...queryResult}
+      orgUuid={orgUuid}
+    />
+  )
+}
+
+PositionNewFetchOrg.propTypes = {
+  orgUuid: PropTypes.string.isRequired,
   pageDispatchers: PageDispatchersPropType
 }
 

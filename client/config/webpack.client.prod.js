@@ -7,7 +7,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const paths = require("./paths")
 const common = require("./webpack.common.js")
 
-const clientConfig = merge(common.clientConfig, {
+const clientConfig = merge.merge(common.clientConfig, {
   bail: true,
   devtool: "source-map",
   resolve: {

@@ -80,7 +80,7 @@ const commonConfig = {
 }
 
 module.exports = {
-  clientConfig: merge(commonConfig, {
+  clientConfig: merge.merge(commonConfig, {
     target: "web",
     entry: {
       anet: [require.resolve("./polyfills"), "./src/index.js"]
@@ -102,7 +102,9 @@ module.exports = {
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
       }),
       new ContextReplacementPlugin(/moment[\\/]locale$/, /^\.\/(en)$/),
-      new CopyWebpackPlugin([{ from: "public", ignore: ["index.html"] }])
+      new CopyWebpackPlugin({
+        patterns: [{ from: "public", globOptions: { ignore: ["index.html"] } }]
+      })
       // new webpack.optimize.CommonsChunkPlugin({
       //     name: "dependencies",
       //     minChunks: ({ resource }) => /node_modules/.test(resource)
@@ -113,7 +115,7 @@ module.exports = {
     ]
   }),
 
-  simConfig: merge(commonConfig, {
+  simConfig: merge.merge(commonConfig, {
     resolve: {
       modules: [paths.appSrc, "node_modules", "platform/node"]
     },

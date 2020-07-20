@@ -1,11 +1,10 @@
 import { clearSearchQuery, resetPages } from "actions"
-import { Settings } from "api"
 import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
-import { Organization, Person } from "models"
+import { Organization } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
+import React, { useContext, useEffect } from "react"
 import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
 import { connect } from "react-redux"
 import {
@@ -15,6 +14,7 @@ import {
 import { useLocation } from "react-router-dom"
 import { ScrollLink, scrollSpy } from "react-scroll"
 import { bindActionCreators } from "redux"
+import Settings from "settings"
 import utils from "utils"
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
@@ -61,13 +61,13 @@ SidebarLink.propTypes = {
   id: PropTypes.string
 }
 
-const BaseNav = ({
-  currentUser,
-  organizations,
-  appSettings,
+const Nav = ({
+  advisorOrganizations,
+  principalOrganizations,
   resetPages,
   clearSearchQuery
 }) => {
+  const { appSettings, currentUser } = useContext(AppContext)
   useEffect(() => scrollSpy.update(), [])
 
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -87,6 +87,9 @@ const BaseNav = ({
     orgUuid = path.split("/")[2]
     myOrgUuid = myOrg && myOrg.uuid
   }
+
+  const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
+  const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
 
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
@@ -123,9 +126,13 @@ const BaseNav = ({
       <NavDropdown
         title={Settings.fields.advisor.org.allOrgName}
         id="advisor-organizations"
-        active={inOrg && orgUuid !== myOrgUuid}
+        active={
+          inOrg &&
+          advisorOrganizationUuids.includes(orgUuid) &&
+          orgUuid !== myOrgUuid
+        }
       >
-        {Organization.map(organizations, org => (
+        {Organization.map(advisorOrganizations, org => (
           <Link
             to={Organization.pathFor(org)}
             key={org.uuid}
@@ -136,7 +143,30 @@ const BaseNav = ({
         ))}
       </NavDropdown>
 
-      <BSNav id="org-nav" />
+      <BSNav id="advisor-org-nav" />
+
+      <NavDropdown
+        title={Settings.fields.principal.org.allOrgName}
+        id="principal-organizations"
+        active={
+          inOrg &&
+          principalOrganizationUuids.includes(orgUuid) &&
+          orgUuid !== myOrgUuid
+        }
+      >
+        {Organization.map(principalOrganizations, org => (
+          <Link
+            to={Organization.pathFor(org)}
+            key={org.uuid}
+            onClick={clearSearchQuery}
+          >
+            <MenuItem>{org.shortName}</MenuItem>
+          </Link>
+        ))}
+      </NavDropdown>
+
+      <BSNav id="principal-org-nav" />
+
       <SidebarLink linkTo="/rollup" handleOnClick={resetPages}>
         Daily rollup
       </SidebarLink>
@@ -202,17 +232,16 @@ const BaseNav = ({
   )
 }
 
-BaseNav.propTypes = {
-  currentUser: PropTypes.instanceOf(Person),
-  appSettings: PropTypes.object,
-  organizations: PropTypes.array,
+Nav.propTypes = {
+  advisorOrganizations: PropTypes.array,
+  principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired
 }
 
-BaseNav.defaultProps = {
-  appSettings: {},
-  organizations: []
+Nav.defaultProps = {
+  advisorOrganizations: [],
+  principalOrganizations: []
 }
 
 const mapDispatchToProps = (dispatch, ownProps) =>
@@ -223,18 +252,6 @@ const mapDispatchToProps = (dispatch, ownProps) =>
     },
     dispatch
   )
-
-const Nav = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseNav
-        appSettings={context.appSettings}
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false

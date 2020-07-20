@@ -245,9 +245,9 @@ public class GraphQlResource {
 
     final GraphQL graphql = GraphQL
         .newGraphQL(AuthUtils.isAdmin(user) ? graphqlSchema : graphqlSchemaWithoutIntrospection)
-        // .instrumentation(new DataLoaderDispatcherInstrumentation()) — use our own dispatcher
-        // instead
-        .build();
+        // Prevent adding .instrumentation(new DataLoaderDispatcherInstrumentation())
+        // — use our own dispatcher instead
+        .doNotAddDefaultInstrumentations().build();
     final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
     final Runnable dispatcher = () -> {
       while (!request.isDone()) {

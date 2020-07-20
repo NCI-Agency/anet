@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
@@ -20,12 +20,12 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Report, Task } from "models"
+import { Report, Task } from "models"
 import moment from "moment"
-import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -72,6 +72,7 @@ const GQL_GET_TASK = gql`
       planningApprovalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -87,6 +88,7 @@ const GQL_GET_TASK = gql`
       approvalSteps {
         uuid
         name
+        restrictedApproval
         approvers {
           uuid
           name
@@ -134,7 +136,8 @@ const GQL_GET_TASK = gql`
   }
 `
 
-const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
+const TaskShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
@@ -362,7 +365,10 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
 
-            <Approvals relatedObject={task} />
+            <Approvals
+              restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
+              relatedObject={task}
+            />
 
             <Fieldset title={`Reports for this ${fieldSettings.shortLabel}`}>
               <ReportCollection
@@ -380,15 +386,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   )
 }
 
-BaseTaskShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+TaskShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const TaskShow = props => (
-  <AppContext.Consumer>
-    {context => <BaseTaskShow currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(TaskShow)

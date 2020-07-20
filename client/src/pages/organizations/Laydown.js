@@ -1,16 +1,17 @@
-import { Settings } from "api"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
 import LinkTo from "components/LinkTo"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
+import Settings from "settings"
 
-const BaseOrganizationLaydown = ({ currentUser, organization }) => {
+const OrganizationLaydown = ({ organization }) => {
+  const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
   const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
 
@@ -227,17 +228,8 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
   }
 }
 
-BaseOrganizationLaydown.propTypes = {
-  organization: PropTypes.instanceOf(Organization).isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+OrganizationLaydown.propTypes = {
+  organization: PropTypes.instanceOf(Organization).isRequired
 }
-
-const OrganizationLaydown = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOrganizationLaydown currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default OrganizationLaydown

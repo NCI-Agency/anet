@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -12,8 +12,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 
@@ -31,7 +30,8 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
   }
 `
 
-const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
+const AdminIndex = ({ pageDispatchers }) => {
+  const { loadAppData } = useContext(AppContext)
   const [saveError, setSaveError] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -120,15 +120,8 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   }
 }
 
-BaseAdminIndex.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  loadAppData: PropTypes.func
+AdminIndex.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const AdminIndex = props => (
-  <AppContext.Consumer>
-    {context => <BaseAdminIndex loadAppData={context.loadAppData} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(AdminIndex)

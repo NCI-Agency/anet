@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -5,8 +6,7 @@ import {
   SEARCH_OBJECT_TYPES,
   setPagination
 } from "actions"
-import API, { Settings } from "api"
-import { gql } from "apollo-boost"
+import API from "api"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -56,6 +56,7 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 
 const GQL_CREATE_SAVED_SEARCH = gql`
   mutation($savedSearch: SavedSearchInput!) {
