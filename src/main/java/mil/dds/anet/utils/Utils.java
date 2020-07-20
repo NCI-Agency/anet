@@ -247,9 +247,7 @@ public class Utils {
       final ArrayNode arrayNode = (ArrayNode) jsonNode;
       for (int i = 0; i < arrayNode.size(); i++) {
         if (arrayNode.get(i).isTextual()) {
-          final String sanitizedValue = sanitizeHtml(arrayNode.get(i).asText());
-          arrayNode.remove(i);
-          arrayNode.insert(i, sanitizedValue);
+          arrayNode.set(i, arrayNode.textNode(sanitizeHtml(arrayNode.get(i).asText())));
         } else {
           internalSanitizeJsonForHtml(arrayNode.get(i));
         }
