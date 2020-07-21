@@ -293,6 +293,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(created.getCustomFields())
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
+    // Have another regular user try to submit the report
+    try {
+      graphQLHelper.updateObject(getRegularUser(), "submitReport", "uuid", FIELDS, "String",
+          created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Have a super-user of another AO try to submit the report
+    try {
+      graphQLHelper.updateObject(getSuperUser(), "submitReport", "uuid", FIELDS, "String",
+          created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
     // Have the author submit the report
     Report submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
         created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
