@@ -333,6 +333,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
+          returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
     logger.debug("Expecting report {} in step {} because of org {} on author {}", new Object[] {
         returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author.getUuid()});
     assertThat(returned.getApprovalStepUuid()).isEqualTo(approval.getUuid());
@@ -428,6 +436,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
     assertThat(returned.getApprovalStepUuid()).isNull();
+
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
+          returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
 
     // check on report status to see that it got approved.
     workflow = returned.getWorkflow();
@@ -1281,6 +1297,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Report returned2 = graphQLHelper.getObjectById(liz, "report", FIELDS, saved.getUuid(),
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
+
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(liz, "submitReport", "uuid", FIELDS, "String", returned2.getUuid(),
+          new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
   }
 
   @Test

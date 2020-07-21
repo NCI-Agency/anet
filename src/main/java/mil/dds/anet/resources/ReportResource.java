@@ -385,7 +385,7 @@ public class ReportResource {
           Status.FORBIDDEN);
     }
 
-    if (r.getState() != Report.ReportState.DRAFT && r.getState() != Report.ReportState.REJECTED) {
+    if (r.getState() != ReportState.DRAFT && r.getState() != ReportState.REJECTED) {
       throw new WebApplicationException(
           "Cannot submit report unless it is either Draft or Rejected", Status.BAD_REQUEST);
     }
