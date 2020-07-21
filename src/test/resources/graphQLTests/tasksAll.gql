@@ -4,5 +4,6 @@ taskList(query: {pageSize: 0}) {
     uuid
     shortName
     longName
+    customFields
   }
 }
