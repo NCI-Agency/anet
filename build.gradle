@@ -1,8 +1,8 @@
 plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
-	id "com.bmuschko.docker-remote-api" version "6.5.0"
+	id "com.bmuschko.docker-remote-api" version "6.6.0"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.gradle.spotless" version "4.5.1"
+	id "com.diffplug.spotless" version "5.1.0"
 }
 
 apply plugin: 'java'
@@ -74,7 +74,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.2.jre8'
 	implementation 'org.postgresql:postgresql:42.2.14' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:3.10.1'
+	implementation 'org.liquibase:liquibase-core:4.0.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.8.1'
@@ -88,7 +88,7 @@ dependencies {
 	implementation 'com.github.waffle:waffle-jna:1.9.1'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.10.1'
-	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200615.1'
+	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'

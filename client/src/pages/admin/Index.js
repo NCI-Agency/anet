@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -14,8 +14,7 @@ import {
 import { Field, Form, Formik } from "formik"
 import moment from "moment"
 import UserActivityTable from "pages/admin/UserActivityTable"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
@@ -34,6 +33,7 @@ const GQL_SAVE_ADMIN_SETTINGS = gql`
     saveAdminSettings(settings: $settings)
   }
 `
+
 const CLEAR_CACHE = gql`
   mutation {
     clearCache
@@ -49,7 +49,8 @@ const USER_ACTIVITIES = gql`
     userActivities
   }
 `
-const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
+const AdminIndex = ({ pageDispatchers }) => {
+  const { loadAppData } = useContext(AppContext)
   const [userActivities, setUserActivities] = useState(null)
   const [recentUsers, setRecentUsers] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
@@ -263,15 +264,8 @@ const BaseAdminIndex = ({ pageDispatchers, loadAppData }) => {
   }
 }
 
-BaseAdminIndex.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  loadAppData: PropTypes.func
+AdminIndex.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const AdminIndex = props => (
-  <AppContext.Consumer>
-    {context => <BaseAdminIndex loadAppData={context.loadAppData} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(AdminIndex)

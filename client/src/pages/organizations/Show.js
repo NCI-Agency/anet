@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
@@ -25,11 +25,10 @@ import ReportCollection, {
 } from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import { Organization, Person, Position, Report, Task } from "models"
+import { Organization, Position, Report, Task } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -124,7 +123,8 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
+const OrganizationShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const { uuid } = useParams()
@@ -418,22 +418,13 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
   }
 }
 
-BaseOrganizationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+OrganizationShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
-
-const OrganizationShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOrganizationShow currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(
   mapStateToProps,

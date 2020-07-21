@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import * as FieldHelper from "components/FieldHelper"
@@ -10,9 +10,9 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Form, Formik } from "formik"
 import _escape from "lodash/escape"
-import { Location, Person, Position } from "models"
+import { Location, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import GeoLocation from "./GeoLocation"
@@ -30,7 +30,8 @@ const GQL_UPDATE_LOCATION = gql`
   }
 `
 
-const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
+const LocationForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const canEditName =
@@ -247,25 +248,16 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
   }
 }
 
-BaseLocationForm.propTypes = {
+LocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BaseLocationForm.defaultProps = {
+LocationForm.defaultProps = {
   initialValues: new Location(),
   title: "",
   edit: false
 }
-
-const LocationForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseLocationForm currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default LocationForm

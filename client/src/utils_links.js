@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import LinkAnet from "components/editor/LinkAnet"
 import parse from "html-react-parser"
 import { PAGE_URLS } from "pages/util"
@@ -112,7 +112,10 @@ export function getEntityInfoFromUrl(url) {
 }
 
 // Enhanced HTML so that links will be converted to LinkTo components
-export function parseHtmlWithLinkTo(html, report) {
+export function parseHtmlWithLinkTo(html) {
+  if (!html) {
+    return null
+  }
   return parse(html, {
     replace: domNode => {
       if (domNode.attribs && domNode.attribs.href) {

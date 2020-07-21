@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -17,9 +17,8 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
-import { AuthorizationGroup, Person } from "models"
-import PropTypes from "prop-types"
-import React from "react"
+import { AuthorizationGroup } from "models"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 
@@ -53,7 +52,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const BaseAuthorizationGroupShow = ({ pageDispatchers, currentUser }) => {
+const AuthorizationGroupShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(
@@ -146,20 +146,8 @@ const BaseAuthorizationGroupShow = ({ pageDispatchers, currentUser }) => {
   )
 }
 
-BaseAuthorizationGroupShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+AuthorizationGroupShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const AuthorizationGroupShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseAuthorizationGroupShow
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupShow)

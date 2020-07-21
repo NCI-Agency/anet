@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import * as FieldHelper from "components/FieldHelper"
@@ -24,9 +24,8 @@ import ReportCollection, {
 } from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
-import { Location, Person } from "models"
-import PropTypes from "prop-types"
-import React from "react"
+import { Location } from "models"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "./GeoLocation"
@@ -74,7 +73,8 @@ const GQL_GET_LOCATION = gql`
   }
 `
 
-const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
+const LocationShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
@@ -177,17 +177,8 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
   )
 }
 
-BaseLocationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+LocationShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const LocationShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseLocationShow currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(LocationShow)

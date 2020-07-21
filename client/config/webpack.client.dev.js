@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const common = require("./webpack.common.js")
 const paths = require("./paths")
 
-module.exports = merge(common.clientConfig, {
+module.exports = merge.merge(common.clientConfig, {
   resolve: {
     modules: [paths.appSrc, "node_modules", "platform/web-dev"]
   },
