@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +42,10 @@ public class UtilsTest {
 
   public static InOut getCombinedHtmlTestCase() {
     return getCombinedTestCase(getHtmlTestCases());
+  }
+
+  private static void addTestCase(List<InOut> testCases, InOut inOut) {
+    testCases.add(inOut);
   }
 
   private static void addTestCase(List<InOut> testCases, String inputOutput) {
@@ -106,6 +111,40 @@ public class UtilsTest {
     final InOut combinedTestCase = getCombinedHtmlTestCase();
     assertThat(Utils.sanitizeHtml(combinedTestCase.getInput()))
         .isEqualTo(combinedTestCase.getOutput());
+  }
+
+  public static InOut getCombinedJsonTestCase() {
+    final InOut combinedHtmlTestCase = getCombinedHtmlTestCase();
+    final String input = String.format("{\"html\":\"%s\"}",
+        combinedHtmlTestCase.getInput().replaceAll("\"", "\\\\\""));
+    final String output = String.format("{\"html\":\"%s\"}",
+        combinedHtmlTestCase.getOutput().replaceAll("\"", "\\\\\""));
+    return new InOut(input, output);
+  }
+
+  // set up JSON test cases (feel free to add more)
+  private static List<InOut> getJsonTestCases() {
+    final List<InOut> testCases = new ArrayList<>();
+    // allowed
+    addTestCase(testCases, "{\"bool\":true}");
+    // will be corrected
+    addTestCase(testCases, "{\"bool\":true", "{\"bool\":true}");
+    // will be stripped down
+    addTestCase(testCases, "\"bool\":true}", "\"bool\"");
+    // will be stripped down
+    addTestCase(testCases, "\"bool\":true", "\"bool\"");
+    // check sanitized HTML
+    final InOut combinedJsonTestCase = getCombinedJsonTestCase();
+    addTestCase(testCases, combinedJsonTestCase);
+    return testCases;
+  }
+
+  @Test
+  public void testSanitizeJson() throws JsonProcessingException {
+    final List<InOut> testCases = getJsonTestCases();
+    for (final InOut testCase : testCases) {
+      assertThat(Utils.sanitizeJson(testCase.getInput())).isEqualTo(testCase.getOutput());
+    }
   }
 
   @Test

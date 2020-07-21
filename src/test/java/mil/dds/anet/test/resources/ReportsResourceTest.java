@@ -85,7 +85,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS = "uuid";
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
-          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText createdAt updatedAt";
+          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText createdAt updatedAt"
+          + " customFields";
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("%1$s customFieldRef1 { %1$s }", _TASK_FIELDS);
@@ -271,6 +272,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setIntent("A testing report to test that reporting reports");
     // set HTML of report text
     r.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // set JSON of customFields
+    r.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     r.setNextSteps("This is the next steps on a report");
     r.setKeyOutcomes("These are the key outcomes of this engagement");
     r.setAdvisorOrg(advisorOrg);
@@ -286,6 +289,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(created.getPrincipalOrgUuid()).isEqualTo(principalOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after create
+    assertThat(created.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Have the author submit the report
     Report submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
@@ -694,6 +700,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     returned.setLocation(loc);
     // update HTML of report text
     returned.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // u[date JSON of customFields
+    returned.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
         PersonTest.personToReportPerson(nick), PersonTest.personToPrimaryReportPerson(elizabeth)));
     returned.setTasks(ImmutableList.of());
@@ -713,6 +721,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // check that HTML of report text is sanitized after update
     assertThat(returned2.getReportText())
         .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after update
+    assertThat(returned2.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Elizabeth submits the report
     Report submitted = graphQLHelper.updateObject(elizabeth, "submitReport", "uuid", FIELDS,
