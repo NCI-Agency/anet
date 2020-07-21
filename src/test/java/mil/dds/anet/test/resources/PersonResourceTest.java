@@ -67,7 +67,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setRole(Role.ADVISOR);
     newPerson.setStatus(PersonStatus.ACTIVE);
     // set HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
     newPerson.setGender("Female");
     newPerson.setCountry("Canada");
     newPerson.setCode("123456");
@@ -81,7 +81,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPerson.getUuid()).isNotNull();
     assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
     // check that HTML of biography is sanitized after create
-    assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     newPerson.setName("testCreatePerson updated name");
     newPerson.setCountry("The Commonwealth of Canada");
@@ -93,7 +93,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setAvatar(defaultAvatarData);
 
     // update HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
 
     Integer nrUpdated =
         graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson);
@@ -105,7 +105,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson.getCode()).isEqualTo(newPerson.getCode());
     assertThat(retPerson.getAvatar()).isNotNull();
     // check that HTML of biography is sanitized after update
-    assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     // Test creating a person with a position already set.
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
