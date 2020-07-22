@@ -663,7 +663,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     return null
                   }
                   const taskCustomFields = JSON.parse(task.customFields)
-                  if (!taskCustomFields.assessmentDefinition) {
+                  if (!taskCustomFields?.assessmentDefinition) {
                     return null
                   }
                   const taskAssessmentDefinition = JSON.parse(

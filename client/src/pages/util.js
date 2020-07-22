@@ -7,7 +7,6 @@ export const PAGE_URLS = {
   HOME: "/",
   SEARCH: "/search",
   ROLLUP: "/rollup",
-  GRAPHIQL: "/graphiql",
   HELP: "/help",
   REPORTS: "/reports",
   PEOPLE: "/people",

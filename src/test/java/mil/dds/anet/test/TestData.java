@@ -41,6 +41,13 @@ public class TestData {
   }
 
   public static Task createTask(String shortName, String longName, String category,
+      String customFields) {
+    final Task p = TestData.createTask(shortName, longName, category);
+    p.setCustomFields(customFields);
+    return p;
+  }
+
+  public static Task createTask(String shortName, String longName, String category,
       Task customFieldRef1, List<Organization> taskedOrganizations, Task.TaskStatus status) {
     Task p = new Task();
     p.setShortName(shortName);

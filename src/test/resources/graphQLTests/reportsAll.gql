@@ -46,6 +46,7 @@ reportList(query:{pageSize:100}) {
     tasks {
       uuid
       shortName
+      customFields
     }
     tags {
       uuid
@@ -77,5 +78,6 @@ reportList(query:{pageSize:100}) {
       }
     }
     updatedAt
+    customFields
   }
 }

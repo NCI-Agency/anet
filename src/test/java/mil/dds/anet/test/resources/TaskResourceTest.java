@@ -23,23 +23,29 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 public class TaskResourceTest extends AbstractResourceTest {
 
   private static final String FIELDS =
-      "uuid shortName longName category customFieldRef1 { uuid } taskedOrganizations { uuid } status";
+      "uuid shortName longName category customFieldRef1 { uuid } taskedOrganizations { uuid }"
+          + " status customFields";
 
   @Test
   public void taskTest() {
     final Person jack = getJackJackson();
 
     final String aUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("TestF1", "Do a thing with a person", "Test-EF"),
+        TestData.createTask("TestF1", "Do a thing with a person", "Test-EF",
+            // set JSON of customFields
+            UtilsTest.getCombinedJsonTestCase().getInput()),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(aUuid).isNotNull();
     final Task a = graphQLHelper.getObjectById(admin, "task", FIELDS, aUuid,
         new TypeReference<GraphQlResponse<Task>>() {});
+    // check that JSON of customFields is sanitized after create
+    assertThat(a.getCustomFields()).isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     final String bUuid = graphQLHelper.createObject(
         admin, "createTask", "task", "TaskInput", TestData.createTask("TestM1",
@@ -67,12 +73,17 @@ public class TaskResourceTest extends AbstractResourceTest {
 
     // modify a task.
     a.setLongName("Do a thing with a person modified");
+    // update JSON of customFields
+    a.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     final Integer nrUpdated =
         graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
     assertThat(nrUpdated).isEqualTo(1);
     final Task returned = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid,
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(returned.getLongName()).isEqualTo(a.getLongName());
+    // check that JSON of customFields is sanitized after update
+    assertThat(returned.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Assign the Task to the AO
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
@@ -99,7 +110,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     final AnetBeanList<Task> tasks =
         graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
             queryTasks, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
-    assertThat(tasks.getList()).contains(a);
+    assertThat(tasks.getList()).contains(returned);
 
     // Search for the task:
 
