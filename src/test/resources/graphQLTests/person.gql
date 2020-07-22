@@ -90,4 +90,5 @@ person(uuid:"${personUuid}") {
       }
     }
   }
+  customFields
 }

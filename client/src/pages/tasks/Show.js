@@ -8,7 +8,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT, NOTE_TYPE } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -149,23 +149,25 @@ const TaskShow = ({ pageDispatchers }) => {
   }
 
   if (data) {
-    // TODO: Maybe move this code to Task()
     data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.task.customFields
     )
     data.task.notes.forEach(
-      note => (note.customFields = utils.parseJsonSafe(note.text))
-    )
+      note =>
+        note.type !== NOTE_TYPE.FREE_TEXT &&
+        (note.customFields = utils.parseJsonSafe(note.text))
+    ) // TODO: Maybe move this code to Ta
   }
   const task = new Task(data ? data.task : {})
 
   const subTasks = []
   data &&
     data.subTasks.list.forEach(subTask => {
-      // TODO: Maybe move this code to Task()
       subTask.notes.forEach(
-        note => (note.customFields = utils.parseJsonSafe(note.text))
-      )
+        note =>
+          note.type !== NOTE_TYPE.FREE_TEXT &&
+          (note.customFields = utils.parseJsonSafe(note.text))
+      ) // TODO: Maybe move this code to Task()
       subTasks.push(new Task(subTask))
     })
 

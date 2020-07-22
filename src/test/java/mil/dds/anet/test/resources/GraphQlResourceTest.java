@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableMap;
+import graphql.introspection.IntrospectionQuery;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,7 +31,37 @@ public class GraphQlResourceTest extends AbstractResourceTest {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Test
-  public void test() {
+  public void testIntrospection() {
+    final Map<String, Object> introspectionQuery = new HashMap<String, Object>();
+    introspectionQuery.put("operationName", "IntrospectionQuery");
+    introspectionQuery.put("variables", ImmutableMap.of());
+    introspectionQuery.put("query", IntrospectionQuery.INTROSPECTION_QUERY);
+    // only admin can do introspection query
+    try {
+      final Map<String, Object> resp = httpQuery("/graphql", admin)
+          .post(Entity.json(introspectionQuery), new GenericType<Map<String, Object>>() {});
+      assertThat(resp.get("data")).isNotNull(); // we could check a million things here
+    } catch (Exception e) {
+      fail("Unexpected exception", e);
+    }
+    try {
+      httpQuery("/graphql", getSuperUser()).post(Entity.json(introspectionQuery),
+          new GenericType<Map<String, Object>>() {});
+      fail("Expected exception");
+    } catch (Exception e) {
+      // correct
+    }
+    try {
+      httpQuery("/graphql", getRegularUser()).post(Entity.json(introspectionQuery),
+          new GenericType<Map<String, Object>>() {});
+      fail("Expected exception");
+    } catch (Exception e) {
+      // correct
+    }
+  }
+
+  @Test
+  public void testGraphQlFiles() {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
     final File testDir = new File(GraphQlResourceTest.class.getResource("/graphQLTests").getFile());

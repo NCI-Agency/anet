@@ -48,7 +48,6 @@ const Routing = () => {
       <Route exact path={PAGE_URLS.HOME} component={Home} />
       <Route path={PAGE_URLS.SEARCH} component={Search} />
       <Route path={PAGE_URLS.ROLLUP} component={RollupShow} />
-      <Route path={PAGE_URLS.GRAPHIQL} component={GraphiQL} />
       <Route path={PAGE_URLS.HELP} component={Help} />
       <Route
         path={PAGE_URLS.REPORTS}
@@ -115,32 +114,35 @@ const Routing = () => {
           </Switch>
         )}
       />
-      <Route
-        path={PAGE_URLS.ADMIN}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route exact path={`${url}/`} component={AdminIndex} />
-            <Route path={`${url}/mergePeople`} component={MergePeople} />
-            <Route
-              exact
-              path={`${url}/authorizationGroups`}
-              component={AuthorizationGroups}
-            />
-            <Route
-              path={`${url}/authorizationGroups/new`}
-              component={AuthorizationGroupNew}
-            />
-            <Route
-              path={`${url}/authorizationGroups/:uuid/edit`}
-              component={AuthorizationGroupEdit}
-            />
-            <Route
-              path={`${url}/authorizationGroups/:uuid`}
-              component={AuthorizationGroupShow}
-            />
-          </Switch>
-        )}
-      />
+      {currentUser.isAdmin() && (
+        <Route
+          path={PAGE_URLS.ADMIN}
+          render={({ match: { url } }) => (
+            <Switch>
+              <Route exact path={`${url}/`} component={AdminIndex} />
+              <Route path={`${url}/mergePeople`} component={MergePeople} />
+              <Route
+                exact
+                path={`${url}/authorizationGroups`}
+                component={AuthorizationGroups}
+              />
+              <Route
+                path={`${url}/authorizationGroups/new`}
+                component={AuthorizationGroupNew}
+              />
+              <Route
+                path={`${url}/authorizationGroups/:uuid/edit`}
+                component={AuthorizationGroupEdit}
+              />
+              <Route
+                path={`${url}/authorizationGroups/:uuid`}
+                component={AuthorizationGroupShow}
+              />
+              <Route path={`${url}/graphiql`} component={GraphiQL} />
+            </Switch>
+          )}
+        />
+      )}
       <Route
         path={PAGE_URLS.INSIGHTS}
         render={({ match: { url } }) => (
