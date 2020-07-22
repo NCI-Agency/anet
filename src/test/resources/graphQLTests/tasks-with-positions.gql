@@ -22,5 +22,6 @@ taskList(query: {pageSize: 0}) {
         avatar(size: 32)
       }
     }
+    customFields
   }
 }

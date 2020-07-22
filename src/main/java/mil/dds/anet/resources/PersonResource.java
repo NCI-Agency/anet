@@ -51,6 +51,7 @@ public class PersonResource {
   @GraphQLMutation(name = "createPerson")
   public Person createPerson(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "person") Person p) {
+    p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     if (!canCreateOrUpdatePerson(user, p, true)) {
       throw new WebApplicationException("You do not have permissions to create this person",
@@ -115,6 +116,7 @@ public class PersonResource {
   @GraphQLMutation(name = "updatePerson")
   public Integer updatePerson(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "person") Person p) {
+    p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
     if (!canCreateOrUpdatePerson(user, existing, false)) {

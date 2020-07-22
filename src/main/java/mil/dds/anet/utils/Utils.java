@@ -1,5 +1,11 @@
 package mil.dds.anet.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.json.JsonSanitizer;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +34,7 @@ import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import net.coobird.thumbnailator.Thumbnails;
 import org.jsoup.Jsoup;
@@ -39,6 +47,7 @@ public class Utils {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 
   /**
    * Crude method to check whether a uuid is purely integer, in which case it is probably a legacy
@@ -180,7 +189,7 @@ public class Utils {
     return result;
   }
 
-  public static final PolicyFactory POLICY_DEFINITION = new HtmlPolicyBuilder()
+  public static final PolicyFactory HTML_POLICY_DEFINITION = new HtmlPolicyBuilder()
       .allowStandardUrlProtocols()
       // Allow in-line image data
       .allowUrlProtocols("data").allowAttributes("src").matching(Pattern.compile("^data:image/.*$"))
@@ -208,9 +217,43 @@ public class Utils {
     if (input == null) {
       return null;
     }
-    return POLICY_DEFINITION.sanitize(input);
+    return HTML_POLICY_DEFINITION.sanitize(input);
   }
 
+  public static String sanitizeJson(String inputJson) throws JsonProcessingException {
+    final String sanitizedJson = JsonSanitizer.sanitize(inputJson);
+    final JsonNode jsonTree = mapper.readTree(sanitizedJson);
+    internalSanitizeJsonForHtml(jsonTree);
+    return mapper.writeValueAsString(jsonTree);
+  }
+
+  private static void internalSanitizeJsonForHtml(JsonNode jsonNode) {
+    if (jsonNode.isObject()) {
+      final ObjectNode objectNode = (ObjectNode) jsonNode;
+      for (final Iterator<Map.Entry<String, JsonNode>> entryIter = objectNode.fields(); entryIter
+          .hasNext();) {
+        final Map.Entry<String, JsonNode> entry = entryIter.next();
+        final JsonNode newValue = entry.getValue().isTextual()
+            ? objectNode.textNode(sanitizeHtml(entry.getValue().asText()))
+            : entry.getValue();
+        final String sanitizedKey = sanitizeHtml(entry.getKey());
+        if (!entry.getKey().equals(sanitizedKey)) {
+          objectNode.remove(entry.getKey());
+        }
+        objectNode.set(sanitizedKey, newValue);
+        internalSanitizeJsonForHtml(entry.getValue());
+      }
+    } else if (jsonNode.isArray()) {
+      final ArrayNode arrayNode = (ArrayNode) jsonNode;
+      for (int i = 0; i < arrayNode.size(); i++) {
+        if (arrayNode.get(i).isTextual()) {
+          arrayNode.set(i, arrayNode.textNode(sanitizeHtml(arrayNode.get(i).asText())));
+        } else {
+          internalSanitizeJsonForHtml(arrayNode.get(i));
+        }
+      }
+    }
+  }
 
   public static String trimStringReturnNull(String input) {
     if (input == null) {
