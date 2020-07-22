@@ -1113,10 +1113,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     confirmHandler,
     cancelHandler
   ) {
-    const validationWarnings = warnApproveOwnReport
-      ? [`You are requesting changes to your own ${reportType}`]
-      : []
-    return _isEmpty(validationWarnings) ? (
+    const warnings = _concat(
+      validationWarnings || [],
+      warnApproveOwnReport
+        ? [`You are requesting changes to your own ${reportType}`]
+        : []
+    )
+    return _isEmpty(warnings) ? (
       <Button bsStyle="warning" onClick={confirmHandler}>
         {label}
       </Button>
@@ -1125,7 +1128,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         onConfirm={confirmHandler}
         onClose={cancelHandler}
         title="Request changes?"
-        body={renderValidationWarnings(validationWarnings, "rejecting")}
+        body={renderValidationWarnings(warnings, "rejecting")}
         confirmText="Request changes anyway"
         cancelText="Cancel change request"
         dialogClassName="react-confirm-bootstrap-modal"
@@ -1209,13 +1212,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     id,
     className
   ) {
-    let validationWarnings = warnApproveOwnReport
-      ? [`You are approving your own ${reportType}`]
-      : []
-    if (!_isEmpty(validationWarnings)) {
-      validationWarnings = _concat(validationWarnings, validationWarnings)
-    }
-    return _isEmpty(validationWarnings) ? (
+    const warnings = _concat(
+      validationWarnings || [],
+      warnApproveOwnReport ? [`You are approving your own ${reportType}`] : []
+    )
+    return _isEmpty(warnings) ? (
       <Button
         type="button"
         bsStyle="primary"
@@ -1232,7 +1233,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         onConfirm={confirmHandler}
         onClose={cancelHandler}
         title={title}
-        body={renderValidationWarnings(validationWarnings, submitType)}
+        body={renderValidationWarnings(warnings, submitType)}
         confirmText={confirmText}
         cancelText={cancelText}
         dialogClassName="react-confirm-bootstrap-modal"
@@ -1288,7 +1289,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     }
     return (
       <Alert bsStyle="warning">
-        The following warnings should be addressed before {submitType} this
+        The following warnings should be addressed before {submitType} this{" "}
         {reportType}:
         <ul>
           {validationWarnings.map((warning, idx) => (
