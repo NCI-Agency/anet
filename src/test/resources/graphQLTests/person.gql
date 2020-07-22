@@ -65,4 +65,5 @@ person(uuid:"${personUuid}") {
       relatedObjectUuid
     }
   }
+  customFields
 }

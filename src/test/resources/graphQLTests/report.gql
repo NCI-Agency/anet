@@ -181,4 +181,5 @@ report(uuid:"${reportUuid}") {
       relatedObjectUuid
     }
   }
+  customFields
 }

@@ -16,5 +16,6 @@ taskList(query: {text: "1.1.", pageSize: 0}) {
     textReportsCopy: reports(query: {text: "meet"}) {
       uuid
     }
+    customFields
   }
 }

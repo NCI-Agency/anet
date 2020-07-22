@@ -27,6 +27,7 @@ personList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECEN
         name
       }
     }
+    customFields
   }
 }
 taskList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
