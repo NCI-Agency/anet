@@ -137,6 +137,7 @@
     "lodash": "4.17.19",
     "mathjs": "7.1.0",
     "milsymbol": "2.0.0",
+    "ml-matrix": "6.5.0",
     "moment": "2.27.0",
     "pathfinding": "0.4.18",
     "paths-js": "0.4.11",
@@ -164,6 +165,7 @@
     "react-use-dimensions": "1.2.1",
     "redux": "4.0.5",
     "redux-persist": "6.0.0",
+    "resize-observer-polyfill": "1.5.1",
     "use-debounce": "3.4.3",
     "yup": "0.29.1"
   },
