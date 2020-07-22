@@ -124,6 +124,11 @@ public class ReportResource {
       r.setAuthorUuid(author.getUuid());
     }
 
+    // FIXME: Eventually, also admins should no longer be allowed to create non-draft reports
+    if (r.getState() != ReportState.DRAFT && !AuthUtils.isAdmin(author)) {
+      throw new WebApplicationException("Can only create Draft reports", Status.BAD_REQUEST);
+    }
+
     Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
     if (r.getAdvisorOrgUuid() == null && primaryAdvisor != null) {
       logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);

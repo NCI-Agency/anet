@@ -1754,7 +1754,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setEngagementDate(engagementDate);
     r.setAttendees(Lists.newArrayList(attendee));
     r.setAdvisorOrg(advisorOrganization);
-    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+    final String createdUuid = graphQLHelper.createObject(admin, "createReport", "report",
         "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(createdUuid).isNotNull();
   }
