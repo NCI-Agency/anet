@@ -334,10 +334,10 @@ const ReportForm = ({
   reportTasks
     .filter(t => t.customFields)
     .forEach(t => {
-      const taskCustomFields = JSON.parse(t.customFields)
+      const taskCustomFields = utils.parseJsonSafe(t.customFields)
       if (taskCustomFields?.assessmentDefinition) {
         taskAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
-          JSON.parse(taskCustomFields.assessmentDefinition),
+          utils.parseJsonSafe(taskCustomFields.assessmentDefinition),
           `taskAssessments.${t.uuid}`
         )
       }
@@ -1075,11 +1075,13 @@ const ReportForm = ({
                   if (!task.customFields) {
                     return null
                   }
-                  const taskCustomFields = JSON.parse(task.customFields)
+                  const taskCustomFields = utils.parseJsonSafe(
+                    task.customFields
+                  )
                   if (!taskCustomFields?.assessmentDefinition) {
                     return null
                   }
-                  const taskAssessmentDefinition = JSON.parse(
+                  const taskAssessmentDefinition = utils.parseJsonSafe(
                     taskCustomFields.assessmentDefinition
                   )
                   return (

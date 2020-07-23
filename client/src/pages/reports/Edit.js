@@ -13,6 +13,7 @@ import { Report } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import utils from "utils"
 import ReportForm from "./Form"
 
 const GQL_GET_REPORT = gql`
@@ -119,7 +120,7 @@ const ReportEdit = ({ pageDispatchers }) => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report.formCustomFields = utils.parseJsonSafe(data.report.customFields)
   }
   const report = new Report(data ? data.report : {})
   const reportInitialValues = Object.assign(report, report.getTaskAssessments())

@@ -223,7 +223,7 @@ export default class Task extends Model {
           (!dateRange ||
             (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
       )
-      .map(ta => JSON.parse(ta.text))
+      .map(ta => utils.parseJsonSafe(ta.text))
     const assessmentResults = {}
     taskAssessmentNotes.forEach(o =>
       Object.keys(o).forEach(k => {
@@ -249,7 +249,7 @@ export default class Task extends Model {
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
       .map(ta => ({
         uuid: ta.uuid,
-        assessment: JSON.parse(ta.text)
+        assessment: utils.parseJsonSafe(ta.text)
       }))
     return notesToAssessments.length ? notesToAssessments[0].assessment : null
   }

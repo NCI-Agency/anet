@@ -398,7 +398,7 @@ export default class Report extends Model {
           )[0].relatedObjectUuid
         ],
         assessmentUuid: ta.uuid,
-        assessment: JSON.parse(ta.text)
+        assessment: utils.parseJsonSafe(ta.text)
       }))
     // When updating the assessments, we need for each task the uuid of the related assessment
     const taskToAssessmentUuid = {}

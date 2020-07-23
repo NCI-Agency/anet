@@ -301,7 +301,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       text: tag.name
     }))
     data.report.to = ""
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report.formCustomFields = utils.parseJsonSafe(data.report.customFields)
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })
@@ -662,11 +662,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   if (!task.customFields) {
                     return null
                   }
-                  const taskCustomFields = JSON.parse(task.customFields)
+                  const taskCustomFields = utils.parseJsonSafe(
+                    task.customFields
+                  )
                   if (!taskCustomFields?.assessmentDefinition) {
                     return null
                   }
-                  const taskAssessmentDefinition = JSON.parse(
+                  const taskAssessmentDefinition = utils.parseJsonSafe(
                     taskCustomFields.assessmentDefinition
                   )
                   return (

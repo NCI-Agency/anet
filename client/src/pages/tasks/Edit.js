@@ -14,6 +14,7 @@ import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 import TaskForm from "./Form"
 
 const GQL_GET_TASK = gql`
@@ -113,7 +114,7 @@ const TaskEdit = ({ pageDispatchers }) => {
     return result
   }
   if (data) {
-    data.task.formCustomFields = JSON.parse(data.task.customFields)
+    data.task.formCustomFields = utils.parseJsonSafe(data.task.customFields)
   }
   const task = new Task(data ? data.task : {})
 

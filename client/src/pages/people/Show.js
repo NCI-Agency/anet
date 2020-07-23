@@ -35,6 +35,7 @@ import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
 const GQL_GET_PERSON = gql`
@@ -119,7 +120,7 @@ const PersonShow = ({ pageDispatchers }) => {
     return result
   }
   if (data) {
-    data.person.formCustomFields = JSON.parse(data.person.customFields)
+    data.person.formCustomFields = utils.parseJsonSafe(data.person.customFields)
   }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success

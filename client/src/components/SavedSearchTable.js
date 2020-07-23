@@ -2,6 +2,7 @@ import { SEARCH_OBJECT_TYPES } from "actions"
 import ReportCollection from "components/ReportCollection"
 import PropTypes from "prop-types"
 import React from "react"
+import utils from "utils"
 
 const SavedSearchTable = props => {
   const objType =
@@ -11,7 +12,7 @@ const SavedSearchTable = props => {
     return <em>No reports found</em>
   }
 
-  const query = JSON.parse(props.search.query)
+  const query = utils.parseJsonSafe(props.search.query)
   // Add default sorting (if not specified/saved in the query); see SEARCH_CONFIG in pages/Search.js
   query.sortBy = query.sortBy || "ENGAGEMENT_DATE"
   query.sortOrder = query.sortOrder || "DESC"

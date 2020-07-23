@@ -14,6 +14,7 @@ import moment from "moment"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import utils from "utils"
 import PersonForm from "./Form"
 
 const GQL_GET_PERSON = gql`
@@ -74,7 +75,7 @@ const PersonEdit = ({ pageDispatchers }) => {
     const parsedFullName = Person.parseFullName(data.person.name)
     data.person.firstName = parsedFullName.firstName
     data.person.lastName = parsedFullName.lastName
-    data.person.formCustomFields = JSON.parse(data.person.customFields)
+    data.person.formCustomFields = utils.parseJsonSafe(data.person.customFields)
   }
   const person = new Person(data ? data.person : {})
   const legendText = person.isNewUser()

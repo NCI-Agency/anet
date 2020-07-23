@@ -11,6 +11,7 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
+import utils from "utils"
 import "components/assessments/AssessmentResultsTable.css"
 
 /* The AssessmentResultsTable component displays the results of two types of
@@ -213,8 +214,8 @@ const EntityAssessmentResults = ({
   if (!entity) {
     return null
   }
-  const assessmentDefinition = JSON.parse(
-    JSON.parse(entity.customFields || "{}").assessmentDefinition || "{}"
+  const assessmentDefinition = utils.parseJsonSafe(
+    utils.parseJsonSafe(entity.customFields).assessmentDefinition
   )
   return (
     <>
