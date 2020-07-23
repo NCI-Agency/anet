@@ -15,10 +15,10 @@ import {
   periodToString
 } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Panel } from "react-bootstrap"
 
-const BasePeriodicAssessment = ({
+const PeriodicAssessment = ({
   assessment,
   assessmentYupSchema,
   assessmentConfig,
@@ -26,9 +26,9 @@ const BasePeriodicAssessment = ({
   entity,
   period,
   recurrence,
-  onUpdateAssessment,
-  currentUser
+  onUpdateAssessment
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
 
   const byMe = Person.isEqual(currentUser, note.author)
@@ -115,7 +115,7 @@ const BasePeriodicAssessment = ({
     </Panel>
   )
 }
-BasePeriodicAssessment.propTypes = {
+PeriodicAssessment.propTypes = {
   assessment: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
   assessmentYupSchema: PropTypes.object.isRequired,
@@ -123,26 +123,17 @@ BasePeriodicAssessment.propTypes = {
   entity: PropTypes.object.isRequired,
   period: AssessmentPeriodPropType.isRequired,
   recurrence: PropTypes.string.isRequired,
-  onUpdateAssessment: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  onUpdateAssessment: PropTypes.func.isRequired
 }
 
-const PeriodicAssessment = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePeriodicAssessment currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
-
-const BasePeriodicAssessmentsRows = ({
+export const PeriodicAssessmentsRows = ({
   entity,
   entityType,
   periodsConfig,
   canAddAssessment,
-  onUpdateAssessment,
-  currentUser
+  onUpdateAssessment
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
   const { recurrence, periods } = periodsConfig
   if (_isEmpty(periods)) {
@@ -260,22 +251,10 @@ const BasePeriodicAssessmentsRows = ({
     </>
   )
 }
-BasePeriodicAssessmentsRows.propTypes = {
+PeriodicAssessmentsRows.propTypes = {
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   periodsConfig: AssessmentPeriodsConfigPropType.isRequired,
   canAddAssessment: PropTypes.bool,
-  onUpdateAssessment: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  onUpdateAssessment: PropTypes.func.isRequired
 }
-
-export const PeriodicAssessmentsRows = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePeriodicAssessmentsRows
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
