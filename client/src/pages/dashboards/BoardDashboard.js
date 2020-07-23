@@ -29,6 +29,7 @@ import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
 import Settings from "settings"
+import utils from "utils"
 import "./BoardDashboard.css"
 import {
   DiagramLinkFactory,
@@ -201,7 +202,7 @@ const BoardDashboard = () => {
         }}
         onDrop={event => {
           event.persist()
-          const data = JSON.parse(
+          const data = utils.parseJsonSafe(
             event.dataTransfer.getData("storm-diagram-node")
           )
           const point = engineRef.current.getRelativeMousePoint(event)

@@ -491,7 +491,7 @@ export default class Model {
           // FIXME: make a nicer implementation of the check on period start
           obj.assessment.__recurrence === recurrence &&
           obj.assessment.__periodStart ===
-            JSON.parse(JSON.stringify(period.start))
+            utils.parseJsonSafe(JSON.stringify(period.start))
       )
   }
 

@@ -156,7 +156,7 @@ const TaskShow = ({ pageDispatchers }) => {
       note =>
         note.type !== NOTE_TYPE.FREE_TEXT &&
         (note.customFields = utils.parseJsonSafe(note.text))
-    ) // TODO: Maybe move this code to Ta
+    ) // TODO: Maybe move this code to Task()
   }
   const task = new Task(data ? data.task : {})
 

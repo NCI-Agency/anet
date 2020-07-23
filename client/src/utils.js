@@ -179,12 +179,13 @@ export default {
 
   parseJsonSafe: function(jsonString) {
     // TODO: Improve error handling so that consuming widgets can display an error w/o crashing
+    let result
     try {
-      return JSON.parse(jsonString)
+      result = JSON.parse(jsonString || "{}")
     } catch (error) {
       console.error(`unable to parse JSON: ${jsonString}`)
     }
-    return null
+    return typeof result === "object" ? result : {}
   },
 
   arrayOfNumbers: function(arr) {
