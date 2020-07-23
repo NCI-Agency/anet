@@ -123,7 +123,7 @@ BasePeriodicAssessment.propTypes = {
   entity: PropTypes.object.isRequired,
   period: AssessmentPeriodPropType.isRequired,
   recurrence: PropTypes.string.isRequired,
-  onUpdateAssessment: PropTypes.func,
+  onUpdateAssessment: PropTypes.func.isRequired,
   currentUser: PropTypes.instanceOf(Person)
 }
 

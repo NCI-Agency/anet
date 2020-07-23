@@ -141,6 +141,7 @@ const AssessmentResultsTable = ({
                         entityType={entityType}
                         periodsConfig={periodsConfig}
                         canAddAssessment={false}
+                        onUpdateAssessment={onUpdateAssessment}
                       />
                     ))}
                   </>

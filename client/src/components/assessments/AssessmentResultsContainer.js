@@ -42,7 +42,7 @@ AssessmentResultsContainer.propTypes = {
   entity: PropTypes.instanceOf(Model),
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
-  onUpdateAssessment: PropTypes.func,
+  onUpdateAssessment: PropTypes.func.isRequired,
   canAddAssessment: PropTypes.bool
 }
 
