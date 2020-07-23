@@ -185,7 +185,7 @@ export default {
     } catch (error) {
       console.error(`unable to parse JSON: ${jsonString}`)
     }
-    return typeof result === "object" ? result : {}
+    return typeof result === "object" ? result || {} : {}
   },
 
   arrayOfNumbers: function(arr) {
