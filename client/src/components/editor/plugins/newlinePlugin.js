@@ -24,7 +24,7 @@ const createNewLines = (newLines, nextState) => {
   return EditorState.push(nextState, nextContentState, "insert-fragment")
 }
 
-const newlinePlugin = () => ({
+const createNewlinePlugin = () => ({
   handlePastedText(text, html, editorState, { setEditorState }) {
     const nextState = editorState
     if (!HTML_REGEX.test(html)) {
@@ -39,4 +39,4 @@ const newlinePlugin = () => ({
   }
 })
 
-export default newlinePlugin
+export default createNewlinePlugin

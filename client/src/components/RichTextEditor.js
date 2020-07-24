@@ -235,7 +235,7 @@ class RichTextEditor extends Component {
           }}
           onBlur={onHandleBlur}
           stateSaveInterval={100}
-          plugins={[sideToolbarPlugin, newlinePlugin, mandatoryBlockPlugin]}
+          plugins={[sideToolbarPlugin, mandatoryBlockPlugin, newlinePlugin]}
           handlePastedText={() => true}
           rawContentState={
             value
