@@ -56,12 +56,7 @@ const IqrBoxPlot = ({ values, levels, width, height, whenUnspecified }) => {
     return whenUnspecified
   }
   return (
-    <svg
-      height={height}
-      width={width}
-      xmlns="http://www.w3.org/2000/svg"
-      ref={containerRef}
-    >
+    <svg height={height} width={width} ref={containerRef}>
       {values?.length > 1 && (
         <g transform={`translate(0 ${scaleYPosition})`}>
           <line

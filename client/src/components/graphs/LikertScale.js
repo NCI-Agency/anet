@@ -100,7 +100,6 @@ const LikertScale = ({
     <svg
       height={height}
       width={width}
-      xmlns="http://www.w3.org/2000/svg"
       ref={containerRef}
       onClick={e => {
         if (editable && e.clientX) {
