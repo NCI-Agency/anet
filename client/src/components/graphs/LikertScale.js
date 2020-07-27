@@ -43,10 +43,7 @@ const LikertScale = ({
   )
 
   const xToValue = useCallback(
-    newX => {
-      const a = newX >= scale.range()[0] ? scale.invert(newX) : null
-      return a
-    },
+    newX => (newX >= scale.range()[0] ? scale.invert(newX) : null),
     [scale]
   )
 

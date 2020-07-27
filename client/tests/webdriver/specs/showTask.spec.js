@@ -10,7 +10,7 @@ describe("Show task page", () => {
     ShowTask.openAsAdminUser(ShowReport.task12BUrl)
   })
 
-  describe("When on the show page of a task with assessmnets", () => {
+  describe("When on the show page of a task with assessments", () => {
     it("We should see a table of assessments related to the current task", () => {
       ShowTask.assessmentResultsMonthly.waitForDisplayed()
       const frenchFlagAssessmentMonthly = ShowTask.assessmentResultsMonthly.$(

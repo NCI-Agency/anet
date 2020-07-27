@@ -64,6 +64,16 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
   }
 `
 
+// Entity type --> GQL query
+export const GRAPHQL_ENTITY_FIELDS = {
+  Report: "uuid intent",
+  Person: "uuid name role avatar(size: 32)",
+  Organization: "uuid shortName",
+  Position: "uuid name",
+  Location: "uuid name",
+  Task: "uuid shortName longName"
+}
+
 export const GQL_CREATE_NOTE = gql`
   mutation($note: NoteInput!) {
     createNote(note: $note) {

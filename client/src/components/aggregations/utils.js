@@ -134,16 +134,14 @@ export const getReportsByTasks = reportsList => {
     .sort((a, b) => a.shortName.localeCompare(b.shortName))
   // add No Task item, in order to relate to reports without Tasks
   tasks.push(noTask)
-  return tasks.map(d => {
-    const r = {}
-    r.task = d
-    r.reportsCount =
+  return tasks.map(d => ({
+    task: d,
+    reportsCount:
       d.uuid === noTask.uuid
         ? simplifiedValues.filter(item => _isEmpty(item.tasks)).length
         : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1)
           .length
-    return r
-  })
+  }))
 }
 
 export const reportsByTaskAggregation = (fieldName, fieldConfig, data) => ({

@@ -132,20 +132,18 @@ const AssessmentResultsTable = ({
             >
               <PeriodsTableHeader periodsConfig={periodsConfig} />
               <tbody>
-                {!_isEmpty(subEntities) && (
-                  <>
-                    {subEntities?.map(subEntity => (
-                      <EntityAssessmentResults
-                        key={`subassessment-${subEntity.uuid}`}
-                        entity={subEntity}
-                        entityType={entityType}
-                        periodsConfig={periodsConfig}
-                        canAddAssessment={false}
-                        onUpdateAssessment={onUpdateAssessment}
-                      />
-                    ))}
-                  </>
-                )}
+                <>
+                  {subEntities?.map(subEntity => (
+                    <EntityAssessmentResults
+                      key={`subassessment-${subEntity.uuid}`}
+                      entity={subEntity}
+                      entityType={entityType}
+                      periodsConfig={periodsConfig}
+                      canAddAssessment={false}
+                      onUpdateAssessment={onUpdateAssessment}
+                    />
+                  ))}
+                </>
                 <EntityAssessmentResults
                   entity={entity}
                   entityType={entityType}

@@ -22,7 +22,7 @@ import AggregationWidgetContainer, {
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import { CUSTOM_FIELD_TYPE } from "components/Model"
+import { CUSTOM_FIELD_TYPE, GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import _uniqueId from "lodash/uniqueId"
 import * as Models from "models"
@@ -32,12 +32,12 @@ import PropTypes from "prop-types"
 import * as React from "react"
 
 const ENTITY_GQL_FIELDS = {
-  Report: "uuid, intent",
+  Report: GRAPHQL_ENTITY_FIELDS.Report,
   Person: `uuid, name, role, avatar(size: 64), ${GRAPHQL_NOTES_FIELDS}`,
-  Organization: "uuid, shortName",
-  Position: "uuid, name",
-  Location: "uuid, name",
-  Task: `uuid, shortName, longName, ${GRAPHQL_NOTES_FIELDS}`
+  Organization: GRAPHQL_ENTITY_FIELDS.Organization,
+  Position: GRAPHQL_ENTITY_FIELDS.Position,
+  Location: GRAPHQL_ENTITY_FIELDS.Location,
+  Task: `${GRAPHQL_ENTITY_FIELDS.Task} ${GRAPHQL_NOTES_FIELDS}`
 }
 
 const DIAGRAM_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
