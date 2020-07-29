@@ -436,7 +436,7 @@ run.dependsOn buildClient
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '8.18'
+	toolVersion = '8.35'
 }
 
 spotless {
