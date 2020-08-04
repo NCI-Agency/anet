@@ -3,12 +3,12 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
-import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
+import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { NOTE_TYPE } from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT, NOTE_TYPE } from "components/Model"
 import {
   getSubscriptionIcon,
   mapPageDispatchersToProps,
@@ -23,12 +23,13 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Report, Task } from "models"
+import { Task } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -108,12 +109,6 @@ const GQL_GET_TASK = gql`
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
-      publishedReports: reports(query: {
-        pageSize: 0
-        state: [${Report.STATE.PUBLISHED}]
-      }) {
-        uuid
-      }
     }
     subTasks: taskList(query: {
       pageSize: 0
@@ -130,12 +125,6 @@ const GQL_GET_TASK = gql`
         }
         customFields
         ${GRAPHQL_NOTES_FIELDS}
-        publishedReports: reports(query: {
-          pageSize: 0
-          state: [${Report.STATE.PUBLISHED}]
-        }) {
-          uuid
-        }
       }
     }
   }
@@ -164,11 +153,13 @@ const TaskShow = ({ pageDispatchers }) => {
   }
 
   if (data) {
-    data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
+    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.task.customFields
+    )
     data.task.notes.forEach(
       note =>
         note.type !== NOTE_TYPE.FREE_TEXT &&
-        (note.customFields = JSON.parse(note.text))
+        (note.customFields = utils.parseJsonSafe(note.text))
     ) // TODO: Maybe move this code to Task()
   }
   const task = new Task(data ? data.task : {})
@@ -179,7 +170,7 @@ const TaskShow = ({ pageDispatchers }) => {
       subTask.notes.forEach(
         note =>
           note.type !== NOTE_TYPE.FREE_TEXT &&
-          (note.customFields = JSON.parse(note.text))
+          (note.customFields = utils.parseJsonSafe(note.text))
       ) // TODO: Maybe move this code to Task()
       subTasks.push(new Task(subTask))
     })
@@ -206,24 +197,6 @@ const TaskShow = ({ pageDispatchers }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
-  const now = moment()
-  const assessmentPeriods = [
-    {
-      start: now.clone().subtract(2, "months").startOf("month"),
-      end: now.clone().subtract(2, "months").endOf("month"),
-      allowNewAssessments: false
-    },
-    {
-      start: now.clone().subtract(1, "months").startOf("month"),
-      end: now.clone().subtract(1, "months").endOf("month"),
-      allowNewAssessments: true
-    },
-    {
-      start: now.clone().startOf("month"),
-      end: now.clone().endOf("month"),
-      allowNewAssessments: false
-    }
-  ]
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -239,7 +212,8 @@ const TaskShow = ({ pageDispatchers }) => {
               relatedObject={
                 task.uuid && {
                   relatedObjectType: Task.relatedObjectType,
-                  relatedObjectUuid: task.uuid
+                  relatedObjectUuid: task.uuid,
+                  relatedObject: task
                 }
               }
             />
@@ -377,14 +351,12 @@ const TaskShow = ({ pageDispatchers }) => {
               </div>
             </Form>
 
-            <AssessmentResultsTable
-              style={{ flex: "0 0 100%" }}
+            <AssessmentResultsContainer
               entity={task}
               entityType={Task}
               subEntities={subTasks}
-              assessmentPeriods={assessmentPeriods}
               canAddAssessment={canEdit}
-              onAddAssessment={refetch}
+              onUpdateAssessment={refetch}
             />
 
             <Fieldset title="Responsible positions">

@@ -627,8 +627,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Put billet in EF 1.1
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> results = graphQLHelper.searchObjects(admin,
         "organizationList", "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -886,8 +885,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Search by direct organization
     OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,

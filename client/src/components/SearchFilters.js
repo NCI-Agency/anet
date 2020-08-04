@@ -363,7 +363,11 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "atmosphere",
-          options: ["POSITIVE", "NEUTRAL", "NEGATIVE"]
+          options: [
+            Report.ATMOSPHERE.POSITIVE,
+            Report.ATMOSPHERE.NEUTRAL,
+            Report.ATMOSPHERE.NEGATIVE
+          ]
         }
       },
       Tag: {

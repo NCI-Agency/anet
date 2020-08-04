@@ -85,7 +85,8 @@ const LocationEdit = ({ pageDispatchers }) => {
         relatedObject={
           location.uuid && {
             relatedObjectType: Location.relatedObjectType,
-            relatedObjectUuid: location.uuid
+            relatedObjectUuid: location.uuid,
+            relatedObject: location
           }
         }
       />

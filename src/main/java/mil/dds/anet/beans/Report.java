@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,13 +24,18 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Report extends AbstractCustomizableAnetBean implements SubscribableObject {
+public class Report extends AbstractCustomizableAnetBean
+    implements RelatableObject, SubscribableObject {
 
   public enum ReportState {
     DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, // -
     @Deprecated
     FUTURE, // Should no longer be used but remain in place to keep the correct values
     APPROVED
+  }
+
+  public enum EngagementStatus {
+    HAPPENED, FUTURE, CANCELLED
   }
 
   public enum Atmosphere {
@@ -784,6 +790,16 @@ public class Report extends AbstractCustomizableAnetBean implements Subscribable
   @JsonIgnore
   public boolean isFutureEngagement() {
     return engagementDate != null && engagementDate.isAfter(Utils.endOfToday());
+  }
+
+  @GraphQLQuery(name = "engagementStatus")
+  public List<EngagementStatus> loadEngagementStatus() {
+    LinkedList<EngagementStatus> statuses = new LinkedList<EngagementStatus>();
+    if (state == ReportState.CANCELLED) {
+      statuses.add(EngagementStatus.CANCELLED);
+    }
+    statuses.add(isFutureEngagement() ? EngagementStatus.FUTURE : EngagementStatus.HAPPENED);
+    return statuses;
   }
 
   @Override

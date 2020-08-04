@@ -29,7 +29,7 @@ public abstract class AbstractLocationSearcher
     qb.addTotalCount();
     qb.addFromClause("locations");
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -48,8 +48,6 @@ public abstract class AbstractLocationSearcher
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(LocationSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     switch (query.getSortBy()) {

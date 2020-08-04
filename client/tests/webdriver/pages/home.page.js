@@ -24,6 +24,10 @@ class Home extends Page {
     return browser.$("#topbar #searchBarSubmit")
   }
 
+  get myOrgLink() {
+    return browser.$("#my-organization")
+  }
+
   waitForSecurityBannerValue(value) {
     this.securityBanner.waitForExist()
     this.securityBanner.waitForDisplayed()

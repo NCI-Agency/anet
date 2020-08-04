@@ -54,7 +54,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       qb.addFromClause("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
     }
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -107,8 +107,6 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(PersonSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     switch (query.getSortBy()) {

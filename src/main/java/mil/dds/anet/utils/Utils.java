@@ -221,6 +221,11 @@ public class Utils {
   }
 
   public static String sanitizeJson(String inputJson) throws JsonProcessingException {
+    if (inputJson == null) {
+      // `JsonSanitizer.sanitize(null)` would return `"null"` in this case,
+      // but we prefer plain `null`
+      return null;
+    }
     final String sanitizedJson = JsonSanitizer.sanitize(inputJson);
     final JsonNode jsonTree = mapper.readTree(sanitizedJson);
     internalSanitizeJsonForHtml(jsonTree);

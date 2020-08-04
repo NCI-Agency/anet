@@ -32,7 +32,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     qb.addTotalCount();
     qb.addFromClause("tasks");
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -84,8 +84,6 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(TaskSearchQuery query);
 
   @SuppressWarnings("unchecked")
   protected void addBatchClause(TaskSearchQuery query) {

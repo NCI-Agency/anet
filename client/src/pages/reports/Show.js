@@ -7,12 +7,14 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   AnchorLink,
   PageDispatchersPropType,
@@ -32,7 +34,7 @@ import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
-import { Comment, Person, Position, Report } from "models"
+import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -304,8 +306,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       id: tag.uuid.toString(),
       text: tag.name
     }))
+    data.report.tasks = Task.fromArray(data.report.tasks)
+    data.report.attendees = Person.fromArray(data.report.attendees)
     data.report.to = ""
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.report.customFields
+    )
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })
@@ -356,8 +362,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial task assessments values
-  report = Object.assign(report, report.getTaskAssessments())
+  // Get initial tasks/attendees instant assessments values
+  report = Object.assign(report, report.getTasksEngagementAssessments())
+  report = Object.assign(report, report.getAttendeesEngagementAssessments())
 
   return (
     <Formik
@@ -393,7 +400,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               relatedObject={
                 uuid && {
                   relatedObjectType: Report.relatedObjectType,
-                  relatedObjectUuid: uuid
+                  relatedObjectUuid: uuid,
+                  relatedObject: report
                 }
               }
             />
@@ -676,29 +684,32 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 </Fieldset>
               )}
               <Fieldset
-                title="Engagement assessments"
-                id="engagement-assessments"
+                title="Attendees engagement assessments"
+                id="attendees-engagement-assessments"
               >
-                {values.tasks.map(task => {
-                  if (!task.customFields) {
-                    return null
-                  }
-                  const taskCustomFields = JSON.parse(task.customFields)
-                  if (!taskCustomFields?.assessmentDefinition) {
-                    return null
-                  }
-                  const taskAssessmentDefinition = JSON.parse(
-                    taskCustomFields.assessmentDefinition
-                  )
-                  return (
-                    <ReadonlyCustomFields
-                      key={`assessment-${values.uuid}-${task.uuid}`}
-                      fieldsConfig={taskAssessmentDefinition}
-                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
-                      values={values}
-                    />
-                  )
-                })}
+                <InstantAssessmentsContainerField
+                  entityType={Person}
+                  entities={values.attendees}
+                  parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
+                  formikProps={{
+                    values
+                  }}
+                  readonly
+                />
+              </Fieldset>
+              <Fieldset
+                title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                id="tasks-engagement-assessments"
+              >
+                <InstantAssessmentsContainerField
+                  entityType={Task}
+                  entities={values.tasks}
+                  parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                  formikProps={{
+                    values
+                  }}
+                  readonly
+                />
               </Fieldset>
               {report.showWorkflow() && (
                 <ReportFullWorkflow workflow={report.workflow} />

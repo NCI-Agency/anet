@@ -1,16 +1,18 @@
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_FIELDS } from "components/Model"
+import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
-import { getEntityByUuid } from "utils_links"
 
 const LinkAnetEntity = ({ type, uuid, children }) => {
   const [entity, setEntity] = useState()
 
   useEffect(() => {
-    const response = getEntityByUuid(type, uuid)
-    if (response) {
-      response.then(data => setEntity(data))
-    }
+    const modelClass = Models[type]
+    modelClass &&
+      modelClass
+        .fetchByUuid(uuid, GRAPHQL_ENTITY_FIELDS)
+        .then(data => setEntity(data))
   }, [type, uuid])
 
   return (

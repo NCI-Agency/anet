@@ -35,7 +35,7 @@ public abstract class AbstractPositionSearcher
       qb.addFromClause("LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid");
     }
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -83,8 +83,6 @@ public abstract class AbstractPositionSearcher
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(PositionSearchQuery query);
 
   @SuppressWarnings("unchecked")
   protected void addBatchClause(PositionSearchQuery query) {
