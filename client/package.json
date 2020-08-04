@@ -5,6 +5,7 @@
   "homepage": "/assets/client",
   "devDependencies": {
     "@babel/core": "7.11.0",
+    "@babel/eslint-parser": "7.11.0",
     "@babel/plugin-proposal-class-properties": "7.10.4",
     "@babel/plugin-proposal-decorators": "7.10.5",
     "@babel/plugin-proposal-do-expressions": "7.10.4",
@@ -35,7 +36,6 @@
     "aigle": "1.14.1",
     "autoprefixer": "9.8.6",
     "ava": "3.11.1",
-    "babel-eslint": "10.1.0",
     "babel-jest": "26.2.2",
     "babel-loader": "8.1.0",
     "babel-preset-react-app": "9.1.2",
@@ -172,8 +172,8 @@
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production --config config/webpack.client.prod.js",
     "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack-dev-server --mode development --open --config config/webpack.client.dev.js",
-    "lint": "eslint '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
-    "lint-fix": "prettier --write '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js' && eslint --fix '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
+    "lint": "NODE_ENV=development eslint '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
+    "lint-fix": "prettier --write '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js' && NODE_ENV=development eslint --fix '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-wdio-ie\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-wdio-ie && yarn run test-e2e",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava --config ava.config.js",
@@ -258,7 +258,7 @@
     "globals": {
       "browser": "readonly"
     },
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
     "plugins": [
       "flowtype",
       "import",
