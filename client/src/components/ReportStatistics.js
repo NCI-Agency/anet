@@ -1,8 +1,8 @@
-import API from "api"
 import { gql } from "@apollo/client"
+import API from "api"
 import AggregationWidgetContainer, {
-  AGGREGATION_TYPE,
   AGGERGATION_WIDGET_TYPE,
+  AGGREGATION_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
 import { CUSTOM_FIELD_TYPE } from "components/Model"

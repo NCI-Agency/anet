@@ -237,8 +237,6 @@ const BoardDashboard = () => {
               <Button
                 onClick={() => {
                   dagreEngineRef.current.redistribute(model)
-
-                  // this.reroute();
                   engineRef.current.repaintCanvas()
                 }}
               >
