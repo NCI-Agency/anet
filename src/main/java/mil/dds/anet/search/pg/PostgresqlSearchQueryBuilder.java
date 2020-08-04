@@ -6,6 +6,7 @@ import java.util.Map;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
@@ -20,16 +21,33 @@ public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends 
 
   @Override
   public String getContainsQuery(String text) {
-    return "%" + stripWildcards(text) + "%";
+    if (Utils.isEmptyOrNull(text)) {
+      return null;
+    }
+    final String cleanText = stripWildcards(text);
+    if (Utils.isEmptyOrNull(cleanText)) {
+      return null;
+    }
+    return "%" + cleanText + "%";
   }
 
   @Override
   public String getFullTextQuery(String text) {
-    String cleanText = stripWildcards(text);
-    if (text.endsWith("*")) {
-      cleanText = cleanText + ":*";
+    if (Utils.isEmptyOrNull(text)) {
+      return null;
     }
-    return cleanText;
+    // Replace all special characters for tsquery with spaces
+    final String cleanText = text.trim().replaceAll("[<>:*|&!()\"']", " ").trim();
+    if (Utils.isEmptyOrNull(cleanText)) {
+      return null;
+    }
+    // Split into words
+    final String[] lexemes = cleanText.split("\\s+");
+    if (lexemes.length == 0) {
+      return null;
+    }
+    // Turn each word into a prefix match, and AND them
+    return Joiner.on(":* & ").join(lexemes).concat(":*");
   }
 
   @Override

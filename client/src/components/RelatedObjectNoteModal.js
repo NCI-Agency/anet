@@ -1,23 +1,30 @@
 import API from "api"
+import ConfirmDelete from "components/ConfirmDelete"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
 import Model, {
   GQL_CREATE_NOTE,
   GQL_UPDATE_NOTE,
+  MODEL_TO_OBJECT_TYPE,
   NOTE_TYPE
 } from "components/Model"
+import RelatedObjectsTable from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
+import utils from "utils"
 import * as yup from "yup"
 
 const RelatedObjectNoteModal = ({
   note,
+  currentObject,
   showModal,
   onCancel,
   onSuccess,
+  onDelete,
   questions
 }) => {
   const yupSchema = yup.object().shape({
@@ -25,6 +32,9 @@ const RelatedObjectNoteModal = ({
     text: yup.string().default("")
   })
   const [error, setError] = useState(null)
+  const [relatedObjects, setRelatedObjects] = useState(
+    note.noteRelatedObjects || []
+  )
   const edit = !!note.uuid
 
   return (
@@ -44,7 +54,8 @@ const RelatedObjectNoteModal = ({
           submitForm
         }) => {
           const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-          const jsonFields = isJson && note.text ? JSON.parse(note.text) : {}
+          const jsonFields =
+            isJson && note.text ? utils.parseJsonSafe(note.text) : {}
           const noteText = isJson ? jsonFields.text : note.text
           const typeName =
             note.type === NOTE_TYPE.PARTNER_ASSESSMENT ||
@@ -68,7 +79,6 @@ const RelatedObjectNoteModal = ({
                   }}
                 >
                   <Messages error={error} />
-
                   {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
                     <>
                       {questions.map(question => (
@@ -89,7 +99,6 @@ const RelatedObjectNoteModal = ({
                       ))}
                     </>
                   )}
-
                   <Field
                     name="text"
                     value={noteText}
@@ -106,19 +115,37 @@ const RelatedObjectNoteModal = ({
                     }
                     vertical
                   />
+                  <RelatedObjectsTable
+                    relatedObjects={relatedObjects}
+                    currentObject={edit ? undefined : currentObject}
+                    onSelect={handleRelatedObjectSelect}
+                    showDelete
+                    onDelete={handleRelatedObjectDelete}
+                  />
                 </div>
               </Modal.Body>
               <Modal.Footer>
                 <Button className="pull-left" onClick={close}>
                   Cancel
                 </Button>
-                <Button
-                  onClick={submitForm}
-                  bsStyle="primary"
-                  disabled={isSubmitting || !isValid}
-                >
-                  Save
-                </Button>
+                {_isEmpty(relatedObjects) && onDelete && (
+                  <ConfirmDelete
+                    onConfirmDelete={() => onDelete(note.uuid)}
+                    objectType="note"
+                    objectDisplay={"#" + note.uuid}
+                    bsStyle="warning"
+                    buttonLabel="Delete note"
+                  />
+                )}
+                {!_isEmpty(relatedObjects) && (
+                  <Button
+                    onClick={submitForm}
+                    bsStyle="primary"
+                    disabled={isSubmitting || !isValid}
+                  >
+                    Save
+                  </Button>
+                )}
               </Modal.Footer>
             </Form>
           )
@@ -126,6 +153,26 @@ const RelatedObjectNoteModal = ({
       </Formik>
     </Modal>
   )
+
+  function handleRelatedObjectSelect(value, model) {
+    const relatedObjectsUuids = relatedObjects.map(o => o.relatedObjectUuid)
+    if (!relatedObjectsUuids.includes(value.uuid)) {
+      const newRelatedObject = {
+        relatedObjectType: MODEL_TO_OBJECT_TYPE[model],
+        relatedObjectUuid: value.uuid,
+        relatedObject: value
+      }
+      setRelatedObjects([...relatedObjects, newRelatedObject])
+    }
+  }
+
+  function handleRelatedObjectDelete(relatedObject) {
+    const newRelatedObjects = relatedObjects.filter(
+      item => item.relatedObjectUuid !== relatedObject.relatedObjectUuid
+    )
+    setRelatedObjects(newRelatedObjects)
+  }
+
   function onSubmit(values, form) {
     return save(values, form)
       .then(response => onSubmitSuccess(response, values, form))
@@ -141,11 +188,15 @@ const RelatedObjectNoteModal = ({
   }
 
   function save(values, form) {
+    const noteRelatedObjects = relatedObjects.map(o => ({
+      relatedObjectType: o.relatedObjectType,
+      relatedObjectUuid: o.relatedObjectUuid
+    }))
     const updatedNote = {
       uuid: values.uuid,
       author: values.author,
       type: values.type,
-      noteRelatedObjects: values.noteRelatedObjects,
+      noteRelatedObjects,
       text: values.text
     }
     const isJson = updatedNote.type !== NOTE_TYPE.FREE_TEXT
@@ -161,14 +212,17 @@ const RelatedObjectNoteModal = ({
   function close() {
     // Reset state before closing (cancel)
     setError(null)
+    setRelatedObjects(note.noteRelatedObjects || [])
     onCancel()
   }
 }
 RelatedObjectNoteModal.propTypes = {
-  note: Model.notePropTypes,
+  note: Model.notePropType,
+  currentObject: Model.relatedObjectPropType,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
   questions: PropTypes.array
 }
 

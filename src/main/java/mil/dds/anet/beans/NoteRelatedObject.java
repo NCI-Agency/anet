@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class NoteRelatedObject extends AbstractAnetBean {
 
@@ -23,6 +25,8 @@ public class NoteRelatedObject extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private String relatedObjectUuid;
+  // annotated below
+  private RelatableObject relatedObject;
 
   @Override
   @JsonIgnore
@@ -103,4 +107,17 @@ public class NoteRelatedObject extends AbstractAnetBean {
     this.relatedObjectUuid = relatedObjectUuid;
   }
 
+  @GraphQLQuery(name = "relatedObject")
+  public CompletableFuture<RelatableObject> loadRelatedObject(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (relatedObject != null) {
+      return CompletableFuture.completedFuture(relatedObject);
+    }
+    return new UuidFetcher<AbstractAnetBean>()
+        .load(context, IdDataLoaderKey.valueOfTableName(relatedObjectType), relatedObjectUuid)
+        .thenApply(o -> {
+          relatedObject = (RelatableObject) o;
+          return relatedObject;
+        });
+  }
 }

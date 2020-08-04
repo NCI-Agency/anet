@@ -13,30 +13,35 @@ const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
 
 const authMiddleware = new ApolloLink((operation, forward) => {
-  const [authHeaderName, authHeaderValue] = API._getAuthHeader()
-  operation.setContext(({ headers = {} }) => ({
-    headers: {
+  operation.setContext(({ headers = {} }) => {
+    headers = {
       ...headers,
-      Accept: "application/json",
-      [authHeaderName]: authHeaderValue
+      Accept: "application/json"
     }
-  }))
+    const [authHeaderName, authHeaderValue] = API._getAuthHeader()
+    if (authHeaderName && authHeaderValue) {
+      headers[authHeaderName] = authHeaderValue
+    }
+    return { headers }
+  })
 
   return forward(operation)
 })
 
 const API = {
   _fetch(url, data, accept) {
-    const [authHeaderName, authHeaderValue] = API._getAuthHeader()
     const params = {
       method: "POST",
       body: JSON.stringify(data),
       credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
-        Accept: accept || "application/json",
-        [authHeaderName]: authHeaderValue
+        Accept: accept || "application/json"
       }
+    }
+    const [authHeaderName, authHeaderValue] = API._getAuthHeader()
+    if (authHeaderName && authHeaderValue) {
+      params.headers[authHeaderName] = authHeaderValue
     }
 
     return window.fetch(url, params)

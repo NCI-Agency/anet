@@ -14,7 +14,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Position extends AbstractAnetBean {
+public class Position extends AbstractAnetBean implements RelatableObject {
 
   public static enum PositionType {
     ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR
