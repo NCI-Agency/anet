@@ -30,7 +30,7 @@ const MyTasks = ({
   const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
     searchQuery
   ])
-  const tasksSearchQueryParams = useMemo(
+  const taskedTasksSearchQueryParams = useMemo(
     () =>
       Object.assign({}, searchQueryParams, {
         sortBy: "NAME",
@@ -41,14 +41,39 @@ const MyTasks = ({
       }),
     [searchQueryParams, currentUser]
   )
+  const responsibleTasksSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "NAME",
+        sortOrder: "ASC",
+        status: Task.STATUS.ACTIVE,
+        responsiblePositionUuid: currentUser.position?.uuid
+      }),
+    [searchQueryParams, currentUser]
+  )
 
   return (
     <div>
-      <Fieldset id="tasks" title={pluralize(taskShortLabel)}>
+      <Fieldset
+        id="my_tasked_tasks"
+        title={`${pluralize(taskShortLabel)} I am tasked with`}
+      >
         <Tasks
           pageDispatchers={pageDispatchers}
-          queryParams={tasksSearchQueryParams}
-          paginationKey="my_tasks"
+          queryParams={taskedTasksSearchQueryParams}
+          paginationKey="my_tasked_tasks"
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      </Fieldset>
+      <Fieldset
+        id="my_responsible_tasks"
+        title={`${pluralize(taskShortLabel)} I am responsible for`}
+      >
+        <Tasks
+          pageDispatchers={pageDispatchers}
+          queryParams={responsibleTasksSearchQueryParams}
+          paginationKey="my_responsible_tasks"
           pagination={pagination}
           setPagination={setPagination}
         />
@@ -63,6 +88,7 @@ MyTasks.propTypes = {
   setPagination: PropTypes.func.isRequired,
   searchQuery: SearchQueryPropType
 }
+
 const mapDispatchToProps = (dispatch, ownProps) => {
   const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
   return {
