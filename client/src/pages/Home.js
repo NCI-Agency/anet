@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -5,7 +6,6 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Fieldset from "components/Fieldset"
@@ -24,7 +24,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import {
   Button,
   ControlLabel,
@@ -37,6 +37,7 @@ import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_SAVED_SEARCHES = gql`
   query {
@@ -369,7 +370,7 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
   function showSearch() {
     if (selectedSearch) {
       const objType = SEARCH_OBJECT_TYPES[selectedSearch.objectType]
-      const queryParams = JSON.parse(selectedSearch.query)
+      const queryParams = utils.parseJsonSafe(selectedSearch.query)
       deserializeQueryParams(objType, queryParams, deserializeCallback)
     }
   }
@@ -401,7 +402,8 @@ SavedSearches.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-const BaseHome = ({ currentUser, setSearchQuery, pageDispatchers }) => {
+const Home = ({ setSearchQuery, pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
@@ -472,9 +474,8 @@ const BaseHome = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   )
 }
 
-BaseHome.propTypes = {
+Home.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person),
   pageDispatchers: PageDispatchersPropType
 }
 
@@ -485,11 +486,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     ...pageDispatchers
   }
 }
-
-const Home = props => (
-  <AppContext.Consumer>
-    {context => <BaseHome currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapDispatchToProps)(Home)

@@ -1,14 +1,15 @@
+import { gql } from "@apollo/client"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { gql } from "apollo-boost"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import ReportCollection, {
+  FORMAT_CALENDAR,
   FORMAT_MAP,
+  FORMAT_STATISTICS,
   FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
+  FORMAT_TABLE
 } from "components/ReportCollection"
 import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
@@ -139,7 +140,12 @@ const Collection = ({ id, queryParams }) => (
     <ReportCollection
       paginationKey={`r_${id}`}
       queryParams={queryParams}
-      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+      viewFormats={[
+        FORMAT_CALENDAR,
+        FORMAT_TABLE,
+        FORMAT_SUMMARY,
+        FORMAT_STATISTICS
+      ]}
     />
   </div>
 )

@@ -5,20 +5,24 @@ import {
   PageDispatchersPropType,
   mapPageDispatchersToProps
 } from "components/Page"
-import ReportCollection from "components/ReportCollection"
+import ReportCollection, {
+  FORMAT_CALENDAR,
+  FORMAT_MAP,
+  FORMAT_STATISTICS,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE
+} from "components/ReportCollection"
 import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
 import SubNav from "components/SubNav"
-import { Person, Report } from "models"
-import PropTypes from "prop-types"
-import React from "react"
+import { Report } from "models"
+import React, { useContext } from "react"
 import { Nav } from "react-bootstrap"
 import { connect } from "react-redux"
 
-const BaseMyReports = ({
-  pageDispatchers,
-  searchQuery,
-  currentUser: { uuid }
-}) => {
+const MyReports = ({ pageDispatchers, searchQuery }) => {
+  const {
+    currentUser: { uuid }
+  } = useContext(AppContext)
   const sectionQueryParams = {
     draft: {
       state: [Report.STATE.DRAFT, Report.STATE.REJECTED]
@@ -83,26 +87,26 @@ const BaseMyReports = ({
           paginationKey={`r_${id}_${uuid}`}
           queryParams={queryParams}
           mapId={id}
+          viewFormats={[
+            FORMAT_SUMMARY,
+            FORMAT_TABLE,
+            FORMAT_CALENDAR,
+            FORMAT_MAP,
+            FORMAT_STATISTICS
+          ]}
         />
       </Fieldset>
     )
   }
 }
 
-BaseMyReports.propTypes = {
+MyReports.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person),
   searchQuery: SearchQueryPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
-
-const MyReports = props => (
-  <AppContext.Consumer>
-    {context => <BaseMyReports currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapPageDispatchersToProps)(MyReports)

@@ -153,9 +153,7 @@ export const InputField = ({
     () => (
       <FormControl
         {...Object.without(field, "value")}
-        value={
-          field.value === null || field.value === undefined ? "" : field.value
-        }
+        value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
       />
     ),
@@ -196,9 +194,7 @@ export const InputFieldNoLabel = ({
     () => (
       <FormControl
         {...Object.without(field, "value")}
-        value={
-          field.value === null || field.value === undefined ? "" : field.value
-        }
+        value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
       />
     ),
@@ -487,7 +483,7 @@ export const FieldShortcuts = ({
   shortcuts.length > 0 && (
     <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
       <h5>{title}</h5>
-      {shortcuts.map(shortcut => (
+      {objectType.map(shortcuts, (shortcut, idx) => (
         <Button
           key={shortcut.uuid}
           bsStyle="link"
@@ -495,7 +491,7 @@ export const FieldShortcuts = ({
         >
           Add{" "}
           <LinkTo
-            modelType={objectType}
+            modelType={objectType.resourceName}
             model={shortcut}
             isLink={false}
             forShortcut
@@ -508,7 +504,7 @@ export const FieldShortcuts = ({
 FieldShortcuts.propTypes = {
   shortcuts: PropTypes.arrayOf(PropTypes.shape({ uuid: PropTypes.string })),
   fieldName: PropTypes.string.isRequired,
-  objectType: PropTypes.string.isRequired,
+  objectType: PropTypes.func.isRequired,
   curValue: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   onChange: PropTypes.func,
   handleAddItem: PropTypes.func.isRequired,

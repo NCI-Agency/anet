@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import AvatarEditModal from "components/AvatarEditModal"
@@ -11,6 +11,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
@@ -22,7 +23,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useRef, useState } from "react"
+import React, { useContext, useRef, useState } from "react"
 import {
   Alert,
   Button,
@@ -48,14 +49,8 @@ const GQL_UPDATE_PERSON = gql`
   }
 `
 
-const BasePersonForm = ({
-  loadAppData,
-  currentUser,
-  edit,
-  title,
-  saveText,
-  initialValues
-}) => {
+const PersonForm = ({ edit, title, saveText, initialValues }) => {
+  const { loadAppData, currentUser } = useContext(AppContext)
   const history = useHistory()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -595,7 +590,7 @@ const BasePersonForm = ({
       "firstName",
       "lastName",
       "customFields", // initial JSON from the db
-      "formCustomFields"
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
@@ -633,31 +628,17 @@ const BasePersonForm = ({
   }
 }
 
-BasePersonForm.propTypes = {
+PersonForm.propTypes = {
   initialValues: PropTypes.instanceOf(Person).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  saveText: PropTypes.string,
-  currentUser: PropTypes.instanceOf(Person),
-  loadAppData: PropTypes.func
+  saveText: PropTypes.string
 }
 
-BasePersonForm.defaultProps = {
+PersonForm.defaultProps = {
   title: "",
   edit: false,
   saveText: "Save Person"
 }
-
-const PersonForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePersonForm
-        currentUser={context.currentUser}
-        loadAppData={context.loadAppData}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default PersonForm

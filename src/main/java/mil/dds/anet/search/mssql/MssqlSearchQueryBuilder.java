@@ -5,6 +5,7 @@ import java.util.Map;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
@@ -23,7 +24,13 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
    */
   @Override
   public String getContainsQuery(String text) {
+    if (Utils.isEmptyOrNull(text)) {
+      return null;
+    }
     String cleanText = stripWildcards(text);
+    if (Utils.isEmptyOrNull(cleanText)) {
+      return null;
+    }
     if (text.endsWith("*")) {
       cleanText = "\"" + cleanText + "*\"";
     } else {
@@ -34,6 +41,9 @@ public class MssqlSearchQueryBuilder<B extends AbstractAnetBean, T extends Abstr
 
   @Override
   public String getFullTextQuery(String text) {
+    if (Utils.isEmptyOrNull(text)) {
+      return null;
+    }
     return text;
   }
 

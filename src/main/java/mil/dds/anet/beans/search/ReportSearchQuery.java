@@ -8,14 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Report.Atmosphere;
+import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 
 public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
-
-  public static enum EngagementStatus {
-    HAPPENED, FUTURE, CANCELLED
-  }
 
   @GraphQLQuery
   @GraphQLInputField

@@ -85,7 +85,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS = "uuid";
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
-          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText createdAt updatedAt";
+          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText createdAt updatedAt"
+          + " customFields";
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("%1$s customFieldRef1 { %1$s }", _TASK_FIELDS);
@@ -270,7 +271,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setAtmosphereDetails("Everybody was super nice!");
     r.setIntent("A testing report to test that reporting reports");
     // set HTML of report text
-    r.setReportText(UtilsTest.getCombinedTestCase().getInput());
+    r.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // set JSON of customFields
+    r.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     r.setNextSteps("This is the next steps on a report");
     r.setKeyOutcomes("These are the key outcomes of this engagement");
     r.setAdvisorOrg(advisorOrg);
@@ -285,7 +288,26 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(created.getAdvisorOrgUuid()).isEqualTo(advisorOrg.getUuid());
     assertThat(created.getPrincipalOrgUuid()).isEqualTo(principalOrg.getUuid());
     // check that HTML of report text is sanitized after create
-    assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after create
+    assertThat(created.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+
+    // Have another regular user try to submit the report
+    try {
+      graphQLHelper.updateObject(getRegularUser(), "submitReport", "uuid", FIELDS, "String",
+          created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Have a super-user of another AO try to submit the report
+    try {
+      graphQLHelper.updateObject(getSuperUser(), "submitReport", "uuid", FIELDS, "String",
+          created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
 
     // Have the author submit the report
     Report submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
@@ -310,6 +332,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getUuid(),
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
+          returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}", new Object[] {
         returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author.getUuid()});
@@ -406,6 +436,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
     assertThat(returned.getApprovalStepUuid()).isNull();
+
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
+          returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
 
     // check on report status to see that it got approved.
     workflow = returned.getWorkflow();
@@ -547,8 +585,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(r.getUuid()).isNotNull();
 
-    // Submit the report
-    Report submitted = graphQLHelper.updateObject(jack, "submitReport", "uuid", FIELDS, "String",
+    // Submit the report (by admin who can do that, as author doesn't have a position)
+    Report submitted = graphQLHelper.updateObject(admin, "submitReport", "uuid", FIELDS, "String",
         r.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(submitted).isNotNull();
 
@@ -589,8 +627,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Put billet in EF 1.1
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> results = graphQLHelper.searchObjects(admin,
         "organizationList", "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -693,7 +730,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Elizabeth edits the report (update locationUuid and text, addPerson, remove a Task)
     returned.setLocation(loc);
     // update HTML of report text
-    returned.setReportText(UtilsTest.getCombinedTestCase().getInput());
+    returned.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // u[date JSON of customFields
+    returned.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
         PersonTest.personToReportPerson(nick), PersonTest.personToPrimaryReportPerson(elizabeth)));
     returned.setTasks(ImmutableList.of());
@@ -711,7 +750,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned2Attendees).hasSize(3);
     assertThat(returned2Attendees.contains(roger));
     // check that HTML of report text is sanitized after update
-    assertThat(returned2.getReportText()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(returned2.getReportText())
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after update
+    assertThat(returned2.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Elizabeth submits the report
     Report submitted = graphQLHelper.updateObject(elizabeth, "submitReport", "uuid", FIELDS,
@@ -842,8 +885,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Search by direct organization
     OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -1253,6 +1295,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Report returned2 = graphQLHelper.getObjectById(liz, "report", FIELDS, saved.getUuid(),
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
+
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(liz, "submitReport", "uuid", FIELDS, "String", returned2.getUuid(),
+          new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
   }
 
   @Test
@@ -1468,7 +1518,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
         "This reportTest was generated by ReportsResourceTest#testSensitiveInformation");
     final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
     // set HTML of report sensitive information
-    rsi.setText(UtilsTest.getCombinedTestCase().getInput());
+    rsi.setText(UtilsTest.getCombinedHtmlTestCase().getInput());
     r.setReportSensitiveInformation(rsi);
     String returnedUuid = graphQLHelper.createObject(elizabeth, "createReport", "report",
         "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
@@ -1480,24 +1530,25 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after create
     assertThat(returned.getReportSensitiveInformation().getText())
-        .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     final Report returned2 = graphQLHelper.getObjectById(elizabeth, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // elizabeth should be allowed to see it
     assertThat(returned2.getReportSensitiveInformation()).isNotNull();
     assertThat(returned2.getReportSensitiveInformation().getText())
-        .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     // update HTML of report sensitive information
-    returned2.getReportSensitiveInformation().setText(UtilsTest.getCombinedTestCase().getInput());
+    returned2.getReportSensitiveInformation()
+        .setText(UtilsTest.getCombinedHtmlTestCase().getInput());
     Report updated = graphQLHelper.updateObject(elizabeth, "updateReport", "report", rsiFields,
         "ReportInput", returned2, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after update
     assertThat(updated.getReportSensitiveInformation().getText())
-        .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     final Person jack = getJackJackson();
     final Report returned3 = graphQLHelper.getObjectById(jack, "report", rsiFields,
@@ -1701,7 +1752,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setEngagementDate(engagementDate);
     r.setAttendees(Lists.newArrayList(attendee));
     r.setAdvisorOrg(advisorOrganization);
-    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+    final String createdUuid = graphQLHelper.createObject(admin, "createReport", "report",
         "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(createdUuid).isNotNull();
   }

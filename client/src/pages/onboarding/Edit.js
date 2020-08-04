@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import {
   PageDispatchersPropType,
@@ -10,8 +10,7 @@ import {
 import { Person } from "models"
 import moment from "moment"
 import PersonForm from "pages/people/Form"
-import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_PERSON = gql`
@@ -40,7 +39,10 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const BaseOnboardingEdit = ({ pageDispatchers, currentUser: { uuid } }) => {
+const OnboardingEdit = ({ pageDispatchers }) => {
+  const {
+    currentUser: { uuid }
+  } = useContext(AppContext)
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
@@ -78,17 +80,8 @@ const BaseOnboardingEdit = ({ pageDispatchers, currentUser: { uuid } }) => {
   )
 }
 
-BaseOnboardingEdit.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+OnboardingEdit.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const OnboardingEdit = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOnboardingEdit currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(OnboardingEdit)

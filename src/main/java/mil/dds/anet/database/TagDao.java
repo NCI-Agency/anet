@@ -7,7 +7,6 @@ import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
-import mil.dds.anet.utils.DaoUtils;
 
 public class TagDao extends AnetBaseDao<Tag, TagSearchQuery> {
 
@@ -36,19 +35,12 @@ public class TagDao extends AnetBaseDao<Tag, TagSearchQuery> {
 
   @Override
   public Tag insertInternal(Tag t) {
-    getDbHandle().createUpdate(
-        "/* tagInsert */ INSERT INTO tags (uuid, name, description, \"createdAt\", \"updatedAt\") "
-            + "VALUES (:uuid, :name, :description, :createdAt, :updatedAt)")
-        .bindBean(t).bind("createdAt", DaoUtils.asLocalDateTime(t.getCreatedAt()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt())).execute();
-    return t;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public int updateInternal(Tag t) {
-    return getDbHandle().createUpdate("/* updateTag */ UPDATE tags "
-        + "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-        .bindBean(t).bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt())).execute();
+    throw new UnsupportedOperationException();
   }
 
   @Override

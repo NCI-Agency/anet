@@ -19,6 +19,7 @@ const ReportTags = ({ value, suggestions, onChange }) => {
       handleFilterSuggestions={handleTagSuggestions}
       handleDelete={handleTagDelete}
       handleAddition={handleTagAddition}
+      renderSuggestion={item => <span>{item.text}</span>}
     />
   )
 

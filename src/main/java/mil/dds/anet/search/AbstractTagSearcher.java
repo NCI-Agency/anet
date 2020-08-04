@@ -27,14 +27,12 @@ public abstract class AbstractTagSearcher extends AbstractSearcher<Tag, TagSearc
     qb.addTotalCount();
     qb.addFromClause("tags");
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(TagSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TagSearchQuery query) {
     switch (query.getSortBy()) {
