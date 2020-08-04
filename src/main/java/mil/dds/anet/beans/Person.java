@@ -24,7 +24,7 @@ import mil.dds.anet.views.UuidFetcher;
 public class Person extends AbstractCustomizableAnetBean implements Principal, RelatableObject {
 
   public static enum PersonStatus {
-    ACTIVE, INACTIVE, NEW_USER
+    ACTIVE, INACTIVE
   }
 
   public static enum Role {
@@ -38,13 +38,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
   private String name;
   @GraphQLQuery
   @GraphQLInputField
-  private PersonStatus status;
+  private PersonStatus status = PersonStatus.ACTIVE;
   @GraphQLQuery
   @GraphQLInputField
   private Role role;
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean pendingVerification;
+  private Boolean pendingVerification = false;
   @GraphQLQuery
   @GraphQLInputField
   private String emailAddress;
@@ -78,10 +78,6 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
   @GraphQLQuery
   @GraphQLInputField
   private String code;
-
-  public Person() {
-    this.pendingVerification = false; // Defaults
-  }
 
   @Override
   public String getName() {

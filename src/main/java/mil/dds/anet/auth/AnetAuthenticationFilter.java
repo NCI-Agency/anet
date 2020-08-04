@@ -54,7 +54,7 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
           person.setDomainUsername(domainUsername);
           person.setName("");
           person.setRole(Role.ADVISOR);
-          person.setStatus(PersonStatus.NEW_USER);
+          person.setPendingVerification(true);
           person = engine.getPersonDao().insert(person);
         } else {
           person = matches.get(0);

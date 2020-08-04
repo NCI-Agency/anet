@@ -29,6 +29,7 @@ const GQL_GET_APP_DATA = gql`
       role
       emailAddress
       status
+      pendingVerification
       avatar(size: 32)
       code
       position {
@@ -137,7 +138,7 @@ const App = ({ pageDispatchers, pageProps }) => {
   const appState = processData(data)
   // if this is a new user, redirect to onboarding
   if (
-    appState.currentUser.isNewUser() &&
+    appState.currentUser.isPendingVerification() &&
     !routerLocation.pathname.startsWith("/onboarding")
   ) {
     return <Redirect to="/onboarding" />

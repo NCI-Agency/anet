@@ -81,10 +81,12 @@ const PersonEdit = ({ pageDispatchers }) => {
     )
   }
   const person = new Person(data ? data.person : {})
-  const legendText = person.isNewUser()
+  const legendText = person.isPendingVerification()
     ? "Create your account"
     : `Edit ${person.name}`
-  const saveText = person.isNewUser() ? "Create profile" : "Save Person"
+  const saveText = person.isPendingVerification()
+    ? "Update profile"
+    : "Save Person"
 
   return (
     <div>

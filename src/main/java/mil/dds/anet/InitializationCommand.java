@@ -92,7 +92,6 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     System.out.print("Your Domain Username >>");
     admin.setDomainUsername(scanner.nextLine());
     admin.setRole(Role.ADVISOR);
-    admin.setStatus(PersonStatus.ACTIVE);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
     System.out.println("... Person " + admin.getUuid() + " Saved!");

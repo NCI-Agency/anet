@@ -22,7 +22,6 @@ export default class Person extends Model {
   static relatedObjectType = "people"
 
   static STATUS = {
-    NEW_USER: "NEW_USER",
     ACTIVE: "ACTIVE",
     INACTIVE: "INACTIVE"
   }
@@ -123,23 +122,26 @@ export default class Person extends Model {
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate
         .nullable()
-        .when(["role", "status"], (role, status, schema) => {
-          if (Person.isPrincipal({ role })) {
-            return schema
-          } else {
-            schema = schema.required(
-              `You must provide the ${Settings.fields.person.endOfTourDate}`
-            )
-            if (Person.isNewUser({ status })) {
-              schema = schema.test(
-                "end-of-tour-date",
-                `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
-                endOfTourDate => endOfTourDate > Date.now()
+        .when(
+          ["role", "pendingVerification"],
+          (role, pendingVerification, schema) => {
+            if (Person.isPrincipal({ role })) {
+              return schema
+            } else {
+              schema = schema.required(
+                `You must provide the ${Settings.fields.person.endOfTourDate}`
               )
+              if (Person.isPendingVerification({ pendingVerification })) {
+                schema = schema.test(
+                  "end-of-tour-date",
+                  `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
+                  endOfTourDate => endOfTourDate > Date.now()
+                )
+              }
+              return schema
             }
-            return schema
           }
-        })
+        )
         .default(null)
         .label(Settings.fields.person.endOfTourDate),
       biography: yup.string().nullable().default(""),
@@ -188,12 +190,12 @@ export default class Person extends Model {
     return Person.humanNameOfStatus(this.status)
   }
 
-  static isNewUser(person) {
-    return person.status === Person.STATUS.NEW_USER
+  static isPendingVerification(person) {
+    return person.pendingVerification
   }
 
-  isNewUser() {
-    return Person.isNewUser(this)
+  isPendingVerification() {
+    return Person.isPendingVerification(this)
   }
 
   static isAdvisor(person) {

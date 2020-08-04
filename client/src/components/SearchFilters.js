@@ -422,11 +422,7 @@ const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "status",
-          options: [
-            Person.STATUS.ACTIVE,
-            Person.STATUS.INACTIVE,
-            Person.STATUS.NEW_USER
-          ]
+          options: [Person.STATUS.ACTIVE, Person.STATUS.INACTIVE]
         }
       },
       Location: {

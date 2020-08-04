@@ -59,7 +59,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(
-    Person.isNewUser(initialValues)
+    Person.isPendingVerification(initialValues)
   )
   const statusButtons = [
     {
@@ -125,7 +125,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
         const isSelf = Person.isEqual(currentUser, values)
         const isAdmin = currentUser && currentUser.isAdmin()
         const isAdvisor = Person.isAdvisor(values)
-        const isNewUser = Person.isNewUser(values)
+        const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast = values.endOfTourDate
           ? values.endOfTourDate <= Date.now()
           : false
@@ -150,7 +150,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
         // admins can edit all persons, new users can be edited by super users or themselves
         const canEditName =
           isAdmin ||
-          ((isNewUser || !edit) &&
+          ((isPendingVerification || !edit) &&
             currentUser &&
             (currentUser.isSuperUser() || isSelf))
         const fullName = Person.fullName(Person.parseFullName(values.name))
@@ -351,7 +351,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                     component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
-                ) : isNewUser ? (
+                ) : isPendingVerification ? (
                   <FastField
                     name="status"
                     component={FieldHelper.ReadonlyField}
@@ -592,8 +592,8 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       "customFields", // initial JSON from the db
       DEFAULT_CUSTOM_FIELDS_PARENT
     )
-    if (values.status === Person.STATUS.NEW_USER) {
-      person.status = Person.STATUS.ACTIVE
+    if (values.isPendingVerification) {
+      person.pendingVerification = false
     }
     person.name = Person.fullName(
       { firstName: values.firstName, lastName: values.lastName },
