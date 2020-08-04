@@ -40,6 +40,11 @@ public abstract class AbstractSubscriptionSearcher extends
     addOrderByClauses(qb, query);
   }
 
+  @Override
+  protected void addTextQuery(SubscriptionSearchQuery query) {
+    throw new UnsupportedOperationException();
+  }
+
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
       SubscriptionSearchQuery query) {
     switch (query.getSortBy()) {
