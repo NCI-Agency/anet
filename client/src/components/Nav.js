@@ -3,6 +3,7 @@ import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect } from "react"
 import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
@@ -92,6 +93,7 @@ const Nav = ({
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
 
   const isAdvisor = currentUser.isAdvisor()
+  const taskShortLabel = Settings.fields.task.shortLabel
 
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
@@ -112,12 +114,12 @@ const Nav = ({
 
       <BSNav id="reports-nav" />
 
-      {isAdvisor && (
+      {isAdvisor && currentUser.position && (
         <SidebarLink
           linkTo={{ pathname: "/tasks/mine" }}
           handleOnClick={resetPages}
         >
-          My tasks
+          {`My ${pluralize(taskShortLabel)}`}
         </SidebarLink>
       )}
 
