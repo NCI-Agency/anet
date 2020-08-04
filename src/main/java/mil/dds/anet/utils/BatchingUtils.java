@@ -294,14 +294,6 @@ public final class BatchingUtils {
                 .getReportSensitiveInformation(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(IdDataLoaderKey.SUBSCRIPTIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, Subscription>() {
-          @Override
-          public CompletionStage<List<Subscription>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getSubscriptionDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_TAGS.toString(),
         new DataLoader<>(new BatchLoader<String, List<Tag>>() {
           @Override
@@ -315,6 +307,14 @@ public final class BatchingUtils {
           @Override
           public CompletionStage<List<List<Task>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.SUBSCRIPTIONS.toString(),
+        new DataLoader<>(new BatchLoader<String, Subscription>() {
+          @Override
+          public CompletionStage<List<Subscription>> load(List<String> keys) {
+            return CompletableFuture.supplyAsync(() -> engine.getSubscriptionDao().getByIds(keys),
                 dispatcherService);
           }
         }, dataLoaderOptions));
