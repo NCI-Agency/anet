@@ -31,7 +31,7 @@ public abstract class AbstractOrganizationSearcher extends
     qb.addTotalCount();
     qb.addFromClause("organizations");
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -56,8 +56,6 @@ public abstract class AbstractOrganizationSearcher extends
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(OrganizationSearchQuery query);
 
   @SuppressWarnings("unchecked")
   protected void addBatchClause(OrganizationSearchQuery query) {
