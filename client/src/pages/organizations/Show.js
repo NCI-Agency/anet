@@ -10,9 +10,9 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  PageDispatchersPropType,
   getSubscriptionIcon,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   toggleSubscription,
   useBoilerplate
 } from "components/Page"

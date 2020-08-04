@@ -17,10 +17,10 @@ import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   AnchorLink,
-  PageDispatchersPropType,
   getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   toggleSubscription,
   useBoilerplate
 } from "components/Page"

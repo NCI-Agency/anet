@@ -9,9 +9,9 @@ import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   getSubscriptionIcon,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   toggleSubscription,
   useBoilerplate
 } from "components/Page"

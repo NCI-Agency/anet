@@ -3,9 +3,9 @@ import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   getSubscriptionIcon,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   toggleSubscription,
   useBoilerplate
 } from "components/Page"
