@@ -3,6 +3,7 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
 import ReactTooltip from "react-tooltip"
+import utils from "utils"
 import "./BarChart.css"
 
 /*
@@ -86,7 +87,7 @@ const HorizontalBarChart = ({
       bottom: 20 // left and bottom MARGINs are dynamic, these are extra margins
     }
     const chartBox = node.current.getBoundingClientRect()
-    const chartWidth = isNumeric(width) ? width : chartBox.width
+    const chartWidth = utils.isNumeric(width) ? width : chartBox.width
     const chartData = data.data
     const categoryLabels = data.categoryLabels
     const leavesLabels = data.leavesLabels
@@ -292,10 +293,6 @@ const HorizontalBarChart = ({
       </div>
     )) || <svg id={chartId} ref={node} width={width} height={height} />
   )
-
-  function isNumeric(value) {
-    return typeof value === "number"
-  }
 
   function bindElementOnClick(element, onClickHandler) {
     if (onClickHandler) {

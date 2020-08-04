@@ -11,7 +11,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class AuthorizationGroup extends AbstractAnetBean {
+public class AuthorizationGroup extends AbstractAnetBean implements RelatableObject {
 
   public static enum AuthorizationGroupStatus {
     ACTIVE, INACTIVE

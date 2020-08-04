@@ -22,7 +22,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Organization extends AbstractAnetBean {
+public class Organization extends AbstractAnetBean implements RelatableObject {
 
   /** Pseudo uuid to represent all/top-level organization(s). */
   public static final String DUMMY_ORG_UUID = "-1";

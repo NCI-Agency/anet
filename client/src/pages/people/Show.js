@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -11,20 +12,16 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection, {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -35,6 +32,7 @@ import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
 const GQL_GET_PERSON = gql`
@@ -119,7 +117,9 @@ const PersonShow = ({ pageDispatchers }) => {
     return result
   }
   if (data) {
-    data.person.formCustomFields = JSON.parse(data.person.customFields)
+    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.person.customFields
+    )
   }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -147,7 +147,10 @@ const PersonShow = ({ pageDispatchers }) => {
     (!hasPosition && currentUser.isSuperUser()) ||
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-
+  const canAddAssessment = currentUser.position.associatedPositions
+    .filter(ap => ap.person)
+    .map(ap => ap.person.uuid)
+    .includes(person.uuid)
   return (
     <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
@@ -189,7 +192,8 @@ const PersonShow = ({ pageDispatchers }) => {
               relatedObject={
                 person.uuid && {
                   relatedObjectType: Person.relatedObjectType,
-                  relatedObjectUuid: person.uuid
+                  relatedObjectUuid: person.uuid,
+                  relatedObject: person
                 }
               }
               relatedObjectValue={person}
@@ -347,12 +351,6 @@ const PersonShow = ({ pageDispatchers }) => {
                     queryParams={{
                       authorUuid: uuid
                     }}
-                    viewFormats={[
-                      FORMAT_CALENDAR,
-                      FORMAT_SUMMARY,
-                      FORMAT_TABLE,
-                      FORMAT_MAP
-                    ]}
                     mapId="reports-authored"
                   />
                 </Fieldset>
@@ -414,6 +412,13 @@ const PersonShow = ({ pageDispatchers }) => {
                 </Fieldset>
               )}
             </Form>
+
+            <AssessmentResultsContainer
+              entity={person}
+              entityType={Person}
+              canAddAssessment={canAddAssessment}
+              onUpdateAssessment={refetch}
+            />
           </div>
         )
       }}

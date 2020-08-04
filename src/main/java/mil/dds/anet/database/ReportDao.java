@@ -66,9 +66,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   // Must always retrieve these e.g. for ORDER BY or search post-processing
   public static final String[] minimalFields = {"uuid", "approvalStepUuid",
-      "advisorOrganizationUuid", "createdAt", "updatedAt", "engagementDate", "releasedAt"};
-  public static final String[] additionalFields = {"state", "duration", "intent", "exsum",
-      "locationUuid", "principalOrganizationUuid", "authorUuid", "atmosphere", "cancelledReason",
+      "advisorOrganizationUuid", "createdAt", "updatedAt", "engagementDate", "releasedAt", "state"};
+  public static final String[] additionalFields = {"duration", "intent", "exsum", "locationUuid",
+      "principalOrganizationUuid", "authorUuid", "atmosphere", "cancelledReason",
       "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);

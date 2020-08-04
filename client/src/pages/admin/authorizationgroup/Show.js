@@ -15,7 +15,13 @@ import PositionTable from "components/PositionTable"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection from "components/ReportCollection"
+import ReportCollection, {
+  FORMAT_CALENDAR,
+  FORMAT_MAP,
+  FORMAT_STATISTICS,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE
+} from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
 import React, { useContext } from "react"
@@ -100,7 +106,8 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
               relatedObject={
                 authorizationGroup.uuid && {
                   relatedObjectType: AuthorizationGroup.relatedObjectType,
-                  relatedObjectUuid: authorizationGroup.uuid
+                  relatedObjectUuid: authorizationGroup.uuid,
+                  relatedObject: authorizationGroup
                 }
               }
             />
@@ -136,6 +143,13 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                     authorizationGroupUuid: uuid
                   }}
                   mapId="reports"
+                  viewFormats={[
+                    FORMAT_SUMMARY,
+                    FORMAT_TABLE,
+                    FORMAT_CALENDAR,
+                    FORMAT_MAP,
+                    FORMAT_STATISTICS
+                  ]}
                 />
               </Fieldset>
             </Form>
