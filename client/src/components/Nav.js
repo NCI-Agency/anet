@@ -91,6 +91,8 @@ const Nav = ({
   const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
 
+  const isAdvisor = currentUser.isAdvisor()
+
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
       <SidebarLink linkTo="/" handleOnClick={resetPages}>
@@ -110,6 +112,15 @@ const Nav = ({
 
       <BSNav id="reports-nav" />
 
+      {isAdvisor && (
+        <SidebarLink
+          linkTo={{ pathname: "/tasks/mine" }}
+          handleOnClick={resetPages}
+        >
+          My tasks
+        </SidebarLink>
+      )}
+
       {myOrg && (
         <SidebarLink
           linkTo={Organization.pathFor(myOrg)}
@@ -120,7 +131,6 @@ const Nav = ({
           <small>{myOrg.shortName}</small>
         </SidebarLink>
       )}
-
       <BSNav id="myorg-nav" />
 
       <NavDropdown

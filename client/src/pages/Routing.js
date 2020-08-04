@@ -35,6 +35,7 @@ import ReportShow from "pages/reports/Show"
 import RollupShow from "pages/rollup/Show"
 import Search from "pages/Search"
 import TaskEdit from "pages/tasks/Edit"
+import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import { PAGE_URLS } from "pages/util"
@@ -110,6 +111,7 @@ const Routing = () => {
           <Switch>
             <Route path={`${url}/new`} component={TaskNew} />
             <Route path={`${url}/:uuid/edit`} component={TaskEdit} />
+            <Route path={`${url}/mine`} component={MyTasks} />
             <Route path={`${url}/:uuid`} component={TaskShow} />
           </Switch>
         )}
