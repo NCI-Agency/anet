@@ -430,7 +430,8 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	args cmdline
 }
 
-classes.dependsOn buildClient
+jar.dependsOn buildClient
+run.dependsOn buildClient
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
