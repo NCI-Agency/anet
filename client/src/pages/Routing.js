@@ -25,6 +25,7 @@ import PersonEdit from "pages/people/Edit"
 import PersonNew from "pages/people/New"
 import PersonShow from "pages/people/Show"
 import PositionEdit from "pages/positions/Edit"
+import MyCounterparts from "pages/positions/MyCounterparts"
 import PositionNew from "pages/positions/New"
 import PositionShow from "pages/positions/Show"
 import ReportEdit from "pages/reports/Edit"
@@ -101,6 +102,7 @@ const Routing = () => {
           <Switch>
             <Route path={`${url}/new`} component={PositionNew} />
             <Route path={`${url}/:uuid/edit`} component={PositionEdit} />
+            <Route path={`${url}/counterparts`} component={MyCounterparts} />
             <Route path={`${url}/:uuid`} component={PositionShow} />
           </Switch>
         )}

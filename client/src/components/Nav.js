@@ -115,12 +115,20 @@ const Nav = ({
       <BSNav id="reports-nav" />
 
       {isAdvisor && currentUser.position && (
-        <SidebarLink
-          linkTo={{ pathname: "/tasks/mine" }}
-          handleOnClick={resetPages}
-        >
-          {`My ${pluralize(taskShortLabel)}`}
-        </SidebarLink>
+        <>
+          <SidebarLink
+            linkTo={{ pathname: "/tasks/mine" }}
+            handleOnClick={resetPages}
+          >
+            {`My ${pluralize(taskShortLabel)}`}
+          </SidebarLink>
+          <SidebarLink
+            linkTo={{ pathname: "/positions/counterparts" }}
+            handleOnClick={resetPages}
+          >
+            My counterparts
+          </SidebarLink>
+        </>
       )}
 
       {myOrg && (
