@@ -31,7 +31,7 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
   PositionType type;
   @GraphQLQuery
   @GraphQLInputField
-  Status status;
+  private Status status;
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
@@ -247,12 +247,13 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
     Position other = (Position) o;
     return Objects.equals(uuid, other.getUuid()) && Objects.equals(name, other.getName())
         && Objects.equals(code, other.getCode()) && Objects.equals(type, other.getType())
+        && Objects.equals(status, other.getStatus())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, code, type, organization);
+    return Objects.hash(uuid, name, code, type, status, organization);
   }
 
   @Override

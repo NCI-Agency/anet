@@ -52,7 +52,7 @@ public class Task extends AbstractCustomizableAnetBean implements RelatableObjec
   private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
-  Status status;
+  private Status status;
   // annotated below
   private List<Position> responsiblePositions;
   // annotated below
@@ -280,12 +280,13 @@ public class Task extends AbstractCustomizableAnetBean implements RelatableObjec
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
+        && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getCustomFields(), customFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, customFields);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, status, customFields);
   }
 
   @Override
