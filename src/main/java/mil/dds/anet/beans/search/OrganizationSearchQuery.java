@@ -70,8 +70,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
       return false;
     }
     final OrganizationSearchQuery other = (OrganizationSearchQuery) obj;
-    return super.equals(obj) && Objects.equals(getStatus(), other.getStatus())
-        && Objects.equals(getType(), other.getType())
+    return super.equals(obj) && Objects.equals(getType(), other.getType())
         && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy());
