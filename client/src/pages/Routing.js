@@ -55,10 +55,10 @@ const Routing = () => {
         path={PAGE_URLS.REPORTS}
         render={({ match: { url } }) => (
           <Switch>
+            <Route path={`${url}/mine`} component={MyReports} />
             <Route path={`${url}/new`} component={ReportNew} />
             <Route path={`${url}/:uuid/edit`} component={ReportEdit} />
             <Route path={`${url}/:uuid/min`} component={ReportMinimal} />
-            <Route path={`${url}/mine`} component={MyReports} />
             <Route path={`${url}/:uuid`} component={ReportShow} />
           </Switch>
         )}
@@ -100,9 +100,9 @@ const Routing = () => {
         path={PAGE_URLS.POSITIONS}
         render={({ match: { url } }) => (
           <Switch>
+            <Route path={`${url}/counterparts`} component={MyCounterparts} />
             <Route path={`${url}/new`} component={PositionNew} />
             <Route path={`${url}/:uuid/edit`} component={PositionEdit} />
-            <Route path={`${url}/counterparts`} component={MyCounterparts} />
             <Route path={`${url}/:uuid`} component={PositionShow} />
           </Switch>
         )}
@@ -111,9 +111,9 @@ const Routing = () => {
         path={PAGE_URLS.TASKS}
         render={({ match: { url } }) => (
           <Switch>
+            <Route path={`${url}/mine`} component={MyTasks} />
             <Route path={`${url}/new`} component={TaskNew} />
             <Route path={`${url}/:uuid/edit`} component={TaskEdit} />
-            <Route path={`${url}/mine`} component={MyTasks} />
             <Route path={`${url}/:uuid`} component={TaskShow} />
           </Switch>
         )}
