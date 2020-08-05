@@ -2,10 +2,9 @@ package mil.dds.anet.beans.search;
 
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
-import mil.dds.anet.beans.WithStatus;
 
 public class AuthorizationGroupSearchQuery
-    extends AbstractSearchQuery<AuthorizationGroupSearchSortBy> implements WithStatus {
+    extends AbstractSearchQuery<AuthorizationGroupSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField
