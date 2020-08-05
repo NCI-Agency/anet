@@ -9,6 +9,7 @@ import {
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import searchFilters, {
+  findCommonFiltersForAllObjectTypes,
   POSTITION_POSITION_TYPE_FILTER_KEY,
   SearchQueryPropType
 } from "components/SearchFilters"
@@ -64,7 +65,13 @@ const AdvancedSearch = ({
     getOrgQueryParams(null)
   )
   const ALL_FILTERS = searchFilters.searchFilters()
-  const filterDefs = objectType ? ALL_FILTERS[objectType].filters : {}
+  const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
+    searchObjectTypes,
+    ALL_FILTERS
+  )
+  const filterDefs = objectType
+    ? ALL_FILTERS[objectType].filters
+    : commonFiltersForAllObjectTypes
   const existingKeys = filters.map(f => f.key)
   const moreFiltersAvailable =
     existingKeys.length < Object.keys(filterDefs).length
@@ -173,10 +180,12 @@ const AdvancedSearch = ({
                   flexGrow: 1
                 }}
               >
-                {!objectType ? (
-                  "To add filters, first pick a type above"
-                ) : !moreFiltersAvailable ? (
-                  "No additional filters available"
+                {!moreFiltersAvailable ? (
+                  !objectType ? (
+                    "To add more filters, first pick a type above"
+                  ) : (
+                    "No additional filters available"
+                  )
                 ) : (
                   <Popover
                     content={advancedSearchMenuContent}
@@ -234,7 +243,9 @@ const AdvancedSearch = ({
 
   function changeObjectType(objectType) {
     setObjectType(objectType)
-    setFilters([])
+    setFilters(
+      filters.filter(value => commonFiltersForAllObjectTypes[value.key])
+    )
     setOrgFilterQueryParams(getOrgQueryParams(null))
   }
 
