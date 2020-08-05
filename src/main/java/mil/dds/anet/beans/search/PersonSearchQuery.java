@@ -3,8 +3,6 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
-import java.util.List;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 
 public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
@@ -15,9 +13,6 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
   @GraphQLQuery
   @GraphQLInputField
   Role role;
-  @GraphQLQuery
-  @GraphQLInputField
-  List<PersonStatus> status;
   @GraphQLQuery
   @GraphQLInputField
   RecurseStrategy orgRecurseStrategy;
@@ -74,14 +69,6 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
 
   public void setRole(Role role) {
     this.role = role;
-  }
-
-  public List<PersonStatus> getStatus() {
-    return status;
-  }
-
-  public void setStatus(List<PersonStatus> status) {
-    this.status = status;
   }
 
   public RecurseStrategy getOrgRecurseStrategy() {

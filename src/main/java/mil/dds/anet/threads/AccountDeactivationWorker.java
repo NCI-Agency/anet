@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
@@ -103,7 +102,7 @@ public class AccountDeactivationWorker implements Runnable {
   private void checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
       final Integer nextWarning, final Instant now) {
     // Skip inactive ANET users or users from ignored domains
-    if (person.getStatus() == PersonStatus.INACTIVE
+    if (person.getStatus() == Person.Status.INACTIVE
         || Utils.isDomainUserNameIgnored(person.getDomainUsername(), this.ignoredDomainNames)) {
       return;
     }
@@ -129,7 +128,7 @@ public class AccountDeactivationWorker implements Runnable {
         "Person {} status set to {} by system because the End-of-Tour date has been reached", p,
         p.getStatus());
 
-    p.setStatus(PersonStatus.INACTIVE);
+    p.setStatus(Person.Status.INACTIVE);
 
     AnetAuditLogger.log(
         "Person {} domainUsername '{}' cleared by system because they are now inactive", p,

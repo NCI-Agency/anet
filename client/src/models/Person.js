@@ -21,11 +21,6 @@ export default class Person extends Model {
   static getInstanceName = "person"
   static relatedObjectType = "people"
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static ROLE = {
     ADVISOR: "ADVISOR",
     PRINCIPAL: "PRINCIPAL"
@@ -153,7 +148,7 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE)
+        .default(() => Model.STATUS.ACTIVE)
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)

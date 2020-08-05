@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -124,7 +123,7 @@ public class PositionResource {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
 
-    if (pos.getPersonUuid() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
+    if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
       final Position current = dao.getByUuid(pos.getUuid());
       if (current != null) {
         // Run the diff and see if anything changed and update.
@@ -141,7 +140,7 @@ public class PositionResource {
           }
         }
 
-        if (PositionStatus.INACTIVE.equals(pos.getStatus()) && current.getPersonUuid() != null) {
+        if (Position.Status.INACTIVE.equals(pos.getStatus()) && current.getPersonUuid() != null) {
           // Remove this person from this position.
           AnetAuditLogger.log(
               "Person {} removed from position {} by {} because the position is now inactive",
@@ -212,7 +211,7 @@ public class PositionResource {
     }
 
     // if position is active, reject
-    if (PositionStatus.ACTIVE.equals(position.getStatus())) {
+    if (Position.Status.ACTIVE.equals(position.getStatus())) {
       throw new WebApplicationException("Cannot delete an active position", Status.BAD_REQUEST);
     }
 

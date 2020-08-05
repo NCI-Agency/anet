@@ -17,7 +17,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -49,25 +48,26 @@ public class TaskResourceTest extends AbstractResourceTest {
 
     final String bUuid = graphQLHelper.createObject(
         admin, "createTask", "task", "TaskInput", TestData.createTask("TestM1",
-            "Teach a person how to fish", "Test-Milestone", a, null, TaskStatus.ACTIVE),
+            "Teach a person how to fish", "Test-Milestone", a, null, Task.Status.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(bUuid).isNotNull();
 
     final String cUuid = graphQLHelper.createObject(
         admin, "createTask", "task", "TaskInput", TestData.createTask("TestM2",
-            "Watch the person fishing", "Test-Milestone", a, null, TaskStatus.ACTIVE),
+            "Watch the person fishing", "Test-Milestone", a, null, Task.Status.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(cUuid).isNotNull();
 
-    final String dUuid = graphQLHelper.createObject(
-        admin, "createTask", "task", "TaskInput", TestData.createTask("TestM3",
-            "Have the person go fishing without you", "Test-Milestone", a, null, TaskStatus.ACTIVE),
-        new TypeReference<GraphQlResponse<Task>>() {});
+    final String dUuid =
+        graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+            TestData.createTask("TestM3", "Have the person go fishing without you",
+                "Test-Milestone", a, null, Task.Status.ACTIVE),
+            new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(dUuid).isNotNull();
 
     final String eUuid = graphQLHelper.createObject(
         admin, "createTask", "task", "TaskInput", TestData.createTask("TestF2",
-            "Be a thing in a test case", "Test-EF", null, null, TaskStatus.ACTIVE),
+            "Be a thing in a test case", "Test-EF", null, null, Task.Status.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(eUuid).isNotNull();
 
@@ -115,13 +115,13 @@ public class TaskResourceTest extends AbstractResourceTest {
     // Search for the task:
 
     // set task to inactive
-    a.setStatus(TaskStatus.INACTIVE);
+    a.setStatus(Task.Status.INACTIVE);
     final Integer nrUpdated3 =
         graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
     assertThat(nrUpdated3).isEqualTo(1);
     final Task returned3 = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid,
         new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(returned3.getStatus()).isEqualTo(TaskStatus.INACTIVE);
+    assertThat(returned3.getStatus()).isEqualTo(Task.Status.INACTIVE);
   }
 
   @Test

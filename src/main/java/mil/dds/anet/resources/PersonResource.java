@@ -13,7 +13,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -155,8 +154,8 @@ public class PersonResource {
     }
 
     // If person changed to inactive, clear out the domainUsername
-    if (PersonStatus.INACTIVE.equals(p.getStatus())
-        && !PersonStatus.INACTIVE.equals(existing.getStatus())) {
+    if (Person.Status.INACTIVE.equals(p.getStatus())
+        && !Person.Status.INACTIVE.equals(existing.getStatus())) {
       AnetAuditLogger.log(
           "Person {} domainUsername '{}' cleared by {} because they are now inactive", p,
           existing.getDomainUsername(), user);
@@ -164,7 +163,7 @@ public class PersonResource {
     }
 
     // Automatically remove people from a position if they are inactive.
-    if (PersonStatus.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
+    if (Person.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
       Position existingPos = existing.loadPosition();
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")

@@ -21,11 +21,8 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Person extends AbstractCustomizableAnetBean implements Principal, RelatableObject {
-
-  public static enum PersonStatus {
-    ACTIVE, INACTIVE
-  }
+public class Person extends AbstractCustomizableAnetBean
+    implements Principal, RelatableObject, WithStatus {
 
   public static enum Role {
     ADVISOR, PRINCIPAL
@@ -38,7 +35,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
   private String name;
   @GraphQLQuery
   @GraphQLInputField
-  private PersonStatus status = PersonStatus.ACTIVE;
+  private Status status = Status.ACTIVE;
   @GraphQLQuery
   @GraphQLInputField
   private Role role;
@@ -88,11 +85,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  public PersonStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(PersonStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 

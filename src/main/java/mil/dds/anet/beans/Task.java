@@ -19,14 +19,10 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Task extends AbstractCustomizableAnetBean implements RelatableObject {
+public class Task extends AbstractCustomizableAnetBean implements RelatableObject, WithStatus {
 
   /** Pseudo uuid to represent 'no task'. */
   public static final String DUMMY_TASK_UUID = "-1";
-
-  public enum TaskStatus {
-    ACTIVE, INACTIVE
-  }
 
   @GraphQLQuery
   @GraphQLInputField
@@ -56,7 +52,7 @@ public class Task extends AbstractCustomizableAnetBean implements RelatableObjec
   private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
-  TaskStatus status;
+  Status status;
   // annotated below
   private List<Position> responsiblePositions;
   // annotated below
@@ -163,11 +159,13 @@ public class Task extends AbstractCustomizableAnetBean implements RelatableObjec
     return customFieldRef1.getForeignObject();
   }
 
-  public TaskStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(TaskStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 

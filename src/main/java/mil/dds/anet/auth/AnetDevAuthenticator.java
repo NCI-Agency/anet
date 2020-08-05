@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.database.PersonDao;
 

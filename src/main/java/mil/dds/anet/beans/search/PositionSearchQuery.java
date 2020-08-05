@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 
 public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortBy> {
@@ -28,9 +27,6 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   @GraphQLQuery
   @GraphQLInputField
   String locationUuid;
-  @GraphQLQuery
-  @GraphQLInputField
-  PositionStatus status;
   @GraphQLQuery
   @GraphQLInputField
   private String authorizationGroupUuid;
@@ -88,14 +84,6 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     this.locationUuid = locationUuid;
   }
 
-  public PositionStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(PositionStatus status) {
-    this.status = status;
-  }
-
   public String getAuthorizationGroupUuid() {
     return authorizationGroupUuid;
   }
@@ -107,7 +95,7 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, orgRecurseStrategy,
-        type, isFilled, locationUuid, status, authorizationGroupUuid);
+        type, isFilled, locationUuid, authorizationGroupUuid);
   }
 
   @Override
@@ -122,7 +110,6 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
         && Objects.equals(getType(), other.getType())
         && Objects.equals(getIsFilled(), other.getIsFilled())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
-        && Objects.equals(getStatus(), other.getStatus())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid());
   }
 

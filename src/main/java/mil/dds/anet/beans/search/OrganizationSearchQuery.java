@@ -4,14 +4,10 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 
 public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSearchSortBy> {
 
-  @GraphQLQuery
-  @GraphQLInputField
-  private OrganizationStatus status;
   @GraphQLQuery
   @GraphQLInputField
   private OrganizationType type;
@@ -29,14 +25,6 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
 
   public OrganizationSearchQuery() {
     super(OrganizationSearchSortBy.NAME);
-  }
-
-  public OrganizationStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(OrganizationStatus status) {
-    this.status = status;
   }
 
   public OrganizationType getType() {
@@ -73,8 +61,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), status, type, hasParentOrg, parentOrgUuid,
-        orgRecurseStrategy);
+    return Objects.hash(super.hashCode(), type, hasParentOrg, parentOrgUuid, orgRecurseStrategy);
   }
 
   @Override
