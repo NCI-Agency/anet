@@ -314,12 +314,11 @@ public class Person extends AbstractCustomizableAnetBean
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
-        && (createdAt != null)
-            ? (createdAt.equals(other.getCreatedAt()))
-            : (other.getCreatedAt() == null) && (updatedAt != null)
-                ? (updatedAt.equals(other.getUpdatedAt()))
-                : (other.getUpdatedAt() == null)
-                    && Objects.equals(other.getCustomFields(), customFields);
+        && (createdAt != null ? createdAt.equals(other.getCreatedAt())
+            : (other.getCreatedAt() == null && updatedAt != null)
+                ? updatedAt.equals(other.getUpdatedAt())
+                : other.getUpdatedAt() == null)
+        && Objects.equals(other.getCustomFields(), customFields);
     return b;
   }
 
