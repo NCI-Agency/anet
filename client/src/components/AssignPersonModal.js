@@ -98,7 +98,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   }, [person, position.uuid])
 
   const personSearchQuery = {
-    status: [Person.STATUS.ACTIVE],
+    status: Person.STATUS.ACTIVE,
     role:
       position.type === Position.TYPE.PRINCIPAL
         ? Person.ROLE.PRINCIPAL
