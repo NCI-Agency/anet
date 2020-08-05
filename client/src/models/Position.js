@@ -40,7 +40,7 @@ export default class Position extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Model.STATUS.ACTIVE),
+        .default(() => Position.STATUS.ACTIVE),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup

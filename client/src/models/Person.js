@@ -149,7 +149,7 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Model.STATUS.ACTIVE)
+        .default(() => Person.STATUS.ACTIVE)
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)

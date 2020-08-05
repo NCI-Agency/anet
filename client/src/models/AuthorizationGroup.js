@@ -21,7 +21,7 @@ export default class AuthorizationGroup extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Model.STATUS.ACTIVE),
+        .default(() => AuthorizationGroup.STATUS.ACTIVE),
       positions: yup.array().nullable().default([])
     })
     .concat(Model.yupSchema)

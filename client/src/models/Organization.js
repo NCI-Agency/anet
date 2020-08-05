@@ -32,7 +32,7 @@ export default class Organization extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Model.STATUS.ACTIVE),
+        .default(() => Organization.STATUS.ACTIVE),
       identificationCode: yup.string().nullable().default(""),
       type: yup
         .string()
