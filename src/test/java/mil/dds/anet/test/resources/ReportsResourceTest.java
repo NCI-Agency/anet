@@ -44,6 +44,7 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
@@ -1086,6 +1087,18 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)).count())
             .isEqualTo(searchResults.getList().size());
+  }
+
+  @Test
+  public void searchInactiveReportsTest() {
+    // All reports are considered ACTIVE; check that none are INACTIVE
+    final ReportSearchQuery query = new ReportSearchQuery();
+    query.setStatus(WithStatus.Status.INACTIVE);
+    final AnetBeanList<Report> searchResults =
+        graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput", FIELDS,
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
+    assertThat(searchResults.getTotalCount()).isZero();
+    assertThat(searchResults.getList()).isEmpty();
   }
 
   @Test
