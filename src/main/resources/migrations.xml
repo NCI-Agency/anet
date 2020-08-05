@@ -3357,7 +3357,7 @@
 			CREATE INDEX "FT_mv_fts_tags" ON mv_fts_tags USING gin(full_text);
 			CREATE INDEX "TR_tags_uuid" ON mv_fts_tags USING gin(uuid gin_trgm_ops);
 
-			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) ASVassilIordanov
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
 				SELECT
 					tasks.uuid,
 					tasks.full_text
@@ -3375,11 +3375,15 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
-	<changeSet id="renamePoams-to-Tasks-sqlite-combined-columns" author="VassilIordanov">
+	<changeSet id="people-pendingVerification" author="VassilIordanov">
 		<comment>We are going to use pendingVerification column instead of the NEW_USER value of the status column</comment>
-		<sql>
-			UPDATE people set pendingVerification = false;
-			UPDATE people WHERE status = 2 set status = 0, pendingVerification = true;
+		<sql dbms="mssql">
+			UPDATE people SET "pendingVerification" = 0;
+			UPDATE people SET status = 0, "pendingVerification" = 1 WHERE status = 2;
+		</sql>
+		<sql dbms="postgresql">
+			UPDATE people SET "pendingVerification" = false;
+			UPDATE people SET status = 0, "pendingVerification" = true WHERE status = 2;
 		</sql>
 	</changeSet>
 
