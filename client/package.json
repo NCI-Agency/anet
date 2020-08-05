@@ -154,6 +154,7 @@
     "react-use-dimensions": "1.2.1",
     "redux": "4.0.5",
     "redux-persist": "6.0.0",
+    "use-d3-transition": "1.1.5",
     "use-debounce": "3.4.3",
     "yup": "0.29.1"
   },

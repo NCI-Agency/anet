@@ -1,21 +1,24 @@
+/* eslint-disable */
+
 import { gql } from "@apollo/client"
 import API from "api"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
-  useBoilerplate
+  PageDispatchersPropType,
+  useBoilerplate,
 } from "components/Page"
 import * as d3 from "d3"
+import { flextree } from "d3-flextree"
 import { Symbol } from "milsymbol"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState, useCallback } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import Settings from "settings"
-import { flextree } from "d3-flextree"
+import useD3Transition from "use-d3-transition"
 
 const GQL_ORGANIZATION_FIELDS = /* GraphQL */ `
   uuid
@@ -67,26 +70,144 @@ const sortPositions = (positions, truncateLimit) => {
     : allResults
 }
 
+const OrganizationLink = ({ link }) => {
+  const d = d3
+    .linkVertical()
+    .x(d => d.x)
+    .y(d => d.y)(link)
+
+  const { ref, attrState } = useD3Transition({
+    attrsToTransitionTo: { d },
+    deps: [link],
+  })
+  return <path ref={ref} strokeOpacity={0.4} d={attrState.d} />
+}
+
+OrganizationLink.propTypes = {
+  link: PropTypes.object.isRequired,
+}
+
+const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
+  const history = useHistory()
+
+  const transform = `translate(${x},${y}) scale(${scale} ${scale})`
+  const background = isMain
+    ? "rgba(255, 255, 255, 1)"
+    : "rgba(230, 230, 230, 0.5)"
+
+  const { ref, attrState } = useD3Transition({
+    attrsToTransitionTo: { transform, background },
+    deps: [x, y, isMain],
+  })
+
+  return (
+    <g ref={ref} className="org" key={org.uuid} transform={attrState.transform}>
+      <rect
+        rx="7"
+        ry="7"
+        x={-size[0] / 2}
+        y={15}
+        width={size[0]}
+        height={size[1] - 100 * scale}
+        style={{
+          fill: attrState.background,
+          stroke: isMain ? "black" : "none",
+        }}
+      />
+      <g className="orgDetails" transform="translate(-8,-15)">
+        <g
+          onClick={() => history.push(Organization.pathFor(org))}
+          dangerouslySetInnerHTML={{ __html: symbol.asSVG() }}
+        />
+        <text
+          onClick={() => history.push(Organization.pathFor(org))}
+          fontSize="20px"
+          fontFamily="monospace"
+          fontWeight="bold"
+          dy={22}
+          x={38}
+        >
+          {org.shortName?.length > 12
+            ? org.shortName.substring(0, 10) + ".."
+            : org.shortName}
+        </text>
+        <text
+          onClick={() => history.push(Organization.pathFor(org))}
+          fontFamily="monospace"
+          dy={45}
+          x={-40}
+        >
+          {org.longName?.length > 21
+            ? org.longName.substring(0, 18) + ".."
+            : org.longName}
+        </text>
+
+        {sortPositions(org.positions, 10).map((position, i) => {
+          const positionText = `${
+            position.person ? position.person.rank : ""
+          } ${position.person ? position.person.name : "unfilled"} ${
+            position.name
+          }`
+
+          return (
+            <g
+              key={position.uuid}
+              transform={`translate(-63,${87 + i * 11})`}
+              onClick={() => history.push(Position.pathFor(org))}
+            >
+              <image
+                width={13}
+                height={13}
+                y={-10}
+                href={position.person?.avatar || DEFAULT_AVATAR}
+              />
+              <text
+                x={18}
+                fontSize="9px"
+                fontFamily="monospace"
+                textAnchor="start"
+              >
+                {positionText.length > 31
+                  ? positionText.substring(0, 28) + "..."
+                  : positionText}
+              </text>
+            </g>
+          )
+        })}
+      </g>
+    </g>
+  )
+}
+
+OrganizationNode.propTypes = {
+  org: PropTypes.object.isRequired,
+  x: PropTypes.number.isRequired,
+  y: PropTypes.number.isRequired,
+  scale: PropTypes.number.isRequired,
+  size: PropTypes.arrayOf(PropTypes.number).isRequired,
+  symbol: PropTypes.object,
+  isMain: PropTypes.bool,
+}
+
 const OrganizationalChart = ({
   pageDispatchers,
   org,
   exportTitle,
   width,
-  height: initialHeight
+  height: initialHeight,
 }) => {
-  const history = useHistory()
   const svgRef = useRef(null)
   const treeLayout = useRef(null)
   const [root, setRoot] = useState(null)
   const [height, setHeight] = useState(initialHeight)
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
-    uuid: org.uuid
+    uuid: org.uuid,
   })
 
   const { done, result } = useBoilerplate({
     loading,
     error,
-    pageDispatchers
+    pageDispatchers,
   })
 
   const getDescendant = useCallback(
@@ -99,7 +220,7 @@ const OrganizationalChart = ({
     [data]
   )
   const isMain = useCallback(node => node?.uuid === data?.organization?.uuid, [
-    data
+    data,
   ])
 
   const getScale = useCallback(
@@ -178,119 +299,41 @@ const OrganizationalChart = ({
               treeLayout
                 .current(root)
                 .links()
-                .map((d, i) => {
-                  return (
-                    <path
-                      strokeOpacity={0.3}
-                      key={i}
-                      d={d3
-                        .linkVertical()
-                        .x(d => d.x)
-                        .y(d => d.y)(d)}
-                    />
-                  )
-                })}
+                .map(link => (
+                  <OrganizationLink
+                    key={`${link.source.data.uuid}->${link.target.data.uuid}`}
+                    link={link}
+                  />
+                ))}
           </g>
           <g style={{ cursor: "pointer", pointerEvents: "all" }}>
-            {root?.descendants().map(d => {
-              const org = d.data
-              const scale = getScale(org)
-              const size = getSize(org)
-              const positions = sortPositions(org.positions)
-              const unitcode = Settings.fields.person.ranks.find(
-                element => element.value === positions?.[0]?.person?.rank
-              )?.app6Modifier
-              const sym = new Symbol(
-                `S${
-                  org.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
-                }GPU------${unitcode || "-"}`,
-                { size: 22 }
-              )
+            {root &&
+              root.descendants().map(node => {
+                const org = node.data
+                const positions = sortPositions(org.positions)
+                const unitcode = Settings.fields.person.ranks.find(
+                  element => element.value === positions?.[0]?.person?.rank
+                )?.app6Modifier
+                const sym = new Symbol(
+                  `S${
+                    org.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
+                  }GPU------${unitcode || "-"}`,
+                  { size: 22 }
+                )
 
-              return (
-                <g
-                  className="org"
-                  key={`${org.uuid}`}
-                  transform={`translate(${d.x},${d.y}) scale(${scale} ${scale})`}
-                >
-                  <rect
-                    rx="7"
-                    ry="7"
-                    x={-size[0] / 2}
-                    y={15}
-                    width={size[0]}
-                    height={size[1] - 100 * scale}
-                    style={{
-                      fill: isMain(org)
-                        ? "rgba(255, 255, 255, 1)"
-                        : "rgba(230, 230, 230, 0.5)",
-                      stroke: isMain(org) ? "black" : "none"
-                    }}
+                return (
+                  <OrganizationNode
+                    key={org.uuid}
+                    org={org}
+                    x={node.x}
+                    y={node.y}
+                    scale={getScale(org)}
+                    size={getSize(org)}
+                    symbol={sym}
+                    isMain={isMain(org)}
                   />
-                  <g className="orgDetails" transform="translate(-8,-15)">
-                    <g
-                      onClick={() => history.push(Organization.pathFor(org))}
-                      dangerouslySetInnerHTML={{ __html: sym.asSVG() }}
-                    />
-                    <text
-                      onClick={() => history.push(Organization.pathFor(org))}
-                      fontSize="20px"
-                      fontFamily="monospace"
-                      fontWeight="bold"
-                      dy={22}
-                      x={38}
-                    >
-                      {org.shortName?.length > 12
-                        ? org.shortName.substring(0, 10) + ".."
-                        : org.shortName}
-                    </text>
-                    <text
-                      onClick={() => history.push(Organization.pathFor(org))}
-                      fontFamily="monospace"
-                      dy={45}
-                      x={-40}
-                    >
-                      {org.longName?.length > 21
-                        ? org.longName.substring(0, 18) + ".."
-                        : org.longName}
-                    </text>
-
-                    {sortPositions(org.positions, 10).map((position, i) => {
-                      const result = `${
-                        position.person ? position.person.rank : ""
-                      } ${
-                        position.person ? position.person.name : "unfilled"
-                      } ${position.name}`
-
-                      return (
-                        <g
-                          key={position.uuid}
-                          transform={`translate(-63,${87 + i * 11})`}
-                          onClick={() => history.push(Position.pathFor(d))}
-                        >
-                          <image
-                            width={13}
-                            height={13}
-                            y={-10}
-                            href={position.person?.avatar || DEFAULT_AVATAR}
-                          />
-                          <text
-                            x={18}
-                            fontSize="9px"
-                            fontFamily="monospace"
-                            textAnchor="start"
-                          >
-                            {result.length > 31
-                              ? result.substring(0, 28) + "..."
-                              : result}
-                          </text>
-                        </g>
-                      )
-                    })}
-                  </g>
-                </g>
-              )
-            })}
+                )
+              })}
           </g>
         </g>
       </SVGCanvas>
@@ -303,7 +346,7 @@ OrganizationalChart.propTypes = {
   org: PropTypes.object.isRequired,
   exportTitle: PropTypes.string,
   width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired
+  height: PropTypes.number.isRequired,
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationalChart)
