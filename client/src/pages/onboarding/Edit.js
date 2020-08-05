@@ -23,6 +23,7 @@ const GQL_GET_PERSON = gql`
       emailAddress
       phoneNumber
       status
+      pendingVerification
       biography
       country
       gender

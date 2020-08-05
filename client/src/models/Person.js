@@ -141,6 +141,7 @@ export default class Person extends Model {
         .label(Settings.fields.person.endOfTourDate),
       biography: yup.string().nullable().default(""),
       position: yup.object().nullable().default({}),
+      pendingVerification: yup.boolean().default(false),
       role: yup
         .string()
         .nullable()

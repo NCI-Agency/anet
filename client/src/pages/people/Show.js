@@ -43,6 +43,7 @@ const GQL_GET_PERSON = gql`
       rank
       role
       status
+      pendingVerification
       emailAddress
       phoneNumber
       domainUsername
