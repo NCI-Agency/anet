@@ -108,7 +108,7 @@ const Nav = ({
           linkTo={{ pathname: "/reports/mine" }}
           handleOnClick={resetPages}
         >
-          My reports
+          My Reports
         </SidebarLink>
       )}
 
@@ -126,7 +126,7 @@ const Nav = ({
             linkTo={{ pathname: "/positions/counterparts" }}
             handleOnClick={resetPages}
           >
-            My counterparts
+            My Counterparts
           </SidebarLink>
         </>
       )}
@@ -137,7 +137,7 @@ const Nav = ({
           handleOnClick={resetPages}
           id="my-organization"
         >
-          My organization <br />
+          My Organization <br />
           <small>{myOrg.shortName}</small>
         </SidebarLink>
       )}
@@ -188,7 +188,7 @@ const Nav = ({
       <BSNav id="principal-org-nav" />
 
       <SidebarLink linkTo="/rollup" handleOnClick={resetPages}>
-        Daily rollup
+        Daily Rollup
       </SidebarLink>
 
       {currentUser.isAdmin() && (
