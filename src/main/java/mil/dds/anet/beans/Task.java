@@ -285,7 +285,7 @@ public class Task extends AbstractCustomizableAnetBean implements RelatableObjec
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, customFields);
   }
 
   @Override

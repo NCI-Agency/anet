@@ -325,7 +325,7 @@ public class Person extends AbstractCustomizableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(uuid, name, status, role, emailAddress, phoneNumber, rank, biography,
-        pendingVerification, avatar, code, createdAt, updatedAt);
+        pendingVerification, avatar, code, createdAt, updatedAt, customFields);
   }
 
   @Override
