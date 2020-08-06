@@ -119,12 +119,14 @@ const Nav = ({
           <SidebarLink
             linkTo={{ pathname: "/tasks/mine" }}
             handleOnClick={resetPages}
+            id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
           </SidebarLink>
           <SidebarLink
             linkTo={{ pathname: "/positions/counterparts" }}
             handleOnClick={resetPages}
+            id="my-counterparts-nav"
           >
             My Counterparts
           </SidebarLink>

@@ -63,7 +63,7 @@ const MyTasks = ({
   )
   return (
     <div>
-      <Fieldset id="my_org_assigned_tasks" title={myOrgAssignedTasksTitle}>
+      <Fieldset id="my-org-assigned-tasks" title={myOrgAssignedTasksTitle}>
         <Tasks
           pageDispatchers={pageDispatchers}
           queryParams={taskedTasksSearchQueryParams}
@@ -73,7 +73,7 @@ const MyTasks = ({
         />
       </Fieldset>
       <Fieldset
-        id="my_responsible_tasks"
+        id="my-responsible-tasks"
         title={`${pluralize(taskShortLabel)} I am responsible for`}
       >
         <Tasks

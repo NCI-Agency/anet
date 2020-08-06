@@ -12,7 +12,7 @@ const MyCounterparts = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   return (
     <div>
-      <Fieldset id="my_counterparts" title="My Counterparts">
+      <Fieldset id="my-counterparts" title="My Counterparts">
         <PositionTable positions={currentUser.position.associatedPositions} />
       </Fieldset>
     </div>
