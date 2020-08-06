@@ -1,6 +1,7 @@
 import { setPagination } from "actions"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps
@@ -51,17 +52,22 @@ const MyTasks = ({
       }),
     [searchQueryParams, currentUser]
   )
-
+  const myOrgAssignedTasksTitle = (
+    <>
+      {pluralize(taskShortLabel)} assigned to{" "}
+      <LinkTo
+        modelType="Organization"
+        model={currentUser.position.organization}
+      />
+    </>
+  )
   return (
     <div>
-      <Fieldset
-        id="my_tasked_tasks"
-        title={`${pluralize(taskShortLabel)} I am tasked with`}
-      >
+      <Fieldset id="my_org_assigned_tasks" title={myOrgAssignedTasksTitle}>
         <Tasks
           pageDispatchers={pageDispatchers}
           queryParams={taskedTasksSearchQueryParams}
-          paginationKey="my_tasked_tasks"
+          paginationKey="my_org_assigned_tasks"
           pagination={pagination}
           setPagination={setPagination}
         />
