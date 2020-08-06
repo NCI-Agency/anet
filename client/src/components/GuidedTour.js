@@ -1,9 +1,8 @@
 import AppContext from "components/AppContext"
 import hopscotch from "hopscotch"
 import "hopscotch/dist/css/hopscotch.css"
-import { Person } from "models"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import TOUR_ICON from "resources/tour-icon.png"
@@ -17,7 +16,8 @@ const HOPSCOTCH_CONFIG = {
   bubbleWidth: 400
 }
 
-const BaseGuidedTour = ({ autostart, currentUser, title, tour, onEnd }) => {
+const GuidedTour = ({ autostart, title, tour, onEnd }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [runningTour, setRunningTour] = useState(false)
   const startTour = useCallback(() => {
@@ -64,18 +64,11 @@ const BaseGuidedTour = ({ autostart, currentUser, title, tour, onEnd }) => {
   )
 }
 
-BaseGuidedTour.propTypes = {
+GuidedTour.propTypes = {
   tour: PropTypes.func.isRequired,
   autostart: PropTypes.bool,
   onEnd: PropTypes.func,
-  title: PropTypes.string,
-  currentUser: PropTypes.instanceOf(Person)
+  title: PropTypes.string
 }
-
-const GuidedTour = props => (
-  <AppContext.Consumer>
-    {context => <BaseGuidedTour currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default GuidedTour

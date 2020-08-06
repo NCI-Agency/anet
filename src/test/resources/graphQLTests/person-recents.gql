@@ -21,5 +21,6 @@ personList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder:
         name
       }
     }
+    customFields
   }
 }

@@ -1,10 +1,10 @@
+import { gql } from "@apollo/client"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
@@ -21,6 +21,7 @@ import {
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
+  FORMAT_STATISTICS,
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
@@ -30,7 +31,7 @@ import { Organization, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useMemo, useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Button, HelpBlock, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
@@ -223,7 +224,12 @@ const Collection = ({ queryParams }) => (
     <ReportCollection
       paginationKey="r_rollup"
       queryParams={queryParams}
-      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+      viewFormats={[
+        FORMAT_CALENDAR,
+        FORMAT_TABLE,
+        FORMAT_SUMMARY,
+        FORMAT_STATISTICS
+      ]}
     />
   </div>
 )
@@ -252,7 +258,8 @@ Map.propTypes = {
   queryParams: PropTypes.object
 }
 
-const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
+const RollupShow = ({ pageDispatchers, searchQuery }) => {
+  const { appSettings } = useContext(AppContext)
   const history = useHistory()
   const routerLocation = useLocation()
   const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
@@ -648,8 +655,7 @@ const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
   }
 }
 
-BaseRollupShow.propTypes = {
-  appSettings: PropTypes.object,
+RollupShow.propTypes = {
   searchQuery: SearchQueryPropType,
   pageDispatchers: PageDispatchersPropType
 }
@@ -657,11 +663,5 @@ BaseRollupShow.propTypes = {
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
-
-const RollupShow = props => (
-  <AppContext.Consumer>
-    {context => <BaseRollupShow appSettings={context.appSettings} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapPageDispatchersToProps)(RollupShow)

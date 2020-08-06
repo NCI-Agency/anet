@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import ConfirmDelete from "components/ConfirmDelete"
@@ -21,11 +21,10 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-import { Person, Position } from "models"
+import { Position } from "models"
 import moment from "moment"
 import { positionTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
@@ -94,7 +93,8 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
-const BasePositionShow = ({ pageDispatchers, currentUser }) => {
+const PositionShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
   const [
@@ -182,7 +182,8 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 position.uuid && {
                   relatedObjectType: Position.relatedObjectType,
-                  relatedObjectUuid: position.uuid
+                  relatedObjectUuid: position.uuid,
+                  relatedObject: position
                 }
               }
             />
@@ -433,17 +434,8 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
   }
 }
 
-const PositionShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePositionShow currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
-
-BasePositionShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+PositionShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionShow)

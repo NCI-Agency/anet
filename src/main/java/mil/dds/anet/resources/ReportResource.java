@@ -115,12 +115,18 @@ public class ReportResource {
   @GraphQLMutation(name = "createReport")
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
+    r.checkAndFixCustomFields();
     Person author = DaoUtils.getUserFromContext(context);
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
     }
     if (r.getAuthorUuid() == null) {
       r.setAuthorUuid(author.getUuid());
+    }
+
+    // FIXME: Eventually, also admins should no longer be allowed to create non-draft reports
+    if (r.getState() != ReportState.DRAFT && !AuthUtils.isAdmin(author)) {
+      throw new WebApplicationException("Can only create Draft reports", Status.BAD_REQUEST);
     }
 
     Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
@@ -148,6 +154,7 @@ public class ReportResource {
   public Report updateReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r,
       @GraphQLArgument(name = "sendEditEmail", defaultValue = "true") boolean sendEmail) {
+    r.checkAndFixCustomFields();
     Person editor = DaoUtils.getUserFromContext(context);
     // perform all modifications to the report and its tasks and steps in a single transaction,
     // returning the original state of the report
@@ -367,7 +374,6 @@ public class ReportResource {
   @GraphQLMutation(name = "submitReport")
   public Report submitReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
-    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
     if (r == null) {
@@ -375,6 +381,19 @@ public class ReportResource {
     }
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
+
+    if (!Objects.equals(r.getAuthorUuid(), user.getUuid())
+        && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true)
+        && !AuthUtils.isAdmin(user)) {
+      throw new WebApplicationException(
+          "Cannot submit report unless you are the report's author, his/her super user or an admin",
+          Status.FORBIDDEN);
+    }
+
+    if (r.getState() != ReportState.DRAFT && r.getState() != ReportState.REJECTED) {
+      throw new WebApplicationException(
+          "Cannot submit report unless it is either Draft or Rejected", Status.BAD_REQUEST);
+    }
 
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();

@@ -197,7 +197,9 @@ const _createPosition = async function(user) {
       role: getPersonRole(organization.type)
     },
     "uuid",
-    [user.uuid]
+    randomObject =>
+      randomObject?.uuid === user.uuid ||
+      randomObject?.domainUsername === specialUser.name
   )
   const location = await getRandomObject(user, "locations")
   const template = {

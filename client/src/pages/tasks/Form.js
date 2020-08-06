@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
@@ -17,16 +17,20 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_NOTE_FIELDS,
+  NOTE_TYPE
+} from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import { Organization, Person, Position, Task } from "models"
+import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -52,7 +56,8 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
+const TaskForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -496,7 +501,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
       "notes",
       "assessment_customFieldEnum1",
       "customFields", // initial JSON from the db
-      "formCustomFields"
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     task.customFields = customFieldsJSONString(values)
@@ -533,22 +538,15 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
   }
 }
 
-BaseTaskForm.propTypes = {
+TaskForm.propTypes = {
   initialValues: PropTypes.instanceOf(Task).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BaseTaskForm.defaultProps = {
+TaskForm.defaultProps = {
   title: "",
   edit: false
 }
-
-const TaskForm = props => (
-  <AppContext.Consumer>
-    {context => <BaseTaskForm currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default TaskForm

@@ -6,6 +6,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Glyphicon, Panel } from "react-bootstrap"
 import Settings from "settings"
+import utils from "utils"
 
 const Kanban = ({ columns, allTasks }) => (
   <div
@@ -135,9 +136,7 @@ const Card = ({ task }) => {
         {task.longName && (
           <div>
             <small>
-              {open || task.longName.length < 100
-                ? task.longName
-                : task.longName.substring(0, 100) + "..."}
+              {open ? task.longName : utils.ellipsize(task.longName, 100)}
             </small>
           </div>
         )}

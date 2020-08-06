@@ -19,7 +19,7 @@ public class PostgresqlTaskSearcher extends AbstractTaskSearcher {
 
   @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {
-    if (query.isTextPresent() && !query.isSortByPresent()) {
+    if (hasTextQuery(query) && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));

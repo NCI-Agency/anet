@@ -8,12 +8,12 @@ import {
 } from "components/Page"
 import { Person, Report } from "models"
 import { reportTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import ReportForm from "./Form"
 
-const BaseReportNew = ({ pageDispatchers, currentUser }) => {
+const ReportNew = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -26,7 +26,11 @@ const BaseReportNew = ({ pageDispatchers, currentUser }) => {
     person.primary = true
     report.attendees.push(person)
   }
-  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
+  const reportInitialValues = Object.assign(
+    report,
+    report.getTasksEngagementAssessments(),
+    report.getAttendeesEngagementAssessments()
+  )
 
   return (
     <div className="report-new">
@@ -50,15 +54,8 @@ const BaseReportNew = ({ pageDispatchers, currentUser }) => {
   )
 }
 
-BaseReportNew.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+ReportNew.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const ReportNew = props => (
-  <AppContext.Consumer>
-    {context => <BaseReportNew currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(ReportNew)

@@ -22,9 +22,29 @@ Object.keys(changeCase)
       !input ? "" : changeCase[c](input, options)
   })
 
+const isNullOrUndefined = value => {
+  return value === null || value === undefined
+}
+
+const fnRequiredWhen = (boolPropName, props, propName, componentName) => {
+  if (props[boolPropName] && typeof props[propName] !== "function") {
+    return new Error(
+      `Prop "${componentName}.${propName}" is a required function if "${boolPropName}" is true`
+    )
+  }
+}
+
+const ellipsize = (value, maxLength) =>
+  value.length > maxLength
+    ? value.substring(0, maxLength - 1) + "\u2026"
+    : value
+
 export default {
   ...wrappedChangeCase,
   pluralize,
+  isNullOrUndefined,
+  fnRequiredWhen,
+  ellipsize,
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
@@ -138,6 +158,10 @@ export default {
     return _isEmpty(text)
   },
 
+  isNumeric: function(value) {
+    return typeof value === "number"
+  },
+
   pushHash: function(hash) {
     const { history, location } = window
     hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""
@@ -151,6 +175,24 @@ export default {
     } else {
       location.hash = hash
     }
+  },
+
+  parseJsonSafe: function(jsonString) {
+    // TODO: Improve error handling so that consuming widgets can display an error w/o crashing
+    let result
+    try {
+      result = JSON.parse(jsonString || "{}")
+    } catch (error) {
+      console.error(`unable to parse JSON: ${jsonString}`)
+    }
+    return typeof result === "object" ? result || {} : {}
+  },
+
+  arrayOfNumbers: function(arr) {
+    return (
+      arr &&
+      arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
+    )
   }
 }
 
@@ -172,7 +214,7 @@ Object.get = function(source, keypath) {
   while (keys[0]) {
     const key = keys.shift()
     source = source[key]
-    if (source === undefined || source === null) {
+    if (isNullOrUndefined(source)) {
       return source
     }
   }

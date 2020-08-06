@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
@@ -11,7 +11,7 @@ import RECURSE_STRATEGY from "components/SearchFilters"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
@@ -67,13 +67,13 @@ AssociatedPositionsTable.propTypes = {
   associatedPositions: PropTypes.array
 }
 
-const BaseEditAssociatedPositionsModal = ({
+const EditAssociatedPositionsModal = ({
   position,
   showModal,
   onCancel,
-  onSuccess,
-  currentUser
+  onSuccess
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [error, setError] = useState(null)
   const assignedRole =
     position.type === Position.TYPE.PRINCIPAL
@@ -183,7 +183,7 @@ const BaseEditAssociatedPositionsModal = ({
   }
 
   function save(values, form) {
-    const newPosition = new Position(position)
+    const newPosition = Object.without(new Position(values), "notes")
     newPosition.associatedPositions = values.associatedPositions
     delete newPosition.previousPeople
     delete newPosition.person // prevent any changes to person.
@@ -192,23 +192,11 @@ const BaseEditAssociatedPositionsModal = ({
     })
   }
 }
-BaseEditAssociatedPositionsModal.propTypes = {
+EditAssociatedPositionsModal.propTypes = {
   position: PropTypes.object.isRequired,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
-  onSuccess: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  onSuccess: PropTypes.func.isRequired
 }
-
-const EditAssociatedPositionsModal = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseEditAssociatedPositionsModal
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default EditAssociatedPositionsModal
