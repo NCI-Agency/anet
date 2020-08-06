@@ -1,12 +1,12 @@
-/* eslint-disable */
-
 import { gql } from "@apollo/client"
+import { Tooltip } from "@blueprintjs/core"
 import API from "api"
 import SVGCanvas from "components/graphs/SVGCanvas"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate,
+  useBoilerplate
 } from "components/Page"
 import * as d3 from "d3"
 import { flextree } from "d3-flextree"
@@ -19,6 +19,7 @@ import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import Settings from "settings"
 import useD3Transition from "use-d3-transition"
+import Text from "react-svg-text"
 
 const GQL_ORGANIZATION_FIELDS = /* GraphQL */ `
   uuid
@@ -70,6 +71,52 @@ const sortPositions = (positions, truncateLimit) => {
     : allResults
 }
 
+const textEllipsis = (text, width) =>
+  text.length > width * 0.16
+    ? text.substring(0, width * 0.16 - 3) + "..."
+    : text
+
+const PositionNode = ({ position, size }) => {
+  const history = useHistory()
+
+  return (
+    <Tooltip
+      key={position.uuid}
+      popoverClassName="bp3-dark"
+      content={
+        <>
+          <LinkTo modelType="Person" model={position.person} /> -{" "}
+          <LinkTo modelType="Position" model={position} />{" "}
+        </>
+      }
+      targetTagName="g"
+      wrapperTagName="g"
+    >
+      <g onClick={() => history.push(Position.pathFor(position))}>
+        <image
+          width={13}
+          height={13}
+          y={-10}
+          href={position.person?.avatar || DEFAULT_AVATAR}
+        />
+        <Text x={18} fontSize="9px" fontFamily="monospace" textAnchor="start">
+          {textEllipsis(
+            `${position.person ? position.person.rank : ""} ${
+              position.person ? position.person.name : "unfilled"
+            } ${position.name}`,
+            size[0]
+          )}
+        </Text>
+      </g>
+    </Tooltip>
+  )
+}
+
+PositionNode.propTypes = {
+  position: PropTypes.object.isRequired,
+  size: PropTypes.arrayOf(PropTypes.number).isRequired
+}
+
 const OrganizationLink = ({ link }) => {
   const d = d3
     .linkVertical()
@@ -78,13 +125,13 @@ const OrganizationLink = ({ link }) => {
 
   const { ref, attrState } = useD3Transition({
     attrsToTransitionTo: { d },
-    deps: [link],
+    deps: [link]
   })
   return <path ref={ref} strokeOpacity={0.4} d={attrState.d} />
 }
 
 OrganizationLink.propTypes = {
-  link: PropTypes.object.isRequired,
+  link: PropTypes.object.isRequired
 }
 
 const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
@@ -97,83 +144,59 @@ const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
 
   const { ref, attrState } = useD3Transition({
     attrsToTransitionTo: { transform, background },
-    deps: [x, y, isMain],
+    deps: [x, y, isMain]
   })
 
   return (
     <g ref={ref} className="org" key={org.uuid} transform={attrState.transform}>
       <rect
-        rx="7"
-        ry="7"
+        rx="15"
+        ry="15"
         x={-size[0] / 2}
-        y={15}
+        y={-20}
         width={size[0]}
-        height={size[1] - 100 * scale}
+        height={size[1]}
         style={{
           fill: attrState.background,
-          stroke: isMain ? "black" : "none",
+          stroke: isMain ? "black" : "none"
         }}
       />
-      <g className="orgDetails" transform="translate(-8,-15)">
-        <g
-          onClick={() => history.push(Organization.pathFor(org))}
-          dangerouslySetInnerHTML={{ __html: symbol.asSVG() }}
-        />
-        <text
-          onClick={() => history.push(Organization.pathFor(org))}
-          fontSize="20px"
-          fontFamily="monospace"
-          fontWeight="bold"
-          dy={22}
-          x={38}
-        >
-          {org.shortName?.length > 12
-            ? org.shortName.substring(0, 10) + ".."
-            : org.shortName}
-        </text>
-        <text
-          onClick={() => history.push(Organization.pathFor(org))}
-          fontFamily="monospace"
-          dy={45}
-          x={-40}
-        >
-          {org.longName?.length > 21
-            ? org.longName.substring(0, 18) + ".."
-            : org.longName}
-        </text>
-
-        {sortPositions(org.positions, 10).map((position, i) => {
-          const positionText = `${
-            position.person ? position.person.rank : ""
-          } ${position.person ? position.person.name : "unfilled"} ${
-            position.name
-          }`
-
-          return (
-            <g
-              key={position.uuid}
-              transform={`translate(-63,${87 + i * 11})`}
-              onClick={() => history.push(Position.pathFor(org))}
-            >
-              <image
-                width={13}
-                height={13}
-                y={-10}
-                href={position.person?.avatar || DEFAULT_AVATAR}
-              />
-              <text
-                x={18}
-                fontSize="9px"
-                fontFamily="monospace"
-                textAnchor="start"
-              >
-                {positionText.length > 31
-                  ? positionText.substring(0, 28) + "..."
-                  : positionText}
-              </text>
+      <g className="orgDetails">
+        <g transform="translate(-15,-15)">
+          <g
+            onClick={() => history.push(Organization.pathFor(org))}
+            dangerouslySetInnerHTML={{ __html: symbol.asSVG() }}
+          />
+          <text
+            onClick={() => history.push(Organization.pathFor(org))}
+            fontSize="20px"
+            fontFamily="monospace"
+            fontWeight="bold"
+            dy={22}
+            x={38}
+          >
+            {org.shortName?.length > 12
+              ? org.shortName.substring(0, 10) + ".."
+              : org.shortName}
+          </text>
+          <text
+            onClick={() => history.push(Organization.pathFor(org))}
+            fontFamily="monospace"
+            dy={45}
+            x={-40}
+          >
+            {org.longName?.length > 21
+              ? org.longName.substring(0, 18) + ".."
+              : org.longName}
+          </text>
+        </g>
+        <g transform={`translate(${5 + -size[0] / 2},60)`}>
+          {sortPositions(org.positions).map((position, i) => (
+            <g key={position.uuid} transform={`translate(0,${i * 11})`}>
+              <PositionNode position={position} size={size} />
             </g>
-          )
-        })}
+          ))}
+        </g>
       </g>
     </g>
   )
@@ -186,7 +209,7 @@ OrganizationNode.propTypes = {
   scale: PropTypes.number.isRequired,
   size: PropTypes.arrayOf(PropTypes.number).isRequired,
   symbol: PropTypes.object,
-  isMain: PropTypes.bool,
+  isMain: PropTypes.bool
 }
 
 const OrganizationalChart = ({
@@ -194,20 +217,20 @@ const OrganizationalChart = ({
   org,
   exportTitle,
   width,
-  height: initialHeight,
+  height: initialHeight
 }) => {
   const svgRef = useRef(null)
   const treeLayout = useRef(null)
   const [root, setRoot] = useState(null)
   const [height, setHeight] = useState(initialHeight)
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
-    uuid: org.uuid,
+    uuid: org.uuid
   })
 
   const { done, result } = useBoilerplate({
     loading,
     error,
-    pageDispatchers,
+    pageDispatchers
   })
 
   const getDescendant = useCallback(
@@ -219,9 +242,10 @@ const OrganizationalChart = ({
     node => node?.uuid === data?.organization?.parentOrg?.uuid,
     [data]
   )
-  const isMain = useCallback(node => node?.uuid === data?.organization?.uuid, [
-    data,
-  ])
+  const isMain = useCallback(
+    node => node && node?.uuid === data?.organization?.uuid,
+    [data]
+  )
 
   const getScale = useCallback(
     node => {
@@ -241,16 +265,14 @@ const OrganizationalChart = ({
   )
 
   const getSize = useCallback(
-    node => {
+    (node, scale = 1) => {
       if (isMain(node)) {
-        return [400, 400]
-      } else if (isParent(node)) {
-        return [200, 200]
+        return [400 * scale, (node.positions?.length * 11 + 100) * scale]
       } else {
-        return [200 * getScale(node), 200 * getScale(node)]
+        return [200 * scale, (node.positions?.length * 11 + 100) * scale]
       }
     },
-    [getScale, isMain, isParent]
+    [isMain]
   )
 
   useEffect(() => {
@@ -264,7 +286,7 @@ const OrganizationalChart = ({
             org => org.parentOrg?.uuid === d.uuid
           )
         })
-        .nodeSize(node => getSize(node.data))
+        .nodeSize(node => getSize(node.data, getScale(node.data)))
         .spacing(10)
       const tree = treeLayout.current.hierarchy(
         data.organization.parentOrg || data.organization
@@ -272,7 +294,7 @@ const OrganizationalChart = ({
       treeLayout.current(tree)
       setRoot(tree)
     }
-  }, [data, isParent, getSize, isMain])
+  }, [data, getSize, getScale, isMain, isParent])
 
   useEffect(() => {
     if (!data || !root) {
@@ -346,7 +368,7 @@ OrganizationalChart.propTypes = {
   org: PropTypes.object.isRequired,
   exportTitle: PropTypes.string,
   width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationalChart)
