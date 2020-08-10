@@ -222,6 +222,7 @@ const OrganizationalChart = ({
   const svgRef = useRef(null)
   const treeLayout = useRef(null)
   const [root, setRoot] = useState(null)
+  const [zoomLevel, setZoomLevel] = useState(1.3)
   const [height, setHeight] = useState(initialHeight)
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
     uuid: org.uuid
@@ -238,48 +239,47 @@ const OrganizationalChart = ({
       uuid && data?.organization?.descendantOrgs.find(org => org.uuid === uuid),
     [data]
   )
-  const isParent = useCallback(
-    node => node?.uuid === data?.organization?.parentOrg?.uuid,
-    [data]
-  )
-  const isMain = useCallback(
-    node => node && node?.uuid === data?.organization?.uuid,
-    [data]
+
+  const distanceFromMain = useCallback(
+    node => {
+      if (node?.uuid === data?.organization?.parentOrg?.uuid) {
+        return -1
+      } else {
+        let distance = 0
+        let nodeIt = node
+        while (nodeIt && nodeIt.uuid !== data?.organization?.uuid) {
+          distance++
+          nodeIt = getDescendant(nodeIt.parentOrg?.uuid)
+        }
+        return distance
+      }
+    },
+    [data, getDescendant]
   )
 
   const getScale = useCallback(
-    node => {
-      if (isParent(node)) {
-        return 0.7
-      } else {
-        let scale = 1.3
-        let nodeIt = node
-        while (nodeIt && !isMain(nodeIt)) {
-          scale = scale / 1.4
-          nodeIt = getDescendant(nodeIt.parentOrg?.uuid)
-        }
-        return scale
-      }
-    },
-    [getDescendant, isParent, isMain]
+    node =>
+      (distanceFromMain(node) === 0 ? 1.3 : zoomLevel) *
+      Math.pow(0.7, Math.abs(distanceFromMain(node))),
+    [distanceFromMain, zoomLevel]
   )
 
   const getSize = useCallback(
     (node, scale = 1) => {
-      if (isMain(node)) {
+      if (distanceFromMain(node) === 0) {
         return [400 * scale, (node.positions?.length * 11 + 100) * scale]
       } else {
         return [200 * scale, (node.positions?.length * 11 + 100) * scale]
       }
     },
-    [isMain]
+    [distanceFromMain]
   )
 
   useEffect(() => {
     if (data) {
       treeLayout.current = flextree()
         .children(d => {
-          if (isParent(d)) {
+          if (distanceFromMain(d) === -1) {
             return [data.organization]
           }
           return data.organization.descendantOrgs.filter(
@@ -294,7 +294,7 @@ const OrganizationalChart = ({
       treeLayout.current(tree)
       setRoot(tree)
     }
-  }, [data, getSize, getScale, isMain, isParent])
+  }, [data, getSize, getScale, distanceFromMain])
 
   useEffect(() => {
     if (!data || !root) {
@@ -314,6 +314,8 @@ const OrganizationalChart = ({
         exportTitle={
           exportTitle || `${data.organization.shortName} organization chart`
         }
+        zoomFn={zoomIncrement =>
+          setZoomLevel(zoomLevel * Math.pow(1.1, zoomIncrement))}
       >
         <g transform={`translate(${width / 2},50)`}>
           <g style={{ fill: "none", stroke: "#555" }}>
@@ -352,7 +354,7 @@ const OrganizationalChart = ({
                     scale={getScale(org)}
                     size={getSize(org)}
                     symbol={sym}
-                    isMain={isMain(org)}
+                    isMain={distanceFromMain(org) === 0}
                   />
                 )
               })}
