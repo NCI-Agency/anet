@@ -301,8 +301,25 @@ const OrganizationalChart = ({
       return
     }
 
-    setHeight(1000)
-  }, [data, height, width, root])
+    const boundingBox = root.descendants().reduce(
+      (box, nodeArg) => {
+        const size = getSize(nodeArg.data, getScale(nodeArg.data))
+        return {
+          xmin: Math.min(box.xmin, nodeArg.x || 0),
+          xmax: Math.max(box.xmax, nodeArg.x + size[0] || 0),
+          ymin: Math.min(box.ymin, nodeArg.y || 0),
+          ymax: Math.max(box.ymax, nodeArg.y + size[1] || 0)
+        }
+      },
+      {
+        xmin: Number.MAX_SAFE_INTEGER,
+        xmax: Number.MIN_SAFE_INTEGER,
+        ymin: Number.MAX_SAFE_INTEGER,
+        ymax: Number.MIN_SAFE_INTEGER
+      }
+    )
+    setHeight(boundingBox.ymax - boundingBox.ymin + 50)
+  }, [data, width, root, getSize, getScale])
 
   return (
     <>
