@@ -1,0 +1,7 @@
+build_rules:
+  - id: shiftleft-builds
+    severity:
+      - SEVERITY_MEDIUM_IMPACT
+      - SEVERITY_HIGH_IMPACT
+      - SEVERITY_LOW_IMPACT
+    threshold: 5
