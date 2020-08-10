@@ -116,10 +116,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return idBatcher.getByIds(uuids);
   }
 
-  public Person getAvatar(String uuid) {
-    return getAvatars(Arrays.asList(uuid)).get(0);
-  }
-
   public List<Person> getAvatars(List<String> uuids) {
     final IdBatcher<Person> avatarBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(AvatarBatcher.class);
@@ -290,7 +286,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   private Person findInCacheByPersonUuid(String personUuid) {
     if (domainUsersCache != null && personUuid != null) {
       for (final Entry<String, Person> entry : domainUsersCache) {
-        if (Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
+        if (entry != null && Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
           return entry.getValue();
         }
       }
@@ -301,7 +297,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   private Person findInCacheByPositionUuid(String positionUuid) {
     if (domainUsersCache != null && positionUuid != null) {
       for (final Entry<String, Person> entry : domainUsersCache) {
-        if (Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
+        if (entry != null
+            && Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
           return entry.getValue();
         }
       }
