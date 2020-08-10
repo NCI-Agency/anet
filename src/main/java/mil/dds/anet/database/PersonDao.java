@@ -116,10 +116,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return idBatcher.getByIds(uuids);
   }
 
-  public Person getAvatar(String uuid) {
-    return getAvatars(Arrays.asList(uuid)).get(0);
-  }
-
   public List<Person> getAvatars(List<String> uuids) {
     final IdBatcher<Person> avatarBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(AvatarBatcher.class);
