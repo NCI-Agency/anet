@@ -258,7 +258,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   }
 
   private void putInCache(Person person) {
-    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
+    if (domainUsersCache != null && person != null && person.getUuid() != null
+        && person.getDomainUsername() != null) {
       // defensively copy the person we will be caching
       final Person copy = copyPerson(person);
       if (copy != null) {
