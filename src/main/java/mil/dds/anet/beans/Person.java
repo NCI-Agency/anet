@@ -261,7 +261,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
     }
     return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE_AVATARS, uuid)
         .thenApply(o -> {
-          avatar = Optional.ofNullable(o.getAvatar());
+          // Careful, `o` might be null
+          avatar = Optional.ofNullable(o == null ? null : o.getAvatar());
           return resizeAvatar(size);
         });
   }
