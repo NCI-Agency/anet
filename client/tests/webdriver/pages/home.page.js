@@ -26,6 +26,21 @@ class Home extends Page {
   get submitSearch() {
     return browser.$("#topbar #searchBarSubmit")
   }
+
+  get myOrgLink() {
+    return browser.$("#my-organization")
+  }
+
+  waitForSecurityBannerValue(value) {
+    this.securityBanner.waitForExist()
+    this.securityBanner.waitForDisplayed()
+    return browser.waitUntil(
+      () => {
+        return this.securityBanner.getText() === value
+      },
+      { timeout: 5000, timeoutMsg: "Expected different banner text after 5s" }
+    )
+  }
 }
 
 export default new Home()

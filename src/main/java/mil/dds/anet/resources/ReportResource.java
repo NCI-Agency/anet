@@ -115,12 +115,18 @@ public class ReportResource {
   @GraphQLMutation(name = "createReport")
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
+    r.checkAndFixCustomFields();
     Person author = DaoUtils.getUserFromContext(context);
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
     }
     if (r.getAuthorUuid() == null) {
       r.setAuthorUuid(author.getUuid());
+    }
+
+    // FIXME: Eventually, also admins should no longer be allowed to create non-draft reports
+    if (r.getState() != ReportState.DRAFT && !AuthUtils.isAdmin(author)) {
+      throw new WebApplicationException("Can only create Draft reports", Status.BAD_REQUEST);
     }
 
     Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
@@ -148,6 +154,7 @@ public class ReportResource {
   public Report updateReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r,
       @GraphQLArgument(name = "sendEditEmail", defaultValue = "true") boolean sendEmail) {
+    r.checkAndFixCustomFields();
     Person editor = DaoUtils.getUserFromContext(context);
     // perform all modifications to the report and its tasks and steps in a single transaction,
     // returning the original state of the report
@@ -355,9 +362,8 @@ public class ReportResource {
         }
         break;
       case PUBLISHED:
-        AnetAuditLogger.log(
-            "attempt to edit published report {} by editor {} (uuid: {}) was forbidden",
-            report.getUuid(), editor.getName(), editor.getUuid());
+        AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
+            report.getUuid(), editor);
         throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
       default:
         throw new WebApplicationException("Unknown report state", Status.FORBIDDEN);
@@ -367,7 +373,6 @@ public class ReportResource {
   @GraphQLMutation(name = "submitReport")
   public Report submitReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
-    // TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
     if (r == null) {
@@ -375,6 +380,19 @@ public class ReportResource {
     }
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
+
+    if (!Objects.equals(r.getAuthorUuid(), user.getUuid())
+        && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true)
+        && !AuthUtils.isAdmin(user)) {
+      throw new WebApplicationException(
+          "Cannot submit report unless you are the report's author, his/her super user or an admin",
+          Status.FORBIDDEN);
+    }
+
+    if (r.getState() != ReportState.DRAFT && r.getState() != ReportState.REJECTED) {
+      throw new WebApplicationException(
+          "Cannot submit report unless it is either Draft or Rejected", Status.BAD_REQUEST);
+    }
 
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
@@ -431,8 +449,7 @@ public class ReportResource {
       logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
-    AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(),
-        r.loadAuthor(engine.getContext()).join(), r.getAuthorUuid());
+    AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), r.getAuthorUuid());
     // GraphQL mutations *have* to return something, we return the report
     return r;
   }
@@ -468,8 +485,8 @@ public class ReportResource {
         .canUserApproveStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
         .join();
     if (!canApprove) {
-      logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(),
-          r.getUuid(), step.getUuid());
+      logger.info("User {} cannot approve report UUID {} for step UUID {}", approver, r.getUuid(),
+          step.getUuid());
       throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
     }
 
@@ -486,8 +503,7 @@ public class ReportResource {
       engine.getCommentDao().insert(comment1);
     }
 
-    AnetAuditLogger.log("Report {} approved by {} (uuid: {})", r.getUuid(), approver.getName(),
-        approver.getUuid());
+    AnetAuditLogger.log("Report {} approved by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
     return r;
   }
@@ -514,8 +530,8 @@ public class ReportResource {
           .canUserRejectStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
           .join();
       if (!canReject) {
-        logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}",
-            approver.getUuid(), r.getUuid(), step.getUuid());
+        logger.info("User {} cannot request changes to report UUID {} for step UUID {}", approver,
+            r.getUuid(), step.getUuid());
         throw new WebApplicationException("User cannot request changes to report",
             Status.FORBIDDEN);
       }
@@ -547,8 +563,7 @@ public class ReportResource {
     engine.getCommentDao().insert(reason1);
 
     sendReportRejectEmail(r, approver, reason1);
-    AnetAuditLogger.log("report {} has requested changes by {} (uuid: {})", r.getUuid(),
-        approver.getName(), approver.getUuid());
+    AnetAuditLogger.log("report {} has requested changes by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
     return r;
   }
@@ -577,7 +592,7 @@ public class ReportResource {
 
     // Only admin may publish a report, and only for non future engagements
     if (!AuthUtils.isAdmin(user) || r.isFutureEngagement()) {
-      logger.info("User {} cannot publish report UUID {}", user.getUuid(), r.getUuid());
+      logger.info("User {} cannot publish report UUID {}", user, r.getUuid());
       throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
     }
 
@@ -586,7 +601,7 @@ public class ReportResource {
       throw new WebApplicationException("Couldn't process report publication", Status.NOT_FOUND);
     }
 
-    AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());
+    AnetAuditLogger.log("report {} published by admin {}", r.getUuid(), user);
     // GraphQL mutations *have* to return something
     return r;
   }
@@ -651,8 +666,7 @@ public class ReportResource {
     }
 
     assertCanDeleteReport(report, user);
-    AnetAuditLogger.log("report {} deleted by {} (uuid: {})", reportUuid, user.getName(),
-        user.getUuid());
+    AnetAuditLogger.log("report {} deleted by {}", reportUuid, user);
 
     return dao.delete(reportUuid);
   }

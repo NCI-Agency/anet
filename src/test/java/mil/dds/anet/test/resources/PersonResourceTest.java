@@ -46,7 +46,8 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS = "uuid name code type status";
   private static final String PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
-          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
+          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
+          + " customFields";
   private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
 
   // 200 x 200 avatar
@@ -67,7 +68,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setRole(Role.ADVISOR);
     newPerson.setStatus(PersonStatus.ACTIVE);
     // set HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // set JSON of customFields
+    newPerson.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     newPerson.setGender("Female");
     newPerson.setCountry("Canada");
     newPerson.setCode("123456");
@@ -81,7 +84,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPerson.getUuid()).isNotNull();
     assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
     // check that HTML of biography is sanitized after create
-    assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after create
+    assertThat(newPerson.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     newPerson.setName("testCreatePerson updated name");
     newPerson.setCountry("The Commonwealth of Canada");
@@ -93,7 +99,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setAvatar(defaultAvatarData);
 
     // update HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // update JSON of customFields
+    newPerson.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
 
     Integer nrUpdated =
         graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson);
@@ -105,7 +113,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson.getCode()).isEqualTo(newPerson.getCode());
     assertThat(retPerson.getAvatar()).isNotNull();
     // check that HTML of biography is sanitized after update
-    assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after update
+    assertThat(retPerson.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Test creating a person with a position already set.
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
@@ -215,8 +226,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         .findFirst()).isNotEmpty();
 
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", "uuid shortName", queryOrgs,

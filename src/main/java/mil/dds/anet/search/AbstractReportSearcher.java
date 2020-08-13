@@ -16,6 +16,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
@@ -24,7 +25,6 @@ import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
@@ -87,7 +87,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
     // Base select and from clauses are added by child classes
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -162,7 +162,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getPendingApprovalOf() != null) {
-      qb.addWhereClause("reports.\"authorUuid\" != :approverUuid");
       qb.addWhereClause("reports.\"approvalStepUuid\" IN"
           + " (SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN"
           + " (SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :approverUuid))");
@@ -274,8 +273,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(ReportSearchQuery query);
 
   protected abstract void addBatchClause(ReportSearchQuery query);
 

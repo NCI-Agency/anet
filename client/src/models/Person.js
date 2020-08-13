@@ -1,4 +1,8 @@
-import Model, { createYupObjectShape, yupDate } from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS,
+  yupDate
+} from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
@@ -30,8 +34,13 @@ export default class Person extends Model {
 
   static nameDelimiter = ","
 
+  static advisorAssessmentConfig = Settings.fields.advisor.person.assessments
+
+  static principalAssessmentConfig =
+    Settings.fields.principal.person.assessments
+
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.person.customFields
   )
 
@@ -142,14 +151,16 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Person.customFieldsSchema.nullable()
+        .default(() => Person.STATUS.ACTIVE)
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Person.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
     "uuid, name, rank, role, status, endOfTourDate, avatar(size: 32), position { uuid, name, type, code, status, organization { uuid, shortName }, location {uuid, name} }"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfRole(role) {
     if (role === Person.ROLE.ADVISOR) {
@@ -315,5 +326,15 @@ export default class Person extends Model {
       lastName: lastName.trim().toUpperCase(),
       firstName: firstName.trim()
     }
+  }
+
+  generalAssessmentsConfig() {
+    let config
+    if (this.isAdvisor()) {
+      config = Person.advisorAssessmentConfig
+    } else if (this.isPrincipal()) {
+      config = Person.principalAssessmentConfig
+    }
+    return config || []
   }
 }

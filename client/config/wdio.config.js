@@ -100,9 +100,7 @@ const config = {
   //
   // A key-value store of headers to be added to every selenium request. Values must be strings. Type: Object
   // Default: None
-  headers: {
-    Authorization: "Basic ZXJpbjplcmlu"
-  },
+  // headers: {},
   //
   // Default timeout for all waitFor* commands.
   waitforTimeout: 10000,

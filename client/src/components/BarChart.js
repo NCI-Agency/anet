@@ -3,6 +3,7 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
 import ReactTooltip from "react-tooltip"
+import utils from "utils"
 import "./BarChart.css"
 
 /*
@@ -50,7 +51,11 @@ const BarChart = ({
 
     const xScale = d3.scaleBand().domain(
       data.map(function(d) {
-        xLabels[getPropValue(d, xProp)] = getPropValue(d, label)
+        xLabels[getPropValue(d, xProp)] = utils.ellipsize(
+          // TODO: Make responsive
+          getPropValue(d, label),
+          10
+        )
         return getPropValue(d, xProp)
       })
     )
@@ -108,8 +113,8 @@ const BarChart = ({
 
     let chart = d3.select(node.current)
     const chartBox = node.current.getBoundingClientRect()
-    const chartWidth = isNumeric(width) ? width : chartBox.width
-    const chartHeight = isNumeric(height) ? height : 0.7 * chartWidth
+    const chartWidth = utils.isNumeric(width) ? width : chartBox.width
+    const chartHeight = utils.isNumeric(height) ? height : 0.7 * chartWidth
     const xWidth = chartWidth - marginLeft - MARGIN.right
     const yHeight = chartHeight - MARGIN.top - marginBottom
 
@@ -197,10 +202,6 @@ const BarChart = ({
       </div>
     )) || <svg id={chartId} ref={node} width={width} height={height} />
   )
-
-  function isNumeric(value) {
-    return typeof value === "number"
-  }
 }
 
 BarChart.propTypes = {

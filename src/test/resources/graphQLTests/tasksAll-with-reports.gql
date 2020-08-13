@@ -25,5 +25,6 @@ taskList(query: {pageSize: 0}) {
     approvedReports: reports(query: {state: [APPROVED]}) {
       uuid
     }
+    customFields
   }
 }
