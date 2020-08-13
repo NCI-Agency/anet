@@ -467,4 +467,58 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
             + " WHERE pp.\"positionUuid\" = :%3$s AND maxPp.\"createdAt\" IS NULL ",
         personJoinColumn, dateFilterColumn, placeholderName);
   }
+
+  @InTransaction
+  public int cleanLoserPositionCode(String loserUuid) {
+    return getDbHandle().createUpdate(
+        "/* deleteLoserPositionCodeBeforeMerge */ UPDATE \"positions\" set \"code\" = NULL "
+            + "WHERE \"uuid\" = :loserUuid")
+        .bind("loserUuid", loserUuid).execute();
+  }
+
+
+  @InTransaction
+  public int mergePositions(Position existingPos, Position mergedPosition) {
+    getDbHandle().createUpdate(
+        "/* updatePeoplePositionsAfterMergePosition */ UPDATE \"peoplePositions\" set \"positionUuid\" = :mergedPositionUuid "
+            + "WHERE \"positionUuid\" = :existingPosUuid")
+        .bind("mergedPositionUuid", mergedPosition.getUuid())
+        .bind("existingPosUuid", existingPos.getUuid()).execute();
+
+    getDbHandle().execute(
+        "DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?",
+        existingPos.getUuid(), existingPos.getUuid());
+
+    // Update notes of existing position's with merged position info
+    getDbHandle().createUpdate(
+        "/* updateNoteRelatedObjectsAfterMergePosition */ UPDATE \"noteRelatedObjects\" set \"relatedObjectUuid\" = :mergedPositionUuid "
+            + "WHERE \"relatedObjectUuid\" = :existingPosUuid")
+        .bind("mergedPositionUuid", mergedPosition.getUuid())
+        .bind("existingPosUuid", existingPos.getUuid()).execute();
+
+    // Update approvers position info with merged position info
+    getDbHandle().createUpdate(
+        "/* updateApproversAfterMergePosition */ UPDATE \"approvers\" set \"positionUuid\" = :mergedPositionUuid "
+            + "WHERE \"positionUuid\" = :existingPosUuid")
+        .bind("mergedPositionUuid", mergedPosition.getUuid())
+        .bind("existingPosUuid", existingPos.getUuid()).execute();
+
+    // Update task Responsible Position info with merged position info
+    getDbHandle().createUpdate(
+        "/* updateTaskResponsiblePositionsAfterMergePosition */ UPDATE \"taskResponsiblePositions\" set \"positionUuid\" = :mergedPositionUuid "
+            + "WHERE \"positionUuid\" = :existingPosUuid")
+        .bind("mergedPositionUuid", mergedPosition.getUuid())
+        .bind("existingPosUuid", existingPos.getUuid()).execute();
+
+    getDbHandle().execute("DELETE FROM \"authorizationGroupPositions\" WHERE \"positionUuid\" = ?",
+        existingPos.getUuid());
+
+    final int nr = getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
+        .bind("positionUuid", existingPos.getUuid()).execute();
+
+    // Evict the persons (previously) holding this position from the domain users cache
+    AnetObjectEngine.getInstance().getPersonDao()
+        .evictFromCacheByPositionUuid(existingPos.getUuid());
+    return nr;
+  }
 }
