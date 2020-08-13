@@ -337,7 +337,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
 
   @Override
   public String toString() {
-    return String.format("[uuid:%s, name:%s, emailAddress:%s]", uuid, name, emailAddress);
+    // Only use the uuid, no personal information
+    return String.format("[uuid:%s]", uuid);
   }
 
   public static Person createWithUuid(String uuid) {
