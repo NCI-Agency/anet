@@ -106,6 +106,10 @@ export default class Position extends Model {
     return this.type === Position.TYPE.PRINCIPAL
   }
 
+  isActive() {
+    return this.status === Position.STATUS.ACTIVE
+  }
+
   toString() {
     return this.name
   }
