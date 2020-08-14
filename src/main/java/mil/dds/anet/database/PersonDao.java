@@ -60,6 +60,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
   private static final String DOMAIN_USERS_CACHE = "domainUsersCache";
+  private static final int ACTIVITY_LOG_LIMIT = 100;
 
   private Cache<String, Person> domainUsersCache;
   private MetricRegistry metricRegistry;
@@ -230,8 +231,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   public void logActivitiesByDomainUsername(String domainUsername, Map<String, String> activity) {
     final Person person = domainUsersCache.get(domainUsername);
     if (person != null) {
-      List<Map<String, String>> activities = person.getUserActivities();
-      if (activities.size() >= 100) {
+      final List<Map<String, String>> activities = person.getUserActivities();
+      if (activities.size() >= ACTIVITY_LOG_LIMIT) {
         activities.clear();
       }
       activities.add(activity);

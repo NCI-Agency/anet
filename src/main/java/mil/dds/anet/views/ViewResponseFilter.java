@@ -72,7 +72,7 @@ public class ViewResponseFilter implements ContainerResponseFilter {
           AnetObjectEngine.getInstance().getPersonDao().logActivitiesByDomainUsername(
               person.getDomainUsername(), new HashMap<String, String>() {
                 {
-                  put("ip", request.getRemoteAddr() != null ? request.getRemoteAddr() : "-");
+                  put("ip", request.getRemoteAddr() == null ? "-" : request.getRemoteAddr());
                   put("user",
                       person.getDomainUsername() != null ? person.getDomainUsername() : "-");
                   put("request",

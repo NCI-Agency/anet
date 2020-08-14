@@ -183,12 +183,13 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     this.dictionary = Collections.unmodifiableMap(dictionary);
   }
 
-  @SuppressWarnings("unchecked")
   public void loadDictionary() throws IOException, IllegalArgumentException {
     // Read and set anet-dictionary
     final File file = new File(System.getProperty("user.dir") + "/" + getAnetDictionaryName());
     try (final InputStream inputStream = new FileInputStream(file)) {
+      @SuppressWarnings("unchecked")
       final Map<String, Object> objectMap = yamlMapper.readValue(inputStream, Map.class);
+      @SuppressWarnings("unchecked")
       final Map<String, Object> dictionaryMap = (Map<String, Object>) objectMap.get("dictionary");
       // Check and then set dictionary if it is valid
       if (isValid(dictionaryMap)) {

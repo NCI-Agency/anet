@@ -108,8 +108,8 @@ public class AdminResourceTest extends AbstractResourceTest {
     engine.getPersonDao().findByDomainUsername(user.getDomainUsername());
 
     try {
-      final String result = (String) graphQLHelper.getObject(user,
-          "mutation { payload: clearCache }", new HashMap<>());
+      final String result = graphQLHelper.getObjectOfType(user, "mutation { payload: clearCache }",
+          new TypeReference<GraphQlResponse<String>>() {});
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.USERCACHE_MESSAGE);
       } else {
@@ -126,8 +126,9 @@ public class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final String result = (String) graphQLHelper.getObject(user,
-          "mutation { payload: reloadDictionary }", new HashMap<>());
+      final String result =
+          graphQLHelper.getObjectOfType(user, "mutation { payload: reloadDictionary }",
+              new TypeReference<GraphQlResponse<String>>() {});
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.DICTIONARY_RELOAD_MESSAGE);
       } else {
@@ -144,8 +145,9 @@ public class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final Map<String, Object> allActivities = (HashMap<String, Object>) graphQLHelper
-          .getObject(user, "query { payload: userActivities }", new HashMap<>());
+      final Map<String, Object> allActivities =
+          graphQLHelper.getObjectOfType(user, "query { payload: userActivities }",
+              new TypeReference<GraphQlResponse<Map<String, Object>>>() {});
       if (isAdmin) {
         assertThat(allActivities.containsKey("users")).isTrue();
         assertThat(allActivities.containsKey("recentCalls")).isTrue();
