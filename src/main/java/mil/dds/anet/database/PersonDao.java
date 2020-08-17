@@ -116,10 +116,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return idBatcher.getByIds(uuids);
   }
 
-  public Person getAvatar(String uuid) {
-    return getAvatars(Arrays.asList(uuid)).get(0);
-  }
-
   public List<Person> getAvatars(List<String> uuids) {
     final IdBatcher<Person> avatarBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(AvatarBatcher.class);
@@ -262,7 +258,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   private void putInCache(Person person) {
-    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
+    if (domainUsersCache != null && person != null && person.getUuid() != null
+        && person.getDomainUsername() != null) {
       // defensively copy the person we will be caching
       final Person copy = copyPerson(person);
       if (copy != null) {
@@ -290,7 +287,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   private Person findInCacheByPersonUuid(String personUuid) {
     if (domainUsersCache != null && personUuid != null) {
       for (final Entry<String, Person> entry : domainUsersCache) {
-        if (Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
+        if (entry != null && Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
           return entry.getValue();
         }
       }
@@ -301,7 +298,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   private Person findInCacheByPositionUuid(String positionUuid) {
     if (domainUsersCache != null && positionUuid != null) {
       for (final Entry<String, Person> entry : domainUsersCache) {
-        if (Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
+        if (entry != null
+            && Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
           return entry.getValue();
         }
       }

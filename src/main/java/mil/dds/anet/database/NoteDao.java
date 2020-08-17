@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.ArrayList;
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
@@ -16,11 +17,16 @@ import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "notes";
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Override
   public Note getByUuid(String uuid) {
@@ -162,6 +168,45 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         uuid);
   }
 
+  @InTransaction
+  public void deleteDanglingNotes() {
+    // 1. for report assessments, their noteRelatedObjects can be deleted
+    // if the report they point to has been deleted
+    final int nrReportAssessmentsNroDeleted = getDbHandle().execute(
+        "/* deleteDanglingNoteRelatedObjectsForReportAssessments */"
+            + "DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" IN ("
+            + " SELECT n.uuid FROM notes n WHERE n.type = ? AND EXISTS ("
+            + "  SELECT nro_reports.\"noteUuid\" FROM \"noteRelatedObjects\" nro_reports"
+            + "  WHERE nro_reports.\"relatedObjectType\" = ?"
+            + "  AND nro_reports.\"noteUuid\" = n.uuid AND NOT EXISTS ("
+            + "    SELECT r.uuid FROM reports r"
+            + "    WHERE r.uuid = nro_reports.\"relatedObjectUuid\")))",
+        DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), ReportDao.TABLE_NAME);
+    logger.info("Deleted {} dangling noteRelatedObjects for assessments of deleted reports",
+        nrReportAssessmentsNroDeleted);
+
+    // 2. noteRelatedObjects can be deleted if the relatedObject they point to no longer exists;
+    // since only positions and reports can be deleted and can have notes, just check these two
+    final int nrPositionsNroDeleted = getDbHandle().execute(
+        "/* deleteDanglingNoteRelatedObjectsForPositions */ DELETE FROM \"noteRelatedObjects\""
+            + " WHERE \"relatedObjectType\" = ?"
+            + " AND \"relatedObjectUuid\" NOT IN ( SELECT uuid FROM positions )",
+        PositionDao.TABLE_NAME);
+    logger.info("Deleted {} dangling noteRelatedObjects for deleted positions",
+        nrPositionsNroDeleted);
+    final int nrReportsNroDeleted = getDbHandle().execute(
+        "/* deleteDanglingNoteRelatedObjectsForReports */ DELETE FROM \"noteRelatedObjects\""
+            + " WHERE \"relatedObjectType\" = ?"
+            + " AND \"relatedObjectUuid\" NOT IN ( SELECT uuid FROM reports )",
+        ReportDao.TABLE_NAME);
+    logger.info("Deleted {} dangling noteRelatedObjects for deleted reports", nrReportsNroDeleted);
+
+    // 3. a note can be deleted if there are no longer any noteRelatedObjects linking to it
+    final int nrNotesDeleted = getDbHandle().execute("/* deleteDanglingNotes */ DELETE FROM notes"
+        + " WHERE uuid NOT IN ( SELECT \"noteUuid\" FROM \"noteRelatedObjects\" )");
+    logger.info("Deleted {} dangling notes", nrNotesDeleted);
+  }
+
   private void updateSubscriptions(int numRows, Note obj) {
     if (numRows > 0) {
       final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj);
@@ -187,4 +232,5 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
     return updates;
   }
+
 }
