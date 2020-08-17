@@ -216,8 +216,7 @@ public class PositionResource {
       throw new WebApplicationException("Cannot delete an active position", Status.BAD_REQUEST);
     }
 
-    AnetAuditLogger.log("Position {} deleted by {} (uuid: {})", positionUuid, user.getName(),
-        user.getUuid());
+    AnetAuditLogger.log("Position {} deleted by {}", positionUuid, user);
 
     // if this position has any history, we'll just delete it
     // if this position is in an approval chain, we just delete it
