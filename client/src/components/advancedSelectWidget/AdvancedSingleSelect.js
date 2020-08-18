@@ -41,10 +41,11 @@ const AdvancedSingleSelect = props => {
 }
 AdvancedSingleSelect.propTypes = {
   ...advancedSelectPropTypes,
-  value: PropTypes.object,
+  value: PropTypes.object.isRequired,
   valueKey: PropTypes.string
 }
 AdvancedSingleSelect.defaultProps = {
+  value: {},
   overlayTable: AdvancedSingleSelectOverlayTable,
   showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
 }

@@ -15,13 +15,14 @@ import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import _isEqualWith from "lodash/isEqualWith"
 import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import { Button, HelpBlock } from "react-bootstrap"
+import { Button, HelpBlock, Table } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
@@ -372,10 +373,11 @@ const AnetObjectField = ({ name, types, formikProps, ...otherFieldProps }) => {
     <FastField
       name={name}
       component={FieldHelper.SpecialField}
+      value={fieldValue}
       widget={
         <MultiTypeAdvancedSelectComponent
+          fieldName={name}
           entityTypes={types}
-          value={fieldValue}
           onConfirm={(value, entityType) =>
             setFieldValue(name, {
               type: entityType,
@@ -422,6 +424,110 @@ ReadonlyAnetObjectField.propTypes = {
   values: PropTypes.object.isRequired
 }
 
+const ArrayOfAnetObjectsField = ({
+  name,
+  types,
+  formikProps,
+  ...otherFieldProps
+}) => {
+  const { values, setFieldValue } = formikProps
+  const fieldValue = Object.get(values, name) || []
+  return (
+    <FastField
+      name={name}
+      component={FieldHelper.SpecialField}
+      value={fieldValue}
+      widget={
+        <MultiTypeAdvancedSelectComponent
+          fieldName={name}
+          entityTypes={types}
+          isMultiSelect
+          onConfirm={(value, entityType) => {
+            if (value.length > fieldValue.length) {
+              // entity was added at the end, set correct value
+              const addedEntity = value.pop()
+              value.push({
+                type: entityType,
+                uuid: addedEntity.uuid
+              })
+            }
+            setFieldValue(name, value)
+          }}
+        />
+      }
+      {...otherFieldProps}
+    >
+      {!_isEmpty(fieldValue) && (
+        <Table striped condensed hover responsive>
+          <tbody>
+            {fieldValue.map(entity => (
+              <tr key={entity.uuid}>
+                <td>
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      let found = false
+                      const newValue = fieldValue.filter(e => {
+                        if (_isEqual(e, entity)) {
+                          found = true
+                          return false
+                        }
+                        return true
+                      })
+                      if (found) {
+                        setFieldValue(name, newValue)
+                      }
+                    }}
+                  >
+                    <img src={REMOVE_ICON} height={14} alt="Unlink object" />
+                  </span>
+                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </FastField>
+  )
+}
+ArrayOfAnetObjectsField.propTypes = {
+  name: PropTypes.string.isRequired,
+  types: PropTypes.arrayOf(PropTypes.string),
+  formikProps: PropTypes.object
+}
+
+const ReadonlyArrayOfAnetObjectsField = ({ name, label, values }) => {
+  const fieldValue = Object.get(values, name) || []
+  return (
+    <FastField
+      name={name}
+      label={label}
+      component={FieldHelper.ReadonlyField}
+      humanValue={
+        !_isEmpty(fieldValue) && (
+          <Table striped condensed hover responsive>
+            <tbody>
+              {fieldValue.map(entity => (
+                <tr key={entity.uuid}>
+                  <td>
+                    <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )
+      }
+    />
+  )
+}
+ReadonlyArrayOfAnetObjectsField.propTypes = {
+  name: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  values: PropTypes.object.isRequired
+}
+
 const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: TextField,
   [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
@@ -431,7 +537,8 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.ENUMSET]: EnumSetField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ArrayOfObjectsField,
   [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: SpecialField,
-  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: AnetObjectField
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: AnetObjectField,
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: ArrayOfAnetObjectsField
 }
 
 function getInvisibleFields(
@@ -559,6 +666,7 @@ const CustomField = ({
           updateInvisibleFields
         }
       case CUSTOM_FIELD_TYPE.ANET_OBJECT:
+      case CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS:
         return {
           formikProps
         }
@@ -681,7 +789,8 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField,
   [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: ReadonlySpecialField,
-  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: ReadonlyAnetObjectField
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: ReadonlyAnetObjectField,
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: ReadonlyArrayOfAnetObjectsField
 }
 
 export const ReadonlyCustomFields = ({

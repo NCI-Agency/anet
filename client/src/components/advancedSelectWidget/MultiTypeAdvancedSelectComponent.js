@@ -7,6 +7,7 @@ import {
   ReportDetailedOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import * as Models from "models"
@@ -113,9 +114,12 @@ const widgetTypeMapping = {
 }
 
 const MultiTypeAdvancedSelectComponent = ({
+  fieldName,
   onConfirm,
   objectType,
-  entityTypes
+  entityTypes,
+  value,
+  isMultiSelect
 }) => {
   const [entityType, setEntityType] = useState(
     objectType ||
@@ -153,33 +157,58 @@ const MultiTypeAdvancedSelectComponent = ({
         </ButtonToggleGroup>
       )}
 
-      <AdvancedSingleSelect
-        autofocus="true"
-        fieldName="entitySelect"
-        fieldLabel="Search in ANET:"
-        placeholder={searchPlaceholder}
-        value={{}}
-        showEmbedded
-        overlayColumns={advancedSelectProps.overlayColumns}
-        overlayRenderRow={advancedSelectProps.overlayRenderRow}
-        filterDefs={advancedSelectProps.filterDefs}
-        onChange={value => onConfirm(value, entityType)}
-        objectType={advancedSelectProps.objectType}
-        queryParams={advancedSelectProps.queryParams}
-        fields={advancedSelectProps.fields}
-        addon={advancedSelectProps.addon}
-      />
+      {isMultiSelect ? (
+        <AdvancedMultiSelect
+          autofocus="true"
+          fieldName={fieldName}
+          fieldLabel="Search in ANET:"
+          placeholder={searchPlaceholder}
+          value={value}
+          showEmbedded
+          overlayColumns={advancedSelectProps.overlayColumns}
+          overlayRenderRow={advancedSelectProps.overlayRenderRow}
+          filterDefs={advancedSelectProps.filterDefs}
+          onChange={value => onConfirm(value, entityType)}
+          objectType={advancedSelectProps.objectType}
+          queryParams={advancedSelectProps.queryParams}
+          fields={advancedSelectProps.fields}
+          addon={advancedSelectProps.addon}
+        />
+      ) : (
+        <AdvancedSingleSelect
+          autofocus="true"
+          fieldName={fieldName}
+          fieldLabel="Search in ANET:"
+          placeholder={searchPlaceholder}
+          value={value}
+          showEmbedded
+          showRemoveButton={false}
+          overlayColumns={advancedSelectProps.overlayColumns}
+          overlayRenderRow={advancedSelectProps.overlayRenderRow}
+          filterDefs={advancedSelectProps.filterDefs}
+          onChange={value => onConfirm(value, entityType)}
+          objectType={advancedSelectProps.objectType}
+          queryParams={advancedSelectProps.queryParams}
+          fields={advancedSelectProps.fields}
+          addon={advancedSelectProps.addon}
+        />
+      )}
     </>
   )
 }
 
 MultiTypeAdvancedSelectComponent.propTypes = {
+  fieldName: PropTypes.string,
   onConfirm: PropTypes.func,
   objectType: PropTypes.string,
-  entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired
+  entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  isMultiSelect: PropTypes.bool.isRequired
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
-  entityTypes: Object.values(ENTITY_TYPES)
+  fieldName: "entitySelect",
+  entityTypes: Object.values(ENTITY_TYPES),
+  isMultiSelect: false
 }
 
 export default MultiTypeAdvancedSelectComponent
