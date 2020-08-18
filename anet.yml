@@ -372,6 +372,18 @@ dictionary:
       keyOutcomes: Key outcomes
       reportText: Key details
       customFields:
+        relatedReport:
+          type: anet_object
+          label: Related report
+          types:
+            - Report
+        additionalEngagementNeeded:
+          type: array_of_anet_objects
+          label: Additional engagement needed for
+          types:
+            - Person
+            - Position
+            - Organization
         multipleButtons:
           type: enumset
           label: Engagement types
