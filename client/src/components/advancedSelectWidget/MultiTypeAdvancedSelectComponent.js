@@ -11,7 +11,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -114,9 +114,14 @@ const widgetTypeMapping = {
 
 const MultiTypeAdvancedSelectComponent = ({
   onConfirm,
-  objectType: entityTypeArg
+  objectType,
+  entityTypes
 }) => {
-  const [entityType, setEntityType] = useState(entityTypeArg)
+  const [entityType, setEntityType] = useState(
+    objectType ||
+      Object.values(ENTITY_TYPES).find(et => entityTypes.includes(et)) ||
+      ENTITY_TYPES.REPORTS
+  )
   const [advancedSelectProps, setAdvancedSelectProps] = useState(
     widgetTypeMapping[entityType]
   )
@@ -124,23 +129,29 @@ const MultiTypeAdvancedSelectComponent = ({
     setEntityType(newEntityType)
     setAdvancedSelectProps(widgetTypeMapping[newEntityType])
   }
-  let searchPlaceholder = ""
+  const searchPlaceholder = useMemo(() => {
+    const [key] = Object.entries(ENTITY_TYPES).find(
+      ([, et]) => et === entityType
+    )
+    const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
+    return "Find " + entityLabel.toLowerCase()
+  }, [entityType])
   return (
     <>
-      <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
-        {Object.entries(ENTITY_TYPES).map((key, value) => {
-          const entityName = key[1]
-          const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key[0]]]
-          if (entityName === entityType) {
-            searchPlaceholder = "Find " + entityLabel.toLowerCase()
-          }
-          return (
-            <Button key={entityName} value={entityName}>
-              {entityLabel}
-            </Button>
-          )
-        })}
-      </ButtonToggleGroup>
+      {entityTypes.length > 1 && (
+        <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
+          {Object.entries(ENTITY_TYPES)
+            .filter(([, et]) => entityTypes.includes(et))
+            .map(([key, entityName], value) => {
+              const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
+              return (
+                <Button key={entityName} value={entityName}>
+                  {entityLabel}
+                </Button>
+              )
+            })}
+        </ButtonToggleGroup>
+      )}
 
       <AdvancedSingleSelect
         autofocus="true"
@@ -164,10 +175,11 @@ const MultiTypeAdvancedSelectComponent = ({
 
 MultiTypeAdvancedSelectComponent.propTypes = {
   onConfirm: PropTypes.func,
-  objectType: PropTypes.string
+  objectType: PropTypes.string,
+  entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
-  objectType: ENTITY_TYPES.REPORTS
+  entityTypes: Object.values(ENTITY_TYPES)
 }
 
 export default MultiTypeAdvancedSelectComponent
