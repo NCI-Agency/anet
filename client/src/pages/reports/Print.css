@@ -1,0 +1,73 @@
+@page {
+  margin: 10mm;
+}
+.print-page-table {
+  width: 100%;
+}
+
+.print-page-table,
+.print-page-table tr,
+.print-page-table th,
+.print-page-table td {
+  /* outline: 1px solid grey; DEBUG */
+}
+
+.print-page-header-space{
+  height: 30px;
+}
+.print-page-footer-space {
+  height: 30px;
+}
+
+.print-page-table th {
+  padding: 4px 0;
+}
+
+.print-page-table td {
+  padding: 4px 1rem;
+}
+.print-page-table th {
+  vertical-align: top;
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  width: 20%;
+}
+.print-page-table td {
+  padding-left: 1rem;
+}
+
+.print-page-header-content,
+.print-page-footer-content {
+  position: fixed;
+  width: 100%;
+  padding: 5px 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.print-page-header-content {
+  top: 0mm;
+  border-bottom: 1px solid black;
+}
+
+.print-page-footer-content {
+  bottom: 0mm;
+  border-top: 1px solid black;
+
+}
+
+.print-table-title,
+.print-table-subtitle {
+  text-align: center;
+}
+
+@media print {
+  thead {display: table-header-group;}
+  tfoot {display: table-footer-group;}
+
+  button {display: none;}
+
+  body {margin: 0;}
+}

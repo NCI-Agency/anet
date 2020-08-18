@@ -281,6 +281,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
+
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -388,6 +389,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {canEmail && (
               <Button onClick={toggleEmailModal}>Email report</Button>
             )}
+            <Button type="button" bsStyle="primary" onClick={onPrintClick}>
+              Print report
+            </Button>
             {canEdit && (
               <LinkTo modelType="Report" model={report} edit button="primary">
                 Edit
@@ -962,6 +966,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function toggleEmailModal() {
     setShowEmailModal(!showEmailModal)
+  }
+
+  function onPrintClick() {
+    history.push(`${report.uuid}/print`)
   }
 
   function handleEmailValidation(value) {
