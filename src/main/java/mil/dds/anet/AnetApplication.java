@@ -332,9 +332,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
       if (inputStream == null) {
         logger.error("ANET schema [anet-schema.yml] not found");
       } else {
-        JsonSchemaFactory factory =
-            JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-                .objectMapper(yamlMapper).build();
+        JsonSchemaFactory factory = JsonSchemaFactory
+            .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
+            .objectMapper(yamlMapper).build();
 
         JsonSchema schema = factory.getSchema(inputStream);
         final JsonNode dictionary = jsonMapper.valueToTree(configuration.getDictionary());

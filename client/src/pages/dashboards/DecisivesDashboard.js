@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -7,6 +6,7 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
   PageDispatchersPropType,
