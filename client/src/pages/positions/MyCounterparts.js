@@ -1,14 +1,9 @@
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
-import {
-  mapPageDispatchersToProps,
-  PageDispatchersPropType
-} from "components/Page"
 import PositionTable from "components/PositionTable"
 import React, { useContext } from "react"
-import { connect } from "react-redux"
 
-const MyCounterparts = ({ pageDispatchers }) => {
+const MyCounterparts = () => {
   const { currentUser } = useContext(AppContext)
   return (
     <div>
@@ -18,9 +13,4 @@ const MyCounterparts = ({ pageDispatchers }) => {
     </div>
   )
 }
-
-MyCounterparts.propTypes = {
-  pageDispatchers: PageDispatchersPropType
-}
-
-export default connect(null, mapPageDispatchersToProps)(MyCounterparts)
+export default MyCounterparts
