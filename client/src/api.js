@@ -1,32 +1,11 @@
 import querystring from "querystring"
-import {
-  ApolloClient,
-  ApolloLink,
-  from,
-  HttpLink,
-  InMemoryCache,
-  useQuery
-} from "@apollo/client"
+import { useQuery } from "@apollo/react-hooks"
+import ApolloClient from "apollo-boost"
+import { InMemoryCache } from "apollo-cache-inmemory"
 import _isEmpty from "lodash/isEmpty"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
-
-const authMiddleware = new ApolloLink((operation, forward) => {
-  operation.setContext(({ headers = {} }) => {
-    headers = {
-      ...headers,
-      Accept: "application/json"
-    }
-    const [authHeaderName, authHeaderValue] = API._getAuthHeader()
-    if (authHeaderName && authHeaderValue) {
-      headers[authHeaderName] = authHeaderValue
-    }
-    return { headers }
-  })
-
-  return forward(operation)
-})
 
 const API = {
   _fetch(url, data, accept) {
@@ -39,9 +18,10 @@ const API = {
         Accept: accept || "application/json"
       }
     }
-    const [authHeaderName, authHeaderValue] = API._getAuthHeader()
-    if (authHeaderName && authHeaderValue) {
-      params.headers[authHeaderName] = authHeaderValue
+
+    const authHeader = API._getAuthHeader()
+    if (authHeader) {
+      params.headers[authHeader[0]] = authHeader[1]
     }
 
     return window.fetch(url, params)
@@ -158,35 +138,43 @@ const API = {
           Buffer.from(`${creds.user}:${creds.pass}`).toString("base64")
       ]
     }
-    return []
+    return null
   },
 
   client: new ApolloClient({
-    link: from([
-      authMiddleware,
-      new HttpLink({
-        uri: GRAPHQL_ENDPOINT
-      })
-    ]),
+    uri: GRAPHQL_ENDPOINT,
     cache: new InMemoryCache({
       addTypename: false,
       dataIdFromObject: object => object.uuid || null
     }),
-    defaultOptions: {
-      query: {
-        fetchPolicy: "no-cache"
-      },
-      watchQuery: {
-        fetchPolicy: "no-cache"
-      },
-      mutate: {
-        fetchPolicy: "no-cache"
-      }
-    },
     fetchOptions: {
       credentials: "same-origin"
+    },
+    request: operation => {
+      const headers = {
+        Accept: "application/json"
+      }
+      const authHeader = API._getAuthHeader()
+      if (authHeader) {
+        headers[authHeader[0]] = authHeader[1]
+      }
+      operation.setContext({ headers })
     }
   })
+}
+
+// Have to initialise this after creating the client
+// (see https://github.com/apollographql/apollo-client/issues/3900)
+API.client.defaultOptions = {
+  query: {
+    fetchPolicy: "no-cache"
+  },
+  watchQuery: {
+    fetchPolicy: "no-cache"
+  },
+  mutate: {
+    fetchPolicy: "no-cache"
+  }
 }
 
 export default API

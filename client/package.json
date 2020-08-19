@@ -94,7 +94,7 @@
     "xhr2": "0.2.0"
   },
   "dependencies": {
-    "@apollo/client": "3.1.3",
+    "@apollo/react-hooks": "3.1.5",
     "@blueprintjs/core": "3.30.1",
     "@blueprintjs/datetime": "3.18.5",
     "@emotion/core": "10.0.34",
@@ -108,6 +108,7 @@
     "@projectstorm/react-diagrams-core": "6.2.0",
     "@projectstorm/react-diagrams-defaults": "6.2.0",
     "@projectstorm/react-diagrams-routing": "6.2.0",
+    "apollo-boost": "0.4.9",
     "bootstrap": "3.4.1",
     "change-case": "4.1.1",
     "classnames": "2.2.6",
