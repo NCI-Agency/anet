@@ -19,7 +19,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Task extends AbstractCustomizableAnetBean {
+public class Task extends AbstractCustomizableAnetBean implements RelatableObject {
 
   /** Pseudo uuid to represent 'no task'. */
   public static final String DUMMY_TASK_UUID = "-1";

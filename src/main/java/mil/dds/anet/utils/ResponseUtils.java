@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
@@ -10,9 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -26,11 +31,103 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class ResponseUtils {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  /**
+   * Source:
+   * https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#transformerfactory
+   *
+   * @return a TransformerFactory that is safe from XXE attacks
+   */
+  public static final TransformerFactory getTransformerFactory() {
+    String feature = null;
+    try {
+      final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      feature = XMLConstants.FEATURE_SECURE_PROCESSING;
+      transformerFactory.setFeature(feature, true);
+      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+      return transformerFactory;
+    } catch (TransformerConfigurationException e) {
+      // This should catch a failed setFeature feature
+      logger.warn("TransformerConfigurationException was thrown."
+          + " The feature '{}' is probably not supported by your XML processor.", feature);
+    }
+    return null;
+  }
+
+  /**
+   * Create a DocumentBuilderFactory that is safe from XXE attacks, and return the parsed input.
+   * Source:
+   * https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j
+   *
+   * @param input the input to parse
+   *
+   * @return the parsed input
+   */
+  public static final Document parseDocument(InputSource input) {
+    String feature = null;
+    try {
+      final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+
+      // Some additional ones to the list from OWASP:
+      feature = XMLConstants.FEATURE_SECURE_PROCESSING;
+      documentBuilderFactory.setFeature(feature, true);
+      documentBuilderFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+      documentBuilderFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+      // This is the PRIMARY defense. If DTDs (doctypes) are disallowed, almost all
+      // XML entity attacks are prevented
+      // Xerces 2 only - http://xerces.apache.org/xerces2-j/features.html#disallow-doctype-decl
+      feature = "http://apache.org/xml/features/disallow-doctype-decl";
+      documentBuilderFactory.setFeature(feature, true);
+
+      // If you can't completely disable DTDs, then at least do the following:
+      // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-general-entities
+      // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-general-entities
+      // JDK7+ - http://xml.org/sax/features/external-general-entities
+      feature = "http://xml.org/sax/features/external-general-entities";
+      documentBuilderFactory.setFeature(feature, false);
+
+      // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-parameter-entities
+      // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-parameter-entities
+      // JDK7+ - http://xml.org/sax/features/external-parameter-entities
+      feature = "http://xml.org/sax/features/external-parameter-entities";
+      documentBuilderFactory.setFeature(feature, false);
+
+      // Disable external DTDs as well
+      feature = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
+      documentBuilderFactory.setFeature(feature, false);
+
+      // and these as well, per Timothy Morgan's 2014 paper: "XML Schema, DTD, and Entity Attacks"
+      documentBuilderFactory.setXIncludeAware(false);
+      documentBuilderFactory.setExpandEntityReferences(false);
+
+      // And, per Timothy Morgan: "If for some reason support for inline DOCTYPEs are a requirement,
+      // then ensure the entity settings are disabled (as shown above) and beware that SSRF attacks
+      // (http://cwe.mitre.org/data/definitions/918.html) and denial of service attacks (such as
+      // billion laughs or decompression bombs via "jar:") are a risk."
+
+      final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+      return documentBuilder.parse(input);
+    } catch (ParserConfigurationException e) {
+      // This should catch a failed setFeature feature
+      logger.warn("ParserConfigurationException was thrown."
+          + " The feature '{}' is probably not supported by your XML processor.", feature);
+    } catch (SAXException e) {
+      // On Apache, this should be thrown when disallowing DOCTYPE
+      logger.warn("A DOCTYPE was passed into the XML document");
+    } catch (IOException e) {
+      // XXE that points to a file that doesn't exist
+      logger.error("IOException occurred, XXE may still possible", e);
+    }
+    return null;
+  }
 
   private static ObjectMapper mapper = new ObjectMapper();
 
@@ -59,8 +156,11 @@ public class ResponseUtils {
   public static String toPrettyString(String xml, int indent) {
     try {
       // Turn XML string into a document
-      Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-          .parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
+      final Document document =
+          parseDocument(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
+      if (document == null) {
+        return null;
+      }
 
       // Remove whitespace outside tags
       document.normalize();
@@ -74,7 +174,10 @@ public class ResponseUtils {
       }
 
       // Setup pretty print options
-      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      final TransformerFactory transformerFactory = getTransformerFactory();
+      if (transformerFactory == null) {
+        return null;
+      }
       transformerFactory.setAttribute("indent-number", indent);
       Transformer transformer = transformerFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");

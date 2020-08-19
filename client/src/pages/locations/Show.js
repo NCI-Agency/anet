@@ -1,6 +1,6 @@
-import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import * as FieldHelper from "components/FieldHelper"
@@ -16,12 +16,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection, {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _escape from "lodash/escape"
 import { Location } from "models"
@@ -129,7 +124,8 @@ const LocationShow = ({ pageDispatchers }) => {
               relatedObject={
                 location.uuid && {
                   relatedObjectType: Location.relatedObjectType,
-                  relatedObjectUuid: location.uuid
+                  relatedObjectUuid: location.uuid,
+                  relatedObject: location
                 }
               }
             />
@@ -162,12 +158,6 @@ const LocationShow = ({ pageDispatchers }) => {
                 paginationKey={`r_${uuid}`}
                 queryParams={{ locationUuid: uuid }}
                 mapId="reports"
-                viewFormats={[
-                  FORMAT_CALENDAR,
-                  FORMAT_SUMMARY,
-                  FORMAT_TABLE,
-                  FORMAT_MAP
-                ]}
               />
             </Fieldset>
           </div>

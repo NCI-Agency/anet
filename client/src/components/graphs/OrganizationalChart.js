@@ -1,6 +1,6 @@
-import { gql } from "@apollo/client"
 import { Tooltip } from "@blueprintjs/core"
 import API from "api"
+import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import LinkTo from "components/LinkTo"
 import {
@@ -18,6 +18,7 @@ import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import Settings from "settings"
+import utils from "utils"
 import useD3Transition from "use-d3-transition"
 import Text from "react-svg-text"
 
@@ -71,11 +72,6 @@ const sortPositions = (positions, truncateLimit) => {
     : allResults
 }
 
-const textEllipsis = (text, width) =>
-  text.length > width * 0.16
-    ? text.substring(0, width * 0.16 - 3) + "..."
-    : text
-
 const PositionNode = ({ position, size }) => {
   const history = useHistory()
 
@@ -100,12 +96,9 @@ const PositionNode = ({ position, size }) => {
           href={position.person?.avatar || DEFAULT_AVATAR}
         />
         <Text x={18} fontSize="9px" fontFamily="monospace" textAnchor="start">
-          {textEllipsis(
-            `${position.person ? position.person.rank : ""} ${
+          {utils.ellipsize(`${position.person ? position.person.rank : ""} ${
               position.person ? position.person.name : "unfilled"
-            } ${position.name}`,
-            size[0]
-          )}
+            } ${position.name}`, size[0] * 0.16)}
         </Text>
       </g>
     </Tooltip>
@@ -318,6 +311,7 @@ const OrganizationalChart = ({
         ymax: Number.MIN_SAFE_INTEGER
       }
     )
+
     setHeight(boundingBox.ymax - boundingBox.ymin + 50)
   }, [data, width, root, getSize, getScale])
 

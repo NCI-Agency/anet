@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -6,6 +5,7 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Fieldset from "components/Fieldset"
@@ -37,6 +37,7 @@ import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_SAVED_SEARCHES = gql`
   query {
@@ -369,7 +370,7 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
   function showSearch() {
     if (selectedSearch) {
       const objType = SEARCH_OBJECT_TYPES[selectedSearch.objectType]
-      const queryParams = JSON.parse(selectedSearch.query)
+      const queryParams = utils.parseJsonSafe(selectedSearch.query)
       deserializeQueryParams(objType, queryParams, deserializeCallback)
     }
   }

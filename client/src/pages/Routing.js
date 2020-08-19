@@ -5,6 +5,7 @@ import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
 import MergePeople from "pages/admin/MergePeople"
+import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
 import GraphiQL from "pages/GraphiQL"
@@ -47,7 +48,6 @@ const Routing = () => {
       <Route exact path={PAGE_URLS.HOME} component={Home} />
       <Route path={PAGE_URLS.SEARCH} component={Search} />
       <Route path={PAGE_URLS.ROLLUP} component={RollupShow} />
-      <Route path={PAGE_URLS.GRAPHIQL} component={GraphiQL} />
       <Route path={PAGE_URLS.HELP} component={Help} />
       <Route
         path={PAGE_URLS.REPORTS}
@@ -114,32 +114,35 @@ const Routing = () => {
           </Switch>
         )}
       />
-      <Route
-        path={PAGE_URLS.ADMIN}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route exact path={`${url}/`} component={AdminIndex} />
-            <Route path={`${url}/mergePeople`} component={MergePeople} />
-            <Route
-              exact
-              path={`${url}/authorizationGroups`}
-              component={AuthorizationGroups}
-            />
-            <Route
-              path={`${url}/authorizationGroups/new`}
-              component={AuthorizationGroupNew}
-            />
-            <Route
-              path={`${url}/authorizationGroups/:uuid/edit`}
-              component={AuthorizationGroupEdit}
-            />
-            <Route
-              path={`${url}/authorizationGroups/:uuid`}
-              component={AuthorizationGroupShow}
-            />
-          </Switch>
-        )}
-      />
+      {currentUser.isAdmin() && (
+        <Route
+          path={PAGE_URLS.ADMIN}
+          render={({ match: { url } }) => (
+            <Switch>
+              <Route exact path={`${url}/`} component={AdminIndex} />
+              <Route path={`${url}/mergePeople`} component={MergePeople} />
+              <Route
+                exact
+                path={`${url}/authorizationGroups`}
+                component={AuthorizationGroups}
+              />
+              <Route
+                path={`${url}/authorizationGroups/new`}
+                component={AuthorizationGroupNew}
+              />
+              <Route
+                path={`${url}/authorizationGroups/:uuid/edit`}
+                component={AuthorizationGroupEdit}
+              />
+              <Route
+                path={`${url}/authorizationGroups/:uuid`}
+                component={AuthorizationGroupShow}
+              />
+              <Route path={`${url}/graphiql`} component={GraphiQL} />
+            </Switch>
+          )}
+        />
+      )}
       <Route
         path={PAGE_URLS.INSIGHTS}
         render={({ match: { url } }) => (
@@ -161,6 +164,14 @@ const Routing = () => {
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/:dashboard`} component={DecisivesDashboard} />
+          </Switch>
+        )}
+      />
+      <Route
+        path={PAGE_URLS.BOARD}
+        render={({ match: { url } }) => (
+          <Switch>
+            <Route path={`${url}/:dashboard`} component={BoardDashboard} />
           </Switch>
         )}
       />

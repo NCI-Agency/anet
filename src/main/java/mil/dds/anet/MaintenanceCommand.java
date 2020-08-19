@@ -25,6 +25,10 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
     subparser.addArgument("-ceb", "--clearEmptyBiographies").action(Arguments.storeTrue())
         .required(false).help(
             "Clears empty biographies (blank or empty HTML tags) by replacing them with a NULL value");
+    subparser.addArgument("-ddn", "--deleteDanglingNotes").action(Arguments.storeTrue())
+        .required(false)
+        .help("Delete dangling notes (either report assessments for reports that have been deleted,"
+            + " or notes pointing to objects that no longer exist)");
 
     super.configure(subparser);
   }
@@ -38,11 +42,20 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
       clearEmptyBiographies(engine);
     }
 
+    if (Boolean.TRUE.equals(namespace.getBoolean("deleteDanglingNotes"))) {
+      deleteDanglingNotes(engine);
+    }
+
     System.exit(0);
   }
 
   private void clearEmptyBiographies(AnetObjectEngine engine) {
     logger.info("Clearing empty biographies");
     engine.getPersonDao().clearEmptyBiographies();
+  }
+
+  private void deleteDanglingNotes(AnetObjectEngine engine) {
+    logger.info("Deleting dangling assessments and notes");
+    engine.getNoteDao().deleteDanglingNotes();
   }
 }

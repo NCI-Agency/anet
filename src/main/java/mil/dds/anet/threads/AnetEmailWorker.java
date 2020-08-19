@@ -4,7 +4,6 @@ import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
@@ -23,14 +22,10 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.mail.Authenticator;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
-import javax.mail.SendFailedException;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
@@ -41,6 +36,10 @@ import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.simplejavamail.MailException;
+import org.simplejavamail.api.email.Email;
+import org.simplejavamail.email.EmailBuilder;
+import org.simplejavamail.mailer.MailerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,21 +213,19 @@ public class AnetEmailWorker implements Runnable {
       return;
     }
 
-    StringWriter writer = new StringWriter();
-    Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
+    final StringWriter writer = new StringWriter();
+    final Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
+    // scan:ignore — false positive, we know which template we are processing
     temp.process(context, writer);
 
-    Session session = Session.getInstance(props, auth);
-    Message message = new MimeMessage(session);
-    message.setFrom(new InternetAddress(fromAddr));
-    String toAddress = Joiner.on(", ").join(email.getToAddresses());
-    message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddress));
-    message.setSubject(email.getAction().getSubject(context));
-    message.setContent(writer.toString(), "text/html; charset=utf-8");
+    final Session session = Session.getInstance(props, auth);
+    final Email mail = EmailBuilder.startingBlank().from(new InternetAddress(fromAddr))
+        .toMultiple(email.getToAddresses()).withSubject(email.getAction().getSubject(context))
+        .withHTMLText(writer.toString()).buildEmail();
 
     try {
-      Transport.send(message);
-    } catch (SendFailedException e) {
+      MailerBuilder.usingSession(session).buildMailer().sendMail(mail);
+    } catch (MailException e) {
       // The server rejected this... we'll log it and then not try again.
       logger.error("Send failed", e);
       return;

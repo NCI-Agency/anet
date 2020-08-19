@@ -1,6 +1,6 @@
-import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -97,7 +97,8 @@ const OrganizationEdit = ({ pageDispatchers }) => {
         relatedObject={
           organization.uuid && {
             relatedObjectType: Organization.relatedObjectType,
-            relatedObjectUuid: organization.uuid
+            relatedObjectUuid: organization.uuid,
+            relatedObject: organization
           }
         }
       />

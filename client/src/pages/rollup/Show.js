@@ -1,10 +1,10 @@
-import { gql } from "@apollo/client"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
@@ -21,6 +21,7 @@ import {
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
+  FORMAT_STATISTICS,
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
@@ -223,7 +224,12 @@ const Collection = ({ queryParams }) => (
     <ReportCollection
       paginationKey="r_rollup"
       queryParams={queryParams}
-      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+      viewFormats={[
+        FORMAT_CALENDAR,
+        FORMAT_TABLE,
+        FORMAT_SUMMARY,
+        FORMAT_STATISTICS
+      ]}
     />
   </div>
 )

@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client"
 import API from "api"
+import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
@@ -183,7 +183,7 @@ const EditAssociatedPositionsModal = ({
   }
 
   function save(values, form) {
-    const newPosition = new Position(position)
+    const newPosition = Object.without(new Position(values), "notes")
     newPosition.associatedPositions = values.associatedPositions
     delete newPosition.previousPeople
     delete newPosition.person // prevent any changes to person.

@@ -52,7 +52,7 @@ public class LoggingResource {
       final List<LogEntry> logEntries) {
     for (final LogEntry logEntry : logEntries) {
 
-      final String message = String.format("%1$s %2$s %3$s %4$s %5$s", user.getUuid(),
+      final String message = String.format("%1$s %2$s %3$s %4$s %5$s", user,
           requestContext.getRemoteAddr(), logEntry.url, logEntry.lineNr, logEntry.message);
 
       switch (logEntry.severity) {

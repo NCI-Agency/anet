@@ -21,7 +21,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Person extends AbstractCustomizableAnetBean implements Principal {
+public class Person extends AbstractCustomizableAnetBean implements Principal, RelatableObject {
 
   public static enum PersonStatus {
     ACTIVE, INACTIVE, NEW_USER
@@ -261,7 +261,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     }
     return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE_AVATARS, uuid)
         .thenApply(o -> {
-          avatar = Optional.ofNullable(o.getAvatar());
+          // Careful, `o` might be null
+          avatar = Optional.ofNullable(o == null ? null : o.getAvatar());
           return resizeAvatar(size);
         });
   }
@@ -336,7 +337,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
 
   @Override
   public String toString() {
-    return String.format("[uuid:%s, name:%s, emailAddress:%s]", uuid, name, emailAddress);
+    // Only use the uuid, no personal information
+    return String.format("[uuid:%s]", uuid);
   }
 
   public static Person createWithUuid(String uuid) {

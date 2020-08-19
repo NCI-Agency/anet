@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client"
 import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import AvatarEditModal from "components/AvatarEditModal"
@@ -11,6 +11,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
@@ -589,7 +590,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       "firstName",
       "lastName",
       "customFields", // initial JSON from the db
-      "formCustomFields"
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
     if (values.status === Person.STATUS.NEW_USER) {
       person.status = Person.STATUS.ACTIVE
