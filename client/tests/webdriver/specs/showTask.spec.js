@@ -14,14 +14,14 @@ describe("Show task page", () => {
     it("We should see a table of assessments related to the current task", () => {
       ShowTask.assessmentResultsMonthly.waitForDisplayed()
       const frenchFlagAssessmentMonthly = ShowTask.assessmentResultsMonthly.$(
-        "id*=frenchFlag-assessment"
+        "[id*=frenchFlag-assessment]"
       )
       // eslint-disable-next-line no-unused-expressions
       expect(frenchFlagAssessmentMonthly.isExisting()).to.be.true
 
       ShowTask.assessmentResultsWeekly.waitForDisplayed()
       const frenchFlagAssessmentWeekly = ShowTask.assessmentResultsWeekly.$(
-        "id*=levels-assessment"
+        "[id*=levels-assessment]"
       )
       // eslint-disable-next-line no-unused-expressions
       expect(frenchFlagAssessmentWeekly.isExisting()).to.be.true
