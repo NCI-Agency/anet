@@ -39,6 +39,7 @@ public class DatabaseScriptCommand extends ConfiguredCommand<AnetConfiguration> 
     Handle jdbiHandle = null;
 
     try {
+      // scan:ignore — false positive, we *want* to run the user-provided SQL script
       final String sqlScript = new String(Files.readAllBytes(Paths.get(sqlFilePath)));
       jdbiHandle = factory
           .build(environment, configuration.getDataSourceFactory(), "database-script").open();

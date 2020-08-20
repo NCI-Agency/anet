@@ -215,6 +215,7 @@ public class AnetEmailWorker implements Runnable {
 
     final StringWriter writer = new StringWriter();
     final Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
+    // scan:ignore — false positive, we know which template we are processing
     temp.process(context, writer);
 
     final Session session = Session.getInstance(props, auth);
