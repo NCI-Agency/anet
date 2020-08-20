@@ -29,7 +29,6 @@ const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
             display: "flex",
             flexDirection: "column",
             position: "absolute",
-            top: "20px",
             left: "15px"
           }}
         >
@@ -43,7 +42,6 @@ const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
             display: "flex",
             flexDirection: "column",
             position: "absolute",
-            top: "20px",
             right: "15px"
           }}
         >

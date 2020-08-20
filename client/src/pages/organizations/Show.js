@@ -1,28 +1,35 @@
+import { Tab, Tabs } from "@blueprintjs/core"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import Fieldset from "components/Fieldset"
+import OrganizationalChart from "components/graphs/OrganizationalChart"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
-import { mapPageDispatchersToProps, PageDispatchersPropType, useBoilerplate } from "components/Page"
-import RelatedObjectNotes, { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
+import RelatedObjectNotes, {
+  GRAPHQL_NOTES_FIELDS
+} from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
 import SubNav from "components/SubNav"
-import { Form, Formik } from "formik"
 import { Organization, Report, Task } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Button, Checkbox, Nav } from "react-bootstrap"
+import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
-import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
 
 const GQL_GET_ORGANIZATION = gql`
@@ -171,129 +178,159 @@ const OrganizationShow = ({ pageDispatchers }) => {
   }
 
   return (
-    <Formik enableReinitialize initialValues={organization}>
-      {({ values }) => {
-        const action = (
-          <div>
-            {isAdmin && (
-              <LinkTo
-                modelType="Organization"
-                model={Organization.pathForNew({
-                  parentOrgUuid: organization.uuid
-                })}
-                button
-              >
-                Create sub-organization
-              </LinkTo>
-            )}
+    <div>
+      {done && result}
+      <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
-            {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
-              <LinkTo
-                modelType="Organization"
-                model={organization}
-                edit
-                button="primary"
-                id="editButton"
-              >
-                Edit
-              </LinkTo>
-            )}
-          </div>
-        )
-        return (
-          <div>
-            {done && result}
-            <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
+      <SubNav subnavElemId="advisor-org-nav">
+        {!isMyOrg && isAdvisorOrg && orgSubNav}
+      </SubNav>
 
-            <SubNav subnavElemId="advisor-org-nav">
-              {!isMyOrg && isAdvisorOrg && orgSubNav}
-            </SubNav>
+      <SubNav subnavElemId="principal-org-nav">
+        {!isMyOrg && isPrincipalOrg && orgSubNav}
+      </SubNav>
 
-            <SubNav subnavElemId="principal-org-nav">
-              {!isMyOrg && isPrincipalOrg && orgSubNav}
-            </SubNav>
+      {currentUser.isSuperUser() && (
+        <div className="pull-right">
+          <GuidedTour
+            title="Take a guided tour of this organization's page."
+            tour={orgTour}
+            autostart={
+              localStorage.newUser === "true" &&
+              localStorage.hasSeenOrgTour !== "true"
+            }
+            onEnd={() => (localStorage.hasSeenOrgTour = "true")}
+          />
+        </div>
+      )}
 
-            {currentUser.isSuperUser() && (
-              <div className="pull-right">
-                <GuidedTour
-                  title="Take a guided tour of this organization's page."
-                  tour={orgTour}
-                  autostart={
-                    localStorage.newUser === "true" &&
-                    localStorage.hasSeenOrgTour !== "true"
-                  }
-                  onEnd={() => (localStorage.hasSeenOrgTour = "true")}
-                />
-              </div>
-            )}
+      <RelatedObjectNotes
+        notes={organization.notes}
+        relatedObject={
+          organization.uuid && {
+            relatedObjectType: Organization.relatedObjectType,
+            relatedObjectUuid: organization.uuid,
+            relatedObject: organization
+          }
+        }
+      />
+      <Messages success={stateSuccess} error={stateError} />
 
-            <RelatedObjectNotes
-              notes={organization.notes}
-              relatedObject={
-                organization.uuid && {
-                  relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid,
-                  relatedObject: organization
+      <div
+        className="legend"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "nowrap",
+          alignItems: "flex-start"
+        }}
+      >
+        <ContainerDimensions>
+          {({ width, height }) => (
+            <Tabs id="tabs">
+              <h4 className="title-text" style={{ flexGrow: 0 }}>
+                {`Organization ${organization.shortName}`}
+              </h4>
+              <Tab
+                id="tab-diagram"
+                title="Diagram"
+                panel={
+                  <OrganizationalChart
+                    label="test"
+                    org={organization}
+                    exportTitle={`Organization diagram for ${organization}`}
+                    width={width}
+                    height={height}
+                  />
                 }
-              }
-            />
-            <Messages success={stateSuccess} error={stateError} />
-            <Form className="form-horizontal" method="post">
-              <Fieldset
-                title={`Organization ${organization.shortName}`}
-                action={action}
               />
-
-              <OrganizationLaydown organization={organization} />
-              {!isPrincipalOrg && <Approvals relatedObject={organization} />}
-              {organization.isTaskEnabled() && (
-                <OrganizationTasks
-                  organization={organization}
-                  queryParams={{
-                    status: Task.STATUS.ACTIVE,
-                    pageSize: 10,
-                    taskedOrgUuid: organization.uuid
-                  }}
+              <Tab
+                id="tab-positions"
+                title="Positions"
+                panel={<div style={{ width: `${width}px` }} />}
+              />
+              {!isPrincipalOrg && (
+                <Tab
+                  id="tab-approval-workflow"
+                  title="Approval workflow"
+                  panel={
+                    <div style={{ width: `${width}px` }}>
+                      <Approvals relatedObject={organization} />
+                    </div>
+                  }
                 />
               )}
+              <Tabs.Expander />
+              {isAdmin && (
+                <LinkTo
+                  modelType="Organization"
+                  model={Organization.pathForNew({
+                    parentOrgUuid: organization.uuid
+                  })}
+                  button
+                  style={{ flexGrow: 0 }}
+                >
+                  Create sub-organization
+                </LinkTo>
+              )}
 
-              <Fieldset
-                id="reports"
-                title={`Reports from ${organization.shortName}`}
-              >
-                <ReportCollection
-                  paginationKey={`r_${uuid}`}
-                  queryParams={reportQueryParams}
-                  reportsFilter={
-                    !isSuperUser ? null : (
-                      <>
-                        <Button
-                          value="toggle-filter"
-                          className="btn btn-sm"
-                          onClick={() =>
-                            setFilterPendingApproval(!filterPendingApproval)}
-                        >
-                          {filterPendingApproval
-                            ? "Show all reports"
-                            : "Show pending approval"}
-                        </Button>
-                        <Checkbox
-                          checked={includeChildrenOrgs}
-                          onChange={() =>
-                            setIncludeChildrenOrgs(!includeChildrenOrgs)}
-                        >
-                          include reports from sub-orgs
-                        </Checkbox>
-                      </>
-                    )
-                  }
-                />
-              </Fieldset>
-            </Form>
-          </div>
-        )
-      }}
-    </Formik>
+              {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
+                <LinkTo
+                  modelType="Organization"
+                  model={organization}
+                  edit
+                  button="primary"
+                  id="editButton"
+                  style={{ flexGrow: 0 }}
+                >
+                  Edit
+                </LinkTo>
+              )}
+            </Tabs>
+          )}
+        </ContainerDimensions>
+      </div>
+
+      {organization.isTaskEnabled() && (
+        <OrganizationTasks
+          organization={organization}
+          queryParams={{
+            status: Task.STATUS.ACTIVE,
+            pageSize: 10,
+            taskedOrgUuid: organization.uuid
+          }}
+        />
+      )}
+
+      <Fieldset id="reports" title={`Reports from ${organization.shortName}`}>
+        <ReportCollection
+          paginationKey={`r_${uuid}`}
+          queryParams={reportQueryParams}
+          reportsFilter={
+            !isSuperUser ? null : (
+              <>
+                <Button
+                  value="toggle-filter"
+                  className="btn btn-sm"
+                  onClick={() =>
+                    setFilterPendingApproval(!filterPendingApproval)}
+                >
+                  {filterPendingApproval
+                    ? "Show all reports"
+                    : "Show pending approval"}
+                </Button>
+                <Checkbox
+                  checked={includeChildrenOrgs}
+                  onChange={() => setIncludeChildrenOrgs(!includeChildrenOrgs)}
+                >
+                  include reports from sub-orgs
+                </Checkbox>
+              </>
+            )
+          }
+        />
+      </Fieldset>
+    </div>
   )
 }
 

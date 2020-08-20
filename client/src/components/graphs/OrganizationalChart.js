@@ -96,9 +96,12 @@ const PositionNode = ({ position, size }) => {
           href={position.person?.avatar || DEFAULT_AVATAR}
         />
         <Text x={18} fontSize="9px" fontFamily="monospace" textAnchor="start">
-          {utils.ellipsize(`${position.person ? position.person.rank : ""} ${
+          {utils.ellipsize(
+            `${position.person ? position.person.rank : ""} ${
               position.person ? position.person.name : "unfilled"
-            } ${position.name}`, size[0] * 0.16)}
+            } ${position.name}`,
+            size[0] * 0.16
+          )}
         </Text>
       </g>
     </Tooltip>
