@@ -4,6 +4,26 @@
 .print-table {
   width: 100%;
 }
+.ReportPrint {
+  position: relative;
+  outline: 2px solid grey;
+  padding: 0 1rem;
+}
+.print-page-buttons {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.report-preview-title {
+  margin-bottom: 1rem;
+}
+
+.print-page-buttons button {
+  margin-left: 5px;
+  margin-right: 5px;
+}
 
 .print-table,
 .print-table tr,
@@ -13,12 +33,28 @@
   /* outline: 1px solid grey; */
 }
 
-.print-header-space{
+.print-header-space {
   height: 50px;
 }
 .print-footer-space {
   height: 50px;
 }
+
+.print-classification-banner-top,
+.print-classification-banner-bot{
+  position: absolute;
+  margin: 10px auto;
+  width: 100%;
+  text-align: center;
+}
+.print-classification-banner-top {
+  top: 0;
+}
+
+.print-classification-banner-bot {
+  bottom: 0;
+}
+
 
 .print-row-label {
   padding: 4px 0 !important;
@@ -30,16 +66,15 @@
   padding: 4px 1rem !important;
 }
 
-
 .print-table th {
   vertical-align: top;
-  font-family: 'Times New Roman', Times, serif;
-  width: 20%;
+  font-family: "Times New Roman", Times, serif;
+  max-width: 20%;
 }
 
 .print-header-content,
 .print-footer-content {
-  position: fixed;
+  position: absolute;
   display: flex;
   width: 95%;
   margin: 10px auto;
@@ -59,27 +94,66 @@
 .print-footer-content {
   bottom: 0mm;
   border-top: 1px solid black;
-
 }
 
 .print-table-title,
 .print-table-subtitle {
   text-align: center;
+  padding: 5px 0;
+  /* outline: 1px solid blue; */
 }
 
 .print-table-title {
   font-size: 18px;
+  padding-top: 1rem;
 }
 .print-table-subtitle {
   font-style: italic;
 }
-
+.ReportPrint table,
+.ReportPrint tr {
+  width: 100%;
+}
 @media print {
+  .ReportPrint {
+    padding: 0;
+    outline: none;
+  }
 
-  thead {display: table-header-group;}
-  tfoot {display: table-footer-group;}
 
-  button {display: none;}
+  .print-task-assessment-field {
+    width: 100%;
+    font-size: 12px;
+  }
+  .print-task-assessment-field> div {
+    max-width: 100%;
+    margin: 0 !important;
+  }
 
-  body {margin: 0;}
+  .print-task-assessment-field .form-control-static {
+    padding: 0;
+    margin: 0;
+  }
+
+  .report-preview-title {
+    display: none;
+  }
+  .print-header-content,
+  .print-footer-content {
+    position: fixed;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tfoot {
+    display: table-footer-group;
+  }
+
+  button {
+    display: none;
+  }
+
+  body {
+    margin: 0;
+  }
 }
