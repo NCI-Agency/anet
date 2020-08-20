@@ -63,7 +63,6 @@ const GQL_GET_CHART_DATA = gql`
 `
 
 const AVATAR_SIZE = 16
-const MAX_DEPTH_ORG_CHART = 3
 
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
@@ -160,23 +159,43 @@ OrganizationLink.propTypes = {
   link: PropTypes.object.isRequired
 }
 
-const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
+const OrganizationNode = ({
+  org,
+  x,
+  y,
+  scale,
+  size,
+  symbol,
+  isMain,
+  minimized,
+  onMouseEnter,
+  onMouseLeave
+}) => {
   const history = useHistory()
 
   const transform = `translate(${x},${y}) scale(${scale} ${scale})`
   const background = isMain
     ? "rgba(255, 255, 255, 1)"
-    : "rgba(230, 230, 230, 0.5)"
+    : minimized
+      ? "none"
+      : "rgba(230, 230, 230, 0.5)"
 
   const { ref, attrState } = useD3Transition({
-    attrsToTransitionTo: { transform, background },
-    deps: [x, y, isMain]
+    attrsToTransitionTo: { transform },
+    deps: [x, y, isMain, scale]
   })
 
   const numberOfFullPositions = 5
   const numberOfRowsMinifiedPositions = size[0] / AVATAR_SIZE
   return (
-    <g ref={ref} className="org" key={org.uuid} transform={attrState.transform}>
+    <g
+      ref={ref}
+      className="org"
+      key={org.uuid}
+      transform={attrState.transform}
+      onMouseEnter={() => onMouseEnter(org)}
+      onMouseLeave={() => onMouseLeave(org)}
+    >
       <rect
         rx="15"
         ry="15"
@@ -185,7 +204,7 @@ const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
         width={size[0]}
         height={size[1]}
         style={{
-          fill: attrState.background,
+          fill: background,
           stroke: isMain ? "black" : "none"
         }}
       />
@@ -200,54 +219,59 @@ const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
             fontSize="20px"
             fontFamily="monospace"
             fontWeight="bold"
-            dy={22}
-            x={38}
+            dy={minimized ? 42 : 22}
+            x={minimized ? -20 : 38}
           >
             {org.shortName?.length > 12
               ? org.shortName.substring(0, 10) + ".."
               : org.shortName}
           </text>
-          <text
-            onClick={() => history.push(Organization.pathFor(org))}
-            fontFamily="monospace"
-            dy={45}
-            x={-40}
-          >
-            {org.longName?.length > 21
-              ? org.longName.substring(0, 18) + ".."
-              : org.longName}
-          </text>
+          {!minimized && (
+            <text
+              onClick={() => history.push(Organization.pathFor(org))}
+              fontFamily="monospace"
+              dy={45}
+              x={-40}
+            >
+              {org.longName?.length > 21
+                ? org.longName.substring(0, 18) + ".."
+                : org.longName}
+            </text>
+          )}
         </g>
-        <g transform={`translate(${5 + -size[0] / 2},60)`}>
-          {sortPositions(org.positions).map((position, i) => {
-            let row =
-              i < numberOfFullPositions
-                ? i
-                : Math.floor(
-                  (i - numberOfFullPositions) / numberOfRowsMinifiedPositions
-                ) + numberOfFullPositions
-            row = row && row + 1
-            const column =
-              i < numberOfFullPositions
-                ? 0
-                : (i - numberOfFullPositions) % numberOfRowsMinifiedPositions
-            return (
-              <g
-                key={position.uuid}
-                transform={`translate(${column * AVATAR_SIZE},${
-                  row * AVATAR_SIZE
-                })`}
-              >
-                <PositionNode
-                  position={position}
-                  size={[size[0], (i === 0 ? 2 : 1) * AVATAR_SIZE]}
-                  minified={i >= numberOfFullPositions}
-                  twoRows={i === 0}
-                />
-              </g>
-            )
-          })}
-        </g>
+        {!minimized && (
+          <g transform={`translate(${5 + -size[0] / 2},60)`}>
+            {sortPositions(org.positions).map((position, i) => {
+              let row =
+                i < numberOfFullPositions
+                  ? i
+                  : Math.floor(
+                    (i - numberOfFullPositions) /
+                        numberOfRowsMinifiedPositions
+                  ) + numberOfFullPositions
+              row = row && row + 1
+              const column =
+                i < numberOfFullPositions
+                  ? 0
+                  : (i - numberOfFullPositions) % numberOfRowsMinifiedPositions
+              return (
+                <g
+                  key={position.uuid}
+                  transform={`translate(${column * AVATAR_SIZE},${
+                    row * AVATAR_SIZE
+                  })`}
+                >
+                  <PositionNode
+                    position={position}
+                    size={[size[0], (i === 0 ? 2 : 1) * AVATAR_SIZE]}
+                    minified={i >= numberOfFullPositions}
+                    twoRows={i === 0}
+                  />
+                </g>
+              )
+            })}
+          </g>
+        )}
       </g>
     </g>
   )
@@ -260,7 +284,10 @@ OrganizationNode.propTypes = {
   scale: PropTypes.number.isRequired,
   size: PropTypes.arrayOf(PropTypes.number).isRequired,
   symbol: PropTypes.object,
-  isMain: PropTypes.bool
+  isMain: PropTypes.bool,
+  minimized: PropTypes.bool,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func
 }
 
 const OrganizationalChart = ({
@@ -273,6 +300,7 @@ const OrganizationalChart = ({
   const svgRef = useRef(null)
   const treeLayout = useRef(null)
   const [root, setRoot] = useState(null)
+  const [magnifiedOrg, setMagnifiedOrg] = useState(null)
   const [zoomLevel, setZoomLevel] = useState(1.3)
   const [height, setHeight] = useState(initialHeight)
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
@@ -310,18 +338,20 @@ const OrganizationalChart = ({
 
   const getScale = useCallback(
     node =>
-      (distanceFromMain(node) === 0 ? 1.3 : zoomLevel) *
-      Math.pow(0.7, Math.abs(distanceFromMain(node))),
-    [distanceFromMain, zoomLevel]
+      distanceFromMain(node) === 0 || magnifiedOrg === node
+        ? Math.max(1.3, zoomLevel * 1.1)
+        : zoomLevel * Math.pow(0.7, Math.abs(distanceFromMain(node))),
+    [distanceFromMain, zoomLevel, magnifiedOrg]
   )
 
   const getSize = useCallback(
     (node, scale = 1) => {
       const isMain = distanceFromMain(node) === 0
-      const width = isMain ? 400 : 200
+      const minimized = node !== magnifiedOrg && distanceFromMain(node) > 1
+      const width = isMain ? 400 : minimized ? 50 : 200
       const numberOfFullPositions = 5
       const numberOfRowsMinifiedPositions = width / AVATAR_SIZE
-      const nbPositions = node.positions?.length || 0
+      const nbPositions = minimized ? 0 : node.positions?.length || 0
       const nbRows =
         nbPositions < numberOfFullPositions
           ? nbPositions
@@ -330,9 +360,12 @@ const OrganizationalChart = ({
                 numberOfRowsMinifiedPositions
           ) + numberOfFullPositions
 
-      return [width * scale, (nbRows * AVATAR_SIZE + 100) * scale]
+      return [
+        width * scale,
+        (nbRows * AVATAR_SIZE + (minimized ? 50 : 100)) * scale
+      ]
     },
-    [distanceFromMain]
+    [distanceFromMain, magnifiedOrg]
   )
 
   useEffect(() => {
@@ -341,9 +374,6 @@ const OrganizationalChart = ({
         .children(d => {
           if (distanceFromMain(d) === -1) {
             return [data.organization]
-          }
-          if (distanceFromMain(d) >= MAX_DEPTH_ORG_CHART) {
-            return []
           }
           return data.organization.descendantOrgs.filter(
             org => org.parentOrg?.uuid === d.uuid
@@ -436,6 +466,12 @@ const OrganizationalChart = ({
                     size={getSize(org)}
                     symbol={sym}
                     isMain={distanceFromMain(org) === 0}
+                    minimized={
+                      magnifiedOrg !== org && distanceFromMain(org) > 1
+                    }
+                    onMouseEnter={org => setMagnifiedOrg(org)}
+                    onMouseLeave={org =>
+                      org === magnifiedOrg && setMagnifiedOrg(null)}
                   />
                 )
               })}
