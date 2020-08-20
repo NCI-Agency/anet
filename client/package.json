@@ -167,8 +167,8 @@
     "react-use-dimensions": "1.2.1",
     "redux": "4.0.5",
     "redux-persist": "6.0.0",
-    "use-d3-transition": "1.1.5",
     "resize-observer-polyfill": "1.5.1",
+    "use-d3-transition": "https://github.com/VassilIordanov/use-d3-transition#4d1428ac774af4af81b4df8ae7c168a235fee1e8",
     "use-debounce": "3.4.3",
     "yup": "0.29.3"
   },
