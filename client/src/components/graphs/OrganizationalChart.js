@@ -61,6 +61,10 @@ const GQL_GET_CHART_DATA = gql`
     }
   }
 `
+
+const AVATAR_SIZE = 16
+const MAX_DEPTH_ORG_CHART = 3
+
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
 const sortPositions = (positions, truncateLimit) => {
@@ -72,8 +76,12 @@ const sortPositions = (positions, truncateLimit) => {
     : allResults
 }
 
-const PositionNode = ({ position, size }) => {
+const PositionNode = ({ position, size, minified, twoRows }) => {
   const history = useHistory()
+  const personText = `${position.person ? position.person.rank : ""} ${
+    position.person ? position.person.name : "unfilled"
+  }`
+  const positionText = `${position.name}`
 
   return (
     <Tooltip
@@ -90,19 +98,39 @@ const PositionNode = ({ position, size }) => {
     >
       <g onClick={() => history.push(Position.pathFor(position))}>
         <image
-          width={13}
-          height={13}
+          width={size[1]}
+          height={size[1]}
           y={-10}
           href={position.person?.avatar || DEFAULT_AVATAR}
         />
-        <Text x={18} fontSize="9px" fontFamily="monospace" textAnchor="start">
-          {utils.ellipsize(
-            `${position.person ? position.person.rank : ""} ${
-              position.person ? position.person.name : "unfilled"
-            } ${position.name}`,
-            size[0] * 0.16
-          )}
-        </Text>
+        {!minified && (
+          <>
+            <Text
+              x={size[1] + 2}
+              fontSize="9px"
+              fontWeight={twoRows ? "bold" : "normal"}
+              fontFamily="monospace"
+              textAnchor="start"
+            >
+              {utils.ellipsize(
+                twoRows ? `${personText}` : `${personText} ${positionText}`,
+                (size[0] - size[1]) * 0.17
+              )}
+            </Text>
+            {twoRows && (
+              <Text
+                x={size[1] + 2}
+                y={size[1] / 2}
+                fontSize="9px"
+                fontWeight={twoRows ? "bold" : "normal"}
+                fontFamily="monospace"
+                textAnchor="start"
+              >
+                {utils.ellipsize(positionText, (size[0] - size[1]) * 0.17)}
+              </Text>
+            )}
+          </>
+        )}
       </g>
     </Tooltip>
   )
@@ -110,7 +138,9 @@ const PositionNode = ({ position, size }) => {
 
 PositionNode.propTypes = {
   position: PropTypes.object.isRequired,
-  size: PropTypes.arrayOf(PropTypes.number).isRequired
+  size: PropTypes.arrayOf(PropTypes.number).isRequired,
+  minified: PropTypes.bool,
+  twoRows: PropTypes.bool
 }
 
 const OrganizationLink = ({ link }) => {
@@ -143,6 +173,8 @@ const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
     deps: [x, y, isMain]
   })
 
+  const numberOfFullPositions = 5
+  const numberOfRowsMinifiedPositions = size[0] / AVATAR_SIZE
   return (
     <g ref={ref} className="org" key={org.uuid} transform={attrState.transform}>
       <rect
@@ -187,11 +219,34 @@ const OrganizationNode = ({ org, x, y, scale, size, symbol, isMain }) => {
           </text>
         </g>
         <g transform={`translate(${5 + -size[0] / 2},60)`}>
-          {sortPositions(org.positions).map((position, i) => (
-            <g key={position.uuid} transform={`translate(0,${i * 11})`}>
-              <PositionNode position={position} size={size} />
-            </g>
-          ))}
+          {sortPositions(org.positions).map((position, i) => {
+            let row =
+              i < numberOfFullPositions
+                ? i
+                : Math.floor(
+                  (i - numberOfFullPositions) / numberOfRowsMinifiedPositions
+                ) + numberOfFullPositions
+            row = row && row + 1
+            const column =
+              i < numberOfFullPositions
+                ? 0
+                : (i - numberOfFullPositions) % numberOfRowsMinifiedPositions
+            return (
+              <g
+                key={position.uuid}
+                transform={`translate(${column * AVATAR_SIZE},${
+                  row * AVATAR_SIZE
+                })`}
+              >
+                <PositionNode
+                  position={position}
+                  size={[size[0], (i === 0 ? 2 : 1) * AVATAR_SIZE]}
+                  minified={i >= numberOfFullPositions}
+                  twoRows={i === 0}
+                />
+              </g>
+            )
+          })}
         </g>
       </g>
     </g>
@@ -262,11 +317,20 @@ const OrganizationalChart = ({
 
   const getSize = useCallback(
     (node, scale = 1) => {
-      if (distanceFromMain(node) === 0) {
-        return [400 * scale, (node.positions?.length * 11 + 100) * scale]
-      } else {
-        return [200 * scale, (node.positions?.length * 11 + 100) * scale]
-      }
+      const isMain = distanceFromMain(node) === 0
+      const width = isMain ? 400 : 200
+      const numberOfFullPositions = 5
+      const numberOfRowsMinifiedPositions = width / AVATAR_SIZE
+      const nbPositions = node.positions?.length || 0
+      const nbRows =
+        nbPositions < numberOfFullPositions
+          ? nbPositions
+          : Math.floor(
+            (nbPositions - numberOfFullPositions) /
+                numberOfRowsMinifiedPositions
+          ) + numberOfFullPositions
+
+      return [width * scale, (nbRows * AVATAR_SIZE + 100) * scale]
     },
     [distanceFromMain]
   )
@@ -277,6 +341,9 @@ const OrganizationalChart = ({
         .children(d => {
           if (distanceFromMain(d) === -1) {
             return [data.organization]
+          }
+          if (distanceFromMain(d) >= MAX_DEPTH_ORG_CHART) {
+            return []
           }
           return data.organization.descendantOrgs.filter(
             org => org.parentOrg?.uuid === d.uuid
