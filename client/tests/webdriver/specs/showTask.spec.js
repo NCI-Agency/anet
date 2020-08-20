@@ -16,13 +16,15 @@ describe("Show task page", () => {
       const frenchFlagAssessmentMonthly = ShowTask.assessmentResultsMonthly.$(
         "id*=frenchFlag-assessment"
       )
-      expect(frenchFlagAssessmentMonthly.isExisting())
+      // eslint-disable-next-line no-unused-expressions
+      expect(frenchFlagAssessmentMonthly.isExisting()).to.be.true
 
       ShowTask.assessmentResultsWeekly.waitForDisplayed()
       const frenchFlagAssessmentWeekly = ShowTask.assessmentResultsWeekly.$(
         "id*=levels-assessment"
       )
-      expect(frenchFlagAssessmentWeekly.isExisting())
+      // eslint-disable-next-line no-unused-expressions
+      expect(frenchFlagAssessmentWeekly.isExisting()).to.be.true
     })
   })
 })
