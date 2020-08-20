@@ -66,15 +66,15 @@ const ReportPrint = ({ pageDispatchers }) => {
   }
   return (
     <div className="ReportPrint">
-      <div className="print-page-header-content">
+      <div className="print-header-content">
         <img src={anetLogo} alt="logo" width="92" height="21" />
         <span>Classification Banner</span>
         <span>{report.uuid}</span>
       </div>
-      <table className="print-page-table">
+      <table className="print-table">
         <thead>
           <tr>
-            <td className="print-page-header-space" colSpan="2" />
+            <td className="print-header-space" colSpan="2" />
           </tr>
         </thead>
         <tbody>
@@ -85,6 +85,7 @@ const ReportPrint = ({ pageDispatchers }) => {
               {moment(report.engagementDate).format(
                 Report.getEngagementDateFormat()
               )}
+              <br />
               at{" "}
               {report.location && (
                 <LinkTo modelType="Location" model={report.location} />
@@ -92,54 +93,54 @@ const ReportPrint = ({ pageDispatchers }) => {
             </th>
           </tr>
           <tr>
-            <th className="print-table-subtitle" colSpan="2">
+            <td className="print-table-subtitle" colSpan="2">
               Authored by <LinkTo modelType="Person" model={report.author} /> on{" "}
               {moment(report.releasedAt).format(
                 Settings.dateFormats.forms.displayShort.withTime
               )}
-              , printed by <LinkTo modelType="Person" model={currentUser} />
-            </th>
+              <br />
+              printed by <LinkTo modelType="Person" model={currentUser} /> [
+              {Report.STATE_LABELS[report.state]}]
+            </td>
           </tr>
 
           <tr>
-            <th>purpose</th>
-            <td>some purpose</td>
+            <th className="print-row-label">purpose</th>
+            <td className="print-row-content">some purpose</td>
           </tr>
           <tr>
-            <th>status</th>
-            <td>{Report.STATE_LABELS[report.state]}</td>
+            <th className="print-row-label">key details</th>
+            <td className="print-row-content">some key details</td>
           </tr>
-          {report.engagementDate && (
-            <tr>
-              <th>key details</th>
-              <td>some key details</td>
-            </tr>
-          )}
+
           {Settings.engagementsIncludeTimeAndDuration && report.duration && (
             <tr>
-              <th>Duration(min)</th>
-              <td>{report.duration}</td>
+              <th className="print-row-label">Duration(min)</th>
+              <td className="print-row-content">{report.duration}</td>
             </tr>
           )}
           <tr>
-            <th>{tasksLabel}</th>
-            <td>
+            <th className="print-row-label">{tasksLabel}</th>
+            <td className="print-row-content">
               {report.tasks.map(task => (
-                <span key={task.uuid}>{task.shortName}</span>
+                <div key={task.uuid}>{task.shortName}</div>
               ))}
             </td>
           </tr>
           <tr>
-            <td colSpan="2">{renderValidationMessages()}</td>
+            <td colSpan="2">
+              {(report.isDraft() || report.isPending()) &&
+                renderValidationMessages()}
+            </td>
           </tr>
         </tbody>
         <tfoot>
           <tr>
-            <td className="print-page-footer-space" colSpan="2" />
+            <td className="print-footer-space" colSpan="2" />
           </tr>
         </tfoot>
       </table>
-      <div className="print-page-footer-content">
+      <div className="print-footer-content">
         <img src={anetLogo} alt="logo" width="92" height="21" />
         <span>Classification Banner</span>
         <span>{report.uuid}</span>
