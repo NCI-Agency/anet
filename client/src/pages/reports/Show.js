@@ -399,7 +399,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               <Button onClick={toggleEmailModal}>Email report</Button>
             )}
             <Button type="button" bsStyle="primary" onClick={onPrintClick}>
-              Print report
+              Print View
             </Button>
             {canEdit && (
               <LinkTo modelType="Report" model={report} edit button="primary">

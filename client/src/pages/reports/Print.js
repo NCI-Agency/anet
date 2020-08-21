@@ -1,33 +1,43 @@
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
+import { ReportFullWorkflow } from "components/ReportWorkflow"
 import { Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext, useEffect } from "react"
+import React, { useContext } from "react"
+import { Button } from "react-bootstrap"
 import anetLogo from "resources/logo.png"
 import Settings from "settings"
 import utils from "utils"
+import { parseHtmlWithLinkTo } from "utils_links"
 import "./Print.css"
+
 const ReportPrint = ({ report, setPrintDone }) => {
   const { currentUser } = useContext(AppContext)
 
-  useEffect(() => {
-    // wait for render to print
-    setTimeout(() => {
-      if (typeof window.print === "function") {
-        window.print()
-        // setPrintDone()
-      } else {
-        alert("Press CTRL+P to print this report")
-      }
-    }, 100)
-  }, [setPrintDone])
   return (
     <>
-      <h3 className="report-preview-title" style={{ textAlign: "center" }}>
-        Printable Version
-      </h3>
+      <header
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          width: 768
+        }}
+      >
+        <h3 className="report-preview-title" style={{ margin: 0 }}>
+          Printable Version
+        </h3>
+        <div className="print-page-buttons">
+          <Button type="button" bsStyle="primary" onClick={onPrintClick}>
+            Print
+          </Button>
+          <Button type="button" bsStyle="primary" onClick={setPrintDone}>
+            Web View
+          </Button>
+        </div>
+      </header>
       <div className="ReportPrint">
         <div className="print-header-content">
           <img src={anetLogo} alt="logo" width="92" height="21" />
@@ -90,21 +100,21 @@ const ReportPrint = ({ report, setPrintDone }) => {
               </th>
               <td className="print-row-content">{report.nextSteps}</td>
             </tr>
-            {Settings.engagementsIncludeTimeAndDuration && report.duration && (
+            {Settings.engagementsIncludeTimeAndDuration && report.duration ? (
               <tr>
                 <th className="print-row-label">duration(min)</th>
                 <td className="print-row-content">{report.duration}</td>
               </tr>
-            )}
-            {report.cancelled && (
+            ) : null}
+            {report.cancelled ? (
               <tr>
                 <th className="print-row-label">cancelled reason</th>
                 <td className="print-row-content">
                   {utils.sentenceCase(report.cancelledReason)}
                 </td>
               </tr>
-            )}
-            {!report.cancelled && (
+            ) : null}
+            {!report.cancelled ? (
               <tr>
                 <th className="print-row-label">
                   {Settings.fields.report.atmosphere.toLowerCase()}
@@ -118,7 +128,7 @@ const ReportPrint = ({ report, setPrintDone }) => {
                   </>
                 </td>
               </tr>
-            )}
+            ) : null}
             <tr>
               <th className="print-row-label">
                 {Settings.fields.advisor.org.name.toLowerCase()}
@@ -137,30 +147,54 @@ const ReportPrint = ({ report, setPrintDone }) => {
                 <LinkTo modelType="Organization" model={report.principalOrg} />
               </td>
             </tr>
+            {report.reportText ? (
+              <tr>
+                <th className="print-row-label">
+                  {Settings.fields.report.reportText}
+                </th>
+                <td className="print-row-content">
+                  {parseHtmlWithLinkTo(report.reportText)}
+                </td>
+              </tr>
+            ) : null}
+            {report.reportSensitiveInformation &&
+            report.reportSensitiveInformation.text ? (
+              <tr>
+                <th className="print-row-label">sensitive information</th>
+                <td className="print-row-content">
+                  {" "}
+                  {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
+                </td>
+              </tr>
+              ) : null}
+
             <tr>
-              <th className="print-row-label">b</th>
-              <td className="print-row-content">b</td>
+              <th className="print-row-label">workflow</th>
+              <td className="print-row-content">
+                {report.showWorkflow() && (
+                  <ReportFullWorkflow workflow={report.workflow} />
+                )}
+              </td>
             </tr>
             <tr>
-              <th className="print-row-label">b</th>
-              <td className="print-row-content">b</td>
+              <th className="print-row-label">comments</th>
+              <td className="print-row-content">{getComments()}</td>
             </tr>
-            <tr>
-              <th className="print-row-label">b</th>
-              <td className="print-row-content">b</td>
-            </tr>
-            <tr>
-              <th className="print-row-label">b</th>
-              <td className="print-row-content">b</td>
-            </tr>
+            {Settings.fields.report.customFields ? (
+              <tr>
+                <th className="print-row-label">engagement information</th>
+                <td className="print-row-content custom-fields-row">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.report.customFields}
+                    values={report}
+                    vertical
+                  />
+                </td>
+              </tr>
+            ) : null}
             <tr>
               <th className="print-row-label">meeting attendees</th>
-              <td className="print-row-content">
-                {
-                  ((console.dir(report.attendees), console.dir(report)),
-                  attendeesAndAssessments())
-                }
-              </td>
+              <td className="print-row-content">{attendeesAndAssessments()}</td>
             </tr>
             <tr>
               <th className="print-row-label">
@@ -200,34 +234,12 @@ const ReportPrint = ({ report, setPrintDone }) => {
           {report.tasks.map(task => {
             const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
             // return only name and objective if no assessment
-            if (!taskInstantAssessmentConfig) {
-              return (
-                <tr key={task.uuid}>
-                  <th>
-                    <LinkTo modelType={Task.resourceName} model={task} />
-                  </th>
-                  <td className="print-task-assessment-field">
-                    <div className="form-group">
-                      <label htmlFor={`${task.uuid}-topLevel`}>
-                        {Settings.fields.task.topLevel.shortLabel}
-                      </label>
-                      <br />
-                      {task.customFieldRef1 && (
-                        <LinkTo modelType="Task" model={task.customFieldRef1}>
-                          {task.customFieldRef1.shortName}
-                        </LinkTo>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              )
-            }
             return (
               <tr key={task.uuid}>
-                <th>
+                <th className="print-assessment-label">
                   <LinkTo modelType={Task.resourceName} model={task} />
                 </th>
-                <td className="print-task-assessment-field">
+                <td className="print-assessment-field">
                   <div className="form-group">
                     <label htmlFor={`${task.uuid}-topLevel`}>
                       {Settings.fields.task.topLevel.shortLabel}
@@ -239,13 +251,17 @@ const ReportPrint = ({ report, setPrintDone }) => {
                       </LinkTo>
                     )}
                   </div>
-                  <h4 style={{ textAlign: "center" }}>Assessments</h4>
-                  <ReadonlyCustomFields
-                    parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
-                    fieldsConfig={taskInstantAssessmentConfig}
-                    values={report}
-                    vertical
-                  />
+                  {taskInstantAssessmentConfig && (
+                    <>
+                      <h5 style={{ textAlign: "center" }}>Assessments</h5>
+                      <ReadonlyCustomFields
+                        parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
+                        fieldsConfig={taskInstantAssessmentConfig}
+                        values={report}
+                        vertical
+                      />
+                    </>
+                  )}
                 </td>
               </tr>
             )
@@ -263,18 +279,45 @@ const ReportPrint = ({ report, setPrintDone }) => {
       return <>None</>
     }
     // to keep track of different organization, if same don't print for compactness
-    // const prevOrg = null
+    let prevDiffOrgName = ""
     return (
       <table>
         <tbody>
           {report.attendees.map(attendee => {
+            const attendeeInstantAssessmentConfig = attendee.getInstantAssessmentConfig()
+            const renderOrgName =
+              prevDiffOrgName !== attendee.position?.organization?.shortName
+            prevDiffOrgName = renderOrgName
+              ? attendee.position?.organization?.shortName
+              : prevDiffOrgName
             return (
               <tr key={attendee.uuid}>
-                <th>
-                  <label className="label label-primary">Primary</label>
+                <th className="print-assessment-label">
+                  {attendee.primary && (
+                    <label className="label label-primary">Primary</label>
+                  )}
                   {attendee.name}
+                  {renderOrgName && (
+                    <LinkTo
+                      modelType="Organization"
+                      model={
+                        attendee.position && attendee.position.organization
+                      }
+                      whenUnspecified=""
+                    />
+                  )}
                 </th>
-                <td />
+                {attendeeInstantAssessmentConfig && (
+                  <td className="print-assessment-field">
+                    <h5 style={{ textAlign: "left" }}>Assessments</h5>
+                    <ReadonlyCustomFields
+                      parentFieldName={`${Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}.${attendee.uuid}`}
+                      fieldsConfig={attendeeInstantAssessmentConfig}
+                      values={report}
+                      vertical
+                    />
+                  </td>
+                )}
               </tr>
             )
           })}
@@ -282,13 +325,47 @@ const ReportPrint = ({ report, setPrintDone }) => {
       </table>
     )
   }
+
+  function getComments() {
+    return (
+      <>
+        {report.comments.map(comment => {
+          const createdAt = moment(comment.createdAt)
+          return (
+            <p key={comment.uuid}>
+              <LinkTo modelType="Person" model={comment.author} />,
+              <span
+                title={createdAt.format(
+                  Settings.dateFormats.forms.displayShort.withTime
+                )}
+              >
+                {" "}
+                {createdAt.fromNow()}:{" "}
+              </span>
+              "{comment.text}"
+            </p>
+          )
+        })}
+
+        {!report.comments.length && <p>There are no comments</p>}
+      </>
+    )
+  }
+  function onPrintClick() {
+    if (typeof window.print === "function") {
+      window.print()
+    } else {
+      alert("Press CTRL+P to print this report")
+    }
+  }
 }
 
 // Explanation why we need header-space and header-content (same for footer) to create printable report
 // https://medium.com/@Idan_Co/the-ultimate-print-html-template-with-header-footer-568f415f6d2a
 // tldr: we need both
 // 1- headers and footers to be position fixed at top and bottom of page which "header/footer-content" div provides
-// 2- we need normal content not to overlap with headers and footers which "header/footer-space" provides
+// 2- we need normal content not to overlap with headers and footers which "header/footer-space" provides with table-header-group rule
+// table-footer-group is empty because at the last page, footer is appended at the end of content not the page
 
 ReportPrint.propTypes = {
   report: PropTypes.object.isRequired,

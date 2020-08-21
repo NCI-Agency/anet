@@ -32,13 +32,8 @@
   height: 70px;
 }
 
-.print-header-space {
-}
-.print-footer-space {
-}
-
 .print-classification-banner-top,
-.print-classification-banner-bot{
+.print-classification-banner-bot {
   position: absolute;
   margin: 10px auto;
   width: 100%;
@@ -52,7 +47,6 @@
   bottom: 0;
 }
 
-
 .print-row-label {
   padding: 4px 0 !important;
   font-style: italic !important;
@@ -62,6 +56,10 @@
 
 .print-row-content {
   padding: 4px 1rem !important;
+}
+
+.custom-fields-row h2.legend {
+  font-size: 1.5rem;
 }
 
 .print-table th {
@@ -78,8 +76,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  /* DEBUG *************************************************/
-  /* outline: 1px solid red;*/
+
   padding: 1rem;
 }
 
@@ -97,7 +94,6 @@
 .print-table-subtitle {
   text-align: center;
   padding: 5px 0;
-  /* outline: 1px solid blue; */
 }
 
 .print-table-title {
@@ -108,30 +104,36 @@
   font-style: italic;
 }
 .ReportPrint table,
-.ReportPrint tr
- {
+.ReportPrint tr {
   width: 100%;
 }
-.print-task-assessment-field {
+
+.print-assessment-label {
+  white-space: nowrap;
+  overflow: hidden;
+}
+.print-assessment-field {
   width: 100%;
   padding-left: 1rem;
 }
-
+.print-row-content label {
+  margin: 0 5px;
+}
 @media print {
   .ReportPrint {
     padding: 0;
     outline: none;
   }
 
-  .print-task-assessment-field {
+  .print-assessment-field {
     font-size: 12px;
   }
-  .print-task-assessment-field> div {
+  .print-assessment-field > div {
     max-width: 100%;
     margin: 0 !important;
   }
 
-  .print-task-assessment-field .form-control-static {
+  .print-assessment-field .form-control-static {
     padding: 0;
     margin: 0;
   }
@@ -156,5 +158,10 @@
 
   body {
     margin: 0;
+    overflow-y: scroll !important;
+  }
+  /* messes with print pdf*/
+  svg > text#__react_svg_text_measurement_id {
+    display: none;
   }
 }
