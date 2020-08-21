@@ -7,21 +7,20 @@ import PropTypes from "prop-types"
 import React, { useContext, useEffect } from "react"
 import anetLogo from "resources/logo.png"
 import Settings from "settings"
+import utils from "utils"
 import "./Print.css"
 const ReportPrint = ({ report, setPrintDone }) => {
   const { currentUser } = useContext(AppContext)
 
-  const tasksLabel = Settings.fields.task.subLevel.longLabel.toLowerCase()
-
   useEffect(() => {
     // wait for render to print
     setTimeout(() => {
-      if (typeof window.print !== "function") {
+      if (typeof window.print === "function") {
         window.print()
+        // setPrintDone()
       } else {
         alert("Press CTRL+P to print this report")
       }
-      setPrintDone()
     }, 100)
   }, [setPrintDone])
   return (
@@ -79,7 +78,17 @@ const ReportPrint = ({ report, setPrintDone }) => {
                 {Settings.fields.report.keyOutcomes.toLowerCase() ||
                   "key outcomes"}
               </th>
-              <td className="print-row-content">{report.keyOutcomes}</td>
+              <td className="print-row-content">
+                {report.keyOutcomes}
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                Repellat consequatur accusantium doloribus facilis.
+              </td>
+            </tr>
+            <tr>
+              <th className="print-row-label">
+                {Settings.fields.report.nextSteps.toLowerCase()}
+              </th>
+              <td className="print-row-content">{report.nextSteps}</td>
             </tr>
             {Settings.engagementsIncludeTimeAndDuration && report.duration && (
               <tr>
@@ -87,8 +96,76 @@ const ReportPrint = ({ report, setPrintDone }) => {
                 <td className="print-row-content">{report.duration}</td>
               </tr>
             )}
+            {report.cancelled && (
+              <tr>
+                <th className="print-row-label">cancelled reason</th>
+                <td className="print-row-content">
+                  {utils.sentenceCase(report.cancelledReason)}
+                </td>
+              </tr>
+            )}
+            {!report.cancelled && (
+              <tr>
+                <th className="print-row-label">
+                  {Settings.fields.report.atmosphere.toLowerCase()}
+                </th>
+                <td className="print-row-content">
+                  {" "}
+                  <>
+                    {utils.sentenceCase(report.atmosphere)}
+                    {report.atmosphereDetails &&
+                      ` – ${report.atmosphereDetails}`}
+                  </>
+                </td>
+              </tr>
+            )}
             <tr>
-              <th className="print-row-label">{tasksLabel}</th>
+              <th className="print-row-label">
+                {Settings.fields.advisor.org.name.toLowerCase()}
+              </th>
+              <td className="print-row-content">
+                {" "}
+                <LinkTo modelType="Organization" model={report.advisorOrg} />
+              </td>
+            </tr>
+            <tr>
+              <th className="print-row-label">
+                {Settings.fields.principal.org.name.toLowerCase()}
+              </th>
+              <td className="print-row-content">
+                {" "}
+                <LinkTo modelType="Organization" model={report.principalOrg} />
+              </td>
+            </tr>
+            <tr>
+              <th className="print-row-label">b</th>
+              <td className="print-row-content">b</td>
+            </tr>
+            <tr>
+              <th className="print-row-label">b</th>
+              <td className="print-row-content">b</td>
+            </tr>
+            <tr>
+              <th className="print-row-label">b</th>
+              <td className="print-row-content">b</td>
+            </tr>
+            <tr>
+              <th className="print-row-label">b</th>
+              <td className="print-row-content">b</td>
+            </tr>
+            <tr>
+              <th className="print-row-label">meeting attendees</th>
+              <td className="print-row-content">
+                {
+                  ((console.dir(report.attendees), console.dir(report)),
+                  attendeesAndAssessments())
+                }
+              </td>
+            </tr>
+            <tr>
+              <th className="print-row-label">
+                {Settings.fields.task.subLevel.longLabel.toLowerCase()}
+              </th>
               <td className="print-row-content">{effortsAndAssessments()}</td>
             </tr>
           </tbody>
@@ -109,31 +186,95 @@ const ReportPrint = ({ report, setPrintDone }) => {
     </>
   )
 
+  // each tasks name, objective and assessments combined into a table
   function effortsAndAssessments() {
     if (!report) {
       return null
+    }
+    if (report.tasks.length === 0) {
+      return <>None</>
     }
     return (
       <table>
         <tbody>
           {report.tasks.map(task => {
             const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
+            // return only name and objective if no assessment
             if (!taskInstantAssessmentConfig) {
-              return null
+              return (
+                <tr key={task.uuid}>
+                  <th>
+                    <LinkTo modelType={Task.resourceName} model={task} />
+                  </th>
+                  <td className="print-task-assessment-field">
+                    <div className="form-group">
+                      <label htmlFor={`${task.uuid}-topLevel`}>
+                        {Settings.fields.task.topLevel.shortLabel}
+                      </label>
+                      <br />
+                      {task.customFieldRef1 && (
+                        <LinkTo modelType="Task" model={task.customFieldRef1}>
+                          {task.customFieldRef1.shortName}
+                        </LinkTo>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )
             }
-            console.log(taskInstantAssessmentConfig)
             return (
               <tr key={task.uuid}>
                 <th>
                   <LinkTo modelType={Task.resourceName} model={task} />
                 </th>
                 <td className="print-task-assessment-field">
+                  <div className="form-group">
+                    <label htmlFor={`${task.uuid}-topLevel`}>
+                      {Settings.fields.task.topLevel.shortLabel}
+                    </label>
+                    <br />
+                    {task.customFieldRef1 && (
+                      <LinkTo modelType="Task" model={task.customFieldRef1}>
+                        {task.customFieldRef1.shortName}
+                      </LinkTo>
+                    )}
+                  </div>
+                  <h4 style={{ textAlign: "center" }}>Assessments</h4>
                   <ReadonlyCustomFields
                     parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
                     fieldsConfig={taskInstantAssessmentConfig}
                     values={report}
+                    vertical
                   />
                 </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    )
+  }
+
+  function attendeesAndAssessments() {
+    if (!report) {
+      return null
+    }
+    if (report.attendees.length === 0) {
+      return <>None</>
+    }
+    // to keep track of different organization, if same don't print for compactness
+    // const prevOrg = null
+    return (
+      <table>
+        <tbody>
+          {report.attendees.map(attendee => {
+            return (
+              <tr key={attendee.uuid}>
+                <th>
+                  <label className="label label-primary">Primary</label>
+                  {attendee.name}
+                </th>
+                <td />
               </tr>
             )
           })}

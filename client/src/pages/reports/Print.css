@@ -1,13 +1,16 @@
 @page {
   margin: 0;
 }
-.print-table {
-  width: 100%;
-}
 .ReportPrint {
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
+  /* need fixed width for now so that likert scales don't go crazy when printing */
+  /* FIXME: if likert scales printing gets more repsonsive, width can be more repsonsive*/
+  width: 768px;
+}
+.print-table {
+  width: 100%;
 }
 .print-page-buttons {
   margin-bottom: 1rem;
@@ -24,20 +27,14 @@
   margin-left: 5px;
   margin-right: 5px;
 }
-
-.print-table,
-.print-table tr,
-.print-table th,
-.print-table td {
-  /* DEBUG *************************************************/
-  /* outline: 1px solid grey; */
+.print-header-space,
+.print-footer-space {
+  height: 70px;
 }
 
 .print-header-space {
-  height: 50px;
 }
 .print-footer-space {
-  height: 50px;
 }
 
 .print-classification-banner-top,
@@ -60,6 +57,7 @@
   padding: 4px 0 !important;
   font-style: italic !important;
   color: grey !important;
+  width: 12%;
 }
 
 .print-row-content {
@@ -69,7 +67,6 @@
 .print-table th {
   vertical-align: top;
   font-family: "Times New Roman", Times, serif;
-  max-width: 20%;
 }
 
 .print-header-content,
@@ -111,18 +108,22 @@
   font-style: italic;
 }
 .ReportPrint table,
-.ReportPrint tr {
+.ReportPrint tr
+ {
   width: 100%;
 }
+.print-task-assessment-field {
+  width: 100%;
+  padding-left: 1rem;
+}
+
 @media print {
   .ReportPrint {
     padding: 0;
     outline: none;
   }
 
-
   .print-task-assessment-field {
-    width: 100%;
     font-size: 12px;
   }
   .print-task-assessment-field> div {
