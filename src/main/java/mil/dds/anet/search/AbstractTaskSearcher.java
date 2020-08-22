@@ -66,6 +66,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addCustomFieldRef1UuidQuery(query);
     }
 
+    if (query.getResponsiblePositionUuid() != null) {
+      addResponsiblePositionUuidQuery(query);
+    }
+
     if (Boolean.TRUE.equals(query.isInMyReports())) {
       qb.addFromClause("JOIN ("
           + "  SELECT \"reportTasks\".\"taskUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
@@ -107,6 +111,14 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       qb.addInListClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
           query.getCustomFieldRef1Uuid());
     }
+  }
+
+  protected void addResponsiblePositionUuidQuery(TaskSearchQuery query) {
+    qb.addFromClause(
+        "LEFT JOIN \"taskResponsiblePositions\" ON tasks.uuid = \"taskResponsiblePositions\".\"taskUuid\"");
+
+    qb.addEqualsClause("responsiblePositionUuid", "\"taskResponsiblePositions\".\"positionUuid\"",
+        query.getResponsiblePositionUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {

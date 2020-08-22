@@ -3,6 +3,7 @@ import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect } from "react"
 import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
@@ -91,6 +92,9 @@ const Nav = ({
   const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
 
+  const isAdvisor = currentUser.isAdvisor()
+  const taskShortLabel = Settings.fields.task.shortLabel
+
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
       <SidebarLink linkTo="/" handleOnClick={resetPages}>
@@ -104,11 +108,30 @@ const Nav = ({
           linkTo={{ pathname: "/reports/mine" }}
           handleOnClick={resetPages}
         >
-          My reports
+          My Reports
         </SidebarLink>
       )}
 
       <BSNav id="reports-nav" />
+
+      {isAdvisor && currentUser.position && (
+        <>
+          <SidebarLink
+            linkTo={{ pathname: "/tasks/mine" }}
+            handleOnClick={resetPages}
+            id="my-tasks-nav"
+          >
+            {`My ${pluralize(taskShortLabel)}`}
+          </SidebarLink>
+          <SidebarLink
+            linkTo={{ pathname: "/positions/counterparts" }}
+            handleOnClick={resetPages}
+            id="my-counterparts-nav"
+          >
+            My Counterparts
+          </SidebarLink>
+        </>
+      )}
 
       {myOrg && (
         <SidebarLink
@@ -116,11 +139,10 @@ const Nav = ({
           handleOnClick={resetPages}
           id="my-organization"
         >
-          My organization <br />
+          My Organization <br />
           <small>{myOrg.shortName}</small>
         </SidebarLink>
       )}
-
       <BSNav id="myorg-nav" />
 
       <NavDropdown
@@ -168,7 +190,7 @@ const Nav = ({
       <BSNav id="principal-org-nav" />
 
       <SidebarLink linkTo="/rollup" handleOnClick={resetPages}>
-        Daily rollup
+        Daily Rollup
       </SidebarLink>
 
       {currentUser.isAdmin() && (
