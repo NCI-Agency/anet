@@ -18,9 +18,10 @@ const LinkAnet = ({
 
   if (isAnetEntityLink) {
     return (
-      <LinkAnetEntity type={isAnetEntityLink.type} uuid={isAnetEntityLink.uuid}>
-        {children}
-      </LinkAnetEntity>
+      <LinkAnetEntity
+        type={isAnetEntityLink.type}
+        uuid={isAnetEntityLink.uuid}
+      />
     )
   } else {
     // Non ANET entity link
