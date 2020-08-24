@@ -388,7 +388,7 @@ const AnetObjectField = ({ name, types, formikProps, ...otherFieldProps }) => {
       {...otherFieldProps}
     >
       {fieldValue.type && fieldValue.uuid && (
-        <>
+        <div id={`${name}-value`}>
           <span
             style={{ cursor: "pointer" }}
             onClick={() => setFieldValue(name, null)}
@@ -396,7 +396,7 @@ const AnetObjectField = ({ name, types, formikProps, ...otherFieldProps }) => {
             <img src={REMOVE_ICON} height={14} alt="Unlink object" />
           </span>
           <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
-        </>
+        </div>
       )}
     </FastField>
   )
@@ -414,7 +414,14 @@ const ReadonlyAnetObjectField = ({ name, label, values }) => {
       name={name}
       label={label}
       component={FieldHelper.ReadonlyField}
-      humanValue={type && uuid && <LinkAnetEntity type={type} uuid={uuid} />}
+      humanValue={
+        type &&
+        uuid && (
+          <div id={`${name}-value`}>
+            <LinkAnetEntity type={type} uuid={uuid} />
+          </div>
+        )
+      }
     />
   )
 }
@@ -458,7 +465,7 @@ const ArrayOfAnetObjectsField = ({
       {...otherFieldProps}
     >
       {!_isEmpty(fieldValue) && (
-        <Table striped condensed hover responsive>
+        <Table id={`${name}-value`} striped condensed hover responsive>
           <tbody>
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
@@ -506,7 +513,7 @@ const ReadonlyArrayOfAnetObjectsField = ({ name, label, values }) => {
       component={FieldHelper.ReadonlyField}
       humanValue={
         !_isEmpty(fieldValue) && (
-          <Table striped condensed hover responsive>
+          <Table id={`${name}-value`} striped condensed hover responsive>
             <tbody>
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
