@@ -49,7 +49,7 @@ const widgetPropsReport = {
   overlayRenderRow: ReportDetailedOverlayRow,
   overlayColumns: ["Goal", "Author", "Updated"],
   filterDefs: entityFilters,
-  queryParams: {},
+  queryParams: {}, // allow any report, incl. one's own drafts
   fields: Models.Report.autocompleteQuery,
   addon: REPORTS_ICON
 }
@@ -59,7 +59,7 @@ const widgetPropsPeople = {
   overlayRenderRow: PersonDetailedOverlayRow,
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   filterDefs: peopleFilters,
-  queryParams: {},
+  queryParams: { status: Models.Person.STATUS.ACTIVE },
   fields: Models.Person.autocompleteQueryWithNotes,
   addon: PEOPLE_ICON
 }
@@ -69,7 +69,7 @@ const widgetPropsOrganization = {
   overlayRenderRow: OrganizationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: {},
+  queryParams: { status: Models.Organization.STATUS.ACTIVE },
   fields: Models.Organization.autocompleteQuery,
   addon: ORGANIZATIONS_ICON
 }
@@ -79,7 +79,7 @@ const widgetPropsPosition = {
   overlayRenderRow: PositionOverlayRow,
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
-  queryParams: {},
+  queryParams: { status: Models.Position.STATUS.ACTIVE },
   fields: Models.Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
