@@ -1,5 +1,7 @@
-import { css } from "@emotion/core"
+/** @jsx jsx */
+import { css, jsx } from "@emotion/core"
 import AppContext from "components/AppContext"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { Report } from "models"
 import moment from "moment"
@@ -8,20 +10,114 @@ import React, { useContext } from "react"
 import { Button } from "react-bootstrap"
 import anetLogo from "resources/logo.png"
 import Settings from "settings"
-
+import utils from "utils"
+import { parseHtmlWithLinkTo } from "utils_links"
+import "./PrintEmotion.css"
 const PrintReportPage = ({ report, setPrintDone }) => {
   const { currentUser } = useContext(AppContext)
 
+  if (!report) {
+    return null
+  }
+  console.log("Print Report Page")
+  console.dir(report)
+  report.formCustomFields.itemsAgreed = [
+    {
+      item: "Very good item",
+      dueDate: moment()
+    },
+    {
+      item: "Very nice item",
+      dueDate: moment()
+    },
+    {
+      item: "Very bad item",
+      dueDate: moment()
+    }
+  ]
   return (
-    <div css={PRINT_PAGE_STYLE}>
+    <React.Fragment>
       <PrintPageHeader onPrintClick={printReport} setPrintDone={setPrintDone} />
-      <ReportHeaderContent report={report} />
-      <PrintTable>
-        <PrintRow isTitle label={reportTitle()} />
-        <PrintRow isTitle label={reportSubTitle()} />
-      </PrintTable>
-      <ReportFooterContent report={report} />
-    </div>
+      <div css={PRINT_PAGE_STYLE}>
+        <ReportHeaderContent report={report} />
+        <PrintTable>
+          <PrintRow
+            rowType={ROW_TYPES.titleLike}
+            titleStyle={TITLE_STYLE}
+            label={reportTitle()}
+          />
+          <PrintRow
+            rowType={ROW_TYPES.titleLike}
+            titleStyle={SUBTITLE_STYLE}
+            label={reportSubTitle()}
+          />
+          <PrintRow label="purpose" content={report.intent} />
+          <PrintRow
+            label={
+              Settings.fields.report.keyOutcomes.toLowerCase() || "key outcomes"
+            }
+            content={report.keyOutcomes}
+          />
+          <PrintRow
+            label={Settings.fields.report.nextSteps.toLowerCase()}
+            content={report.intent}
+          />
+
+          {Settings.engagementsIncludeTimeAndDuration && report.duration ? (
+            <PrintRow label="duration(min)" content={report.duration} />
+          ) : null}
+          {report.cancelled ? (
+            <PrintRow
+              label="cancelled reason"
+              content={utils.sentenceCase(report.cancelledReason)}
+            />
+          ) : null}
+          {!report.cancelled ? (
+            <PrintRow
+              label={Settings.fields.report.atmosphere.toLowerCase()}
+              content={
+                <React.Fragment>
+                  {utils.sentenceCase(report.atmosphere)}
+                  {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
+                </React.Fragment>
+              }
+            />
+          ) : null}
+          {report.reportText ? (
+            <PrintRow
+              label={Settings.fields.report.reportText.toLowerCase()}
+              content={parseHtmlWithLinkTo(report.reportText)}
+            />
+          ) : null}
+          {report.reportSensitiveInformation &&
+          report.reportSensitiveInformation.text ? (
+            <PrintRow
+              label="sensitive information"
+              content={parseHtmlWithLinkTo(
+                report.reportSensitiveInformation.text
+              )}
+            />
+            ) : null}
+          {/*             Workflow needs change */}
+          {report.showWorkflow() ? (
+            <PrintRow label="workflow" content={report.workflow} />
+          ) : null}
+          <PrintRow label="comments" content={getComments()} />
+          {Settings.fields.report.customFields ? (
+            <ReadonlyCustomFields
+              fieldsConfig={Settings.fields.report.customFields}
+              values={report}
+              vertical
+              printStyle={{ say: "hello" }}
+            />
+          ) : null}
+          <PrintRow label="purpose" content={report.intent} />
+          <PrintRow label="purpose" content={report.intent} />
+          <PrintRow label="purpose" content={report.intent} />
+        </PrintTable>
+        <ReportFooterContent report={report} />
+      </div>
+    </React.Fragment>
   )
 
   function printReport() {
@@ -35,7 +131,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
 
   function reportTitle() {
     return (
-      <>
+      <React.Fragment>
         Engagement of <LinkTo modelType="Person" model={report.author} /> on{" "}
         {moment(report.engagementDate).format(Report.getEngagementDateFormat())}
         <br />
@@ -43,13 +139,13 @@ const PrintReportPage = ({ report, setPrintDone }) => {
         {report.location && (
           <LinkTo modelType="Location" model={report.location} />
         )}
-      </>
+      </React.Fragment>
     )
   }
 
   function reportSubTitle() {
     return (
-      <>
+      <React.Fragment>
         Authored by <LinkTo modelType="Person" model={report.author} /> on{" "}
         {moment(report.releasedAt).format(
           Settings.dateFormats.forms.displayShort.withTime
@@ -57,7 +153,33 @@ const PrintReportPage = ({ report, setPrintDone }) => {
         <br />
         printed by <LinkTo modelType="Person" model={currentUser} /> [
         {Report.STATE_LABELS[report.state]}]
-      </>
+      </React.Fragment>
+    )
+  }
+
+  function getComments() {
+    return (
+      <React.Fragment>
+        {report.comments.map(comment => {
+          const createdAt = moment(comment.createdAt)
+          return (
+            <p key={comment.uuid}>
+              <LinkTo modelType="Person" model={comment.author} />,
+              <span
+                title={createdAt.format(
+                  Settings.dateFormats.forms.displayShort.withTime
+                )}
+              >
+                {" "}
+                {createdAt.fromNow()}:{" "}
+              </span>
+              "{comment.text}"
+            </p>
+          )
+        })}
+
+        {!report.comments.length && <p>There are no comments</p>}
+      </React.Fragment>
     )
   }
 }
@@ -68,19 +190,35 @@ PrintReportPage.propTypes = {
 }
 
 const PRINT_PAGE_STYLE = css`
-  postion: relative;
+  position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
   width: 768px;
   @media print {
+    position: static;
     padding: 0;
     outline: none;
   }
 `
+
+const TITLE_STYLE = css`
+  font-size: 18px;
+  padding-top: 1rem;
+  font-style: normal;
+  color: black;
+  text-align: center;
+`
+const SUBTITLE_STYLE = css`
+  font-style: italic;
+  color: black;
+  text-align: center;
+  font-weight: normal;
+`
+
 const PrintPageHeader = ({ onPrintClick, setPrintDone }) => {
   return (
     <header css={HEADER_STYLE}>
-      <h3 style={{ margin: 0 }}>Printable Version</h3>
+      <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
       <div css={BUTTONS_STYLE}>
         <Button type="button" bsStyle="primary" onClick={onPrintClick}>
           Print
@@ -102,7 +240,14 @@ const HEADER_STYLE = css`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 768;
+  width: 768px;
+`
+
+const HEADER_TITLE_STYLE = css`
+  margin: 0;
+  @media print {
+    display: none;
+  }
 `
 
 const BUTTONS_STYLE = css`
@@ -121,7 +266,9 @@ const ReportHeaderContent = ({ report }) => {
     <div css={HEADER_CONTENT_STYLE}>
       <img src={anetLogo} alt="logo" width="92" height="21" />
       <div css={TOP_CLASSIFICATION_BANNER_STYLE}>Classification Banner</div>
-      <span style={{ fontSize: "12px" }}>#{report.uuid}</span>
+      <span style={{ fontSize: "12px" }}>
+        <LinkTo modelType="Report" model={report} />
+      </span>
     </div>
   )
 }
@@ -163,7 +310,7 @@ const HEADER_CONTENT_STYLE = css`
 `
 const FOOTER_CONTENT_STYLE = css`
   ${HF_COMMON_STYLE};
-  bot: 0mm;
+  bottom: 0mm;
   border-top: 1px solid black;
 `
 
@@ -208,20 +355,34 @@ const TABLE_STYLE = css`
   width: 100%;
 `
 const SPACE_STYLE = css`
-  height: 70px;
+  height: 50px;
 `
 
-const PrintRow = ({ label, content, isTitle }) => {
+const ROW_TYPES = {
+  titleLike: "titleLike",
+  customField: "customField"
+}
+
+export const PrintRow = ({ label, content, rowType, ...otherProps }) => {
+  if (rowType === ROW_TYPES.titleLike) {
+    const { titleStyle } = otherProps
+    const customStyle = css`
+      ${ROW_LABEL};
+      ${titleStyle};
+    `
+    return (
+      <tr css={ROW_STYLE}>
+        <th css={customStyle} colSpan="2">
+          {label}
+        </th>
+      </tr>
+    )
+  }
+
   return (
     <tr css={ROW_STYLE}>
-      {isTitle ? (
-        <th colSpan="2">{label}</th>
-      ) : (
-        <>
-          <th>{label}</th>
-          <td>{content}</td>
-        </>
-      )}
+      <th css={ROW_LABEL}>{label}</th>
+      <td css={ROW_CONTENT}>{content}</td>
     </tr>
   )
 }
@@ -229,24 +390,23 @@ const PrintRow = ({ label, content, isTitle }) => {
 PrintRow.propTypes = {
   label: PropTypes.node,
   content: PropTypes.node,
-  isTitle: PropTypes.bool
+  rowType: PropTypes.string
 }
 
 const ROW_STYLE = css`
   vertical-align: top;
   font-family: "Times New Roman", Times, serif;
-  th {
-    padding: 4px 0;
-    font-style: italic;
-    color: grey;
-    width: 15%;
-  }
-  td {
-    padding: 4px 1rem;
-    label {
-      margin: 0 5px;
-    }
-  }
+  width: 100%;
 `
 
+const ROW_LABEL = css`
+  padding: 4px 0;
+  font-style: italic;
+  color: grey;
+  width: 15%;
+`
+
+const ROW_CONTENT = css`
+  padding: 4px 1rem;
+`
 export default PrintReportPage

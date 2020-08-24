@@ -1,6 +1,7 @@
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
+import { PrintRow } from "pages/reports/PrintEmotion"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -15,7 +16,6 @@ import {
   ToggleButtonGroup
 } from "react-bootstrap"
 import utils from "utils"
-
 const getFieldId = field => field.id || field.name // name property is required
 
 const getHumanValue = (field, humanValue) => {
@@ -69,6 +69,7 @@ const Field = ({
   extraColElem,
   addon,
   vertical,
+  printStyle,
   extraAddon
 }) => {
   const id = getFieldId(field)
@@ -89,11 +90,26 @@ const Field = ({
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
-
   // setting label or extraColElem explicitly to null will completely remove these columns!
   const widgetWidth =
     12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
+
+  if (printStyle) {
+    return (
+      <PrintRow
+        label={label}
+        content={
+          <>
+            {widget}
+            {getHelpBlock(field, form)}
+            {children}
+          </>
+        }
+      />
+    )
+  }
+
   return (
     <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
       {vertical ? (
@@ -132,7 +148,8 @@ Field.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  extraAddon: PropTypes.object
+  extraAddon: PropTypes.object,
+  printStyle: PropTypes.object
 }
 Field.defaultProps = {
   vertical: false // default direction of label and input = horizontal
@@ -227,6 +244,7 @@ export const ReadonlyField = ({
   addon,
   vertical,
   humanValue,
+  printStyle,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -247,6 +265,7 @@ export const ReadonlyField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
+      printStyle={printStyle}
     />
   )
 }
@@ -258,7 +277,8 @@ ReadonlyField.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  humanValue: PropTypes.any
+  humanValue: PropTypes.any,
+  printStyle: PropTypes.object
 }
 
 export const SpecialField = ({
@@ -270,6 +290,7 @@ export const SpecialField = ({
   addon,
   vertical,
   widget,
+  printStyle,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -286,6 +307,7 @@ export const SpecialField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
+      printStyle={printStyle}
     />
   )
 }
@@ -297,7 +319,8 @@ SpecialField.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  widget: PropTypes.any
+  widget: PropTypes.any,
+  printStyle: PropTypes.object
 }
 
 export const customEnumButtons = list => {
