@@ -28,6 +28,14 @@ class Home extends Page {
     return browser.$("#my-organization")
   }
 
+  get myTasksLink() {
+    return browser.$("#my-tasks-nav")
+  }
+
+  get myCounterpartsLink() {
+    return browser.$("#my-counterparts-nav")
+  }
+
   waitForSecurityBannerValue(value) {
     this.securityBanner.waitForExist()
     this.securityBanner.waitForDisplayed()
