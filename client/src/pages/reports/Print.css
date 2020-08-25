@@ -1,150 +1,7 @@
 @page {
   margin: 0;
 }
-.ReportPrint {
-  position: relative;
-  outline: 2px solid grey;
-  padding: 0 1rem;
-  /* need fixed width for now so that likert scales don't go crazy when printing */
-  /* FIXME: if likert scales printing gets more repsonsive, width can be more repsonsive*/
-  width: 768px;
-}
-.print-table {
-  width: 100%;
-}
-.print-page-buttons {
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-
-.report-preview-title {
-  margin-bottom: 1rem;
-}
-
-.print-page-buttons button {
-  margin-left: 5px;
-  margin-right: 5px;
-}
-.print-header-space,
-.print-footer-space {
-  height: 70px;
-}
-
-.print-classification-banner-top,
-.print-classification-banner-bot {
-  position: absolute;
-  margin: 10px auto;
-  width: 100%;
-  text-align: center;
-}
-.print-classification-banner-top {
-  top: 0;
-}
-
-.print-classification-banner-bot {
-  bottom: 0;
-}
-
-.print-row-label {
-  padding: 4px 0 !important;
-  font-style: italic !important;
-  color: grey !important;
-  width: 12%;
-}
-
-.print-row-content {
-  padding: 4px 1rem !important;
-}
-
-.custom-fields-row h2.legend {
-  font-size: 1.5rem;
-}
-
-.print-table th {
-  vertical-align: top;
-  font-family: "Times New Roman", Times, serif;
-}
-
-.print-header-content,
-.print-footer-content {
-  position: absolute;
-  display: flex;
-  width: 95%;
-  margin: 10px auto;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 1rem;
-}
-
-.print-header-content {
-  top: 0mm;
-  border-bottom: 1px solid black;
-}
-
-.print-footer-content {
-  bottom: 0mm;
-  border-top: 1px solid black;
-}
-
-.print-table-title,
-.print-table-subtitle {
-  text-align: center;
-  padding: 5px 0;
-}
-
-.print-table-title {
-  font-size: 18px;
-  padding-top: 1rem;
-}
-.print-table-subtitle {
-  font-style: italic;
-}
-.ReportPrint table,
-.ReportPrint tr {
-  width: 100%;
-}
-
-.print-assessment-label {
-  white-space: nowrap;
-  overflow: hidden;
-}
-.print-assessment-field {
-  width: 100%;
-  padding-left: 1rem;
-}
-.print-row-content label {
-  margin: 0 5px;
-}
 @media print {
-  .ReportPrint {
-    padding: 0;
-    outline: none;
-  }
-
-  .print-assessment-field {
-    font-size: 12px;
-  }
-  .print-assessment-field > div {
-    max-width: 100%;
-    margin: 0 !important;
-  }
-
-  .print-assessment-field .form-control-static {
-    padding: 0;
-    margin: 0;
-  }
-
-  .report-preview-title {
-    display: none;
-  }
-  .print-header-content,
-  .print-footer-content {
-    position: fixed;
-  }
   thead {
     display: table-header-group;
   }
@@ -156,12 +13,15 @@
     display: none;
   }
 
+  .print-page .workflow-action button {
+    display: inline-block !important;
+  }
   body {
     margin: 0;
-    overflow-y: scroll !important;
   }
   /* messes with print pdf*/
   svg > text#__react_svg_text_measurement_id {
     display: none;
   }
+
 }

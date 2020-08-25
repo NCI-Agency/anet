@@ -1,7 +1,7 @@
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
-import { PrintRow } from "pages/reports/PrintEmotion"
+import { PrintRow } from "pages/reports/Print"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -106,6 +106,7 @@ const Field = ({
             {children}
           </>
         }
+        style={printStyle}
       />
     )
   }

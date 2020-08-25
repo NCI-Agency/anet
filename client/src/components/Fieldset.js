@@ -1,23 +1,21 @@
 import _isEmpty from "lodash/isEmpty"
-import { PrintRow } from "pages/reports/PrintEmotion"
+import { PrintRow } from "pages/reports/Print"
 import PropTypes from "prop-types"
 import React from "react"
 import { Element } from "react-scroll"
 const Fieldset = ({ id, title, action, style, printStyle, ...otherProps }) => {
   if (printStyle) {
     return (
-      <>
-        <PrintRow
-          label={title}
-          content={
-            !_isEmpty(otherProps) && (
-              <table>
-                <tbody style={style} {...otherProps} />
-              </table>
-            )
-          }
-        />
-      </>
+      <PrintRow
+        label={title}
+        content={
+          !_isEmpty(otherProps) && (
+            <table>
+              <tbody {...otherProps} />
+            </table>
+          )
+        }
+      />
     )
   }
 

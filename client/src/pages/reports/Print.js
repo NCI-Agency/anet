@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { css, jsx } from "@emotion/core"
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
@@ -12,273 +14,150 @@ import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 import "./Print.css"
-
-const ReportPrint = ({ report, setPrintDone }) => {
-  const { currentUser } = useContext(AppContext)
+const PrintReportPage = ({ report, setPrintDone }) => {
+  if (!report) {
+    return null
+  }
+  console.log("Print Report Page")
+  console.dir(report)
+  report.formCustomFields.itemsAgreed = [
+    {
+      item: "Very good item",
+      dueDate: moment()
+    },
+    {
+      item: "Very nice item",
+      dueDate: moment()
+    },
+    {
+      item: "Very bad item",
+      dueDate: moment()
+    }
+  ]
 
   return (
-    <>
-      <header
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          width: 768
-        }}
-      >
-        <h3 className="report-preview-title" style={{ margin: 0 }}>
-          Printable Version
-        </h3>
-        <div className="print-page-buttons">
-          <Button type="button" bsStyle="primary" onClick={onPrintClick}>
-            Print
-          </Button>
-          <Button type="button" bsStyle="primary" onClick={setPrintDone}>
-            Web View
-          </Button>
-        </div>
-      </header>
-      <div className="ReportPrint">
-        <div className="print-header-content">
-          <img src={anetLogo} alt="logo" width="92" height="21" />
-          <div className="print-classification-banner-top">
-            Classification Banner
-          </div>
-          <span style={{ fontSize: "12px" }}>#{report.uuid}</span>
-        </div>
-        <table className="print-table">
-          <thead>
-            <tr>
-              <td className="print-header-space" colSpan="2" />
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th className="print-table-title" colSpan="2">
-                Engagement of{" "}
-                <LinkTo modelType="Person" model={report.author} /> on{" "}
-                {moment(report.engagementDate).format(
-                  Report.getEngagementDateFormat()
-                )}
-                <br />
-                at{" "}
-                {report.location && (
-                  <LinkTo modelType="Location" model={report.location} />
-                )}
-              </th>
-            </tr>
-            <tr>
-              <td className="print-table-subtitle" colSpan="2">
-                Authored by <LinkTo modelType="Person" model={report.author} />{" "}
-                on{" "}
-                {moment(report.releasedAt).format(
-                  Settings.dateFormats.forms.displayShort.withTime
-                )}
-                <br />
-                printed by <LinkTo modelType="Person" model={currentUser} /> [
-                {Report.STATE_LABELS[report.state]}]
-              </td>
-            </tr>
-            <tr>
-              <th className="print-row-label">purpose</th>
-              <td className="print-row-content">{report.intent}</td>
-            </tr>
-            <tr>
-              <th className="print-row-label">
-                {Settings.fields.report.keyOutcomes.toLowerCase() ||
-                  "key outcomes"}
-              </th>
-              <td className="print-row-content">
-                {report.keyOutcomes}
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Repellat consequatur accusantium doloribus facilis.
-              </td>
-            </tr>
-            <tr>
-              <th className="print-row-label">
-                {Settings.fields.report.nextSteps.toLowerCase()}
-              </th>
-              <td className="print-row-content">{report.nextSteps}</td>
-            </tr>
-            {Settings.engagementsIncludeTimeAndDuration && report.duration ? (
-              <tr>
-                <th className="print-row-label">duration(min)</th>
-                <td className="print-row-content">{report.duration}</td>
-              </tr>
+    <React.Fragment>
+      <PrintPageHeader onPrintClick={printReport} setPrintDone={setPrintDone} />
+      <div css={PRINT_PAGE_STYLE} className="print-page">
+        <ReportHeaderContent report={report} />
+        <PrintTable>
+          <PrintRow
+            rowType={ROW_TYPES.titleLike}
+            style={TITLE_STYLE}
+            label={getReportTitle()}
+          />
+          <PrintRow
+            rowType={ROW_TYPES.titleLike}
+            style={SUBTITLE_STYLE}
+            label={getReportSubTitle()}
+          />
+          <PrintRow label="purpose" content={report.intent} />
+          <PrintRow
+            label={Settings.fields.report.keyOutcomes || "key outcomes"}
+            content={report.keyOutcomes}
+          />
+          <PrintRow
+            label={Settings.fields.report.nextSteps}
+            content={report.intent}
+          />
+          <PrintRow label="attendees" content={getAttendeesAndAssessments()} />
+          <PrintRow
+            label={Settings.fields.task.subLevel.longLabel}
+            content={getTasksAndAssessments()}
+          />
+          {Settings.engagementsIncludeTimeAndDuration && report.duration ? (
+            <PrintRow label="duration(min)" content={report.duration} />
+          ) : null}
+          {report.cancelled ? (
+            <PrintRow
+              label="cancelled reason"
+              content={utils.sentenceCase(report.cancelledReason)}
+            />
+          ) : null}
+          {!report.cancelled ? (
+            <PrintRow
+              label={Settings.fields.report.atmosphere}
+              content={
+                <React.Fragment>
+                  {utils.sentenceCase(report.atmosphere)}
+                  {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
+                </React.Fragment>
+              }
+            />
+          ) : null}
+          {report.reportText ? (
+            <PrintRow
+              label={Settings.fields.report.reportText}
+              content={parseHtmlWithLinkTo(report.reportText)}
+            />
+          ) : null}
+          {report.reportSensitiveInformation &&
+          report.reportSensitiveInformation.text ? (
+            <PrintRow
+              label="sensitive information"
+              content={parseHtmlWithLinkTo(
+                report.reportSensitiveInformation.text
+              )}
+            />
             ) : null}
-            {report.cancelled ? (
-              <tr>
-                <th className="print-row-label">cancelled reason</th>
-                <td className="print-row-content">
-                  {utils.sentenceCase(report.cancelledReason)}
-                </td>
-              </tr>
-            ) : null}
-            {!report.cancelled ? (
-              <tr>
-                <th className="print-row-label">
-                  {Settings.fields.report.atmosphere.toLowerCase()}
-                </th>
-                <td className="print-row-content">
-                  {" "}
-                  <>
-                    {utils.sentenceCase(report.atmosphere)}
-                    {report.atmosphereDetails &&
-                      ` – ${report.atmosphereDetails}`}
-                  </>
-                </td>
-              </tr>
-            ) : null}
-            <tr>
-              <th className="print-row-label">
-                {Settings.fields.advisor.org.name.toLowerCase()}
-              </th>
-              <td className="print-row-content">
-                {" "}
-                <LinkTo modelType="Organization" model={report.advisorOrg} />
-              </td>
-            </tr>
-            <tr>
-              <th className="print-row-label">
-                {Settings.fields.principal.org.name.toLowerCase()}
-              </th>
-              <td className="print-row-content">
-                {" "}
-                <LinkTo modelType="Organization" model={report.principalOrg} />
-              </td>
-            </tr>
-            {report.reportText ? (
-              <tr>
-                <th className="print-row-label">
-                  {Settings.fields.report.reportText}
-                </th>
-                <td className="print-row-content">
-                  {parseHtmlWithLinkTo(report.reportText)}
-                </td>
-              </tr>
-            ) : null}
-            {report.reportSensitiveInformation &&
-            report.reportSensitiveInformation.text ? (
-              <tr>
-                <th className="print-row-label">sensitive information</th>
-                <td className="print-row-content">
-                  {" "}
-                  {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
-                </td>
-              </tr>
-              ) : null}
-
-            <tr>
-              <th className="print-row-label">workflow</th>
-              <td className="print-row-content">
-                {report.showWorkflow() && (
-                  <ReportFullWorkflow workflow={report.workflow} />
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th className="print-row-label">comments</th>
-              <td className="print-row-content">{getComments()}</td>
-            </tr>
-            {Settings.fields.report.customFields ? (
-              <tr>
-                <th className="print-row-label">engagement information</th>
-                <td className="print-row-content custom-fields-row">
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.report.customFields}
-                    values={report}
-                    vertical
-                  />
-                </td>
-              </tr>
-            ) : null}
-            <tr>
-              <th className="print-row-label">meeting attendees</th>
-              <td className="print-row-content">{attendeesAndAssessments()}</td>
-            </tr>
-            <tr>
-              <th className="print-row-label">
-                {Settings.fields.task.subLevel.longLabel.toLowerCase()}
-              </th>
-              <td className="print-row-content">{effortsAndAssessments()}</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td className="print-footer-space" colSpan="2" />
-            </tr>
-          </tfoot>
-        </table>
-        <div className="print-footer-content">
-          <img src={anetLogo} alt="logo" width="92" height="21" />
-          <div className="print-classification-banner-bot">
-            Classification Banner
-          </div>
-          <span style={{ fontSize: "12px" }}>#{report.uuid}</span>
-        </div>
+          {report.showWorkflow() ? (
+            <ReportFullWorkflow
+              workflow={report.workflow}
+              printStyle={WORKFLOW_STYLE}
+            />
+          ) : null}
+          <PrintRow label="comments" content={getComments()} />
+          {Settings.fields.report.customFields ? (
+            <ReadonlyCustomFields
+              fieldsConfig={Settings.fields.report.customFields}
+              values={report}
+              vertical
+              printStyle={{}}
+            />
+          ) : null}
+        </PrintTable>
+        <ReportFooterContent report={report} />
       </div>
-    </>
+    </React.Fragment>
   )
 
-  // each tasks name, objective and assessments combined into a table
-  function effortsAndAssessments() {
-    if (!report) {
-      return null
+  function printReport() {
+    console.log(report, "printed")
+    if (typeof window.print === "function") {
+      window.print()
+    } else {
+      alert("Press CTRL+P to print this report")
     }
-    if (report.tasks.length === 0) {
-      return <>None</>
-    }
+  }
+
+  function getReportTitle() {
     return (
-      <table>
-        <tbody>
-          {report.tasks.map(task => {
-            const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
-            // return only name and objective if no assessment
-            return (
-              <tr key={task.uuid}>
-                <th className="print-assessment-label">
-                  <LinkTo modelType={Task.resourceName} model={task} />
-                </th>
-                <td className="print-assessment-field">
-                  <div className="form-group">
-                    <label htmlFor={`${task.uuid}-topLevel`}>
-                      {Settings.fields.task.topLevel.shortLabel}
-                    </label>
-                    <br />
-                    {task.customFieldRef1 && (
-                      <LinkTo modelType="Task" model={task.customFieldRef1}>
-                        {task.customFieldRef1.shortName}
-                      </LinkTo>
-                    )}
-                  </div>
-                  {taskInstantAssessmentConfig && (
-                    <>
-                      <h5 style={{ textAlign: "center" }}>Assessments</h5>
-                      <ReadonlyCustomFields
-                        parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
-                        fieldsConfig={taskInstantAssessmentConfig}
-                        values={report}
-                        vertical
-                      />
-                    </>
-                  )}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+      <React.Fragment>
+        Engagement of <LinkTo modelType="Person" model={report.author} /> on{" "}
+        {moment(report.engagementDate).format(Report.getEngagementDateFormat())}
+        <br />
+        at{" "}
+        {report.location && (
+          <LinkTo modelType="Location" model={report.location} />
+        )}
+      </React.Fragment>
     )
   }
 
-  function attendeesAndAssessments() {
-    if (!report) {
-      return null
-    }
-    if (report.attendees.length === 0) {
-      return <>None</>
-    }
-    // to keep track of different organization, if same don't print for compactness
+  function getReportSubTitle() {
+    return (
+      <React.Fragment>
+        Authored by <LinkTo modelType="Person" model={report.author} /> on{" "}
+        {moment(report.releasedAt).format(
+          Settings.dateFormats.forms.displayShort.withTime
+        )}
+        [{Report.STATE_LABELS[report.state]}]
+      </React.Fragment>
+    )
+  }
+
+  function getAttendeesAndAssessments() {
+    // to keep track of different organization, if it is same consecutively, don't print for compactness
     let prevDiffOrgName = ""
     return (
       <table>
@@ -291,34 +170,86 @@ const ReportPrint = ({ report, setPrintDone }) => {
               ? attendee.position?.organization?.shortName
               : prevDiffOrgName
             return (
-              <tr key={attendee.uuid}>
-                <th className="print-assessment-label">
-                  {attendee.primary && (
-                    <label className="label label-primary">Primary</label>
-                  )}
-                  {attendee.name}
-                  {renderOrgName && (
-                    <LinkTo
-                      modelType="Organization"
-                      model={
-                        attendee.position && attendee.position.organization
-                      }
-                      whenUnspecified=""
-                    />
-                  )}
-                </th>
-                {attendeeInstantAssessmentConfig && (
-                  <td className="print-assessment-field">
-                    <h5 style={{ textAlign: "left" }}>Assessments</h5>
+              <PrintRow
+                key={attendee.uuid}
+                label={
+                  <React.Fragment>
+                    {attendee.primary && (
+                      <label className="label label-primary">Primary</label>
+                    )}
+                    {attendee.name}
+                    {renderOrgName && (
+                      <LinkTo
+                        modelType="Organization"
+                        model={
+                          attendee.position && attendee.position.organization
+                        }
+                        whenUnspecified=""
+                      />
+                    )}
+                  </React.Fragment>
+                }
+                content={
+                  attendeeInstantAssessmentConfig && (
                     <ReadonlyCustomFields
                       parentFieldName={`${Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}.${attendee.uuid}`}
                       fieldsConfig={attendeeInstantAssessmentConfig}
                       values={report}
                       vertical
                     />
-                  </td>
-                )}
-              </tr>
+                  )
+                }
+                style={css`
+                  th {
+                    line-height: 1.4;
+                  }
+                  th label {
+                    margin-right: 4px;
+                  }
+                `}
+              />
+            )
+          })}
+        </tbody>
+      </table>
+    )
+  }
+
+  function getTasksAndAssessments() {
+    return (
+      <table>
+        <tbody>
+          {report.tasks.map(task => {
+            const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
+            // return only name and objective if no assessment
+            return (
+              <PrintRow
+                key={task.uuid}
+                label={<LinkTo modelType={Task.resourceName} model={task} />}
+                content={
+                  <React.Fragment>
+                    <div className="form-group">
+                      <label htmlFor={`${task.uuid}-topLevel`}>
+                        {Settings.fields.task.topLevel.shortLabel}
+                      </label>
+                      <br />
+                      {task.customFieldRef1 && (
+                        <LinkTo modelType="Task" model={task.customFieldRef1}>
+                          {task.customFieldRef1.shortName}
+                        </LinkTo>
+                      )}
+                    </div>
+                    {taskInstantAssessmentConfig && (
+                      <ReadonlyCustomFields
+                        parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
+                        fieldsConfig={taskInstantAssessmentConfig}
+                        values={report}
+                        vertical
+                      />
+                    )}
+                  </React.Fragment>
+                }
+              />
             )
           })}
         </tbody>
@@ -328,7 +259,7 @@ const ReportPrint = ({ report, setPrintDone }) => {
 
   function getComments() {
     return (
-      <>
+      <React.Fragment>
         {report.comments.map(comment => {
           const createdAt = moment(comment.createdAt)
           return (
@@ -348,28 +279,283 @@ const ReportPrint = ({ report, setPrintDone }) => {
         })}
 
         {!report.comments.length && <p>There are no comments</p>}
-      </>
+      </React.Fragment>
     )
-  }
-  function onPrintClick() {
-    if (typeof window.print === "function") {
-      window.print()
-    } else {
-      alert("Press CTRL+P to print this report")
-    }
   }
 }
 
-// Explanation why we need header-space and header-content (same for footer) to create printable report
-// https://medium.com/@Idan_Co/the-ultimate-print-html-template-with-header-footer-568f415f6d2a
-// tldr: we need both
-// 1- headers and footers to be position fixed at top and bottom of page which "header/footer-content" div provides
-// 2- we need normal content not to overlap with headers and footers which "header/footer-space" provides with table-header-group rule
-// table-footer-group is empty because at the last page, footer is appended at the end of content not the page
-
-ReportPrint.propTypes = {
+PrintReportPage.propTypes = {
   report: PropTypes.object.isRequired,
   setPrintDone: PropTypes.func
 }
 
-export default ReportPrint
+const PRINT_PAGE_STYLE = css`
+  position: relative;
+  outline: 2px solid grey;
+  padding: 0 1rem;
+  width: 768px;
+  @media print {
+    position: static;
+    padding: 0;
+    outline: none;
+  }
+`
+
+const TITLE_STYLE = css`
+  & > th {
+    font-size: 18px;
+    padding-top: 1rem;
+    font-style: normal;
+    color: black;
+    text-align: center;
+  }
+`
+
+const SUBTITLE_STYLE = css`
+  & > th {
+    font-style: italic;
+    color: black;
+    text-align: center;
+    font-weight: normal;
+  }
+`
+
+const PrintPageHeader = ({ onPrintClick, setPrintDone }) => {
+  return (
+    <header css={HEADER_STYLE}>
+      <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
+      <div css={BUTTONS_STYLE}>
+        <Button type="button" bsStyle="primary" onClick={onPrintClick}>
+          Print
+        </Button>
+        <Button type="button" bsStyle="primary" onClick={setPrintDone}>
+          Web View
+        </Button>
+      </div>
+    </header>
+  )
+}
+
+PrintPageHeader.propTypes = {
+  onPrintClick: PropTypes.func,
+  setPrintDone: PropTypes.func
+}
+
+const HEADER_STYLE = css`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 768px;
+`
+
+const HEADER_TITLE_STYLE = css`
+  margin: 0;
+  @media print {
+    display: none;
+  }
+`
+
+const BUTTONS_STYLE = css`
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  button {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+`
+
+const ReportHeaderContent = ({ report }) => {
+  return (
+    <div css={HEADER_CONTENT_STYLE}>
+      <img src={anetLogo} alt="logo" width="50" height="12" />
+      <div css={TOP_CLASSIFICATION_BANNER_STYLE}>Classification Banner</div>
+      <span style={{ fontSize: "12px" }}>
+        <LinkTo modelType="Report" model={report} />
+      </span>
+    </div>
+  )
+}
+
+ReportHeaderContent.propTypes = {
+  report: PropTypes.object
+}
+
+const ReportFooterContent = () => {
+  const { currentUser } = useContext(AppContext)
+
+  return (
+    <div css={FOOTER_CONTENT_STYLE}>
+      <img src={anetLogo} alt="logo" width="50" height="12" />
+      <div css={BOTTOM_CLASSIFICATION_BANNER_STYLE}>Classification Banner</div>
+      <span style={{ fontSize: "12px" }}>
+        <React.Fragment>
+          printed by <LinkTo modelType="Person" model={currentUser} />
+        </React.Fragment>
+      </span>
+    </div>
+  )
+}
+
+const HF_COMMON_STYLE = css`
+  position: absolute;
+  display: flex;
+  width: 95%;
+  margin: 10px auto;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  img {
+    max-width: 50px !important;
+    max-height: 24px !important;
+  }
+  @media print {
+    position: fixed;
+  }
+`
+
+const HEADER_CONTENT_STYLE = css`
+  ${HF_COMMON_STYLE};
+  top: 0mm;
+  border-bottom: 1px solid black;
+`
+
+const FOOTER_CONTENT_STYLE = css`
+  ${HF_COMMON_STYLE};
+  bottom: 0mm;
+  border-top: 1px solid black;
+`
+
+const CLASSIFICATION_BANNER_STYLE = css`
+  position: absolute;
+  margin: 10px auto;
+  width: 100%;
+  text-align: center;
+`
+
+const TOP_CLASSIFICATION_BANNER_STYLE = css`
+  ${CLASSIFICATION_BANNER_STYLE};
+  top: 0;
+`
+
+const BOTTOM_CLASSIFICATION_BANNER_STYLE = css`
+  ${CLASSIFICATION_BANNER_STYLE};
+  bottom: 0;
+`
+
+const PrintTable = ({ children }) => {
+  return (
+    <table css={TABLE_STYLE}>
+      <thead>
+        <tr>
+          <td css={SPACE_STYLE} colSpan="2" />
+        </tr>
+      </thead>
+      <tbody>{children}</tbody>
+      <tfoot>
+        <tr>
+          <td css={SPACE_STYLE} colSpan="2" />
+        </tr>
+      </tfoot>
+    </table>
+  )
+}
+
+PrintTable.propTypes = {
+  children: PropTypes.node
+}
+
+const TABLE_STYLE = css`
+  width: 100%;
+`
+
+const SPACE_STYLE = css`
+  height: 70px;
+`
+
+export const ROW_TYPES = {
+  titleLike: "titleLike",
+  onlyData: "onlyData"
+}
+
+export const PrintRow = ({ label, content, rowType, ...otherProps }) => {
+  const { style } = otherProps
+  const customStyle = css`
+    ${ROW_STYLE};
+    ${style};
+  `
+  if (rowType === ROW_TYPES.titleLike) {
+    return (
+      <tr css={customStyle}>
+        <th css={ROW_LABEL_STYLE} colSpan="2">
+          {label}
+        </th>
+      </tr>
+    )
+  }
+
+  if (rowType === ROW_TYPES.onlyData) {
+    return (
+      <tr css={customStyle}>
+        <td css={ROW_CONTENT_STYLE} colSpan="2">
+          {content}
+        </td>
+      </tr>
+    )
+  }
+
+  const lowerLabel =
+    typeof label === "string" ? label.toLocaleLowerCase() : label
+  return (
+    <tr css={customStyle}>
+      <th css={ROW_LABEL_STYLE}>{lowerLabel}</th>
+      <td css={ROW_CONTENT_STYLE}>{content}</td>
+    </tr>
+  )
+}
+
+PrintRow.propTypes = {
+  label: PropTypes.node,
+  content: PropTypes.node,
+  rowType: PropTypes.string
+}
+
+const ROW_STYLE = css`
+  vertical-align: top;
+  font-family: "Times New Roman", Times, serif;
+  width: 100%;
+`
+
+const ROW_LABEL_STYLE = css`
+  padding: 4px 0;
+  font-style: italic;
+  color: grey;
+  width: 15%;
+  font-weight: 300;
+`
+
+const ROW_CONTENT_STYLE = css`
+  padding: 4px 1rem;
+`
+
+const WORKFLOW_STYLE = css`
+  & > td {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    & > div {
+      position: relative;
+      margin-right: 24px;
+    }
+    & > div:not(:last-child):after {
+      position: absolute;
+      right: -18px;
+      top: 50%;
+      content: "→";
+    }
+  }
+`
+
+export default PrintReportPage

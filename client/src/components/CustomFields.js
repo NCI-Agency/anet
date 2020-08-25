@@ -377,40 +377,25 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
   const { name, fieldConfig, values, printStyle, vertical } = fieldProps
   const value = useMemo(() => getArrayObjectValue(values, name), [values, name])
   const fieldsetTitle = fieldConfig.label || ""
+
+  const arrayOfObjects = value.map((obj, index) => (
+    <ReadonlyArrayObject
+      key={index}
+      fieldName={name}
+      fieldConfig={fieldConfig}
+      values={values}
+      printStyle={printStyle}
+      index={index}
+      vertical={vertical}
+    />
+  ))
+
   return (
     <Fieldset title={fieldsetTitle} printStyle={printStyle}>
       <FieldArray
         name={name}
         render={arrayHelpers =>
-          printStyle ? (
-            <>
-              {value.map((obj, index) => (
-                <ReadonlyArrayObject
-                  key={index}
-                  fieldName={name}
-                  fieldConfig={fieldConfig}
-                  values={values}
-                  printStyle={printStyle}
-                  index={index}
-                  vertical={vertical}
-                />
-              ))}
-            </>
-          ) : (
-            <div>
-              {value.map((obj, index) => (
-                <ReadonlyArrayObject
-                  key={index}
-                  fieldName={name}
-                  fieldConfig={fieldConfig}
-                  values={values}
-                  printStyle={printStyle}
-                  index={index}
-                  vertical={vertical}
-                />
-              ))}
-            </div>
-          )}
+          printStyle ? <>{arrayOfObjects}</> : <div>{arrayOfObjects}</div>}
       />
     </Fieldset>
   )
@@ -943,8 +928,7 @@ ReadonlyCustomFields.propTypes = {
 }
 ReadonlyCustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
-  vertical: false,
-  printStyle: null
+  vertical: false
 }
 
 // customFields should contain the JSON of all the visible custom fields.

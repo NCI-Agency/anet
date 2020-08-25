@@ -2,6 +2,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
+import { PrintRow, ROW_TYPES } from "pages/reports/Print"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
@@ -160,18 +161,36 @@ CompactReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-export const ReportFullWorkflow = ({ workflow }) => (
-  <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
-    {workflow.map(action => {
-      const key = action.step
-        ? `${action.createdAt}-${action.step.uuid}`
-        : action.createdAt
-      return <ReportAction action={action} key={key} />
-    })}
-  </Fieldset>
-)
+export const ReportFullWorkflow = ({ workflow, printStyle }) => {
+  const workflows = workflow.map(action => {
+    const key = action.step
+      ? `${action.createdAt}-${action.step.uuid}`
+      : action.createdAt
+    return <ReportAction action={action} key={key} />
+  })
+
+  return (
+    <Fieldset
+      id="workflow"
+      className="workflow-fieldset"
+      title="Workflow"
+      printStyle={printStyle}
+    >
+      {printStyle ? (
+        <PrintRow
+          rowType={ROW_TYPES.onlyData}
+          style={printStyle}
+          content={workflows}
+        />
+      ) : (
+        workflows
+      )}
+    </Fieldset>
+  )
+}
 ReportFullWorkflow.propTypes = {
-  workflow: PropTypes.array.isRequired
+  workflow: PropTypes.array.isRequired,
+  printStyle: PropTypes.object
 }
 
 export const ReportCompactWorkflow = ({ workflow }) => (
