@@ -13,7 +13,9 @@
     display: none;
   }
 
-  .print-page .workflow-action button {
+  .print-page .workflow-action button,
+  .print-page .banner
+   {
     display: inline-block !important;
   }
   body {

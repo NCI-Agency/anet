@@ -4,22 +4,23 @@ import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
-import { Report, Task } from "models"
+import SecurityBanner from "components/SecurityBanner"
+import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button } from "react-bootstrap"
+import { Link, useLocation } from "react-router-dom"
 import anetLogo from "resources/logo.png"
 import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 import "./Print.css"
 const PrintReportPage = ({ report, setPrintDone }) => {
+  console.log("Print Report Page Render")
   if (!report) {
     return null
   }
-  console.log("Print Report Page")
-  console.dir(report)
   report.formCustomFields.itemsAgreed = [
     {
       item: "Very good item",
@@ -51,7 +52,14 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             style={SUBTITLE_STYLE}
             label={getReportSubTitle()}
           />
-          <PrintRow label="purpose" content={report.intent} />
+          <PrintRow
+            label="purpose"
+            content={
+              report.intent +
+              "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Omnis facilis ipsa, alias numquam harum a tenetur nemo vero deserunt. Animi neque nihil illo ipsum atque voluptas quis cumque, quaerat officiis hic quibusdam, eveniet, provident dignissimos amet quam ex doloribus! Quas ducimus nam veritatis nobis impedit ut corporis cupiditate? Magni facilis repellat hic ipsa at? Minima doloribus nisi dignissimos numquam incidunt reiciendis quas ipsam ea accusamus cupiditate asperiores dolor illo error fugit sed alias, hic et porro sint, repellat earum? Deserunt illo exercitationem natus praesentium aspernatur facilis accusantium fuga adipisci tempora? Nobis dolore tenetur id dolorem, cupiditate perferendis qui repellendus sit esse adipisci, provident impedit nesciunt necessitatibus. Aliquam quia corrupti aspernatur esse?"
+            }
+          />
+
           <PrintRow
             label={Settings.fields.report.keyOutcomes || "key outcomes"}
             content={report.keyOutcomes}
@@ -61,6 +69,24 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             content={report.intent}
           />
           <PrintRow label="attendees" content={getAttendeesAndAssessments()} />
+          {report.showWorkflow() ? (
+            <ReportFullWorkflow
+              workflow={report.workflow}
+              printStyle={WORKFLOW_STYLE}
+            />
+          ) : null}
+          <PrintRow label="comments" content={getComments()} />
+          {!report.cancelled ? (
+            <PrintRow
+              label={Settings.fields.report.atmosphere}
+              content={
+                <React.Fragment>
+                  {utils.sentenceCase(report.atmosphere)}
+                  {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
+                </React.Fragment>
+              }
+            />
+          ) : null}
           <PrintRow
             label={Settings.fields.task.subLevel.longLabel}
             content={getTasksAndAssessments()}
@@ -72,17 +98,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             <PrintRow
               label="cancelled reason"
               content={utils.sentenceCase(report.cancelledReason)}
-            />
-          ) : null}
-          {!report.cancelled ? (
-            <PrintRow
-              label={Settings.fields.report.atmosphere}
-              content={
-                <React.Fragment>
-                  {utils.sentenceCase(report.atmosphere)}
-                  {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
-                </React.Fragment>
-              }
             />
           ) : null}
           {report.reportText ? (
@@ -100,13 +115,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
               )}
             />
             ) : null}
-          {report.showWorkflow() ? (
-            <ReportFullWorkflow
-              workflow={report.workflow}
-              printStyle={WORKFLOW_STYLE}
-            />
-          ) : null}
-          <PrintRow label="comments" content={getComments()} />
           {Settings.fields.report.customFields ? (
             <ReadonlyCustomFields
               fieldsConfig={Settings.fields.report.customFields}
@@ -122,7 +130,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
   )
 
   function printReport() {
-    console.log(report, "printed")
     if (typeof window.print === "function") {
       window.print()
     } else {
@@ -133,9 +140,27 @@ const PrintReportPage = ({ report, setPrintDone }) => {
   function getReportTitle() {
     return (
       <React.Fragment>
-        Engagement of <LinkTo modelType="Person" model={report.author} /> on{" "}
-        {moment(report.engagementDate).format(Report.getEngagementDateFormat())}
+        Engagement of{" "}
+        <LinkTo
+          modelType="Person"
+          model={Report.getPrimaryAttendee(
+            report.attendees,
+            Person.ROLE.PRINCIPAL
+          )}
+        />{" "}
+        by{" "}
+        <LinkTo
+          modelType="Person"
+          model={Report.getPrimaryAttendee(
+            report.attendees,
+            Person.ROLE.ADVISOR
+          )}
+        />
         <br />
+        on{" "}
+        {moment(report.engagementDate).format(
+          Report.getEngagementDateFormat()
+        )}{" "}
         at{" "}
         {report.location && (
           <LinkTo modelType="Location" model={report.location} />
@@ -177,7 +202,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                     {attendee.primary && (
                       <label className="label label-primary">Primary</label>
                     )}
-                    {attendee.name}
+                    <LinkTo modelType="Person" model={attendee} />
                     {renderOrgName && (
                       <LinkTo
                         modelType="Organization"
@@ -202,6 +227,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                 style={css`
                   th {
                     line-height: 1.4;
+                    width: auto;
                   }
                   th label {
                     margin-right: 4px;
@@ -304,10 +330,10 @@ const PRINT_PAGE_STYLE = css`
 const TITLE_STYLE = css`
   & > th {
     font-size: 18px;
-    padding-top: 1rem;
     font-style: normal;
     color: black;
     text-align: center;
+    font-weight: bold;
   }
 `
 
@@ -367,12 +393,15 @@ const BUTTONS_STYLE = css`
 `
 
 const ReportHeaderContent = ({ report }) => {
+  const location = useLocation()
   return (
     <div css={HEADER_CONTENT_STYLE}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
-      <div css={TOP_CLASSIFICATION_BANNER_STYLE}>Classification Banner</div>
+      <div css={TOP_CLASSIFICATION_BANNER_STYLE}>
+        <SecurityBanner />
+      </div>
       <span style={{ fontSize: "12px" }}>
-        <LinkTo modelType="Report" model={report} />
+        <Link to={location.pathname}>{report.uuid}</Link>
       </span>
     </div>
   )
@@ -388,7 +417,9 @@ const ReportFooterContent = () => {
   return (
     <div css={FOOTER_CONTENT_STYLE}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
-      <div css={BOTTOM_CLASSIFICATION_BANNER_STYLE}>Classification Banner</div>
+      <div css={BOTTOM_CLASSIFICATION_BANNER_STYLE}>
+        <SecurityBanner />
+      </div>
       <span style={{ fontSize: "12px" }}>
         <React.Fragment>
           printed by <LinkTo modelType="Person" model={currentUser} />
@@ -429,9 +460,7 @@ const FOOTER_CONTENT_STYLE = css`
 `
 
 const CLASSIFICATION_BANNER_STYLE = css`
-  position: absolute;
-  margin: 10px auto;
-  width: 100%;
+  width: auto;
   text-align: center;
 `
 
@@ -544,6 +573,7 @@ const WORKFLOW_STYLE = css`
   & > td {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     text-align: center;
     & > div {
       position: relative;
@@ -552,7 +582,7 @@ const WORKFLOW_STYLE = css`
     & > div:not(:last-child):after {
       position: absolute;
       right: -18px;
-      top: 50%;
+      top: 0;
       content: "→";
     }
   }

@@ -166,6 +166,9 @@ export const ReportFullWorkflow = ({ workflow, printStyle }) => {
     const key = action.step
       ? `${action.createdAt}-${action.step.uuid}`
       : action.createdAt
+    if (printStyle) {
+      return <CompactReportAction action={action} key={key} />
+    }
     return <ReportAction action={action} key={key} />
   })
 

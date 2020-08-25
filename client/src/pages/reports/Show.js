@@ -283,7 +283,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
-  const [shouldPrint, setShouldPrint] = useState(true)
+  const [shouldPrint, setShouldPrint] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
