@@ -8,6 +8,7 @@ const moment = require("moment")
 const _includes = require("lodash/includes")
 const _isRegExp = require("lodash/isRegExp")
 const chalk = require("chalk")
+const fetch = require("cross-fetch")
 
 let capabilities
 const nullDevice = os.platform() === "win32" ? "NUL" : "/dev/null"
@@ -388,6 +389,27 @@ test.beforeEach(t => {
 // Shut down the browser when we are done.
 test.afterEach.always(async t => {
   if (t.context.driver) {
+    if (testEnv !== "local") {
+      // Send back test result to BrowserStack
+      const session = await t.context.driver.getSession()
+      const url = `https://api.browserstack.com/automate/sessions/${session.getId()}.json`
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Basic " +
+            Buffer.from(
+              `${capabilities["browserstack.user"]}:${capabilities["browserstack.key"]}`
+            ).toString("base64")
+        },
+        body: JSON.stringify({
+          status: t.passed ? "passed" : "failed"
+        })
+      }
+      await fetch(url, options)
+    }
+
     await t.context.driver.quit()
   }
 })

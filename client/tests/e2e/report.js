@@ -320,7 +320,7 @@ test.serial("Publish report chain", async t => {
   // )
 
   const $rollupLink = await t.context.driver.findElement(
-    By.linkText("Daily rollup")
+    By.linkText("Daily Rollup")
   )
   await t.context.driver.wait(until.elementIsEnabled($rollupLink), mediumWaitMs)
   await $rollupLink.click()
@@ -328,7 +328,7 @@ test.serial("Publish report chain", async t => {
   t.is(
     currentPathname,
     "/rollup",
-    'Clicking the "daily rollup" link takes the user to the rollup page'
+    'Clicking the "Daily Rollup" link takes the user to the rollup page'
   )
   await $("#daily-rollup")
 
@@ -359,7 +359,7 @@ test.serial("Publish report chain", async t => {
     t,
     $approvedIntent,
     "meeting goal",
-    "Daily rollup report list includes the recently approved report"
+    "Daily Rollup report list includes the recently approved report"
   )
 
   const serverResponse = await httpRequestSmtpServer("GET")

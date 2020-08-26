@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client"
 import API from "api"
+import { gql } from "apollo-boost"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"

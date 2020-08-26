@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.6.1"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.spotless" version "5.1.1"
+	id "com.diffplug.spotless" version "5.1.2"
 }
 
 apply plugin: 'java'
@@ -74,7 +74,7 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.4.0.jre8'
-	implementation 'org.postgresql:postgresql:42.2.14' // If using postgresql
+	implementation 'org.postgresql:postgresql:42.2.16' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:4.0.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
@@ -106,13 +106,13 @@ dependencies {
 	implementation 'org.jsoup:jsoup:1.13.1'
 
 	// For fast and simple image scaling
-	implementation 'net.coobird:thumbnailator:0.4.11'
+	implementation 'net.coobird:thumbnailator:0.4.12'
 
 	testImplementation 'io.dropwizard:dropwizard-testing:2.0.12'
 	testImplementation 'io.dropwizard:dropwizard-client:2.0.12'
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
-	testImplementation 'org.assertj:assertj-core:3.16.1'
+	testImplementation 'org.assertj:assertj-core:3.17.0'
 
 	testImplementation 'org.powermock:powermock-api-mockito2:2.0.7'
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.7'

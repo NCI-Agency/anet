@@ -53,6 +53,9 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
   @GraphQLQuery
   @GraphQLInputField
   private Boolean customFieldRef1Recursively;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String responsiblePositionUuid;
 
   public TaskSearchQuery() {
     super(TaskSearchSortBy.NAME);
@@ -162,12 +165,20 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
     this.customFieldRef1Recursively = customFieldRef1Recursively;
   }
 
+  public String getResponsiblePositionUuid() {
+    return responsiblePositionUuid;
+  }
+
+  public void setResponsiblePositionUuid(String responsiblePositionUuid) {
+    this.responsiblePositionUuid = responsiblePositionUuid;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category, status,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
-        customFieldRef1Recursively);
+        customFieldRef1Recursively, responsiblePositionUuid);
   }
 
   @Override
@@ -187,7 +198,8 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
         && Objects.equals(getProjectStatus(), other.getProjectStatus())
         && Objects.equals(getCustomField(), other.getCustomField())
         && Objects.equals(getCustomFieldRef1Uuid(), other.getCustomFieldRef1Uuid())
-        && Objects.equals(getCustomFieldRef1Recursively(), other.getCustomFieldRef1Recursively());
+        && Objects.equals(getCustomFieldRef1Recursively(), other.getCustomFieldRef1Recursively())
+        && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());
   }
 
 }
