@@ -17,9 +17,14 @@ import {
   PathFindingLinkFactory,
   DagreEngine
 } from "@projectstorm/react-diagrams-routing"
+import { DEFAULT_PAGE_PROPS } from "actions"
 import LinkTo from "components/LinkTo"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
-import { mapPageDispatchersToProps } from "components/Page"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
 import FileSaver from "file-saver"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -96,7 +101,12 @@ PrototypeNode.propTypes = {
   onClick: PropTypes.func
 }
 
-const BoardDashboard = () => {
+const BoardDashboard = ({ pageDispatchers }) => {
+  // Make sure we have a navigation menu
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    pageDispatchers
+  })
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dropEvent, setDropEvent] = useState(null)
@@ -329,6 +339,10 @@ const BoardDashboard = () => {
       </div>
     </div>
   )
+}
+
+BoardDashboard.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(BoardDashboard)
