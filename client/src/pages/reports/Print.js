@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core"
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import { ReportFullWorkflow } from "components/ReportWorkflow"
+import { PrintCompactReportWorkflow } from "components/ReportWorkflow"
 import { PrintSecurityBanner } from "components/SecurityBanner"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -104,8 +104,8 @@ const PrintReportPage = ({ report, setPrintDone }) => {
               printStyle={{}}
             />
           ) : null}
-          {report.showWorkflow() ? (
-            <ReportFullWorkflow
+          {report.showWorkflow() && null ? (
+            <PrintCompactReportWorkflow
               workflow={report.workflow}
               printStyle={WORKFLOW_STYLE}
             />
@@ -203,12 +203,17 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                 }
                 content={
                   attendeeInstantAssessmentConfig && (
-                    <ReadonlyCustomFields
-                      parentFieldName={`${Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}.${attendee.uuid}`}
-                      fieldsConfig={attendeeInstantAssessmentConfig}
-                      values={report}
-                      vertical
-                    />
+                    <table>
+                      <tbody>
+                        <ReadonlyCustomFields
+                          parentFieldName={`${Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}.${attendee.uuid}`}
+                          fieldsConfig={attendeeInstantAssessmentConfig}
+                          values={report}
+                          vertical
+                          printStyle={{}}
+                        />
+                      </tbody>
+                    </table>
                   )
                 }
                 style={css`
@@ -240,27 +245,32 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                 key={task.uuid}
                 label={<LinkTo modelType={Task.resourceName} model={task} />}
                 content={
-                  <React.Fragment>
-                    <div className="form-group">
-                      <label htmlFor={`${task.uuid}-topLevel`}>
-                        {Settings.fields.task.topLevel.shortLabel}
-                      </label>
-                      <br />
-                      {task.customFieldRef1 && (
-                        <LinkTo modelType="Task" model={task.customFieldRef1}>
-                          {task.customFieldRef1.shortName}
-                        </LinkTo>
-                      )}
-                    </div>
-                    {taskInstantAssessmentConfig && (
-                      <ReadonlyCustomFields
-                        parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
-                        fieldsConfig={taskInstantAssessmentConfig}
-                        values={report}
-                        vertical
+                  <table>
+                    <tbody>
+                      <PrintRow
+                        label={Settings.fields.task.topLevel.shortLabel}
+                        content={
+                          task.customFieldRef1 && (
+                            <LinkTo
+                              modelType="Task"
+                              model={task.customFieldRef1}
+                            >
+                              {task.customFieldRef1.shortName}
+                            </LinkTo>
+                          )
+                        }
                       />
-                    )}
-                  </React.Fragment>
+                      {taskInstantAssessmentConfig && (
+                        <ReadonlyCustomFields
+                          parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
+                          fieldsConfig={taskInstantAssessmentConfig}
+                          values={report}
+                          vertical
+                          printStyle={{}}
+                        />
+                      )}
+                    </tbody>
+                  </table>
                 }
               />
             )

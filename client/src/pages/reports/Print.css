@@ -14,8 +14,7 @@
   }
 
   .print-page .workflow-action button,
-  .print-page .banner
-   {
+  .print-page .banner {
     display: inline-block !important;
   }
   body {
@@ -25,5 +24,4 @@
   svg > text#__react_svg_text_measurement_id {
     display: none;
   }
-
 }

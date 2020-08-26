@@ -161,39 +161,18 @@ CompactReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-export const ReportFullWorkflow = ({ workflow, printStyle }) => {
-  const workflows = workflow.map(action => {
-    const key = action.step
-      ? `${action.createdAt}-${action.step.uuid}`
-      : action.createdAt
-    if (printStyle) {
-      return <CompactReportAction action={action} key={key} />
-    }
-    return <ReportAction action={action} key={key} />
-  })
-
-  return (
-    <Fieldset
-      id="workflow"
-      className="workflow-fieldset"
-      title="Workflow"
-      printStyle={printStyle}
-    >
-      {printStyle ? (
-        <PrintRow
-          rowType={ROW_TYPES.onlyData}
-          style={printStyle}
-          content={workflows}
-        />
-      ) : (
-        workflows
-      )}
-    </Fieldset>
-  )
-}
+export const ReportFullWorkflow = ({ workflow }) => (
+  <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
+    {workflow.map(action => {
+      const key = action.step
+        ? `${action.createdAt}-${action.step.uuid}`
+        : action.createdAt
+      return <ReportAction action={action} key={key} />
+    })}
+  </Fieldset>
+)
 ReportFullWorkflow.propTypes = {
-  workflow: PropTypes.array.isRequired,
-  printStyle: PropTypes.object
+  workflow: PropTypes.array.isRequired
 }
 
 export const ReportCompactWorkflow = ({ workflow }) => (
@@ -208,4 +187,28 @@ export const ReportCompactWorkflow = ({ workflow }) => (
 )
 ReportCompactWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired
+}
+
+export const PrintCompactReportWorkflow = ({ workflow, printStyle }) => (
+  <Fieldset
+    className="workflow-fieldset compact"
+    title="Workflow"
+    printStyle={printStyle}
+  >
+    <PrintRow
+      rowType={ROW_TYPES.onlyData}
+      style={printStyle}
+      content={workflow.map(action => {
+        const key = action.step
+          ? `${action.createdAt}-${action.step.uuid}`
+          : action.createdAt
+        return <CompactReportAction action={action} key={key} />
+      })}
+    />
+  </Fieldset>
+)
+
+PrintCompactReportWorkflow.propTypes = {
+  workflow: PropTypes.array.isRequired,
+  printStyle: PropTypes.object
 }
