@@ -7,15 +7,25 @@ describe("Home page", () => {
     it("Should see a link to my counterparts page when the user is an advisor", () => {
       Home.open()
       Home.myCounterpartsLink.waitForDisplayed()
+      // eslint-disable-next-line no-unused-expressions
+      expect(Home.myCounterpartsLink.isExisting()).to.be.true
+      Home.logout()
     })
     it("Should NOT see a link to my counterparts page when the user is not an advisor", () => {
       Home.openAsOnboardUser()
-      expect(Home.myCounterpartsLink.isExisting()).to.equal(false)
+      // eslint-disable-next-line no-unused-expressions
+      expect(Home.myCounterpartsLink.isExisting()).to.be.false
+      // No Logout link, so just call logout directly
+      browser.url("/api/logout")
     })
   })
 })
 
 describe("My counterparts page", () => {
+  afterEach("On the my counterparts page...", () => {
+    MyCounterparts.logout()
+  })
+
   describe("When Erin is checking the content of the page", () => {
     it("Should see an empty table of the counterparts", () => {
       MyCounterparts.open()
