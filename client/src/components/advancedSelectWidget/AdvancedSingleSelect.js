@@ -21,6 +21,7 @@ const AdvancedSingleSelect = props => {
       extraAddon={
         props.showRemoveButton && !_isEmpty(props.value) ? (
           <img
+            style={{ cursor: "pointer" }}
             src={REMOVE_ICON}
             height={16}
             alt=""
