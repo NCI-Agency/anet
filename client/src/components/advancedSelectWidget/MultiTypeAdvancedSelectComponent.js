@@ -140,6 +140,10 @@ const MultiTypeAdvancedSelectComponent = ({
     const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
     return "Find " + entityLabel.toLowerCase()
   }, [entityType])
+  const SelectComponent = isMultiSelect
+    ? AdvancedMultiSelect
+    : AdvancedSingleSelect
+  const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
   return (
     <>
       {entityTypes.length > 1 && (
@@ -157,42 +161,23 @@ const MultiTypeAdvancedSelectComponent = ({
         </ButtonToggleGroup>
       )}
 
-      {isMultiSelect ? (
-        <AdvancedMultiSelect
-          autofocus="true"
-          fieldName={fieldName}
-          fieldLabel="Search in ANET:"
-          placeholder={searchPlaceholder}
-          value={value}
-          showEmbedded
-          overlayColumns={advancedSelectProps.overlayColumns}
-          overlayRenderRow={advancedSelectProps.overlayRenderRow}
-          filterDefs={advancedSelectProps.filterDefs}
-          onChange={value => onConfirm(value, entityType)}
-          objectType={advancedSelectProps.objectType}
-          queryParams={advancedSelectProps.queryParams}
-          fields={advancedSelectProps.fields}
-          addon={advancedSelectProps.addon}
-        />
-      ) : (
-        <AdvancedSingleSelect
-          autofocus="true"
-          fieldName={fieldName}
-          fieldLabel="Search in ANET:"
-          placeholder={searchPlaceholder}
-          value={value}
-          showEmbedded
-          showRemoveButton={false}
-          overlayColumns={advancedSelectProps.overlayColumns}
-          overlayRenderRow={advancedSelectProps.overlayRenderRow}
-          filterDefs={advancedSelectProps.filterDefs}
-          onChange={value => onConfirm(value, entityType)}
-          objectType={advancedSelectProps.objectType}
-          queryParams={advancedSelectProps.queryParams}
-          fields={advancedSelectProps.fields}
-          addon={advancedSelectProps.addon}
-        />
-      )}
+      <SelectComponent
+        autofocus="true"
+        fieldName={fieldName}
+        fieldLabel="Search in ANET:"
+        placeholder={searchPlaceholder}
+        value={value}
+        showEmbedded
+        overlayColumns={advancedSelectProps.overlayColumns}
+        overlayRenderRow={advancedSelectProps.overlayRenderRow}
+        filterDefs={advancedSelectProps.filterDefs}
+        onChange={value => onConfirm(value, entityType)}
+        objectType={advancedSelectProps.objectType}
+        queryParams={advancedSelectProps.queryParams}
+        fields={advancedSelectProps.fields}
+        addon={advancedSelectProps.addon}
+        {...extraSelectProps}
+      />
     </>
   )
 }
