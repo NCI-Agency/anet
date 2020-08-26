@@ -16,11 +16,14 @@ import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 import "./Print.css"
+
 const PrintReportPage = ({ report, setPrintDone }) => {
   console.log("Print Report Page Render")
   if (!report) {
     return null
   }
+  console.dir(report)
+  getPrincipalAttendees()
   report.formCustomFields.itemsAgreed = [
     {
       item: "custom_item 1",
@@ -56,7 +59,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             label="purpose"
             content={
               report.intent +
-              "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Omnis facilis ipsa, alias numquam harum a tenetur nemo vero deserunt. Animi neque nihil illo ipsum atque voluptas quis cumque, quaerat officiis hic quibusdam, eveniet, provident dignissimos amet quam ex doloribus! Quas ducimus nam veritatis nobis impedit ut corporis cupiditate? Magni facilis repellat hic ipsa at? Minima doloribus nisi dignissimos numquam incidunt reiciendis quas ipsam ea accusamus cupiditate asperiores dolor illo error fugit sed alias, hic et porro sint, repellat earum? Deserunt illo exercitationem natus praesentium aspernatur facilis accusantium fuga adipisci tempora? Nobis dolore tenetur id dolorem, cupiditate perferendis qui repellendus sit esse adipisci, provident impedit nesciunt necessitatibus. Aliquam quia corrupti aspernatur esse?"
+              "Make long purpose: Lorem ipsum dolor sit, amet consectetur adipisicing elit. Omnis facilis ipsa, alias numquam harum a tenetur nemo vero deserunt. Animi neque nihil illo ipsum atque voluptas quis cumque, quaerat officiis hic quibusdam, eveniet, provident dignissimos amet quam ex doloribus! Quas ducimus nam veritatis nobis impedit ut corporis cupiditate? Magni facilis repellat hic ipsa at? Minima doloribus nisi dignissimos numquam incidunt reiciendis quas ipsam ea accusamus cupiditate asperiores dolor illo error fugit sed alias, hic et porro sint, repellat earum? Deserunt illo exercitationem natus praesentium aspernatur facilis accusantium fuga adipisci tempora? Nobis dolore tenetur id dolorem, cupiditate perferendis qui repellendus sit esse adipisci, provident impedit nesciunt necessitatibus. Aliquam quia corrupti aspernatur esse?"
             }
           />
 
@@ -68,7 +71,8 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             label={Settings.fields.report.nextSteps}
             content={report.intent}
           />
-          <PrintRow label="attendees" content={getAttendeesAndAssessments()} />
+          <PrintRow label="principals" content={getPrincipalAttendees()} />
+          <PrintRow label="advisors" content={getAdvisorAttendees()} />
           {!report.cancelled ? (
             <PrintRow
               label={Settings.fields.report.atmosphere}
@@ -121,6 +125,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
       window.print()
     } else {
       alert("Press CTRL+P to print this report")
+      console.log(getAdvisorAttendees)
     }
   }
 
@@ -168,13 +173,13 @@ const PrintReportPage = ({ report, setPrintDone }) => {
     )
   }
 
-  function getAttendeesAndAssessments() {
+  function getAttendeesAndAssessments(attendees) {
     // to keep track of different organization, if it is same consecutively, don't print for compactness
     let prevDiffOrgName = ""
     return (
       <table>
         <tbody>
-          {report.attendees.map(attendee => {
+          {attendees.map(attendee => {
             const attendeeInstantAssessmentConfig = attendee.getInstantAssessmentConfig()
             const renderOrgName =
               prevDiffOrgName !== attendee.position?.organization?.shortName
@@ -186,9 +191,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                 key={attendee.uuid}
                 label={
                   <React.Fragment>
-                    {attendee.primary && (
-                      <label className="label label-primary">Primary</label>
-                    )}
                     <LinkTo modelType="Person" model={attendee} />
                     {renderOrgName && (
                       <LinkTo
@@ -196,7 +198,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                         model={
                           attendee.position && attendee.position.organization
                         }
-                        whenUnspecified=""
+                        whenUnspecified=" 'NA'"
                       />
                     )}
                   </React.Fragment>
@@ -219,7 +221,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                 style={css`
                   th {
                     line-height: 1.4;
-                    width: auto;
+                    width: max-content;
                   }
                   th label {
                     margin-right: 4px;
@@ -233,6 +235,50 @@ const PrintReportPage = ({ report, setPrintDone }) => {
     )
   }
 
+  function getPrincipalAttendees() {
+    let principalAttendees = []
+    const primaryPrincipal = Report.getPrimaryAttendee(
+      report.attendees,
+      Person.ROLE.PRINCIPAL
+    )
+    if (primaryPrincipal) {
+      principalAttendees.push(primaryPrincipal)
+    }
+
+    principalAttendees = principalAttendees.concat(
+      report.attendees.filter(attendee => {
+        // filter principal attendees which are not the primary one we added above
+        return (
+          attendee.role === Person.ROLE.PRINCIPAL &&
+          attendee.uuid !== principalAttendees[0]?.uuid
+        )
+      })
+    )
+
+    return getAttendeesAndAssessments(groupByOrganization(principalAttendees))
+  }
+  function getAdvisorAttendees() {
+    let advisorAttendees = []
+    const primaryAdvisor = Report.getPrimaryAttendee(
+      report.attendees,
+      Person.ROLE.ADVISOR
+    )
+    if (primaryAdvisor) {
+      advisorAttendees.push(primaryAdvisor)
+    }
+
+    advisorAttendees = advisorAttendees.concat(
+      report.attendees.filter(attendee => {
+        // filter advisor attendees which are not the primary one we added above
+        return (
+          attendee.role === Person.ROLE.ADVISOR &&
+          attendee.uuid !== advisorAttendees[0]?.uuid
+        )
+      })
+    )
+
+    return getAttendeesAndAssessments(groupByOrganization(advisorAttendees))
+  }
   function getTasksAndAssessments() {
     return (
       <table>
@@ -285,12 +331,50 @@ PrintReportPage.propTypes = {
   report: PropTypes.object.isRequired,
   setPrintDone: PropTypes.func
 }
-
+// first item is primary, grouped around that item
+// people without organization at the end
+function groupByOrganization(attendees) {
+  const newAttendees = []
+  newAttendees.push(attendees[0])
+  // keep track of index for non-org people, primary always has org so start at 1
+  let indexWithoutOrg = 1
+  attendees.forEach((attendeeEach, index) => {
+    if (index !== 0) {
+      // if no organization, put it at the end
+      if (!attendeeEach.position?.organization) {
+        newAttendees.push(attendeeEach)
+      } else {
+        // check if same org exists and it is not the exact same attendee
+        const indexFound = attendees.findIndex(
+          attendeeFind =>
+            attendeeEach.uuid !== attendeeFind.uuid &&
+            attendeeEach.position?.organization?.uuid ===
+              attendeeFind.position?.organization?.uuid
+        )
+        // if found we should insert next to similar ones
+        if (indexFound > -1) {
+          newAttendees.splice(indexFound + 1, 0, attendeeEach)
+        } else {
+          // add new org people just before non-org peope line
+          newAttendees.splice(indexWithoutOrg, 0, attendeeEach)
+        }
+        // we added someone with org, index moves up
+        indexWithoutOrg++
+      }
+    }
+  })
+  return newAttendees
+}
 const PRINT_PAGE_STYLE = css`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
   width: 768px;
+  table,
+  tbody,
+  tr {
+    width: 100%;
+  }
   @media print {
     position: static;
     padding: 0;
