@@ -10,6 +10,7 @@ import Model, {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   INVISIBLE_CUSTOM_FIELDS_FIELD
 } from "components/Model"
+import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
@@ -23,7 +24,6 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Button, HelpBlock, Table } from "react-bootstrap"
-import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
@@ -279,13 +279,11 @@ const ArrayObject = ({
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
   return (
     <Fieldset title={`${objLabel} ${index + 1}`}>
-      <Button
-        className="pull-right"
+      <RemoveButton
         title={`Remove this ${objLabel}`}
+        altText={`Remove this ${objLabel}`}
         onClick={() => arrayHelpers.remove(index)}
-      >
-        <img src={REMOVE_ICON} height={14} alt={`Remove this ${objLabel}`} />
-      </Button>
+      />
       <CustomFields
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
@@ -388,15 +386,22 @@ const AnetObjectField = ({ name, types, formikProps, ...otherFieldProps }) => {
       {...otherFieldProps}
     >
       {fieldValue.type && fieldValue.uuid && (
-        <div id={`${name}-value`}>
-          <span
-            style={{ cursor: "pointer" }}
-            onClick={() => setFieldValue(name, null)}
-          >
-            <img src={REMOVE_ICON} height={14} alt="Unlink object" />
-          </span>
-          <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
-        </div>
+        <Table id={`${name}-value`} striped condensed hover responsive>
+          <tbody>
+            <tr>
+              <td>
+                <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
+              </td>
+              <td className="col-xs-1">
+                <RemoveButton
+                  title={`Unlink this ${fieldValue.type}`}
+                  altText={`Unlink this ${fieldValue.type}`}
+                  onClick={() => setFieldValue(name, null)}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </Table>
       )}
     </FastField>
   )
@@ -417,9 +422,15 @@ const ReadonlyAnetObjectField = ({ name, label, values }) => {
       humanValue={
         type &&
         uuid && (
-          <div id={`${name}-value`}>
-            <LinkAnetEntity type={type} uuid={uuid} />
-          </div>
+          <Table id={`${name}-value`} striped condensed hover responsive>
+            <tbody>
+              <tr>
+                <td>
+                  <LinkAnetEntity type={type} uuid={uuid} />
+                </td>
+              </tr>
+            </tbody>
+          </Table>
         )
       }
     />
@@ -470,8 +481,12 @@ const ArrayOfAnetObjectsField = ({
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
                 <td>
-                  <span
-                    style={{ cursor: "pointer" }}
+                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                </td>
+                <td className="col-xs-1">
+                  <RemoveButton
+                    title={`Unlink this ${entity.type}`}
+                    altText={`Unlink this ${entity.type}`}
                     onClick={() => {
                       let found = false
                       const newValue = fieldValue.filter(e => {
@@ -485,10 +500,7 @@ const ArrayOfAnetObjectsField = ({
                         setFieldValue(name, newValue)
                       }
                     }}
-                  >
-                    <img src={REMOVE_ICON} height={14} alt="Unlink object" />
-                  </span>
-                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                  />
                 </td>
               </tr>
             ))}

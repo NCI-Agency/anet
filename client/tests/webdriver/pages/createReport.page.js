@@ -37,7 +37,9 @@ class CreateReport extends Page {
   }
 
   get testReferenceFieldValue() {
-    return this.testReferenceFieldFormGroup.$(`div[id="${trfId}-value"]`)
+    return this.testReferenceFieldFormGroup.$(
+      `table[id="${trfId}-value"] tbody tr:first-child`
+    )
   }
 
   get testMultiReferenceFieldFormGroup() {

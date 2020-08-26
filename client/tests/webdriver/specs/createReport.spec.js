@@ -62,7 +62,7 @@ describe("Create report form page", () => {
       )
 
       // Delete selected value
-      CreateReport.testReferenceFieldValue.$("span").click()
+      CreateReport.testReferenceFieldValue.$("button").click()
       // eslint-disable-next-line no-unused-expressions
       expect(CreateReport.testReferenceFieldValue.isExisting()).to.be.false
 
@@ -169,7 +169,7 @@ describe("Create report form page", () => {
       // Should have 5 values
       expect(CreateReport.testMultiReferenceFieldValueRows).to.have.lengthOf(5)
       // Delete one of the selected values
-      CreateReport.getTestMultiReferenceFieldValueRow(3).$("span").click()
+      CreateReport.getTestMultiReferenceFieldValueRow(3).$("button").click()
       // Should have only 4 values left
       expect(CreateReport.testMultiReferenceFieldValueRows).to.have.lengthOf(4)
       // 3rd value should have changed
@@ -225,7 +225,7 @@ describe("Create report form page", () => {
         REPORT_VALUE
       )
       // Delete selected value
-      CreateReport.testReferenceFieldValue.$("span").click()
+      CreateReport.testReferenceFieldValue.$("button").click()
 
       CreateReport.testMultiReferenceFieldLabel.waitForExist()
       CreateReport.testMultiReferenceFieldLabel.waitForDisplayed()
@@ -249,7 +249,7 @@ describe("Create report form page", () => {
       ).to.include(POSITION_VALUE_3)
       // Delete selected values
       CreateReport.testMultiReferenceFieldValueRows.forEach(r =>
-        r.$("span").click()
+        r.$("button").click()
       )
     })
 
