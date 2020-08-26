@@ -340,7 +340,7 @@ const OrganizationalChart = ({
     node =>
       distanceFromMain(node) === 0 || magnifiedOrg === node
         ? Math.max(1.3, zoomLevel * 1.1)
-        : zoomLevel * Math.pow(0.7, Math.abs(distanceFromMain(node))),
+        : zoomLevel * Math.pow(0.6, Math.abs(distanceFromMain(node))),
     [distanceFromMain, zoomLevel, magnifiedOrg]
   )
 
@@ -374,6 +374,9 @@ const OrganizationalChart = ({
         .children(d => {
           if (distanceFromMain(d) === -1) {
             return [data.organization]
+          }
+          if (distanceFromMain(d) > 3) {
+            return []
           }
           return data.organization.descendantOrgs.filter(
             org => org.parentOrg?.uuid === d.uuid
