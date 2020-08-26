@@ -4,7 +4,7 @@ import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
-import SecurityBanner from "components/SecurityBanner"
+import { PrintSecurityBanner } from "components/SecurityBanner"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -23,15 +23,15 @@ const PrintReportPage = ({ report, setPrintDone }) => {
   }
   report.formCustomFields.itemsAgreed = [
     {
-      item: "Very good item",
+      item: "custom_item 1",
       dueDate: moment()
     },
     {
-      item: "Very nice item",
+      item: "custom_item 2",
       dueDate: moment()
     },
     {
-      item: "Very bad item",
+      item: "custom_item 3",
       dueDate: moment()
     }
   ]
@@ -69,13 +69,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             content={report.intent}
           />
           <PrintRow label="attendees" content={getAttendeesAndAssessments()} />
-          {report.showWorkflow() ? (
-            <ReportFullWorkflow
-              workflow={report.workflow}
-              printStyle={WORKFLOW_STYLE}
-            />
-          ) : null}
-          <PrintRow label="comments" content={getComments()} />
           {!report.cancelled ? (
             <PrintRow
               label={Settings.fields.report.atmosphere}
@@ -91,9 +84,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             label={Settings.fields.task.subLevel.longLabel}
             content={getTasksAndAssessments()}
           />
-          {Settings.engagementsIncludeTimeAndDuration && report.duration ? (
-            <PrintRow label="duration(min)" content={report.duration} />
-          ) : null}
           {report.cancelled ? (
             <PrintRow
               label="cancelled reason"
@@ -106,21 +96,18 @@ const PrintReportPage = ({ report, setPrintDone }) => {
               content={parseHtmlWithLinkTo(report.reportText)}
             />
           ) : null}
-          {report.reportSensitiveInformation &&
-          report.reportSensitiveInformation.text ? (
-            <PrintRow
-              label="sensitive information"
-              content={parseHtmlWithLinkTo(
-                report.reportSensitiveInformation.text
-              )}
-            />
-            ) : null}
           {Settings.fields.report.customFields ? (
             <ReadonlyCustomFields
               fieldsConfig={Settings.fields.report.customFields}
               values={report}
               vertical
               printStyle={{}}
+            />
+          ) : null}
+          {report.showWorkflow() ? (
+            <ReportFullWorkflow
+              workflow={report.workflow}
+              printStyle={WORKFLOW_STYLE}
             />
           ) : null}
         </PrintTable>
@@ -282,32 +269,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
       </table>
     )
   }
-
-  function getComments() {
-    return (
-      <React.Fragment>
-        {report.comments.map(comment => {
-          const createdAt = moment(comment.createdAt)
-          return (
-            <p key={comment.uuid}>
-              <LinkTo modelType="Person" model={comment.author} />,
-              <span
-                title={createdAt.format(
-                  Settings.dateFormats.forms.displayShort.withTime
-                )}
-              >
-                {" "}
-                {createdAt.fromNow()}:{" "}
-              </span>
-              "{comment.text}"
-            </p>
-          )
-        })}
-
-        {!report.comments.length && <p>There are no comments</p>}
-      </React.Fragment>
-    )
-  }
 }
 
 PrintReportPage.propTypes = {
@@ -397,9 +358,7 @@ const ReportHeaderContent = ({ report }) => {
   return (
     <div css={HEADER_CONTENT_STYLE}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
-      <div css={TOP_CLASSIFICATION_BANNER_STYLE}>
-        <SecurityBanner />
-      </div>
+      <ClassificationBanner style={TOP_CLASSIFICATION_BANNER_STYLE} />
       <span style={{ fontSize: "12px" }}>
         <Link to={location.pathname}>{report.uuid}</Link>
       </span>
@@ -417,9 +376,7 @@ const ReportFooterContent = () => {
   return (
     <div css={FOOTER_CONTENT_STYLE}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
-      <div css={BOTTOM_CLASSIFICATION_BANNER_STYLE}>
-        <SecurityBanner />
-      </div>
+      <ClassificationBanner style={BOTTOM_CLASSIFICATION_BANNER_STYLE} />
       <span style={{ fontSize: "12px" }}>
         <React.Fragment>
           printed by <LinkTo modelType="Person" model={currentUser} />
@@ -459,9 +416,29 @@ const FOOTER_CONTENT_STYLE = css`
   border-top: 1px solid black;
 `
 
+const ClassificationBanner = ({ style }) => {
+  return (
+    <div
+      css={css`
+        ${style}
+      `}
+    >
+      <PrintSecurityBanner />
+    </div>
+  )
+}
+
+ClassificationBanner.propTypes = {
+  style: PropTypes.object
+}
+
 const CLASSIFICATION_BANNER_STYLE = css`
   width: auto;
   text-align: center;
+  display: inline-block;
+  & > .banner {
+    padding: 2px 4px;
+  }
 `
 
 const TOP_CLASSIFICATION_BANNER_STYLE = css`

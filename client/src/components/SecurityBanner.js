@@ -48,4 +48,19 @@ const VersionBox = styled.h6`
   }
 `
 
+export const PrintSecurityBanner = () => {
+  const { appSettings } = useContext(AppContext)
+  return (
+    <PrintBanner className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
+      {appSettings[SETTING_KEY_TEXT]}
+    </PrintBanner>
+  )
+}
+// override global print background-color stripping
+const PrintBanner = styled.div`
+  ${css};
+  background: ${props => props.bgc} !important;
+  color: white !important;
+`
+
 export default SecurityBanner
