@@ -290,20 +290,31 @@ describe("Create report form page", () => {
       expect(CreateReport.testMultiReferenceFieldValue.isExisting()).to.be.false
     })
 
-    it("Should be able to delete the report", () => {
+    it("Should be able to delete the report", async() => {
+      // See https://webdriver.io/docs/sync-vs-async.html
       // Edit the report
-      CreateReport.editButton.click()
+      const editButton = await CreateReport.editButton
+      await editButton.waitForExist()
+      await editButton.waitForDisplayed()
+      await editButton.click()
+
       // Delete it
-      CreateReport.deleteButton.waitForExist()
-      CreateReport.deleteButton.waitForDisplayed()
-      CreateReport.deleteButton.click()
+      const deleteButton = await CreateReport.deleteButton
+      await deleteButton.waitForExist()
+      await deleteButton.waitForDisplayed()
+      await deleteButton.click()
+
       // Confirm delete
-      CreateReport.confirmButton.waitForExist()
-      CreateReport.confirmButton.waitForDisplayed()
-      CreateReport.confirmButton.click()
+      const confirmButton = await CreateReport.confirmButton
+      await confirmButton.waitForExist()
+      await confirmButton.waitForDisplayed()
+      await confirmButton.click()
+
       // Report should be deleted
-      CreateReport.waitForAlertToLoad()
-      expect(CreateReport.alert.getText()).to.include("Report deleted")
+      const alertEl = await CreateReport.alert
+      await alertEl.waitForExist()
+      await alertEl.waitForDisplayed()
+      expect(await alertEl.getText()).to.include("Report deleted")
     })
   })
 })
