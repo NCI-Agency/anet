@@ -77,7 +77,7 @@ const SearchBar = ({
   const popoverContent = (
     <AdvancedSearch
       onSearch={runAdvancedSearch}
-      onCancel={setShowAdvancedSearch}
+      onCancel={() => setShowAdvancedSearch(false)}
       text={searchTerms}
     />
   )
