@@ -219,7 +219,8 @@ const ArrayOfObjectsField = fieldProps => {
     formikProps,
     invisibleFields,
     updateInvisibleFields,
-    vertical
+    vertical,
+    children
   } = fieldProps
   const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
     formikProps.values,
@@ -234,6 +235,7 @@ const ArrayOfObjectsField = fieldProps => {
   const addButtonLabel = fieldConfig.addButtonLabel || "Add a new item"
   return (
     <Fieldset title={fieldsetTitle}>
+      {children}
       <FieldArray
         name={name}
         render={arrayHelpers => (
@@ -364,7 +366,13 @@ ReadonlyArrayObject.propTypes = {
   index: PropTypes.number.isRequired
 }
 
-const AnetObjectField = ({ name, types, formikProps, ...otherFieldProps }) => {
+const AnetObjectField = ({
+  name,
+  types,
+  formikProps,
+  children,
+  ...otherFieldProps
+}) => {
   const { values, setFieldValue } = formikProps
   const fieldValue = Object.get(values, name) || {}
   return (
@@ -385,6 +393,7 @@ const AnetObjectField = ({ name, types, formikProps, ...otherFieldProps }) => {
       }
       {...otherFieldProps}
     >
+      {children}
       {fieldValue.type && fieldValue.uuid && (
         <Table id={`${name}-value`} striped condensed hover responsive>
           <tbody>
@@ -409,7 +418,8 @@ const AnetObjectField = ({ name, types, formikProps, ...otherFieldProps }) => {
 AnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
   types: PropTypes.arrayOf(PropTypes.string),
-  formikProps: PropTypes.object
+  formikProps: PropTypes.object,
+  children: PropTypes.node
 }
 
 const ReadonlyAnetObjectField = ({ name, label, values }) => {
@@ -446,6 +456,7 @@ const ArrayOfAnetObjectsField = ({
   name,
   types,
   formikProps,
+  children,
   ...otherFieldProps
 }) => {
   const { values, setFieldValue } = formikProps
@@ -475,6 +486,7 @@ const ArrayOfAnetObjectsField = ({
       }
       {...otherFieldProps}
     >
+      {children}
       {!_isEmpty(fieldValue) && (
         <Table id={`${name}-value`} striped condensed hover responsive>
           <tbody>
@@ -513,7 +525,8 @@ const ArrayOfAnetObjectsField = ({
 ArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
   types: PropTypes.arrayOf(PropTypes.string),
-  formikProps: PropTypes.object
+  formikProps: PropTypes.object,
+  children: PropTypes.node
 }
 
 const ReadonlyArrayOfAnetObjectsField = ({ name, label, values }) => {
