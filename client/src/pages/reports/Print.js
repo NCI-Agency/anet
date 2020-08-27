@@ -5,6 +5,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { PrintCompactReportWorkflow } from "components/ReportWorkflow"
 import { PrintSecurityBanner } from "components/SecurityBanner"
+import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -18,8 +19,8 @@ import { parseHtmlWithLinkTo } from "utils_links"
 import "./Print.css"
 
 const PrintReportPage = ({ report, setPrintDone }) => {
-  if (!report) {
-    return null
+  if (_isEmpty(report)) {
+    return <PrintPageHeader setPrintDone={setPrintDone} noReport />
   }
 
   const draftAttr = report.isDraft() ? "draft" : "not-draft"
@@ -349,7 +350,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
 }
 
 PrintReportPage.propTypes = {
-  report: PropTypes.object.isRequired,
+  report: PropTypes.object,
   setPrintDone: PropTypes.func
 }
 // first item is primary, grouped around that item
@@ -417,14 +418,16 @@ const SUBTITLE_STYLE = css`
   }
 `
 
-const PrintPageHeader = ({ onPrintClick, setPrintDone }) => {
+const PrintPageHeader = ({ onPrintClick, setPrintDone, noReport }) => {
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
       <div css={BUTTONS_STYLE}>
-        <Button type="button" bsStyle="primary" onClick={onPrintClick}>
-          Print
-        </Button>
+        {!noReport && (
+          <Button type="button" bsStyle="primary" onClick={onPrintClick}>
+            Print
+          </Button>
+        )}
         <Button type="button" bsStyle="primary" onClick={setPrintDone}>
           Web View
         </Button>
@@ -435,7 +438,12 @@ const PrintPageHeader = ({ onPrintClick, setPrintDone }) => {
 
 PrintPageHeader.propTypes = {
   onPrintClick: PropTypes.func,
-  setPrintDone: PropTypes.func
+  setPrintDone: PropTypes.func,
+  noReport: PropTypes.bool
+}
+
+PrintPageHeader.defaultProps = {
+  noReport: false
 }
 
 const HEADER_STYLE = css`
