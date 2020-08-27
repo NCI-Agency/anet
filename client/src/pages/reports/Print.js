@@ -18,31 +18,15 @@ import { parseHtmlWithLinkTo } from "utils_links"
 import "./Print.css"
 
 const PrintReportPage = ({ report, setPrintDone }) => {
-  console.log("Print Report Page Render")
   if (!report) {
     return null
   }
-  console.dir(report)
-  getPrincipalAttendees()
-  report.formCustomFields.itemsAgreed = [
-    {
-      item: "custom_item 1",
-      dueDate: moment()
-    },
-    {
-      item: "custom_item 2",
-      dueDate: moment()
-    },
-    {
-      item: "custom_item 3",
-      dueDate: moment()
-    }
-  ]
 
+  const draftAttr = report.isDraft() ? "draft" : "not-draft"
   return (
     <React.Fragment>
       <PrintPageHeader onPrintClick={printReport} setPrintDone={setPrintDone} />
-      <div css={PRINT_PAGE_STYLE} className="print-page">
+      <div css={PRINT_PAGE_STYLE} className="print-page" data-draft={draftAttr}>
         <ReportHeaderContent report={report} />
         <PrintTable>
           <PrintRow
@@ -94,6 +78,12 @@ const PrintReportPage = ({ report, setPrintDone }) => {
               content={utils.sentenceCase(report.cancelledReason)}
             />
           ) : null}
+          {report.showWorkflow() ? (
+            <PrintCompactReportWorkflow
+              workflow={report.workflow}
+              printStyle={WORKFLOW_STYLE}
+            />
+          ) : null}
           {report.reportText ? (
             <PrintRow
               label={Settings.fields.report.reportText}
@@ -108,12 +98,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
               printStyle={{}}
             />
           ) : null}
-          {report.showWorkflow() && null ? (
-            <PrintCompactReportWorkflow
-              workflow={report.workflow}
-              printStyle={WORKFLOW_STYLE}
-            />
-          ) : null}
         </PrintTable>
         <ReportFooterContent report={report} />
       </div>
@@ -125,7 +109,6 @@ const PrintReportPage = ({ report, setPrintDone }) => {
       window.print()
     } else {
       alert("Press CTRL+P to print this report")
-      console.log(getAdvisorAttendees)
     }
   }
 
@@ -170,6 +153,99 @@ const PrintReportPage = ({ report, setPrintDone }) => {
         )}
         [{Report.STATE_LABELS[report.state]}]
       </React.Fragment>
+    )
+  }
+
+  function getPrincipalAttendees() {
+    let principalAttendees = []
+    const primaryPrincipal = Report.getPrimaryAttendee(
+      report.attendees,
+      Person.ROLE.PRINCIPAL
+    )
+    if (primaryPrincipal) {
+      principalAttendees.push(primaryPrincipal)
+    }
+
+    principalAttendees = principalAttendees.concat(
+      report.attendees.filter(attendee => {
+        // filter principal attendees which are not the primary one we added above
+        return (
+          attendee.role === Person.ROLE.PRINCIPAL &&
+          attendee.uuid !== principalAttendees[0]?.uuid
+        )
+      })
+    )
+    return getAttendeesAndAssessments(
+      sortGroupByOrganization(principalAttendees)
+    )
+  }
+
+  function getAdvisorAttendees() {
+    let advisorAttendees = []
+    const primaryAdvisor = Report.getPrimaryAttendee(
+      report.attendees,
+      Person.ROLE.ADVISOR
+    )
+    if (primaryAdvisor) {
+      advisorAttendees.push(primaryAdvisor)
+    }
+
+    advisorAttendees = advisorAttendees.concat(
+      report.attendees.filter(attendee => {
+        // filter advisor attendees which are not the primary one we added above
+        return (
+          attendee.role === Person.ROLE.ADVISOR &&
+          attendee.uuid !== advisorAttendees[0]?.uuid
+        )
+      })
+    )
+    return getAttendeesAndAssessments(sortGroupByOrganization(advisorAttendees))
+  }
+
+  function getTasksAndAssessments() {
+    return (
+      <table>
+        <tbody>
+          {report.tasks.map(task => {
+            const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
+            // return only name and objective if no assessment
+            return (
+              <PrintRow
+                key={task.uuid}
+                label={<LinkTo modelType={Task.resourceName} model={task} />}
+                content={
+                  <table>
+                    <tbody>
+                      <PrintRow
+                        label={Settings.fields.task.topLevel.shortLabel}
+                        content={
+                          task.customFieldRef1 && (
+                            <LinkTo
+                              modelType="Task"
+                              model={task.customFieldRef1}
+                            >
+                              {task.customFieldRef1.shortName}
+                            </LinkTo>
+                          )
+                        }
+                      />
+                      {taskInstantAssessmentConfig && (
+                        <ReadonlyCustomFields
+                          parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
+                          fieldsConfig={taskInstantAssessmentConfig}
+                          values={report}
+                          vertical
+                          printStyle={{}}
+                        />
+                      )}
+                    </tbody>
+                  </table>
+                }
+              />
+            )
+          })}
+        </tbody>
+      </table>
     )
   }
 
@@ -235,95 +311,40 @@ const PrintReportPage = ({ report, setPrintDone }) => {
     )
   }
 
-  function getPrincipalAttendees() {
-    let principalAttendees = []
-    const primaryPrincipal = Report.getPrimaryAttendee(
-      report.attendees,
-      Person.ROLE.PRINCIPAL
-    )
-    if (primaryPrincipal) {
-      principalAttendees.push(primaryPrincipal)
+  function sortGroupByOrganization(attendees) {
+    if (attendees.length === 0) {
+      return attendees
     }
-
-    principalAttendees = principalAttendees.concat(
-      report.attendees.filter(attendee => {
-        // filter principal attendees which are not the primary one we added above
-        return (
-          attendee.role === Person.ROLE.PRINCIPAL &&
-          attendee.uuid !== principalAttendees[0]?.uuid
-        )
-      })
-    )
-
-    return getAttendeesAndAssessments(groupByOrganization(principalAttendees))
-  }
-  function getAdvisorAttendees() {
-    let advisorAttendees = []
-    const primaryAdvisor = Report.getPrimaryAttendee(
-      report.attendees,
-      Person.ROLE.ADVISOR
-    )
-    if (primaryAdvisor) {
-      advisorAttendees.push(primaryAdvisor)
-    }
-
-    advisorAttendees = advisorAttendees.concat(
-      report.attendees.filter(attendee => {
-        // filter advisor attendees which are not the primary one we added above
-        return (
-          attendee.role === Person.ROLE.ADVISOR &&
-          attendee.uuid !== advisorAttendees[0]?.uuid
-        )
-      })
-    )
-
-    return getAttendeesAndAssessments(groupByOrganization(advisorAttendees))
-  }
-  function getTasksAndAssessments() {
-    return (
-      <table>
-        <tbody>
-          {report.tasks.map(task => {
-            const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
-            // return only name and objective if no assessment
-            return (
-              <PrintRow
-                key={task.uuid}
-                label={<LinkTo modelType={Task.resourceName} model={task} />}
-                content={
-                  <table>
-                    <tbody>
-                      <PrintRow
-                        label={Settings.fields.task.topLevel.shortLabel}
-                        content={
-                          task.customFieldRef1 && (
-                            <LinkTo
-                              modelType="Task"
-                              model={task.customFieldRef1}
-                            >
-                              {task.customFieldRef1.shortName}
-                            </LinkTo>
-                          )
-                        }
-                      />
-                      {taskInstantAssessmentConfig && (
-                        <ReadonlyCustomFields
-                          parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
-                          fieldsConfig={taskInstantAssessmentConfig}
-                          values={report}
-                          vertical
-                          printStyle={{}}
-                        />
-                      )}
-                    </tbody>
-                  </table>
-                }
-              />
-            )
-          })}
-        </tbody>
-      </table>
-    )
+    const sortedAttendees = []
+    sortedAttendees.push(attendees[0])
+    // keep track of index for non-org people, primary always has org so start at 1
+    let indexWithoutOrg = 1
+    attendees.forEach((attendeeEach, index) => {
+      if (index !== 0) {
+        // if no organization, put it at the end
+        if (!attendeeEach.position?.organization) {
+          sortedAttendees.push(attendeeEach)
+        } else {
+          // check if same org exists and it is not the exact same attendee
+          const indexFound = attendees.findIndex(
+            attendeeFind =>
+              attendeeEach.uuid !== attendeeFind.uuid &&
+              attendeeEach.position?.organization?.uuid ===
+                attendeeFind.position?.organization?.uuid
+          )
+          // if found we should insert next to similar ones
+          if (indexFound > -1) {
+            sortedAttendees.splice(indexFound + 1, 0, attendeeEach)
+          } else {
+            // add new org people just before non-org peope line
+            sortedAttendees.splice(indexWithoutOrg, 0, attendeeEach)
+          }
+          // we added someone with org, index moves up
+          indexWithoutOrg++
+        }
+      }
+    })
+    return sortedAttendees
   }
 }
 
@@ -333,38 +354,8 @@ PrintReportPage.propTypes = {
 }
 // first item is primary, grouped around that item
 // people without organization at the end
-function groupByOrganization(attendees) {
-  const newAttendees = []
-  newAttendees.push(attendees[0])
-  // keep track of index for non-org people, primary always has org so start at 1
-  let indexWithoutOrg = 1
-  attendees.forEach((attendeeEach, index) => {
-    if (index !== 0) {
-      // if no organization, put it at the end
-      if (!attendeeEach.position?.organization) {
-        newAttendees.push(attendeeEach)
-      } else {
-        // check if same org exists and it is not the exact same attendee
-        const indexFound = attendees.findIndex(
-          attendeeFind =>
-            attendeeEach.uuid !== attendeeFind.uuid &&
-            attendeeEach.position?.organization?.uuid ===
-              attendeeFind.position?.organization?.uuid
-        )
-        // if found we should insert next to similar ones
-        if (indexFound > -1) {
-          newAttendees.splice(indexFound + 1, 0, attendeeEach)
-        } else {
-          // add new org people just before non-org peope line
-          newAttendees.splice(indexWithoutOrg, 0, attendeeEach)
-        }
-        // we added someone with org, index moves up
-        indexWithoutOrg++
-      }
-    }
-  })
-  return newAttendees
-}
+// color-adjust forces browsers to keep color values of the node
+// supported in most major browsers' new versions, but not in IE or some older versions
 const PRINT_PAGE_STYLE = css`
   position: relative;
   outline: 2px solid grey;
@@ -375,10 +366,35 @@ const PRINT_PAGE_STYLE = css`
   tr {
     width: 100%;
   }
+  &[data-draft="draft"]:before {
+    content: "DRAFT";
+    z-index: -1000;
+    position: absolute;
+    font-weight: 100;
+    top: 300px;
+    left: 20%;
+    font-size: 150px;
+    color: rgba(161, 158, 158, 0.699) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact !important;
+    transform: rotateZ(-45deg);
+  }
   @media print {
     position: static;
     padding: 0;
     outline: none;
+    &[data-draft="draft"]:before {
+      top: 40%;
+      position: fixed;
+    }
+    .banner {
+      display: inline-block !important;
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact !important;
+    }
+    .workflow-action button {
+      display: inline block !important;
+    }
   }
 `
 
@@ -644,17 +660,23 @@ const WORKFLOW_STYLE = css`
   & > td {
     display: flex;
     flex-direction: row;
+    justify-content: flex-start;
     flex-wrap: wrap;
+    align items: center;
     text-align: center;
     & > div {
       position: relative;
-      margin-right: 24px;
+      margin-right: 18px;
     }
     & > div:not(:last-child):after {
       position: absolute;
       right: -18px;
       top: 0;
       content: "→";
+    }
+    & > div > button {
+      padding: 0 5px !important;
+      margin: 0;
     }
   }
 `

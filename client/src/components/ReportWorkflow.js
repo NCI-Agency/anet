@@ -202,7 +202,7 @@ export const PrintCompactReportWorkflow = ({ workflow, printStyle }) => (
         const key = action.step
           ? `${action.createdAt}-${action.step.uuid}`
           : action.createdAt
-        return <CompactReportAction action={action} key={key} />
+        return <PrintCompactReportAction action={action} key={key} />
       })}
     />
   </Fieldset>
@@ -211,4 +211,16 @@ export const PrintCompactReportWorkflow = ({ workflow, printStyle }) => (
 PrintCompactReportWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired,
   printStyle: PropTypes.object
+}
+
+export const PrintCompactReportAction = ({ action }) => {
+  return (
+    <div className="workflow-action">
+      <ActionStatus action={action} />
+      <ActionButton action={action} />
+    </div>
+  )
+}
+PrintCompactReportAction.propTypes = {
+  action: PropTypes.object.isRequired
 }

@@ -1,6 +1,7 @@
 @page {
   margin: 0;
 }
+
 @media print {
   thead {
     display: table-header-group;
@@ -11,11 +12,6 @@
 
   button {
     display: none;
-  }
-
-  .print-page .workflow-action button,
-  .print-page .banner {
-    display: inline-block !important;
   }
   body {
     margin: 0;
