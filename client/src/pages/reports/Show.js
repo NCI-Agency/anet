@@ -399,7 +399,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {canEmail && (
               <Button onClick={toggleEmailModal}>Email report</Button>
             )}
-            <Button type="button" bsStyle="primary" onClick={onPrintClick}>
+            <Button
+              value="printView"
+              type="button"
+              bsStyle="primary"
+              onClick={onPrintClick}
+            >
               Print View
             </Button>
             {canEdit && (

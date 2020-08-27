@@ -34,30 +34,40 @@ const PrintReportPage = ({ report, setPrintDone }) => {
             rowType={ROW_TYPES.titleLike}
             style={TITLE_STYLE}
             label={getReportTitle()}
+            className="reportField"
           />
           <PrintRow
             rowType={ROW_TYPES.titleLike}
             style={SUBTITLE_STYLE}
             label={getReportSubTitle()}
+            className="reportField"
           />
           <PrintRow
             label="purpose"
-            content={
-              report.intent +
-              "Make long purpose: Lorem ipsum dolor sit, amet consectetur adipisicing elit. Omnis facilis ipsa, alias numquam harum a tenetur nemo vero deserunt. Animi neque nihil illo ipsum atque voluptas quis cumque, quaerat officiis hic quibusdam, eveniet, provident dignissimos amet quam ex doloribus! Quas ducimus nam veritatis nobis impedit ut corporis cupiditate? Magni facilis repellat hic ipsa at? Minima doloribus nisi dignissimos numquam incidunt reiciendis quas ipsam ea accusamus cupiditate asperiores dolor illo error fugit sed alias, hic et porro sint, repellat earum? Deserunt illo exercitationem natus praesentium aspernatur facilis accusantium fuga adipisci tempora? Nobis dolore tenetur id dolorem, cupiditate perferendis qui repellendus sit esse adipisci, provident impedit nesciunt necessitatibus. Aliquam quia corrupti aspernatur esse?"
-            }
+            content={report.intent}
+            className="reportField"
           />
 
           <PrintRow
             label={Settings.fields.report.keyOutcomes || "key outcomes"}
             content={report.keyOutcomes}
+            className="reportField"
           />
           <PrintRow
             label={Settings.fields.report.nextSteps}
             content={report.intent}
+            className="reportField"
           />
-          <PrintRow label="principals" content={getPrincipalAttendees()} />
-          <PrintRow label="advisors" content={getAdvisorAttendees()} />
+          <PrintRow
+            label="principals"
+            content={getPrincipalAttendees()}
+            className="reportField"
+          />
+          <PrintRow
+            label="advisors"
+            content={getAdvisorAttendees()}
+            className="reportField"
+          />
           {!report.cancelled ? (
             <PrintRow
               label={Settings.fields.report.atmosphere}
@@ -67,28 +77,33 @@ const PrintReportPage = ({ report, setPrintDone }) => {
                   {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
                 </React.Fragment>
               }
+              className="reportField"
             />
           ) : null}
           <PrintRow
             label={Settings.fields.task.subLevel.longLabel}
             content={getTasksAndAssessments()}
+            className="reportField"
           />
           {report.cancelled ? (
             <PrintRow
               label="cancelled reason"
               content={utils.sentenceCase(report.cancelledReason)}
+              className="reportField"
             />
           ) : null}
           {report.showWorkflow() ? (
             <PrintCompactReportWorkflow
               workflow={report.workflow}
               printStyle={WORKFLOW_STYLE}
+              className="reportField"
             />
           ) : null}
           {report.reportText ? (
             <PrintRow
               label={Settings.fields.report.reportText}
               content={parseHtmlWithLinkTo(report.reportText)}
+              className="reportField"
             />
           ) : null}
           {Settings.fields.report.customFields ? (
@@ -424,11 +439,21 @@ const PrintPageHeader = ({ onPrintClick, setPrintDone, noReport }) => {
       <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
       <div css={BUTTONS_STYLE}>
         {!noReport && (
-          <Button type="button" bsStyle="primary" onClick={onPrintClick}>
+          <Button
+            value="print"
+            type="button"
+            bsStyle="primary"
+            onClick={onPrintClick}
+          >
             Print
           </Button>
         )}
-        <Button type="button" bsStyle="primary" onClick={setPrintDone}>
+        <Button
+          value="webView"
+          type="button"
+          bsStyle="primary"
+          onClick={setPrintDone}
+        >
           Web View
         </Button>
       </div>
@@ -605,7 +630,7 @@ export const ROW_TYPES = {
 }
 
 export const PrintRow = ({ label, content, rowType, ...otherProps }) => {
-  const { style } = otherProps
+  const { style, className } = otherProps
   const customStyle = css`
     ${ROW_STYLE};
     ${style};
@@ -633,7 +658,7 @@ export const PrintRow = ({ label, content, rowType, ...otherProps }) => {
   const lowerLabel =
     typeof label === "string" ? label.toLocaleLowerCase() : label
   return (
-    <tr css={customStyle}>
+    <tr css={customStyle} className={className || null}>
       <th css={ROW_LABEL_STYLE}>{lowerLabel}</th>
       <td css={ROW_CONTENT_STYLE}>{content}</td>
     </tr>
