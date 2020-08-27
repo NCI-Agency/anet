@@ -293,6 +293,9 @@ describe("Create report form page", () => {
     it("Should be able to delete the report", () => {
       // Edit the report
       CreateReport.editButton.click()
+
+      CreateReport.testReferenceFieldLabel.waitForExist()
+      CreateReport.testReferenceFieldLabel.waitForDisplayed()
       // Delete it
       CreateReport.deleteButton.waitForExist()
       CreateReport.deleteButton.waitForDisplayed()
