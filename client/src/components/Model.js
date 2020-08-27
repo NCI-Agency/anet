@@ -133,7 +133,9 @@ export const CUSTOM_FIELD_TYPE = {
   ENUM: "enum",
   ENUMSET: "enumset",
   ARRAY_OF_OBJECTS: "array_of_objects",
-  SPECIAL_FIELD: "special_field"
+  SPECIAL_FIELD: "special_field",
+  ANET_OBJECT: "anet_object",
+  ARRAY_OF_ANET_OBJECTS: "array_of_anet_objects"
 }
 
 const CUSTOM_FIELD_TYPE_SCHEMA = {
@@ -147,7 +149,9 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
   [CUSTOM_FIELD_TYPE.ENUM]: yup.string().nullable().default(""),
   [CUSTOM_FIELD_TYPE.ENUMSET]: yup.array().nullable().default([]),
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup.array().nullable().default([]),
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null)
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null),
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: yup.mixed().nullable().default(null),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: yup.array().nullable().default([])
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {

@@ -3,14 +3,30 @@ import React from "react"
 import { Button } from "react-bootstrap"
 import REMOVE_ICON from "resources/delete.png"
 
-const RemoveButton = ({ title, handleOnClick, ...props }) => (
-  <Button {...props} bsStyle="link" title={title} onClick={handleOnClick}>
-    <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
+const RemoveButton = ({
+  title,
+  altText,
+  onClick,
+  buttonStyle = "default",
+  disabled = false
+}) => (
+  <Button
+    className="pull-right"
+    bsStyle={buttonStyle}
+    title={title}
+    onClick={onClick}
+    disabled={disabled}
+  >
+    <img src={REMOVE_ICON} height={14} alt={altText} />
   </Button>
 )
+
 RemoveButton.propTypes = {
   title: PropTypes.string,
-  handleOnClick: PropTypes.func
+  altText: PropTypes.string,
+  onClick: PropTypes.func,
+  buttonStyle: PropTypes.string,
+  disabled: PropTypes.bool
 }
 
 export default RemoveButton

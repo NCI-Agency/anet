@@ -368,6 +368,7 @@ const AdvancedSelect = ({
                   value={searchTerms || ""}
                   placeholder={placeholder}
                   onChange={changeSearchTerms}
+                  onFocus={event => handleInteraction(true, event)}
                   inputRef={ref => {
                     searchInput.current = ref
                   }}

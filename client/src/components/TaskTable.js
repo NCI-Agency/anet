@@ -1,10 +1,10 @@
 import LinkTo from "components/LinkTo"
+import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
 import { Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
-import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
 
 const TaskTable = ({
@@ -70,17 +70,12 @@ const TaskTable = ({
                     </td>
                   )}
                   {showDelete && (
-                    <td
-                      onClick={() => onDelete(task)}
-                      id={"taskDelete_" + task.uuid}
-                    >
-                      <span style={{ cursor: "pointer" }}>
-                        <img
-                          src={REMOVE_ICON}
-                          height={14}
-                          alt={`Remove ${fieldSettings.shortLabel}`}
-                        />
-                      </span>
+                    <td id={"taskDelete_" + task.uuid}>
+                      <RemoveButton
+                        title={`Remove ${fieldSettings.shortLabel}`}
+                        altText={`Remove ${fieldSettings.shortLabel}`}
+                        onClick={() => onDelete(task)}
+                      />
                     </td>
                   )}
                 </tr>

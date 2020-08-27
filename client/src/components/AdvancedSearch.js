@@ -8,6 +8,7 @@ import {
 } from "@blueprintjs/core"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import RemoveButton from "components/RemoveButton"
 import searchFilters, {
   POSTITION_POSITION_TYPE_FILTER_KEY,
   SearchQueryPropType
@@ -26,7 +27,6 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
-import REMOVE_ICON from "resources/delete.png"
 
 const ORG_QUERY_PARAM_TYPES = {
   NONE: {},
@@ -124,9 +124,7 @@ const AdvancedSearch = ({
                   ))}
                 </ButtonToggleGroup>
 
-                <Button
-                  bsStyle="link"
-                  onClick={clearObjectType}
+                <div
                   style={{
                     visibility:
                       possibleFilterTypes.length > 1 && objectType
@@ -134,8 +132,13 @@ const AdvancedSearch = ({
                         : "hidden"
                   }}
                 >
-                  <img src={REMOVE_ICON} height={14} alt="Clear type" />
-                </Button>
+                  <RemoveButton
+                    title="Clear type"
+                    altText="Clear type"
+                    onClick={clearObjectType}
+                    buttonStyle="link"
+                  />
+                </div>
               </div>
             </FormGroup>
 
@@ -333,9 +336,12 @@ const SearchFilter = ({
         </div>
       </Col>
       <Col sm={1} lg={1}>
-        <Button bsStyle="link" onClick={() => onRemove(filter)}>
-          <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
-        </Button>
+        <RemoveButton
+          title="Remove this filter"
+          altText="Remove this filter"
+          onClick={() => onRemove(filter)}
+          buttonStyle="link"
+        />
       </Col>
     </FormGroup>
   )
