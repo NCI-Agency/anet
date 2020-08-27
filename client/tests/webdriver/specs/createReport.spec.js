@@ -30,6 +30,14 @@ describe("Create report form page", () => {
     it("Should be able to select an ANET object reference", () => {
       CreateReport.testReferenceFieldLabel.waitForExist()
       CreateReport.testReferenceFieldLabel.waitForDisplayed()
+      expect(CreateReport.testReferenceFieldLabel.getText()).to.equal(
+        "Related report"
+      )
+      CreateReport.testReferenceFieldHelpText.waitForExist()
+      CreateReport.testReferenceFieldHelpText.waitForDisplayed()
+      expect(CreateReport.testReferenceFieldHelpText.getText()).to.equal(
+        "Here you can link to a related report"
+      )
 
       // Only input type is Reports, so there should be no button to select a type
       expect(
@@ -79,6 +87,14 @@ describe("Create report form page", () => {
     it("Should be able to select multiple ANET object references", () => {
       CreateReport.testMultiReferenceFieldLabel.waitForExist()
       CreateReport.testMultiReferenceFieldLabel.waitForDisplayed()
+      expect(CreateReport.testMultiReferenceFieldLabel.getText()).to.equal(
+        "Additional engagement needed for"
+      )
+      CreateReport.testMultiReferenceFieldHelpText.waitForExist()
+      CreateReport.testMultiReferenceFieldHelpText.waitForDisplayed()
+      expect(CreateReport.testMultiReferenceFieldHelpText.getText()).to.equal(
+        "Here you can link to people, positions and organizations that need an additional engagement"
+      )
 
       // Default input type is People
       expect(
@@ -182,8 +198,9 @@ describe("Create report form page", () => {
       // Submit the report
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
-      const alertMessage = CreateReport.alert.getText()
-      expect(alertMessage).to.include("The following errors must be fixed")
+      expect(CreateReport.alert.getText()).to.include(
+        "The following errors must be fixed"
+      )
 
       // Check ANET object reference
       CreateReport.testReferenceFieldLabel.waitForExist()
@@ -286,8 +303,7 @@ describe("Create report form page", () => {
       CreateReport.confirmButton.click()
       // Report should be deleted
       CreateReport.waitForAlertToLoad()
-      const alertMessage = CreateReport.alert.getText()
-      expect(alertMessage).to.include("Report deleted")
+      expect(CreateReport.alert.getText()).to.include("Report deleted")
     })
   })
 })

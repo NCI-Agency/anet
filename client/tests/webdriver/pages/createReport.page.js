@@ -26,6 +26,10 @@ class CreateReport extends Page {
     return this.testReferenceFieldFormGroup.$(`label[for="${trfId}"]`)
   }
 
+  get testReferenceFieldHelpText() {
+    return this.testReferenceFieldFormGroup.$('span[class="help-block"]')
+  }
+
   get testReferenceField() {
     return this.testReferenceFieldFormGroup.$(`input[id="${trfId}"]`)
   }
@@ -48,6 +52,10 @@ class CreateReport extends Page {
 
   get testMultiReferenceFieldLabel() {
     return this.testMultiReferenceFieldFormGroup.$(`label[for="${tmrfId}"]`)
+  }
+
+  get testMultiReferenceFieldHelpText() {
+    return this.testMultiReferenceFieldFormGroup.$('span[class="help-block"]')
   }
 
   get testMultiReferenceField() {
