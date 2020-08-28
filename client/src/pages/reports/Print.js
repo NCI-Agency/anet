@@ -533,11 +533,11 @@ const PrintTableFooterContent = () => {
     >
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBanner />
-      <span style={PRINTED_BY_STYLE}>
+      <span css={PRINTED_BY_STYLE}>
         printed by{" "}
-        <div>
+        <span>
           <LinkTo modelType="Person" model={currentUser} />
-        </div>
+        </span>
       </span>
     </div>
   )
@@ -583,13 +583,17 @@ const FOOTER_CONTENT_STYLE = css`
 `
 
 const PRINTED_BY_STYLE = css`
+  width: auto;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  align-items: center;
   flex-wrap: wrap;
   font-size: 12px;
-  text-align: center;
-}
+  & > span {
+    display: inline-block;
+    text-align: right;
+  }
 `
 
 const ClassificationBanner = () => {

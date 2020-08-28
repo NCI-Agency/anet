@@ -15,6 +15,7 @@ const Fieldset = ({ id, title, action, style, printStyle, ...otherProps }) => {
             </table>
           )
         }
+        style={printStyle}
       />
     )
   }

@@ -213,7 +213,7 @@ PrintCompactReportWorkflow.propTypes = {
   printStyle: PropTypes.object
 }
 
-export const PrintCompactReportAction = ({ action }) => {
+const PrintCompactReportAction = ({ action }) => {
   return (
     <div className="workflow-action">
       <ActionStatus action={action} />

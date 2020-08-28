@@ -1101,13 +1101,6 @@ header.searchPagination {
 		display: block !important;
 		height: 100% !important;
 	}
-
-  thead {
-    display: table-header-group;
-  }
-  tfoot {
-    display: table-footer-group;
-  }
 	/* adds random characters to printed pdf*/
 	svg > text#__react_svg_text_measurement_id {
 		display: none;
