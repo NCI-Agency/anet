@@ -2,13 +2,17 @@ import API from "api"
 import { gql } from "apollo-boost"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
-import * as Models from "models"
 import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
+
+// These two are needed here although they are Report specific;
+// export these separately to avoid circular import problems
+export const REPORT_RELATED_OBJECT_TYPE = "reports"
+export const REPORT_STATE_PUBLISHED = "PUBLISHED"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
@@ -388,7 +392,7 @@ export default class Model {
       {
         uuid: uuid
       }
-    ).then(data => new Models[this.resourceName](data[this.getInstanceName]))
+    ).then(data => new this(data[this.getInstanceName]))
   }
 
   constructor(props) {
@@ -547,8 +551,8 @@ export default class Model {
           n.noteRelatedObjects.filter(
             ro =>
               ro.relatedObject &&
-              ro.relatedObjectType === Models.Report.relatedObjectType &&
-              ro.relatedObject.state === Models.Report.STATE.PUBLISHED &&
+              ro.relatedObjectType === REPORT_RELATED_OBJECT_TYPE &&
+              ro.relatedObject.state === REPORT_STATE_PUBLISHED &&
               (!dateRange ||
                 (ro.relatedObject.engagementDate <= dateRange.end &&
                   ro.relatedObject.engagementDate >= dateRange.start))
