@@ -5,7 +5,7 @@ import React, { useContext } from "react"
 import { Version } from "settings"
 
 const SETTING_KEY_TEXT = "SECURITY_BANNER_TEXT"
-const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
+export const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
 
 const css = {
   zIndex: 101,
@@ -59,8 +59,6 @@ export const PrintSecurityBanner = () => {
 // override global print background-color stripping
 const PrintBanner = styled.div`
   ${css};
-  background: ${props => props.bgc} !important;
-  color: white !important;
 `
 
 export default SecurityBanner

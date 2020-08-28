@@ -9,31 +9,13 @@ describe("Show print report page", () => {
     ShowReport.printViewButton.click()
   })
   describe("When on the print report page", () => {
-    it("We should see a title with the correct text", () => {
-      const title = ShowReport.printTitle.getText()
-      expect(title).to.equal("Printable Version")
-    })
-    it("We should see buttons with correct text", () => {
-      const printButtonText = ShowReport.printButton.getText()
-      const webViewButtonText = ShowReport.webViewButton.getText()
-      expect(printButtonText).to.equal("Print")
-      expect(webViewButtonText).to.equal("Web View")
-    })
     it("Web View button should remove print view to web view", () => {
       const webViewButton = ShowReport.webViewButton
       webViewButton.click()
       expect(ShowReport.printView.isDisplayed()).to.equal(false)
       expect(ShowReport.printViewButton.isDisplayed()).to.equal(true)
     })
-
-    it("Printable report banner should have correct text", () => {
-      const printBannerText = ShowReport.printBanner.getText()
-      Home.openAsAdminUser()
-      const bannerText = Home.securityBanner.getText()
-      expect(bannerText.includes(printBannerText)).to.equal(true)
-    })
-
-    it("We should see correct report fields", () => {
+    it("We should see the correct report fields", () => {
       const mustHaveFieldTexts = [
         "purpose",
         "key outcomes",
@@ -48,6 +30,22 @@ describe("Show print report page", () => {
       mustHaveFieldTexts.forEach(mustHave => {
         expect(fieldTexts).to.contain(mustHave)
       })
+    })
+    it("We should see a title with the correct text", () => {
+      const title = ShowReport.printTitle.getText()
+      expect(title).to.equal("Printable Version")
+    })
+    it("We should see buttons with the correct text", () => {
+      const printButtonText = ShowReport.printButton.getText()
+      const webViewButtonText = ShowReport.webViewButton.getText()
+      expect(printButtonText).to.equal("Print")
+      expect(webViewButtonText).to.equal("Web View")
+    })
+    it("Printable report banner should have the correct text", () => {
+      const printBannerText = ShowReport.printBanner.getText()
+      Home.openAsAdminUser()
+      const bannerText = Home.securityBanner.getText()
+      expect(bannerText.includes(printBannerText)).to.equal(true)
     })
   })
 })

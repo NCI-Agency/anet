@@ -4,7 +4,10 @@ import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { PrintCompactReportWorkflow } from "components/ReportWorkflow"
-import { PrintSecurityBanner } from "components/SecurityBanner"
+import {
+  PrintSecurityBanner,
+  SETTING_KEY_COLOR
+} from "components/SecurityBanner"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -27,7 +30,7 @@ const PrintReportView = ({ report, setPrintDone }) => {
     <React.Fragment>
       <PrintViewHeader onPrintClick={printReport} setPrintDone={setPrintDone} />
       <div css={PRINT_VIEW_STYLE} className="print-view" data-draft={draftAttr}>
-        <ReportHeaderContent report={report} />
+        <PrintTableHeaderContent report={report} />
         <PrintTable>
           <PrintRow
             rowType={ROW_TYPES.titleLike}
@@ -114,7 +117,7 @@ const PrintReportView = ({ report, setPrintDone }) => {
             />
           ) : null}
         </PrintTable>
-        <ReportFooterContent report={report} />
+        <PrintTableFooterContent report={report} />
       </div>
     </React.Fragment>
   )
@@ -375,7 +378,7 @@ const PRINT_VIEW_STYLE = css`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
-  width: 768px;
+  width: 21cm;
   table,
   tbody,
   tr {
@@ -474,7 +477,8 @@ const HEADER_STYLE = css`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 768px;
+  width: 100%;
+  max-width: 21cm;
 `
 
 const HEADER_TITLE_STYLE = css`
@@ -495,12 +499,18 @@ const BUTTONS_STYLE = css`
   }
 `
 
-const ReportHeaderContent = ({ report }) => {
+const PrintTableHeaderContent = ({ report }) => {
   const location = useLocation()
+  const { appSettings } = useContext(AppContext)
   return (
-    <div css={HEADER_CONTENT_STYLE}>
+    <div
+      css={css`
+        ${HEADER_CONTENT_STYLE};
+        background-color: ${appSettings[SETTING_KEY_COLOR]} !important;
+      `}
+    >
       <img src={anetLogo} alt="logo" width="50" height="12" />
-      <ClassificationBanner style={TOP_CLASSIFICATION_BANNER_STYLE} />
+      <ClassificationBanner />
       <span style={{ fontSize: "12px" }}>
         <Link to={location.pathname}>{report.uuid}</Link>
       </span>
@@ -508,41 +518,55 @@ const ReportHeaderContent = ({ report }) => {
   )
 }
 
-ReportHeaderContent.propTypes = {
+PrintTableHeaderContent.propTypes = {
   report: PropTypes.object
 }
 
-const ReportFooterContent = () => {
-  const { currentUser } = useContext(AppContext)
-
+const PrintTableFooterContent = () => {
+  const { currentUser, appSettings } = useContext(AppContext)
   return (
-    <div css={FOOTER_CONTENT_STYLE}>
+    <div
+      css={css`
+        ${FOOTER_CONTENT_STYLE};
+        background-color: ${appSettings[SETTING_KEY_COLOR]} !important;
+      `}
+    >
       <img src={anetLogo} alt="logo" width="50" height="12" />
-      <ClassificationBanner style={BOTTOM_CLASSIFICATION_BANNER_STYLE} />
-      <span style={{ fontSize: "12px" }}>
-        <React.Fragment>
-          printed by <LinkTo modelType="Person" model={currentUser} />
-        </React.Fragment>
+      <ClassificationBanner />
+      <span style={PRINTED_BY_STYLE}>
+        printed by{" "}
+        <div>
+          <LinkTo modelType="Person" model={currentUser} />
+        </div>
       </span>
     </div>
   )
 }
 
+// background color of banner makes reading blue links hard. Force white color
 const HF_COMMON_STYLE = css`
   position: absolute;
+  left: 0mm;
   display: flex;
-  width: 95%;
+  width: 100%;
+  max-height: 50px;
   margin: 10px auto;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
+  -webkit-print-color-adjust: exact !important;
+  color-adjust: exact !important;
   img {
     max-width: 50px !important;
     max-height: 24px !important;
   }
+  & * {
+    color: white !important;
+  }
   @media print {
     position: fixed;
+    max-height: 70px;
   }
 `
 
@@ -558,11 +582,21 @@ const FOOTER_CONTENT_STYLE = css`
   border-top: 1px solid black;
 `
 
-const ClassificationBanner = ({ style }) => {
+const PRINTED_BY_STYLE = css`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  font-size: 12px;
+  text-align: center;
+}
+`
+
+const ClassificationBanner = () => {
   return (
     <div
       css={css`
-        ${style}
+        ${CLASSIFICATION_BANNER_STYLE}
       `}
     >
       <PrintSecurityBanner />
@@ -570,29 +604,15 @@ const ClassificationBanner = ({ style }) => {
   )
 }
 
-ClassificationBanner.propTypes = {
-  style: PropTypes.object
-}
-
 const CLASSIFICATION_BANNER_STYLE = css`
   width: auto;
+  max-width: 67%;
   text-align: center;
   display: inline-block;
   & > .banner {
     padding: 2px 4px;
   }
 `
-
-const TOP_CLASSIFICATION_BANNER_STYLE = css`
-  ${CLASSIFICATION_BANNER_STYLE};
-  top: 0;
-`
-
-const BOTTOM_CLASSIFICATION_BANNER_STYLE = css`
-  ${CLASSIFICATION_BANNER_STYLE};
-  bottom: 0;
-`
-
 const PrintTable = ({ children }) => {
   return (
     <table css={TABLE_STYLE}>
@@ -620,7 +640,7 @@ const TABLE_STYLE = css`
 `
 
 const SPACE_STYLE = css`
-  height: 70px;
+  height: 80px;
 `
 
 export const ROW_TYPES = {

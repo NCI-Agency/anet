@@ -69,12 +69,19 @@ SpecialField.propTypes = {
   formikProps: PropTypes.object
 }
 
-const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
+const ReadonlySpecialField = ({
+  name,
+  widget,
+  values,
+  printStyle,
+  ...otherFieldProps
+}) => {
   if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
     const fieldValue = Object.get(values, name) || "" // name might be a path for a nested prop
     return (
       <FastField
         name={name}
+        printStyle={printStyle}
         component={FieldHelper.ReadonlyField}
         humanValue={parseHtmlWithLinkTo(fieldValue)}
         {...Object.without(otherFieldProps, "style")}
@@ -85,6 +92,7 @@ const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
     return (
       <FastField
         name={name}
+        printStyle={printStyle}
         component={FieldHelper.SpecialField}
         widget={<WidgetComponent />}
         readonly
@@ -99,7 +107,8 @@ ReadonlySpecialField.propTypes = {
     SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
     SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
   ]).isRequired,
-  values: PropTypes.object
+  values: PropTypes.object,
+  printStyle: PropTypes.object
 }
 
 const TextField = fieldProps => {
@@ -488,13 +497,14 @@ AnetObjectField.propTypes = {
   children: PropTypes.node
 }
 
-const ReadonlyAnetObjectField = ({ name, label, values }) => {
+const ReadonlyAnetObjectField = ({ name, label, values, printStyle }) => {
   const { type, uuid } = Object.get(values, name) || {}
   return (
     <FastField
       name={name}
       label={label}
       component={FieldHelper.ReadonlyField}
+      printStyle={printStyle}
       humanValue={
         type &&
         uuid && (
@@ -515,7 +525,8 @@ const ReadonlyAnetObjectField = ({ name, label, values }) => {
 ReadonlyAnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired
+  values: PropTypes.object.isRequired,
+  printStyle: PropTypes.object
 }
 
 const ArrayOfAnetObjectsField = ({
@@ -595,13 +606,19 @@ ArrayOfAnetObjectsField.propTypes = {
   children: PropTypes.node
 }
 
-const ReadonlyArrayOfAnetObjectsField = ({ name, label, values }) => {
+const ReadonlyArrayOfAnetObjectsField = ({
+  name,
+  label,
+  values,
+  printStyle
+}) => {
   const fieldValue = Object.get(values, name) || []
   return (
     <FastField
       name={name}
       label={label}
       component={FieldHelper.ReadonlyField}
+      printStyle={printStyle}
       humanValue={
         !_isEmpty(fieldValue) && (
           <Table id={`${name}-value`} striped condensed hover responsive>
@@ -623,7 +640,8 @@ const ReadonlyArrayOfAnetObjectsField = ({ name, label, values }) => {
 ReadonlyArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired
+  values: PropTypes.object.isRequired,
+  printStyle: PropTypes.object
 }
 
 const FIELD_COMPONENTS = {
@@ -911,6 +929,7 @@ export const ReadonlyCustomFields = ({
             name={fieldName}
             label={fieldProps.label}
             vertical={fieldProps.vertical}
+            printStyle={printStyle}
             component={FieldHelper.ReadonlyField}
             humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
           />
