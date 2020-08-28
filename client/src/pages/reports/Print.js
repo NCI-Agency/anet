@@ -16,18 +16,17 @@ import anetLogo from "resources/logo.png"
 import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
-import "./Print.css"
 
-const PrintReportPage = ({ report, setPrintDone }) => {
+const PrintReportView = ({ report, setPrintDone }) => {
   if (_isEmpty(report)) {
-    return <PrintPageHeader setPrintDone={setPrintDone} noReport />
+    return <PrintViewHeader setPrintDone={setPrintDone} noReport />
   }
 
   const draftAttr = report.isDraft() ? "draft" : "not-draft"
   return (
     <React.Fragment>
-      <PrintPageHeader onPrintClick={printReport} setPrintDone={setPrintDone} />
-      <div css={PRINT_PAGE_STYLE} className="print-page" data-draft={draftAttr}>
+      <PrintViewHeader onPrintClick={printReport} setPrintDone={setPrintDone} />
+      <div css={PRINT_VIEW_STYLE} className="print-view" data-draft={draftAttr}>
         <ReportHeaderContent report={report} />
         <PrintTable>
           <PrintRow
@@ -364,7 +363,7 @@ const PrintReportPage = ({ report, setPrintDone }) => {
   }
 }
 
-PrintReportPage.propTypes = {
+PrintReportView.propTypes = {
   report: PropTypes.object,
   setPrintDone: PropTypes.func
 }
@@ -372,7 +371,7 @@ PrintReportPage.propTypes = {
 // people without organization at the end
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
-const PRINT_PAGE_STYLE = css`
+const PRINT_VIEW_STYLE = css`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
@@ -433,7 +432,7 @@ const SUBTITLE_STYLE = css`
   }
 `
 
-const PrintPageHeader = ({ onPrintClick, setPrintDone, noReport }) => {
+const PrintViewHeader = ({ onPrintClick, setPrintDone, noReport }) => {
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
@@ -461,13 +460,13 @@ const PrintPageHeader = ({ onPrintClick, setPrintDone, noReport }) => {
   )
 }
 
-PrintPageHeader.propTypes = {
+PrintViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
   setPrintDone: PropTypes.func,
   noReport: PropTypes.bool
 }
 
-PrintPageHeader.defaultProps = {
+PrintViewHeader.defaultProps = {
   noReport: false
 }
 
@@ -714,4 +713,4 @@ const WORKFLOW_STYLE = css`
   }
 `
 
-export default PrintReportPage
+export default PrintReportView

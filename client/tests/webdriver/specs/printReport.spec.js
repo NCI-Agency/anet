@@ -19,6 +19,12 @@ describe("Show print report page", () => {
       expect(printButtonText).to.equal("Print")
       expect(webViewButtonText).to.equal("Web View")
     })
+    it("Web View button should remove print view to web view", () => {
+      const webViewButton = ShowReport.webViewButton
+      webViewButton.click()
+      expect(ShowReport.printView.isDisplayed()).to.equal(false)
+      expect(ShowReport.printViewButton.isDisplayed()).to.equal(true)
+    })
 
     it("Printable report banner should have correct text", () => {
       const printBannerText = ShowReport.printBanner.getText()

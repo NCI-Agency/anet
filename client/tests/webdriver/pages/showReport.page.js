@@ -9,6 +9,10 @@ class ShowReport extends Page {
     return browser.$("*=1.2.B").getAttribute("href")
   }
 
+  get printView() {
+    return browser.$(".print-view")
+  }
+
   get printViewButton() {
     return browser.$("button[value='printView'")
   }
@@ -22,11 +26,11 @@ class ShowReport extends Page {
   }
 
   get printableReportFields() {
-    return browser.$$(".print-page .reportField > th")
+    return browser.$$(".print-view .reportField > th")
   }
 
   get printBanner() {
-    return browser.$(".print-page .banner")
+    return browser.$(".print-view .banner")
   }
 
   get printTitle() {
