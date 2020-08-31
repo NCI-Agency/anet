@@ -37,7 +37,6 @@ import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
-import CompactReportView from "pages/reports/Compact"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -282,7 +281,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
-  const [shouldPrint, setShouldPrint] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -385,14 +383,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       initialValues={report}
     >
       {({ isValid, setFieldValue, values }) => {
-        if (report && shouldPrint) {
-          return (
-            <CompactReportView
-              report={report}
-              setPrintDone={() => setShouldPrint(false)}
-            />
-          )
-        }
         const action = (
           <div>
             {canEmail && (
@@ -402,9 +392,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               value="printView"
               type="button"
               bsStyle="primary"
-              onClick={onPrintClick}
+              onClick={onCompactClick}
             >
-              Print View
+              Compact View
             </Button>
             {canEdit && (
               <LinkTo modelType="Report" model={report} edit button="primary">
@@ -982,8 +972,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     setShowEmailModal(!showEmailModal)
   }
 
-  function onPrintClick() {
-    setShouldPrint(true)
+  function onCompactClick() {
+    if (!_isEmpty(report)) {
+      history.push(`${report.uuid}/compact`, { report })
+    }
   }
 
   function handleEmailValidation(value) {

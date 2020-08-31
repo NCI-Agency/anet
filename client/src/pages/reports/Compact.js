@@ -1,129 +1,175 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core"
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
 import { CompactRowReportWorkflow } from "components/ReportWorkflow"
 import {
   CompactSecurityBanner,
   SETTING_KEY_COLOR
 } from "components/SecurityBanner"
+import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button } from "react-bootstrap"
-import { Link, useLocation } from "react-router-dom"
+import { connect } from "react-redux"
+import { Link, useHistory, useLocation } from "react-router-dom"
 import anetLogo from "resources/logo.png"
 import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
-const CompactReportView = ({ report, setPrintDone }) => {
-  if (_isEmpty(report)) {
-    return <CompactViewHeader setPrintDone={setPrintDone} noReport />
+const CompactReportView = ({ pageDispatchers }) => {
+  const location = useLocation()
+  const data = new Report(location.state)
+  const history = useHistory()
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    pageDispatchers
+  })
+  let report
+  if (!data) {
+    report = new Report()
+  } else {
+    data.report.tasks = Task.fromArray(data.report.tasks)
+    data.report.attendees = Person.fromArray(data.report.attendees)
+    data.report.to = ""
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.report.customFields
+    )
+    report = new Report(data.report)
   }
-
+  if (_isEmpty(report)) {
+    return (
+      <CompactViewHeader returnToDefualtPage={returnToDefualtPage} noReport />
+    )
+  }
   const draftAttr = report.isDraft() ? "draft" : "not-draft"
   return (
-    <React.Fragment>
-      <CompactViewHeader
-        onPrintClick={printReport}
-        setPrintDone={setPrintDone}
-      />
-      <div css={PRINT_VIEW_STYLE} className="print-view" data-draft={draftAttr}>
-        <CompactTableHeaderContent report={report} />
-        <CompactTable>
-          <CompactRow
-            rowType={ROW_TYPES.titleLike}
-            style={TITLE_STYLE}
-            label={getReportTitle()}
-            className="reportField"
+    <Formik
+      validationSchema={Report.yupSchema}
+      validateOnMount
+      initialValues={report}
+    >
+      {() => (
+        <React.Fragment>
+          <CompactViewHeader
+            onPrintClick={printReport}
+            returnToDefualtPage={returnToDefualtPage}
           />
-          <CompactRow
-            rowType={ROW_TYPES.titleLike}
-            style={SUBTITLE_STYLE}
-            label={getReportSubTitle()}
-            className="reportField"
-          />
-          <CompactRow
-            label="purpose"
-            content={report.intent}
-            className="reportField"
-          />
-
-          <CompactRow
-            label={Settings.fields.report.keyOutcomes || "key outcomes"}
-            content={report.keyOutcomes}
-            className="reportField"
-          />
-          <CompactRow
-            label={Settings.fields.report.nextSteps}
-            content={report.intent}
-            className="reportField"
-          />
-          <CompactRow
-            label="principals"
-            content={getPrincipalAttendees()}
-            className="reportField"
-          />
-          <CompactRow
-            label="advisors"
-            content={getAdvisorAttendees()}
-            className="reportField"
-          />
-          {!report.cancelled ? (
-            <CompactRow
-              label={Settings.fields.report.atmosphere}
-              content={
-                <React.Fragment>
-                  {utils.sentenceCase(report.atmosphere)}
-                  {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
-                </React.Fragment>
-              }
-              className="reportField"
-            />
-          ) : null}
-          <CompactRow
-            label={Settings.fields.task.subLevel.longLabel}
-            content={getTasksAndAssessments()}
-            className="reportField"
-          />
-          {report.cancelled ? (
-            <CompactRow
-              label="cancelled reason"
-              content={utils.sentenceCase(report.cancelledReason)}
-              className="reportField"
-            />
-          ) : null}
-          {report.showWorkflow() ? (
-            <CompactRowReportWorkflow
-              workflow={report.workflow}
-              compactStyle={WORKFLOW_STYLE}
-              className="reportField"
-            />
-          ) : null}
-          {report.reportText ? (
-            <CompactRow
-              label={Settings.fields.report.reportText}
-              content={parseHtmlWithLinkTo(report.reportText)}
-              className="reportField"
-            />
-          ) : null}
-          {Settings.fields.report.customFields ? (
-            <ReadonlyCustomFields
-              fieldsConfig={Settings.fields.report.customFields}
-              values={report}
-              vertical
-              compactStyle={{}}
-            />
-          ) : null}
-        </CompactTable>
-        <CompactTableFooterContent report={report} />
-      </div>
-    </React.Fragment>
+          <div
+            css={PRINT_VIEW_STYLE}
+            className="print-view"
+            data-draft={draftAttr}
+          >
+            <CompactTableHeaderContent report={report} />
+            <CompactTable>
+              <CompactRow
+                rowType={ROW_TYPES.titleLike}
+                style={TITLE_STYLE}
+                label={getReportTitle()}
+                className="reportField"
+              />
+              <CompactRow
+                rowType={ROW_TYPES.titleLike}
+                style={SUBTITLE_STYLE}
+                label={getReportSubTitle()}
+                className="reportField"
+              />
+              <CompactRow
+                label="purpose"
+                content={report.intent}
+                className="reportField"
+              />
+              <CompactRow
+                label={Settings.fields.report.keyOutcomes || "key outcomes"}
+                content={report.keyOutcomes}
+                className="reportField"
+              />
+              <CompactRow
+                label={Settings.fields.report.nextSteps}
+                content={report.intent}
+                className="reportField"
+              />
+              <CompactRow
+                label="principals"
+                content={getPrincipalAttendees()}
+                className="reportField"
+              />
+              <CompactRow
+                label="advisors"
+                content={getAdvisorAttendees()}
+                className="reportField"
+              />
+              {!report.cancelled ? (
+                <CompactRow
+                  label={Settings.fields.report.atmosphere}
+                  content={
+                    <React.Fragment>
+                      {utils.sentenceCase(report.atmosphere)}
+                      {report.atmosphereDetails &&
+                        ` – ${report.atmosphereDetails}`}
+                    </React.Fragment>
+                  }
+                  className="reportField"
+                />
+              ) : null}
+              <CompactRow
+                label={Settings.fields.task.subLevel.longLabel}
+                content={getTasksAndAssessments()}
+                className="reportField"
+              />
+              {report.cancelled ? (
+                <CompactRow
+                  label="cancelled reason"
+                  content={utils.sentenceCase(report.cancelledReason)}
+                  className="reportField"
+                />
+              ) : null}
+              {report.showWorkflow() ? (
+                <CompactRowReportWorkflow
+                  workflow={report.workflow}
+                  compactStyle={WORKFLOW_STYLE}
+                  className="reportField"
+                />
+              ) : null}
+              {report.reportText ? (
+                <CompactRow
+                  label={Settings.fields.report.reportText}
+                  content={parseHtmlWithLinkTo(report.reportText)}
+                  className="reportField"
+                />
+              ) : null}
+              {Settings.fields.report.customFields ? (
+                <ReadonlyCustomFields
+                  fieldsConfig={Settings.fields.report.customFields}
+                  values={report}
+                  vertical
+                  compactStyle={{}}
+                />
+              ) : null}
+            </CompactTable>
+            <CompactTableFooterContent report={report} />
+          </div>
+        </React.Fragment>
+      )}
+    </Formik>
   )
+
+  function returnToDefualtPage() {
+    history.push(`/reports/${report.uuid}`)
+  }
 
   function printReport() {
     if (typeof window.print === "function") {
@@ -331,7 +377,8 @@ const CompactReportView = ({ report, setPrintDone }) => {
       </table>
     )
   }
-
+  // first item is primary, grouped around that item
+  // people without organization at the end
   function sortGroupByOrganization(attendees) {
     if (attendees.length === 0) {
       return attendees
@@ -370,11 +417,9 @@ const CompactReportView = ({ report, setPrintDone }) => {
 }
 
 CompactReportView.propTypes = {
-  report: PropTypes.object,
-  setPrintDone: PropTypes.func
+  pageDispatchers: PageDispatchersPropType
 }
-// first item is primary, grouped around that item
-// people without organization at the end
+
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
 const PRINT_VIEW_STYLE = css`
@@ -385,7 +430,11 @@ const PRINT_VIEW_STYLE = css`
   table,
   tbody,
   tr {
-    width: 100%;
+    width: 100% !important;
+    background-color: transparent !important;
+  }
+  td {
+    background-color: transparent !important;
   }
   &[data-draft="draft"]:before {
     content: "DRAFT";
@@ -438,7 +487,7 @@ const SUBTITLE_STYLE = css`
   }
 `
 
-const CompactViewHeader = ({ onPrintClick, setPrintDone, noReport }) => {
+const CompactViewHeader = ({ onPrintClick, returnToDefualtPage, noReport }) => {
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
@@ -457,7 +506,7 @@ const CompactViewHeader = ({ onPrintClick, setPrintDone, noReport }) => {
           value="webView"
           type="button"
           bsStyle="primary"
-          onClick={setPrintDone}
+          onClick={returnToDefualtPage}
         >
           Web View
         </Button>
@@ -468,7 +517,7 @@ const CompactViewHeader = ({ onPrintClick, setPrintDone, noReport }) => {
 
 CompactViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
-  setPrintDone: PropTypes.func,
+  returnToDefualtPage: PropTypes.func,
   noReport: PropTypes.bool
 }
 
@@ -740,4 +789,4 @@ const WORKFLOW_STYLE = css`
   }
 `
 
-export default CompactReportView
+export default connect(null, mapPageDispatchersToProps)(CompactReportView)
