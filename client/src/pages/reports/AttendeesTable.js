@@ -1,24 +1,10 @@
 import LinkTo from "components/LinkTo"
+import RemoveButton from "components/RemoveButton"
 import { Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { Button, Label, Radio, Table } from "react-bootstrap"
-import REMOVE_ICON from "resources/delete.png"
+import { Label, Radio, Table } from "react-bootstrap"
 import "./AttendeesTable.css"
-
-const RemoveIcon = () => (
-  <img src={REMOVE_ICON} height={14} alt="Remove attendee" />
-)
-
-const RemoveButton = ({ title, handleOnClick }) => (
-  <Button bsStyle="link" title={title} onClick={handleOnClick}>
-    <RemoveIcon />
-  </Button>
-)
-RemoveButton.propTypes = {
-  title: PropTypes.string,
-  handleOnClick: PropTypes.func
-}
 
 const AttendeeDividerRow = () => (
   <tr className="attendee-divider-row">
@@ -161,7 +147,8 @@ const AttendeesTable = ({
           <td>
             <RemoveButton
               title="Remove attendee"
-              handleOnClick={() => onDelete(person)}
+              altText="Remove attendee"
+              onClick={() => onDelete(person)}
             />
           </td>
         )}
