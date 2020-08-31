@@ -1,12 +1,19 @@
 import _isEmpty from "lodash/isEmpty"
-import { PrintRow } from "pages/reports/Print"
+import { CompactRow } from "pages/reports/Compact"
 import PropTypes from "prop-types"
 import React from "react"
 import { Element } from "react-scroll"
-const Fieldset = ({ id, title, action, style, printStyle, ...otherProps }) => {
-  if (printStyle) {
+const Fieldset = ({
+  id,
+  title,
+  action,
+  style,
+  compactStyle,
+  ...otherProps
+}) => {
+  if (compactStyle) {
     return (
-      <PrintRow
+      <CompactRow
         label={title}
         content={
           !_isEmpty(otherProps) && (
@@ -15,7 +22,7 @@ const Fieldset = ({ id, title, action, style, printStyle, ...otherProps }) => {
             </table>
           )
         }
-        style={printStyle}
+        style={compactStyle}
       />
     )
   }
@@ -43,7 +50,7 @@ Fieldset.propTypes = {
   title: PropTypes.node,
   action: PropTypes.node,
   style: PropTypes.object,
-  printStyle: PropTypes.object
+  compactStyle: PropTypes.object
 }
 
 export default Fieldset

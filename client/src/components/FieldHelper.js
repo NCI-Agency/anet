@@ -1,7 +1,7 @@
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
-import { PrintRow } from "pages/reports/Print"
+import { CompactRow } from "pages/reports/Compact"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -69,7 +69,7 @@ const Field = ({
   extraColElem,
   addon,
   vertical,
-  printStyle,
+  compactStyle,
   extraAddon
 }) => {
   const id = getFieldId(field)
@@ -95,9 +95,9 @@ const Field = ({
     12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
 
-  if (printStyle) {
+  if (compactStyle) {
     return (
-      <PrintRow
+      <CompactRow
         label={label}
         content={
           <>
@@ -106,7 +106,7 @@ const Field = ({
             {children}
           </>
         }
-        style={printStyle}
+        style={compactStyle}
       />
     )
   }
@@ -150,7 +150,7 @@ Field.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   extraAddon: PropTypes.object,
-  printStyle: PropTypes.object
+  compactStyle: PropTypes.object
 }
 Field.defaultProps = {
   vertical: false // default direction of label and input = horizontal
@@ -245,7 +245,7 @@ export const ReadonlyField = ({
   addon,
   vertical,
   humanValue,
-  printStyle,
+  compactStyle,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -266,7 +266,7 @@ export const ReadonlyField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-      printStyle={printStyle}
+      compactStyle={compactStyle}
     />
   )
 }
@@ -279,7 +279,7 @@ ReadonlyField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   humanValue: PropTypes.any,
-  printStyle: PropTypes.object
+  compactStyle: PropTypes.object
 }
 
 export const SpecialField = ({
@@ -291,7 +291,7 @@ export const SpecialField = ({
   addon,
   vertical,
   widget,
-  printStyle,
+  compactStyle,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -308,7 +308,7 @@ export const SpecialField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-      printStyle={printStyle}
+      compactStyle={compactStyle}
     />
   )
 }
@@ -321,7 +321,7 @@ SpecialField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   widget: PropTypes.any,
-  printStyle: PropTypes.object
+  compactStyle: PropTypes.object
 }
 
 export const customEnumButtons = list => {

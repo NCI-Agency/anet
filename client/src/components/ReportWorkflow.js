@@ -2,7 +2,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
-import { PrintRow, ROW_TYPES } from "pages/reports/Print"
+import { CompactRow, ROW_TYPES } from "pages/reports/Compact"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
@@ -189,31 +189,31 @@ ReportCompactWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired
 }
 
-export const PrintCompactReportWorkflow = ({ workflow, printStyle }) => (
+export const CompactRowReportWorkflow = ({ workflow, compactStyle }) => (
   <Fieldset
     className="workflow-fieldset compact"
     title="Workflow"
-    printStyle={printStyle}
+    compactStyle={compactStyle}
   >
-    <PrintRow
+    <CompactRow
       rowType={ROW_TYPES.onlyData}
-      style={printStyle}
+      style={compactStyle}
       content={workflow.map(action => {
         const key = action.step
           ? `${action.createdAt}-${action.step.uuid}`
           : action.createdAt
-        return <PrintCompactReportAction action={action} key={key} />
+        return <CompactRowReportAction action={action} key={key} />
       })}
     />
   </Fieldset>
 )
 
-PrintCompactReportWorkflow.propTypes = {
+CompactRowReportWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired,
-  printStyle: PropTypes.object
+  compactStyle: PropTypes.object
 }
 
-const PrintCompactReportAction = ({ action }) => {
+const CompactRowReportAction = ({ action }) => {
   return (
     <div className="workflow-action">
       <ActionStatus action={action} />
@@ -221,6 +221,6 @@ const PrintCompactReportAction = ({ action }) => {
     </div>
   )
 }
-PrintCompactReportAction.propTypes = {
+CompactRowReportAction.propTypes = {
   action: PropTypes.object.isRequired
 }

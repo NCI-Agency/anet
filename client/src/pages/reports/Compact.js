@@ -3,9 +3,9 @@ import { css, jsx } from "@emotion/core"
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import { PrintCompactReportWorkflow } from "components/ReportWorkflow"
+import { CompactRowReportWorkflow } from "components/ReportWorkflow"
 import {
-  PrintSecurityBanner,
+  CompactSecurityBanner,
   SETTING_KEY_COLOR
 } from "components/SecurityBanner"
 import _isEmpty from "lodash/isEmpty"
@@ -20,58 +20,61 @@ import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
-const PrintReportView = ({ report, setPrintDone }) => {
+const CompactReportView = ({ report, setPrintDone }) => {
   if (_isEmpty(report)) {
-    return <PrintViewHeader setPrintDone={setPrintDone} noReport />
+    return <CompactViewHeader setPrintDone={setPrintDone} noReport />
   }
 
   const draftAttr = report.isDraft() ? "draft" : "not-draft"
   return (
     <React.Fragment>
-      <PrintViewHeader onPrintClick={printReport} setPrintDone={setPrintDone} />
+      <CompactViewHeader
+        onPrintClick={printReport}
+        setPrintDone={setPrintDone}
+      />
       <div css={PRINT_VIEW_STYLE} className="print-view" data-draft={draftAttr}>
-        <PrintTableHeaderContent report={report} />
-        <PrintTable>
-          <PrintRow
+        <CompactTableHeaderContent report={report} />
+        <CompactTable>
+          <CompactRow
             rowType={ROW_TYPES.titleLike}
             style={TITLE_STYLE}
             label={getReportTitle()}
             className="reportField"
           />
-          <PrintRow
+          <CompactRow
             rowType={ROW_TYPES.titleLike}
             style={SUBTITLE_STYLE}
             label={getReportSubTitle()}
             className="reportField"
           />
-          <PrintRow
+          <CompactRow
             label="purpose"
             content={report.intent}
             className="reportField"
           />
 
-          <PrintRow
+          <CompactRow
             label={Settings.fields.report.keyOutcomes || "key outcomes"}
             content={report.keyOutcomes}
             className="reportField"
           />
-          <PrintRow
+          <CompactRow
             label={Settings.fields.report.nextSteps}
             content={report.intent}
             className="reportField"
           />
-          <PrintRow
+          <CompactRow
             label="principals"
             content={getPrincipalAttendees()}
             className="reportField"
           />
-          <PrintRow
+          <CompactRow
             label="advisors"
             content={getAdvisorAttendees()}
             className="reportField"
           />
           {!report.cancelled ? (
-            <PrintRow
+            <CompactRow
               label={Settings.fields.report.atmosphere}
               content={
                 <React.Fragment>
@@ -82,27 +85,27 @@ const PrintReportView = ({ report, setPrintDone }) => {
               className="reportField"
             />
           ) : null}
-          <PrintRow
+          <CompactRow
             label={Settings.fields.task.subLevel.longLabel}
             content={getTasksAndAssessments()}
             className="reportField"
           />
           {report.cancelled ? (
-            <PrintRow
+            <CompactRow
               label="cancelled reason"
               content={utils.sentenceCase(report.cancelledReason)}
               className="reportField"
             />
           ) : null}
           {report.showWorkflow() ? (
-            <PrintCompactReportWorkflow
+            <CompactRowReportWorkflow
               workflow={report.workflow}
-              printStyle={WORKFLOW_STYLE}
+              compactStyle={WORKFLOW_STYLE}
               className="reportField"
             />
           ) : null}
           {report.reportText ? (
-            <PrintRow
+            <CompactRow
               label={Settings.fields.report.reportText}
               content={parseHtmlWithLinkTo(report.reportText)}
               className="reportField"
@@ -113,11 +116,11 @@ const PrintReportView = ({ report, setPrintDone }) => {
               fieldsConfig={Settings.fields.report.customFields}
               values={report}
               vertical
-              printStyle={{}}
+              compactStyle={{}}
             />
           ) : null}
-        </PrintTable>
-        <PrintTableFooterContent report={report} />
+        </CompactTable>
+        <CompactTableFooterContent report={report} />
       </div>
     </React.Fragment>
   )
@@ -228,13 +231,13 @@ const PrintReportView = ({ report, setPrintDone }) => {
             const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
             // return only name and objective if no assessment
             return (
-              <PrintRow
+              <CompactRow
                 key={task.uuid}
                 label={<LinkTo modelType={Task.resourceName} model={task} />}
                 content={
                   <table>
                     <tbody>
-                      <PrintRow
+                      <CompactRow
                         label={Settings.fields.task.topLevel.shortLabel}
                         content={
                           task.customFieldRef1 && (
@@ -253,7 +256,7 @@ const PrintReportView = ({ report, setPrintDone }) => {
                           fieldsConfig={taskInstantAssessmentConfig}
                           values={report}
                           vertical
-                          printStyle={{}}
+                          compactStyle={{}}
                         />
                       )}
                     </tbody>
@@ -281,7 +284,7 @@ const PrintReportView = ({ report, setPrintDone }) => {
               ? attendee.position?.organization?.shortName
               : prevDiffOrgName
             return (
-              <PrintRow
+              <CompactRow
                 key={attendee.uuid}
                 label={
                   <React.Fragment>
@@ -306,7 +309,7 @@ const PrintReportView = ({ report, setPrintDone }) => {
                           fieldsConfig={attendeeInstantAssessmentConfig}
                           values={report}
                           vertical
-                          printStyle={{}}
+                          compactStyle={{}}
                         />
                       </tbody>
                     </table>
@@ -366,7 +369,7 @@ const PrintReportView = ({ report, setPrintDone }) => {
   }
 }
 
-PrintReportView.propTypes = {
+CompactReportView.propTypes = {
   report: PropTypes.object,
   setPrintDone: PropTypes.func
 }
@@ -435,7 +438,7 @@ const SUBTITLE_STYLE = css`
   }
 `
 
-const PrintViewHeader = ({ onPrintClick, setPrintDone, noReport }) => {
+const CompactViewHeader = ({ onPrintClick, setPrintDone, noReport }) => {
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
@@ -463,13 +466,13 @@ const PrintViewHeader = ({ onPrintClick, setPrintDone, noReport }) => {
   )
 }
 
-PrintViewHeader.propTypes = {
+CompactViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
   setPrintDone: PropTypes.func,
   noReport: PropTypes.bool
 }
 
-PrintViewHeader.defaultProps = {
+CompactViewHeader.defaultProps = {
   noReport: false
 }
 
@@ -499,7 +502,7 @@ const BUTTONS_STYLE = css`
   }
 `
 
-const PrintTableHeaderContent = ({ report }) => {
+const CompactTableHeaderContent = ({ report }) => {
   const location = useLocation()
   const { appSettings } = useContext(AppContext)
   return (
@@ -518,11 +521,11 @@ const PrintTableHeaderContent = ({ report }) => {
   )
 }
 
-PrintTableHeaderContent.propTypes = {
+CompactTableHeaderContent.propTypes = {
   report: PropTypes.object
 }
 
-const PrintTableFooterContent = () => {
+const CompactTableFooterContent = () => {
   const { currentUser, appSettings } = useContext(AppContext)
   return (
     <div
@@ -603,7 +606,7 @@ const ClassificationBanner = () => {
         ${CLASSIFICATION_BANNER_STYLE}
       `}
     >
-      <PrintSecurityBanner />
+      <CompactSecurityBanner />
     </div>
   )
 }
@@ -617,7 +620,7 @@ const CLASSIFICATION_BANNER_STYLE = css`
     padding: 2px 4px;
   }
 `
-const PrintTable = ({ children }) => {
+const CompactTable = ({ children }) => {
   return (
     <table css={TABLE_STYLE}>
       <thead>
@@ -635,7 +638,7 @@ const PrintTable = ({ children }) => {
   )
 }
 
-PrintTable.propTypes = {
+CompactTable.propTypes = {
   children: PropTypes.node
 }
 
@@ -652,7 +655,7 @@ export const ROW_TYPES = {
   onlyData: "onlyData"
 }
 
-export const PrintRow = ({ label, content, rowType, ...otherProps }) => {
+export const CompactRow = ({ label, content, rowType, ...otherProps }) => {
   const { style, className } = otherProps
   const customStyle = css`
     ${ROW_STYLE};
@@ -688,7 +691,7 @@ export const PrintRow = ({ label, content, rowType, ...otherProps }) => {
   )
 }
 
-PrintRow.propTypes = {
+CompactRow.propTypes = {
   label: PropTypes.node,
   content: PropTypes.node,
   rowType: PropTypes.string
@@ -737,4 +740,4 @@ const WORKFLOW_STYLE = css`
   }
 `
 
-export default PrintReportView
+export default CompactReportView

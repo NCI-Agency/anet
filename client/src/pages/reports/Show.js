@@ -37,7 +37,7 @@ import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
 import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
-import ReportPrintView from "pages/reports/Print"
+import CompactReportView from "pages/reports/Compact"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -387,7 +387,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       {({ isValid, setFieldValue, values }) => {
         if (report && shouldPrint) {
           return (
-            <ReportPrintView
+            <CompactReportView
               report={report}
               setPrintDone={() => setShouldPrint(false)}
             />

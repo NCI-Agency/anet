@@ -48,7 +48,7 @@ const VersionBox = styled.h6`
   }
 `
 
-export const PrintSecurityBanner = () => {
+export const CompactSecurityBanner = () => {
   const { appSettings } = useContext(AppContext)
   return (
     <PrintBanner className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
