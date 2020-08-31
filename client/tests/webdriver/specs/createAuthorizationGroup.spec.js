@@ -31,7 +31,8 @@ describe("Create authorization group form page", () => {
         CreateAuthorizationGroup.statusInactiveButton.getAttribute("class")
       ).to.not.include("active")
       CreateAuthorizationGroup.statusInactiveButton.click()
-      expect($(".positions_table").isExisting()).to.equal(false)
+      // eslint-disable-next-line no-unused-expressions
+      expect($(".positions_table").isExisting()).to.be.false
       CreateAuthorizationGroup.positionsInput.click()
       CreateAuthorizationGroup.positionsInput.setValue(POSITION)
       CreateAuthorizationGroup.waitForPositionsAdvancedSelectToChange(
@@ -46,7 +47,8 @@ describe("Create authorization group form page", () => {
       // Advanced select input gets empty, the position is added to a table underneath
       expect(CreateAuthorizationGroup.positionsInput.getValue()).to.equal("")
       // positions table exists now
-      expect($(".positions_table").isExisting())
+      // eslint-disable-next-line no-unused-expressions
+      expect($(".positions_table").isExisting()).to.be.true
       CreateAuthorizationGroup.submitForm()
       CreateAuthorizationGroup.waitForAlertSuccessToLoad()
       const alertMessage = CreateAuthorizationGroup.alertSuccess.getText()

@@ -1,7 +1,7 @@
+import RemoveButton from "components/RemoveButton"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
-import REMOVE_ICON from "resources/delete.png"
 
 const AuthorizationGroupTable = ({
   authorizationGroups,
@@ -22,10 +22,12 @@ const AuthorizationGroupTable = ({
           <td>{ag.name}</td>
           <td>{ag.description}</td>
           {showDelete && (
-            <td onClick={() => onDelete(ag)}>
-              <span style={{ cursor: "pointer" }}>
-                <img src={REMOVE_ICON} height={14} alt="Remove group" />
-              </span>
+            <td>
+              <RemoveButton
+                title="Remove group"
+                altText="Remove group"
+                onClick={() => onDelete(ag)}
+              />
             </td>
           )}
         </tr>

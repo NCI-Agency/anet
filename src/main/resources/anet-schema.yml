@@ -72,7 +72,7 @@ $defs:
       type:
         title: value type field
         type: string
-        enum: [text, number, date, datetime, enum, enumset, array_of_objects, special_field]
+        enum: [text, number, date, datetime, enum, enumset, array_of_objects, anet_object, array_of_anet_objects, special_field]
       typeError:
         title: custom value for type error
         type: string
@@ -132,6 +132,8 @@ $defs:
         type: object
         additionalProperties:
           "$ref": "#/$defs/customField"
+      types:
+        type: array
       widget:
         type: string
         enum: [likertScale, richTextEditor, default]
@@ -173,6 +175,16 @@ $defs:
               additionalProperties:
                 "$ref": "#/$defs/customField"
           required: [addButtonLabel,objectLabel,objectFields]
+        - properties:
+            type:
+              enum: [anet_object, array_of_anet_objects]
+            types:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+                enum: [Location, Organization, Person, Position, Report, Task]
+            required: [types]
         - properties:
             type:
               enum: [special_field]
