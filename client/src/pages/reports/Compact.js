@@ -1,6 +1,8 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import API from "api"
+import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
@@ -23,21 +25,206 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { Link, useHistory, useLocation } from "react-router-dom"
+import { Link, useHistory, useLocation, useParams } from "react-router-dom"
 import anetLogo from "resources/logo.png"
 import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
 
+const GQL_GET_REPORT = gql`
+  query($uuid: String!) {
+    report(uuid: $uuid) {
+      uuid
+      intent
+      engagementDate
+      duration
+      atmosphere
+      atmosphereDetails
+      keyOutcomes
+      reportText
+      nextSteps
+      cancelledReason
+      releasedAt
+      state
+      location {
+        uuid
+        name
+      }
+      author {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+        position {
+          uuid
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            approvalSteps {
+              uuid
+              name
+              approvers {
+                uuid
+                name
+                person {
+                  uuid
+                  name
+                  rank
+                  role
+                  avatar(size: 32)
+                }
+              }
+            }
+          }
+        }
+      }
+      attendees {
+        uuid
+        name
+        primary
+        rank
+        role
+        status
+        endOfTourDate
+        avatar(size: 32)
+        position {
+          uuid
+          name
+          type
+          code
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
+      primaryAdvisor {
+        uuid
+      }
+      primaryPrincipal {
+        uuid
+      }
+      tasks {
+        uuid
+        shortName
+        longName
+        customFieldRef1 {
+          uuid
+          shortName
+        }
+        taskedOrganizations {
+          uuid
+          shortName
+        }
+        customFields
+      }
+      comments {
+        uuid
+        text
+        createdAt
+        updatedAt
+        author {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+      principalOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      advisorOrg {
+        uuid
+        shortName
+        longName
+        identificationCode
+        type
+      }
+      workflow {
+        type
+        createdAt
+        step {
+          uuid
+          name
+          approvers {
+            uuid
+            name
+            person {
+              uuid
+              name
+              rank
+              role
+              avatar(size: 32)
+            }
+          }
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+      approvalStep {
+        uuid
+        name
+        approvers {
+          uuid
+        }
+        nextStepUuid
+      }
+      tags {
+        uuid
+        name
+        description
+      }
+      reportSensitiveInformation {
+        uuid
+        text
+      }
+      authorizationGroups {
+        uuid
+        name
+        description
+      }
+      customFields
+    }
+  }
+`
+
 const CompactReportView = ({ pageDispatchers }) => {
-  const location = useLocation()
-  const data = new Report(location.state)
   const history = useHistory()
-  useBoilerplate({
+  const { uuid } = useParams()
+  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
+    uuid
+  })
+
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Report",
+    uuid,
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  if (done) {
+    return result
+  }
   let report
   if (!data) {
     report = new Report()
@@ -50,11 +237,15 @@ const CompactReportView = ({ pageDispatchers }) => {
     )
     report = new Report(data.report)
   }
+
   if (_isEmpty(report)) {
     return (
       <CompactViewHeader returnToDefualtPage={returnToDefualtPage} noReport />
     )
   }
+  // Get initial tasks/attendees instant assessments values
+  report = Object.assign(report, report.getTasksEngagementAssessments())
+  report = Object.assign(report, report.getAttendeesEngagementAssessments())
   const draftAttr = report.isDraft() ? "draft" : "not-draft"
   return (
     <Formik
