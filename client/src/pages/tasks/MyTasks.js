@@ -1,10 +1,11 @@
-import { setPagination } from "actions"
+import { DEFAULT_PAGE_PROPS, setPagination } from "actions"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
+  mapPageDispatchersToProps,
   PageDispatchersPropType,
-  mapPageDispatchersToProps
+  useBoilerplate
 } from "components/Page"
 import {
   SearchQueryPropType,
@@ -25,6 +26,11 @@ const MyTasks = ({
   pagination,
   setPagination
 }) => {
+  // Make sure we have a navigation menu
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    pageDispatchers
+  })
   const { currentUser } = useContext(AppContext)
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders

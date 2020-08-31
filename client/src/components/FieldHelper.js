@@ -46,7 +46,7 @@ const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   const id = getFieldId(field)
   const validationState = getFormGroupValidationState(field, form)
   return (
-    <FormGroup controlId={id} validationState={validationState}>
+    <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
       {widgetElem}
       {getHelpBlock(field, form)}
       {children}
@@ -95,7 +95,7 @@ const Field = ({
     12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
   return (
-    <FormGroup controlId={id} validationState={validationState}>
+    <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
       {vertical ? (
         <>
           <div>{label !== null && <ControlLabel>{label}</ControlLabel>}</div>

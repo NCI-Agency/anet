@@ -7,11 +7,12 @@ import {
   ReportDetailedOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -48,7 +49,7 @@ const widgetPropsReport = {
   overlayRenderRow: ReportDetailedOverlayRow,
   overlayColumns: ["Goal", "Author", "Updated"],
   filterDefs: entityFilters,
-  queryParams: {},
+  queryParams: {}, // allow any report, incl. one's own drafts
   fields: Models.Report.autocompleteQuery,
   addon: REPORTS_ICON
 }
@@ -58,7 +59,7 @@ const widgetPropsPeople = {
   overlayRenderRow: PersonDetailedOverlayRow,
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   filterDefs: peopleFilters,
-  queryParams: {},
+  queryParams: { status: Models.Person.STATUS.ACTIVE },
   fields: Models.Person.autocompleteQueryWithNotes,
   addon: PEOPLE_ICON
 }
@@ -68,7 +69,7 @@ const widgetPropsOrganization = {
   overlayRenderRow: OrganizationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: {},
+  queryParams: { status: Models.Organization.STATUS.ACTIVE },
   fields: Models.Organization.autocompleteQuery,
   addon: ORGANIZATIONS_ICON
 }
@@ -78,7 +79,7 @@ const widgetPropsPosition = {
   overlayRenderRow: PositionOverlayRow,
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
-  queryParams: {},
+  queryParams: { status: Models.Position.STATUS.ACTIVE },
   fields: Models.Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
@@ -113,10 +114,18 @@ const widgetTypeMapping = {
 }
 
 const MultiTypeAdvancedSelectComponent = ({
+  fieldName,
   onConfirm,
-  objectType: entityTypeArg
+  objectType,
+  entityTypes,
+  value,
+  isMultiSelect
 }) => {
-  const [entityType, setEntityType] = useState(entityTypeArg)
+  const [entityType, setEntityType] = useState(
+    objectType ||
+      Object.values(ENTITY_TYPES).find(et => entityTypes.includes(et)) ||
+      ENTITY_TYPES.REPORTS
+  )
   const [advancedSelectProps, setAdvancedSelectProps] = useState(
     widgetTypeMapping[entityType]
   )
@@ -124,30 +133,40 @@ const MultiTypeAdvancedSelectComponent = ({
     setEntityType(newEntityType)
     setAdvancedSelectProps(widgetTypeMapping[newEntityType])
   }
-  let searchPlaceholder = ""
+  const searchPlaceholder = useMemo(() => {
+    const [key] = Object.entries(ENTITY_TYPES).find(
+      ([, et]) => et === entityType
+    )
+    const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
+    return "Find " + entityLabel.toLowerCase()
+  }, [entityType])
+  const SelectComponent = isMultiSelect
+    ? AdvancedMultiSelect
+    : AdvancedSingleSelect
+  const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
   return (
     <>
-      <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
-        {Object.entries(ENTITY_TYPES).map((key, value) => {
-          const entityName = key[1]
-          const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key[0]]]
-          if (entityName === entityType) {
-            searchPlaceholder = "Find " + entityLabel.toLowerCase()
-          }
-          return (
-            <Button key={entityName} value={entityName}>
-              {entityLabel}
-            </Button>
-          )
-        })}
-      </ButtonToggleGroup>
+      {entityTypes.length > 1 && (
+        <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
+          {Object.entries(ENTITY_TYPES)
+            .filter(([, et]) => entityTypes.includes(et))
+            .map(([key, entityName], value) => {
+              const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
+              return (
+                <Button key={entityName} value={entityName}>
+                  {entityLabel}
+                </Button>
+              )
+            })}
+        </ButtonToggleGroup>
+      )}
 
-      <AdvancedSingleSelect
+      <SelectComponent
         autofocus="true"
-        fieldName="entitySelect"
+        fieldName={fieldName}
         fieldLabel="Search in ANET:"
         placeholder={searchPlaceholder}
-        value={{}}
+        value={value}
         showEmbedded
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
@@ -157,17 +176,24 @@ const MultiTypeAdvancedSelectComponent = ({
         queryParams={advancedSelectProps.queryParams}
         fields={advancedSelectProps.fields}
         addon={advancedSelectProps.addon}
+        {...extraSelectProps}
       />
     </>
   )
 }
 
 MultiTypeAdvancedSelectComponent.propTypes = {
+  fieldName: PropTypes.string,
   onConfirm: PropTypes.func,
-  objectType: PropTypes.string
+  objectType: PropTypes.string,
+  entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  isMultiSelect: PropTypes.bool.isRequired
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
-  objectType: ENTITY_TYPES.REPORTS
+  fieldName: "entitySelect",
+  entityTypes: Object.values(ENTITY_TYPES),
+  isMultiSelect: false
 }
 
 export default MultiTypeAdvancedSelectComponent
