@@ -7,6 +7,8 @@ describe("Show print report page", () => {
     MyReports.open()
     ShowReport.openAsAdminUser(MyReports.reportWithAssessmentsUrl)
     ShowReport.compactViewButton.click()
+    ShowReport.compactView.waitForExist()
+    ShowReport.compactView.waitForDisplayed()
   })
   describe("When on the print report page", () => {
     it("Web View button should remove print view to web view", () => {
