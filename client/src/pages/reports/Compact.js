@@ -69,8 +69,8 @@ const CompactReportView = ({ pageDispatchers }) => {
             returnToDefualtPage={returnToDefualtPage}
           />
           <div
-            css={PRINT_VIEW_STYLE}
-            className="print-view"
+            css={COMPACT_VIEW_STYLE}
+            className="compact-view"
             data-draft={draftAttr}
           >
             <CompactTableHeaderContent report={report} />
@@ -317,7 +317,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   }
 
   function getAttendeesAndAssessments(attendees) {
-    // to keep track of different organization, if it is same consecutively, don't print for compactness
+    // to keep track of different organization, if it is same consecutively, don't show for compactness
     let prevDiffOrgName = ""
     return (
       <table>
@@ -422,7 +422,7 @@ CompactReportView.propTypes = {
 
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
-const PRINT_VIEW_STYLE = css`
+const COMPACT_VIEW_STYLE = css`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
@@ -490,7 +490,9 @@ const SUBTITLE_STYLE = css`
 const CompactViewHeader = ({ onPrintClick, returnToDefualtPage, noReport }) => {
   return (
     <header css={HEADER_STYLE}>
-      <h3 css={HEADER_TITLE_STYLE}>Printable Version</h3>
+      <h3 css={HEADER_TITLE_STYLE} value="title">
+        Compact Version
+      </h3>
       <div css={BUTTONS_STYLE}>
         {!noReport && (
           <Button

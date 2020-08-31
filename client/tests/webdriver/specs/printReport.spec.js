@@ -6,14 +6,16 @@ describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open()
     ShowReport.openAsAdminUser(MyReports.reportWithAssessmentsUrl)
-    ShowReport.printViewButton.click()
+    ShowReport.compactViewButton.click()
   })
   describe("When on the print report page", () => {
     it("Web View button should remove print view to web view", () => {
       const webViewButton = ShowReport.webViewButton
       webViewButton.click()
-      expect(ShowReport.printView.isDisplayed()).to.equal(false)
-      expect(ShowReport.printViewButton.isDisplayed()).to.equal(true)
+      ShowReport.defaultReportView.waitForExist()
+      ShowReport.defaultReportView.waitForDisplayed()
+      expect(ShowReport.compactView.isDisplayed()).to.equal(false)
+      expect(ShowReport.compactViewButton.isDisplayed()).to.equal(true)
     })
     it("We should see the correct report fields", () => {
       const mustHaveFieldTexts = [
@@ -25,15 +27,15 @@ describe("Show print report page", () => {
         "atmospherics",
         "efforts"
       ]
-      const fields = ShowReport.printableReportFields
+      const fields = ShowReport.compactReportFields
       const fieldTexts = Array.from(fields).map(field => field.getText())
       mustHaveFieldTexts.forEach(mustHave => {
         expect(fieldTexts).to.contain(mustHave)
       })
     })
     it("We should see a title with the correct text", () => {
-      const title = ShowReport.printTitle.getText()
-      expect(title).to.equal("Printable Version")
+      const title = ShowReport.compactTitle.getText()
+      expect(title).to.equal("Compact Version")
     })
     it("We should see buttons with the correct text", () => {
       const printButtonText = ShowReport.printButton.getText()
@@ -42,10 +44,10 @@ describe("Show print report page", () => {
       expect(webViewButtonText).to.equal("Web View")
     })
     it("Printable report banner should have the correct text", () => {
-      const printBannerText = ShowReport.printBanner.getText()
+      const compactBannerText = ShowReport.compactBanner.getText()
       Home.openAsAdminUser()
       const bannerText = Home.securityBanner.getText()
-      expect(bannerText.includes(printBannerText)).to.equal(true)
+      expect(bannerText.includes(compactBannerText)).to.equal(true)
     })
   })
 })

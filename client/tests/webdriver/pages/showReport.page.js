@@ -9,32 +9,36 @@ class ShowReport extends Page {
     return browser.$("*=1.2.B").getAttribute("href")
   }
 
-  get printView() {
-    return browser.$(".print-view")
+  get defaultReportView() {
+    return browser.$(".report-show")
   }
 
-  get printViewButton() {
-    return browser.$("button[value='printView'")
+  get compactView() {
+    return browser.$(".compact-view")
+  }
+
+  get compactViewButton() {
+    return browser.$("button[value='compactView'")
+  }
+
+  get compactBanner() {
+    return browser.$(".compact-view .banner")
+  }
+
+  get compactTitle() {
+    return browser.$("header *[value='title'")
   }
 
   get printButton() {
     return browser.$("button[value='print'")
   }
 
+  get compactReportFields() {
+    return browser.$$(".compact-view .reportField > th")
+  }
+
   get webViewButton() {
     return browser.$("button[value='webView'")
-  }
-
-  get printableReportFields() {
-    return browser.$$(".print-view .reportField > th")
-  }
-
-  get printBanner() {
-    return browser.$(".print-view .banner")
-  }
-
-  get printTitle() {
-    return browser.$("h3")
   }
 }
 

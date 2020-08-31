@@ -51,13 +51,12 @@ const VersionBox = styled.h6`
 export const CompactSecurityBanner = () => {
   const { appSettings } = useContext(AppContext)
   return (
-    <PrintBanner className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
+    <CompactBanner className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
       {appSettings[SETTING_KEY_TEXT]}
-    </PrintBanner>
+    </CompactBanner>
   )
 }
-// override global print background-color stripping
-const PrintBanner = styled.div`
+const CompactBanner = styled.div`
   ${css};
 `
 
