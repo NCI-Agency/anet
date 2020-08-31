@@ -1,4 +1,4 @@
-import { ApolloProvider } from "@apollo/client"
+import { ApolloProvider } from "@apollo/react-hooks"
 import API from "api"
 import "bootstrap/dist/css/bootstrap.css"
 import { jumpToTop } from "components/Page"

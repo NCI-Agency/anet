@@ -1,11 +1,12 @@
-import { gql } from "@apollo/client"
 import API from "api"
+import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Organization } from "models"
@@ -13,7 +14,6 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
 
 const GQL_GET_ORGANIZATION_LIST = gql`
@@ -142,17 +142,12 @@ const BaseOrganizationTable = ({
                     <td>{org.identificationCode}</td>
                   )}
                   {showDelete && (
-                    <td
-                      onClick={() => onDelete(org)}
-                      id={"organizationDelete_" + org.uuid}
-                    >
-                      <span style={{ cursor: "pointer" }}>
-                        <img
-                          src={REMOVE_ICON}
-                          height={14}
-                          alt="Remove organization"
-                        />
-                      </span>
+                    <td id={"organizationDelete_" + org.uuid}>
+                      <RemoveButton
+                        title="Remove organization"
+                        altText="Remove organization"
+                        onClick={() => onDelete(org)}
+                      />
                     </td>
                   )}
                 </tr>

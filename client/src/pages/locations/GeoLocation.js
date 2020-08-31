@@ -1,9 +1,9 @@
+import RemoveButton from "components/RemoveButton"
 import React from "react"
 import PropTypes from "prop-types"
-import { Button, Col, ControlLabel, FormGroup } from "react-bootstrap"
+import { Col, ControlLabel, FormGroup } from "react-bootstrap"
 import { Field } from "formik"
 import { Location } from "models"
-import REMOVE_ICON from "resources/delete.png"
 import * as FieldHelper from "components/FieldHelper"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
@@ -77,19 +77,17 @@ const GeoLocation = ({
         </Col>
         {(lat || lng) && (
           <Col sm={1}>
-            <Button
-              style={{ width: "auto", margin: "8px 0 0 0", padding: "0" }}
-              bsStyle="link"
-              bsSize="sm"
+            <RemoveButton
+              title="Clear Location"
+              altText="Clear Location"
+              buttonStyle="link"
               onClick={() => {
                 setTouched(false) // prevent validation since lat, lng can be null together
                 setFieldValue("lat", null)
                 setFieldValue("lng", null)
               }}
               disabled={isSubmitting}
-            >
-              <img src={REMOVE_ICON} height={14} alt="Clear Location" />
-            </Button>
+            />
           </Col>
         )}
       </Col>

@@ -29,6 +29,7 @@ public class HttpsRedirectFilter implements Filter {
             request.getServerName(), 443, request.getRequestURI(), request.getQueryString());
         final HttpServletResponse response = (HttpServletResponse) res;
         response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        // scan:ignore — false positive, we only redirect from http to https
         response.setHeader(HttpHeaders.LOCATION, redirectUrl);
         return;
       }

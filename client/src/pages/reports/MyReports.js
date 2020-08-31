@@ -1,9 +1,11 @@
+import { DEFAULT_PAGE_PROPS } from "actions"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import { AnchorNavItem } from "components/Nav"
 import {
+  mapPageDispatchersToProps,
   PageDispatchersPropType,
-  mapPageDispatchersToProps
+  useBoilerplate
 } from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
@@ -20,6 +22,11 @@ import { Nav } from "react-bootstrap"
 import { connect } from "react-redux"
 
 const MyReports = ({ pageDispatchers, searchQuery }) => {
+  // Make sure we have a navigation menu
+  useBoilerplate({
+    pageProps: DEFAULT_PAGE_PROPS,
+    pageDispatchers
+  })
   const {
     currentUser: { uuid }
   } = useContext(AppContext)

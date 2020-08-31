@@ -1,7 +1,7 @@
 
 [![Build ANET](https://github.com/NCI-Agency/anet/workflows/Build%20ANET/badge.svg)](https://github.com/NCI-Agency/anet/actions)
 [![Build Status](https://dev.azure.com/advisornetwork/anet/_apis/build/status/NCI-Agency.anet)](https://dev.azure.com/advisornetwork/anet/_build/latest?definitionId=1)
-[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)](https://www.browserstack.com/automate/public-build/SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)
+[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=M0lYTkZHY0hkNmJoWEZ1MEJOS2diNkxUY3JuZXA5ZmhnNjRpTDVPVmoxTT0tLXRaZTE5c3JOVHZ6RXZzZG9BZWlSMEE9PQ==--a8bd7129094a0bce9d168e27a45b3d1a4a6c03dc)](https://www.browserstack.com/automate/public-build/M0lYTkZHY0hkNmJoWEZ1MEJOS2diNkxUY3JuZXA5ZmhnNjRpTDVPVmoxTT0tLXRaZTE5c3JOVHZ6RXZzZG9BZWlSMEE9PQ==--a8bd7129094a0bce9d168e27a45b3d1a4a6c03dc)
 [![Docker Pulls](https://img.shields.io/docker/pulls/ncia/anet-app-server.svg)](https://hub.docker.com/r/ncia/anet-app-server/)
 
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/context:javascript)

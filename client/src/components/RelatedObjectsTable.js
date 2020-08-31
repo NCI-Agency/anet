@@ -1,11 +1,11 @@
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
-import REMOVE_ICON from "resources/delete.png"
 import utils from "utils"
 
 const RelatedObjectsTable = ({
@@ -55,17 +55,12 @@ const RelatedObjectsTable = ({
                   currentObject?.relatedObjectUuid === nro.relatedObjectUuid ? (
                     <td />
                     ) : (
-                      <td
-                        onClick={() => onDelete(nro)}
-                        id={"relatedObjectsDelete_" + nro.relatedObjectUuid}
-                      >
-                        <span style={{ cursor: "pointer" }}>
-                          <img
-                            src={REMOVE_ICON}
-                            height={14}
-                            alt="Unlink object"
-                          />
-                        </span>
+                      <td id={"relatedObjectsDelete_" + nro.relatedObjectUuid}>
+                        <RemoveButton
+                          title="Unlink object"
+                          altText="Unlink object"
+                          onClick={() => onDelete(nro)}
+                        />
                       </td>
                     ))}
               </tr>

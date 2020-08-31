@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -7,6 +6,7 @@ import {
   setPagination
 } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -218,7 +218,10 @@ const Organizations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.organizationList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -316,7 +319,10 @@ const People = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.personList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -432,7 +438,10 @@ const Positions = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.positionList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -466,7 +475,7 @@ Positions.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
-const Tasks = ({
+export const Tasks = ({
   pageDispatchers,
   queryParams,
   setTotalCount,
@@ -503,7 +512,10 @@ const Tasks = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.taskList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -597,7 +609,10 @@ const Locations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.locationList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }

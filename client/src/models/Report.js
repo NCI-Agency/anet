@@ -1,6 +1,8 @@
 import Model, {
   createCustomFieldsSchema,
   NOTE_TYPE,
+  REPORT_RELATED_OBJECT_TYPE,
+  REPORT_STATE_PUBLISHED,
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -15,13 +17,13 @@ export default class Report extends Model {
   static resourceName = "Report"
   static listName = "reportList"
   static getInstanceName = "report"
-  static relatedObjectType = "reports"
+  static relatedObjectType = REPORT_RELATED_OBJECT_TYPE
 
   static STATE = {
     DRAFT: "DRAFT",
     PENDING_APPROVAL: "PENDING_APPROVAL",
     APPROVED: "APPROVED",
-    PUBLISHED: "PUBLISHED",
+    PUBLISHED: REPORT_STATE_PUBLISHED,
     REJECTED: "REJECTED",
     CANCELLED: "CANCELLED"
   }

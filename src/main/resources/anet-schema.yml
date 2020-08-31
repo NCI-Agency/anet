@@ -1,10 +1,10 @@
-"$schema": "http://json-schema.org/draft-07/schema#"
+"$schema": "https://json-schema.org/draft/2019-09/schema"
 "$id": https://raw.githubusercontent.com/NCI-Agency/anet/master/src/main/resources/anet-schema.json
 
 #########################################################
-### definitions
+### $defs
 #########################################################
-definitions:
+$defs:
 
 # base definition for a value with a description
   describedValue:
@@ -35,7 +35,7 @@ definitions:
 # definition for fields that allow free-form entry
   inputField:
     allOf:
-    - "$ref": "#/definitions/labeledField"
+    - "$ref": "#/$defs/labeledField"
     - properties:
         placeholder:
           type: string
@@ -43,20 +43,24 @@ definitions:
           description: Used in the UI where a placeholder for the field is shown (example input).
         componentClass:
           type: string
-          title: The bootstrap componet class
+          title: The bootstrap component class
           description: Used to determine how the user interface of this particular field looks.
+        style:
+          type: object
+          title: Optional styling for the bootstrap component class
+          description: Used for styling this field.
 
 # definition for fields that present a choice to be selected from
   choiceField:
     allOf:
-    - "$ref": "#/definitions/labeledField"
+    - "$ref": "#/$defs/labeledField"
     - properties:
         enum:
           type: object
           title: The placeholder for this field
           description: Used in the UI where a placeholder for the field is shown (example input).
           additionalProperties:
-            "$ref": "#/definitions/labeledField"
+            "$ref": "#/$defs/labeledField"
       required: [enum]
 
 # definition for custom fields
@@ -68,7 +72,7 @@ definitions:
       type:
         title: value type field
         type: string
-        enum: [text, number, date, datetime, enum, enumset, array_of_objects, special_field]
+        enum: [text, number, date, datetime, enum, enumset, array_of_objects, anet_object, array_of_anet_objects, special_field]
       typeError:
         title: custom value for type error
         type: string
@@ -103,21 +107,21 @@ definitions:
           widget:
             type: string
             enum: [pie, iqrBoxPlot, likertScale, default]
-        dependencies:
+        dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
           widget:
             oneOf:
             - properties:
                 widget:
-                  enum: [likertScale, countPerValue, default]
+                  enum: [pie, likertScale, default]
             - properties:
-                type:
+                widget:
                   enum: [iqrBoxPlot]
                 aggregationType:
                   type: string
                   enum: [sum, avg, min, max]
               required: [aggregationType]
 # TODO: The following properties should not be here as these are only dependency fields.
-# I can't figure out yet why the schema validation will not pass without them
+# When we have proper handling of `unevaluatedProperties` this section can be removed.
       choices:
         type: object
       addButtonLabel:
@@ -127,7 +131,9 @@ definitions:
       objectFields:
         type: object
         additionalProperties:
-          "$ref": "#/definitions/customField"
+          "$ref": "#/$defs/customField"
+      types:
+        type: array
       widget:
         type: string
         enum: [likertScale, richTextEditor, default]
@@ -145,7 +151,7 @@ definitions:
             label:
               type: string
 
-    dependencies:
+    dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
       type:
         oneOf:
         - properties:
@@ -167,8 +173,18 @@ definitions:
             objectFields:
               type: object
               additionalProperties:
-                "$ref": "#/definitions/customField"
+                "$ref": "#/$defs/customField"
           required: [addButtonLabel,objectLabel,objectFields]
+        - properties:
+            type:
+              enum: [anet_object, array_of_anet_objects]
+            types:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+                enum: [Location, Organization, Person, Position, Report, Task]
+            required: [types]
         - properties:
             type:
               enum: [special_field]
@@ -177,7 +193,7 @@ definitions:
               type: string
               enum: [likertScale, richTextEditor, default]
           required: [widget]
-          dependencies:
+          dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
             widget:
               oneOf:
               - properties:
@@ -224,7 +240,7 @@ definitions:
         title: questions to respond when assessing
         type: object
         additionalProperties:
-          "$ref": "#/definitions/customField"
+          "$ref": "#/$defs/customField"
 
 #########################################################
 ### schema root
@@ -355,13 +371,13 @@ properties:
             title: The short label for this field
             description: Used in the UI where a short label for tasks is shown.
           shortName:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           longLabel:
             type: string
             title: The long label for this field
             description: Used in the UI where a long label for tasks is shown.
           longName:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           topLevel:
             type: object
             additionalProperties: false
@@ -378,29 +394,29 @@ properties:
               assessments:
                 type: array
                 items:
-                  "$ref": "#/definitions/assessmentDef"
+                  "$ref": "#/$defs/assessmentDef"
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           plannedCompletion:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           customFieldRef1:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           customField:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           customFieldEnum1:
-            "$ref": "#/definitions/choiceField"
+            "$ref": "#/$defs/choiceField"
           customFieldEnum2:
-            "$ref": "#/definitions/choiceField"
+            "$ref": "#/$defs/choiceField"
           taskedOrganizations:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           responsiblePositions:
-            "$ref": "#/definitions/inputField"
+            "$ref": "#/$defs/inputField"
           customFields:
             type: object
             additionalProperties:
-              "$ref": "#/definitions/customField"
+              "$ref": "#/$defs/customField"
 
       report:
         type: object
@@ -442,7 +458,7 @@ properties:
           customFields:
             type: object
             additionalProperties:
-              "$ref": "#/definitions/customField"
+              "$ref": "#/$defs/customField"
 
       person:
         type: object
@@ -462,7 +478,9 @@ properties:
             title: The label for a person's domain username
             description: Used in the UI where a person's domain username is shown.
           emailAddress:
-            "$ref": "#/definitions/inputField"
+            type: string
+            title: The label for a person's email address
+            description: Used in the UI where a person's email address is shown.
           phoneNumber:
             type: string
             title: The label for a person's phone number
@@ -484,7 +502,7 @@ properties:
             uniqueItems: true
             minItems: 1
             items:
-              "$ref": "#/definitions/describedValue"
+              "$ref": "#/$defs/describedValue"
           gender:
             type: string
             title: The label for a person's gender
@@ -496,7 +514,7 @@ properties:
           customFields:
             type: object
             additionalProperties:
-              "$ref": "#/definitions/customField"
+              "$ref": "#/$defs/customField"
 
       position:
         type: object
@@ -561,7 +579,7 @@ properties:
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an advisor position.
               code:
-                "$ref": "#/definitions/inputField"
+                "$ref": "#/$defs/inputField"
 
           org:
             type: object
@@ -577,9 +595,9 @@ properties:
                 title: The name used to represent 'all advisor organizations'
                 description: Used in the UI to refer to all advisor organizations collectively.
               longName:
-                "$ref": "#/definitions/inputField"
+                "$ref": "#/$defs/inputField"
               identificationCode:
-                "$ref": "#/definitions/inputField"
+                "$ref": "#/$defs/inputField"
 
       principal:
         type: object
@@ -642,7 +660,7 @@ properties:
               assessments:
                 type: array
                 items:
-                  "$ref": "#/definitions/assessmentDef"
+                  "$ref": "#/$defs/assessmentDef"
 
           position:
             type: object
@@ -658,7 +676,7 @@ properties:
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a principal position.
               code:
-                "$ref": "#/definitions/inputField"
+                "$ref": "#/$defs/inputField"
 
           org:
             type: object
@@ -674,9 +692,9 @@ properties:
                 title: The name used to represent 'all principal organizations'
                 description: Used in the UI to refer to all principal organizations collectively.
               longName:
-                "$ref": "#/definitions/inputField"
+                "$ref": "#/$defs/inputField"
               identificationCode:
-                "$ref": "#/definitions/inputField"
+                "$ref": "#/$defs/inputField"
 
       superUser:
         type: object
@@ -826,7 +844,6 @@ properties:
 
   decisives:
     type: array
-
 
   automaticallyInactivateUsers:
     type: object
