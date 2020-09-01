@@ -121,6 +121,7 @@ const getAggregationFunction = (fieldConfig, aggregationWidget) => {
 
 const AggregationWidgetContainer = ({
   data,
+  dataType,
   fieldConfig,
   fieldName,
   period,
@@ -164,6 +165,7 @@ const AggregationWidgetContainer = ({
   const widgetElem = (
     <WidgetComponent
       values={values}
+      valueType={dataType}
       vertical={vertical}
       fieldConfig={fieldConfig}
       fieldName={fieldName}
@@ -200,6 +202,7 @@ const AggregationWidgetContainer = ({
 }
 AggregationWidgetContainer.propTypes = {
   data: PropTypes.any,
+  dataType: PropTypes.string,
   fieldConfig: PropTypes.object.isRequired,
   fieldName: PropTypes.string.isRequired,
   period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType]),

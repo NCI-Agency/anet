@@ -1,10 +1,10 @@
 import _clone from "lodash/clone"
 import _isEmpty from "lodash/isEmpty"
+import { Person, Report } from "models"
 import moment from "moment"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import Settings from "settings"
-
 export const aggregationWidgetPropTypes = {
   values: PropTypes.oneOfType([
     PropTypes.object,
@@ -17,6 +17,7 @@ export const aggregationWidgetPropTypes = {
       ])
     )
   ]),
+  valueType: PropTypes.string,
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
   vertical: PropTypes.bool,
@@ -187,4 +188,35 @@ export const likertScaleAndPieAggregation = (fieldName, fieldConfig, data) => {
       pieValues: countPerLevelAggregation(fieldName, fieldConfig, data)
     }
   }
+}
+
+export const CALENDAR_OBJECT_TYPES = {
+  REPORT: "Report"
+}
+
+export const GET_CALENDAR_EVENTS_FROM = {
+  [CALENDAR_OBJECT_TYPES.REPORT]: reportsToEvents
+}
+
+export function reportsToEvents(reports) {
+  return reports.map(r => {
+    const who =
+      (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+    const where =
+      (r.principalOrg && r.principalOrg.shortName) ||
+      (r.location && r.location.name) ||
+      ""
+    return {
+      title: who + "@" + where,
+      start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
+      end: moment(r.engagementDate)
+        .add(r.duration, "minutes")
+        .format("YYYY-MM-DD HH:mm"),
+      url: Report.pathFor(r),
+      classNames: [`event-${Report.getStateForClassName(r)}`],
+      extendedProps: { ...r },
+      allDay:
+        !Settings.engagementsIncludeTimeAndDuration || r.duration === null
+    }
+  })
 }

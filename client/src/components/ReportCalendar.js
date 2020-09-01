@@ -1,15 +1,13 @@
 import API from "api"
 import { gql } from "apollo-boost"
+import { reportsToEvents } from "components/aggregations/utils"
 import Calendar from "components/Calendar"
 import { PageDispatchersPropType } from "components/Page"
 import _isEqual from "lodash/isEqual"
-import { Person, Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { useHistory } from "react-router-dom"
-import Settings from "settings"
-
 const GQL_GET_REPORT_LIST = gql`
   query($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
@@ -94,28 +92,7 @@ const ReportCalendar = ({
     return apiPromise.current
   }
 }
-export function reportsToEvents(reports) {
-  return reports.map(r => {
-    const who =
-      (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
-    const where =
-      (r.principalOrg && r.principalOrg.shortName) ||
-      (r.location && r.location.name) ||
-      ""
-    return {
-      title: who + "@" + where,
-      start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
-      end: moment(r.engagementDate)
-        .add(r.duration, "minutes")
-        .format("YYYY-MM-DD HH:mm"),
-      url: Report.pathFor(r),
-      classNames: [`event-${Report.getStateForClassName(r)}`],
-      extendedProps: { ...r },
-      allDay:
-        !Settings.engagementsIncludeTimeAndDuration || r.duration === null
-    }
-  })
-}
+
 ReportCalendar.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,

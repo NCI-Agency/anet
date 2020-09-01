@@ -4,9 +4,9 @@ import "@fullcalendar/daygrid/main.css"
 import FullCalendar from "@fullcalendar/react"
 import {
   aggregationWidgetDefaultProps,
-  aggregationWidgetPropTypes
+  aggregationWidgetPropTypes,
+  GET_CALENDAR_EVENTS_FROM
 } from "components/aggregations/utils"
-import { reportsToEvents } from "components/ReportCalendar"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
@@ -15,6 +15,7 @@ const DATE_FORMAT = "YYYY-MM-DD"
 
 const CalendarWidget = ({
   values,
+  valueType,
   fieldConfig,
   fieldName,
   period,
@@ -23,7 +24,7 @@ const CalendarWidget = ({
   ...otherWidgetProps
 }) => {
   const calendarComponentRef = useRef(null)
-  const events = reportsToEvents(values)
+  const events = GET_CALENDAR_EVENTS_FROM[valueType](values)
   if (_isEmpty(events)) {
     return whenUnspecified
   }
