@@ -10,21 +10,20 @@ import {
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
+import { useHistory } from "react-router-dom"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
 const CalendarWidget = ({
   values,
   valueType,
-  fieldConfig,
-  fieldName,
   period,
   whenUnspecified,
-  hasPrevNext,
-  ...otherWidgetProps
+  hasPrevNext
 }) => {
   const calendarComponentRef = useRef(null)
   const events = GET_CALENDAR_EVENTS_FROM[valueType](values)
+  const history = useHistory()
   if (_isEmpty(events)) {
     return whenUnspecified
   }
@@ -57,6 +56,11 @@ const CalendarWidget = ({
       aspectRatio={3} // ratio of width-to-height
       ref={calendarComponentRef}
       events={events}
+      eventClick={info => {
+        history.push(info.event.url)
+        // Prevent browser navigation to the url
+        info.jsEvent.preventDefault()
+      }}
       eventOverlap
       eventLimit
     />

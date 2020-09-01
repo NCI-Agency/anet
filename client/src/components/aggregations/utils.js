@@ -5,6 +5,7 @@ import moment from "moment"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import Settings from "settings"
+
 export const aggregationWidgetPropTypes = {
   values: PropTypes.oneOfType([
     PropTypes.object,

@@ -8,6 +8,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { useHistory } from "react-router-dom"
+
 const GQL_GET_REPORT_LIST = gql`
   query($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
