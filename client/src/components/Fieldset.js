@@ -6,10 +6,20 @@ import { Element } from "react-scroll"
 const Fieldset = ({ id, title, action, style, ...otherProps }) => (
   <Element id={id} name={id} className="scroll-anchor-container" style={style}>
     {(title || action) && (
-      <h2 className="legend">
-        <span className="title-text">{title}</span>
-        {action && <small>{action}</small>}
-      </h2>
+      <div
+        className="legend"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "nowrap",
+          alignItems: "flex-start"
+        }}
+      >
+        <h4 className="title-text" style={{ flexGrow: 0 }}>
+          {title}
+        </h4>
+        {action}
+      </div>
     )}
 
     {!_isEmpty(otherProps) && <fieldset style={style} {...otherProps} />}

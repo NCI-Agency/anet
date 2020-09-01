@@ -116,6 +116,7 @@
     "closest": "0.0.1",
     "core-js": "3.6.5",
     "d3": "5.16.0",
+    "d3-flextree": "^2.1.1",
     "dagre": "0.8.5",
     "draft-convert": "2.1.10",
     "draft-js": "0.10.5",
@@ -168,6 +169,7 @@
     "redux": "4.0.5",
     "redux-persist": "6.0.0",
     "resize-observer-polyfill": "1.5.1",
+    "use-d3-transition": "https://github.com/VassilIordanov/use-d3-transition#4d1428ac774af4af81b4df8ae7c168a235fee1e8",
     "use-debounce": "3.4.3",
     "yup": "0.29.3"
   },
