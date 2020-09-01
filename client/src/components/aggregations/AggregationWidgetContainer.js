@@ -80,7 +80,7 @@ const DEFAULT_AGGREGATION_TYPE_PER_WIDGET_TYPE = {
   [AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK]: AGGREGATION_TYPE.REPORTS_BY_TASK,
   [AGGERGATION_WIDGET_TYPE.REPORTS_MAP]: AGGREGATION_TYPE.OBJECTS_LIST,
   [AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT]: AGGREGATION_TYPE.NUMBERS_LIST,
-  [AGGERGATION_WIDGET_TYPE.CALENDAR]: AGGREGATION_TYPE.COUNT_PER_DATE,
+  [AGGERGATION_WIDGET_TYPE.CALENDAR]: AGGREGATION_TYPE.OBJECTS_LIST,
   [AGGERGATION_WIDGET_TYPE.DEFAULT]: AGGREGATION_TYPE.VALUES_LIST
 }
 
@@ -121,6 +121,7 @@ const getAggregationFunction = (fieldConfig, aggregationWidget) => {
 
 const AggregationWidgetContainer = ({
   data,
+  dataType,
   fieldConfig,
   fieldName,
   period,
@@ -164,6 +165,7 @@ const AggregationWidgetContainer = ({
   const widgetElem = (
     <WidgetComponent
       values={values}
+      valueType={dataType}
       vertical={vertical}
       fieldConfig={fieldConfig}
       fieldName={fieldName}
@@ -200,6 +202,7 @@ const AggregationWidgetContainer = ({
 }
 AggregationWidgetContainer.propTypes = {
   data: PropTypes.any,
+  dataType: PropTypes.string,
   fieldConfig: PropTypes.object.isRequired,
   fieldName: PropTypes.string.isRequired,
   period: PropTypes.oneOfType([AssessmentPeriodPropType, PeriodPropType]),
