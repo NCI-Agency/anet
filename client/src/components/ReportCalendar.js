@@ -50,7 +50,6 @@ const ReportCalendar = ({
   const prevReportQuery = useRef(null)
   const apiPromise = useRef(null)
   const calendarComponentRef = useRef(null)
-
   return (
     <Calendar
       events={getEvents}
@@ -88,34 +87,35 @@ const ReportCalendar = ({
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      const results = reports.map(r => {
-        const who =
-          (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
-        const where =
-          (r.principalOrg && r.principalOrg.shortName) ||
-          (r.location && r.location.name) ||
-          ""
-
-        return {
-          title: who + "@" + where,
-          start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
-          end: moment(r.engagementDate)
-            .add(r.duration, "minutes")
-            .format("YYYY-MM-DD HH:mm"),
-          url: Report.pathFor(r),
-          classNames: [`event-${Report.getStateForClassName(r)}`],
-          extendedProps: { ...r },
-          allDay:
-            !Settings.engagementsIncludeTimeAndDuration || r.duration === null
-        }
-      })
+      const results = reportsToEvents(reports)
       hideLoading()
       return results
     })
     return apiPromise.current
   }
 }
-
+export function reportsToEvents(reports) {
+  return reports.map(r => {
+    const who =
+      (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+    const where =
+      (r.principalOrg && r.principalOrg.shortName) ||
+      (r.location && r.location.name) ||
+      ""
+    return {
+      title: who + "@" + where,
+      start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
+      end: moment(r.engagementDate)
+        .add(r.duration, "minutes")
+        .format("YYYY-MM-DD HH:mm"),
+      url: Report.pathFor(r),
+      classNames: [`event-${Report.getStateForClassName(r)}`],
+      extendedProps: { ...r },
+      allDay:
+        !Settings.engagementsIncludeTimeAndDuration || r.duration === null
+    }
+  })
+}
 ReportCalendar.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,

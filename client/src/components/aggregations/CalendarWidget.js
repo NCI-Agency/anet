@@ -6,6 +6,7 @@ import {
   aggregationWidgetDefaultProps,
   aggregationWidgetPropTypes
 } from "components/aggregations/utils"
+import { reportsToEvents } from "components/ReportCalendar"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
@@ -22,15 +23,7 @@ const CalendarWidget = ({
   ...otherWidgetProps
 }) => {
   const calendarComponentRef = useRef(null)
-  const events = Object.entries(Object.without(values, null)).map(
-    ([key, value]) => {
-      return {
-        title: `${value} events`,
-        start: key,
-        end: key
-      }
-    }
-  )
+  const events = reportsToEvents(values)
   if (_isEmpty(events)) {
     return whenUnspecified
   }
