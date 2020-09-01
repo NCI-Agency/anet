@@ -278,7 +278,7 @@ export default class Person extends Model {
     if (this.rank) {
       return this.rank + " " + this.name
     } else {
-      return this.name || this.uuid
+      return this.name || this.domainUsername || this.uuid
     }
   }
 

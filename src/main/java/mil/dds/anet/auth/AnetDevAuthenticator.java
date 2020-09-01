@@ -37,7 +37,7 @@ public class AnetDevAuthenticator implements Authenticator<BasicCredentials, Per
       if (credentials.getUsername().equals(credentials.getPassword())) {
         // Special development mechanism to perform a 'first login'.
         Person newUser = new Person();
-        newUser.setName(credentials.getUsername());
+        newUser.setName("");
         newUser.setRole(Role.ADVISOR);
         newUser.setDomainUsername(credentials.getUsername());
         newUser.setPendingVerification(true);
