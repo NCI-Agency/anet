@@ -757,7 +757,8 @@ const ReportForm = ({
                       filterDefs={attendeesFilters}
                       objectType={Person}
                       queryParams={{
-                        status: Person.STATUS.ACTIVE
+                        status: Person.STATUS.ACTIVE,
+                        pendingVerification: false
                       }}
                       fields={Person.autocompleteQuery}
                       addon={PEOPLE_ICON}

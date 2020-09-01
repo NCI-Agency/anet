@@ -99,6 +99,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
 
   const personSearchQuery = {
     status: Person.STATUS.ACTIVE,
+    pendingVerification: false,
     role:
       position.type === Position.TYPE.PRINCIPAL
         ? Person.ROLE.PRINCIPAL
