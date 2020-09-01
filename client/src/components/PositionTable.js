@@ -1,11 +1,12 @@
-import { gql } from "@apollo/client"
 import API from "api"
+import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Position } from "models"
@@ -13,7 +14,6 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import REMOVE_ICON from "resources/delete.png"
 import utils from "utils"
 
 const GQL_GET_POSITION_LIST = gql`
@@ -171,17 +171,12 @@ const BasePositionTable = ({
                   </td>
                   <td>{utils.sentenceCase(pos.status)}</td>
                   {showDelete && (
-                    <td
-                      onClick={() => onDelete(pos)}
-                      id={"positionDelete_" + pos.uuid}
-                    >
-                      <span style={{ cursor: "pointer" }}>
-                        <img
-                          src={REMOVE_ICON}
-                          height={14}
-                          alt="Remove position"
-                        />
-                      </span>
+                    <td id={"positionDelete_" + pos.uuid}>
+                      <RemoveButton
+                        title="Remove position"
+                        altText="Remove position"
+                        onClick={() => onDelete(pos)}
+                      />
                     </td>
                   )}
                 </tr>

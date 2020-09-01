@@ -4,33 +4,26 @@ import "@fullcalendar/daygrid/main.css"
 import FullCalendar from "@fullcalendar/react"
 import {
   aggregationWidgetDefaultProps,
-  aggregationWidgetPropTypes
+  aggregationWidgetPropTypes,
+  GET_CALENDAR_EVENTS_FROM
 } from "components/aggregations/utils"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
+import { useHistory } from "react-router-dom"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
 const CalendarWidget = ({
   values,
-  fieldConfig,
-  fieldName,
+  valueType,
   period,
   whenUnspecified,
-  hasPrevNext,
-  ...otherWidgetProps
+  hasPrevNext
 }) => {
   const calendarComponentRef = useRef(null)
-  const events = Object.entries(Object.without(values, null)).map(
-    ([key, value]) => {
-      return {
-        title: `${value} events`,
-        start: key,
-        end: key
-      }
-    }
-  )
+  const events = GET_CALENDAR_EVENTS_FROM[valueType](values)
+  const history = useHistory()
   if (_isEmpty(events)) {
     return whenUnspecified
   }
@@ -63,6 +56,11 @@ const CalendarWidget = ({
       aspectRatio={3} // ratio of width-to-height
       ref={calendarComponentRef}
       events={events}
+      eventClick={info => {
+        history.push(info.event.url)
+        // Prevent browser navigation to the url
+        info.jsEvent.preventDefault()
+      }}
       eventOverlap
       eventLimit
     />

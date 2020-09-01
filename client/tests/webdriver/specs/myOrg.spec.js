@@ -2,8 +2,8 @@ import { expect } from "chai"
 import Home from "../pages/home.page"
 import MyOrg from "../pages/myOrg.page"
 
-describe("My organization page", () => {
-  beforeEach("Open the my organization page", () => {
+describe("My Organization page", () => {
+  beforeEach("Open the My Organization page", () => {
     Home.openAsAdminUser()
     const myOrgUrl = Home.myOrgLink.getAttribute("href")
     MyOrg.openAsAdminUser(myOrgUrl)

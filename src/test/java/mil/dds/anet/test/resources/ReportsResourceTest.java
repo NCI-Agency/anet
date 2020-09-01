@@ -339,8 +339,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     } catch (BadRequestException expectedException) {
     }
 
-    logger.debug("Expecting report {} in step {} because of org {} on author {}", new Object[] {
-        returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author.getUuid()});
+    logger.debug("Expecting report {} in step {} because of org {} on author {}",
+        new Object[] {returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author});
     assertThat(returned.getApprovalStepUuid()).isEqualTo(approval.getUuid());
 
     // verify the location on this report

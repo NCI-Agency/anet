@@ -362,9 +362,8 @@ public class ReportResource {
         }
         break;
       case PUBLISHED:
-        AnetAuditLogger.log(
-            "attempt to edit published report {} by editor {} (uuid: {}) was forbidden",
-            report.getUuid(), editor.getName(), editor.getUuid());
+        AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
+            report.getUuid(), editor);
         throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
       default:
         throw new WebApplicationException("Unknown report state", Status.FORBIDDEN);
@@ -450,8 +449,7 @@ public class ReportResource {
       logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
-    AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(),
-        r.loadAuthor(engine.getContext()).join(), r.getAuthorUuid());
+    AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), r.getAuthorUuid());
     // GraphQL mutations *have* to return something, we return the report
     return r;
   }
@@ -487,8 +485,8 @@ public class ReportResource {
         .canUserApproveStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
         .join();
     if (!canApprove) {
-      logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(),
-          r.getUuid(), step.getUuid());
+      logger.info("User {} cannot approve report UUID {} for step UUID {}", approver, r.getUuid(),
+          step.getUuid());
       throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
     }
 
@@ -505,8 +503,7 @@ public class ReportResource {
       engine.getCommentDao().insert(comment1);
     }
 
-    AnetAuditLogger.log("Report {} approved by {} (uuid: {})", r.getUuid(), approver.getName(),
-        approver.getUuid());
+    AnetAuditLogger.log("Report {} approved by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
     return r;
   }
@@ -533,8 +530,8 @@ public class ReportResource {
           .canUserRejectStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
           .join();
       if (!canReject) {
-        logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}",
-            approver.getUuid(), r.getUuid(), step.getUuid());
+        logger.info("User {} cannot request changes to report UUID {} for step UUID {}", approver,
+            r.getUuid(), step.getUuid());
         throw new WebApplicationException("User cannot request changes to report",
             Status.FORBIDDEN);
       }
@@ -566,8 +563,7 @@ public class ReportResource {
     engine.getCommentDao().insert(reason1);
 
     sendReportRejectEmail(r, approver, reason1);
-    AnetAuditLogger.log("report {} has requested changes by {} (uuid: {})", r.getUuid(),
-        approver.getName(), approver.getUuid());
+    AnetAuditLogger.log("report {} has requested changes by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
     return r;
   }
@@ -596,7 +592,7 @@ public class ReportResource {
 
     // Only admin may publish a report, and only for non future engagements
     if (!AuthUtils.isAdmin(user) || r.isFutureEngagement()) {
-      logger.info("User {} cannot publish report UUID {}", user.getUuid(), r.getUuid());
+      logger.info("User {} cannot publish report UUID {}", user, r.getUuid());
       throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
     }
 
@@ -605,7 +601,7 @@ public class ReportResource {
       throw new WebApplicationException("Couldn't process report publication", Status.NOT_FOUND);
     }
 
-    AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());
+    AnetAuditLogger.log("report {} published by admin {}", r.getUuid(), user);
     // GraphQL mutations *have* to return something
     return r;
   }
@@ -670,8 +666,7 @@ public class ReportResource {
     }
 
     assertCanDeleteReport(report, user);
-    AnetAuditLogger.log("report {} deleted by {} (uuid: {})", reportUuid, user.getName(),
-        user.getUuid());
+    AnetAuditLogger.log("report {} deleted by {}", reportUuid, user);
 
     return dao.delete(reportUuid);
   }
@@ -809,6 +804,7 @@ public class ReportResource {
 
       Template temp = freemarkerConfig.getTemplate(action.getTemplateName());
       StringWriter writer = new StringWriter();
+      // scan:ignore — false positive, we know which template we are processing
       temp.process(action.buildContext(context), writer);
 
       return writer.toString();

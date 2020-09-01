@@ -1,9 +1,9 @@
-import { gql } from "@apollo/client"
 import API from "api"
+import { gql } from "apollo-boost"
 import ReportsMapWidget from "components/aggregations/ReportsMapWidget"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import PropTypes from "prop-types"

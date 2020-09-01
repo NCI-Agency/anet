@@ -321,6 +321,7 @@ dictionary:
         assessments:
           type: array_of_objects
           label: Assessments definition
+          helpText: Here you can add as many assessments as needed
           addButtonLabel: Add an assessment
           objectLabel: Assessment
           objectFields:
@@ -372,10 +373,24 @@ dictionary:
       keyOutcomes: Key outcomes
       reportText: Key details
       customFields:
+        relatedReport:
+          type: anet_object
+          label: Related report
+          helpText: Here you can link to a related report
+          types:
+            - Report
+        additionalEngagementNeeded:
+          type: array_of_anet_objects
+          label: Additional engagement needed for
+          helpText: Here you can link to people, positions and organizations that need an additional engagement
+          types:
+            - Person
+            - Position
+            - Organization
         multipleButtons:
           type: enumset
           label: Engagement types
-          helpText: Choose one or more of the engagement purposess
+          helpText: Choose one or more of the engagement purposes
           choices:
             train:
               label: Train
@@ -444,6 +459,7 @@ dictionary:
         itemsAgreed:
           type: array_of_objects
           label: Items Agreed To
+          helpText: Here you can add as many agreed-to items as needed
           addButtonLabel: Add an item
           objectLabel: Item agreed
           objectFields:
@@ -461,6 +477,7 @@ dictionary:
         assetsUsed:
           type: array_of_objects
           label: Assets used to assist
+          helpText: Here you can add all assets that were used
           addButtonLabel: Add an asset
           objectLabel: Asset used
           objectFields:
@@ -609,6 +626,7 @@ dictionary:
         arrayFieldName:
           type: array_of_objects
           label: Array of objects
+          helpText: Here you can add as many objects as needed
           addButtonLabel: Add an object
           objectLabel: Object
           objectFields:

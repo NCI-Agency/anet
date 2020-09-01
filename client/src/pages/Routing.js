@@ -25,6 +25,7 @@ import PersonEdit from "pages/people/Edit"
 import PersonNew from "pages/people/New"
 import PersonShow from "pages/people/Show"
 import PositionEdit from "pages/positions/Edit"
+import MyCounterparts from "pages/positions/MyCounterparts"
 import PositionNew from "pages/positions/New"
 import PositionShow from "pages/positions/Show"
 import ReportEdit from "pages/reports/Edit"
@@ -35,6 +36,7 @@ import ReportShow from "pages/reports/Show"
 import RollupShow from "pages/rollup/Show"
 import Search from "pages/Search"
 import TaskEdit from "pages/tasks/Edit"
+import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import { PAGE_URLS } from "pages/util"
@@ -53,10 +55,10 @@ const Routing = () => {
         path={PAGE_URLS.REPORTS}
         render={({ match: { url } }) => (
           <Switch>
+            <Route path={`${url}/mine`} component={MyReports} />
             <Route path={`${url}/new`} component={ReportNew} />
             <Route path={`${url}/:uuid/edit`} component={ReportEdit} />
             <Route path={`${url}/:uuid/min`} component={ReportMinimal} />
-            <Route path={`${url}/mine`} component={MyReports} />
             <Route path={`${url}/:uuid`} component={ReportShow} />
           </Switch>
         )}
@@ -98,6 +100,7 @@ const Routing = () => {
         path={PAGE_URLS.POSITIONS}
         render={({ match: { url } }) => (
           <Switch>
+            <Route path={`${url}/counterparts`} component={MyCounterparts} />
             <Route path={`${url}/new`} component={PositionNew} />
             <Route path={`${url}/:uuid/edit`} component={PositionEdit} />
             <Route path={`${url}/:uuid`} component={PositionShow} />
@@ -108,6 +111,7 @@ const Routing = () => {
         path={PAGE_URLS.TASKS}
         render={({ match: { url } }) => (
           <Switch>
+            <Route path={`${url}/mine`} component={MyTasks} />
             <Route path={`${url}/new`} component={TaskNew} />
             <Route path={`${url}/:uuid/edit`} component={TaskEdit} />
             <Route path={`${url}/:uuid`} component={TaskShow} />

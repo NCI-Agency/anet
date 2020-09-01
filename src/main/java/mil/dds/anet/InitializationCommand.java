@@ -93,7 +93,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     admin.setRole(Role.ADVISOR);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
-    System.out.println("... Person " + admin.getUuid() + " Saved!");
+    System.out.println("... Person " + admin + " Saved!");
 
     // Set Default Approval Chain.
     System.out.println("Setting you as the default approver...");

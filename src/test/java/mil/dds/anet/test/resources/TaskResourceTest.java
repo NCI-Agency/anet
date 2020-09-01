@@ -176,30 +176,42 @@ public class TaskResourceTest extends AbstractResourceTest {
     final List<Task> searchResults3 = searchObjects3.getList();
     assertThat(searchResults3).isNotEmpty();
 
-    // Autocomplete
-    query = new TaskSearchQuery();
-    query.setText("1.1*");
+    // Search by responsible position
+    final Position jackPosition = jack.getPosition();
+    query.setResponsiblePositionUuid(jackPosition.getUuid());
+    query.setText("");
     final AnetBeanList<Task> searchObjects4 =
         graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
     assertThat(searchObjects4).isNotNull();
     assertThat(searchObjects4.getList()).isNotEmpty();
     final List<Task> searchResults4 = searchObjects4.getList();
-    assertThat(searchResults4.stream().filter(p -> p.getShortName().equals("1.1")).count())
-        .isEqualTo(1);
-    assertThat(searchResults4.stream().filter(p -> p.getShortName().equals("1.1.A")).count())
-        .isEqualTo(1);
-    assertThat(searchResults4.stream().filter(p -> p.getShortName().equals("1.1.B")).count())
-        .isEqualTo(1);
+    assertThat(searchResults4).isNotEmpty();
 
-    query.setText("1.1.A*");
+    // Autocomplete
+    query = new TaskSearchQuery();
+    query.setText("1.1*");
     final AnetBeanList<Task> searchObjects5 =
         graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
     assertThat(searchObjects5).isNotNull();
     assertThat(searchObjects5.getList()).isNotEmpty();
     final List<Task> searchResults5 = searchObjects5.getList();
+    assertThat(searchResults5.stream().filter(p -> p.getShortName().equals("1.1")).count())
+        .isEqualTo(1);
     assertThat(searchResults5.stream().filter(p -> p.getShortName().equals("1.1.A")).count())
+        .isEqualTo(1);
+    assertThat(searchResults5.stream().filter(p -> p.getShortName().equals("1.1.B")).count())
+        .isEqualTo(1);
+
+    query.setText("1.1.A*");
+    final AnetBeanList<Task> searchObjects6 =
+        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    assertThat(searchObjects6).isNotNull();
+    assertThat(searchObjects6.getList()).isNotEmpty();
+    final List<Task> searchResults6 = searchObjects6.getList();
+    assertThat(searchResults6.stream().filter(p -> p.getShortName().equals("1.1.A")).count())
         .isEqualTo(1);
   }
 

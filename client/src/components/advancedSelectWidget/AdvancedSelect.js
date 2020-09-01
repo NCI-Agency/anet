@@ -1,6 +1,6 @@
-import { gql } from "@apollo/client"
 import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
 import API from "api"
+import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import UltimatePagination from "components/UltimatePagination"
 import _isEmpty from "lodash/isEmpty"
@@ -368,6 +368,7 @@ const AdvancedSelect = ({
                   value={searchTerms || ""}
                   placeholder={placeholder}
                   onChange={changeSearchTerms}
+                  onFocus={event => handleInteraction(true, event)}
                   inputRef={ref => {
                     searchInput.current = ref
                   }}
