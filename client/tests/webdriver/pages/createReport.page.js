@@ -115,10 +115,8 @@ class CreateReport extends Page {
   }
 
   waitForAlertToLoad() {
-    if (!this.alert.isDisplayed()) {
-      this.alert.waitForExist()
-      this.alert.waitForDisplayed()
-    }
+    this.alert.waitForExist()
+    this.alert.waitForDisplayed()
   }
 
   waitForAdvancedSelectToChange(item, value) {
