@@ -185,7 +185,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   public void loadDictionary() throws IOException, IllegalArgumentException {
     // Read and set anet-dictionary
-    final File file = new File(System.getProperty("user.dir") + "/" + getAnetDictionaryName());
+    final File file = new File(System.getProperty("user.dir"), getAnetDictionaryName());
     try (final InputStream inputStream = new FileInputStream(file)) {
       @SuppressWarnings("unchecked")
       final Map<String, Object> objectMap = yamlMapper.readValue(inputStream, Map.class);
@@ -216,9 +216,9 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
         logger.error("ANET schema [anet-schema.yml] not found");
         throw new IOException("ANET schema [anet-schema.yml] not found");
       } else {
-        final JsonSchemaFactory factory =
-            JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-                .objectMapper(yamlMapper).build();
+        final JsonSchemaFactory factory = JsonSchemaFactory
+            .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
+            .objectMapper(yamlMapper).build();
         final JsonSchema schema = factory.getSchema(inputStream);
         final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
         final Set<ValidationMessage> errors = schema.validate(anetDictionary);

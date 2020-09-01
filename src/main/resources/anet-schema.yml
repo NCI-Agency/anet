@@ -478,9 +478,7 @@ properties:
             title: The label for a person's domain username
             description: Used in the UI where a person's domain username is shown.
           emailAddress:
-            type: string
-            title: The label for a person's email address
-            description: Used in the UI where a person's email address is shown.
+            "$ref": "#/$defs/inputField"
           phoneNumber:
             type: string
             title: The label for a person's phone number
