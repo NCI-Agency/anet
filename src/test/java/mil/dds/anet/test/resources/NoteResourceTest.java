@@ -15,7 +15,6 @@ import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Task;
@@ -59,7 +58,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     final Position testPosition = new Position();
     testPosition.setName("a test position created by testDeleteDanglingPositionNote");
     testPosition.setType(PositionType.ADVISOR);
-    testPosition.setStatus(PositionStatus.INACTIVE);
+    testPosition.setStatus(Position.Status.INACTIVE);
     testPosition.setOrganization(admin.getPosition().getOrganization());
     final String testPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", testPosition, new TypeReference<GraphQlResponse<Position>>() {});
