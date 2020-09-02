@@ -1,4 +1,4 @@
-import { changeActiveDate } from "Calendar/actions"
+import { changeActiveDate } from "components/Calendar/actions"
 import { addMonths, addYears } from "date-fns"
 
 export function monthNextAction(dispatch, state) {

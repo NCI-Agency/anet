@@ -1,11 +1,12 @@
-import { changeActiveDate } from "Calendar/actions"
-import reducer, { initState } from "Calendar/utils/reducer"
-import Header from "Calendar/Views/Header"
-import MonthlyView from "Calendar/Views/MonthlyView"
-import PropTypes from "prop-types"
+import { changeActiveDate } from "components/Calendar/actions"
+import events from "components/Calendar/utils/dummyData"
+import reducer, { initState } from "components/Calendar/utils/reducer"
+import Header from "components/Calendar/Views/Header"
+import MonthlyView from "components/Calendar/Views/MonthlyView"
+// import PropTypes from "prop-types"
 import React, { useReducer } from "react"
 
-const Calendar = ({ events, views }) => {
+const Calendar = () => {
   const [state, dispatch] = useReducer(reducer, initState)
   return (
     <div className="Calendar">
@@ -14,6 +15,7 @@ const Calendar = ({ events, views }) => {
         prevAction={() => state.prevAction(dispatch, state)}
         nextAction={() => state.nextAction(dispatch, state)}
         todayAction={() => dispatch(changeActiveDate(new Date()))}
+        views={["Yearly", "Monthly"]}
       />
       <MonthlyView
         activeMonth={state.activeDate}
@@ -25,8 +27,8 @@ const Calendar = ({ events, views }) => {
   )
 }
 
-Calendar.propTypes = {
-  events: PropTypes.arrayOf(PropTypes.object),
-  views: PropTypes.object
-}
+// Calendar.propTypes = {
+//   events: PropTypes.arrayOf(PropTypes.object),
+//   views: PropTypes.object
+// }
 export default Calendar

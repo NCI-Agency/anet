@@ -1,9 +1,9 @@
 import {
   monthNextAction,
   monthPrevAction
-} from "Calendar/actions/buttonActions"
-import VIEWS from "Calendar/utils/constants"
-import { monthTitleFormat } from "Calendar/utils/formats"
+} from "components/Calendar/actions/buttonActions"
+import VIEWS from "components/Calendar/utils/constants"
+import { monthTitleFormat } from "components/Calendar/utils/formats"
 export function defaultNextAction(dispatch, state) {
   monthNextAction(dispatch, state)
 }

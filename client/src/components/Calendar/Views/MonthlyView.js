@@ -1,6 +1,6 @@
 import styled from "@emotion/styled"
-import { changeSelectedDay } from "Calendar/actions"
-import MonthDay from "Calendar/Views/MonthDay"
+import { changeSelectedDay } from "components/Calendar/actions"
+import MonthDay from "components/Calendar/Views/MonthDay"
 import {
   addDays,
   format,
@@ -52,14 +52,16 @@ const MonthlyView = ({
     const monthDays = []
     do {
       monthDays.push(
-        <MonthRow key={dayCounter}>{getWeekDays(dayCounter)}</MonthRow>
+        <MonthRow key={dayCounter}>
+          {getWeekDays(dayCounter, firstDayOfMonth)}
+        </MonthRow>
       )
       dayCounter = addDays(dayCounter, 7)
     } while (isSameMonth(dayCounter, firstDayOfMonth))
     return <>{monthDays}</>
   }
 
-  function getWeekDays(theDate) {
+  function getWeekDays(theDate, theMonth) {
     let numOfDays = 7
     if (onlyWeekdays) {
       numOfDays = 5
@@ -68,7 +70,8 @@ const MonthlyView = ({
     const week = []
     for (let i = 0; i < numOfDays; i++) {
       const selected = isSameDay(curDay, selectedDay)
-      const dayNum = format(curDay, "d")
+      const sameMonth = isSameMonth(curDay, theMonth)
+      const dayName = format(curDay, "d")
       const preventClosureDate = curDay
       const tempEvents = []
       const dailyEvents = remainingEvents.filter(event => {
@@ -80,12 +83,13 @@ const MonthlyView = ({
       })
       week.push(
         <MonthDay
-          key={dayNum}
-          dayNum={dayNum}
-          content={dayNum}
+          key={dayName}
+          dayName={dayName}
+          content={dayName}
           onClick={() => dispatcher(changeSelectedDay(preventClosureDate))}
           selected={selected}
           dailyEvents={dailyEvents}
+          sameMonth={sameMonth}
         />
       )
       remainingEvents = tempEvents

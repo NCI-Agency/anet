@@ -2,7 +2,7 @@ import styled from "@emotion/styled"
 import PropTypes from "prop-types"
 import React from "react"
 
-const MonthDay = ({ dayNum, dailyEvents, onClick, selected }) => {
+const MonthDay = ({ dayName, dailyEvents, onClick, selected, sameMonth }) => {
   let bgc
   if (dailyEvents.length === 0) {
     bgc = "transparent"
@@ -15,8 +15,13 @@ const MonthDay = ({ dayNum, dailyEvents, onClick, selected }) => {
   }
 
   return (
-    <MonthDayBox selected={selected} onClick={onClick} bgc={bgc}>
-      <div className="dayNum">{dayNum}</div>
+    <MonthDayBox
+      selected={selected}
+      onClick={onClick}
+      bgc={bgc}
+      sameMonth={sameMonth}
+    >
+      <div className="dayName">{dayName}</div>
       <div className="dayContent">
         {dailyEvents.map(event => (
           <div key={event.title}>{event.title}</div>
@@ -34,9 +39,13 @@ const MonthDayBox = styled.div`
     props.selected ? "rgb(204, 255, 204)" : props.bgc};
   display: flex;
   flex-direction: column;
-  outline: 1px solid black;
-  .dayNum {
+  border: 1px solid black;
+  margin: 2px 2px;
+  border-radius: 4px;
+  .dayName {
     text-align: right;
+    color: ${props => (props.sameMonth ? "black" : "rgb(0, 0, 0, 0.6)")};
+    font-weight: ${props => (props.sameMonth ? "bold" : "normal")};
   }
   .dayContent {
     height: 100%;
@@ -44,10 +53,11 @@ const MonthDayBox = styled.div`
 `
 
 MonthDay.propTypes = {
-  dayNum: PropTypes.number,
+  dayName: PropTypes.string,
   dailyEvents: PropTypes.arrayOf(PropTypes.object),
   onClick: PropTypes.func,
-  selected: PropTypes.bool
+  selected: PropTypes.bool,
+  sameMonth: PropTypes.bool
 }
 
 export default MonthDay

@@ -1,19 +1,22 @@
-import ACTION_TYPES from "Calendar/actions"
+import ACTION_TYPES from "components/Calendar/actions"
 import {
   monthNextAction,
   monthPrevAction,
   yearNextAction,
   yearPrevAction
-} from "Calendar/actions/buttonActions"
-import VIEWS from "Calendar/utils/constants"
+} from "components/Calendar/actions/buttonActions"
+import VIEWS from "components/Calendar/utils/constants"
 import {
   defaultNextAction,
   defaultPrevAction,
   defaultTitle,
   defaultTitleFormatter,
   defaultView
-} from "Calendar/utils/defaults"
-import { monthTitleFormat, yearTitleFormat } from "Calendar/utils/formats"
+} from "components/Calendar/utils/defaults"
+import {
+  monthTitleFormat,
+  yearTitleFormat
+} from "components/Calendar/utils/formats"
 
 export const initState = {
   activeDate: new Date(),
