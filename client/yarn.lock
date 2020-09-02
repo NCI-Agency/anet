@@ -5984,6 +5984,11 @@ data-urls@^2.0.0:
     whatwg-mimetype "^2.3.0"
     whatwg-url "^8.0.0"
 
+date-fns@^2.16.1:
+  version "2.16.1"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.16.1.tgz#05775792c3f3331da812af253e1a935851d3834b"
+  integrity sha512-sAJVKx/FqrLYHAQeN7VpJrPhagZc9R4ImZIWYRFZaaohR3KzmuK88touwsSwSVT8Qcbd4zoDsnGfX4GFB4imyQ==
+
 date-time@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/date-time/-/date-time-3.1.0.tgz#0d1e934d170579f481ed8df1e2b8ff70ee845e1e"
@@ -7391,7 +7396,6 @@ extsprintf@^1.2.0:
 
 "faker@https://github.com/Marak/faker.js.git":
   version "5.1.0"
-  uid ecac64c468f486f45144a2fe18837dab334b74ac
   resolved "https://github.com/Marak/faker.js.git#ecac64c468f486f45144a2fe18837dab334b74ac"
 
 fast-deep-equal@^2.0.1:

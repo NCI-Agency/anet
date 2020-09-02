@@ -117,6 +117,7 @@
     "core-js": "3.6.5",
     "d3": "6.1.1",
     "dagre": "0.8.5",
+    "date-fns": "^2.16.1",
     "draft-convert": "2.1.10",
     "draft-js": "0.10.5",
     "draft-js-buttons": "2.0.2",
