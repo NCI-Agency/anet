@@ -51,9 +51,9 @@ const LikertScale = ({
     if (!editable) {
       return
     }
-    const handleDrag = d3.drag().on("drag", function() {
+    const handleDrag = d3.drag().on("drag", (event, d) => {
       const me = d3.select(cursorRef.current)
-      const newX = calculateNewX(d3.event.x)
+      const newX = calculateNewX(event.x)
       me.attr("transform", `translate(${newX} ${scaleYPosition})`)
       onChange(xToValue(newX))
     })
