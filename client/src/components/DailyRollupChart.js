@@ -130,9 +130,7 @@ const DailyRollupChart = ({
       .attr("data-html", true)
       .attr("data-tip", d => tooltip && tooltip(d))
     if (onBarClick) {
-      bar.on("click", function(d) {
-        onBarClick(d.org)
-      })
+      bar.on("click", (event, d) => onBarClick(d.org))
     }
 
     bar
