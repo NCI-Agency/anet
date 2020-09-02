@@ -16,7 +16,7 @@ export function changeViewToMonthly() {
     type: ACTION_TYPES.CHANGE_VIEW_TO_MONTHLY
   }
 }
-export function changeActiveDate(payload) {
+export function changeViewDate(payload) {
   return {
     type: ACTION_TYPES.CHANGE_ACTIVE_DATE,
     payload: payload

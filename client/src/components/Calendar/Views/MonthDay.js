@@ -1,24 +1,14 @@
-import styled from "@emotion/styled"
 import PropTypes from "prop-types"
 import React from "react"
+import styled from "@emotion/styled"
+import { countToHeatBgc } from "../utils/helpers"
 
 const MonthDay = ({ dayName, dailyEvents, onClick, selected, sameMonth }) => {
-  let bgc
-  if (dailyEvents.length === 0) {
-    bgc = "transparent"
-  } else if (dailyEvents.length < 2) {
-    bgc = "hsl(0, 100%, 90%)"
-  } else if (dailyEvents.length < 3) {
-    bgc = "hsl(0, 100%, 80%)"
-  } else {
-    bgc = "hsl(0, 100%, 70%)"
-  }
-
   return (
     <MonthDayBox
       selected={selected}
       onClick={onClick}
-      bgc={bgc}
+      bgc={countToHeatBgc(dailyEvents.length, { low: 1, mid: 2, color: "red" })}
       sameMonth={sameMonth}
     >
       <div className="dayName">{dayName}</div>

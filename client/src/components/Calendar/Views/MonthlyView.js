@@ -1,6 +1,3 @@
-import styled from "@emotion/styled"
-import { changeSelectedDay } from "components/Calendar/actions"
-import MonthDay from "components/Calendar/Views/MonthDay"
 import {
   addDays,
   format,
@@ -9,46 +6,36 @@ import {
   startOfMonth,
   startOfWeek
 } from "date-fns"
+import { getDayNames, renderDayNames } from "components/Calendar/utils/helpers"
+
+import MonthDay from "components/Calendar/Views/MonthDay"
 import PropTypes from "prop-types"
 import React from "react"
+import { changeSelectedDay } from "components/Calendar/actions"
+import styled from "@emotion/styled"
 
 const MonthlyView = ({
   events,
-  activeMonth,
+  viewMonth,
   selectedDay,
   dispatcher,
-  onlyWeekdays
+  weekStartsOn
 }) => {
   let remainingEvents = [...events]
   return (
     <MonthlyViewBox>
-      {renderDayNames(getDayNames())}
+      <MonthRow>
+        {renderDayNames(getDayNames(viewMonth, weekStartsOn))}
+      </MonthRow>
       {renderMonthDays()}
     </MonthlyViewBox>
   )
 
-  function renderDayNames(dayNames) {
-    return (
-      <MonthRow>
-        {dayNames.map(dayName => (
-          <DayNameBox key={dayName}>{dayName}</DayNameBox>
-        ))}
-      </MonthRow>
-    )
-  }
-
-  function getDayNames(onlyWeekdays) {
-    if (onlyWeekdays) {
-      return ["Mon", "Tue", "Wed", "Thu", "Fri"]
-    }
-    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-  }
-
   function renderMonthDays() {
     // get day 1 of the month (Ex: 1st of June)
-    const firstDayOfMonth = startOfMonth(activeMonth)
+    const firstDayOfMonth = startOfMonth(viewMonth)
     // get Sunday on the week of day 1 (Ex: 28th July)
-    let dayCounter = startOfWeek(firstDayOfMonth)
+    let dayCounter = startOfWeek(firstDayOfMonth, { weekStartsOn })
     const monthDays = []
     do {
       monthDays.push(
@@ -58,15 +45,12 @@ const MonthlyView = ({
       )
       dayCounter = addDays(dayCounter, 7)
     } while (isSameMonth(dayCounter, firstDayOfMonth))
-    return <>{monthDays}</>
+    return monthDays
   }
 
   function getWeekDays(theDate, theMonth) {
-    let numOfDays = 7
-    if (onlyWeekdays) {
-      numOfDays = 5
-    }
-    let curDay = getFirstDayOfTheWeek(theDate)
+    const numOfDays = 7
+    let curDay = theDate
     const week = []
     for (let i = 0; i < numOfDays; i++) {
       const selected = isSameDay(curDay, selectedDay)
@@ -85,7 +69,6 @@ const MonthlyView = ({
         <MonthDay
           key={dayName}
           dayName={dayName}
-          content={dayName}
           onClick={() => dispatcher(changeSelectedDay(preventClosureDate))}
           selected={selected}
           dailyEvents={dailyEvents}
@@ -97,25 +80,25 @@ const MonthlyView = ({
     }
     return week
   }
-  // theDate already sunday when called
-  function getFirstDayOfTheWeek(theDate) {
-    // get monday
-    if (onlyWeekdays) {
-      return addDays(theDate, 1)
-    }
-    return theDate
-  }
 }
 MonthlyView.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
-  activeMonth: PropTypes.object,
+  viewMonth: PropTypes.object,
   selectedDay: PropTypes.object,
   dispatcher: PropTypes.func,
-  onlyWeekdays: PropTypes.bool
+  weekStartsOn: PropTypes.number
+}
+
+MonthlyView.defaultProps = {
+  weekStartsOn: 1
 }
 
 const MonthlyViewBox = styled.div`
   outline: 2px solid pink;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `
 
 const MonthRow = styled.div`
@@ -124,10 +107,6 @@ const MonthRow = styled.div`
   flex-direction: row;
   justify-content: space-between;
   text-align: center;
-`
-
-const DayNameBox = styled.div`
-  width: 100%;
 `
 
 export default MonthlyView

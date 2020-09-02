@@ -1,19 +1,17 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core"
-import styled from "@emotion/styled"
-import VIEWS from "components/Calendar/utils/constants"
+
 import PropTypes from "prop-types"
+import styled from "@emotion/styled"
 
 const Header = ({ title, prevAction, nextAction, todayAction, views }) => {
   const options = (
     <select name="views" id="viewsSelect">
-      {Object.values(VIEWS)
-        .filter(view => views.includes(view))
-        .map(view => (
-          <option key={view} value={view}>
-            {view}
-          </option>
-        ))}
+      {views.map(view => (
+        <option key={view} value={view}>
+          {view}
+        </option>
+      ))}
       )
     </select>
   )

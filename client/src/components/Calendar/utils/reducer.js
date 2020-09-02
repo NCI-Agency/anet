@@ -1,11 +1,3 @@
-import ACTION_TYPES from "components/Calendar/actions"
-import {
-  monthNextAction,
-  monthPrevAction,
-  yearNextAction,
-  yearPrevAction
-} from "components/Calendar/actions/buttonActions"
-import VIEWS from "components/Calendar/utils/constants"
 import {
   defaultNextAction,
   defaultPrevAction,
@@ -14,12 +6,21 @@ import {
   defaultView
 } from "components/Calendar/utils/defaults"
 import {
+  monthNextAction,
+  monthPrevAction,
+  yearNextAction,
+  yearPrevAction
+} from "components/Calendar/actions/buttonActions"
+import {
   monthTitleFormat,
   yearTitleFormat
 } from "components/Calendar/utils/formats"
 
+import ACTION_TYPES from "components/Calendar/actions"
+import VIEWS from "components/Calendar/utils/constants"
+
 export const initState = {
-  activeDate: new Date(),
+  viewDate: new Date(),
   selectedDay: new Date(),
   titleFormatter: defaultTitleFormatter,
   title: defaultTitle,
@@ -37,7 +38,7 @@ const reducer = (state, action) => {
         prevAction: yearPrevAction,
         nextAction: yearNextAction,
         titleFormatter: yearTitleFormat,
-        title: yearTitleFormat(state.activeDate)
+        title: yearTitleFormat(state.viewDate)
       }
     case ACTION_TYPES.CHANGE_VIEW_TO_MONTHLY:
       return {
@@ -46,12 +47,12 @@ const reducer = (state, action) => {
         prevAction: monthPrevAction,
         nextAction: monthNextAction,
         titleFormatter: monthTitleFormat,
-        title: monthTitleFormat(state.activeDate)
+        title: monthTitleFormat(state.viewDate)
       }
     case ACTION_TYPES.CHANGE_ACTIVE_DATE:
       return {
         ...state,
-        activeDate: action.payload,
+        viewDate: action.payload,
         title: state.titleFormatter(action.payload)
       }
     case ACTION_TYPES.CHANGE_SELECTED_DAY:
