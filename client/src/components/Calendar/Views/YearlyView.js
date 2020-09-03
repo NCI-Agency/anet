@@ -79,7 +79,9 @@ YearlyView.defaultProps = {
   weekStartsOn: 1
 }
 const YearlyViewBox = styled.div`
-  outline: 2px solid pink;
+  border: 2px solid blue;
+  padding: 10px 5px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;

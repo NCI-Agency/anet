@@ -14,6 +14,7 @@ const MonthDay = ({
   return (
     <MonthDayBox
       selected={selected}
+      // FIXME: maybe go to daily view when implemented
       onClick={onClick}
       bgc={countToHeatBgc(dailyEvents.length, { low: 1, mid: 2, color: "red" })}
     >

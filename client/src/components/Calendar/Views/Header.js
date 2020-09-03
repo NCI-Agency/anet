@@ -52,7 +52,7 @@ const HeaderBox = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 10px auto;
-  margin: 5px auto;
+  margin: 5px 1rem;
 `
 
 const BUTTONS_STYLE = css`

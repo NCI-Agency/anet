@@ -26,7 +26,7 @@ const YearDay = ({ dailyEvents, eventClick, date, sameYear }) => {
   return (
     <YearDayBox
       onMouseEnter={() => {
-        setShowTooltip(true)
+        setShowTooltip(sameYear)
       }}
       onMouseLeave={() => setShowTooltip(false)}
       // FIXME: Add when clicked go to daily view maybe
@@ -75,6 +75,7 @@ const YearDayBox = styled.div`
   position: relative;
   &[data-same-year="notSame"] {
     border: none;
+    background-color: transparent;
   }
 `
 
