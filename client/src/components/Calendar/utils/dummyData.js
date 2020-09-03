@@ -5,7 +5,7 @@ const events = []
 for (let i = 0; i < 70; i++) {
   const rDate = getRandomDate()
   events.push({
-    title: `event-${i}`,
+    title: `event-${i} title`,
     startDate: rDate,
     endDate: rDate,
     url: `url-${i}`

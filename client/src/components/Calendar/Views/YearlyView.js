@@ -1,4 +1,6 @@
-import React, { useMemo } from "react"
+import styled from "@emotion/styled"
+import { getDayNames, renderDayNames } from "components/Calendar/utils/helpers"
+import YearDay from "components/Calendar/Views/YearDay"
 import {
   addDays,
   isSameDay,
@@ -6,14 +8,11 @@ import {
   startOfWeek,
   startOfYear
 } from "date-fns"
-import { getDayNames, renderDayNames } from "components/Calendar/utils/helpers"
-
 import PropTypes from "prop-types"
-import YearDay from "components/Calendar/Views/YearDay"
-import styled from "@emotion/styled"
+import React, { useMemo } from "react"
 
 // FIXME: Add month names
-const YearlyView = ({ events, viewYear, weekStartsOn }) => {
+const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
   const getDays = useMemo(() => {
     let remainingEvents = [...events]
     // get 1st of January
@@ -53,6 +52,7 @@ const YearlyView = ({ events, viewYear, weekStartsOn }) => {
             dailyEvents={dailyEvents}
             sameYear={sameYear}
             date={preventClosureDate}
+            eventClick={eventClick}
           />
         )
         remainingEvents = tempEvents
@@ -61,7 +61,7 @@ const YearlyView = ({ events, viewYear, weekStartsOn }) => {
       return week
     }
     return yearDays
-  }, [viewYear, events, weekStartsOn])
+  }, [viewYear, events, eventClick, weekStartsOn])
 
   return (
     <YearlyViewBox>
@@ -74,16 +74,21 @@ const YearlyView = ({ events, viewYear, weekStartsOn }) => {
 }
 YearlyView.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
+  eventClick: PropTypes.func,
   viewYear: PropTypes.object,
   weekStartsOn: PropTypes.number
 }
-
+YearlyView.defaultProps = {
+  weekStartsOn: 1
+}
 const YearlyViewBox = styled.div`
   outline: 2px solid pink;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  margin-left: 1rem;
+  margin-right: 1rem;
 `
 
 const YearColumn = styled.div`

@@ -1,8 +1,7 @@
-import { addDays, format, startOfWeek } from "date-fns"
-
-import { COLOR_NAMES_TO_RGB } from "components/Calendar/utils/constants"
-import React from "react"
 import styled from "@emotion/styled"
+import { COLOR_NAMES_TO_RGB } from "components/Calendar/utils/constants"
+import { addDays, format, startOfWeek } from "date-fns"
+import React from "react"
 
 export function getDayNames(someDate, weekStartsOn) {
   const dayNames = []
@@ -30,10 +29,10 @@ export function countToHeatBgc(count, scale) {
   if (count === 0) {
     return "transparent"
   } else if (count <= scale.low) {
-    return `${COLOR_NAMES_TO_RGB[scale.color]}0.6)`
+    return `${COLOR_NAMES_TO_RGB[scale.color]}0.25)`
   } else if (count <= scale.mid) {
-    return `${COLOR_NAMES_TO_RGB[scale.color]}0.8)`
+    return `${COLOR_NAMES_TO_RGB[scale.color]}0.6)`
   } else {
-    return `${COLOR_NAMES_TO_RGB[scale.color]}1)`
+    return scale.color
   }
 }

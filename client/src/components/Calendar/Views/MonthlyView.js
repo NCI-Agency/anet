@@ -1,3 +1,7 @@
+import styled from "@emotion/styled"
+import { changeSelectedDay } from "components/Calendar/actions"
+import { getDayNames, renderDayNames } from "components/Calendar/utils/helpers"
+import MonthDay from "components/Calendar/Views/MonthDay"
 import {
   addDays,
   format,
@@ -6,16 +10,12 @@ import {
   startOfMonth,
   startOfWeek
 } from "date-fns"
-import { getDayNames, renderDayNames } from "components/Calendar/utils/helpers"
-
-import MonthDay from "components/Calendar/Views/MonthDay"
 import PropTypes from "prop-types"
 import React from "react"
-import { changeSelectedDay } from "components/Calendar/actions"
-import styled from "@emotion/styled"
 
 const MonthlyView = ({
   events,
+  eventClick,
   viewMonth,
   selectedDay,
   dispatcher,
@@ -72,6 +72,7 @@ const MonthlyView = ({
           onClick={() => dispatcher(changeSelectedDay(preventClosureDate))}
           selected={selected}
           dailyEvents={dailyEvents}
+          eventClick={eventClick}
           sameMonth={sameMonth}
         />
       )
@@ -83,6 +84,7 @@ const MonthlyView = ({
 }
 MonthlyView.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
+  eventClick: PropTypes.func,
   viewMonth: PropTypes.object,
   selectedDay: PropTypes.object,
   dispatcher: PropTypes.func,
@@ -99,6 +101,8 @@ const MonthlyViewBox = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-left: 1rem;
+  margin-right: 1rem;
 `
 
 const MonthRow = styled.div`
