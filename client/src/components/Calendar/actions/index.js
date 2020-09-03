@@ -1,37 +1,32 @@
-const ACTION_TYPES = {
-  CHANGE_VIEW_TO_YEARLY: 0,
-  CHANGE_VIEW_TO_MONTHLY: 1,
+export const ACTION_TYPES = {
+  CHANGE_VIEW: 1,
   CHANGE_ACVITE_DATE: 2,
   CHANGE_SELECTED_DAY: 3,
   CHANGE_TITLE: 4
 }
 
-export function changeViewToYearly() {
+export function changeView(incView) {
   return {
-    type: ACTION_TYPES.CHANGE_VIEW_TO_YEARLY
+    type: ACTION_TYPES.CHANGE_VIEW,
+    payload: incView
   }
 }
-export function changeViewToMonthly() {
-  return {
-    type: ACTION_TYPES.CHANGE_VIEW_TO_MONTHLY
-  }
-}
-export function changeViewDate(payload) {
+export function changeViewDate(incDate) {
   return {
     type: ACTION_TYPES.CHANGE_ACTIVE_DATE,
-    payload: payload
+    payload: incDate
   }
 }
-export function changeSelectedDay(payload) {
+export function changeSelectedDay(incDay) {
   return {
     type: ACTION_TYPES.CHANGE_SELECTED_DAY,
-    payload: payload
+    payload: incDay
   }
 }
-export function changeTitle(payload) {
+export function changeTitle(incTitle) {
   return {
     type: ACTION_TYPES.CHANGE_TITLE,
-    payload: payload
+    payload: incTitle
   }
 }
 

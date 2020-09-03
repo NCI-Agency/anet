@@ -1,3 +1,8 @@
+import { ACTION_TYPES } from "components/Calendar/actions"
+import {
+  NEXT_ACTIONS,
+  PREV_ACTIONS
+} from "components/Calendar/actions/buttonActions"
 import {
   defaultNextAction,
   defaultPrevAction,
@@ -5,19 +10,7 @@ import {
   defaultTitleFormatter,
   defaultView
 } from "components/Calendar/utils/defaults"
-import {
-  monthNextAction,
-  monthPrevAction,
-  yearNextAction,
-  yearPrevAction
-} from "components/Calendar/actions/buttonActions"
-import {
-  monthTitleFormat,
-  yearTitleFormat
-} from "components/Calendar/utils/formats"
-
-import ACTION_TYPES from "components/Calendar/actions"
-import VIEWS from "components/Calendar/utils/constants"
+import { TITLE_FORMATS } from "components/Calendar/utils/formats"
 
 export const initState = {
   viewDate: new Date(),
@@ -31,23 +24,14 @@ export const initState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case ACTION_TYPES.CHANGE_VIEW_TO_YEARLY:
+    case ACTION_TYPES.CHANGE_VIEW:
       return {
         ...state,
-        view: VIEWS.YEARLY,
-        prevAction: yearPrevAction,
-        nextAction: yearNextAction,
-        titleFormatter: yearTitleFormat,
-        title: yearTitleFormat(state.viewDate)
-      }
-    case ACTION_TYPES.CHANGE_VIEW_TO_MONTHLY:
-      return {
-        ...state,
-        view: VIEWS.MONTHLY,
-        prevAction: monthPrevAction,
-        nextAction: monthNextAction,
-        titleFormatter: monthTitleFormat,
-        title: monthTitleFormat(state.viewDate)
+        view: action.payload,
+        prevAction: PREV_ACTIONS[action.payload],
+        nextAction: NEXT_ACTIONS[action.payload],
+        titleFormatter: TITLE_FORMATS[action.payload],
+        title: TITLE_FORMATS[action.payload](state.viewDate)
       }
     case ACTION_TYPES.CHANGE_ACTIVE_DATE:
       return {

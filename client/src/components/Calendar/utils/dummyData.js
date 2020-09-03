@@ -2,18 +2,19 @@ import { addDays } from "date-fns"
 
 const events = []
 
-for (let i = 0; i < 70; i++) {
+for (let i = 0; i < 200; i++) {
   const rDate = getRandomDate()
   events.push({
     title: `event-${i} title`,
-    startDate: rDate,
+    start: rDate,
     endDate: rDate,
     url: `url-${i}`
   })
 }
 
 function getRandomDate() {
-  return addDays(new Date(), Math.floor(Math.random() * 70 - 35))
+  // random dates, range is big to make different years
+  return addDays(new Date(), Math.floor(Math.random() * 800 - 400))
 }
 export default events
 

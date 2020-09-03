@@ -39,7 +39,7 @@ const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
         const sameYear = isSameYear(curDay, theYear)
         const preventClosureDate = curDay
         const dailyEvents = events.filter(event =>
-          isSameDay(event.startDate, preventClosureDate)
+          isSameDay(event.start, preventClosureDate)
         )
         week.push(
           <YearDay

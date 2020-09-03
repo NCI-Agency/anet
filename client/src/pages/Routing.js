@@ -1,5 +1,5 @@
 import AppContext from "components/AppContext"
-import Calendar from "components/Calendar/Calendar"
+import { CalendarWrapper } from "components/Calendar/Calendar"
 import AuthorizationGroupEdit from "pages/admin/authorizationgroup/Edit"
 import AuthorizationGroupNew from "pages/admin/authorizationgroup/New"
 import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
@@ -52,7 +52,7 @@ const Routing = () => {
       <Route path={PAGE_URLS.SEARCH} component={Search} />
       <Route path={PAGE_URLS.ROLLUP} component={RollupShow} />
       <Route path={PAGE_URLS.HELP} component={Help} />
-      <Route path="/Calendar" component={Calendar} />
+      <Route path="/Calendar" component={CalendarWrapper} />
       <Route
         path={PAGE_URLS.REPORTS}
         render={({ match: { url } }) => (

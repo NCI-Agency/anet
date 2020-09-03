@@ -1,21 +1,16 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core"
-
-import PropTypes from "prop-types"
 import styled from "@emotion/styled"
+import PropTypes from "prop-types"
 
-const Header = ({ title, prevAction, nextAction, todayAction, views }) => {
-  const options = (
-    <select name="views" id="viewsSelect">
-      {views.map(view => (
-        <option key={view} value={view}>
-          {view}
-        </option>
-      ))}
-      )
-    </select>
-  )
-
+const Header = ({
+  title,
+  prevAction,
+  nextAction,
+  viewChangeAction,
+  todayAction,
+  views
+}) => {
   return (
     <HeaderBox>
       <Buttons>
@@ -26,7 +21,17 @@ const Header = ({ title, prevAction, nextAction, todayAction, views }) => {
       <span>{title}</span>
       <ViewSelect>
         <label htmlFor="viewsSelect">View Options</label>
-        {options}
+        <select
+          name="views"
+          id="viewsSelect"
+          onChange={e => viewChangeAction(e.target.value)}
+        >
+          {views.map(view => (
+            <option key={view} value={view}>
+              {view}
+            </option>
+          ))}
+        </select>
       </ViewSelect>
     </HeaderBox>
   )
@@ -36,6 +41,7 @@ Header.propTypes = {
   title: PropTypes.string,
   prevAction: PropTypes.func,
   nextAction: PropTypes.func,
+  viewChangeAction: PropTypes.func,
   todayAction: PropTypes.func,
   views: PropTypes.arrayOf(PropTypes.string)
 }
