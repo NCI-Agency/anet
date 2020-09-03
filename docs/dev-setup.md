@@ -27,7 +27,7 @@ The frontend is run with `yarn`.  We recommend running the backend `gradle` if y
     1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
     1. Open a command line in the `anet` directory that was retrieved from github.
     1. Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
-1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/NCI-Agency/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
+1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](INSTALL.md#anet-configuration) for more details on these configuration options. You are most likely to change:
     1. `emailFromAddr` - use your own email address for testing.
 
 ## Java Backend
