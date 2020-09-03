@@ -12,6 +12,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import { CompactRowReportWorkflow } from "components/ReportWorkflow"
 import {
   CompactSecurityBanner,
@@ -202,6 +203,7 @@ const GQL_GET_REPORT = gql`
         description
       }
       customFields
+      ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
@@ -240,7 +242,7 @@ const CompactReportView = ({ pageDispatchers }) => {
 
   if (_isEmpty(report)) {
     return (
-      <CompactViewHeader returnToDefualtPage={returnToDefualtPage} noReport />
+      <CompactViewHeader returnToDefaultPage={returnToDefaultPage} noReport />
     )
   }
   // Get initial tasks/attendees instant assessments values
@@ -257,14 +259,14 @@ const CompactReportView = ({ pageDispatchers }) => {
         <React.Fragment>
           <CompactViewHeader
             onPrintClick={printReport}
-            returnToDefualtPage={returnToDefualtPage}
+            returnToDefaultPage={returnToDefaultPage}
           />
           <div
             css={COMPACT_VIEW_STYLE}
             className="compact-view"
             data-draft={draftAttr}
           >
-            <CompactTableHeaderContent report={report} />
+            <CompactReportHeaderContent report={report} />
             <CompactTable>
               <CompactRow
                 rowType={ROW_TYPES.titleLike}
@@ -351,14 +353,14 @@ const CompactReportView = ({ pageDispatchers }) => {
                 />
               ) : null}
             </CompactTable>
-            <CompactTableFooterContent report={report} />
+            <CompactReportFooterContent report={report} />
           </div>
         </React.Fragment>
       )}
     </Formik>
   )
 
-  function returnToDefualtPage() {
+  function returnToDefaultPage() {
     history.push(`/reports/${report.uuid}`)
   }
 
@@ -677,8 +679,32 @@ const SUBTITLE_STYLE = css`
     font-weight: normal;
   }
 `
+const WORKFLOW_STYLE = css`
+  & > td {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align items: center;
+    text-align: center;
+    & > div {
+      position: relative;
+      margin-right: 18px;
+    }
+    & > div:not(:last-child):after {
+      position: absolute;
+      right: -18px;
+      top: 0;
+      content: "→";
+    }
+    & > div > button {
+      padding: 0 5px !important;
+      margin: 0;
+    }
+  }
+`
 
-const CompactViewHeader = ({ onPrintClick, returnToDefualtPage, noReport }) => {
+const CompactViewHeader = ({ onPrintClick, returnToDefaultPage, noReport }) => {
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE} value="title">
@@ -699,7 +725,7 @@ const CompactViewHeader = ({ onPrintClick, returnToDefualtPage, noReport }) => {
           value="webView"
           type="button"
           bsStyle="primary"
-          onClick={returnToDefualtPage}
+          onClick={returnToDefaultPage}
         >
           Web View
         </Button>
@@ -710,7 +736,7 @@ const CompactViewHeader = ({ onPrintClick, returnToDefualtPage, noReport }) => {
 
 CompactViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
-  returnToDefualtPage: PropTypes.func,
+  returnToDefaultPage: PropTypes.func,
   noReport: PropTypes.bool
 }
 
@@ -744,7 +770,7 @@ const BUTTONS_STYLE = css`
   }
 `
 
-const CompactTableHeaderContent = ({ report }) => {
+const CompactReportHeaderContent = ({ report }) => {
   const location = useLocation()
   const { appSettings } = useContext(AppContext)
   return (
@@ -763,11 +789,11 @@ const CompactTableHeaderContent = ({ report }) => {
   )
 }
 
-CompactTableHeaderContent.propTypes = {
+CompactReportHeaderContent.propTypes = {
   report: PropTypes.object
 }
 
-const CompactTableFooterContent = () => {
+const CompactReportFooterContent = () => {
   const { currentUser, appSettings } = useContext(AppContext)
   return (
     <div
@@ -955,31 +981,6 @@ const ROW_LABEL_STYLE = css`
 
 const ROW_CONTENT_STYLE = css`
   padding: 4px 1rem;
-`
-
-const WORKFLOW_STYLE = css`
-  & > td {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    align items: center;
-    text-align: center;
-    & > div {
-      position: relative;
-      margin-right: 18px;
-    }
-    & > div:not(:last-child):after {
-      position: absolute;
-      right: -18px;
-      top: 0;
-      content: "→";
-    }
-    & > div > button {
-      padding: 0 5px !important;
-      margin: 0;
-    }
-  }
 `
 
 export default connect(null, mapPageDispatchersToProps)(CompactReportView)
