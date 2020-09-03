@@ -10,11 +10,11 @@ import {
 } from "date-fns"
 import PropTypes from "prop-types"
 import React, { useMemo } from "react"
+import { getMonthNames, renderMonthNames } from "../utils/helpers"
 
 // FIXME: Add month names
 const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
   const getDays = useMemo(() => {
-    let remainingEvents = [...events]
     // get 1st of January
     const firstDayOfTheYear = startOfYear(viewYear)
     // get first Monday on the week of 1st of Jan
@@ -38,14 +38,9 @@ const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
       for (let i = 0; i < numOfDays; i++) {
         const sameYear = isSameYear(curDay, theYear)
         const preventClosureDate = curDay
-        const tempEvents = []
-        const dailyEvents = remainingEvents.filter(event => {
-          if (isSameDay(event.startDate, preventClosureDate)) {
-            return true
-          }
-          tempEvents.push(event)
-          return false
-        })
+        const dailyEvents = events.filter(event =>
+          isSameDay(event.startDate, preventClosureDate)
+        )
         week.push(
           <YearDay
             key={preventClosureDate}
@@ -55,7 +50,6 @@ const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
             eventClick={eventClick}
           />
         )
-        remainingEvents = tempEvents
         curDay = addDays(curDay, 1)
       }
       return week
@@ -65,10 +59,13 @@ const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
 
   return (
     <YearlyViewBox>
-      <YearColumn>
-        {renderDayNames(getDayNames(viewYear, weekStartsOn))}
-      </YearColumn>
-      {getDays}
+      <YearRow>
+        <YearColumn>
+          {renderDayNames(getDayNames(viewYear, weekStartsOn))}
+        </YearColumn>
+        {getDays}
+      </YearRow>
+      <YearRow>{renderMonthNames(getMonthNames(viewYear, "MMM"))}</YearRow>
     </YearlyViewBox>
   )
 }
@@ -84,9 +81,10 @@ YearlyView.defaultProps = {
 const YearlyViewBox = styled.div`
   outline: 2px solid pink;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
   margin-left: 1rem;
   margin-right: 1rem;
 `
@@ -98,6 +96,14 @@ const YearColumn = styled.div`
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
+`
+
+const YearRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-beetween;
+  align-items: center;
+  width: 100%;
 `
 
 export default YearlyView

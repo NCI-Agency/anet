@@ -21,7 +21,6 @@ const MonthlyView = ({
   dispatcher,
   weekStartsOn
 }) => {
-  let remainingEvents = [...events]
   return (
     <MonthlyViewBox>
       <MonthRow>
@@ -57,14 +56,9 @@ const MonthlyView = ({
       const sameMonth = isSameMonth(curDay, theMonth)
       const dayName = format(curDay, "d")
       const preventClosureDate = curDay
-      const tempEvents = []
-      const dailyEvents = remainingEvents.filter(event => {
-        if (isSameDay(event.startDate, preventClosureDate)) {
-          return true
-        }
-        tempEvents.push(event)
-        return false
-      })
+      const dailyEvents = events.filter(event =>
+        isSameDay(event.startDate, preventClosureDate)
+      )
       week.push(
         <MonthDay
           key={dayName}
@@ -76,7 +70,6 @@ const MonthlyView = ({
           sameMonth={sameMonth}
         />
       )
-      remainingEvents = tempEvents
       curDay = addDays(curDay, 1)
     }
     return week
