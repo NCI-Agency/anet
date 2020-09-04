@@ -12,7 +12,13 @@ import PropTypes from "prop-types"
 import React, { useMemo } from "react"
 import { getMonthNames, renderMonthNames } from "../utils/helpers"
 
-const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
+const YearlyView = ({
+  events,
+  eventClick,
+  dayClick,
+  viewYear,
+  weekStartsOn
+}) => {
   const getDays = useMemo(() => {
     // get 1st of January
     const firstDayOfTheYear = startOfYear(viewYear)
@@ -47,6 +53,7 @@ const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
             sameYear={sameYear}
             date={preventClosureDate}
             eventClick={eventClick}
+            dayClick={dayClick}
           />
         )
         curDay = addDays(curDay, 1)
@@ -54,7 +61,7 @@ const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
       return week
     }
     return yearDays
-  }, [viewYear, events, eventClick, weekStartsOn])
+  }, [viewYear, events, eventClick, dayClick, weekStartsOn])
 
   return (
     <YearlyViewBox>
@@ -71,6 +78,7 @@ const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
 YearlyView.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   eventClick: PropTypes.func,
+  dayClick: PropTypes.func,
   viewYear: PropTypes.object,
   weekStartsOn: PropTypes.number
 }

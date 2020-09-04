@@ -14,7 +14,7 @@ import { useHistory } from "react-router-dom"
  * @param {string[]} views - what view types you want to use
  * @param {function} eventClick - what should happen when event is clicked on calendar
  */
-const Calendar = ({ events, views, eventClick }) => {
+const Calendar = ({ events, views, eventClick, dayClick }) => {
   const [state, dispatch] = useReducer(reducer, initState)
   return (
     <div className="Calendar">
@@ -28,6 +28,7 @@ const Calendar = ({ events, views, eventClick }) => {
           viewYear={state.viewDate}
           events={events}
           eventClick={eventClick}
+          dayClick={dayClick}
         />
       )}
       {state.view === VIEWS.MONTHLY && (
@@ -37,6 +38,7 @@ const Calendar = ({ events, views, eventClick }) => {
           dispatcher={dispatch}
           events={events}
           eventClick={eventClick}
+          dayClick={dayClick}
         />
       )}
     </div>
@@ -46,7 +48,8 @@ const Calendar = ({ events, views, eventClick }) => {
 Calendar.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   views: PropTypes.arrayOf(PropTypes.string),
-  eventClick: PropTypes.func
+  eventClick: PropTypes.func,
+  dayClick: PropTypes.func
 }
 
 // See which available views selected
@@ -60,13 +63,24 @@ function parseViewsOptions(views) {
 }
 
 // FIXME: remove this
-export const CalendarWrapper = () => {
+export const CalendarWrapperToTest = () => {
   const views = ["Monthly", "Yearly"]
   const history = useHistory()
   const eventClickMemo = useCallback(event => history.push(event.url), [
     history
   ])
-  return <Calendar events={events} eventClick={eventClickMemo} views={views} />
+  const dayClickMemo = useCallback(
+    dayInfo => console.log(dayInfo.dailyEvents),
+    []
+  )
+  return (
+    <Calendar
+      events={events}
+      eventClick={eventClickMemo}
+      views={views}
+      dayClick={dayClickMemo}
+    />
+  )
 }
 
 export default Calendar

@@ -49,8 +49,8 @@ export function countToHeatBgc(count, scale) {
   } else if (count <= scale.low) {
     return `${COLOR_NAMES_TO_RGB[scale.color]}0.25)`
   } else if (count <= scale.mid) {
-    return `${COLOR_NAMES_TO_RGB[scale.color]}0.6)`
+    return `${COLOR_NAMES_TO_RGB[scale.color]}0.5)`
   } else {
-    return scale.color
+    return `${COLOR_NAMES_TO_RGB[scale.color]}1.0)`
   }
 }

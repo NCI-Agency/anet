@@ -4,7 +4,7 @@ import { format } from "date-fns"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 
-const YearDay = ({ dailyEvents, eventClick, date, sameYear }) => {
+const YearDay = ({ dailyEvents, eventClick, dayClick, date, sameYear }) => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [tooltipLeft, setTooltipLeft] = useState(true)
   const dayNode = useRef(null)
@@ -29,8 +29,7 @@ const YearDay = ({ dailyEvents, eventClick, date, sameYear }) => {
         setShowTooltip(sameYear)
       }}
       onMouseLeave={() => setShowTooltip(false)}
-      // FIXME: Add when clicked go to daily view maybe
-      onClick={() => console.log("daily View")}
+      onClick={() => dayClick({ date, dailyEvents })}
       date={format(date, "dd/MM/yyyy")}
       bgc={countToHeatBgc(dailyEvents.length, { low: 1, mid: 2, color: "red" })}
       data-same-year={sameYearAttr}
@@ -61,6 +60,7 @@ const YearDay = ({ dailyEvents, eventClick, date, sameYear }) => {
 YearDay.propTypes = {
   dailyEvents: PropTypes.arrayOf(PropTypes.object),
   eventClick: PropTypes.func,
+  dayClick: PropTypes.func,
   date: PropTypes.object,
   sameYear: PropTypes.bool
 }
@@ -89,7 +89,7 @@ const DayHoverInfo = styled.div`
   left: ${props => (props.tooltipLeft ? "0" : "auto")};
   right: ${props => (props.tooltipLeft ? "auto" : "0")};
   transform: ${props =>
-    props.tooltipLeft ? "translate(-95%, -95%)" : "translate(95%, -95%)"};
+    props.tooltipLeft ? "translate(-90%, -90%)" : "translate(90%, -90%)"};
   border-radius: 8px;
   padding: 5px 5px;
   min-width: 140px;
@@ -97,8 +97,9 @@ const DayHoverInfo = styled.div`
   z-index: 20;
 `
 
-const DayEventTitle = styled.div`
+const DayEventTitle = styled.a`
   color: blue;
+  display: block;
   border-top: 1px dashed black;
 `
 

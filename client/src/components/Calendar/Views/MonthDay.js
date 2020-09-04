@@ -1,13 +1,13 @@
 import styled from "@emotion/styled"
+import { format } from "date-fns"
 import PropTypes from "prop-types"
 import React from "react"
 import { countToHeatBgc } from "../utils/helpers"
-
 const MonthDay = ({
-  dayName,
+  date,
   dailyEvents,
   eventClick,
-  onClick,
+  dayClick,
   selected,
   sameMonth
 }) => {
@@ -15,13 +15,19 @@ const MonthDay = ({
     <MonthDayBox
       selected={selected}
       // FIXME: maybe go to daily view when implemented
-      onClick={onClick}
+      onClick={() => dayClick({ date, dailyEvents })}
       bgc={countToHeatBgc(dailyEvents.length, { low: 1, mid: 2, color: "red" })}
     >
-      <DayNameBox sameMonth={sameMonth}>{dayName}</DayNameBox>
+      <DayNameBox sameMonth={sameMonth}>{format(date, "d")}</DayNameBox>
       <DayEventsBox>
         {dailyEvents.map(event => (
-          <DayEventBox onClick={() => eventClick(event)} key={event.title}>
+          <DayEventBox
+            onClick={e => {
+              eventClick(event)
+              e.stopPropagation()
+            }}
+            key={event.title}
+          >
             {event.title}
           </DayEventBox>
         ))}
@@ -58,8 +64,9 @@ const DayEventsBox = styled.div`
   justify-content: center;
   align-items: center;
 `
-const DayEventBox = styled.div`
+const DayEventBox = styled.a`
   color: blue;
+  display: block;
   &:not(:first-of-type) {
     border-top: 1px dashed black;
     margin-top: 4px;
@@ -70,10 +77,10 @@ const DayEventBox = styled.div`
 `
 
 MonthDay.propTypes = {
-  dayName: PropTypes.string,
+  date: PropTypes.object,
   dailyEvents: PropTypes.arrayOf(PropTypes.object),
   eventClick: PropTypes.func,
-  onClick: PropTypes.func,
+  dayClick: PropTypes.func,
   selected: PropTypes.bool,
   sameMonth: PropTypes.bool
 }

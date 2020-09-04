@@ -1,10 +1,8 @@
 import styled from "@emotion/styled"
-import { changeSelectedDay } from "components/Calendar/actions"
 import { getDayNames, renderDayNames } from "components/Calendar/utils/helpers"
 import MonthDay from "components/Calendar/Views/MonthDay"
 import {
   addDays,
-  format,
   isSameDay,
   isSameMonth,
   startOfMonth,
@@ -16,6 +14,7 @@ import React from "react"
 const MonthlyView = ({
   events,
   eventClick,
+  dayClick,
   viewMonth,
   selectedDay,
   dispatcher,
@@ -54,16 +53,15 @@ const MonthlyView = ({
     for (let i = 0; i < numOfDays; i++) {
       const selected = isSameDay(curDay, selectedDay)
       const sameMonth = isSameMonth(curDay, theMonth)
-      const dayName = format(curDay, "d")
       const preventClosureDate = curDay
       const dailyEvents = events.filter(event =>
         isSameDay(event.start, preventClosureDate)
       )
       week.push(
         <MonthDay
-          key={dayName}
-          dayName={dayName}
-          onClick={() => dispatcher(changeSelectedDay(preventClosureDate))}
+          key={preventClosureDate}
+          date={preventClosureDate}
+          dayClick={dayClick}
           selected={selected}
           dailyEvents={dailyEvents}
           eventClick={eventClick}
@@ -78,6 +76,7 @@ const MonthlyView = ({
 MonthlyView.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   eventClick: PropTypes.func,
+  dayClick: PropTypes.func,
   viewMonth: PropTypes.object,
   selectedDay: PropTypes.object,
   dispatcher: PropTypes.func,
