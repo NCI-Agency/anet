@@ -1,5 +1,3 @@
-// import PropTypes from "prop-types"
-import { changeView, changeViewDate } from "components/Calendar/actions"
 import VIEWS from "components/Calendar/utils/constants"
 // FIXME: Remove this random data
 import events from "components/Calendar/utils/dummyData"
@@ -21,12 +19,9 @@ const Calendar = ({ events, views, eventClick }) => {
   return (
     <div className="Calendar">
       <Header
-        title={state.title}
-        prevAction={() => state.prevAction(dispatch, state)}
-        nextAction={() => state.nextAction(dispatch, state)}
-        viewChangeAction={incView => dispatch(changeView(incView))}
-        todayAction={() => dispatch(changeViewDate(new Date()))}
-        views={parseViewsOptions()}
+        state={state}
+        dispatch={dispatch}
+        views={parseViewsOptions(views)}
       />
       {state.view === VIEWS.YEARLY && (
         <YearlyView
@@ -46,17 +41,6 @@ const Calendar = ({ events, views, eventClick }) => {
       )}
     </div>
   )
-  // See which available views selected
-  function parseViewsOptions() {
-    const parsedViews = Object.values(VIEWS).filter(view =>
-      views.includes(view)
-    )
-
-    if (parsedViews.length === 0) {
-      return ["Yearly", "Monthly"]
-    }
-    return parsedViews
-  }
 }
 
 Calendar.propTypes = {
@@ -64,7 +48,16 @@ Calendar.propTypes = {
   views: PropTypes.arrayOf(PropTypes.string),
   eventClick: PropTypes.func
 }
-export default Calendar
+
+// See which available views selected
+function parseViewsOptions(views) {
+  const parsedViews = Object.values(VIEWS).filter(view => views.includes(view))
+
+  if (parsedViews.length === 0) {
+    return ["Yearly", "Monthly"]
+  }
+  return parsedViews
+}
 
 // FIXME: remove this
 export const CalendarWrapper = () => {
@@ -75,3 +68,5 @@ export const CalendarWrapper = () => {
   ])
   return <Calendar events={events} eventClick={eventClickMemo} views={views} />
 }
+
+export default Calendar

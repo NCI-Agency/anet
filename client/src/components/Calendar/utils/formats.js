@@ -1,5 +1,6 @@
 import VIEWS from "components/Calendar/utils/constants"
 import { format } from "date-fns"
+
 export function yearTitleFormat(date) {
   return format(date, "yyyy")
 }

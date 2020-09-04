@@ -1,19 +1,15 @@
 import {
-  yearNextAction,
-  yearPrevAction
+  NEXT_ACTIONS,
+  PREV_ACTIONS
 } from "components/Calendar/actions/buttonActions"
 import VIEWS from "components/Calendar/utils/constants"
-import { yearTitleFormat } from "components/Calendar/utils/formats"
+import { TITLE_FORMATS } from "components/Calendar/utils/formats"
 
-export function defaultNextAction(dispatch, state) {
-  yearNextAction(dispatch, state)
-}
-export function defaultPrevAction(dispatch, state) {
-  yearPrevAction(dispatch, state)
-}
+export const defaultView = VIEWS.MONTHLY
 
-export const defaultView = VIEWS.YEARLY
+export const defaultNextAction = NEXT_ACTIONS[defaultView]
+export const defaultPrevAction = PREV_ACTIONS[defaultView]
 
-export const defaultTitleFormatter = yearTitleFormat
+export const defaultTitleFormatter = TITLE_FORMATS[defaultView]
 
 export const defaultTitle = defaultTitleFormatter(new Date())

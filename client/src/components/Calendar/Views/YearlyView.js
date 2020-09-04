@@ -12,7 +12,6 @@ import PropTypes from "prop-types"
 import React, { useMemo } from "react"
 import { getMonthNames, renderMonthNames } from "../utils/helpers"
 
-// FIXME: Add month names
 const YearlyView = ({ events, eventClick, viewYear, weekStartsOn }) => {
   const getDays = useMemo(() => {
     // get 1st of January

@@ -1,6 +1,7 @@
 import { changeViewDate } from "components/Calendar/actions"
 import VIEWS from "components/Calendar/utils/constants"
 import { addMonths, addYears } from "date-fns"
+
 export function monthNextAction(dispatch, state) {
   dispatch(changeViewDate(addMonths(state.viewDate, 1)))
 }
