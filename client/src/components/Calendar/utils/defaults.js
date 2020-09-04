@@ -1,7 +1,4 @@
-import {
-  NEXT_ACTIONS,
-  PREV_ACTIONS
-} from "components/Calendar/actions/buttonActions"
+import { NEXT_ACTIONS, PREV_ACTIONS } from "components/Calendar/actions"
 import VIEWS from "components/Calendar/utils/constants"
 import { TITLE_FORMATS } from "components/Calendar/utils/formats"
 

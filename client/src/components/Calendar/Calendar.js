@@ -1,7 +1,7 @@
+import reducer, { initState } from "components/Calendar/reducers/reducer"
 import VIEWS from "components/Calendar/utils/constants"
 // FIXME: Remove this random data
 import events from "components/Calendar/utils/dummyData"
-import reducer, { initState } from "components/Calendar/utils/reducer"
 import Header from "components/Calendar/Views/Header"
 import MonthlyView from "components/Calendar/Views/MonthlyView"
 import YearlyView from "components/Calendar/Views/YearlyView"
@@ -13,6 +13,10 @@ import { useHistory } from "react-router-dom"
  * @param {Object[]} events - array of events in this form { title: string, url: string, start: Date, end: Date}
  * @param {string[]} views - what view types you want to use
  * @param {function} eventClick - what should happen when event is clicked on calendar
+ * @param {function} dayClick - what should happen when a day is clicked on calendar
+ * @param {object} colorScale - object in the form {low:number, mid:number, bgColor:string}
+ *                              4 levels of tone for event count:  if = 0, if < low, if < mid, if > mid
+ * @param {string} textColor - event title's text color "red" or "rgb(0,0,0)"
  */
 const Calendar = ({
   events,
@@ -85,16 +89,14 @@ export const CalendarWrapperToTest = () => {
     dayInfo => console.log(dayInfo.dailyEvents),
     []
   )
-
   const colorScale = { low: 1, mid: 2, bgColor: "green" }
-
   const textColor = "black"
 
   return (
     <Calendar
       events={events}
-      eventClick={eventClickMemo}
       views={views}
+      eventClick={eventClickMemo}
       dayClick={dayClickMemo}
       colorScale={colorScale}
       textColor={textColor}

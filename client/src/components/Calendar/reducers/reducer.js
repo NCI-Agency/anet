@@ -1,8 +1,8 @@
-import { ACTION_TYPES } from "components/Calendar/actions"
 import {
+  ACTION_TYPES,
   NEXT_ACTIONS,
   PREV_ACTIONS
-} from "components/Calendar/actions/buttonActions"
+} from "components/Calendar/actions"
 import {
   defaultNextAction,
   defaultPrevAction,
