@@ -19,6 +19,8 @@ const POSITION_COMPLETE_1 = `${POSITION_VALUE_1}`
 const POSITION_COMPLETE_2 = `${POSITION_VALUE_2}`
 const POSITION_COMPLETE_3 = `${POSITION_VALUE_3}`
 
+const SHORT_WAIT_MS = 1000
+
 describe("Create report form page", () => {
   describe("When creating a report", () => {
     it("Should be able to load the form", () => {
@@ -301,13 +303,14 @@ describe("Create report form page", () => {
       CreateReport.deleteButton.waitForDisplayed()
       CreateReport.deleteButton.click()
       // Confirm delete
+      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
       CreateReport.confirmButton.waitForExist()
       CreateReport.confirmButton.waitForDisplayed()
       CreateReport.confirmButton.click()
+      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
-      // FIXME: reinstate these lines when we have fixed the intermittent test failures
-      // CreateReport.waitForAlertToLoad()
-      // expect(CreateReport.alert.getText()).to.include("Report deleted")
+      CreateReport.waitForAlertToLoad()
+      expect(CreateReport.alert.getText()).to.include("Report deleted")
     })
   })
 })
