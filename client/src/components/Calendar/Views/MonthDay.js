@@ -8,20 +8,20 @@ const MonthDay = ({
   dailyEvents,
   eventClick,
   dayClick,
-  selected,
-  sameMonth
+  sameMonth,
+  colorScale,
+  textColor
 }) => {
   return (
     <MonthDayBox
-      selected={selected}
-      // FIXME: maybe go to daily view when implemented
       onClick={() => dayClick({ date, dailyEvents })}
-      bgc={countToHeatBgc(dailyEvents.length, { low: 1, mid: 2, color: "red" })}
+      bgc={countToHeatBgc(dailyEvents.length, colorScale)}
     >
       <DayNameBox sameMonth={sameMonth}>{format(date, "d")}</DayNameBox>
       <DayEventsBox>
         {dailyEvents.map(event => (
           <DayEventBox
+            textColor={textColor}
             onClick={e => {
               eventClick(event)
               e.stopPropagation()
@@ -39,8 +39,7 @@ const MonthDay = ({
 const MonthDayBox = styled.div`
   width: 100%;
   min-height: 50px;
-  background-color: ${props =>
-    props.selected ? "rgb(204, 255, 204)" : props.bgc};
+  background-color: ${props => props.bgc};
   display: flex;
   flex-direction: column;
   border: 1px solid black;
@@ -64,9 +63,9 @@ const DayEventsBox = styled.div`
   justify-content: center;
   align-items: center;
 `
-const DayEventBox = styled.a`
-  color: blue;
-  display: block;
+const DayEventBox = styled.div`
+  color: ${props => props.textColor};
+  cursor: pointer;
   &:not(:first-of-type) {
     border-top: 1px dashed black;
     margin-top: 4px;
@@ -81,8 +80,9 @@ MonthDay.propTypes = {
   dailyEvents: PropTypes.arrayOf(PropTypes.object),
   eventClick: PropTypes.func,
   dayClick: PropTypes.func,
-  selected: PropTypes.bool,
-  sameMonth: PropTypes.bool
+  sameMonth: PropTypes.bool,
+  colorScale: PropTypes.object,
+  textColor: PropTypes.string
 }
 
 export default MonthDay

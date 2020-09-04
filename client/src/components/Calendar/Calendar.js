@@ -14,7 +14,14 @@ import { useHistory } from "react-router-dom"
  * @param {string[]} views - what view types you want to use
  * @param {function} eventClick - what should happen when event is clicked on calendar
  */
-const Calendar = ({ events, views, eventClick, dayClick }) => {
+const Calendar = ({
+  events,
+  views,
+  eventClick,
+  dayClick,
+  colorScale,
+  textColor
+}) => {
   const [state, dispatch] = useReducer(reducer, initState)
   return (
     <div className="Calendar">
@@ -29,16 +36,19 @@ const Calendar = ({ events, views, eventClick, dayClick }) => {
           events={events}
           eventClick={eventClick}
           dayClick={dayClick}
+          textColor={textColor}
+          colorScale={colorScale}
         />
       )}
       {state.view === VIEWS.MONTHLY && (
         <MonthlyView
           viewMonth={state.viewDate}
-          selectedDay={state.selectedDay}
           dispatcher={dispatch}
           events={events}
           eventClick={eventClick}
           dayClick={dayClick}
+          textColor={textColor}
+          colorScale={colorScale}
         />
       )}
     </div>
@@ -49,7 +59,9 @@ Calendar.propTypes = {
   events: PropTypes.arrayOf(PropTypes.object),
   views: PropTypes.arrayOf(PropTypes.string),
   eventClick: PropTypes.func,
-  dayClick: PropTypes.func
+  dayClick: PropTypes.func,
+  colorScale: PropTypes.object,
+  textColor: PropTypes.string
 }
 
 // See which available views selected
@@ -73,12 +85,19 @@ export const CalendarWrapperToTest = () => {
     dayInfo => console.log(dayInfo.dailyEvents),
     []
   )
+
+  const colorScale = { low: 1, mid: 2, bgColor: "green" }
+
+  const textColor = "black"
+
   return (
     <Calendar
       events={events}
       eventClick={eventClickMemo}
       views={views}
       dayClick={dayClickMemo}
+      colorScale={colorScale}
+      textColor={textColor}
     />
   )
 }

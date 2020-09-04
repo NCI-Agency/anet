@@ -17,7 +17,9 @@ const YearlyView = ({
   eventClick,
   dayClick,
   viewYear,
-  weekStartsOn
+  weekStartsOn,
+  colorScale,
+  textColor
 }) => {
   const getDays = useMemo(() => {
     // get 1st of January
@@ -54,6 +56,8 @@ const YearlyView = ({
             date={preventClosureDate}
             eventClick={eventClick}
             dayClick={dayClick}
+            colorScale={colorScale}
+            textColor={textColor}
           />
         )
         curDay = addDays(curDay, 1)
@@ -61,7 +65,15 @@ const YearlyView = ({
       return week
     }
     return yearDays
-  }, [viewYear, events, eventClick, dayClick, weekStartsOn])
+  }, [
+    viewYear,
+    events,
+    eventClick,
+    dayClick,
+    colorScale,
+    textColor,
+    weekStartsOn
+  ])
 
   return (
     <YearlyViewBox>
@@ -80,7 +92,9 @@ YearlyView.propTypes = {
   eventClick: PropTypes.func,
   dayClick: PropTypes.func,
   viewYear: PropTypes.object,
-  weekStartsOn: PropTypes.number
+  weekStartsOn: PropTypes.number,
+  colorScale: PropTypes.object,
+  textColor: PropTypes.string
 }
 YearlyView.defaultProps = {
   weekStartsOn: 1

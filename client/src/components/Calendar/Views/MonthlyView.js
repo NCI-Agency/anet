@@ -16,9 +16,9 @@ const MonthlyView = ({
   eventClick,
   dayClick,
   viewMonth,
-  selectedDay,
-  dispatcher,
-  weekStartsOn
+  weekStartsOn,
+  colorScale,
+  textColor
 }) => {
   return (
     <MonthlyViewBox>
@@ -51,7 +51,6 @@ const MonthlyView = ({
     let curDay = theDate
     const week = []
     for (let i = 0; i < numOfDays; i++) {
-      const selected = isSameDay(curDay, selectedDay)
       const sameMonth = isSameMonth(curDay, theMonth)
       const preventClosureDate = curDay
       const dailyEvents = events.filter(event =>
@@ -62,10 +61,11 @@ const MonthlyView = ({
           key={preventClosureDate}
           date={preventClosureDate}
           dayClick={dayClick}
-          selected={selected}
           dailyEvents={dailyEvents}
           eventClick={eventClick}
           sameMonth={sameMonth}
+          colorScale={colorScale}
+          textColor={textColor}
         />
       )
       curDay = addDays(curDay, 1)
@@ -78,9 +78,9 @@ MonthlyView.propTypes = {
   eventClick: PropTypes.func,
   dayClick: PropTypes.func,
   viewMonth: PropTypes.object,
-  selectedDay: PropTypes.object,
-  dispatcher: PropTypes.func,
-  weekStartsOn: PropTypes.number
+  weekStartsOn: PropTypes.number,
+  colorScale: PropTypes.object,
+  textColor: PropTypes.string
 }
 
 MonthlyView.defaultProps = {

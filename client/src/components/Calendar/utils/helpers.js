@@ -41,16 +41,16 @@ const MonthNameBox = styled.div`
  * There are 4 levels, [none, low, mid, high], none=0 assumed, we need two values: low, mid
  * Available colors ["red", "blue", "green", "pink", "orange", "brown"]
  * @param {number} count - number of items to scale
- * @param {object} scale - example object: {low: 3, mid: 6, color: "red"}
+ * @param {object} scale - example object: {low: 3, mid: 6, bgColor: "red"}
  */
 export function countToHeatBgc(count, scale) {
   if (count === 0) {
     return "transparent"
   } else if (count <= scale.low) {
-    return `${COLOR_NAMES_TO_RGB[scale.color]}0.25)`
+    return `${COLOR_NAMES_TO_RGB[scale.bgColor]}0.25)`
   } else if (count <= scale.mid) {
-    return `${COLOR_NAMES_TO_RGB[scale.color]}0.5)`
+    return `${COLOR_NAMES_TO_RGB[scale.bgColor]}0.5)`
   } else {
-    return `${COLOR_NAMES_TO_RGB[scale.color]}1.0)`
+    return `${COLOR_NAMES_TO_RGB[scale.bgColor]}1.0)`
   }
 }

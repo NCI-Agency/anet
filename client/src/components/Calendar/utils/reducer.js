@@ -14,7 +14,6 @@ import { TITLE_FORMATS } from "components/Calendar/utils/formats"
 
 export const initState = {
   viewDate: new Date(),
-  selectedDay: new Date(),
   titleFormatter: defaultTitleFormatter,
   title: defaultTitle,
   view: defaultView,
@@ -39,8 +38,6 @@ const reducer = (state, action) => {
         viewDate: action.payload,
         title: state.titleFormatter(action.payload)
       }
-    case ACTION_TYPES.CHANGE_SELECTED_DAY:
-      return { ...state, selectedDay: action.payload }
     case ACTION_TYPES.CHANGE_TITLE:
       return { ...state, title: action.payload }
     default:

@@ -4,7 +4,15 @@ import { format } from "date-fns"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 
-const YearDay = ({ dailyEvents, eventClick, dayClick, date, sameYear }) => {
+const YearDay = ({
+  dailyEvents,
+  eventClick,
+  dayClick,
+  date,
+  sameYear,
+  colorScale,
+  textColor
+}) => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [tooltipLeft, setTooltipLeft] = useState(true)
   const dayNode = useRef(null)
@@ -31,7 +39,7 @@ const YearDay = ({ dailyEvents, eventClick, dayClick, date, sameYear }) => {
       onMouseLeave={() => setShowTooltip(false)}
       onClick={() => dayClick({ date, dailyEvents })}
       date={format(date, "dd/MM/yyyy")}
-      bgc={countToHeatBgc(dailyEvents.length, { low: 1, mid: 2, color: "red" })}
+      bgc={countToHeatBgc(dailyEvents.length, colorScale)}
       data-same-year={sameYearAttr}
       ref={dayNode}
     >
@@ -43,6 +51,7 @@ const YearDay = ({ dailyEvents, eventClick, dayClick, date, sameYear }) => {
         <div>{format(date, "dd/MM/yyyy")}</div>
         {dailyEvents.map(e => (
           <DayEventTitle
+            textColor={textColor}
             key={e.title}
             onClick={clickEvent => {
               eventClick(e)
@@ -62,7 +71,9 @@ YearDay.propTypes = {
   eventClick: PropTypes.func,
   dayClick: PropTypes.func,
   date: PropTypes.object,
-  sameYear: PropTypes.bool
+  sameYear: PropTypes.bool,
+  colorScale: PropTypes.object,
+  textColor: PropTypes.string
 }
 const YearDayBox = styled.div`
   background-color: ${props => props.bgc};
@@ -97,9 +108,9 @@ const DayHoverInfo = styled.div`
   z-index: 20;
 `
 
-const DayEventTitle = styled.a`
-  color: blue;
-  display: block;
+const DayEventTitle = styled.div`
+  color: ${props => props.textColor};
+  cursor: pointer;
   border-top: 1px dashed black;
 `
 

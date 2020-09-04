@@ -10,9 +10,9 @@ export const COLOR_NAMES_TO_RGB = {
   red: "rgb(155, 0, 0, ",
   blue: "rgb(0, 0, 155, ",
   green: "rgb(0, 155, 0, ",
-  pink: "rgb(255, 192, 203, ",
-  orange: "rgb(255, 165, 0, ",
-  brown: "rgb(165, 42, 42, "
+  pink: "rgb(194, 31, 169, ",
+  orange: "rgb(199, 135, 6, ",
+  brown: "rgb(128, 57, 30, "
 }
 
 export default VIEWS
