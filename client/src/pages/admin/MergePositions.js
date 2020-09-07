@@ -1,7 +1,8 @@
-import { gql } from "@apollo/client"
 import { Button, Callout } from "@blueprintjs/core"
+import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { gql } from "apollo-boost"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import PositionField from "components/MergeField"
@@ -37,6 +38,34 @@ const GQL_MERGE_POSITION = gql`
     }
   }
 `
+const POSITION_FIELDS = `
+  uuid,
+  name,
+  code,
+  type,
+  organization {
+    uuid,
+    shortName,
+    longName,
+    identificationCode
+  },
+  person {
+    uuid,
+    name,
+    rank,
+    role,
+    avatar(size: 32)
+  }
+`
+
+const positionsFilters = {
+  allAdvisorPositions: {
+    label: "All",
+    queryVars: {
+      status: Position.STATUS.ACTIVE
+    }
+  }
+}
 
 const MergePositions = ({ pageDispatchers }) => {
   const history = useHistory()
@@ -64,13 +93,12 @@ const MergePositions = ({ pageDispatchers }) => {
             position={position1}
             setPosition={setPosition1}
             setFieldValue={setFieldValue}
-            style={COLUMN_DIV_STYLE}
             align="left"
             label="Position 1"
           />
         </Col>
         <Col md={4}>
-          <div style={MID_COLUMN_TITLE_STYLE}>
+          <MidColTitle>
             {getActionButton(
               () => setAllFields(position1),
               "left",
@@ -84,7 +112,7 @@ const MergePositions = ({ pageDispatchers }) => {
               !areAllSet(position1, position2),
               "Use All"
             )}
-          </div>
+          </MidColTitle>
           {!areAllSet(position1, position2) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="warning">
@@ -194,7 +222,6 @@ const MergePositions = ({ pageDispatchers }) => {
             position={position2}
             setPosition={setPosition2}
             setFieldValue={setFieldValue}
-            style={COLUMN_DIV_STYLE}
             align="right"
             label="Position 2"
           />
@@ -282,42 +309,25 @@ MergePositions.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-const COLUMN_DIV_STYLE = {
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "flex-start",
-  width: "100%"
-}
-
-const MID_COLUMN_TITLE_STYLE = {
-  height: "39px",
-  marginTop: "25px",
-  borderBottom: "1px solid #CCCCCC",
-  borderTop: "1px solid #CCCCCC",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center"
-}
-
-const positionsFilters = {
-  allAdvisorPositions: {
-    label: "All",
-    queryVars: {
-      status: Position.STATUS.ACTIVE
-    }
-  }
-}
+const MidColTitle = styled.div`
+  display: flex;
+  height: 39px;
+  margin-top: 25px;
+  border-bottom: 1px solid #cccccc;
+  border-top: 1px solid #cccccc;
+  justify-content: space-between;
+  align-items: center;
+`
 
 const PositionColumn = ({
   position,
   setPosition,
   setFieldValue,
   align,
-  style,
   label
 }) => {
   return (
-    <div style={style}>
+    <PositionCol>
       {/* FIXME: label hmtlFor needs AdvancedSingleSelect id, no prop in AdvSelect to set id */}
       <label style={{ textAlign: align }}>{label}</label>
       <AdvancedSingleSelect
@@ -431,19 +441,21 @@ const PositionColumn = ({
           {getLeafletMap(position.uuid, position.location)}
         </>
       )}
-    </div>
+    </PositionCol>
   )
 }
-
-const POSITION_FIELDS =
-  "uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
+const PositionCol = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+`
 
 PositionColumn.propTypes = {
   position: PropTypes.instanceOf(Position),
   setPosition: PropTypes.func.isRequired,
   setFieldValue: PropTypes.func.isRequired,
   align: PropTypes.string.isRequired,
-  style: PropTypes.object,
   label: PropTypes.string.isRequired
 }
 

@@ -1,32 +1,34 @@
+import styled from "@emotion/styled"
 import PropTypes from "prop-types"
 import React from "react"
 
 const MergeField = ({ label, value, align, action }) => {
-  const flexDir = align === "right" ? "row-reverse" : "row"
+  const fDir = align === "right" ? "row-reverse" : "row"
   return (
-    <div style={{ ...FIELD_STYLE, flexDirection: flexDir }}>
+    <MergeFieldBox fDir={fDir}>
       <div style={{ flex: "1 1 auto" }}>
-        <div style={{ ...LABEL_STYLE, textAlign: align }}>{label}</div>
+        <LabelBox align={align}>{label}</LabelBox>
         <div style={{ textAlign: align }}>{value}</div>
       </div>
       {action}
-    </div>
+    </MergeFieldBox>
   )
 }
 
-const FIELD_STYLE = {
-  borderBottom: "1px solid #CCCCCC",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "8px 0",
-  height: "46px"
-}
+const MergeFieldBox = styled.div`
+  display: flex;
+  flex-direction: ${props => props.fDir};
+  justtify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  height: 46px;
+`
 
-const LABEL_STYLE = {
-  fontWeight: "bold",
-  textDecoration: "underline"
-}
+const LabelBox = styled.div`
+  text-align: ${props => props.align};
+  font-weight: bold;
+  text-decoratiın: underline;
+`
 
 MergeField.propTypes = {
   label: PropTypes.string.isRequired,
