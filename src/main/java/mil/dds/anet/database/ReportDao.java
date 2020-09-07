@@ -396,7 +396,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    * Deletes a given report from the database. Ensures consistency by removing all references to a
    * report before deleting a report.
    */
-  @InTransaction
   @Override
   public int deleteInternal(String reportUuid) {
     // Delete tags

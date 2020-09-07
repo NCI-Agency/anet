@@ -5,6 +5,7 @@ import AggregationWidgetContainer, {
   AGGREGATION_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
+import { CALENDAR_OBJECT_TYPES } from "components/aggregations/utils"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import PeriodsNavigation from "components/PeriodsNavigation"
@@ -127,6 +128,7 @@ const FieldStatisticsRow = ({
               fieldConfig={fieldConfig}
               fieldName={fieldName}
               data={periodsData[index]}
+              dataType={CALENDAR_OBJECT_TYPES.REPORT}
               widget={aggregationWidget}
               period={period}
               widgetId={`${fieldName}-${_uniqueId("statistics")}`}

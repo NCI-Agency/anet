@@ -240,7 +240,9 @@ const OrganizationalChart = ({
       .attr("height", 12)
       .attr("x", -15)
       .attr("y", 5)
-      .on("click", d => setExpanded(expanded => _xor(expanded, [d.data.uuid])))
+      .on("click", (event, d) =>
+        setExpanded(expanded => _xor(expanded, [d.data.uuid]))
+      )
 
     node
       .selectAll("image.orgChildIcon")
@@ -250,7 +252,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("g")
-      .on("click", d => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
       .each(function(d) {
         const positions = sortPositions(d.data.positions)
         const unitcode = Settings.fields.person.ranks.find(
@@ -268,7 +270,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("text")
-      .on("click", d => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
       .attr("font-size", "20px")
       .attr("font-family", "monospace")
       .attr("font-weight", "bold")
@@ -282,7 +284,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("text")
-      .on("click", d => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
       .attr("font-family", "monospace")
       .attr("dy", 45)
       .attr("x", -40)
@@ -302,7 +304,7 @@ const OrganizationalChart = ({
       .append("g")
       .attr("class", "head")
       .attr("transform", "translate(-63, 65)")
-      .on("click", d => history.push(Position.pathFor(d)))
+      .on("click", (event, d) => history.push(Position.pathFor(d)))
 
     headG.exit().remove()
 
@@ -354,7 +356,7 @@ const OrganizationalChart = ({
       .append("g")
       .attr("class", "position")
       .attr("transform", (d, i) => `translate(-63,${87 + i * 11})`)
-      .on("click", d => history.push(Position.pathFor(d)))
+      .on("click", (event, d) => history.push(Position.pathFor(d)))
 
     positionsGA
       .append("image")

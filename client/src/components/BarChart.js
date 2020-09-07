@@ -173,9 +173,7 @@ const BarChart = ({
       .attr("data-html", true)
       .attr("data-tip", d => tooltip && tooltip(d))
     if (onBarClick) {
-      bar.on("click", function(d) {
-        onBarClick(d)
-      })
+      bar.on("click", (event, d) => onBarClick(d))
     }
 
     ReactTooltip.rebuild()
