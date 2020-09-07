@@ -296,9 +296,7 @@ const HorizontalBarChart = ({
 
   function bindElementOnClick(element, onClickHandler) {
     if (onClickHandler) {
-      element.on("click", function(d) {
-        onClickHandler(d)
-      })
+      element.on("click", (event, d) => onClickHandler(d))
     }
   }
 }
