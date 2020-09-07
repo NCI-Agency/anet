@@ -163,6 +163,8 @@ jobs:
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
         NODE_OPTIONS: '--max-old-space-size=8192 --throw-deprecation'
+    - run: head -1000 logs/clientLog.log
+      if: always()
     - name: Notify slack success
       if: success()
       env:

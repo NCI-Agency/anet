@@ -97,18 +97,21 @@ const Chart = ({
         values: [{}]
       }
     })
-    const categoriesWithData = d3
-      .nest()
-      .key(function(d) {
-        return moment(d.engagementDate).startOf("day").valueOf()
+    const categoriesWithData = Array.from(
+      d3.rollup(
+        reportsList,
+        leaves => leaves.length,
+        d => moment(d.engagementDate).startOf("day").valueOf(),
+        d => d.location.uuid
+      ),
+      ([key, values]) => ({
+        key,
+        values: Array.from(values, ([key, value]) => ({
+          key,
+          value
+        }))
       })
-      .key(function(d) {
-        return d.location.uuid
-      })
-      .rollup(function(leaves) {
-        return leaves.length
-      })
-      .entries(reportsList)
+    )
     const groupedData = allCategories.map(d => {
       const categData = categoriesWithData.find(x => {
         return Number(x.key) === d.key
