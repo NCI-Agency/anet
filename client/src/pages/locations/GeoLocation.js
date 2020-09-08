@@ -29,7 +29,7 @@ const GeoLocation = ({
   lat,
   lng,
   editable,
-  setValues,
+  setFieldValue,
   setFieldTouched,
   isSubmitting,
   displayType
@@ -69,7 +69,7 @@ const GeoLocation = ({
       lat={lat}
       lng={lng}
       editable
-      setValues={setValues}
+      setFieldValue={setFieldValue}
       setFieldTouched={setFieldTouched}
       isSubmitting={isSubmitting}
     />
@@ -88,7 +88,7 @@ GeoLocation.propTypes = {
   lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   editable: PropTypes.bool,
-  setValues: fnRequiredWhenEditable,
+  setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
   isSubmitting: PropTypes.bool,
   displayType: PropTypes.oneOf([
@@ -113,7 +113,7 @@ const MGRSFormField = ({
   lat,
   lng,
   editable,
-  setValues,
+  setFieldValue,
   setFieldTouched,
   isSubmitting
 }) => {
@@ -127,11 +127,13 @@ const MGRSFormField = ({
       if (mgrsValue) {
         setMgrs(mgrsValue)
         if (editable) {
-          setValues({ displayedCoordinate: mgrsValue, lat: lat, lng: lng })
+          setFieldValue("displayedCoordinate", mgrsValue)
+          setFieldValue("lat", lat)
+          setFieldValue("lng", lng)
         }
       }
     }
-  }, [editable, lat, lng, setValues])
+  }, [editable, lat, lng, setFieldValue])
 
   if (!editable) {
     return <span>{mgrs || "?"}</span>
@@ -152,11 +154,9 @@ const MGRSFormField = ({
             onChange={e => setMgrs(e.target.value)}
             onBlur={e => {
               const newLatLng = convertMGRSToLatLng(mgrs)
-              setValues({
-                displayedCoordinate: e.target.value,
-                lat: newLatLng[0],
-                lng: newLatLng[1]
-              })
+              setFieldValue("displayedCoordinate", e.target.value)
+              setFieldValue("lat", newLatLng[0])
+              setFieldValue("lng", newLatLng[1])
               setFieldTouched("displayedCoordinate", true, false)
             }}
           />
@@ -167,7 +167,9 @@ const MGRSFormField = ({
           isSubmitting={isSubmitting}
           disabled={!mgrs}
           onClear={() => {
-            setValues({ lat: null, lng: null, displayedCoordinate: null })
+            setFieldValue("displayedCoordinate", null)
+            setFieldValue("lat", null)
+            setFieldValue("lng", null)
             setMgrs("")
           }}
         />
@@ -180,7 +182,7 @@ MGRSFormField.propTypes = {
   lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   editable: PropTypes.bool,
-  setValues: fnRequiredWhenEditable,
+  setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
   isSubmitting: PropTypes.bool
 }
@@ -198,7 +200,7 @@ const LatLonFormField = ({
   lat,
   lng,
   editable,
-  setValues,
+  setFieldValue,
   setFieldTouched,
   isSubmitting
 }) => {
@@ -228,10 +230,8 @@ const LatLonFormField = ({
             onBlur={() => {
               setFieldTouched("lat", true, false)
               setFieldTouched("lng", true, false)
-              setValues({
-                lat: parseCoordinate(lat),
-                lng: parseCoordinate(lng)
-              })
+              setFieldValue("lat", parseCoordinate(lat))
+              setFieldValue("lng", parseCoordinate(lng))
             }}
           />
         </Col>
@@ -242,10 +242,8 @@ const LatLonFormField = ({
             onBlur={() => {
               setFieldTouched("lat", true, false)
               setFieldTouched("lng", true, false)
-              setValues({
-                lat: parseCoordinate(lat),
-                lng: parseCoordinate(lng)
-              })
+              setFieldValue("lat", parseCoordinate(lat))
+              setFieldValue("lng", parseCoordinate(lng))
             }}
           />
         </Col>
@@ -258,7 +256,8 @@ const LatLonFormField = ({
             // setting second param to false prevents validation since lat, lng can be null together
             setFieldTouched("lat", false, false)
             setFieldTouched("lng", false, false)
-            setValues({ lat: null, lng: null })
+            setFieldValue("lat", null)
+            setFieldValue("lng", null)
           }}
         />
       </Col>
@@ -270,7 +269,7 @@ LatLonFormField.propTypes = {
   lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   editable: PropTypes.bool,
-  setValues: fnRequiredWhenEditable,
+  setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
   isSubmitting: PropTypes.bool
 }

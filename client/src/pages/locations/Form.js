@@ -147,7 +147,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   lat={values.lat}
                   lng={values.lng}
                   isSubmitting={isSubmitting}
-                  setValues={vals => setValues({ ...values, ...vals })}
+                  setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
                 />
               </Fieldset>
