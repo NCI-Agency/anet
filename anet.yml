@@ -641,6 +641,9 @@ dictionary:
               helpText: Help text for object date field
               visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
+    location:
+      format: LAT_LON
+      
     position:
       name: 'Position Name'
 

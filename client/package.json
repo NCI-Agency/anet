@@ -138,6 +138,7 @@
     "locale-compare-polyfill": "0.0.2",
     "lodash": "4.17.20",
     "mathjs": "7.2.0",
+    "mgrs": "1.0.0",
     "milsymbol": "2.0.0",
     "ml-matrix": "6.5.1",
     "moment": "2.27.0",
