@@ -84,7 +84,7 @@ MonthlyView.propTypes = {
 }
 
 MonthlyView.defaultProps = {
-  weekStartsOn: 1
+  weekStartsOn: 1 // Monday
 }
 
 const MonthlyViewBox = styled.div`

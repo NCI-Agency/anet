@@ -46,13 +46,13 @@ const Calendar = ({
       )}
       {state.view === VIEWS.MONTHLY && (
         <MonthlyView
-          viewMonth={state.viewDate}
-          dispatcher={dispatch}
           events={events}
           eventClick={eventClick}
           dayClick={dayClick}
-          textColor={textColor}
+          viewMonth={state.viewDate}
+          weekStartsOn={1} // Monday
           colorScale={colorScale}
+          textColor={textColor}
         />
       )}
     </div>

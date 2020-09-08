@@ -97,7 +97,7 @@ YearlyView.propTypes = {
   textColor: PropTypes.string
 }
 YearlyView.defaultProps = {
-  weekStartsOn: 1
+  weekStartsOn: 1 // Monday
 }
 const YearlyViewBox = styled.div`
   border: 2px solid blue;
