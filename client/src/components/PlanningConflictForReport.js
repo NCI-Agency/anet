@@ -1,11 +1,12 @@
 import { Icon, Intent, Spinner, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import styled from "@emotion/styled"
 import API from "api"
 import { gql } from "apollo-boost"
 import Report from "models/Report"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React from "react"
 
 const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
   query($uuid: String, $attendedReportsQuery: ReportSearchQueryInput) {
@@ -29,61 +30,29 @@ const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
 `
 
 const PlanningConflictForReport = ({ report, text, largeIcon }) => {
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState()
-  const [data, setData] = useState()
-
-  /*
-   * We cannot use API.useApiQuery here because this component is rendered by
-   * ReactDOM.render in ReportCalendar and ReportMap.
-   *
-   * If the component is unmounted before API.query is resolved or rejected,
-   * following warning is printed to the console;
-   *
-   * Warning: Can't perform a React state update on an unmounted component.
-   * This is a no-op, but it indicates a memory leak in your application.
-   * To fix, cancel all subscriptions and asynchronous tasks in a useEffect
-   * cleanup function.
-   *
-   * Since there is no way of canceling a Promise, _isMounted is a workaround.
-   *
-   * https://stackoverflow.com/questions/59780268/cleanup-memory-leaks-on-an-unmounted-component-in-react-hooks
-   */
-  const _isMounted = useRef(true)
-
-  useEffect(() => {
-    if (!report || !report.uuid || !report.engagementDate) {
-      setLoading(false)
-    } else {
-      API.query(GET_REPORT_WITH_ATTENDED_REPORTS, {
-        uuid: report.uuid,
-        attendedReportsQuery: {
-          engagementDateStart: moment(report.engagementDate)
-            .startOf("day")
-            .valueOf(),
-          engagementDateEnd: moment(report.engagementDate)
-            .endOf("day")
-            .valueOf()
-        }
-      })
-        .then(d => _isMounted.current && setData(d))
-        .catch(e => _isMounted.current && setError(e))
-        .finally(() => _isMounted.current && setLoading(false))
+  const { loading, error, data } = API.useApiQuery(
+    GET_REPORT_WITH_ATTENDED_REPORTS,
+    {
+      uuid: report.uuid,
+      attendedReportsQuery: {
+        engagementDateStart: moment(report.engagementDate)
+          .startOf("day")
+          .valueOf(),
+        engagementDateEnd: moment(report.engagementDate).endOf("day").valueOf()
+      }
     }
-
-    return () => (_isMounted.current = false)
-  }, [report])
+  )
 
   if (loading) {
     return (
-      <span className="reportConflictLoadingIcon">
+      <ReportConflictLoadingIconBox className="reportConflictLoadingIcon">
         <Spinner
           intent={Intent.WARNING}
           size={12}
           style={{ margin: "0 2px" }}
         />
         {text}
-      </span>
+      </ReportConflictLoadingIconBox>
     )
   }
 
@@ -114,10 +83,10 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
   }
 
   return (
-    <span className="reportConflictIcon">
+    <ReportConflictIconBox className="reportConflictIcon">
       <Tooltip
         content={
-          <div className="reportConflictTooltipContainer">
+          <ReportConflictTooltipContainer className="reportConflictTooltipContainer">
             <div>
               {conflictingAttendees.length} of {attendees.length} attendees are
               busy at the selected time!
@@ -127,7 +96,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
                 <li key={at.uuid}>{at.name}</li>
               ))}
             </ul>
-          </div>
+          </ReportConflictTooltipContainer>
         }
         intent={Intent.WARNING}
       >
@@ -139,9 +108,29 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
         />
       </Tooltip>
       {text}
-    </span>
+    </ReportConflictIconBox>
   )
 }
+
+/** wdio e2e tests rely on these class names
+ *
+ * .reportConflictIcon, .reportConflictLoadingIcon, .reportConflictTooltipContainer
+ *
+ */
+
+const ReportConflictIconBox = styled.span`
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+`
+
+const ReportConflictLoadingIconBox = styled(ReportConflictIconBox)``
+
+const ReportConflictTooltipContainer = styled.div`
+  & > div {
+    font-weight: bold;
+  }
+`
 
 PlanningConflictForReport.propTypes = {
   report: PropTypes.instanceOf(Report).isRequired,
