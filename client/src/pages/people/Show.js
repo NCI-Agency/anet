@@ -271,7 +271,8 @@ const PersonShow = ({ pageDispatchers }) => {
                 }
                 action={action}
               />
-              <Fieldset>
+              <Fieldset name="status">
+                >
                 <Container fluid>
                   <Row>
                     <Col md={6}>
