@@ -128,8 +128,8 @@ const MGRSFormField = ({
         setMgrs(mgrsValue)
         if (editable) {
           setFieldValue("displayedCoordinate", mgrsValue)
-          setFieldValue("lat", lat)
-          setFieldValue("lng", lng)
+          setFieldValue("lat", lat, false)
+          setFieldValue("lng", lng, false)
         }
       }
     }
@@ -155,8 +155,8 @@ const MGRSFormField = ({
             onBlur={e => {
               const newLatLng = convertMGRSToLatLng(mgrs)
               setFieldValue("displayedCoordinate", e.target.value)
-              setFieldValue("lat", newLatLng[0])
-              setFieldValue("lng", newLatLng[1])
+              setFieldValue("lat", newLatLng[0], false)
+              setFieldValue("lng", newLatLng[1], false)
               setFieldTouched("displayedCoordinate", true, false)
             }}
           />
@@ -215,7 +215,12 @@ const LatLonFormField = ({
       </>
     )
   }
-
+  const setParsedLatLng = (_lat, _lng) => {
+    setFieldTouched("lat", true, false)
+    setFieldTouched("lng", true, false)
+    setFieldValue("lat", parseCoordinate(_lat))
+    setFieldValue("lng", parseCoordinate(_lng))
+  }
   return (
     <FormGroup style={{ marginBottom: 0 }}>
       <Col sm={2} componentClass={ControlLabel} htmlFor="lat">
@@ -228,10 +233,7 @@ const LatLonFormField = ({
             name="lat"
             component={FieldHelper.InputFieldNoLabel}
             onBlur={() => {
-              setFieldTouched("lat", true, false)
-              setFieldTouched("lng", true, false)
-              setFieldValue("lat", parseCoordinate(lat))
-              setFieldValue("lng", parseCoordinate(lng))
+              setParsedLatLng(lat, lng)
             }}
           />
         </Col>
@@ -240,10 +242,7 @@ const LatLonFormField = ({
             name="lng"
             component={FieldHelper.InputFieldNoLabel}
             onBlur={() => {
-              setFieldTouched("lat", true, false)
-              setFieldTouched("lng", true, false)
-              setFieldValue("lat", parseCoordinate(lat))
-              setFieldValue("lng", parseCoordinate(lng))
+              setParsedLatLng(lat, lng)
             }}
           />
         </Col>
