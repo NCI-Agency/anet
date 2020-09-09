@@ -32,11 +32,12 @@ const GeoLocation = ({
   setFieldValue,
   setFieldTouched,
   isSubmitting,
-  displayType
+  displayType,
+  locationFormat
 }) => {
   let label = LAT_LON_LABEL
   let CoordinatesFormField = LatLonFormField
-  if (Settings?.fields?.location?.format === "MGRS") {
+  if (locationFormat === "MGRS") {
     label = MGRS_LABEL
     CoordinatesFormField = MGRSFormField
   }
@@ -94,7 +95,8 @@ GeoLocation.propTypes = {
   displayType: PropTypes.oneOf([
     GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD,
     GEO_LOCATION_DISPLAY_TYPE.GENERIC
-  ])
+  ]),
+  locationFormat: PropTypes.string
 }
 
 GeoLocation.defaultProps = {
@@ -102,7 +104,8 @@ GeoLocation.defaultProps = {
   lng: null,
   editable: false,
   isSubmitting: false,
-  displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC
+  displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC,
+  locationFormat: Settings?.fields?.location?.format
 }
 
 export default GeoLocation
@@ -119,21 +122,25 @@ const MGRSFormField = ({
 }) => {
   const [mgrs, setMgrs] = useState("")
 
-  useEffect(() => {
-    if (!editable && lat === null && lng === null) {
-      setMgrs("")
-    } else {
-      const mgrsValue = convertLatLngToMGRS(lat, lng)
-      if (mgrsValue) {
-        setMgrs(mgrsValue)
-        if (editable) {
-          setFieldValue("displayedCoordinate", mgrsValue)
-          setFieldValue("lat", lat, false)
-          setFieldValue("lng", lng, false)
+  // Coordinate should be sync between input field and map interaction
+  useEffect(
+    function syncMapEdit() {
+      if (!editable && lat === null && lng === null) {
+        setMgrs("")
+      } else {
+        const mgrsValue = convertLatLngToMGRS(lat, lng)
+        if (mgrsValue) {
+          setMgrs(mgrsValue)
+          if (editable) {
+            setFieldValue("displayedCoordinate", mgrsValue)
+            setFieldValue("lat", lat, false)
+            setFieldValue("lng", lng, false)
+          }
         }
       }
-    }
-  }, [editable, lat, lng, setFieldValue])
+    },
+    [editable, lat, lng, setFieldValue]
+  )
 
   if (!editable) {
     return <span>{mgrs || "?"}</span>
@@ -153,11 +160,11 @@ const MGRSFormField = ({
             value={mgrs}
             onChange={e => setMgrs(e.target.value)}
             onBlur={e => {
+              setFieldTouched("displayedCoordinate", true, false)
               const newLatLng = convertMGRSToLatLng(mgrs)
               setFieldValue("displayedCoordinate", e.target.value)
               setFieldValue("lat", newLatLng[0], false)
               setFieldValue("lng", newLatLng[1], false)
-              setFieldTouched("displayedCoordinate", true, false)
             }}
           />
         </Col>
@@ -168,8 +175,8 @@ const MGRSFormField = ({
           disabled={!mgrs}
           onClear={() => {
             setFieldValue("displayedCoordinate", null)
-            setFieldValue("lat", null)
-            setFieldValue("lng", null)
+            setFieldValue("lat", null, false)
+            setFieldValue("lng", null, false)
             setMgrs("")
           }}
         />
