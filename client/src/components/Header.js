@@ -19,7 +19,7 @@ const Header = ({ minimalHeader, onHomeClick, toggleMenuAction }) => (
   <header style={backgroundCss} className="header">
     <Grid fluid>
       <Row>
-        <Col xs={3} sm={3} md={2} lg={2}>
+        <Col xs={3} sm={3} md={2} lg={2} id="anet-logo">
           {minimalHeader ? (
             <span className="logo hidden-xs">
               <img src={logo} alt="ANET Logo" />

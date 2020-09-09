@@ -1225,11 +1225,6 @@ header.searchPagination {
     display: block;
   }
 
-  /* hide guide tour on small screen as it is broken */
-  .persistent-tour-launcher {
-    display: none;
-  }
-
   .scroll-anchor-container .action-small {
     display: flex;
     flex-direction: column;

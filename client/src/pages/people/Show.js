@@ -220,7 +220,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 title={`${person.rank} ${person.name}`}
                 action={action}
               />
-              <Fieldset>
+              <Fieldset name="status">
                 <Grid fluid>
                   <Row>
                     <Col md={6}>

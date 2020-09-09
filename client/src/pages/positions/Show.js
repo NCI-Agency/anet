@@ -147,7 +147,11 @@ const PositionShow = ({ pageDispatchers }) => {
             />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Position ${position.name}`} action={action} />
+              <Fieldset
+                id="info"
+                title={`Position ${position.name}`}
+                action={action}
+              />
               <Fieldset>
                 <Field
                   name="name"
