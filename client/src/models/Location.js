@@ -1,5 +1,8 @@
 import Model from "components/Model"
+import { convertMGRSToLatLng } from "geoUtils"
+import _isEmpty from "lodash/isEmpty"
 import LOCATIONS_ICON from "resources/locations.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -53,6 +56,29 @@ export default class Location extends Model {
           return true
         })
         .default(null),
+      // not actually in the database, but used for validation
+      displayedCoordinate: yup
+        .string()
+        .nullable()
+        .test({
+          name: "displayedCoordinate",
+          test: function(displayedCoordinate) {
+            if (_isEmpty(displayedCoordinate)) {
+              return true
+            }
+            if (Settings?.fields?.location?.format === "MGRS") {
+              const latLngValue = convertMGRSToLatLng(displayedCoordinate)
+              return !latLngValue[0] || !latLngValue[1]
+                ? this.createError({
+                  message: "Please enter a valid MGRS coordinate",
+                  path: "displayedCoordinate"
+                })
+                : true
+            }
+            return true
+          }
+        })
+        .default(null),
       // FIXME: resolve code duplication in yup schema for approval steps
       planningApprovalSteps: yup
         .array()
@@ -98,15 +124,6 @@ export default class Location extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery = "uuid, name"
-
-  static parseCoordinate(latLng) {
-    const value = parseFloat(latLng)
-    if (!value && value !== 0) {
-      return null
-    }
-    // 6 decimal point (~10cm) precision https://stackoverflow.com/a/16743805/1209097
-    return parseFloat(value.toFixed(6))
-  }
 
   static hasCoordinates(location) {
     return (

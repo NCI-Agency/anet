@@ -514,6 +514,17 @@ properties:
             additionalProperties:
               "$ref": "#/$defs/customField"
 
+      location:
+        type: object
+        additionalProperties: false
+        required: [format]
+        properties:
+          format:
+            type: string
+            enum: [LAT_LON, MGRS]
+            title: Coordinate format for location
+            description: Used in the UI where a location's coordinate is shown. Defaults to LAT_LON.
+
       position:
         type: object
         additionalProperties: false
