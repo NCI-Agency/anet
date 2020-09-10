@@ -27,6 +27,8 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localTestSettings.gradle'
 }
 
+boolean isJupyterLabEnabled = run.environment["ANET_JUPYTER_ENABLE_LAB"] == "yes"
+
 // Defaults for development variables
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "sqlserver")
 boolean isMssql = run.environment["DB_DRIVER"] == "sqlserver"
@@ -49,11 +51,14 @@ run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "
 run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
+run.environment("ANET_JUPYTER_PORT", run.environment["ANET_JUPYTER_PORT"] ?: "5000")
 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
 String keycloakContainerName = "keycloak-server"
 String keycloakVersion = "12.0.2"
+
+String jupyterContainerName = "jupyter_scipy_notebook"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -524,6 +529,48 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	}
 	cmdline << anetConfig
 	args cmdline
+}
+
+task dockerPullJupyter(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	group = "jupyter container"
+	image = "fburakep/jupyter_scipy:latest"
+	description = "Pulls a docker image for the python jupyter environment from ${image}."
+}
+
+task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	group = "jupyter container"
+	imageId = dockerPullJupyter.getImage()
+	containerName = jupyterContainerName
+	description = "Creates an ANET ${dbType} jupyter_scipy container named " + jupyterContainerName + "."
+	hostConfig.binds = ["${projectDir}/anet-tools/anet_tools":"/home/jovyan/work"] + run.environment.get("DOCKER_MOUNTS", [:])
+	if (isJupyterLabEnabled){
+		withEnvVar('JUPYTER_ENABLE_LAB', run.environment["ANET_JUPYTER_ENABLE_LAB"])
+	}
+	withEnvVar('DB_DRIVER', run.environment["DB_DRIVER"])
+	withEnvVar('ANET_DB_SERVER', run.environment["ANET_DB_SERVER"])
+	withEnvVar('ANET_DB_NAME', run.environment["ANET_DB_NAME"])
+	withEnvVar('ANET_DB_USERNAME', run.environment["ANET_DB_USERNAME"])
+	withEnvVar('ANET_DB_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+	withEnvVar('ANET_DB_EXPOSED_PORT', run.environment["ANET_DB_EXPOSED_PORT"])
+	hostConfig.portBindings = [run.environment["ANET_JUPYTER_PORT"] + ":" + "8888"]
+}
+
+task dockerStartJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	group = "jupyter container"
+	description = "Starts " + jupyterContainerName + " container."
+	targetContainerId { jupyterContainerName }
+}
+
+task dockerStopJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	group = "jupyter container"
+	description = "Stops " + jupyterContainerName + " container."
+	targetContainerId { jupyterContainerName }
+}
+
+task dockerRemoveJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	group = "jupyter container"
+	description = "Removes " + jupyterContainerName + " container."
+	targetContainerId { jupyterContainerName }
 }
 
 jar.dependsOn buildClient
