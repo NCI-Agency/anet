@@ -123,24 +123,19 @@ const MGRSFormField = ({
   const [mgrs, setMgrs] = useState("")
 
   // Coordinate should be sync between input field and map interaction
-  useEffect(
-    function syncMapEdit() {
-      if (!editable && lat === null && lng === null) {
-        setMgrs("")
-      } else {
-        const mgrsValue = convertLatLngToMGRS(lat, lng)
-        if (mgrsValue) {
-          setMgrs(mgrsValue)
-          if (editable) {
-            setFieldValue("displayedCoordinate", mgrsValue)
-            setFieldValue("lat", lat, false)
-            setFieldValue("lng", lng, false)
-          }
+  useEffect(() => {
+    if (!editable && lat === null && lng === null) {
+      setMgrs("")
+    } else {
+      const mgrsValue = convertLatLngToMGRS(lat, lng)
+      if (mgrsValue) {
+        setMgrs(mgrsValue)
+        if (editable) {
+          setFieldValue("displayedCoordinate", mgrsValue)
         }
       }
-    },
-    [editable, lat, lng, setFieldValue]
-  )
+    }
+  }, [editable, lat, lng, setFieldValue])
 
   if (!editable) {
     return <span>{mgrs || "?"}</span>
@@ -222,12 +217,6 @@ const LatLonFormField = ({
       </>
     )
   }
-  const setParsedLatLng = (_lat, _lng) => {
-    setFieldTouched("lat", true, false)
-    setFieldTouched("lng", true, false)
-    setFieldValue("lat", parseCoordinate(_lat))
-    setFieldValue("lng", parseCoordinate(_lng))
-  }
   return (
     <FormGroup style={{ marginBottom: 0 }}>
       <Col sm={2} componentClass={ControlLabel} htmlFor="lat">
@@ -269,6 +258,13 @@ const LatLonFormField = ({
       </Col>
     </FormGroup>
   )
+
+  function setParsedLatLng(latVal, lngVal) {
+    setFieldTouched("lat", true, false)
+    setFieldTouched("lng", true, false)
+    setFieldValue("lat", parseCoordinate(latVal))
+    setFieldValue("lng", parseCoordinate(lngVal))
+  }
 }
 
 LatLonFormField.propTypes = {

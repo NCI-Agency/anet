@@ -10,22 +10,24 @@ const EXAMPLE_LAT_LNG_TO_CONVERT = {
 const EXAMPLE_MGRS_TO_BE_EXPECTED = "22TCT5351665858"
 
 describe("When editing an existing location", () => {
-  it("Should see latitude and longitude label when format selected LAT_LON", () => {
+  it("Should see latitude and longitude label when selected format is LAT_LON", () => {
     EditLocation.open(EX_LOCATION_ID)
     EditLocation.latLngLabel.waitForExist()
     EditLocation.latLngLabel.waitForDisplayed()
   })
 
-  it("Should correctly converts and displays both formats in the popover window", () => {
+  it("Should correctly convert and display both formats in the popover window", () => {
     const latInput = EditLocation.latInputField
-    // known issue on chrome driver, setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
+    // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
+    // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
     latInput.setValue(
       "\uE003".repeat(latInput.getValue().length) +
         EXAMPLE_LAT_LNG_TO_CONVERT.lat
     )
 
     const lngInput = EditLocation.lngInputField
-    // known issue on chrome driver, setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
+    // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
+    // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
     lngInput.setValue(
       "\uE003".repeat(lngInput.getValue().length) +
         EXAMPLE_LAT_LNG_TO_CONVERT.lng
