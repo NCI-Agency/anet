@@ -16,8 +16,29 @@ class EditLocation extends Page {
     return browser.$("label*=MGRS")
   }
 
+  get allFormatsPopover() {
+    return browser.$("a#gloc-info-btn")
+  }
+
+  // parent of MGRS table data => tr
+  get allFormatsPopoverLatLng() {
+    return browser.$(".bp3-popover-content table").$("td*=Latitude").$("..")
+  }
+
+  get allFormatsPopoverMGRS() {
+    // parent of MGRS table data => tr
+    return browser.$(".bp3-popover-content table").$("td*=MGRS").$("..")
+  }
+
+  get latInputField() {
+    return browser.$("input#lat")
+  }
+
+  get lngInputField() {
+    return browser.$("input#lng")
+  }
+
   open(locationId) {
-    console.log(PAGE_URL, typeof PAGE_URL)
     super.open(PAGE_URL + locationId + "/edit")
     this.waitForEditLocationPageToLoad()
   }
