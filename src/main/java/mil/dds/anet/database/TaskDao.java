@@ -196,6 +196,31 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
         FkDataLoaderKey.TASK_TASKED_ORGANIZATIONS, taskUuid);
   }
 
+  @InTransaction
+  public List<Task> getTopLevelTasks() {
+    return getDbHandle()
+        .createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
+        .map(new TaskMapper()).list();
+  }
+
+  @InTransaction
+  public int mergeTask(Task loser, Task winnerTask) {
+    getDbHandle().createUpdate(
+        "UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
+            + " AND \"noteUuid\" NOT IN ("
+            + "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
+            + ")")
+        .bind("winnerUuid", winnerTask.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+
+    getDbHandle()
+        .createUpdate(
+            "UPDATE \"reportTasks\" SET \"taskUuid\" = :winnerUuid WHERE \"taskUuid\" = :loserUuid")
+        .bind("winnerUuid", winnerTask.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+
+    return getDbHandle().createUpdate("DELETE FROM \"tasks\" WHERE \"uuid\" = :loserUuid")
+        .bind("loserUuid", loser.getUuid()).execute();
+  }
+
   @Override
   public AnetBeanList<Task> search(TaskSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);

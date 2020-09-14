@@ -171,4 +171,95 @@ public class TaskResource {
     return ResponseUtils.handleSqlException(e,
         String.format("Duplicate %s number", taskShortLabel));
   }
+
+  @GraphQLMutation(name = "mergeTask")
+  public Task mergeTask(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "winnerTask") Task winnerTask) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Task loser = dao.getByUuid(loserUuid);
+
+    final Map<String, Task> children =
+        AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(winnerTask));
+    if (winnerTask.getCustomFieldRef1Uuid() != null
+        && children.containsKey(winnerTask.getCustomFieldRef1Uuid())) {
+      throw new WebApplicationException("Task can not be its own (grand…)parent");
+    }
+    final List<Position> existingResponsiblePositions = dao
+        .getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(winnerTask)).join();
+    final List<Position> looserTaskResponsiblePositions =
+        dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(loser)).join();
+    try {
+      final int numRows = dao.update(winnerTask);
+      if (numRows == 0) {
+        throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
+      }
+
+      // Update positions:
+      if (winnerTask.getResponsiblePositions() != null) {
+        for (final Position p : winnerTask.getResponsiblePositions()) {
+          Optional<Position> existingPosition = existingResponsiblePositions.stream()
+              .filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
+          if (existingPosition.isPresent()) {
+            existingResponsiblePositions.remove(existingPosition.get());
+          } else {
+            dao.addPositionToTask(p, winnerTask);
+          }
+        }
+        for (final Position p : existingResponsiblePositions) {
+          dao.removePositionFromTask(p, winnerTask);
+        }
+        for (final Position p : looserTaskResponsiblePositions) {
+          dao.removePositionFromTask(p, loser);
+        }
+      }
+
+      // Update tasked organizations:
+      if (winnerTask.getTaskedOrganizations() != null) {
+        final List<Organization> existingTaskedOrganizations =
+            dao.getTaskedOrganizationsForTask(engine.getContext(), winnerTask.getUuid()).join();
+        final List<Organization> loserTaskTaskedOrganizations =
+            dao.getTaskedOrganizationsForTask(engine.getContext(), loser.getUuid()).join();
+        for (final Organization org : winnerTask.getTaskedOrganizations()) {
+          Optional<Organization> existingOrganization = existingTaskedOrganizations.stream()
+              .filter(el -> el.getUuid().equals(org.getUuid())).findFirst();
+          if (existingOrganization.isPresent()) {
+            existingTaskedOrganizations.remove(existingOrganization.get());
+          } else {
+            dao.addTaskedOrganizationsToTask(org, winnerTask);
+          }
+        }
+        for (final Organization org : existingTaskedOrganizations) {
+          dao.removeTaskedOrganizationsFromTask(org, winnerTask.getUuid());
+        }
+        for (final Organization org : loserTaskTaskedOrganizations) {
+          dao.removeTaskedOrganizationsFromTask(org, loser.getUuid());
+        }
+      }
+
+      // Update approval steps.
+      final List<ApprovalStep> existingPlanningApprovalSteps =
+          loser.loadPlanningApprovalSteps(engine.getContext()).join();
+      final List<ApprovalStep> existing2PlanningApprovalSteps =
+          winnerTask.loadPlanningApprovalSteps(engine.getContext()).join();
+      existingPlanningApprovalSteps.addAll(existing2PlanningApprovalSteps);
+      final List<ApprovalStep> existingApprovalSteps =
+          loser.loadApprovalSteps(engine.getContext()).join();
+      final List<ApprovalStep> existingApprovalSteps2 =
+          winnerTask.loadApprovalSteps(engine.getContext()).join();
+      existingApprovalSteps.addAll(existingApprovalSteps2);
+      Utils.updateApprovalSteps(winnerTask, winnerTask.getPlanningApprovalSteps(),
+          existingPlanningApprovalSteps, winnerTask.getApprovalSteps(), existingApprovalSteps);
+
+      int mergedRows = dao.mergeTask(loser, winnerTask);
+      if (mergedRows == 0) {
+        throw new WebApplicationException("Couldn't process task merge", Status.NOT_FOUND);
+      }
+      AnetAuditLogger.log("Task {} merged with {} by {}", loser, winnerTask, user);
+
+    } catch (UnableToExecuteStatementException e) {
+      throw createDuplicateException(e);
+    }
+    return winnerTask;
+  }
 }

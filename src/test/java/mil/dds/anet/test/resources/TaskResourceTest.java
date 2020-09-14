@@ -6,11 +6,14 @@ import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -320,4 +323,53 @@ public class TaskResourceTest extends AbstractResourceTest {
     }
   }
 
+  @Test
+  public void mergeTaskTest() {
+    final String orgFields = "uuid shortName longName status identificationCode type";
+    // principal organization
+    final OrganizationSearchQuery query = new OrganizationSearchQuery();
+    query.setType(OrganizationType.PRINCIPAL_ORG);
+    final AnetBeanList<Organization> principalOrgs = graphQLHelper.searchObjects(admin,
+        "organizationList", "query", "OrganizationSearchQueryInput", orgFields, query,
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    assertThat(principalOrgs).isNotNull();
+    assertThat(principalOrgs.getList()).isNotEmpty();
+    final Organization principalOrg = principalOrgs.getList().get(0);
+    Task taskPrincipal =
+        TestData.createTask("Test winner task principal " + UUID.randomUUID().toString(),
+            "Winner test permissions principal org", "Winner-Test-PT-Principal");
+    final Task loserTask =
+        TestData.createTask("Test loser task principal " + UUID.randomUUID().toString(),
+            "Loser test permissions principal org", "Loser-Test-PT-Principal");
+    taskPrincipal.setTaskedOrganizations(Collections.singletonList(principalOrg));
+    loserTask.setTaskedOrganizations(Collections.singletonList(principalOrg));
+    final String winnerPrincipalUuid = graphQLHelper.createObject(admin, "createTask", "task",
+        "TaskInput", taskPrincipal, new TypeReference<GraphQlResponse<Task>>() {});
+    final String loserPrincipalUuid = graphQLHelper.createObject(admin, "createTask", "task",
+        "TaskInput", loserTask, new TypeReference<GraphQlResponse<Task>>() {});
+    assertThat(winnerPrincipalUuid).isNotNull();
+    assertThat(loserPrincipalUuid).isNotNull();
+
+    taskPrincipal = graphQLHelper.getObjectById(admin, "task", FIELDS, winnerPrincipalUuid,
+        new TypeReference<GraphQlResponse<Task>>() {});
+    assertThat(taskPrincipal.getUuid()).isNotNull();
+
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("loserUuid", loserPrincipalUuid);
+    variables.put("winnerTask", taskPrincipal);
+    Task task = graphQLHelper.updateObject(admin,
+        "mutation ($loserUuid: String!, $winnerTask: TaskInput!) "
+            + "{ payload: mergeTask (loserUuid: $loserUuid, winnerTask: $winnerTask) { uuid }}",
+        variables, new TypeReference<GraphQlResponse<Task>>() {});
+    assertThat(task).isNotNull();
+    assertThat(task.getUuid()).isNotNull();
+
+    // Assert that loser is gone.
+    try {
+      graphQLHelper.getObjectById(admin, "task", FIELDS, loserPrincipalUuid,
+          new TypeReference<GraphQlResponse<Position>>() {});
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
+    }
+  }
 }
