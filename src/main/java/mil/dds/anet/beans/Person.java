@@ -316,7 +316,7 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
     if (userActivities == null) {
       return new ArrayList<>();
     }
-    return userActivities;
+    return new ArrayList<>(userActivities);
   }
 
   @JsonIgnore

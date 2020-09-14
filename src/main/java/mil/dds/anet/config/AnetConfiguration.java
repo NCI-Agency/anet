@@ -170,7 +170,20 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     return anetDictionaryName;
   }
 
-  public void setAnetDictionaryName(String anetDictionaryName) throws Exception {
+  /**
+   * The AnetConfiguration class is used as the object representation of the YAML configuration
+   * file. During start-up phase, parametric values are read from the anet.yml file and their set
+   * methods are called automatically. The parameter to be set when this method is called is the
+   * anetDictionaryName which is read from the anet.yml file. This parameter shows the full path to
+   * the dictionary to be loaded. Therefore, as soon as the parameter is set,we can call
+   * loadDictionary method in here to fill and set the dictionary to be used.
+   *
+   * @param anetDictionaryName Full path of the dictionary to be loaded ,read from anet.yml
+   * @throws IOException When an error occurs while trying to load dictionary
+   * @throws IllegalArgumentException In case of invalid dictionary in the configuration
+   */
+  public void setAnetDictionaryName(String anetDictionaryName)
+      throws IOException, IllegalArgumentException {
     this.anetDictionaryName = anetDictionaryName;
     this.loadDictionary();
   }
@@ -185,6 +198,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   public void loadDictionary() throws IOException, IllegalArgumentException {
     // Read and set anet-dictionary
+    // scan:ignore — false positive, we *want* to load the user-provided dictionary file
     final File file = new File(System.getProperty("user.dir"), getAnetDictionaryName());
     try (final InputStream inputStream = new FileInputStream(file)) {
       @SuppressWarnings("unchecked")
@@ -326,7 +340,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     synchronized (versionLock) {
       if (version == null) {
         try (final InputStream inputStream =
-            this.getClass().getResourceAsStream("/version.properties")) {
+            AnetConfiguration.class.getResourceAsStream("/version.properties")) {
           @SuppressWarnings("unchecked")
           final Map<String, String> props = yamlMapper.readValue(inputStream, Map.class);
           version = props.getOrDefault("projectVersion", "unknown");

@@ -181,10 +181,10 @@
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-wdio-ie && yarn run test-e2e",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava --config ava.config.js",
     "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js",
-    "test-jest": "export ANET_CONFIG=../anet.yml ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models)'",
+    "test-jest": "export ANET_CONFIG=../anet-dictionary.yml ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models)'",
     "test-wdio-ie": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node ./tests/util/wdio.ie.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "sim": "export ANET_CONFIG=../anet.yml SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
+    "sim": "export ANET_CONFIG=../anet-dictionary.yml SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
   },
   "jest": {
     "moduleDirectories": [
