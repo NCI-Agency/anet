@@ -23,7 +23,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useHistory, useLocation, useParams } from "react-router-dom"
@@ -215,6 +215,8 @@ const CompactReportView = ({ pageDispatchers }) => {
     uuid
   })
 
+  const [optionalFields, setOptionalFields] = useState(OPTIONAL_FIELDS_STATUS)
+  console.log(optionalFields, setOptionalFields)
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -248,6 +250,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   // Get initial tasks/attendees instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
+  console.log(report.showWorkflow())
   const draftAttr = report.isDraft() ? "draft" : "not-draft"
   return (
     <Formik
@@ -260,6 +263,7 @@ const CompactReportView = ({ pageDispatchers }) => {
           <CompactViewHeader
             onPrintClick={printReport}
             returnToDefaultPage={returnToDefaultPage}
+            setAdditionalFields={setOptionalFields}
           />
           <div
             css={COMPACT_VIEW_STYLE}
@@ -290,6 +294,19 @@ const CompactReportView = ({ pageDispatchers }) => {
                 content={report.keyOutcomes}
                 className="reportField"
               />
+              {!report.cancelled ? (
+                <CompactRow
+                  label={Settings.fields.report.atmosphere}
+                  content={
+                    <React.Fragment>
+                      {utils.sentenceCase(report.atmosphere)}
+                      {report.atmosphereDetails &&
+                        ` – ${report.atmosphereDetails}`}
+                    </React.Fragment>
+                  }
+                  className="reportField"
+                />
+              ) : null}
               <CompactRow
                 label={Settings.fields.report.nextSteps}
                 content={report.intent}
@@ -305,19 +322,6 @@ const CompactReportView = ({ pageDispatchers }) => {
                 content={getAdvisorAttendees()}
                 className="reportField"
               />
-              {!report.cancelled ? (
-                <CompactRow
-                  label={Settings.fields.report.atmosphere}
-                  content={
-                    <React.Fragment>
-                      {utils.sentenceCase(report.atmosphere)}
-                      {report.atmosphereDetails &&
-                        ` – ${report.atmosphereDetails}`}
-                    </React.Fragment>
-                  }
-                  className="reportField"
-                />
-              ) : null}
               <CompactRow
                 label={Settings.fields.task.subLevel.longLabel}
                 content={getTasksAndAssessments()}
@@ -330,7 +334,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                   className="reportField"
                 />
               ) : null}
-              {report.showWorkflow() ? (
+              {optionalFields.workflow && report.showWorkflow() ? (
                 <CompactRowReportWorkflow
                   workflow={report.workflow}
                   compactStyle={WORKFLOW_STYLE}
@@ -489,14 +493,15 @@ const CompactReportView = ({ pageDispatchers }) => {
                           )
                         }
                       />
-                      {taskInstantAssessmentConfig && (
-                        <ReadonlyCustomFields
-                          parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
-                          fieldsConfig={taskInstantAssessmentConfig}
-                          values={report}
-                          vertical
-                          compactStyle={{}}
-                        />
+                      {optionalFields.assessments &&
+                        taskInstantAssessmentConfig && (
+                          <ReadonlyCustomFields
+                            parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
+                            fieldsConfig={taskInstantAssessmentConfig}
+                            values={report}
+                            vertical
+                            compactStyle={{}}
+                          />
                       )}
                     </tbody>
                   </table>
@@ -540,6 +545,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                   </React.Fragment>
                 }
                 content={
+                  optionalFields.assessments &&
                   attendeeInstantAssessmentConfig && (
                     <table>
                       <tbody>
@@ -613,6 +619,10 @@ CompactReportView.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
+const OPTIONAL_FIELDS_STATUS = {
+  assessments: false,
+  workflow: false
+}
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
 const COMPACT_VIEW_STYLE = css`
@@ -704,12 +714,61 @@ const WORKFLOW_STYLE = css`
   }
 `
 
-const CompactViewHeader = ({ onPrintClick, returnToDefaultPage, noReport }) => {
+const CompactViewHeader = ({
+  onPrintClick,
+  returnToDefaultPage,
+  noReport,
+  setAdditionalFields
+}) => {
+  const [active, setActive] = useState(false)
+
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE} value="title">
-        Compact Version
+        {Settings.fields.report.compactView}
       </h3>
+      <div
+        css={css`
+          ${DropdownButton};
+          & > div {
+            display: ${active ? "block" : "none"};
+          }
+        `}
+      >
+        <button className="btn btn-primary" onClick={() => setActive(!active)}>
+          Optional Fields ⇓
+        </button>
+        <div>
+          <div>
+            <label htmlFor="assessmentsBox">
+              Assessments
+              <input
+                type="checkbox"
+                name="assessments"
+                id="assessmentsBox"
+                onChange={() =>
+                  setAdditionalFields(prev => ({
+                    ...prev,
+                    assessments: !prev.assessments
+                  }))}
+              />
+            </label>
+            <label htmlFor="workflowBox">
+              Workflow
+              <input
+                type="checkbox"
+                name="workflow"
+                id="workflowBox"
+                onChange={() =>
+                  setAdditionalFields(prev => ({
+                    ...prev,
+                    workflow: !prev.workflow
+                  }))}
+              />
+            </label>
+          </div>
+        </div>
+      </div>
       <div css={BUTTONS_STYLE}>
         {!noReport && (
           <Button
@@ -727,7 +786,7 @@ const CompactViewHeader = ({ onPrintClick, returnToDefaultPage, noReport }) => {
           bsStyle="primary"
           onClick={returnToDefaultPage}
         >
-          Web View
+          Detailed View
         </Button>
       </div>
     </header>
@@ -737,7 +796,8 @@ const CompactViewHeader = ({ onPrintClick, returnToDefaultPage, noReport }) => {
 CompactViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
   returnToDefaultPage: PropTypes.func,
-  noReport: PropTypes.bool
+  noReport: PropTypes.bool,
+  setAdditionalFields: PropTypes.func
 }
 
 CompactViewHeader.defaultProps = {
@@ -767,6 +827,38 @@ const BUTTONS_STYLE = css`
   button {
     margin-left: 5px;
     margin-right: 5px;
+  }
+`
+
+const DropdownButton = css`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 999999;
+  & > div {
+    position: relative;
+    width: 100%;
+  }
+  & > div > div {
+    background-color: white;
+    width: 100%;
+    border-radius: 5px;
+    position: absolute;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    input {
+      margin-left: 5px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+  @media print {
+    display: none;
   }
 `
 

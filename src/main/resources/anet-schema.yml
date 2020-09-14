@@ -454,6 +454,9 @@ properties:
             type: string
             title: The label for report's engagement details
             description: Used in the UI where report's engagement details are shown.
+          compactView:
+            type: string
+            title: The title for compact view of report for printing etc.
           customFields:
             type: object
             additionalProperties:
