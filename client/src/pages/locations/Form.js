@@ -9,7 +9,7 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Form, Formik } from "formik"
-import { parseCoordinate } from "geoUtils"
+import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
@@ -78,7 +78,14 @@ const LocationForm = ({ edit, title, initialValues }) => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      initialValues={initialValues}
+      initialValues={{
+        ...initialValues,
+        displayedCoordinate: convertLatLngToMGRS(
+          parseCoordinate(initialValues.lat),
+          parseCoordinate(initialValues.lng)
+        )
+      }}
+      validateOnBlur
     >
       {({
         isSubmitting,
@@ -96,11 +103,15 @@ const LocationForm = ({ edit, title, initialValues }) => {
           autoPan: true,
           onMove: (event, map) => {
             const latLng = map.wrapLatLng(event.target.getLatLng())
-            setValues({
-              ...values,
-              lat: parseCoordinate(latLng.lat),
-              lng: parseCoordinate(latLng.lng)
-            })
+            setFieldValue("lat", parseCoordinate(latLng.lat))
+            setFieldValue("lng", parseCoordinate(latLng.lng))
+            setFieldValue(
+              "displayedCoordinate",
+              convertLatLngToMGRS(
+                parseCoordinate(latLng.lat),
+                parseCoordinate(latLng.lng)
+              )
+            )
           }
         }
         if (Location.hasCoordinates(values)) {
@@ -149,6 +160,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
+                  values={values}
                 />
               </Fieldset>
 
@@ -160,7 +172,11 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   setValues({
                     ...values,
                     lat: parseCoordinate(latLng.lat),
-                    lng: parseCoordinate(latLng.lng)
+                    lng: parseCoordinate(latLng.lng),
+                    displayedCoordinate: convertLatLngToMGRS(
+                      parseCoordinate(latLng.lat),
+                      parseCoordinate(latLng.lng)
+                    )
                   })
                 }}
               />

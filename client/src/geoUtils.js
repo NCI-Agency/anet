@@ -45,8 +45,13 @@ export function convertLatLngToMGRS(lat, lng) {
 export function convertMGRSToLatLng(mgrs) {
   let latLng
   try {
-    // toPoint returns an array of [lon, lat]
-    latLng = mgrs ? toPoint(mgrs) : ["", ""]
+    // https://gis.stackexchange.com/a/304034
+    if (mgrs.match(/^\d{1,2}[^IO]{3}(\d{10}|\d{8}|\d{6}|\d{4}|\d{2})$/im)) {
+      // toPoint returns an array of [lon, lat]
+      latLng = mgrs ? toPoint(mgrs) : ["", ""]
+    } else {
+      throw new Error("Bad MGRS value")
+    }
   } catch (e) {
     latLng = ["", ""]
   }

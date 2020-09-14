@@ -13,7 +13,7 @@ import {
   parseCoordinate
 } from "geoUtils"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import Settings from "settings"
 
@@ -33,7 +33,8 @@ const GeoLocation = ({
   setFieldTouched,
   isSubmitting,
   displayType,
-  locationFormat
+  locationFormat,
+  values
 }) => {
   let label = LAT_LON_LABEL
   let CoordinatesFormField = LatLonFormField
@@ -73,6 +74,7 @@ const GeoLocation = ({
       setFieldValue={setFieldValue}
       setFieldTouched={setFieldTouched}
       isSubmitting={isSubmitting}
+      values={values}
     />
   )
 }
@@ -96,7 +98,8 @@ GeoLocation.propTypes = {
     GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD,
     GEO_LOCATION_DISPLAY_TYPE.GENERIC
   ]),
-  locationFormat: PropTypes.string
+  locationFormat: PropTypes.string,
+  values: PropTypes.object
 }
 
 GeoLocation.defaultProps = {
@@ -118,29 +121,12 @@ const MGRSFormField = ({
   editable,
   setFieldValue,
   setFieldTouched,
-  isSubmitting
+  isSubmitting,
+  values
 }) => {
-  const [mgrs, setMgrs] = useState("")
-
-  // Coordinate should be sync between input field and map interaction
-  useEffect(() => {
-    if (!editable && lat === null && lng === null) {
-      setMgrs("")
-    } else {
-      const mgrsValue = convertLatLngToMGRS(lat, lng)
-      if (mgrsValue) {
-        setMgrs(mgrsValue)
-        if (editable) {
-          setFieldValue("displayedCoordinate", mgrsValue)
-        }
-      }
-    }
-  }, [editable, lat, lng, setFieldValue])
-
   if (!editable) {
-    return <span>{mgrs || "?"}</span>
+    return <span>{convertLatLngToMGRS(lat, lng) || "?"}</span>
   }
-
   return (
     <FormGroup style={{ marginBottom: 0 }}>
       <Col sm={2} componentClass={ControlLabel} htmlFor="displayedCoordinate">
@@ -152,12 +138,16 @@ const MGRSFormField = ({
           <Field
             name="displayedCoordinate"
             component={FieldHelper.InputFieldNoLabel}
-            value={mgrs}
-            onChange={e => setMgrs(e.target.value)}
             onBlur={e => {
               setFieldTouched("displayedCoordinate", true, false)
-              const newLatLng = convertMGRSToLatLng(mgrs)
-              setFieldValue("displayedCoordinate", e.target.value)
+              const newLatLng = convertMGRSToLatLng(e.target.value)
+              setFieldValue(
+                "displayedCoordinate",
+                // convertLatLngToMGRS(newLatLng[0], newLatLng[1])
+                //   ? e.target.value
+                //   : ""
+                e.target.value
+              )
               setFieldValue("lat", newLatLng[0], false)
               setFieldValue("lng", newLatLng[1], false)
             }}
@@ -167,12 +157,11 @@ const MGRSFormField = ({
           lat={lat}
           lng={lng}
           isSubmitting={isSubmitting}
-          disabled={!mgrs}
+          disabled={!values.displayedCoordinate}
           onClear={() => {
             setFieldValue("displayedCoordinate", null)
             setFieldValue("lat", null, false)
             setFieldValue("lng", null, false)
-            setMgrs("")
           }}
         />
       </Col>
@@ -186,7 +175,8 @@ MGRSFormField.propTypes = {
   editable: PropTypes.bool,
   setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
-  isSubmitting: PropTypes.bool
+  isSubmitting: PropTypes.bool,
+  values: PropTypes.object
 }
 
 MGRSFormField.defaultProps = {
