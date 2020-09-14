@@ -2,12 +2,16 @@ import "@testing-library/jest-dom/extend-expect"
 import { render, screen } from "@testing-library/react"
 import { Form, Formik } from "formik"
 import React from "react"
+import { convertLatLngToMGRS } from "../../src/geoUtils"
 import GeoLocation from "../../src/pages/locations/GeoLocation"
 
 const GeoLocationTest = format => {
   return (
     <Formik>
       {() => {
+        const values = {
+          displayedCoordinate: convertLatLngToMGRS(0, 0)
+        }
         return (
           <Form>
             <GeoLocation
@@ -17,6 +21,7 @@ const GeoLocationTest = format => {
               editable
               setFieldTouched={() => {}}
               setFieldValue={() => {}}
+              values={values}
             />
           </Form>
         )
