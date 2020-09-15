@@ -103,15 +103,15 @@ const LocationForm = ({ edit, title, initialValues }) => {
           autoPan: true,
           onMove: (event, map) => {
             const latLng = map.wrapLatLng(event.target.getLatLng())
-            setFieldValue("lat", parseCoordinate(latLng.lat))
-            setFieldValue("lng", parseCoordinate(latLng.lng))
-            setFieldValue(
-              "displayedCoordinate",
-              convertLatLngToMGRS(
+            setValues({
+              ...values,
+              lat: parseCoordinate(latLng.lat),
+              lng: parseCoordinate(latLng.lng),
+              displayedCoordinate: convertLatLngToMGRS(
                 parseCoordinate(latLng.lat),
                 parseCoordinate(latLng.lng)
               )
-            )
+            })
           }
         }
         if (Location.hasCoordinates(values)) {
