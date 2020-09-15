@@ -16,6 +16,10 @@ class CreateReport extends Page {
     return browser.$("#intent")
   }
 
+  get intentHelpBlock() {
+    return browser.$("#fg-intent .help-block")
+  }
+
   get engagementDate() {
     return browser.$("#engagementDate")
   }
@@ -117,7 +121,10 @@ class CreateReport extends Page {
       this.intent.setValue(fields.intent)
     }
 
+    this.intentHelpBlock.waitForExist({ reverse: true })
+
     if (moment.isMoment(fields.engagementDate)) {
+      this.engagementDate.waitForClickable()
       this.engagementDate.click()
       this.tomorrow.waitForDisplayed()
       this.tomorrow.waitForClickable()
