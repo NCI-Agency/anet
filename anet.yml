@@ -1,22 +1,22 @@
 ##############################################################
-#### ANET Server Configuration 
+#### ANET Server Configuration
 ####
-#### This is the configuration file for the ANET server. 
+#### This is the configuration file for the ANET server.
 ####
-#### For Production use, replace all areas with ${NAME} with 
+#### For Production use, replace all areas with ${NAME} with
 #### the correct values for your installation.
 ####
 #### For Development use, create a file called `localSettings.gradle`
-#### And set each environment variable there 
+#### And set each environment variable there
 ####  ie: `run.environment('ANET_SMTP_SERVER', 'my-mail-server.example.com`)
-#### Do not make any changes to this file unless they apply to all 
-#### developers! 
-#### 
+#### Do not make any changes to this file unless they apply to all
+#### developers!
+####
 ##############################################################
 
 # Flag to run the server in development mode
 # - Will use Basic authentication (rather than Windows Domain Auth)
-# - Will reload the GraphQL Graph on every request. 
+# - Will reload the GraphQL Graph on every request.
 developmentMode: true
 
 # Flag to tell the server to redirect all HTTP traffic to HTTPS
@@ -31,7 +31,7 @@ assets:
     /imagery: imagery
     /data: data
 
-# Settings for the SMTP server to send email 
+# Settings for the SMTP server to send email
 smtp:
   hostname: ${ANET_SMTP_SERVER}
   port: ${ANET_SMTP_PORT}
@@ -42,13 +42,13 @@ smtp:
   disabled: ${ANET_SMTP_DISABLE}
   nbOfHoursForStaleEmails: 72
 
-# The email address that all automated emails should come from. 
+# The email address that all automated emails should come from.
 # ex: "ANET <anet@example.com>"
 emailFromAddr: "Anet Testing <hunter+anet@dds.mil>"
 
 # The URL that should be used for links in emails
 # ex:  "http://anet.yourdomain"
-# Should not include an ending slash! 
+# Should not include an ending slash!
 serverUrl: "http://localhost:3000"
 
 # Whether to time Waffle requests
@@ -69,7 +69,7 @@ waffleConfig:
 ########################################################
 ### The below is the default Dropwizard Configuration
 ### See http://www.dropwizard.io/1.0.6/docs/manual/configuration.html#man-configuration
-### For all of the possible configuration options. 
+### For all of the possible configuration options.
 #########################################################
 # Configuration for the database Server
 # See http://www.dropwizard.io/1.0.6/docs/manual/jdbi.html#configuration
@@ -79,11 +79,11 @@ database:
   password: ${ANET_DB_PASSWORD}
   url: ${ANET_DB_URL}
   properties:
-   date_string_format: ${ANET_DB_DATE_STRING_FORMAT}
-   date_class: ${ANET_DB_DATE_CLASS}
+    date_string_format: ${ANET_DB_DATE_STRING_FORMAT}
+    date_class: ${ANET_DB_DATE_CLASS}
 
 
-# Configuration for the web servers HTTP connectors. 
+# Configuration for the web servers HTTP connectors.
 # See http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration
 server:
   applicationConnectors:
@@ -96,12 +96,12 @@ server:
 #      keyStorePath: example.keystore
 #      keyStorePassword: example
 #      validateCerts: false
-# The AdminConnector is used for administrative functions of Dropwizard and should not be exposed to users. 
+# The AdminConnector is used for administrative functions of Dropwizard and should not be exposed to users.
   adminConnectors:
     - type: http
       port: ${ANET_ADMIN_PORT}
   requestLog:
-    appenders: 
+    appenders:
       - type: file
         currentLogFilename: ./logs/access.log
         archivedLogFilenamePattern: ./logs/access-%d.log.zip
@@ -119,8 +119,8 @@ views:
 logging:
   level: INFO
   loggers:
-    "io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper" : TRACE
-    "mil.dds.anet.resources.LoggingResource" :
+    "io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper": TRACE
+    "mil.dds.anet.resources.LoggingResource":
       level: TRACE
       appenders:
         - type: file
@@ -128,7 +128,7 @@ logging:
           archivedLogFilenamePattern: ./logs/clientLog-%d.log.zip
           archivedFileCount: 2
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-    "mil.dds.anet.utils.AnetDbLogger" :
+    "mil.dds.anet.utils.AnetDbLogger":
       level: TRACE
       appenders:
         - type: file
@@ -137,12 +137,12 @@ logging:
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
           logFormat: '%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}\t%p\t%m%n'
-    "io.dropwizard.assets.AssetsBundle" : TRACE
-    "io.dropwizard.assets.*" : TRACE
-    "waffle.servlet.NegotiateSecurityFilter" : TRACE
-    "mil.dds.anet.auth.AnetAuthenticationFilter" : TRACE
-    "mil.dds.anet.threads" : DEBUG
-    "mil.dds.anet.resources.TestingResource" :
+    "io.dropwizard.assets.AssetsBundle": TRACE
+    "io.dropwizard.assets.*": TRACE
+    "waffle.servlet.NegotiateSecurityFilter": TRACE
+    "mil.dds.anet.auth.AnetAuthenticationFilter": TRACE
+    "mil.dds.anet.threads": DEBUG
+    "mil.dds.anet.resources.TestingResource":
       level: INFO
       appenders:
         - type: file
@@ -150,7 +150,7 @@ logging:
           archivedLogFilenamePattern: ./logs/testingLogger-%d.log.zip
           archivedFileCount: 2
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-    "mil.dds.anet.utils.AnetAuditLogger" :
+    "mil.dds.anet.utils.AnetAuditLogger":
       level: INFO
       appenders:
         - type: file
@@ -641,6 +641,9 @@ dictionary:
               helpText: Help text for object date field
               visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
+    location:
+      format: LAT_LON
+
     position:
       name: 'Position Name'
 
@@ -842,7 +845,7 @@ dictionary:
         url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
         options:
           layers: GEBCO_LATEST
-          format: "image/png" 
+          format: "image/png"
 
   automaticallyInactivateUsers:
     emailRemindersDaysPrior: [15, 30, 45]

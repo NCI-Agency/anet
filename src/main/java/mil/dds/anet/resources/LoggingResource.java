@@ -66,7 +66,7 @@ public class LoggingResource {
           logger.info(message);
           break;
         case "WARN":
-          logger.info(message);
+          logger.warn(message);
           break;
         default:
           logger.error(message);

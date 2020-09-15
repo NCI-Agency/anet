@@ -16,7 +16,12 @@ const Pie = ({ label, segmentFill, segmentLabel, data, width, height }) => {
   useEffect(() => {
     const canvas = d3.select(canvasRef.current)
     const radius = Math.min(width, height) / 2 - 2
-    const arcs = pie.current(d3.entries(data))
+    const arcs = pie.current(
+      Array.from(Object.entries(data), ([key, value]) => ({
+        key,
+        value
+      }))
+    )
     const arcForLabels = d3
       .arc()
       .innerRadius(radius * 0.7)
