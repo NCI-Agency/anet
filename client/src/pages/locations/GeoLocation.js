@@ -127,6 +127,7 @@ const MGRSFormField = ({
   if (!editable) {
     return <span>{convertLatLngToMGRS(lat, lng) || "?"}</span>
   }
+
   return (
     <FormGroup style={{ marginBottom: 0 }}>
       <Col sm={2} componentClass={ControlLabel} htmlFor="displayedCoordinate">
@@ -138,18 +139,9 @@ const MGRSFormField = ({
           <Field
             name="displayedCoordinate"
             component={FieldHelper.InputFieldNoLabel}
+            onChange={e => updateFields(e.target.value)}
             onBlur={e => {
-              setFieldTouched("displayedCoordinate", true, false)
-              const newLatLng = convertMGRSToLatLng(e.target.value)
-              setFieldValue(
-                "displayedCoordinate",
-                // convertLatLngToMGRS(newLatLng[0], newLatLng[1])
-                //   ? e.target.value
-                //   : ""
-                e.target.value
-              )
-              setFieldValue("lat", newLatLng[0], false)
-              setFieldValue("lng", newLatLng[1], false)
+              updateFields(e.target.value)
             }}
           />
         </Col>
@@ -167,6 +159,14 @@ const MGRSFormField = ({
       </Col>
     </FormGroup>
   )
+
+  function updateFields(val) {
+    setFieldTouched("displayedCoordinate", true, false)
+    const newLatLng = convertMGRSToLatLng(val)
+    setFieldValue("displayedCoordinate", val)
+    setFieldValue("lat", newLatLng[0], false)
+    setFieldValue("lng", newLatLng[1], false)
+  }
 }
 
 MGRSFormField.propTypes = {

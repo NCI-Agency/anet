@@ -133,6 +133,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
             </Button>
           </div>
         )
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty} />
