@@ -1,5 +1,5 @@
 # Setting up Keycloak (user authentication)
-This document describes how to configure Keycloak, for [development](#dev), [production](#rh) on a red Hat platform, and [production with federated users from a Windows Active Directory](#ad).
+This document describes how to configure Keycloak, for [development](#dev), [production](#rh) on a Red Hat platform, and [production with federated users from a Windows Active Directory](#ad).
 On development, Keycloak runs in a Docker container, see [build.gradle](../build.gradle) for the available commands. For production, the directory [scripts](../scripts/) contains some convenient scripts for starting Keycloak.
 
 ## <a name="dev"></a>Setting up Keycloak for development
