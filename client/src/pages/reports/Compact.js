@@ -215,8 +215,9 @@ const CompactReportView = ({ pageDispatchers }) => {
     uuid
   })
 
-  const [optionalFields, setOptionalFields] = useState(OPTIONAL_FIELDS_STATUS)
-  console.log(optionalFields, setOptionalFields)
+  const [optionalFields, setOptionalFields] = useState(
+    OPTIONAL_FIELDS_INIT_STATUS
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -250,7 +251,6 @@ const CompactReportView = ({ pageDispatchers }) => {
   // Get initial tasks/attendees instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
-  console.log(report.showWorkflow())
   const draftAttr = report.isDraft() ? "draft" : "not-draft"
   return (
     <Formik
@@ -619,7 +619,7 @@ CompactReportView.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-const OPTIONAL_FIELDS_STATUS = {
+const OPTIONAL_FIELDS_INIT_STATUS = {
   assessments: false,
   workflow: false
 }
@@ -781,7 +781,7 @@ const CompactViewHeader = ({
           </Button>
         )}
         <Button
-          value="webView"
+          value="detailedView"
           type="button"
           bsStyle="primary"
           onClick={returnToDefaultPage}

@@ -37,8 +37,8 @@ class ShowReport extends Page {
     return browser.$$(".compact-view .reportField > th")
   }
 
-  get webViewButton() {
-    return browser.$("button[value='webView'")
+  get detailedViewButton() {
+    return browser.$("button[value='detailedView'")
   }
 }
 

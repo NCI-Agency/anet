@@ -974,7 +974,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function onCompactClick() {
     if (!_isEmpty(report)) {
-      history.push(`${report.uuid}/compact`, { report })
+      history.push(`${report.uuid}/compact`)
     }
   }
 

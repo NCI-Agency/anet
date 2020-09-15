@@ -1,7 +1,9 @@
 import { expect } from "chai"
+import Settings from "../../../platform/node/settings"
 import Home from "../pages/home.page"
 import MyReports from "../pages/myReports.page"
 import ShowReport from "../pages/showReport.page"
+
 describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open()
@@ -11,9 +13,9 @@ describe("Show print report page", () => {
     ShowReport.compactView.waitForDisplayed()
   })
   describe("When on the print report page", () => {
-    it("Web View button should remove print view to web view", () => {
-      const webViewButton = ShowReport.webViewButton
-      webViewButton.click()
+    it("Detailed View button should remove compact view to detailed view", () => {
+      const detailedViewButton = ShowReport.detailedViewButton
+      detailedViewButton.click()
       ShowReport.defaultReportView.waitForExist()
       ShowReport.defaultReportView.waitForDisplayed()
       expect(ShowReport.compactView.isDisplayed()).to.equal(false)
@@ -37,15 +39,17 @@ describe("Show print report page", () => {
     })
     it("We should see a title with the correct text", () => {
       const title = ShowReport.compactTitle.getText()
-      expect(title).to.equal("Compact Version")
+      expect(title).to.equal(Settings.fields.report.compactView)
     })
     it("We should see buttons with the correct text", () => {
       const printButtonText = ShowReport.printButton.getText()
-      const webViewButtonText = ShowReport.webViewButton.getText()
+      const detailedViewButtonText = ShowReport.detailedViewButton.getText()
       expect(printButtonText).to.equal("Print")
-      expect(webViewButtonText).to.equal("Web View")
+      expect(detailedViewButtonText).to.equal(
+        Settings.fields.report.detailedView
+      )
     })
-    it("Printable report banner should have the correct text", () => {
+    it("Printable report banner should have part of the banner text", () => {
       const compactBannerText = ShowReport.compactBanner.getText()
       Home.openAsAdminUser()
       const bannerText = Home.securityBanner.getText()

@@ -457,6 +457,9 @@ properties:
           compactView:
             type: string
             title: The title for compact view of report for printing etc.
+          detailedView:
+            type: string
+            title: The title for detailed, default view of report
           customFields:
             type: object
             additionalProperties:
