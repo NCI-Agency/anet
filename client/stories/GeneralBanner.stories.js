@@ -2,11 +2,11 @@ import React from "react"
 import GeneralBanner from "../src/components/GeneralBanner"
 
 export default {
-  title: 'ANET/GeneralBanner',
+  title: "ANET/GeneralBanner",
   component: GeneralBanner
 }
 
-const Template = (args) => <GeneralBanner {...args} />
+const Template = args => <GeneralBanner {...args} />
 const defaultOptions = {
   title: "title",
   message: "message",
