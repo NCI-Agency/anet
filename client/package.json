@@ -130,7 +130,7 @@
     "hopscotch": "0.3.1",
     "html-react-parser": "0.14.0",
     "jsonpath-plus": "4.0.0",
-    "leaflet": "1.7.1",
+    "leaflet": "1.6.0",
     "leaflet-defaulticon-compatibility": "0.1.1",
     "leaflet-geosearch": "3.0.6",
     "leaflet-gesture-handling": "1.1.8",
