@@ -25,7 +25,6 @@
     "@babel/preset-react": "7.10.4",
     "@babel/register": "7.11.5",
     "@babel/runtime": "7.11.2",
-    "@storybook/addon-actions": "6.0.21",
     "@storybook/addon-essentials": "6.0.21",
     "@storybook/addon-links": "6.0.21",
     "@storybook/react": "6.0.21",

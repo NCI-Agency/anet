@@ -1,4 +1,3 @@
-import { action } from "@storybook/addon-actions"
 import React from "react"
 import RichTextEditor from "../src/components/RichTextEditor"
 
@@ -11,5 +10,6 @@ const Template = args => <RichTextEditor {...args} />
 
 export const EditorOnChange = Template.bind({})
 EditorOnChange.args = {
-  onChange: action("editor-click")
+  className: "textField",
+  value: "editor content"
 }
