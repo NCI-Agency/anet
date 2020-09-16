@@ -187,7 +187,7 @@
     "test-jest": "export ANET_CONFIG=../anet.yml ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models)'",
     "test-wdio-ie": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node ./tests/util/wdio.ie.js",
     "build-storybook": "build-storybook",
-    "storybook": "start-storybook -p 6006",
+    "storybook": "export STORYBOOK_ANET_CONFIG=/anet.yml ; start-storybook -s .. -p 6006",
     "sim": "export ANET_CONFIG=../anet.yml SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
   },
   "jest": {
