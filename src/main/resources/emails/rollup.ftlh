@@ -184,7 +184,7 @@ a {
         </div>
     </div>
 
-    <a href="${serverUrl}/reports/${report.uuid}/min" >
+    <a href="${serverUrl}/reports/${report.uuid}" >
         Read full report
     </a>
 </#macro>
