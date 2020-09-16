@@ -1,6 +1,6 @@
 import Page from "../page"
 
-const PAGE_URL = "/locations/"
+const PAGE_URL = "/locations/:uuid/edit"
 
 class EditLocation extends Page {
   get saveLocationButton() {
@@ -39,7 +39,7 @@ class EditLocation extends Page {
   }
 
   open(locationId) {
-    super.open(PAGE_URL + locationId + "/edit")
+    super.open(PAGE_URL.replace(":uuid", locationId))
     this.waitForEditLocationPageToLoad()
   }
 

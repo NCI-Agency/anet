@@ -1,12 +1,10 @@
 import { expect } from "chai"
 import CreateNewLocation from "../pages/location/createNewLocation.page"
-export const LOCATION_NAME = "Test Location Spot"
-const BAD_LAT_LNG_VAL = "999"
-export const LOCATION_COORDS = {
-  lat: "39.89089",
-  lng: "32.78224",
-  mgrs: "36SVK8138315670"
-}
+import {
+  BAD_LAT_LNG_VAL,
+  LOCATION_COORDS,
+  LOCATION_NAME
+} from "./locationUtils"
 
 describe("When creating a new Location", () => {
   it("Should not create a location without name input", () => {
@@ -20,6 +18,8 @@ describe("When creating a new Location", () => {
     CreateNewLocation.nameField.setValue(LOCATION_NAME)
     CreateNewLocation.latField.setValue(BAD_LAT_LNG_VAL)
     CreateNewLocation.lngField.setValue(BAD_LAT_LNG_VAL)
+    // trigger onblur effect
+    browser.keys(["Tab"])
 
     CreateNewLocation.latLngErrorsDisplayed()
   })

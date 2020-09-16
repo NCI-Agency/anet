@@ -9,19 +9,19 @@ const GeoLocationTest = format => {
   return (
     <Formik>
       {() => {
-        const values = {
-          displayedCoordinate: convertLatLngToMGRS(0, 0)
+        const coordinates = {
+          displayedCoordinate: convertLatLngToMGRS(0, 0),
+          lat: 0,
+          lng: 0
         }
         return (
           <Form>
             <GeoLocation
               locationFormat={format}
-              lat={0}
-              lng={0}
+              coordinates={coordinates}
               editable
               setFieldTouched={() => {}}
               setFieldValue={() => {}}
-              values={values}
             />
           </Form>
         )

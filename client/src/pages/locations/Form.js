@@ -85,7 +85,6 @@ const LocationForm = ({ edit, title, initialValues }) => {
           parseCoordinate(initialValues.lng)
         )
       }}
-      validateOnBlur
     >
       {({
         isSubmitting,
@@ -103,15 +102,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
           autoPan: true,
           onMove: (event, map) => {
             const latLng = map.wrapLatLng(event.target.getLatLng())
-            setValues({
-              ...values,
-              lat: parseCoordinate(latLng.lat),
-              lng: parseCoordinate(latLng.lng),
-              displayedCoordinate: convertLatLngToMGRS(
-                parseCoordinate(latLng.lat),
-                parseCoordinate(latLng.lng)
-              )
-            })
+            updateCoordinateFields(values, latLng)
           }
         }
         if (Location.hasCoordinates(values)) {
@@ -133,6 +124,12 @@ const LocationForm = ({ edit, title, initialValues }) => {
             </Button>
           </div>
         )
+
+        const coordinates = {
+          lat: values.lat,
+          lng: values.lng,
+          displayedCoordinate: values.displayedCoordinate
+        }
 
         return (
           <div>
@@ -156,12 +153,10 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
                 <GeoLocation
                   editable
-                  lat={values.lat}
-                  lng={values.lng}
+                  coordinates={coordinates}
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
-                  values={values}
                 />
               </Fieldset>
 
@@ -170,15 +165,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                 markers={[marker]}
                 onMapClick={(event, map) => {
                   const latLng = map.wrapLatLng(event.latlng)
-                  setValues({
-                    ...values,
-                    lat: parseCoordinate(latLng.lat),
-                    lng: parseCoordinate(latLng.lng),
-                    displayedCoordinate: convertLatLngToMGRS(
-                      parseCoordinate(latLng.lat),
-                      parseCoordinate(latLng.lng)
-                    )
-                  })
+                  updateCoordinateFields(values, latLng)
                 }}
               />
 
@@ -221,6 +208,17 @@ const LocationForm = ({ edit, title, initialValues }) => {
             </Form>
           </div>
         )
+
+        function updateCoordinateFields(values, latLng) {
+          const parsedLat = parseCoordinate(latLng.lat)
+          const parsedLng = parseCoordinate(latLng.lng)
+          setValues({
+            ...values,
+            lat: parsedLat,
+            lng: parsedLng,
+            displayedCoordinate: convertLatLngToMGRS(parsedLat, parsedLng)
+          })
+        }
       }}
     </Formik>
   )

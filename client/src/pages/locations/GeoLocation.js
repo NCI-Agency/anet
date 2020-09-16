@@ -24,17 +24,19 @@ export const GEO_LOCATION_DISPLAY_TYPE = {
 
 const MGRS_LABEL = "MGRS Coordinate"
 const LAT_LON_LABEL = "Latitude, Longitude"
-
+const DEFAULT_COORDINATES = {
+  lat: null,
+  lng: null,
+  displayedCoordinate: null
+}
 const GeoLocation = ({
-  lat,
-  lng,
+  coordinates,
   editable,
   setFieldValue,
   setFieldTouched,
   isSubmitting,
   displayType,
-  locationFormat,
-  values
+  locationFormat
 }) => {
   let label = LAT_LON_LABEL
   let CoordinatesFormField = LatLonFormField
@@ -46,8 +48,8 @@ const GeoLocation = ({
   if (!editable) {
     const humanValue = (
       <div style={{ display: "flex", alignItems: "center" }}>
-        <CoordinatesFormField lat={lat} lng={lng} />
-        <AllFormatsInfo lat={lat} lng={lng} />
+        <CoordinatesFormField coordinates={coordinates} />
+        <AllFormatsInfo coordinates={coordinates} />
       </div>
     )
 
@@ -68,13 +70,11 @@ const GeoLocation = ({
 
   return (
     <CoordinatesFormField
-      lat={lat}
-      lng={lng}
+      coordinates={coordinates}
       editable
       setFieldValue={setFieldValue}
       setFieldTouched={setFieldTouched}
       isSubmitting={isSubmitting}
-      values={values}
     />
   )
 }
@@ -87,9 +87,15 @@ function fnRequiredWhenEditable(props, propName, componentName) {
   }
 }
 
+export const CoordinatesPropType = PropTypes.shape({
+  // user can input string
+  lat: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  lng: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  displayedCoordinate: PropTypes.string
+})
+
 GeoLocation.propTypes = {
-  lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
   setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
@@ -98,13 +104,11 @@ GeoLocation.propTypes = {
     GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD,
     GEO_LOCATION_DISPLAY_TYPE.GENERIC
   ]),
-  locationFormat: PropTypes.string,
-  values: PropTypes.object
+  locationFormat: PropTypes.string
 }
 
 GeoLocation.defaultProps = {
-  lat: null,
-  lng: null,
+  coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false,
   displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC,
@@ -116,16 +120,15 @@ export default GeoLocation
 /* =========================== MGRSFormField ================================ */
 
 const MGRSFormField = ({
-  lat,
-  lng,
+  coordinates,
   editable,
   setFieldValue,
   setFieldTouched,
-  isSubmitting,
-  values
+  isSubmitting
 }) => {
+  const { displayedCoordinate } = coordinates
   if (!editable) {
-    return <span>{convertLatLngToMGRS(lat, lng) || "?"}</span>
+    return <span>{displayedCoordinate || "?"}</span>
   }
 
   return (
@@ -139,19 +142,19 @@ const MGRSFormField = ({
           <Field
             name="displayedCoordinate"
             component={FieldHelper.InputFieldNoLabel}
-            onChange={e => updateFields(e.target.value)}
+            onChange={e => updateCoordinatesOnChange(e.target.value)}
             onBlur={e => {
-              updateFields(e.target.value)
+              updateCoordinatesOnBlur(e.target.value)
             }}
           />
         </Col>
         <CoordinateActionButtons
-          lat={lat}
-          lng={lng}
+          coordinates={coordinates}
           isSubmitting={isSubmitting}
-          disabled={!values.displayedCoordinate}
+          disabled={!displayedCoordinate}
           onClear={() => {
-            setFieldValue("displayedCoordinate", null)
+            setFieldTouched("displayedCoordinate", false, false)
+            setFieldValue("displayedCoordinate", null, false)
             setFieldValue("lat", null, false)
             setFieldValue("lng", null, false)
           }}
@@ -159,29 +162,31 @@ const MGRSFormField = ({
       </Col>
     </FormGroup>
   )
-
-  function updateFields(val) {
-    setFieldTouched("displayedCoordinate", true, false)
-    const newLatLng = convertMGRSToLatLng(val)
+  // Lat-Lng fields are read only, no need to validate in onChange or onBlur
+  function updateCoordinatesOnChange(val) {
     setFieldValue("displayedCoordinate", val)
+    const newLatLng = convertMGRSToLatLng(val)
+    setFieldValue("lat", newLatLng[0], false)
+    setFieldValue("lng", newLatLng[1], false)
+  }
+  function updateCoordinatesOnBlur(val) {
+    setFieldTouched("displayedCoordinate", true)
+    const newLatLng = convertMGRSToLatLng(val)
     setFieldValue("lat", newLatLng[0], false)
     setFieldValue("lng", newLatLng[1], false)
   }
 }
 
 MGRSFormField.propTypes = {
-  lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
   setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
-  isSubmitting: PropTypes.bool,
-  values: PropTypes.object
+  isSubmitting: PropTypes.bool
 }
 
 MGRSFormField.defaultProps = {
-  lat: null,
-  lng: null,
+  coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false
 }
@@ -189,21 +194,19 @@ MGRSFormField.defaultProps = {
 /* ========================= LatLonFormField ================================ */
 
 const LatLonFormField = ({
-  lat,
-  lng,
+  coordinates,
   editable,
   setFieldValue,
   setFieldTouched,
   isSubmitting
 }) => {
+  const { lat, lng } = coordinates
   if (!editable) {
-    const lt = parseCoordinate(lat)
-    const ln = parseCoordinate(lng)
     return (
       <>
-        <span>{lt || lt === 0 ? lt : "?"}</span>
+        <span>{lat || lat === 0 ? lat : "?"}</span>
         <span>,&nbsp;</span>
-        <span>{ln || ln === 0 ? ln : "?"}</span>
+        <span>{lng || lng === 0 ? lng : "?"}</span>
       </>
     )
   }
@@ -218,8 +221,9 @@ const LatLonFormField = ({
           <Field
             name="lat"
             component={FieldHelper.InputFieldNoLabel}
-            onBlur={() => {
-              setParsedLatLng(lat, lng)
+            onChange={e => setLatOnChange(e.target.value)}
+            onBlur={e => {
+              setParsedLatOnBlur(e.target.value)
             }}
           />
         </Col>
@@ -227,20 +231,21 @@ const LatLonFormField = ({
           <Field
             name="lng"
             component={FieldHelper.InputFieldNoLabel}
-            onBlur={() => {
-              setParsedLatLng(lat, lng)
+            onChange={e => setLngOnChange(e.target.value)}
+            onBlur={e => {
+              setParsedLngOnBlur(e.target.value)
             }}
           />
         </Col>
         <CoordinateActionButtons
-          lat={lat}
-          lng={lng}
+          coordinates={coordinates}
           isSubmitting={isSubmitting}
           disabled={!lat && lat !== 0 && !lng && lng !== 0}
           onClear={() => {
             // setting second param to false prevents validation since lat, lng can be null together
             setFieldTouched("lat", false, false)
             setFieldTouched("lng", false, false)
+            setFieldValue("displayedCoordinate", null)
             setFieldValue("lat", null)
             setFieldValue("lng", null)
           }}
@@ -249,17 +254,33 @@ const LatLonFormField = ({
     </FormGroup>
   )
 
-  function setParsedLatLng(latVal, lngVal) {
-    setFieldTouched("lat", true, false)
-    setFieldTouched("lng", true, false)
-    setFieldValue("lat", parseCoordinate(latVal))
-    setFieldValue("lng", parseCoordinate(lngVal))
+  // Don't parse in onChange, it limits user
+  // displayedCoordinate is in read-only field, no need to validate
+  function setLatOnChange(val) {
+    setFieldValue("lat", val)
+    setFieldValue("displayedCoordinate", convertLatLngToMGRS(val, lng), false)
+  }
+
+  function setLngOnChange(val) {
+    setFieldValue("lng", val)
+    setFieldValue("displayedCoordinate", convertLatLngToMGRS(lat, val), false)
+  }
+
+  function setParsedLatOnBlur(val) {
+    setFieldValue("displayedCoordinate", convertLatLngToMGRS(val, lng), false)
+    setFieldTouched("lat", true)
+    setFieldValue("lat", parseCoordinate(val))
+  }
+
+  function setParsedLngOnBlur(val) {
+    setFieldValue("displayedCoordinate", convertLatLngToMGRS(lat, val), false)
+    setFieldTouched("lng", true)
+    setFieldValue("lng", parseCoordinate(val))
   }
 }
 
 LatLonFormField.propTypes = {
-  lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
   setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
@@ -267,8 +288,7 @@ LatLonFormField.propTypes = {
 }
 
 LatLonFormField.defaultProps = {
-  lat: null,
-  lng: null,
+  coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false
 }
@@ -276,8 +296,7 @@ LatLonFormField.defaultProps = {
 /* ======================= CoordinateActionButtons ============================ */
 
 const CoordinateActionButtons = ({
-  lat,
-  lng,
+  coordinates,
   onClear,
   isSubmitting,
   disabled
@@ -294,28 +313,27 @@ const CoordinateActionButtons = ({
           disabled={isSubmitting || disabled}
         />
       </Tooltip>
-      <AllFormatsInfo lat={lat} lng={lng} inForm />
+      <AllFormatsInfo coordinates={coordinates} inForm />
     </Col>
   )
 }
 
 CoordinateActionButtons.propTypes = {
-  lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  coordinates: CoordinatesPropType,
   onClear: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
   disabled: PropTypes.bool
 }
 
 CoordinateActionButtons.defaultProps = {
-  lat: null,
-  lng: null,
+  coordinates: DEFAULT_COORDINATES,
   disabled: true
 }
 
 /* ======================= AllFormatsInfo ============================ */
 
-const AllFormatsInfo = ({ lat, lng, inForm }) => {
+const AllFormatsInfo = ({ coordinates, inForm }) => {
+  const { lat, lng } = coordinates
   if (!inForm && ((!lat && lat !== 0) || (!lng && lng !== 0))) {
     return null
   }
@@ -335,13 +353,13 @@ const AllFormatsInfo = ({ lat, lng, inForm }) => {
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>{LAT_LON_LABEL}</td>
                 <td>
-                  <LatLonFormField lat={lat} lng={lng} />
+                  <LatLonFormField coordinates={coordinates} />
                 </td>
               </tr>
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>{MGRS_LABEL}</td>
                 <td>
-                  <MGRSFormField lat={lat} lng={lng} />
+                  <MGRSFormField coordinates={coordinates} />
                 </td>
               </tr>
             </tbody>
@@ -368,13 +386,11 @@ const AllFormatsInfo = ({ lat, lng, inForm }) => {
 }
 
 AllFormatsInfo.propTypes = {
-  lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  lng: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  coordinates: CoordinatesPropType,
   inForm: PropTypes.bool
 }
 
 AllFormatsInfo.defaultProps = {
-  lat: null,
-  lng: null,
+  coordinates: DEFAULT_COORDINATES,
   inForm: false
 }

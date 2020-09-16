@@ -1,36 +1,42 @@
+import CreateNewLocation from "../pages/location/createNewLocation.page"
 import EditLocation from "../pages/location/editLocation.page"
+import ShowLocation from "../pages/location/showLocation.page"
+import { LOCATION_COORDS, LOCATION_NAME, NEW_COORDS } from "./locationUtils"
 
-const EX_LOCATION_ID = "f2207d9b-204b-4cb5-874d-3fe6bc6f8acd"
+describe("When editing a location", () => {
+  it("Should create a new location first", () => {
+    CreateNewLocation.open(LOCATION_NAME)
+    CreateNewLocation.nameField.setValue(LOCATION_NAME)
+    CreateNewLocation.latField.setValue(LOCATION_COORDS.lat)
+    CreateNewLocation.lngField.setValue(LOCATION_COORDS.lng)
+    CreateNewLocation.createButton.click()
+    // We are sent to showLocation page
+    ShowLocation.successMsg.waitForExist()
+    ShowLocation.successMsg.waitForDisplayed()
+  })
 
-const EXAMPLE_LAT_LNG_TO_CONVERT = {
-  lat: "47.52963",
-  lng: "-52.94612"
-}
-
-const EXAMPLE_MGRS_TO_BE_EXPECTED = "22TCT5351665858"
-
-describe("When editing an existing location", () => {
   it("Should see latitude and longitude label when selected format is LAT_LON", () => {
-    EditLocation.open(EX_LOCATION_ID)
+    ShowLocation.editButton.waitForExist()
+    ShowLocation.editButton.waitForDisplayed()
+    ShowLocation.editButton.click()
+    // Now we are in the edit page
     EditLocation.latLngLabel.waitForExist()
     EditLocation.latLngLabel.waitForDisplayed()
   })
 
-  it("Should correctly convert and display both formats in the popover window", () => {
+  it("Should correctly edit, display the correct values in both formats in the popover window", () => {
     const latInput = EditLocation.latInputField
     // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
     // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
     latInput.setValue(
-      "\uE003".repeat(latInput.getValue().length) +
-        EXAMPLE_LAT_LNG_TO_CONVERT.lat
+      "\uE003".repeat(latInput.getValue().length) + NEW_COORDS.lat
     )
 
     const lngInput = EditLocation.lngInputField
     // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
     // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
     lngInput.setValue(
-      "\uE003".repeat(lngInput.getValue().length) +
-        EXAMPLE_LAT_LNG_TO_CONVERT.lng
+      "\uE003".repeat(lngInput.getValue().length) + NEW_COORDS.lng
     )
 
     EditLocation.allFormatsPopover.click()
@@ -38,13 +44,19 @@ describe("When editing an existing location", () => {
     EditLocation.allFormatsPopoverMGRS.waitForExist()
 
     expect(EditLocation.allFormatsPopoverLatLng.getText()).toMatch(
-      new RegExp(EXAMPLE_LAT_LNG_TO_CONVERT.lat, "g")
+      new RegExp(NEW_COORDS.lat, "g")
     )
     expect(EditLocation.allFormatsPopoverLatLng.getText()).toMatch(
-      new RegExp(EXAMPLE_LAT_LNG_TO_CONVERT.lng, "g")
+      new RegExp(NEW_COORDS.lng, "g")
     )
     expect(EditLocation.allFormatsPopoverMGRS.getText()).toMatch(
-      new RegExp(EXAMPLE_MGRS_TO_BE_EXPECTED, "g")
+      new RegExp(NEW_COORDS.mgrs, "g")
     )
+  })
+
+  it("Should save the edited location", () => {
+    EditLocation.saveLocationButton.click()
+    ShowLocation.successMsg.waitForExist()
+    ShowLocation.successMsg.waitForDisplayed()
   })
 })
