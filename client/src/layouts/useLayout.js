@@ -21,7 +21,9 @@ const useLayout = (layoutType, viewDate) => {
         break
     }
     return item => {
-      return layoutTemp(item, dimensions, viewDate)
+      return !dimensions?.width || !dimensions?.height
+        ? null
+        : layoutTemp(item, dimensions, viewDate)
     }
   }, [layoutType, dimensions, viewDate])
 
