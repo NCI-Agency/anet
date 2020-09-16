@@ -1,15 +1,17 @@
 import moment from "moment"
 
-const monthLayout = ({ item, dimensions }) => {
+const monthLayout = (item, dimensions, viewDate) => {
   // figure out which month
   const momentDate = moment(item.date)
-
+  if (!viewDate.isSame(momentDate, "month")) {
+    return null
+  }
   // This is the [0,0] day of the month
-  const firstDayofFirstWeekOfTheMonth = momentDate
+  const firstDayofFirstWeekOfTheMonth = moment(momentDate)
     .startOf("month")
     .startOf("isoWeek")
 
-  const endOfMonth = momentDate.endOf("month")
+  const endOfMonth = moment(momentDate).endOf("month")
 
   const numOfWeeks = endOfMonth.diff(firstDayofFirstWeekOfTheMonth, "weeks") + 1
   const daysDiff = momentDate.diff(firstDayofFirstWeekOfTheMonth, "days")
@@ -18,8 +20,8 @@ const monthLayout = ({ item, dimensions }) => {
   const weekDayDiff = daysDiff % 7
 
   return {
-    xPos: (dimensions.width * weekDayDiff) / 7,
-    yPos: (dimensions.height * weekDiff) / numOfWeeks,
+    x: (dimensions.width * weekDayDiff) / 7,
+    y: (dimensions.height * weekDiff) / numOfWeeks,
     width: dimensions.width / 7,
     height: dimensions.height / numOfWeeks
   }

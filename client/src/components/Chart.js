@@ -1,26 +1,31 @@
 import useLayout from "layouts/useLayout"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useEffect } from "react"
 
-const Chart = ({ items, layoutType, element: Element }) => {
-  const [ref, layout] = useLayout(layoutType)
-
+const Chart = ({ items, layoutType, element: Element, style, viewDate }) => {
+  const [ref, layout] = useLayout(layoutType, viewDate)
+  useEffect(() => {}, [])
   return (
-    <svg ref={ref}>
-      {items.map(item => (
-        <g
-          transform={`translate(${layout(item).x}, ${layout(item).y})`}
-          key={item.id}
-        >
-          <Element item={item} />
-        </g>
-      ))}
+    <svg ref={ref} style={style}>
+      {items.map(item => {
+        const rectDim = layout(item)
+        if (!rectDim) {
+          return null
+        }
+        return (
+          <g transform={`translate(${rectDim.x}, ${rectDim.y})`} key={item.id}>
+            <Element item={item} dimensions={rectDim} />
+          </g>
+        )
+      })}
     </svg>
   )
 }
 Chart.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object),
-  layoutType: PropTypes.func,
-  element: PropTypes.node
+  layoutType: PropTypes.string,
+  element: PropTypes.node,
+  style: PropTypes.object,
+  viewDate: PropTypes.object
 }
 export default Chart

@@ -2,7 +2,7 @@ import * as layouts from "layouts"
 import { useMemo } from "react"
 import useDimensions from "react-use-dimensions"
 
-const useLayout = ({ layoutType }) => {
+const useLayout = (layoutType, viewDate) => {
   const [ref, dimensions] = useDimensions()
   const layout = useMemo(() => {
     let layoutTemp
@@ -20,8 +20,10 @@ const useLayout = ({ layoutType }) => {
         layoutTemp = layouts.yearLayout
         break
     }
-    return item => layoutTemp(item, dimensions)
-  }, [layoutType, dimensions])
+    return item => {
+      return layoutTemp(item, dimensions, viewDate)
+    }
+  }, [layoutType, dimensions, viewDate])
 
   return [ref, layout]
 }

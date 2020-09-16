@@ -1,26 +1,30 @@
 import moment from "moment"
 
-const yearLayout = ({ item, dimensions }) => {
+const yearLayout = (item, dimensions, viewDate) => {
   // figure out which year input is
   // figure out where the item located according to its day
   // calculate the how much x-y translation
   const momentDate = moment(item.date)
+  if (!viewDate.isSame(momentDate, "year")) {
+    return null
+  }
   // this day is basically [0,0] coordinates of the chart
-  const firstDayOfFirstWeekofTheYear = momentDate
+  const firstDayOfFirstWeekofTheYear = moment(momentDate)
     .startOf("year")
     .startOf("isoWeek")
 
-  const endOfYear = momentDate.endOf("year")
+  const endOfYear = moment(momentDate).endOf("year")
+
   const numOfWeeks = endOfYear.diff(firstDayOfFirstWeekofTheYear, "weeks") + 1
-  const diff = momentDate.diff(firstDayOfFirstWeekofTheYear, "days")
+  const dayDiff = momentDate.diff(firstDayOfFirstWeekofTheYear, "days")
 
-  const weekDiff = Math.floor(diff / 7)
+  const weekDiff = Math.floor(dayDiff / 7)
 
-  const weekDayDiff = diff % 7
+  const weekDayDiff = dayDiff % 7
 
   return {
-    xPos: (dimensions.width * weekDiff) / numOfWeeks,
-    yPos: (dimensions.height * weekDayDiff) / 7,
+    x: (dimensions.width * weekDiff) / numOfWeeks,
+    y: (dimensions.height * weekDayDiff) / 7,
     width: dimensions.width / numOfWeeks,
     height: dimensions.height / 7
   }
