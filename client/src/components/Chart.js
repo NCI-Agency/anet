@@ -24,7 +24,7 @@ const Chart = ({ items, layoutType, element: Element, style, viewDate }) => {
 Chart.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object),
   layoutType: PropTypes.string,
-  element: PropTypes.node,
+  element: PropTypes.func,
   style: PropTypes.object,
   viewDate: PropTypes.object
 }
