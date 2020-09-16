@@ -40,6 +40,13 @@ Month.args = {
   layoutType: layouts.TYPES.MONTH
 }
 
+export const Geo = Template.bind({})
+
+Geo.args = {
+  ...defaultArgs,
+  layoutType: layouts.TYPES.GEO
+}
+
 export default {
   title: "ANET/HeatMap",
   component: HeatMap
