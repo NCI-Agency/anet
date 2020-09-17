@@ -1,23 +1,47 @@
 package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableMap;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AnetConfiguration extends Configuration implements AssetsBundleConfiguration {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private boolean testMode;
   private boolean developmentMode;
   private boolean redirectToHttps = false;
+
+  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+  private static final ObjectMapper jsonMapper = new ObjectMapper();
+
+  private final Object versionLock = new Object();
 
   @Valid
   @NotNull
@@ -28,6 +52,10 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   private Map<String, Object> dictionary;
 
+  private String anetDictionaryName;
+
+  private String version;
+
   private boolean timeWaffleRequests;
 
   @Valid
@@ -36,7 +64,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
 
   @NotNull
-  private Map<String, String> waffleConfig = new HashMap<String, String>();
+  private Map<String, String> waffleConfig = new HashMap<>();
 
   @Valid
   @NotNull
@@ -138,12 +166,86 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     this.serverUrl = serverUrl;
   }
 
+  public String getAnetDictionaryName() {
+    return anetDictionaryName;
+  }
+
+  /**
+   * The AnetConfiguration class is used as the object representation of the YAML configuration
+   * file. During start-up phase, parametric values are read from the anet.yml file and their set
+   * methods are called automatically. The parameter to be set when this method is called is the
+   * anetDictionaryName which is read from the anet.yml file. This parameter shows the full path to
+   * the dictionary to be loaded. Therefore, as soon as the parameter is set,we can call
+   * loadDictionary method in here to fill and set the dictionary to be used.
+   *
+   * @param anetDictionaryName Full path of the dictionary to be loaded ,read from anet.yml
+   * @throws IOException When an error occurs while trying to load dictionary
+   * @throws IllegalArgumentException In case of invalid dictionary in the configuration
+   */
+  public void setAnetDictionaryName(String anetDictionaryName)
+      throws IOException, IllegalArgumentException {
+    this.anetDictionaryName = anetDictionaryName;
+    this.loadDictionary();
+  }
+
   public Map<String, Object> getDictionary() {
     return dictionary;
   }
 
   public void setDictionary(Map<String, Object> dictionary) {
     this.dictionary = Collections.unmodifiableMap(dictionary);
+  }
+
+  public void loadDictionary() throws IOException, IllegalArgumentException {
+    // Read and set anet-dictionary
+    // scan:ignore — false positive, we *want* to load the user-provided dictionary file
+    final File file = new File(System.getProperty("user.dir"), getAnetDictionaryName());
+    try (final InputStream inputStream = new FileInputStream(file)) {
+      @SuppressWarnings("unchecked")
+      final Map<String, Object> objectMap = yamlMapper.readValue(inputStream, Map.class);
+      @SuppressWarnings("unchecked")
+      final Map<String, Object> dictionaryMap = (Map<String, Object>) objectMap.get("dictionary");
+      // Check and then set dictionary if it is valid
+      if (isValid(dictionaryMap)) {
+        this.setDictionary(dictionaryMap);
+      }
+    } catch (IOException | IllegalArgumentException e) {
+      logger.error("Error while trying to load dictionary");
+      throw e;
+    }
+  }
+
+  // This method is called from AnetCheckCommand
+  public void checkDictionary() throws IOException {
+    this.isValid(this.getDictionary());
+  }
+
+  // Before setting the dictionary with the dictionaryMap value,
+  // check the dictionaryMap value if it is valid
+  public boolean isValid(Map<String, Object> dictionaryMap)
+      throws IOException, IllegalArgumentException {
+    try (final InputStream inputStream =
+        AnetConfiguration.class.getResourceAsStream("/anet-schema.yml")) {
+      if (inputStream == null) {
+        logger.error("ANET schema [anet-schema.yml] not found");
+        throw new IOException("ANET schema [anet-schema.yml] not found");
+      } else {
+        final JsonSchemaFactory factory = JsonSchemaFactory
+            .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
+            .objectMapper(yamlMapper).build();
+        final JsonSchema schema = factory.getSchema(inputStream);
+        final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
+        final Set<ValidationMessage> errors = schema.validate(anetDictionary);
+        for (ValidationMessage error : errors) {
+          logger.error(error.getMessage());
+        }
+        if (!errors.isEmpty()) {
+          throw new IllegalArgumentException("Invalid dictionary in the configuration");
+        }
+        logger.info("dictionary: {}", yamlMapper.writeValueAsString(anetDictionary));
+        return true;
+      }
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -231,6 +333,23 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
     public void setSslTrust(String sslTrust) {
       this.sslTrust = sslTrust;
+    }
+  }
+
+  public String getVersion() {
+    synchronized (versionLock) {
+      if (version == null) {
+        try (final InputStream inputStream =
+            AnetConfiguration.class.getResourceAsStream("/version.properties")) {
+          @SuppressWarnings("unchecked")
+          final Map<String, String> props = yamlMapper.readValue(inputStream, Map.class);
+          version = props.getOrDefault("projectVersion", "unknown");
+        } catch (IOException e) {
+          logger.error(AnetConstants.VERSION_INFORMATION_ERROR_MESSAGE, e);
+          version = "!error!";
+        }
+      }
+      return version;
     }
   }
 

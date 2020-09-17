@@ -11,6 +11,7 @@ public class IndexView extends SimpleView {
   private String securityBannerText;
   private String securityBannerColor;
   private Map<String, Object> dictionary;
+  private String projectVersion;
 
   public IndexView(String path) {
     super(path);
@@ -46,6 +47,14 @@ public class IndexView extends SimpleView {
 
   public void setDictionary(Map<String, Object> dictionary) {
     this.dictionary = dictionary;
+  }
+
+  public String getProjectVersion() {
+    return projectVersion;
+  }
+
+  public void setProjectVersion(String projectVersion) {
+    this.projectVersion = projectVersion;
   }
 
   // TODO: should try to pass the dictionary to the client as literal JSON instead of serializing it

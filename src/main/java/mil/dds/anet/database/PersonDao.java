@@ -27,6 +27,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -59,6 +60,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
   private static final String DOMAIN_USERS_CACHE = "domainUsersCache";
+  private static final int ACTIVITY_LOG_LIMIT = 100;
 
   private Cache<String, Person> domainUsersCache;
   private MetricRegistry metricRegistry;
@@ -84,6 +86,10 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
+  }
+
+  public Cache<String, Person> getDomainUsersCache() {
+    return domainUsersCache;
   }
 
   @Override
@@ -220,6 +226,19 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     // There should at most one match
     people.stream().forEach(p -> putInCache(p));
     return people;
+  }
+
+  public void logActivitiesByDomainUsername(String domainUsername, Map<String, String> activity) {
+    final Person person = domainUsersCache.get(domainUsername);
+    if (person != null) {
+      final List<Map<String, String>> activities = person.getUserActivities();
+      if (activities.size() >= ACTIVITY_LOG_LIMIT) {
+        activities.clear();
+      }
+      activities.add(activity);
+      person.setUserActivities(activities);
+      domainUsersCache.replace(domainUsername, person);
+    }
   }
 
   /**
@@ -427,6 +446,18 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
       }
     }
+  }
+
+  public String clearCache() {
+    if (domainUsersCache != null) {
+      domainUsersCache.removeAll();
+      if (!domainUsersCache.iterator().hasNext()) {
+        logger.info(AnetConstants.USERCACHE_MESSAGE);
+        return AnetConstants.USERCACHE_MESSAGE;
+      }
+    }
+    logger.warn(AnetConstants.USERCACHE_EMPTY_MESSAGE);
+    return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
 }
