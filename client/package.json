@@ -25,7 +25,6 @@
     "@babel/preset-react": "7.10.4",
     "@babel/register": "7.11.5",
     "@babel/runtime": "7.11.2",
-    "@storybook/addon-actions": "6.0.21",
     "@storybook/addon-essentials": "6.0.21",
     "@storybook/addon-links": "6.0.21",
     "@storybook/react": "6.0.21",
@@ -187,7 +186,7 @@
     "test-jest": "export ANET_CONFIG=../anet-dictionary.yml ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models)'",
     "test-wdio-ie": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node ./tests/util/wdio.ie.js",
     "build-storybook": "build-storybook",
-    "storybook": "start-storybook -p 6006",
+    "storybook": "export STORYBOOK_ANET_CONFIG=/anet.yml ; start-storybook -s .. -p 6006",
     "sim": "export ANET_CONFIG=../anet-dictionary.yml SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
   },
   "jest": {
