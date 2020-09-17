@@ -32,17 +32,19 @@ describe("When creating a new Location", () => {
       "\uE003".repeat(BAD_LAT_LNG_VAL.length) + LOCATION_COORDS.lng
     )
     CreateNewLocation.allFormatsPopover.click()
-    CreateNewLocation.allFormatsPopoverLatLng.waitForExist()
+    CreateNewLocation.allFormatsPopoverLat.waitForExist()
     CreateNewLocation.allFormatsPopoverMGRS.waitForExist()
 
-    expect(CreateNewLocation.allFormatsPopoverLatLng.getText()).match(
-      new RegExp(LOCATION_COORDS.lat, "g")
+    expect(CreateNewLocation.allFormatsPopoverLat.getText()).to.equal(
+      LOCATION_COORDS.lat
     )
-    expect(CreateNewLocation.allFormatsPopoverLatLng.getText()).match(
-      new RegExp(LOCATION_COORDS.lng, "g")
+
+    expect(CreateNewLocation.allFormatsPopoverLng.getText()).to.equal(
+      LOCATION_COORDS.lng
     )
-    expect(CreateNewLocation.allFormatsPopoverMGRS.getText()).match(
-      new RegExp(LOCATION_COORDS.mgrs, "g")
+
+    expect(CreateNewLocation.allFormatsPopoverMGRS.getText()).to.equal(
+      LOCATION_COORDS.mgrs
     )
   })
 

@@ -32,13 +32,29 @@ class CreateNewLocation extends Page {
   }
 
   // parent of MGRS table data => tr
-  get allFormatsPopoverLatLng() {
-    return this.form.$(".bp3-popover-content table").$("td*=Latitude").$("..")
+  get allFormatsPopoverLat() {
+    return this.form
+      .$(".bp3-popover-content table")
+      .$("td*=Latitude")
+      .$("..")
+      .$("span:first-child")
+  }
+
+  get allFormatsPopoverLng() {
+    return this.form
+      .$(".bp3-popover-content table")
+      .$("td*=Latitude")
+      .$("..")
+      .$("span:nth-child(3)")
   }
 
   get allFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
-    return this.form.$(".bp3-popover-content table").$("td*=MGRS").$("..")
+    return this.form
+      .$(".bp3-popover-content table")
+      .$("td*=MGRS")
+      .$("..")
+      .$("span:first-child")
   }
 
   get successMsg() {

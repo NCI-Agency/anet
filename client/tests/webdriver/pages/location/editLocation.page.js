@@ -21,13 +21,29 @@ class EditLocation extends Page {
   }
 
   // parent of MGRS table data => tr
-  get allFormatsPopoverLatLng() {
-    return browser.$(".bp3-popover-content table").$("td*=Latitude").$("..")
+  get allFormatsPopoverLat() {
+    return browser
+      .$(".bp3-popover-content table")
+      .$("td*=Latitude")
+      .$("..")
+      .$("span:first-child")
+  }
+
+  get allFormatsPopoverLng() {
+    return browser
+      .$(".bp3-popover-content table")
+      .$("td*=Latitude")
+      .$("..")
+      .$("span:nth-child(3)")
   }
 
   get allFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
-    return browser.$(".bp3-popover-content table").$("td*=MGRS").$("..")
+    return browser
+      .$(".bp3-popover-content table")
+      .$("td*=MGRS")
+      .$("..")
+      .$("span:first-child")
   }
 
   get latInputField() {

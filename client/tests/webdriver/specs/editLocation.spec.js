@@ -4,7 +4,7 @@ import ShowLocation from "../pages/location/showLocation.page"
 import { LOCATION_COORDS, LOCATION_NAME, NEW_COORDS } from "./locationUtils"
 
 describe("When editing a location", () => {
-  it("Should create a new location first", () => {
+  beforeEach("Should create a new location first", () => {
     CreateNewLocation.open(LOCATION_NAME)
     CreateNewLocation.nameField.setValue(LOCATION_NAME)
     CreateNewLocation.latField.setValue(LOCATION_COORDS.lat)
@@ -13,50 +13,55 @@ describe("When editing a location", () => {
     // We are sent to showLocation page
     ShowLocation.successMsg.waitForExist()
     ShowLocation.successMsg.waitForDisplayed()
-  })
-
-  it("Should see latitude and longitude label when selected format is LAT_LON", () => {
     ShowLocation.editButton.waitForExist()
     ShowLocation.editButton.waitForDisplayed()
     ShowLocation.editButton.click()
     // Now we are in the edit page
+  })
+
+  it("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", () => {
     EditLocation.latLngLabel.waitForExist()
     EditLocation.latLngLabel.waitForDisplayed()
+
+    expect(EditLocation.latInputField.getValue()).toEqual(LOCATION_COORDS.lat)
+    expect(EditLocation.lngInputField.getValue()).toEqual(LOCATION_COORDS.lng)
   })
 
-  it("Should correctly edit, display the correct values in both formats in the popover window", () => {
-    const latInput = EditLocation.latInputField
-    // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
-    // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
-    latInput.setValue(
-      "\uE003".repeat(latInput.getValue().length) + NEW_COORDS.lat
-    )
-
-    const lngInput = EditLocation.lngInputField
-    // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
-    // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
-    lngInput.setValue(
-      "\uE003".repeat(lngInput.getValue().length) + NEW_COORDS.lng
-    )
-
+  it("Should correctly edit input fields and display the correct values in both formats in the popover window", () => {
+    editLatLngFields()
     EditLocation.allFormatsPopover.click()
-    EditLocation.allFormatsPopoverLatLng.waitForExist()
+    EditLocation.allFormatsPopoverLat.waitForExist()
     EditLocation.allFormatsPopoverMGRS.waitForExist()
 
-    expect(EditLocation.allFormatsPopoverLatLng.getText()).toMatch(
-      new RegExp(NEW_COORDS.lat, "g")
-    )
-    expect(EditLocation.allFormatsPopoverLatLng.getText()).toMatch(
-      new RegExp(NEW_COORDS.lng, "g")
-    )
-    expect(EditLocation.allFormatsPopoverMGRS.getText()).toMatch(
-      new RegExp(NEW_COORDS.mgrs, "g")
+    expect(EditLocation.allFormatsPopoverLat.getText()).toEqual(NEW_COORDS.lat)
+    expect(EditLocation.allFormatsPopoverLng.getText()).toEqual(NEW_COORDS.lng)
+    expect(EditLocation.allFormatsPopoverMGRS.getText()).toEqual(
+      NEW_COORDS.mgrs
     )
   })
 
-  it("Should save the edited location", () => {
+  it("Should successfully save and saved location should have the correct values for the lat-lng fields", () => {
+    editLatLngFields()
     EditLocation.saveLocationButton.click()
     ShowLocation.successMsg.waitForExist()
     ShowLocation.successMsg.waitForDisplayed()
+    expect(ShowLocation.latField.getText()).toEqual(NEW_COORDS.lat)
+    expect(ShowLocation.lngField.getText()).toEqual(NEW_COORDS.lng)
   })
 })
+
+function editLatLngFields() {
+  const latInput = EditLocation.latInputField
+  // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
+  // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
+  latInput.setValue(
+    "\uE003".repeat(latInput.getValue().length) + NEW_COORDS.lat
+  )
+
+  const lngInput = EditLocation.lngInputField
+  // can't use clear because of https://github.com/webdriverio/webdriverio/issues/4482#issuecomment-543332411
+  // when using setValue shouldn't append but it does (https://github.com/webdriverio/webdriverio/issues/3024)
+  lngInput.setValue(
+    "\uE003".repeat(lngInput.getValue().length) + NEW_COORDS.lng
+  )
+}

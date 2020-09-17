@@ -14,5 +14,13 @@ class ShowLocation extends Page {
   get successMsg() {
     return browser.$('//div[text()="Location saved"]')
   }
+
+  get latField() {
+    return browser.$('div[name="location"] span:first-child')
+  }
+
+  get lngField() {
+    return browser.$('div[name="location"] span:nth-child(3)')
+  }
 }
 export default new ShowLocation()
