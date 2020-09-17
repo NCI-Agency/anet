@@ -375,6 +375,7 @@
   },
   "prettier": {
     "arrowParens": "avoid",
-    "semi": false
+    "semi": false,
+    "trailingComma": "none"
   }
 }
