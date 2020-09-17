@@ -1,9 +1,11 @@
+import HeatWidget from "components/aggregations/HeatWidget"
+import Chart from "components/Chart"
+import HeatMap from "components/HeatMap"
+import * as layouts from "layouts"
 import moment from "moment"
 import React from "react"
-import HeatWidget from "../src/components/aggregations/HeatWidget"
-import Chart from "../src/components/Chart"
-import HeatMap from "../src/components/HeatMap"
-import * as layouts from "../src/layouts"
+
+// import faker from "faker"
 
 const containerStyle = {
   float: "right",
@@ -28,11 +30,11 @@ const Template = args => (
   </HeatMap>
 )
 
-export const Year = Template.bind({})
+export const Geo = Template.bind({})
 
-Year.args = {
+Geo.args = {
   ...defaultArgs,
-  layoutType: layouts.TYPES.YEAR
+  layoutType: layouts.TYPES.GEO
 }
 
 export const Month = Template.bind({})
@@ -42,11 +44,11 @@ Month.args = {
   layoutType: layouts.TYPES.MONTH
 }
 
-export const Geo = Template.bind({})
+export const Year = Template.bind({})
 
-Geo.args = {
+Year.args = {
   ...defaultArgs,
-  layoutType: layouts.TYPES.GEO
+  layoutType: layouts.TYPES.YEAR
 }
 
 export default {
@@ -56,20 +58,26 @@ export default {
 
 function generateMockData(numOfItems) {
   const items = []
-  const dateInterval = 5 * 366 // 5 year interval to randomize
+  const setOfRandomDays = []
+  // 4 year interval to (-2, +2)
+  const maxVal = 2 * 366
+  const minVal = -maxVal
+
+  while (setOfRandomDays.length < numOfItems) {
+    const randomDay = Math.floor(Math.random() * (maxVal - minVal) + minVal)
+    if (!setOfRandomDays.includes(randomDay)) {
+      setOfRandomDays.push(randomDay)
+    }
+  }
 
   for (let i = 0; i < numOfItems; i++) {
-    // - dateInterval/2 for negative values (previous dates)
-    const randomDayDiff = Math.floor(
-      Math.random() * dateInterval - dateInterval / 2
-    )
-
     const randomNumOfEvents = Math.floor(Math.random() * 10)
-    items.push({
-      date: moment().add(randomDayDiff, "days"),
-      numOfEvents: randomNumOfEvents,
-      id: Math.random() * dateInterval
-    })
+    const newItem = {
+      date: moment().add(setOfRandomDays[i], "days"),
+      numOfEvents: randomNumOfEvents
+    }
+    newItem.id = newItem.date.format()
+    items.push(newItem)
   }
   return items
 }

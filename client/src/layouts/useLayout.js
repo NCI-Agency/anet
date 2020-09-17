@@ -27,7 +27,8 @@ const useLayout = (layoutType, viewDate) => {
     }
   }, [layoutType, dimensions, viewDate])
 
-  return [ref, layout]
+  // TODO: return dynamic key instead of "id"
+  return [ref, layout, "id"]
 }
 
 export default useLayout
