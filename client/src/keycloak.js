@@ -1,4 +1,5 @@
-import * as Keycloak from "keycloak-js"
+// Keycloak initialization in browser context
+import Keycloak from "keycloak-js"
 import Settings from "settings"
 
 // Client-side Keycloak init options are defined in the dictionary by the server
