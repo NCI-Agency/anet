@@ -395,7 +395,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   queryParams={reportQueryParams}
                   reportsFilter={
                     <>
-                      !isSuperUser ? null : (
                       <Button
                         value="toggle-filter"
                         className="btn btn-sm"
@@ -406,7 +405,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                           ? "Show all reports"
                           : "Show pending approval"}
                       </Button>
-                      )
                       <Checkbox
                         checked={includeChildrenOrgs}
                         onChange={() =>
