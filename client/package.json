@@ -35,7 +35,7 @@
     "@wdio/spec-reporter": "6.4.7",
     "@wdio/sync": "6.5.0",
     "aigle": "1.14.1",
-    "autoprefixer": "9.8.6",
+    "autoprefixer": "10.0.0",
     "ava": "3.12.1",
     "babel-jest": "26.3.0",
     "babel-loader": "8.1.0",
