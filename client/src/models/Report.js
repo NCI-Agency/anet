@@ -468,4 +468,70 @@ export default class Report extends Model {
       Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
     )
   }
+
+  static hasConflict(report01, report02) {
+    if (report01.uuid === report02.uuid) {
+      return false // same report is not a conflicting report
+    }
+
+    let start01
+    let end01
+
+    if (
+      !Settings.engagementsIncludeTimeAndDuration ||
+      report01.duration === null
+    ) {
+      // It is an all-day event
+      start01 = moment(report01.engagementDate).startOf("day")
+      end01 = moment(report01.engagementDate).endOf("day")
+    } else {
+      start01 = moment(report01.engagementDate)
+      end01 = moment(report01.engagementDate).add(report01.duration, "minute")
+    }
+
+    let start02
+    let end02
+
+    if (
+      !Settings.engagementsIncludeTimeAndDuration ||
+      report02.duration === null
+    ) {
+      // It is an all-day event
+      start02 = moment(report02.engagementDate).startOf("day")
+      end02 = moment(report02.engagementDate).endOf("day")
+    } else {
+      start02 = moment(report02.engagementDate)
+      end02 = moment(report02.engagementDate).add(report02.duration, "minute")
+    }
+
+    return (
+      start01.isSame(start02) ||
+      (end01.isAfter(start02) && start01.isBefore(end02))
+    )
+  }
+
+  static getFormattedEngagementDate(report) {
+    if (!report?.engagementDate) {
+      return ""
+    }
+
+    const start = moment(report.engagementDate)
+    if (!report.duration) {
+      return Settings.engagementsIncludeTimeAndDuration
+        ? start.format(Settings.dateFormats.forms.displayLong.date) +
+            " (all day)"
+        : start.format(Report.getEngagementDateFormat())
+    }
+
+    const end = moment(report.engagementDate).add(report.duration, "minutes")
+
+    return (
+      start.format(Report.getEngagementDateFormat()) +
+      end.format(
+        start.isSame(end, "day")
+          ? " - HH:mm"
+          : " >>> " + Report.getEngagementDateFormat()
+      )
+    )
+  }
 }

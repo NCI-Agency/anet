@@ -1,6 +1,8 @@
 import LinkTo from "components/LinkTo"
+import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import RemoveButton from "components/RemoveButton"
 import { Person } from "models"
+import Report from "models/Report"
 import PropTypes from "prop-types"
 import React from "react"
 import { Label, Radio, Table } from "react-bootstrap"
@@ -8,7 +10,7 @@ import "./AttendeesTable.css"
 
 const AttendeeDividerRow = () => (
   <tr className="attendee-divider-row">
-    <td colSpan={6}>
+    <td colSpan={7}>
       <hr />
     </td>
   </tr>
@@ -22,8 +24,9 @@ const TableHeader = ({ showDelete, hide }) => (
       </th>
       <th className="col-xs-3">{!hide && "Name"}</th>
       <th className="col-xs-3">{!hide && "Position"}</th>
-      <th className="col-xs-2">{!hide && "Location"}</th>
+      <th className="col-xs-1">{!hide && "Location"}</th>
       <th className="col-xs-2">{!hide && "Organization"}</th>
+      <th className="col-xs-1" />
       {showDelete && <th className="col-xs-1" />}
     </tr>
   </thead>
@@ -80,7 +83,7 @@ RadioButton.propTypes = {
 }
 
 const AttendeesTable = ({
-  attendees,
+  report,
   disabled,
   onChange,
   showDelete,
@@ -91,15 +94,15 @@ const AttendeesTable = ({
       <TableContainer className="advisorAttendeesTable">
         <TableHeader showDelete={showDelete} />
         <TableBody
-          attendees={attendees}
+          attendees={report.attendees}
           role={Person.ROLE.ADVISOR}
           handleAttendeeRow={renderAttendeeRow}
         />
       </TableContainer>
       <TableContainer className="principalAttendeesTable">
-        <TableHeader hide />
+        <TableHeader hide showDelete={showDelete} />
         <TableBody
-          attendees={attendees}
+          attendees={report.attendees}
           role={Person.ROLE.PRINCIPAL}
           handleAttendeeRow={renderAttendeeRow}
           enableDivider
@@ -143,8 +146,11 @@ const AttendeesTable = ({
             whenUnspecified=""
           />
         </td>
+        <td style={{ verticalAlign: "middle" }}>
+          <PlanningConflictForPerson person={person} report={report} />
+        </td>
         {showDelete && (
-          <td>
+          <td style={{ verticalAlign: "middle" }}>
             <RemoveButton
               title="Remove attendee"
               altText="Remove attendee"
@@ -157,19 +163,19 @@ const AttendeesTable = ({
   }
 
   function setPrimaryAttendee(person) {
-    attendees.forEach(attendee => {
+    report.attendees.forEach(attendee => {
       if (Person.isEqual(attendee, person)) {
         attendee.primary = true
       } else if (attendee.role === person.role) {
         attendee.primary = false
       }
     })
-    onChange(attendees)
+    onChange(report.attendees)
   }
 }
 
 AttendeesTable.propTypes = {
-  attendees: PropTypes.array,
+  report: PropTypes.instanceOf(Report),
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   showDelete: PropTypes.bool,
