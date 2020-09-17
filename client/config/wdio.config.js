@@ -150,7 +150,7 @@ const config = {
   mochaOpts: {
     ui: "bdd",
     compilers: ["js:@babel/register"],
-    timeout: 60000
+    timeout: 90000
   },
   //
   // =====

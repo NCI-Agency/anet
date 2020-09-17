@@ -6,7 +6,7 @@ This document covers the steps required to deploy ANET to a server environment.
 ## Environment
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
-	- 1x Windows Application Server (50GB HDD, 16 GB RAM, 4x CPU Cores)
+	- 1x Windows Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
 	- 1x Microsoft SQL Server (2016 or greater) Database Server. 
 - **Software**: Software requirements: 
 	- Java JRE 1.8 installed on the Application Server
@@ -20,8 +20,8 @@ This document covers the steps required to deploy ANET to a server environment.
 			3. When prompted to `Add/Repair/Remove`, select `Add` and provide installation media.
 			4. Advance through the wizard until the Feature Selection screen. Then select `Full-Text
 and Semantic Extractions for Search`.
-	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported although performance is degraded and support will be discontinued beyond Q3 2019
-	- A service manager, such as https://nssm.cc/ , can be used to install ANET as a service on Windows
+	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported although performance may degrade and support will be discontinued beyond Q3 2019
+	- A service manager, such as [NSSM](https://nssm.cc/) , can be used to install ANET as a service on Windows
 - **Network Accessibility**
 	- Users will access the Application Server over HTTP/HTTPS (`80`/`443`)
 	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
@@ -55,13 +55,13 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 
 1. Unzip anet.zip. You'll find three folders directly under the application folder:
 	* _bin_: This contains the startup scripts to start/stop the ANET server. 
-	* _lib_: This contains all of the dependencies and compiled resources. All of the ANET specific files are bundled in `lib/anet.jar`.
-	* _docs_: This is a copy of the docs folder from the Git repository, so you'll have a copy of these documents during installation!
+	* _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
+	* _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
 2. Add an anet.yml file with appropriate settings to the application folder (i.e. `c:\anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
-3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section
-4. Verify that your configuration file is valid with ```"bin/anet.bat" check anet.yml```
-5. Install Database Schema: Run ```"bin/anet.bat" db migrate anet.yml```
-6. Seed the Database: Run ```"bin/anet.bat" init anet.yml```. This will ask you the following questions:
+3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section.
+4. Verify that your configuration file is valid with ```bin\anet.bat check anet.yml```
+5. Install Database Schema: Run ```bin\anet.bat db migrate anet.yml```
+6. Seed the Database: Run ```bin\anet.bat init anet.yml```. This will ask you the following questions:
 	* _Classification String_: This is the message that will appear in the top security banner on the screen. For demo instances you should use `FOR DEMO USE ONLY`.
 	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
 	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
@@ -71,7 +71,7 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
 8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
-10. You can either add a start-up task for ANET, or skip to step 11 if you wish to install it as a service:
+10. You can either add a start-up task for ANET, or skip to step 11, if you wish to install it as a service:
 	* Open Task Scheduler
 	* Create task
 	* Name it "ANET"
@@ -105,7 +105,7 @@ On the ANET server:
 Alternatively, an experimental service update script is available in the `doc` folder. 
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file. This file follows the Dropwizard configuration format ( https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration ). If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration). If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
 	- account deactivation worker: When development mode is `true`, the account deactivation worker is run directly at start-up (as well as at the set interval).
@@ -121,14 +121,14 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
 - **keycloakConfiguration**: The configuration for [Keycloak](keycloak.md), i.e. the (federated) user authentication server for ANET.
-- **database**: The configuration for your database. ANET supports either PostgreSQL or Microsoft SQL Server.  Additional Instructions can be found here instructions here: https://www.dropwizard.io/en/latest/manual/configuration.html#database for available configuration options for the database connection.
+- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional instructions can be found [here](https://www.dropwizard.io/en/latest/manual/configuration.html#database) for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.
-	- **url**: the url to the database in the following format: jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]. When Windows Authentication is used, the following parameters can be appended: integratedSecurity=true;authenticationScheme=nativeAuthentication
+	- **url**: the url to the database in the following format: `jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]`. When Windows Authentication is used, the following parameters can be appended: `integratedSecurity=true;authenticationScheme=nativeAuthentication`
 	
 The following configuration can be used for MS SQL databases:
-```
+```yaml
 database:
   driverClass: com.microsoft.sqlserver.jdbc.SQLServerDriver
   user: [ANET_DB_USERNAME]
@@ -454,17 +454,17 @@ Administrator should request certificates.
 ## Self signed certificates
 If needed, self-signed certificates can be created and used as follows:
 
-1. Open a command line in c:\anet
-2. run "c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -genkey -alias anetkey -keyalg RSA -keystore keystore.jks -keysize 2048.
-3. run "c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -export -alias anetkey -file anetkey.crt -keystore keystore.jks
-4. cd to the directory with cacerts, usually "c:\Program Files\Java\jre1.8.0_121\lib\security"
-5. run "c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -import -trustcacerts -alias selfsigned -file c:\anet\anetkey.crt -keystore cacerts
-6. updte anet.yml with keyStore and trustStore information
+1. Open a command line in `c:\anet`
+2. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -genkey -alias anetkey -keyalg RSA -keystore keystore.jks -keysize 2048`
+3. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -export -alias anetkey -file anetkey.crt -keystore keystore.jks`
+4. cd to the directory with cacerts, usually `c:\Program Files\Java\jre1.8.0_121\lib\security`
+5. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -import -trustcacerts -alias selfsigned -file c:\anet\anetkey.crt -keystore cacerts`
+6. update `anet.yml` with keyStore and trustStore information
  
 
 # How to configure imagery.
 
-ANET uses Leaflet as a map viewer.  You can use any map sources that work with Leaflet in ANET. You can start by specifying the coordinate system to use in the `crs` option below:
+ANET uses [Leaflet](https://leafletjs.com/) as a map viewer.  You can use any map sources that work with Leaflet in ANET. You can start by specifying the coordinate system to use in the `crs` option below:
 ```yaml
   imagery:
     mapOptions:
@@ -475,15 +475,15 @@ ANET uses Leaflet as a map viewer.  You can use any map sources that work with L
 
 ```      
 Typically this is a choice between `EPSG3857` and `EPSG4326`. Please consult the specification of the maps you are about to consult. `homeView` defines the default starting location and zoom level of the map.
-_hint:_ If you are planning to use a WMS service, in a browser you can inspect the results of https://wmsURL?request=GetCapabilities&service=WMS to determine the desired coordinate system
+_hint:_ If you are planning to use a WMS service, in a browser you can inspect the results of `https://wmsURL?request=GetCapabilities&service=WMS` to determine the desired coordinate system
 
 CRS	Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
 
 | CRS        |  Description|
 | ---------: |-------------|
 | EPSG3395   | Rarely used by some commercial tile providers. Uses Elliptical Mercator projection. |
-| EPSG3857   | The most common CRS for online maps, used by almost all free and commercial tile providers. Uses Spherical Mercator projection. Set in by default in Map's crs option. |
-| EPSG4326   | A common CRS among GIS enthusiasts. Uses simple Equirectangular projection. Leaflet 1.0.x complies with the TMS coordinate scheme for EPSG:4326, which is a breaking change from 0.7.x behaviour. If you are using a TileLayer with this CRS, ensure that there are two 256x256 pixel tiles covering the whole earth at zoom level zero, and that the tile coordinate origin is (-180,+90), or (-180,-90) for TileLayers with the tms option set. |
+| EPSG3857   | The most common [CRS](https://en.wikipedia.org/wiki/Spatial_reference_system) for online maps, used by almost all free and commercial tile providers. Uses Spherical Mercator projection. Set in by default in Map's crs option. |
+| EPSG4326   | A common CRS among GIS enthusiasts. Uses simple [Equirectangular projection](https://en.wikipedia.org/wiki/Equirectangular_projection). Leaflet 1.0.x complies with the TMS coordinate scheme for [EPSG:4326](https://epsg.io/4326), which is a breaking change from 0.7.x behaviour. If you are using a TileLayer with this CRS, ensure that there are two 256x256 pixel tiles covering the whole earth at zoom level zero, and that the tile coordinate origin is (-180,+90), or (-180,-90) for TileLayers with the tms option set. |
 | Earth      | Serves as the base for CRS that are global such that they cover the earth. Can only be used as the base for other CRS and cannot be used directly, since it does not have a code, projection or transformation. distance() returns meters. |
 | Simple     | A simple CRS that maps longitude and latitude into x and y directly. May be used for maps of flat surfaces (e.g. game maps). Note that the y axis should still be inverted (going from bottom to top). distance() returns simple euclidean distance. |
 
@@ -507,7 +507,7 @@ for WMS-type providers:
           layers: GEBCO_LATEST
           format: "image/png"
 ```
-_hint:_ In a browser you can inspect the results of https://wmsURL?request=GetCapabilities&service=WMS to determine the desired format and layerName
+_hint:_ In a browser you can inspect the results of `https://wmsURL?request=GetCapabilities&service=WMS` to determine the desired format and layerName
 
 and for WMTS-type providers:
 ```yaml
