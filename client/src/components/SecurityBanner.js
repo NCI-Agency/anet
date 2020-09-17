@@ -1,3 +1,4 @@
+import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import React, { useContext } from "react"
@@ -16,13 +17,6 @@ const aCss = {
   fontSize: "0.7em"
 }
 
-const versionCss = {
-  position: "absolute",
-  top: 10,
-  right: 10,
-  margin: 0
-}
-
 const SecurityBanner = () => {
   const { appSettings, currentUser } = useContext(AppContext)
   return (
@@ -39,9 +33,19 @@ const SecurityBanner = () => {
       >
         (edit)
       </LinkTo>
-      <h6 style={{ ...versionCss }}>Version : {Version}</h6>
+      <VersionBox>Version : {Version}</VersionBox>
     </div>
   )
 }
+
+const VersionBox = styled.h6`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin: 0;
+  @media (max-width: 768px) {
+    display: none;
+  }
+`
 
 export default SecurityBanner
