@@ -6,6 +6,8 @@ import HeatMap from "../src/components/HeatMap"
 import * as layouts from "../src/layouts"
 
 const containerStyle = {
+  float: "right",
+  overflow: "hidden",
   width: "100%",
   minWidth: "700px", // week 7days, at least 100px width for a day
   height: "350px", // week 7days, at least 50px height for a day,
