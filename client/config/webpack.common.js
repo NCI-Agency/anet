@@ -117,7 +117,7 @@ module.exports = {
 
   simConfig: merge.merge(commonConfig, {
     resolve: {
-      modules: [paths.appSrc, "node_modules", "platform/node"]
+      modules: ["platform/node", paths.appSrc, "node_modules"]
     },
     target: "node",
     node: {

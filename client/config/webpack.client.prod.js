@@ -11,7 +11,7 @@ const clientConfig = merge.merge(common.clientConfig, {
   bail: true,
   devtool: "source-map",
   resolve: {
-    modules: [paths.appSrc, "node_modules", "platform/web"]
+    modules: ["platform/web", paths.appSrc, "node_modules"]
   },
   output: {
     publicPath: "/assets/client/",
