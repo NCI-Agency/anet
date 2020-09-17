@@ -17,22 +17,27 @@ This section describes the recommended Developer Environment and how to set it u
     ```
 
 ### Possible Problems
-- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
+- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See [_Connecting to GitHub with SSH_](https://help.github.com/articles/connecting-to-github-with-ssh/) for more information on troubleshooting this step. 
 - **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code. 
 
 ## Set Up Gradle
-The frontend is run with `yarn`.  We recommend running the backend `gradle` if you are only doing frontend development.
+The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running the backend [`gradle`](https://gradle.org/) if you are only doing frontend development.
 
-1. Set up Gradle
+1. Set up [Gradle](https://gradle.org/)
     1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
     1. Open a command line in the `anet` directory that was retrieved from github.
     1. Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
-1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/NCI-Agency/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
+1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](INSTALL.md#anet-configuration) for more details on these configuration options. You are most likely to change:
     1. `emailFromAddr` - use your own email address for testing.
 
 ## Java Backend
+
+### Prerequisites
+1. Make sure you can [manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+
 ### Initial Setup
-1. You can either use PostgreSQL or Microsoft SQL Server for your database. Both allow you to run entirely on your local machine and develop offline.
+
+1. You can either use [PostgreSQL](https://www.postgresql.org/) or [Microsoft SQL Server](https://en.wikipedia.org/wiki/Microsoft_SQL_Server) for your database. Both allow you to run entirely on your local machine and develop offline.
     1. MSSQL
         1. This is currently the default, so you don't need to do anything special
         1. If you want to change any of the default database settings (see `build.gradle` for the defaults), you can paste them as following in your `localSettings.gradle` file (do it for the ones you want to change and with the correct values):
@@ -44,15 +49,15 @@ The frontend is run with `yarn`.  We recommend running the backend `gradle` if y
             run.environment("ANET_DB_NAME","database name")
             ```
    1. PostgreSQL
-        1. To re-force gradle to use PostgreSQL you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
+        1. To re-force gradle to use [PostgreSQL](https://www.postgresql.org/) you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
             ```java
             run.environment("DB_DRIVER", "postgresql")
             ```
-1. Pull the MSSQL Docker image: `./gradlew dockerPullDB`
-1. Create the MSSQL Docker container and the initial database: `./gradlew dockerCreateDB`
-1. Start the MSSQL Docker container: `./gradlew dockerStartDB`
+1. Pull the DB Docker image: `./gradlew dockerPullDB`
+1. Create the DB Docker container and the initial database: `./gradlew dockerCreateDB`
+1. Start the DB Docker container: `./gradlew dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew dbMigrate` to build and migrate the database.
-    1. The database schema is stored in `src/main/resources/migrations.xml`.
+    1. The database schema is stored in [`src/main/resources/migrations.xml`](../src/main/resources/migrations.xml).
 1. Seed the initial data:
     1. If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and load the data.
 1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn) and build the project
@@ -104,7 +109,7 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ## Testing
 ### Initial Setup Test Database
-After successfully creating and building the MSSQL Docker container it is posisble to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
+After successfully creating and building the MSSQL Docker container it is possible to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
 1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
 1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew -PtestEnv dbMigrate`
