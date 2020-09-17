@@ -1,6 +1,7 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
+import createMandatoryBlockPlugin from "components/editor/plugins/mandatoryBlockPlugin"
 import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertFromRaw, convertToRaw } from "draft-js"
 import {
@@ -15,6 +16,7 @@ import {
 } from "draft-js-buttons"
 import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
 import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
@@ -25,6 +27,7 @@ import "draft-js-side-toolbar-plugin/lib/plugin.css"
 import "components/RichTextEditor.css"
 
 const newlinePlugin = createNewlinePlugin()
+const mandatoryBlockPlugin = createMandatoryBlockPlugin()
 
 const BLOCK_TYPES = [
   { type: BLOCK_TYPE.HEADER_ONE },
@@ -88,6 +91,37 @@ const ENTITY_CONTROL = {
   }
 }
 
+const BLOCK_TYPE_TAG_NAME = {
+  [BLOCK_TYPE.HEADER_ONE]: "h1",
+  [BLOCK_TYPE.HEADER_TWO]: "h2",
+  [BLOCK_TYPE.HEADER_THREE]: "h3",
+  [BLOCK_TYPE.UNSTYLED]: "p"
+}
+
+const htmlToBlockMiddleware = next => (nodeName, node, lastList) => {
+  if (nodeName === "hr" || nodeName === "img") {
+    // "atomic" blocks is how Draft.js structures block-level entities.
+    return "atomic"
+  }
+
+  const data = {}
+  if (node?.attributes?.class?.nodeValue === "mandatory") {
+    data.mandatory = true
+  }
+  const placeholder = node.attributes?.placeholder?.nodeValue
+  if (!_isEmpty(placeholder)) {
+    data.placeholder = placeholder
+  }
+  if (!_isEmpty(data)) {
+    const defaultBlock = next(nodeName, node, lastList)
+    const block =
+      typeof defaultBlock === "string" ? { type: defaultBlock } : defaultBlock
+    return { ...block, data }
+  }
+  return null
+}
+htmlToBlockMiddleware.__isMiddleware = true
+
 const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
     if (nodeName === "a") {
@@ -102,14 +136,7 @@ const importerConfig = {
 
     return null
   },
-  htmlToBlock: nodeName => {
-    if (nodeName === "hr" || nodeName === "img") {
-      // "atomic" blocks is how Draft.js structures block-level entities.
-      return "atomic"
-    }
-
-    return null
-  },
+  htmlToBlock: htmlToBlockMiddleware,
   htmlToStyle: (nodeName, node, currentStyle) => {
     return currentStyle
   }
@@ -117,6 +144,16 @@ const importerConfig = {
 
 const exporterConfig = {
   blockToHTML: block => {
+    const tagName = BLOCK_TYPE_TAG_NAME[block.type]
+    if (tagName && block.data.mandatory) {
+      return {
+        start: `<${tagName} class="mandatory" placeholder=${
+          block.data.placeholder || ""
+        }>`,
+        end: `</${tagName}>`
+      }
+    }
+
     if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
       return <blockquote />
     }
@@ -172,7 +209,13 @@ class RichTextEditor extends Component {
   }
 
   render() {
-    const { className, value, onChange, onHandleBlur } = this.props
+    const {
+      className,
+      value,
+      onChange,
+      onHandleBlur,
+      htmlTemplate
+    } = this.props
     const { sideToolbarPlugin } = this.state
     const { SideToolbar } = sideToolbarPlugin
     return (
@@ -192,8 +235,15 @@ class RichTextEditor extends Component {
           }}
           onBlur={onHandleBlur}
           stateSaveInterval={100}
-          plugins={[sideToolbarPlugin, newlinePlugin]}
-          rawContentState={value ? fromHTML(value) : null}
+          plugins={[sideToolbarPlugin, mandatoryBlockPlugin, newlinePlugin]}
+          handlePastedText={() => true}
+          rawContentState={
+            value
+              ? fromHTML(value)
+              : htmlTemplate
+                ? fromHTML(htmlTemplate)
+                : null
+          }
           showUndoControl
           showRedoControl
           spellCheck
@@ -226,7 +276,8 @@ RichTextEditor.propTypes = {
   className: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
-  onHandleBlur: PropTypes.func
+  onHandleBlur: PropTypes.func,
+  htmlTemplate: PropTypes.string
 }
 
 export default RichTextEditor

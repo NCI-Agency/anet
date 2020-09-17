@@ -452,9 +452,7 @@ properties:
             title: The label for report's key outcomes
             description: Used in the UI where report's key outcomes are shown.
           reportText:
-            type: string
-            title: The label for report's engagement details
-            description: Used in the UI where report's engagement details are shown.
+            "$ref": "#/definitions/inputField"
           customFields:
             type: object
             additionalProperties:

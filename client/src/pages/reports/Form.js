@@ -941,7 +941,7 @@ const ReportForm = ({
 
                 <FastField
                   name="reportText"
-                  label={Settings.fields.report.reportText}
+                  label={Settings.fields.report.reportText.label}
                   component={FieldHelper.SpecialField}
                   onChange={value => setFieldValue("reportText", value, true)}
                   widget={
@@ -951,6 +951,9 @@ const ReportForm = ({
                         // validation will be done by setFieldValue
                         setFieldTouched("reportText", true, false)
                       }}
+                      htmlTemplate={
+                        Settings.fields.report.reportText.placeholder
+                      }
                     />
                   }
                 />

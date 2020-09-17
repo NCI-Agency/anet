@@ -371,7 +371,9 @@ dictionary:
       reportTags: Tags
       nextSteps: Next steps
       keyOutcomes: Key outcomes
-      reportText: Key details
+      reportText:
+        label: Key details
+        placeholder: <h1 class="mandatory" placeholder="Key details 1">Key details 1</h1><p class="mandatory" placeholder="Type here key details 1 extra information">Type here key details 1 extra information</p><h1 class="mandatory" placeholder="Key details 2">Key details 2</h1><p class="mandatory" placeholder="Type here key details 2 extra information">Type here key details 2 extra information</p><h1 class="mandatory" placeholder="Key details 3">Key details 3</h1><p class="mandatory" placeholder="Type here key details 3 extra information">Type here key details 3 extra information</p><h1>Extra key details</h1><p>Type here optional details</p>
       customFields:
         relatedReport:
           type: anet_object

@@ -8,7 +8,6 @@ const createNewLines = (newLines, nextState) => {
   const htmlMarkup = newLines.map(text => {
     return text.length <= 1 ? "" : `<p>${text}</p>`
   })
-
   // Create content blocks based on the html for the new content statue
   const blocksFromHTML = convertFromHTML(htmlMarkup.join(""))
   const newContentState = ContentState.createFromBlockArray(
@@ -25,7 +24,7 @@ const createNewLines = (newLines, nextState) => {
   return EditorState.push(nextState, nextContentState, "insert-fragment")
 }
 
-const newlinePlugin = () => ({
+const createNewlinePlugin = () => ({
   handlePastedText(text, html, editorState, { setEditorState }) {
     const nextState = editorState
     if (!HTML_REGEX.test(html)) {
@@ -40,4 +39,4 @@ const newlinePlugin = () => ({
   }
 })
 
-export default newlinePlugin
+export default createNewlinePlugin

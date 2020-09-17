@@ -189,29 +189,31 @@ public class Utils {
     return result;
   }
 
-  public static final PolicyFactory HTML_POLICY_DEFINITION = new HtmlPolicyBuilder()
-      .allowStandardUrlProtocols()
-      // Allow in-line image data
-      .allowUrlProtocols("data").allowAttributes("src").matching(Pattern.compile("^data:image/.*$"))
-      .onElements("img")
-      // Allow some image attributes
-      .allowAttributes("align", "alt", "border", "name", "height", "width", "hspace", "vspace")
-      .onElements("img")
-      // Allow title="..." on any element.
-      .allowAttributes("title").globally()
-      // Allow href="..." on <a> elements (but not the 'data:' protocol!).
-      .allowAttributes("href").matching(Pattern.compile("^(?!data:).*$")).onElements("a")
-      // Defeat link spammers.
-      .requireRelNofollowOnLinks()
-      // The align attribute on <p> elements can have any value below.
-      .allowAttributes("align").matching(true, "center", "left", "right", "justify", "char")
-      .onElements("p").allowAttributes("border", "cellpadding", "cellspacing").onElements("table")
-      .allowAttributes("colspan", "rowspan").onElements("td", "th").allowStyling()
-      // These elements are allowed.
-      .allowElements("a", "p", "div", "i", "b", "u", "em", "blockquote", "tt", "strong", "br", "ul",
-          "ol", "li", "table", "tr", "td", "thead", "tbody", "th", "span", "h1", "h2", "h3", "h4",
-          "h5", "h6", "hr", "img", "strike", "mark")
-      .toFactory();
+  public static final PolicyFactory HTML_POLICY_DEFINITION =
+      new HtmlPolicyBuilder().allowStandardUrlProtocols()
+          // Allow in-line image data
+          .allowUrlProtocols("data").allowAttributes("src")
+          .matching(Pattern.compile("^data:image/.*$")).onElements("img")
+          // Allow some image attributes
+          .allowAttributes("align", "alt", "border", "name", "height", "width", "hspace", "vspace")
+          .onElements("img")
+          // Allow title="..." on any element.
+          .allowAttributes("title").globally()
+          // Allow href="..." on <a> elements (but not the 'data:' protocol!).
+          .allowAttributes("href").matching(Pattern.compile("^(?!data:).*$")).onElements("a")
+          // Defeat link spammers.
+          .requireRelNofollowOnLinks()
+          // The align attribute on <p> elements can have any value below.
+          .allowAttributes("align").matching(true, "center", "left", "right", "justify", "char")
+          .onElements("p").allowAttributes("class", "placeholder")
+          .onElements("h1", "h2", "h3", "h4", "h5", "h6", "p")
+          .allowAttributes("border", "cellpadding", "cellspacing").onElements("table")
+          .allowAttributes("colspan", "rowspan").onElements("td", "th").allowStyling()
+          // These elements are allowed.
+          .allowElements("a", "p", "div", "i", "b", "u", "em", "blockquote", "tt", "strong", "br",
+              "ul", "ol", "li", "table", "tr", "td", "thead", "tbody", "th", "span", "h1", "h2",
+              "h3", "h4", "h5", "h6", "hr", "img", "strike", "mark")
+          .toFactory();
 
   public static String sanitizeHtml(String input) {
     if (input == null) {

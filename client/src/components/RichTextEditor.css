@@ -15,3 +15,7 @@
 .Draftail-block--unstyled {
   margin: 0.75rem 0;
 }
+
+.Draftail-block--header-one.mandatory {
+  background-color: #f2f2f2;
+}
