@@ -27,7 +27,7 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localTestSettings.gradle'
 }
 
-boolean isJupyterLabEnabled = run.environment["ANET_JUPYTER_ENABLE_LAB"] == "yes"
+boolean isJupyterLabEnabled = run.environment["JUPYTER_ENABLE_LAB"] == "yes"
 
 // Defaults for development variables
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "sqlserver")
@@ -542,9 +542,9 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	imageId = dockerPullJupyter.getImage()
 	containerName = jupyterContainerName
 	description = "Creates an ANET ${dbType} jupyter_scipy container named " + jupyterContainerName + "."
-	hostConfig.binds = ["${projectDir}/anet-tools/anet_tools":"/home/jovyan/work"] + run.environment.get("DOCKER_MOUNTS", [:])
+	hostConfig.binds = ["${projectDir}/anet-tools":"/home/jovyan/work"] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isJupyterLabEnabled){
-		withEnvVar('JUPYTER_ENABLE_LAB', run.environment["ANET_JUPYTER_ENABLE_LAB"])
+		withEnvVar('JUPYTER_ENABLE_LAB', run.environment["JUPYTER_ENABLE_LAB"])
 	}
 	withEnvVar('DB_DRIVER', run.environment["DB_DRIVER"])
 	withEnvVar('ANET_DB_SERVER', run.environment["ANET_DB_SERVER"])
@@ -552,7 +552,11 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	withEnvVar('ANET_DB_USERNAME', run.environment["ANET_DB_USERNAME"])
 	withEnvVar('ANET_DB_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	withEnvVar('ANET_DB_EXPOSED_PORT', run.environment["ANET_DB_EXPOSED_PORT"])
+	withEnvVar('GRANT_SUDO', "yes")
+	withEnvVar('JUPYTER_TOKEN', "anet")
 	hostConfig.portBindings = [run.environment["ANET_JUPYTER_PORT"] + ":" + "8888"]
+	user = "root"
+	workingDir = "/home/jovyan/work"
 }
 
 task dockerStartJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
@@ -571,6 +575,13 @@ task dockerRemoveJupyter(type: com.bmuschko.gradle.docker.tasks.container.Docker
 	group = "jupyter container"
 	description = "Removes " + jupyterContainerName + " container."
 	targetContainerId { jupyterContainerName }
+}
+
+task dockerInstallJupyterDependencies(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "jupyter container"
+	description = "Installs Python dependencies."
+	targetContainerId { jupyterContainerName }
+	commands = [ ["/bin/bash", "-c", "apt update && apt-get install libsasl2-dev libldap2-dev libssl-dev && pip3 install pipenv && pipenv install --system --skip-lock" ] as String[] ]
 }
 
 jar.dependsOn buildClient
