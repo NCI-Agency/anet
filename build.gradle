@@ -533,7 +533,7 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 
 task dockerPullJupyter(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "jupyter container"
-	image = "fburakep/jupyter_scipy:latest"
+	image = "jupyter/scipy-notebook:6d42503c684f"
 	description = "Pulls a docker image for the python jupyter environment from ${image}."
 }
 
