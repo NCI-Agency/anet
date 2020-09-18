@@ -1,5 +1,4 @@
 import HeatMap from "components/HeatMap"
-import { LAYOUT_TYPES } from "layouts"
 import moment from "moment"
 import React from "react"
 
@@ -22,10 +21,11 @@ const containerStyle = {
 const defaultItems = generateMockData(100)
 
 const defaultArgs = {
-  items: defaultItems
+  items: defaultItems,
+  style: containerStyle
 }
 
-const Template = args => <HeatMap {...args} style={containerStyle} />
+const Template = args => <HeatMap {...args} />
 // FIXME: Add when ready
 // export const Geo = Template.bind({})
 
@@ -34,18 +34,10 @@ const Template = args => <HeatMap {...args} style={containerStyle} />
 //   layoutType: LAYOUT_TYPES.GEO
 // }
 
-// export const Month = Template.bind({})
+export const HEATMAP = Template.bind({})
 
-// Month.args = {
-//   ...defaultArgs,
-//   layoutType: LAYOUT_TYPES.MONTH
-// }
-
-export const Year = Template.bind({})
-
-Year.args = {
-  ...defaultArgs,
-  layoutType: LAYOUT_TYPES.YEAR
+HEATMAP.args = {
+  ...defaultArgs
 }
 
 function generateMockData(numOfItems) {

@@ -1,8 +1,13 @@
 import DateChart from "components/DateChart"
 import GeoChart from "components/GeoChart"
-import { LAYOUT_TYPES } from "layouts"
 import _groupBy from "lodash/groupBy"
 import moment from "moment"
+
+export const LAYOUT_TYPES = {
+  YEAR: "year",
+  MONTH: "month",
+  GEO: "geo"
+}
 
 export const DATE_LAYOUT_FORMAT = "DD-MM-YYYY"
 
@@ -32,16 +37,15 @@ export function groupByDay(inItems) {
   const tempItemsObj = _groupBy(inItems, item =>
     moment(item[aggregationKey]).format(DATE_LAYOUT_FORMAT)
   )
-  // console.log("groupByDay intermediate object", tempItemsObj)
 
-  // convert that object to a list of objects
+  // aggregate from that object to a list of objects
   Object.keys(tempItemsObj).forEach(dayStr => {
     outItems.push({
+      aggregationKey,
       [aggregationKey]: dayStr,
       numOfEvents: tempItemsObj[dayStr].length
     })
   })
-  // console.log("out items", outItems)
 
   return [outItems, aggregationKey]
 }

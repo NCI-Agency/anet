@@ -1,6 +1,6 @@
 import HeatWidget from "components/aggregations/HeatWidget"
 import Chart from "components/Chart"
-import { LAYOUT_TYPES } from "layouts"
+import { LAYOUT_TYPES } from "layouts/utils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 

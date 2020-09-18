@@ -1,11 +1,19 @@
+import { DATE_LAYOUT_FORMAT } from "layouts/utils"
 import moment from "moment"
 
 const monthLayout = (item, dimensions, viewDate) => {
   // figure out which month
-  const momentDate = moment(item.date)
+  const momentDate = moment(item.date, DATE_LAYOUT_FORMAT)
+
   if (!viewDate.isSame(momentDate, "month")) {
     return null
   }
+  /**   Monday-Tuesday ....
+   *   [0,0]-[1,0]**********
+   *   [0,1]***************
+   *   .
+   *   .
+   **/
   // This is the [0,0] day of the month
   const firstDayofFirstWeekOfTheMonth = moment(momentDate)
     .startOf("month")

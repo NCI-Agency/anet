@@ -1,14 +1,20 @@
 import { DATE_LAYOUT_FORMAT } from "layouts/utils"
 import moment from "moment"
-const yearLayout = (item, dimensions, dateField, viewDate) => {
+const yearLayout = (item, dimensions, viewDate) => {
   // figure out which year input is
-  // figure out where the item located according to its day
-  // calculate the how much x-y translation
-  const momentDate = moment(item[dateField], DATE_LAYOUT_FORMAT)
+  const momentDate = moment(item.date, DATE_LAYOUT_FORMAT)
   if (!viewDate.isSame(momentDate, "year")) {
     return null
   }
-  // this day is basically [0,0] coordinates of the chart
+  // figure out where the item located according to its day
+  // calculate how much x-y translation needed
+  /**           Jan           Feb ....
+   *   Monday  [0,0][1,0]**********
+   *   Tuesday [0,1]***************
+   *   .
+   *   .
+   **/
+  // First day of first week of the year is basically [0,0] coordinates of the chart
   const firstDayOfFirstWeekofTheYear = moment(momentDate)
     .startOf("year")
     .startOf("isoWeek")
@@ -21,13 +27,7 @@ const yearLayout = (item, dimensions, dateField, viewDate) => {
   const weekDiff = Math.floor(dayDiff / 7)
 
   const weekDayDiff = dayDiff % 7
-  // console.log("yearLayout item=", item, {
-  //   momentDate,
-  //   dayDiff,
-  //   weekDiff,
-  //   weekDayDiff,
-  //   numOfWeeks
-  // })
+
   return {
     x: (dimensions.width * weekDiff) / numOfWeeks,
     y: (dimensions.height * weekDayDiff) / 7,

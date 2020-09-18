@@ -18,7 +18,7 @@ const DateChart = ({
         return (
           <g
             transform={`translate(${boundingRect.x}, ${boundingRect.y})`}
-            key={item.aggregationKey}
+            key={item[item.aggregationKey]}
           >
             <Element item={item} dimensions={boundingRect} />
           </g>

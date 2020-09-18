@@ -1,5 +1,3 @@
-import PropTypes from "prop-types"
-
 const geoLayout = (item, dimensions) => {
   // FIXME: do something useful instead
   return {
@@ -9,8 +7,5 @@ const geoLayout = (item, dimensions) => {
     height: dimensions.height
   }
 }
-geoLayout.propTypes = {
-  item: PropTypes.object,
-  dimensions: PropTypes.object
-}
+
 export default geoLayout
