@@ -28,6 +28,8 @@
     "@storybook/addon-essentials": "6.0.21",
     "@storybook/addon-links": "6.0.21",
     "@storybook/react": "6.0.21",
+    "@testing-library/jest-dom": "5.11.4",
+    "@testing-library/react": "11.0.2",
     "@wdio/browserstack-service": "6.4.7",
     "@wdio/cli": "6.5.0",
     "@wdio/local-runner": "6.5.0",
@@ -373,6 +375,7 @@
   },
   "prettier": {
     "arrowParens": "avoid",
-    "semi": false
+    "semi": false,
+    "trailingComma": "none"
   }
 }

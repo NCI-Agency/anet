@@ -9,8 +9,8 @@ import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -18,6 +18,7 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
+import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
 import React, { useContext } from "react"
@@ -142,8 +143,14 @@ const LocationShow = ({ pageDispatchers }) => {
                 />
 
                 <GeoLocation
-                  lat={location.lat}
-                  lng={location.lng}
+                  coordinates={{
+                    lat: location.lat,
+                    lng: location.lng,
+                    displayedCoordinate: convertLatLngToMGRS(
+                      location.lat,
+                      location.lng
+                    )
+                  }}
                   displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
                 />
               </Fieldset>
