@@ -1,34 +1,24 @@
-import * as layouts from "layouts"
+import LAYOUTS from "layouts"
+import { INIT_LAYOUT_STATES, LAYOUT_CHART_ELEMENTS } from "layouts/utils"
 import { useMemo } from "react"
 import useDimensions from "react-use-dimensions"
 
-const useLayout = (layoutType, viewDate) => {
+const useLayout = (layoutType, aggregationKey) => {
   const [ref, dimensions] = useDimensions()
-  const layout = useMemo(() => {
-    let layoutTemp
-    switch (layoutType) {
-      case layouts.TYPES.YEAR:
-        layoutTemp = layouts.yearLayout
-        break
-      case layouts.TYPES.MONTH:
-        layoutTemp = layouts.monthLayout
-        break
-      case layouts.TYPES.GEO:
-        layoutTemp = layouts.geoLayout
-        break
-      default:
-        layoutTemp = layouts.yearLayout
-        break
-    }
-    return item => {
+  const vars = useMemo(() => {
+    const chartElement = LAYOUT_CHART_ELEMENTS[layoutType]
+    const specificLayout = LAYOUTS[layoutType]
+    const initViewState = INIT_LAYOUT_STATES[layoutType]
+    const layout = (item, viewArgs) => {
       return !dimensions?.width || !dimensions?.height
         ? null
-        : layoutTemp(item, dimensions, viewDate)
+        : specificLayout(item, dimensions, aggregationKey, viewArgs)
     }
-  }, [layoutType, dimensions, viewDate])
 
-  // TODO: return dynamic key instead of "id"
-  return [ref, layout, "id"]
+    return [chartElement, layout, initViewState]
+  }, [layoutType, dimensions, aggregationKey])
+
+  return [...vars, ref]
 }
 
 export default useLayout

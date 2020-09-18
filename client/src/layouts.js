@@ -1,9 +1,17 @@
-export yearLayout from "layouts/yearLayout"
-export monthLayout from "layouts/monthLayout"
-export geoLayout from "layouts/geoLayout"
+import geoLayout from "layouts/geoLayout"
+import monthLayout from "layouts/monthLayout"
+import yearLayout from "layouts/yearLayout"
 
-export const TYPES = {
+export const LAYOUT_TYPES = {
   YEAR: "year",
   MONTH: "month",
   GEO: "geo"
 }
+
+const LAYOUTS = {
+  [LAYOUT_TYPES.GEO]: geoLayout,
+  [LAYOUT_TYPES.MONTH]: monthLayout,
+  [LAYOUT_TYPES.YEAR]: yearLayout
+}
+
+export default LAYOUTS

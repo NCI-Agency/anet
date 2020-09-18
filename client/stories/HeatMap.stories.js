@@ -1,11 +1,14 @@
-import HeatWidget from "components/aggregations/HeatWidget"
-import Chart from "components/Chart"
 import HeatMap from "components/HeatMap"
-import * as layouts from "layouts"
+import { LAYOUT_TYPES } from "layouts"
 import moment from "moment"
 import React from "react"
 
 // import faker from "faker"
+
+export default {
+  title: "ANET/HeatMap",
+  component: HeatMap
+}
 
 const containerStyle = {
   float: "right",
@@ -16,68 +19,53 @@ const containerStyle = {
   outline: "2px solid red"
 }
 
-const defaultItems = generateMockData(200)
+const defaultItems = generateMockData(100)
 
 const defaultArgs = {
-  items: defaultItems,
-  element: HeatWidget,
-  viewDate: moment()
+  items: defaultItems
 }
 
-const Template = args => (
-  <HeatMap>
-    <Chart {...args} style={containerStyle} />
-  </HeatMap>
-)
+const Template = args => <HeatMap {...args} style={containerStyle} />
+// FIXME: Add when ready
+// export const Geo = Template.bind({})
 
-export const Geo = Template.bind({})
+// Geo.args = {
+//   ...defaultArgs,
+//   layoutType: LAYOUT_TYPES.GEO
+// }
 
-Geo.args = {
-  ...defaultArgs,
-  layoutType: layouts.TYPES.GEO
-}
+// export const Month = Template.bind({})
 
-export const Month = Template.bind({})
-
-Month.args = {
-  ...defaultArgs,
-  layoutType: layouts.TYPES.MONTH
-}
+// Month.args = {
+//   ...defaultArgs,
+//   layoutType: LAYOUT_TYPES.MONTH
+// }
 
 export const Year = Template.bind({})
 
 Year.args = {
   ...defaultArgs,
-  layoutType: layouts.TYPES.YEAR
+  layoutType: LAYOUT_TYPES.YEAR
 }
 
 function generateMockData(numOfItems) {
   const items = []
-  const setOfRandomDays = []
   // 4 year interval to (-2, +2)
-  const maxVal = 2 * 366
+  const plusMinusTimeInterval = 20
+  const maxVal = plusMinusTimeInterval
   const minVal = -maxVal
-
-  while (setOfRandomDays.length < numOfItems) {
-    const randomDay = Math.floor(Math.random() * (maxVal - minVal) + minVal)
-    if (!setOfRandomDays.includes(randomDay)) {
-      setOfRandomDays.push(randomDay)
-    }
-  }
 
   for (let i = 0; i < numOfItems; i++) {
     const randomNumOfEvents = Math.floor(Math.random() * 10)
     const newItem = {
-      date: moment().add(setOfRandomDays[i], "days"),
+      date: moment().add(
+        Math.floor(Math.random() * (maxVal - minVal) + minVal),
+        "days"
+      ),
       numOfEvents: randomNumOfEvents
     }
     newItem.id = newItem.date.format()
     items.push(newItem)
   }
   return items
-}
-
-export default {
-  title: "ANET/HeatMap",
-  component: HeatMap
 }
