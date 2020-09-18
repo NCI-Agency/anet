@@ -51,11 +51,6 @@ Year.args = {
   layoutType: layouts.TYPES.YEAR
 }
 
-export default {
-  title: "ANET/HeatMap",
-  component: HeatMap
-}
-
 function generateMockData(numOfItems) {
   const items = []
   const setOfRandomDays = []
@@ -80,4 +75,9 @@ function generateMockData(numOfItems) {
     items.push(newItem)
   }
   return items
+}
+
+export default {
+  title: "ANET/HeatMap",
+  component: HeatMap
 }
