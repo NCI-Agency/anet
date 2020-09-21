@@ -39,14 +39,16 @@ describe("Show print report page", () => {
     })
     it("We should see a title with the correct text", () => {
       const title = ShowReport.compactTitle.getText()
-      expect(title).to.equal(Settings.fields.report.compactView)
+      expect(title).to.equal(
+        Settings.fields.report.compactView || "Summary / Print"
+      )
     })
     it("We should see buttons with the correct text", () => {
       const printButtonText = ShowReport.printButton.getText()
       const detailedViewButtonText = ShowReport.detailedViewButton.getText()
       expect(printButtonText).to.equal("Print")
       expect(detailedViewButtonText).to.equal(
-        Settings.fields.report.detailedView
+        Settings.fields.report.detailedView || "Detailed View"
       )
     })
     it("Printable report banner should have part of the banner text", () => {

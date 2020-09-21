@@ -725,7 +725,7 @@ const CompactViewHeader = ({
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE} value="title">
-        {Settings.fields.report.compactView}
+        {Settings.fields.report.compactView || "Summary / Print"}
       </h3>
       <div
         css={css`
@@ -786,7 +786,7 @@ const CompactViewHeader = ({
           bsStyle="primary"
           onClick={returnToDefaultPage}
         >
-          Detailed View
+          {Settings.fields.report.detailedView || "Detailed View"}
         </Button>
       </div>
     </header>
