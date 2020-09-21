@@ -4,8 +4,9 @@ import React from "react"
 const DateChart = ({
   items,
   layout,
-  element: Element,
-  initViewState: viewDate
+  widgetElement: Widget,
+  initViewState: viewDate,
+  widgetConfig
 }) => {
   return (
     <>
@@ -20,7 +21,11 @@ const DateChart = ({
             transform={`translate(${boundingRect.x}, ${boundingRect.y})`}
             key={item[item.aggregationKey]}
           >
-            <Element item={item} dimensions={boundingRect} />
+            <Widget
+              item={item}
+              dimensions={boundingRect}
+              widgetConfig={widgetConfig}
+            />
           </g>
         )
       })}
@@ -29,8 +34,9 @@ const DateChart = ({
 }
 DateChart.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object),
-  element: PropTypes.func,
+  widgetElement: PropTypes.func,
   layout: PropTypes.func,
-  initViewState: PropTypes.object
+  initViewState: PropTypes.object,
+  widgetConfig: PropTypes.object
 }
 export default DateChart

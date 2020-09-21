@@ -1,4 +1,4 @@
-const geoLayout = (item, dimensions) => {
+const geoLayout = (item, dimensions, viewLocation) => {
   // FIXME: do something useful instead
   return {
     x: 0,

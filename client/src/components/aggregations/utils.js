@@ -220,3 +220,30 @@ export function reportsToEvents(reports) {
     }
   })
 }
+export const COLOR_NAMES_TO_RGB = {
+  red: "rgb(155, 0, 0, ",
+  blue: "rgb(0, 0, 155, ",
+  green: "rgb(0, 155, 0, ",
+  pink: "rgb(194, 31, 169, ",
+  orange: "rgb(199, 135, 6, ",
+  white: "rgb(255, 255, 255, ",
+  brown: "rgb(128, 57, 30, "
+}
+
+/**
+ * There are 4 levels, [none, low, mid, high], none=0 assumed, we need two values: low, mid
+ * Available colors ["red", "blue", "green", "pink", "orange", "brown"]
+ * @param {number} numOfEvents - number of items to scale
+ * @param {object} scale - example object: {low: 3, mid: 6, bgColor: "red"}
+ */
+export function numOfEventsToHeatBgc(numOfEvents, scale) {
+  if (numOfEvents === 0) {
+    return "transparent"
+  } else if (numOfEvents <= scale.low) {
+    return `${COLOR_NAMES_TO_RGB[scale.bgColor]}0.25)`
+  } else if (numOfEvents <= scale.mid) {
+    return `${COLOR_NAMES_TO_RGB[scale.bgColor]}0.5)`
+  } else {
+    return `${COLOR_NAMES_TO_RGB[scale.bgColor]}1.0)`
+  }
+}

@@ -3,7 +3,7 @@ import { LAYOUT_AGGREGATORS } from "layouts/utils"
 import PropTypes from "prop-types"
 import React from "react"
 
-const Chart = ({ items, layoutType, element: Element, style }) => {
+const Chart = ({ items, layoutType, widgetElement, widgetConfig, style }) => {
   const aggregator = LAYOUT_AGGREGATORS[layoutType]
   const [aggregatedItems, aggregationKey] = aggregator(items)
   const [ChartElement, layout, initViewState, ref] = useLayout(
@@ -16,8 +16,9 @@ const Chart = ({ items, layoutType, element: Element, style }) => {
       <ChartElement
         items={aggregatedItems}
         layout={layout}
-        element={Element}
+        widgetElement={widgetElement}
         initViewState={initViewState}
+        widgetConfig={widgetConfig}
       />
     </svg>
   )
@@ -25,7 +26,8 @@ const Chart = ({ items, layoutType, element: Element, style }) => {
 Chart.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object),
   layoutType: PropTypes.string,
-  element: PropTypes.func,
-  style: PropTypes.object
+  widgetElement: PropTypes.func,
+  style: PropTypes.object,
+  widgetConfig: PropTypes.object
 }
 export default Chart

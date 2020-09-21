@@ -4,6 +4,13 @@ import { LAYOUT_TYPES } from "layouts/utils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 
+// TODO: this config can come from layouts/utils or be input to HeatMap or input from user
+const heatConfig = {
+  low: 3,
+  mid: 6,
+  bgColor: "white",
+  textColor: "black"
+}
 const HeatMap = ({ items, style }) => {
   const [layout, setLayout] = useState(LAYOUT_TYPES.YEAR)
   return (
@@ -25,8 +32,9 @@ const HeatMap = ({ items, style }) => {
       <Chart
         items={items}
         layoutType={layout}
-        element={HeatWidget}
+        widgetElement={HeatWidget}
         style={style}
+        widgetConfig={heatConfig}
       />
     </div>
   )
