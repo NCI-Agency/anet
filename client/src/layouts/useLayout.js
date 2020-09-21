@@ -1,12 +1,17 @@
 import LAYOUTS from "layouts"
-import { INIT_LAYOUT_STATES, LAYOUT_CHART_ELEMENTS } from "layouts/utils"
+import {
+  INIT_LAYOUT_STATES,
+  LAYOUT_CHART_ELEMENTS,
+  LAYOUT_HEADERS
+} from "layouts/utils"
 import { useMemo } from "react"
 import useDimensions from "react-use-dimensions"
 
-const useLayout = (layoutType, aggregationKey) => {
+const useLayout = layoutType => {
   const [ref, dimensions] = useDimensions()
   const vars = useMemo(() => {
     const chartElement = LAYOUT_CHART_ELEMENTS[layoutType]
+    const chartHeader = LAYOUT_HEADERS[layoutType]
     const specificLayout = LAYOUTS[layoutType]
     const initViewState = INIT_LAYOUT_STATES[layoutType]
     // we will cal the layout with item and args related to that layout (e.g selectedDate for date layouts, map location for geo layout)
@@ -16,8 +21,8 @@ const useLayout = (layoutType, aggregationKey) => {
         : specificLayout(item, dimensions, viewArgs)
     }
 
-    return [chartElement, layout, initViewState]
-  }, [layoutType, dimensions, aggregationKey])
+    return [chartElement, chartHeader, layout, initViewState]
+  }, [layoutType, dimensions])
 
   return [...vars, ref]
 }

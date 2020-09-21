@@ -1,5 +1,6 @@
 import DateChart from "components/DateChart"
 import GeoChart from "components/GeoChart"
+import * as LayoutHeaders from "components/LayoutHeader"
 import _groupBy from "lodash/groupBy"
 import moment from "moment"
 
@@ -28,6 +29,12 @@ export const INIT_LAYOUT_STATES = {
   [LAYOUT_TYPES.GEO]: {},
   [LAYOUT_TYPES.MONTH]: moment(),
   [LAYOUT_TYPES.YEAR]: moment()
+}
+
+export const LAYOUT_HEADERS = {
+  [LAYOUT_TYPES.GEO]: LayoutHeaders.GeoHeader,
+  [LAYOUT_TYPES.MONTH]: LayoutHeaders.MonthHeader,
+  [LAYOUT_TYPES.YEAR]: LayoutHeaders.YearHeader
 }
 
 export function groupByDay(inItems) {

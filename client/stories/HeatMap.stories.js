@@ -18,7 +18,7 @@ const containerStyle = {
   outline: "2px solid red"
 }
 
-const defaultItems = generateMockData(100)
+const defaultItems = generateMockData(400)
 
 const defaultArgs = {
   items: defaultItems,
@@ -42,9 +42,8 @@ HEATMAP.args = {
 
 function generateMockData(numOfItems) {
   const items = []
-  // 4 year interval to (-2, +2)
-  const plusMinusTimeInterval = 20
-  const maxVal = plusMinusTimeInterval
+  const plusMinusDaysInterval = 0.5 * 366
+  const maxVal = plusMinusDaysInterval
   const minVal = -maxVal
 
   for (let i = 0; i < numOfItems; i++) {

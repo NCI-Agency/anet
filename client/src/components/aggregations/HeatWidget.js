@@ -12,7 +12,6 @@ import React from "react"
  */
 const HeatWidget = ({ item, dimensions, widgetConfig: heatConfig }) => {
   const bgc = numOfEventsToHeatBgc(item.numOfEvents, heatConfig)
-  console.log(item, heatConfig)
 
   return (
     <>

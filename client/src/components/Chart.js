@@ -1,26 +1,30 @@
 import useLayout from "layouts/useLayout"
 import { LAYOUT_AGGREGATORS } from "layouts/utils"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 
 const Chart = ({ items, layoutType, widgetElement, widgetConfig, style }) => {
   const aggregator = LAYOUT_AGGREGATORS[layoutType]
-  const [aggregatedItems, aggregationKey] = aggregator(items)
-  const [ChartElement, layout, initViewState, ref] = useLayout(
-    layoutType,
-    aggregationKey
+  const [aggregatedItems] = aggregator(items)
+  const [ChartElement, HeaderElement, layout, initViewState, ref] = useLayout(
+    layoutType
   )
 
+  const [viewState, setViewState] = useState(initViewState)
+
   return (
-    <svg ref={ref} style={style}>
-      <ChartElement
-        items={aggregatedItems}
-        layout={layout}
-        widgetElement={widgetElement}
-        initViewState={initViewState}
-        widgetConfig={widgetConfig}
-      />
-    </svg>
+    <>
+      <HeaderElement viewState={viewState} setViewState={setViewState} />
+      <svg ref={ref} style={style}>
+        <ChartElement
+          items={aggregatedItems}
+          layout={layout}
+          widgetElement={widgetElement}
+          viewState={viewState}
+          widgetConfig={widgetConfig}
+        />
+      </svg>
+    </>
   )
 }
 Chart.propTypes = {

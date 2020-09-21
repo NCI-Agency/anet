@@ -1,5 +1,6 @@
 import { DATE_LAYOUT_FORMAT } from "layouts/utils"
 import moment from "moment"
+
 const yearLayout = (item, dimensions, viewDate) => {
   // figure out which year input is
   const momentDate = moment(item.date, DATE_LAYOUT_FORMAT)

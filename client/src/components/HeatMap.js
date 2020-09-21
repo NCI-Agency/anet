@@ -6,9 +6,9 @@ import React, { useState } from "react"
 
 // TODO: this config can come from layouts/utils or be input to HeatMap or input from user
 const heatConfig = {
-  low: 3,
-  mid: 6,
-  bgColor: "white",
+  low: 1,
+  mid: 3,
+  bgColor: "red",
   textColor: "black"
 }
 const HeatMap = ({ items, style }) => {

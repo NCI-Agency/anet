@@ -5,7 +5,7 @@ const DateChart = ({
   items,
   layout,
   widgetElement: Widget,
-  initViewState: viewDate,
+  viewState: viewDate,
   widgetConfig
 }) => {
   return (
@@ -19,7 +19,7 @@ const DateChart = ({
         return (
           <g
             transform={`translate(${boundingRect.x}, ${boundingRect.y})`}
-            key={item[item.aggregationKey]}
+            key={item.date}
           >
             <Widget
               item={item}
@@ -34,9 +34,10 @@ const DateChart = ({
 }
 DateChart.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object),
-  widgetElement: PropTypes.func,
   layout: PropTypes.func,
-  initViewState: PropTypes.object,
+  widgetElement: PropTypes.func,
+  viewState: PropTypes.object,
   widgetConfig: PropTypes.object
 }
+
 export default DateChart

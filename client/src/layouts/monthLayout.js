@@ -1,6 +1,5 @@
 import { DATE_LAYOUT_FORMAT } from "layouts/utils"
 import moment from "moment"
-
 const monthLayout = (item, dimensions, viewDate) => {
   // figure out which month
   const momentDate = moment(item.date, DATE_LAYOUT_FORMAT)
