@@ -161,6 +161,53 @@ const DateTimeField = props => <DateField {...props} withTime />
 
 const ReadonlyDateTimeField = props => <ReadonlyDateField {...props} withTime />
 
+const JsonField = fieldProps => {
+  const { name, onChange, fieldConfig, formikProps, ...otherProps } = fieldProps
+  const { placeholder } = fieldConfig
+  const { values } = formikProps
+  const fieldValue = Object.get(values, name) || ""
+  const value =
+    typeof fieldValue === "object"
+      ? JSON.stringify(fieldValue) || ""
+      : fieldValue
+  return (
+    <FastField
+      name={name}
+      value={value}
+      component={FieldHelper.InputField}
+      placeholder={placeholder}
+      onChange={value => {
+        let newValue
+        try {
+          newValue = utils.parseJsonSafe(value.target.value, true)
+        } catch (error) {
+          // Invalid JSON, use the string value; yup schema validation will show an error
+          newValue = value.target.value
+        }
+        onChange(newValue)
+      }}
+      {...otherProps}
+    />
+  )
+}
+
+const ReadonlyJsonField = ({ name, label, values }) => {
+  const value = Object.get(values, name) || {}
+  return (
+    <FastField
+      name={name}
+      label={label}
+      component={FieldHelper.ReadonlyField}
+      humanValue={JSON.stringify(value)}
+    />
+  )
+}
+ReadonlyJsonField.propTypes = {
+  name: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  values: PropTypes.object.isRequired
+}
+
 const EnumField = fieldProps => {
   const { choices, renderer, ...otherFieldProps } = fieldProps
   return (
@@ -565,6 +612,7 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
   [CUSTOM_FIELD_TYPE.DATE]: DateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
+  [CUSTOM_FIELD_TYPE.JSON]: JsonField,
   [CUSTOM_FIELD_TYPE.ENUM]: EnumField,
   [CUSTOM_FIELD_TYPE.ENUMSET]: EnumSetField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ArrayOfObjectsField,
@@ -697,6 +745,11 @@ const CustomField = ({
           invisibleFields,
           updateInvisibleFields
         }
+      case CUSTOM_FIELD_TYPE.JSON:
+        return {
+          fieldConfig,
+          formikProps
+        }
       case CUSTOM_FIELD_TYPE.ANET_OBJECT:
       case CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS:
         return {
@@ -817,6 +870,7 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.NUMBER]: ReadonlyTextField,
   [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
+  [CUSTOM_FIELD_TYPE.JSON]: ReadonlyJsonField,
   [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField,

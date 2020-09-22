@@ -186,7 +186,8 @@ dictionary:
             questions:
               type: json
               label: Questions
-              placeholder: JSON that defines the assessment (you need to know what you are doing)
+              helpText: JSON that defines the assessment (you need to know what you are doing)
+              placeholder: Fill in valid JSON
               componentClass: textarea
               style:
                 height: 200px
