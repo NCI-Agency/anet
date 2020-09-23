@@ -265,10 +265,3 @@ export const renderBlueprintIconAsSvg = (iconName, iconSize) => {
       </g>` // we use a rect to simulate pointer-events: bounding-box
   }
 }
-
-export const useNotifications = () => {
-  return {
-    myCounterparts: 3,
-    myTasks: 4
-  }
-}

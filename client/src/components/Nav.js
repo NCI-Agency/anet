@@ -3,6 +3,7 @@ import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization } from "models"
+import { useNotifications } from "notificationsUtils"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -67,10 +68,10 @@ const Nav = ({
   advisorOrganizations,
   principalOrganizations,
   resetPages,
-  clearSearchQuery,
-  notifications
+  clearSearchQuery
 }) => {
   const { appSettings, currentUser } = useContext(AppContext)
+  const notifications = useNotifications()
   useEffect(() => scrollSpy.update(), [])
 
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -124,7 +125,7 @@ const Nav = ({
             id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
-            {notifications.myTasks !== 0 && (
+            {!!notifications?.myTasks && (
               <NotificationBadge>{notifications.myTasks}</NotificationBadge>
             )}
           </SidebarLink>
@@ -134,7 +135,7 @@ const Nav = ({
             id="my-counterparts-nav"
           >
             My Counterparts
-            {notifications.myCounterparts !== 0 && (
+            {!!notifications?.myCounterparts && (
               <NotificationBadge>
                 {notifications.myCounterparts}
               </NotificationBadge>
@@ -268,11 +269,7 @@ Nav.propTypes = {
   advisorOrganizations: PropTypes.array,
   principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
-  resetPages: PropTypes.func.isRequired,
-  notifications: PropTypes.shape({
-    myCounterparts: PropTypes.number,
-    myTasks: PropTypes.number
-  })
+  resetPages: PropTypes.func.isRequired
 }
 
 Nav.defaultProps = {
