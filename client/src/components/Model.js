@@ -446,17 +446,6 @@ export default class Model {
     return this.name || this.uuid
   }
 
-  static toConfigObject(value) {
-    switch (typeof value) {
-      case "object":
-        return value
-      case "string":
-        return utils.parseJsonSafe(value)
-      default:
-        return {}
-    }
-  }
-
   static parseAssessmentsConfig(assessmentsConfig) {
     return Object.fromEntries(
       assessmentsConfig.map(a => {
@@ -465,7 +454,7 @@ export default class Model {
           ? `${a.relatedObjectType}_${recurrence}`
           : recurrence
         const questions = a.questions || {}
-        return [assessmentKey, Model.toConfigObject(questions)]
+        return [assessmentKey, questions]
       })
     )
   }
