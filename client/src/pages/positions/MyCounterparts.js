@@ -16,11 +16,11 @@ const MyCounterparts = ({ pageDispatchers }) => {
     pageProps: DEFAULT_PAGE_PROPS,
     pageDispatchers
   })
-  const { currentUser } = useContext(AppContext)
+  const myCounterparts = useMyCounterparts()
   return (
     <div>
       <Fieldset id="my-counterparts" title="My Counterparts">
-        <PositionTable positions={currentUser.position.associatedPositions} />
+        <PositionTable positions={myCounterparts} />
       </Fieldset>
     </div>
   )
@@ -28,6 +28,11 @@ const MyCounterparts = ({ pageDispatchers }) => {
 
 MyCounterparts.propTypes = {
   pageDispatchers: PageDispatchersPropType
+}
+
+export const useMyCounterparts = () => {
+  const { currentUser } = useContext(AppContext)
+  return currentUser.position.associatedPositions
 }
 
 export default connect(null, mapPageDispatchersToProps)(MyCounterparts)

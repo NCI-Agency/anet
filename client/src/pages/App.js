@@ -3,8 +3,8 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
@@ -18,6 +18,7 @@ import { useHistory, useLocation } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import ReactTooltip from "react-tooltip"
+import { useNotifications } from "utils"
 import "../components/reactToastify.css"
 
 const GQL_GET_APP_DATA = gql`
@@ -119,6 +120,7 @@ const App = ({ pageDispatchers, pageProps }) => {
   const history = useHistory()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
+  const notifications = useNotifications()
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -157,7 +159,8 @@ const App = ({ pageDispatchers, pageProps }) => {
         location={routerLocation}
         sidebarData={{
           advisorOrganizations: appState.advisorOrganizations,
-          principalOrganizations: appState.principalOrganizations
+          principalOrganizations: appState.principalOrganizations,
+          notifications
         }}
       >
         <ToastContainer />

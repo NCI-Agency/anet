@@ -1,3 +1,4 @@
+import styled from "@emotion/styled"
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
@@ -66,7 +67,8 @@ const Nav = ({
   advisorOrganizations,
   principalOrganizations,
   resetPages,
-  clearSearchQuery
+  clearSearchQuery,
+  notifications
 }) => {
   const { appSettings, currentUser } = useContext(AppContext)
   useEffect(() => scrollSpy.update(), [])
@@ -122,6 +124,9 @@ const Nav = ({
             id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
+            {notifications.myTasks !== 0 && (
+              <NotificationBadge>{notifications.myTasks}</NotificationBadge>
+            )}
           </SidebarLink>
           <SidebarLink
             linkTo={{ pathname: "/positions/counterparts" }}
@@ -129,6 +134,11 @@ const Nav = ({
             id="my-counterparts-nav"
           >
             My Counterparts
+            {notifications.myCounterparts !== 0 && (
+              <NotificationBadge>
+                {notifications.myCounterparts}
+              </NotificationBadge>
+            )}
           </SidebarLink>
         </>
       )}
@@ -258,7 +268,11 @@ Nav.propTypes = {
   advisorOrganizations: PropTypes.array,
   principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
-  resetPages: PropTypes.func.isRequired
+  resetPages: PropTypes.func.isRequired,
+  notifications: PropTypes.shape({
+    myCounterparts: PropTypes.number,
+    myTasks: PropTypes.number
+  })
 }
 
 Nav.defaultProps = {
@@ -274,6 +288,17 @@ const mapDispatchToProps = (dispatch, ownProps) =>
     },
     dispatch
   )
+
+const NotificationBadge = styled.span`
+  position: absolute;
+  padding: 6px 8px;
+  top: 4px;
+  right: 5px;
+  border-radius: 50%;
+  background-color: #337ab7;
+  color: white;
+  font-weight: bold;
+`
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false

@@ -244,10 +244,7 @@ Promise.prototype.log = function () {
   })
 }
 
-export const renderBlueprintIconAsSvg = (
-  iconName,
-  iconSize: Icon.SIZE_STANDARD
-) => {
+export const renderBlueprintIconAsSvg = (iconName, iconSize) => {
   // choose which pixel grid is most appropriate for given icon size
   const pixelGridSize =
     iconSize >= Icon.SIZE_LARGE ? Icon.SIZE_LARGE : Icon.SIZE_STANDARD
@@ -266,5 +263,12 @@ export const renderBlueprintIconAsSvg = (
         <rect fill="transparent" width="${pixelGridSize}" height="${pixelGridSize}"/>
         ${paths.join("")}
       </g>` // we use a rect to simulate pointer-events: bounding-box
+  }
+}
+
+export const useNotifications = () => {
+  return {
+    myCounterparts: 3,
+    myTasks: 4
   }
 }
