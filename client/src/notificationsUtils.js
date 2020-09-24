@@ -6,18 +6,29 @@ import Model from "components/Model"
 import { Person, Task } from "models"
 import { useContext } from "react"
 
+const commonNoteFields = `
+notes {
+  noteRelatedObjects {
+    noteUuid
+  }
+  createdAt
+  type
+  text
+}
+`
+
 // TODO: which fields enough to calculate pending assessment count
 const GQL_GET_MY_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       totalCount
       list {
-        customFields
-        notes {
-          createdAt
-          type
-          text
+        customFieldRef1 {
+          uuid
         }
+        customFields
+        shortName
+        ${commonNoteFields}
       }
     }
   }
@@ -29,11 +40,8 @@ const GQL_GET_MY_COUNTERPARTS_LIST = gql`
         associatedPositions {
           person {
             customFields
-            notes {
-              createdAt
-              type
-              text
-            }
+            name
+            ${commonNoteFields}
           }
         }
       }
@@ -60,7 +68,7 @@ export const useNotifications = () => {
   })
 
   let unAssessedCounterParts = []
-  if (personData?.person) {
+  if (personData?.person?.position?.associatedPositions?.length) {
     unAssessedCounterParts = personData.person.position.associatedPositions
       .map(asPos => asPos.person)
       .map(person => new Person(person))

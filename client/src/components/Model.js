@@ -496,7 +496,7 @@ export default class Model {
     }
   }
 
-  getPeriodAssessments(recurrence, period, currentUser) {
+  getPeriodAssessments(recurrence, period) {
     return this.notes
       .filter(n => {
         return (
@@ -566,37 +566,26 @@ export default class Model {
   }
 
   static hasPendingAssessments(entity) {
-    const allAssessmentTypes = Object.keys(entity.getAssessmentsConfig())
-    const validAssessmentTypes = allAssessmentTypes.filter(
-      type => PERIOD_FACTORIES[type]
-    )
-    const allAssessments = entity.notes.filter(
-      note => note.type === NOTE_TYPE.ASSESSMENT
-    )
-    validAssessmentTypes.forEach(assessmentType => {
-      const assessmentsOfThatType = allAssessments.filter(
-        note => note.customFields.__recurrence === assessmentType
+    const recurTypes = Object.keys(entity.getAssessmentsConfig())
+    const periodicRecurTypes = recurTypes.filter(type => PERIOD_FACTORIES[type])
+
+    if (_isEmpty(periodicRecurTypes)) {
+      // no periodic, no pending
+      return false
+    }
+
+    // "for loop" to break early
+    for (let i = 0; i < periodicRecurTypes.length; i++) {
+      const latestPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 0)
+      const lastPeriodAssessments = entity.getPeriodAssessments(
+        periodicRecurTypes[i],
+        latestPeriod
       )
-
-      // if none of the assessments are after start of the last period("month", "quarter" etc), we have a pending assessment
-      let assessmentCreatedAtLastPeriod = false
-      const lastPeriodStart = PERIOD_FACTORIES[assessmentType](moment(), 0)
-        .start
-
-      // "for loop" to early break
-      for (let i = 0; i < assessmentsOfThatType.length; i++) {
-        const assessmentDate = moment(assessmentsOfThatType[i].createdAt)
-        if (assessmentDate.isAfter(lastPeriodStart)) {
-          assessmentCreatedAtLastPeriod = true
-          // no need to check more
-          break
-        }
-      }
-      // if at least one assessment type has pending, return early
-      if (!assessmentCreatedAtLastPeriod) {
+      // if there is no assessment in the last period, we have pending assessment
+      if (lastPeriodAssessments.length === 0) {
         return true
       }
-    })
+    }
     // if we didn't early return, there is no pending assessment
     return false
   }
