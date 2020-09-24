@@ -470,9 +470,12 @@ export default class Model {
   }
 
   getAssessmentsConfig() {
+    const general = this.generalAssessmentsConfig()
+    const instance = this.instanceAssessmentsConfig()
     return Object.assign(
-      Model.parseAssessmentsConfig(this.generalAssessmentsConfig()),
-      Model.parseAssessmentsConfig(this.instanceAssessmentsConfig())
+      Model.parseAssessmentsConfig(general),
+      // instance config can override
+      Model.parseAssessmentsConfig(instance)
     )
   }
 
@@ -560,5 +563,26 @@ export default class Model {
           obj.__recurrence === RECURRENCE_TYPE.ONCE &&
           obj.__relatedObjectType === relatedObjectType
       )
+  }
+
+  static populateAssessmentsCustomFields(entity) {
+    entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      entity.customFields
+    )
+    Model.populateAssessmentCustomFields(entity)
+  }
+
+  static populateSubEntitiesAssessmentsCustomFields(subEntities) {
+    subEntities.forEach(subEntity => {
+      Model.populateAssessmentCustomFields(subEntity)
+    })
+  }
+
+  static populateAssessmentCustomFields(entity) {
+    entity.notes.forEach(
+      note =>
+        note.type !== NOTE_TYPE.FREE_TEXT &&
+        (note.customFields = utils.parseJsonSafe(note.text))
+    )
   }
 }
