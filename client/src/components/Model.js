@@ -566,11 +566,14 @@ export default class Model {
   }
 
   static hasPendingAssessments(entity) {
-    const assessmentTypes = Object.keys(entity.getAssessmentsConfig())
+    const allAssessmentTypes = Object.keys(entity.getAssessmentsConfig())
+    const validAssessmentTypes = allAssessmentTypes.filter(
+      type => PERIOD_FACTORIES[type]
+    )
     const allAssessments = entity.notes.filter(
       note => note.type === NOTE_TYPE.ASSESSMENT
     )
-    assessmentTypes.forEach(assessmentType => {
+    validAssessmentTypes.forEach(assessmentType => {
       const assessmentsOfThatType = allAssessments.filter(
         note => note.customFields.__recurrence === assessmentType
       )

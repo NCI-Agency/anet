@@ -3,11 +3,11 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Model from "components/Model"
-import Task from "models/Task"
+import { Person, Task } from "models"
 import { useContext } from "react"
 
 // TODO: which fields enough to calculate pending assessment count
-const GQL_GET_TASK_LIST = gql`
+const GQL_GET_MY_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       totalCount
@@ -17,6 +17,24 @@ const GQL_GET_TASK_LIST = gql`
           createdAt
           type
           text
+        }
+      }
+    }
+  }
+`
+const GQL_GET_MY_COUNTERPARTS_LIST = gql`
+  query($uuid: String!) {
+    person(uuid: $uuid) {
+      position {
+        associatedPositions {
+          person {
+            customFields
+            notes {
+              createdAt
+              type
+              text
+            }
+          }
         }
       }
     }
@@ -34,17 +52,24 @@ export const useNotifications = () => {
     ...baseTaskQuery,
     responsiblePositionUuid: currentUser.position.uuid
   }
-  const { data } = API.useApiQuery(GQL_GET_TASK_LIST, {
+  const { data: taskData } = API.useApiQuery(GQL_GET_MY_TASK_LIST, {
     taskQuery
   })
+  const { data: personData } = API.useApiQuery(GQL_GET_MY_COUNTERPARTS_LIST, {
+    uuid: currentUser.uuid
+  })
 
-  const unAssessedCounterParts = currentUser.position.associatedPositions
-    .map(asPos => asPos.person)
-    .filter(Model.hasPendingAssessments)
+  let unAssessedCounterParts = []
+  if (personData?.person) {
+    unAssessedCounterParts = personData.person.position.associatedPositions
+      .map(asPos => asPos.person)
+      .map(person => new Person(person))
+      .filter(Model.hasPendingAssessments)
+  }
 
   let unAssessedTasks = []
-  if (data?.taskList?.list?.length) {
-    const taskObjects = data.taskList.list.map(obj => new Task(obj))
+  if (taskData?.taskList?.list?.length) {
+    const taskObjects = taskData.taskList.list.map(obj => new Task(obj))
 
     taskObjects.forEach(task => {
       Model.populateAssessmentsCustomFields(task)
