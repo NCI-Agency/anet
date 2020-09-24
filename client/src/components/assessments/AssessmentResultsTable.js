@@ -59,7 +59,6 @@ const EntityAssessmentResults = ({
           questionConfig={instantAssessmentConfig[key]}
           periods={periods}
           periodsData={dataPerPeriod}
-          entity={entity}
           isFirstRow={index === 0}
         />
       ))}

@@ -565,6 +565,12 @@ export default class Model {
       )
   }
 
+  static hasPendingAssessments(entity) {
+    // TODO: implement this
+    // const assessmentsTypes = Object.keys(entity.getAssessmentsConfig())
+    return true
+  }
+
   static populateAssessmentsCustomFields(entity) {
     entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       entity.customFields

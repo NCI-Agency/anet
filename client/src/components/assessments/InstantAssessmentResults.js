@@ -19,7 +19,6 @@ import React from "react"
 export const InstantAssessmentsRow = ({
   questionKey,
   questionConfig,
-  entity,
   periods,
   periodsData,
   isFirstRow
@@ -52,7 +51,6 @@ export const InstantAssessmentsRow = ({
   )
 }
 InstantAssessmentsRow.propTypes = {
-  entity: PropTypes.object.isRequired,
   periods: PeriodsPropType.isRequired,
   periodsData: PropTypes.arrayOf(PropTypes.array).isRequired,
   questionKey: PropTypes.string.isRequired,

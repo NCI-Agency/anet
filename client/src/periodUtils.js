@@ -153,7 +153,3 @@ PeriodsTableHeader.propTypes = {
     PeriodsConfigPropType
   ])
 }
-
-export function hasPendingAssessment() {
-  // TODO: implement
-}
