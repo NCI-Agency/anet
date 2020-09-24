@@ -3,7 +3,7 @@ import { gql } from "apollo-boost"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
-import { RECURRENCE_TYPE } from "periodUtils"
+import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import encodeQuery from "querystring/encode"
 import utils from "utils"
@@ -566,9 +566,36 @@ export default class Model {
   }
 
   static hasPendingAssessments(entity) {
-    // TODO: implement this
-    // const assessmentsTypes = Object.keys(entity.getAssessmentsConfig())
-    return true
+    const assessmentTypes = Object.keys(entity.getAssessmentsConfig())
+    const allAssessments = entity.notes.filter(
+      note => note.type === NOTE_TYPE.ASSESSMENT
+    )
+    assessmentTypes.forEach(assessmentType => {
+      const assessmentsOfThatType = allAssessments.filter(
+        note => note.customFields.__recurrence === assessmentType
+      )
+
+      // if none of the assessments are after start of the last period("month", "quarter" etc), we have a pending assessment
+      let assessmentCreatedAtLastPeriod = false
+      const lastPeriodStart = PERIOD_FACTORIES[assessmentType](moment(), 0)
+        .start
+
+      // "for loop" to early break
+      for (let i = 0; i < assessmentsOfThatType.length; i++) {
+        const assessmentDate = moment(assessmentsOfThatType[i].createdAt)
+        if (assessmentDate.isAfter(lastPeriodStart)) {
+          assessmentCreatedAtLastPeriod = true
+          // no need to check more
+          break
+        }
+      }
+      // if at least one assessment type has pending, return early
+      if (!assessmentCreatedAtLastPeriod) {
+        return true
+      }
+    })
+    // if we didn't early return, there is no pending assessment
+    return false
   }
 
   static populateAssessmentsCustomFields(entity) {

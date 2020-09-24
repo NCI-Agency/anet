@@ -14,7 +14,7 @@ const GQL_GET_TASK_LIST = gql`
       list {
         customFields
         notes {
-          updatedAt
+          createdAt
           type
           text
         }
@@ -34,22 +34,23 @@ export const useNotifications = () => {
     ...baseTaskQuery,
     responsiblePositionUuid: currentUser.position.uuid
   }
-  const { data: tasksData } = API.useApiQuery(GQL_GET_TASK_LIST, {
+  const { data } = API.useApiQuery(GQL_GET_TASK_LIST, {
     taskQuery
   })
 
-  let unAssessedTasks = []
   const unAssessedCounterParts = currentUser.position.associatedPositions
     .map(asPos => asPos.person)
     .filter(Model.hasPendingAssessments)
 
-  if (tasksData?.taskList?.list?.length) {
-    unAssessedTasks = tasksData.taskList.list
-      .map(obj => new Task(obj))
-      .map(Model.populateAssessmentsCustomFields)
-      .filter(Model.hasPendingAssessments)
-  }
+  let unAssessedTasks = []
+  if (data?.taskList?.list?.length) {
+    const taskObjects = data.taskList.list.map(obj => new Task(obj))
 
+    taskObjects.forEach(task => {
+      Model.populateAssessmentsCustomFields(task)
+    })
+    unAssessedTasks = taskObjects.filter(Model.hasPendingAssessments)
+  }
   return {
     myCounterparts: unAssessedCounterParts.length,
     myTasks: unAssessedTasks.length
