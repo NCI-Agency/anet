@@ -70,7 +70,7 @@ test.beforeEach(t => {
 
   const shortWaitMs = moment.duration(1, "seconds").asMilliseconds()
   const mediumWaitMs = moment.duration(3, "seconds").asMilliseconds()
-  const longWaitMs = moment.duration(9, "seconds").asMilliseconds()
+  const longWaitMs = moment.duration(25, "seconds").asMilliseconds()
 
   t.context.By = By
   t.context.until = until

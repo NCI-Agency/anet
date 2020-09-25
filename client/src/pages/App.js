@@ -126,18 +126,22 @@ const App = ({ pageDispatchers, pageProps }) => {
     pageProps,
     pageDispatchers
   })
-  const appState = !done && !error && data ? processData(data) : {}
-  const notifications = useNotifications(appState?.currentUser)
+  const skip = done || error || !data
+  const appState = skip ? null : processData(data)
+  const [notifications, doneN, resultN] = useNotifications(
+    appState?.currentUser,
+    skip,
+    pageDispatchers
+  )
 
-  if (done) {
-    return result
+  if (done || doneN) {
+    return done ? result : resultN
   }
 
-  if (error || !data) {
-    return (
-      <Messages error={error || { message: "Could not load initial data" }} />
-    )
+  if (!data) {
+    return <Messages error={{ message: "Could not load initial data" }} />
   }
+
   // if this is a new user, redirect to onboarding
   if (
     appState.currentUser.isNewUser() &&

@@ -1,7 +1,7 @@
-// import { useMyTasks } from "pages/tasks/MyTasks"
 import API from "api"
 import { gql } from "apollo-boost"
 import Model from "components/Model"
+import { useBoilerplate } from "components/Page"
 import { Person, Task } from "models"
 
 const commonNoteFields = `
@@ -52,55 +52,91 @@ const baseTaskQuery = {
   status: "ACTIVE"
 }
 
-export const useNotifications = currentUser => {
+export const useNotifications = (currentUser, skipQuery, pageDispatchers) => {
   const uuid = currentUser?.uuid
-  const responsiblePositionUuid = currentUser?.position?.uuid
-  const skip = !responsiblePositionUuid
+  const respPosUuid = currentUser?.position?.uuid
+  // don't even query if user has no position
+  const skip = !respPosUuid || skipQuery
 
+  const [taskData, doneTask, resultTask] = useMyPendingTasks(
+    respPosUuid,
+    skip,
+    pageDispatchers
+  )
+  const [personData, donePerson, resultPerson] = useMyPendingCounterparts(
+    uuid,
+    skip,
+    pageDispatchers
+  )
+
+  const pendingCParts = getPendingCounterparts(personData)
+  const pendingTasks = getPendingTasks(taskData)
+
+  const notifications = {
+    myCounterparts: pendingCParts.length,
+    myTasks: pendingTasks.length
+  }
+  const done = doneTask || donePerson
+  const result = resultTask || resultPerson
+
+  return [notifications, done, result]
+}
+
+const useMyPendingTasks = (respPosUuid, skip, pageDispatchers) => {
   const taskQuery = {
     ...baseTaskQuery,
-    responsiblePositionUuid
+    responsiblePositionUuid: respPosUuid
   }
-  // don't even query if user has no position
-  const { data: taskData } = API.useApiQuery(
+  const { loading, error, data } = API.useApiQuery(
     GQL_GET_MY_TASK_LIST,
     {
       taskQuery
     },
     skip
   )
-  const { data: personData } = API.useApiQuery(
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+
+  return [data, done, result]
+}
+
+const useMyPendingCounterparts = (uuid, skip, pageDispatchers) => {
+  const { loading, error, data } = API.useApiQuery(
     GQL_GET_MY_COUNTERPARTS,
     {
       uuid
     },
     skip
   )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
 
-  let unAssessedCounterParts = []
+  return [data, done, result]
+}
+
+const getPendingTasks = taskData => {
+  if (taskData?.taskList?.list?.length) {
+    const taskObjects = taskData.taskList.list.map(obj => new Task(obj))
+    taskObjects.forEach(task => {
+      Model.populateAssessmentsCustomFields(task)
+    })
+    return taskObjects.filter(Model.hasPendingAssessments)
+  }
+  return []
+}
+
+const getPendingCounterparts = personData => {
   if (personData?.person?.position?.associatedPositions?.length) {
-    unAssessedCounterParts = personData.person.position.associatedPositions
+    return personData.person.position.associatedPositions
       .map(asPos => asPos.person)
       .map(person => new Person(person))
       .filter(Model.hasPendingAssessments)
   }
-
-  let unAssessedTasks = []
-  if (taskData?.taskList?.list?.length) {
-    const taskObjects = taskData.taskList.list.map(obj => new Task(obj))
-
-    taskObjects.forEach(task => {
-      Model.populateAssessmentsCustomFields(task)
-    })
-    unAssessedTasks = taskObjects.filter(Model.hasPendingAssessments)
-  }
-
-  // TODO: should there be a cap like 10+
-  return {
-    myCounterparts:
-      unAssessedCounterParts.length >= 10
-        ? "10+"
-        : unAssessedCounterParts.length,
-    myTasks: unAssessedTasks.length >= 10 ? "10+" : unAssessedTasks.length
-  }
+  return []
 }
