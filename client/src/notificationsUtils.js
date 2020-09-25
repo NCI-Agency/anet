@@ -33,7 +33,7 @@ const GQL_GET_MY_TASK_LIST = gql`
     }
   }
 `
-const GQL_GET_MY_COUNTERPARTS_LIST = gql`
+const GQL_GET_MY_COUNTERPARTS = gql`
   query($uuid: String!) {
     person(uuid: $uuid) {
       position {
@@ -56,16 +56,27 @@ const baseTaskQuery = {
 
 export const useNotifications = () => {
   const { currentUser } = useContext(AppContext)
+  console.dir(currentUser)
   const taskQuery = {
     ...baseTaskQuery,
     responsiblePositionUuid: currentUser.position.uuid
   }
-  const { data: taskData } = API.useApiQuery(GQL_GET_MY_TASK_LIST, {
-    taskQuery
-  })
-  const { data: personData } = API.useApiQuery(GQL_GET_MY_COUNTERPARTS_LIST, {
-    uuid: currentUser.uuid
-  })
+  // don't even query if user has no position
+  const skip = !currentUser?.position?.uuid
+  const { data: taskData } = API.useApiQuery(
+    GQL_GET_MY_TASK_LIST,
+    {
+      taskQuery
+    },
+    skip
+  )
+  const { data: personData } = API.useApiQuery(
+    GQL_GET_MY_COUNTERPARTS,
+    {
+      uuid: currentUser.uuid
+    },
+    skip
+  )
 
   let unAssessedCounterParts = []
   if (personData?.person?.position?.associatedPositions?.length) {
@@ -84,8 +95,12 @@ export const useNotifications = () => {
     })
     unAssessedTasks = taskObjects.filter(Model.hasPendingAssessments)
   }
+
   return {
-    myCounterparts: unAssessedCounterParts.length,
-    myTasks: unAssessedTasks.length
+    myCounterparts:
+      unAssessedCounterParts.length >= 10
+        ? "10+"
+        : unAssessedCounterParts.length,
+    myTasks: unAssessedTasks.length >= 10 ? "10+" : unAssessedTasks.length
   }
 }

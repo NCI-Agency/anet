@@ -288,8 +288,8 @@ const mapDispatchToProps = (dispatch, ownProps) =>
 
 const NotificationBadge = styled.span`
   position: absolute;
-  padding: 6px 8px;
-  top: 4px;
+  padding: 2px 4px;
+  top: 8px;
   right: 5px;
   border-radius: 50%;
   background-color: #337ab7;
