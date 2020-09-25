@@ -9,6 +9,7 @@ import {
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
+import { useNotifications } from "notificationsUtils"
 import Routing from "pages/Routing"
 import PropTypes from "prop-types"
 import React from "react"
@@ -125,6 +126,9 @@ const App = ({ pageDispatchers, pageProps }) => {
     pageProps,
     pageDispatchers
   })
+  const appState = !done && !error && data ? processData(data) : {}
+  const notifications = useNotifications(appState?.currentUser)
+
   if (done) {
     return result
   }
@@ -134,7 +138,6 @@ const App = ({ pageDispatchers, pageProps }) => {
       <Messages error={error || { message: "Could not load initial data" }} />
     )
   }
-  const appState = processData(data)
   // if this is a new user, redirect to onboarding
   if (
     appState.currentUser.isNewUser() &&
@@ -148,7 +151,8 @@ const App = ({ pageDispatchers, pageProps }) => {
       value={{
         appSettings: appState.settings,
         currentUser: appState.currentUser,
-        loadAppData: refetch
+        loadAppData: refetch,
+        notifications
       }}
     >
       <ResponsiveLayout

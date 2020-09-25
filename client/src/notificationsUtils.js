@@ -1,10 +1,8 @@
 // import { useMyTasks } from "pages/tasks/MyTasks"
 import API from "api"
 import { gql } from "apollo-boost"
-import AppContext from "components/AppContext"
 import Model from "components/Model"
 import { Person, Task } from "models"
-import { useContext } from "react"
 
 const commonNoteFields = `
 notes {
@@ -54,15 +52,16 @@ const baseTaskQuery = {
   status: "ACTIVE"
 }
 
-export const useNotifications = () => {
-  const { currentUser } = useContext(AppContext)
-  console.dir(currentUser)
+export const useNotifications = currentUser => {
+  const uuid = currentUser?.uuid
+  const responsiblePositionUuid = currentUser?.position?.uuid
+  const skip = !responsiblePositionUuid
+
   const taskQuery = {
     ...baseTaskQuery,
-    responsiblePositionUuid: currentUser.position.uuid
+    responsiblePositionUuid
   }
   // don't even query if user has no position
-  const skip = !currentUser?.position?.uuid
   const { data: taskData } = API.useApiQuery(
     GQL_GET_MY_TASK_LIST,
     {
@@ -73,7 +72,7 @@ export const useNotifications = () => {
   const { data: personData } = API.useApiQuery(
     GQL_GET_MY_COUNTERPARTS,
     {
-      uuid: currentUser.uuid
+      uuid
     },
     skip
   )
@@ -96,6 +95,7 @@ export const useNotifications = () => {
     unAssessedTasks = taskObjects.filter(Model.hasPendingAssessments)
   }
 
+  // TODO: should there be a cap like 10+
   return {
     myCounterparts:
       unAssessedCounterParts.length >= 10

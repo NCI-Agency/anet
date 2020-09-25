@@ -3,7 +3,6 @@ import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { Organization } from "models"
-import { useNotifications } from "notificationsUtils"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -70,8 +69,7 @@ const Nav = ({
   resetPages,
   clearSearchQuery
 }) => {
-  const { appSettings, currentUser } = useContext(AppContext)
-  const notifications = useNotifications()
+  const { appSettings, currentUser, notifications } = useContext(AppContext)
   useEffect(() => scrollSpy.update(), [])
 
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
