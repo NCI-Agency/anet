@@ -26,7 +26,7 @@ const css = {
 }
 
 class CustomUrlEsriProvider extends EsriProvider {
-  constructor(searchUrl: string, options = {}) {
+  constructor(searchUrl, options = {}) {
     super(options)
     if (searchUrl) {
       if (searchUrl.startsWith("http://") || searchUrl.startsWith("https://")) {

@@ -123,9 +123,9 @@ const Nav = ({
             id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
-            {!!notifications?.myTasks && (
+            {notifications?.myTasks ? (
               <NotificationBadge>{notifications.myTasks}</NotificationBadge>
-            )}
+            ) : null}
           </SidebarLink>
           <SidebarLink
             linkTo={{ pathname: "/positions/counterparts" }}
@@ -133,11 +133,11 @@ const Nav = ({
             id="my-counterparts-nav"
           >
             My Counterparts
-            {!!notifications?.myCounterparts && (
+            {notifications?.myCounterparts ? (
               <NotificationBadge>
                 {notifications.myCounterparts}
               </NotificationBadge>
-            )}
+            ) : null}
           </SidebarLink>
         </>
       )}
