@@ -129,7 +129,7 @@ const App = ({ pageDispatchers, pageProps }) => {
   })
   const skip = done || error || !data
   const appState = skip ? null : processData(data)
-  const [notifications, loadingN] = useNotifications(
+  const [notifications, loadingNotifications] = useNotifications(
     appState?.currentUser,
     skip
   )
@@ -137,7 +137,8 @@ const App = ({ pageDispatchers, pageProps }) => {
   if (done) {
     return result
   }
-  if (loadingN) {
+  if (loadingNotifications) {
+    // FIXME: need this otherwise, 404 tests breaks, how can we combine appData + notifications data and loading processes
     return <div className="loader" />
   }
 

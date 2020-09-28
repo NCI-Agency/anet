@@ -8,11 +8,15 @@ import {
   useBoilerplate
 } from "components/Page"
 import {
-  SearchQueryPropType,
   getSearchQuery,
-  RECURSE_STRATEGY
+  RECURSE_STRATEGY,
+  SearchQueryPropType
 } from "components/SearchFilters"
 import { Task } from "models"
+import {
+  getPendingTasks,
+  GQL_GET_MY_PENDING_TASK_LIST
+} from "notificationsUtils"
 import { Tasks } from "pages/Search"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -58,6 +62,16 @@ const MyTasks = ({
       }),
     [searchQueryParams, currentUser]
   )
+  const pendingTasksSearchQueryParams = useMemo(
+    () =>
+      Object.assign({}, searchQueryParams, {
+        sortBy: "NAME",
+        sortOrder: "ASC",
+        status: Task.STATUS.ACTIVE,
+        responsiblePositionUuid: currentUser.position?.uuid
+      }),
+    [searchQueryParams, currentUser]
+  )
   const myOrgAssignedTasksTitle = (
     <>
       {pluralize(taskShortLabel)} assigned to{" "}
@@ -67,6 +81,10 @@ const MyTasks = ({
       />
     </>
   )
+  // FIXME: better indication
+  if (!currentUser?.position?.uuid) {
+    return <p>First assign a position</p>
+  }
   return (
     <div>
       <Fieldset id="my-org-assigned-tasks" title={myOrgAssignedTasksTitle}>
@@ -88,6 +106,20 @@ const MyTasks = ({
           paginationKey="my_responsible_tasks"
           pagination={pagination}
           setPagination={setPagination}
+        />
+      </Fieldset>
+      <Fieldset
+        id="my-pending-tasks"
+        title={`${pluralize(taskShortLabel)} that have pending assessments`}
+      >
+        <Tasks
+          pageDispatchers={pageDispatchers}
+          queryParams={pendingTasksSearchQueryParams}
+          paginationKey="my_pending_tasks"
+          pagination={pagination}
+          setPagination={setPagination}
+          customQuery={GQL_GET_MY_PENDING_TASK_LIST}
+          filterTasks={getPendingTasks}
         />
       </Fieldset>
     </div>

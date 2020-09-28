@@ -481,7 +481,9 @@ export const Tasks = ({
   setTotalCount,
   paginationKey,
   pagination,
-  setPagination
+  setPagination,
+  filterTasks,
+  customQuery
 }) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
@@ -502,16 +504,23 @@ export const Tasks = ({
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   })
-  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
-    taskQuery
-  })
+  const { loading, error, data } = API.useApiQuery(
+    customQuery || GQL_GET_TASK_LIST,
+    {
+      taskQuery
+    }
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
     pageDispatchers
   })
-  // Update the total count
-  const totalCount = done ? null : data?.taskList?.totalCount
+  // Update the total count, filter first if available
+  const totalCount = done
+    ? null
+    : filterTasks
+      ? filterTasks(data).length
+      : data?.taskList?.totalCount
   useEffect(() => setTotalCount && setTotalCount(totalCount), [
     setTotalCount,
     totalCount
@@ -519,8 +528,11 @@ export const Tasks = ({
   if (done) {
     return result
   }
-
-  const tasks = data ? data.taskList.list : []
+  const tasks = data
+    ? filterTasks
+      ? filterTasks(data)
+      : data.taskList.list
+    : []
   if (_get(tasks, "length", 0) === 0) {
     return <em>No {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]} found</em>
   }
@@ -569,7 +581,9 @@ Tasks.propTypes = {
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
   pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
+  setPagination: PropTypes.func.isRequired,
+  filterTasks: PropTypes.func,
+  customQuery: PropTypes.object
 }
 
 const Locations = ({

@@ -568,7 +568,6 @@ export default class Model {
   static hasPendingAssessments(entity) {
     const recurTypes = Object.keys(entity.getAssessmentsConfig())
     const periodicRecurTypes = recurTypes.filter(type => PERIOD_FACTORIES[type])
-
     if (_isEmpty(periodicRecurTypes)) {
       // no periodic, no pending
       return false
@@ -576,7 +575,8 @@ export default class Model {
 
     // "for loop" to break early
     for (let i = 0; i < periodicRecurTypes.length; i++) {
-      const latestPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 0)
+      // offset 1 so that the period is the lastest (not current) period
+      const latestPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 1)
       const lastPeriodAssessments = entity.getPeriodAssessments(
         periodicRecurTypes[i],
         latestPeriod

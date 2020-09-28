@@ -15,16 +15,20 @@ notes {
 `
 
 // TODO: which fields enough to calculate pending assessment count
-const GQL_GET_MY_TASK_LIST = gql`
+export const GQL_GET_MY_PENDING_TASK_LIST = gql`
   query($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       totalCount
+      pageNum
+      pageSize
       list {
+        uuid
+        customFields
+        shortName
+        longName
         customFieldRef1 {
           uuid
         }
-        customFields
-        shortName
         ${commonNoteFields}
       }
     }
@@ -69,7 +73,7 @@ export const useNotifications = (currentUser, skipQuery) => {
   }
   const loading = loadingTask || laodingPerson
 
-  // FIXME: should we show indication about error in notifications? app probably functions fine without it.
+  // FIXME: should we show indication about error in notifications? app probably works fine without it.
   return [notifications, loading]
 }
 
@@ -79,7 +83,7 @@ const useMyPendingTasks = (respPosUuid, skip) => {
     responsiblePositionUuid: respPosUuid
   }
   const { loading, data } = API.useApiQuery(
-    GQL_GET_MY_TASK_LIST,
+    GQL_GET_MY_PENDING_TASK_LIST,
     {
       taskQuery
     },
@@ -101,7 +105,7 @@ const useMyPendingCounterparts = (uuid, skip) => {
   return [data, loading]
 }
 
-const getPendingTasks = taskData => {
+export const getPendingTasks = taskData => {
   if (taskData?.taskList?.list?.length) {
     const taskObjects = taskData.taskList.list.map(obj => new Task(obj))
     taskObjects.forEach(task => {
@@ -116,6 +120,7 @@ const getPendingCounterparts = personData => {
   if (personData?.person?.position?.associatedPositions?.length) {
     return personData.person.position.associatedPositions
       .map(asPos => asPos.person)
+      .filter(person => person)
       .map(person => new Person(person))
       .filter(Model.hasPendingAssessments)
   }
