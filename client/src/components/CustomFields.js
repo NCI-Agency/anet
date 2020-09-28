@@ -668,7 +668,10 @@ const CustomField = ({
   const { type, helpText } = fieldConfig
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
-  const [validateFormDebounced] = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
+  const { callback: validateFormDebounced } = useDebouncedCallback(
+    validateForm,
+    400
+  ) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate: true) => {
       const val =
