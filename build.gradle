@@ -487,5 +487,6 @@ allprojects {
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
 	version = '12.14.1'
+	yarnVersion = '1.22.10'
 	download = true
 }
