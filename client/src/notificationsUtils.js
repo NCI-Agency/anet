@@ -1,7 +1,6 @@
 import API from "api"
 import { gql } from "apollo-boost"
 import Model from "components/Model"
-import { useBoilerplate } from "components/Page"
 import { Person, Task } from "models"
 
 const commonNoteFields = `
@@ -52,22 +51,14 @@ const baseTaskQuery = {
   status: "ACTIVE"
 }
 
-export const useNotifications = (currentUser, skipQuery, pageDispatchers) => {
+export const useNotifications = (currentUser, skipQuery) => {
   const uuid = currentUser?.uuid
   const respPosUuid = currentUser?.position?.uuid
   // don't even query if user has no position
   const skip = !respPosUuid || skipQuery
 
-  const [taskData, doneTask, resultTask] = useMyPendingTasks(
-    respPosUuid,
-    skip,
-    pageDispatchers
-  )
-  const [personData, donePerson, resultPerson] = useMyPendingCounterparts(
-    uuid,
-    skip,
-    pageDispatchers
-  )
+  const [taskData, loadingTask] = useMyPendingTasks(respPosUuid, skip)
+  const [personData, laodingPerson] = useMyPendingCounterparts(uuid, skip)
 
   const pendingCParts = getPendingCounterparts(personData)
   const pendingTasks = getPendingTasks(taskData)
@@ -76,48 +67,38 @@ export const useNotifications = (currentUser, skipQuery, pageDispatchers) => {
     myCounterparts: pendingCParts.length,
     myTasks: pendingTasks.length
   }
-  const done = doneTask || donePerson
-  const result = resultTask || resultPerson
+  const loading = loadingTask || laodingPerson
 
-  return [notifications, done, result]
+  // FIXME: should we show indication about error in notifications? app probably functions fine without it.
+  return [notifications, loading]
 }
 
-const useMyPendingTasks = (respPosUuid, skip, pageDispatchers) => {
+const useMyPendingTasks = (respPosUuid, skip) => {
   const taskQuery = {
     ...baseTaskQuery,
     responsiblePositionUuid: respPosUuid
   }
-  const { loading, error, data } = API.useApiQuery(
+  const { loading, data } = API.useApiQuery(
     GQL_GET_MY_TASK_LIST,
     {
       taskQuery
     },
     skip
   )
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
 
-  return [data, done, result]
+  return [data, loading]
 }
 
-const useMyPendingCounterparts = (uuid, skip, pageDispatchers) => {
-  const { loading, error, data } = API.useApiQuery(
+const useMyPendingCounterparts = (uuid, skip) => {
+  const { loading, data } = API.useApiQuery(
     GQL_GET_MY_COUNTERPARTS,
     {
       uuid
     },
     skip
   )
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
 
-  return [data, done, result]
+  return [data, loading]
 }
 
 const getPendingTasks = taskData => {

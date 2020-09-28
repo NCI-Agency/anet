@@ -120,6 +120,7 @@ const App = ({ pageDispatchers, pageProps }) => {
   const history = useHistory()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
+
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -128,14 +129,16 @@ const App = ({ pageDispatchers, pageProps }) => {
   })
   const skip = done || error || !data
   const appState = skip ? null : processData(data)
-  const [notifications, doneN, resultN] = useNotifications(
+  const [notifications, loadingN] = useNotifications(
     appState?.currentUser,
-    skip,
-    pageDispatchers
+    skip
   )
 
-  if (done || doneN) {
-    return done ? result : resultN
+  if (done) {
+    return result
+  }
+  if (loadingN) {
+    return <div className="loader" />
   }
 
   if (!data) {

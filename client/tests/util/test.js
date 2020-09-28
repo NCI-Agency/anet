@@ -70,6 +70,7 @@ test.beforeEach(t => {
 
   const shortWaitMs = moment.duration(1, "seconds").asMilliseconds()
   const mediumWaitMs = moment.duration(3, "seconds").asMilliseconds()
+  // FIXME: return to old 9 sec limit
   const longWaitMs = moment.duration(25, "seconds").asMilliseconds()
 
   t.context.By = By
