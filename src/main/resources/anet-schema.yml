@@ -420,7 +420,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText, compactView, detailedView]
         properties:
           intent:
             type: string
