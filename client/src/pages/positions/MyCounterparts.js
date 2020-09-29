@@ -19,10 +19,6 @@ const MyCounterparts = ({ pageDispatchers }) => {
   })
   const { currentUser } = useContext(AppContext)
   const myPendingCParts = getPendingCounterparts(currentUser)
-  // FIXME: better notification
-  if (!currentUser?.position?.uuid) {
-    return <p>You are not assigned to a position yet</p>
-  }
   return (
     <div>
       <Fieldset id="my-counterparts" title="My Counterparts">
