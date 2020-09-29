@@ -4,16 +4,9 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-<<<<<<< HEAD
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
 import de.ahus1.keycloak.dropwizard.AbstractKeycloakAuthenticator;
 import de.ahus1.keycloak.dropwizard.KeycloakBundle;
 import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
-=======
->>>>>>> candidate
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import io.dropwizard.Application;
@@ -31,7 +24,6 @@ import io.dropwizard.views.ViewBundle;
 import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -244,16 +236,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final String dbUrl = configuration.getDataSourceFactory().getUrl();
     logger.info("datasource url: {}", dbUrl);
 
-<<<<<<< HEAD
-    // Update and then check the dictionary
-    final JsonNode dictionary = updateAndCheckDictionary(configuration);
-    try {
-      logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionary));
-    } catch (JsonProcessingException exception) {
-    }
-
-=======
->>>>>>> candidate
     // We want to use our own custom DB logger in order to clean up the logs a bit.
     final Injector injector = InjectorLookup.getInjector(this).get();
     injector.getInstance(StatementLogger.class);
@@ -370,53 +352,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
     }
   }
 
-<<<<<<< HEAD
-  private static Map<String, Object> addKeycloakConfiguration(AnetConfiguration configuration) {
-    // Add client-side Keycloak configuration to the dictionary
-    final Map<String, Object> clientConfig = new HashMap<>();
-    final AnetKeycloakConfiguration keycloakConfiguration =
-        configuration.getKeycloakConfiguration();
-    clientConfig.put("realm", keycloakConfiguration.getRealm());
-    clientConfig.put("url", keycloakConfiguration.getAuthServerUrl());
-    clientConfig.put("clientId", keycloakConfiguration.getResource() + "-public");
-    clientConfig.put("showLogoutLink", keycloakConfiguration.isShowLogoutLink());
-    final Map<String, Object> dictionary = new HashMap<>(configuration.getDictionary());
-    dictionary.put("keycloakConfiguration", clientConfig);
-    configuration.setDictionary(dictionary);
-    return configuration.getDictionary();
-  }
-
-  protected static JsonNode updateAndCheckDictionary(AnetConfiguration configuration)
-      throws IllegalArgumentException {
-    final Map<String, Object> updatedDictionary = addKeycloakConfiguration(configuration);
-    try (final InputStream inputStream =
-        AnetApplication.class.getResourceAsStream("/anet-schema.yml")) {
-      if (inputStream == null) {
-        logger.error("ANET schema [anet-schema.yml] not found");
-      } else {
-        JsonSchemaFactory factory = JsonSchemaFactory
-            .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
-            .objectMapper(yamlMapper).build();
-
-        JsonSchema schema = factory.getSchema(inputStream);
-        final JsonNode dictionary = jsonMapper.valueToTree(updatedDictionary);
-        Set<ValidationMessage> errors = schema.validate(dictionary);
-        for (ValidationMessage error : errors) {
-          logger.error(error.getMessage());
-        }
-        if (!errors.isEmpty()) {
-          throw new IllegalArgumentException("Invalid dictionary in the configuration");
-        }
-        return dictionary;
-      }
-    } catch (IOException e) {
-      logger.error("Error closing ANET schema", e);
-    }
-    throw new IllegalArgumentException("Missing dictionary in the configuration");
-  }
-
-=======
->>>>>>> candidate
   /*
    * Adds a Request filter that looks for any HTTP requests and redirects them to HTTPS
    */

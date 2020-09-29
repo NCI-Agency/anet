@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
@@ -54,8 +55,6 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private String anetDictionaryName;
 
   private String version;
-
-  private boolean timeWaffleRequests;
 
   @Valid
   @NotNull
@@ -195,7 +194,8 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       @SuppressWarnings("unchecked")
       final Map<String, Object> objectMap = yamlMapper.readValue(inputStream, Map.class);
       @SuppressWarnings("unchecked")
-      final Map<String, Object> dictionaryMap = (Map<String, Object>) objectMap.get("dictionary");
+      final Map<String, Object> dictionaryMap =
+          addKeycloakConfiguration((Map<String, Object>) objectMap.get("dictionary"));
       // Check and then set dictionary if it is valid
       if (isValid(dictionaryMap)) {
         this.setDictionary(dictionaryMap);
@@ -342,6 +342,19 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       }
       return version;
     }
+  }
+
+  private Map<String, Object> addKeycloakConfiguration(Map<String, Object> dictionaryMap) {
+    // Add client-side Keycloak configuration to the dictionary
+    final Map<String, Object> clientConfig = new HashMap<>();
+    final AnetKeycloakConfiguration keycloakConfiguration = getKeycloakConfiguration();
+    clientConfig.put("realm", keycloakConfiguration.getRealm());
+    clientConfig.put("url", keycloakConfiguration.getAuthServerUrl());
+    clientConfig.put("clientId", keycloakConfiguration.getResource() + "-public");
+    clientConfig.put("showLogoutLink", keycloakConfiguration.isShowLogoutLink());
+    final Map<String, Object> updatedDictionaryMap = new HashMap<>(dictionaryMap);
+    updatedDictionaryMap.put("keycloakConfiguration", clientConfig);
+    return updatedDictionaryMap;
   }
 
 }
