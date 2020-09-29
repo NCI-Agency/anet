@@ -72,6 +72,7 @@ public class HomeResource {
     final String redirectUri =
         URLEncoder.encode(getBaseRequestUrl(requestlUrl), StandardCharsets.UTF_8.toString());
     // Redirect to Keycloak to log out
+    // scan:ignore — false positive, we only let Keycloak redirect back to the original request URI
     response.sendRedirect(String.format(
         "%s/realms/%s/protocol/openid-connect/logout?redirect_uri=%s",
         keycloakConfiguration.getAuthServerUrl(), keycloakConfiguration.getRealm(), redirectUri));
