@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.6.1"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.spotless" version "5.5.1"
+	id "com.diffplug.spotless" version "5.6.1"
 }
 
 apply plugin: 'java'
@@ -76,7 +76,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.4.1.jre8'
 	implementation 'org.postgresql:postgresql:42.2.16' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.0.0'
+	implementation 'org.liquibase:liquibase-core:4.1.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.0'
@@ -144,6 +144,14 @@ jacocoTestReport {
 def proc = "git describe".execute(null, projectDir);
 proc.waitFor();
 project.version = proc.text.trim();
+
+processResources {
+	filesMatching('**/version.properties') {
+		filter {
+			it.replace('APP_VERSION_TOKEN', project.version)
+		}
+	}
+}
 
 def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir);
 projectBranch.waitFor();
@@ -505,6 +513,7 @@ distributions {
 		contents {
 			into('docs/') {
 				from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
+				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
 				from(markdownToHtml)
 			}
 			into('lib/') {
@@ -531,5 +540,6 @@ allprojects {
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
 	version = '12.14.1'
+	yarnVersion = '1.22.10'
 	download = true
 }

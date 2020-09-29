@@ -18,7 +18,7 @@ async function populateLocation(location, user) {
 }
 
 const _createLocation = async function(user) {
-  const location = new Location()
+  const location = Object.without(new Location(), "displayedCoordinate")
   if (await populateLocation(location, user)) {
     console.debug(`Creating location ${location.name}`)
 

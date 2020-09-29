@@ -72,7 +72,7 @@ $defs:
       type:
         title: value type field
         type: string
-        enum: [text, number, date, datetime, enum, enumset, array_of_objects, anet_object, array_of_anet_objects, special_field]
+        enum: [text, number, date, datetime, json, enum, enumset, array_of_objects, anet_object, array_of_anet_objects, special_field]
       typeError:
         title: custom value for type error
         type: string
@@ -156,7 +156,7 @@ $defs:
         oneOf:
         - properties:
             type:
-              enum: [text, number, date, datetime]
+              enum: [text, number, date, datetime, json]
         - properties:
             type:
               enum: [enum, enumset]
@@ -484,9 +484,7 @@ properties:
             title: The label for a person's domain username
             description: Used in the UI where a person's domain username is shown.
           emailAddress:
-            type: string
-            title: The label for a person's email address
-            description: Used in the UI where a person's email address is shown.
+            "$ref": "#/$defs/inputField"
           phoneNumber:
             type: string
             title: The label for a person's phone number

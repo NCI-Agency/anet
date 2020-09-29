@@ -1,13 +1,10 @@
 package mil.dds.anet;
 
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
+<<<<<<< HEAD
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
@@ -15,6 +12,8 @@ import com.networknt.schema.ValidationMessage;
 import de.ahus1.keycloak.dropwizard.AbstractKeycloakAuthenticator;
 import de.ahus1.keycloak.dropwizard.KeycloakBundle;
 import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
+=======
+>>>>>>> candidate
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import io.dropwizard.Application;
@@ -29,15 +28,12 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -90,8 +86,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-  private static final ObjectMapper jsonMapper = new ObjectMapper();
 
   public static final Version FREEMARKER_VERSION = Configuration.VERSION_2_3_30;
 
@@ -250,6 +244,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final String dbUrl = configuration.getDataSourceFactory().getUrl();
     logger.info("datasource url: {}", dbUrl);
 
+<<<<<<< HEAD
     // Update and then check the dictionary
     final JsonNode dictionary = updateAndCheckDictionary(configuration);
     try {
@@ -257,6 +252,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     } catch (JsonProcessingException exception) {
     }
 
+=======
+>>>>>>> candidate
     // We want to use our own custom DB logger in order to clean up the logs a bit.
     final Injector injector = InjectorLookup.getInjector(this).get();
     injector.getInstance(StatementLogger.class);
@@ -373,6 +370,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     }
   }
 
+<<<<<<< HEAD
   private static Map<String, Object> addKeycloakConfiguration(AnetConfiguration configuration) {
     // Add client-side Keycloak configuration to the dictionary
     final Map<String, Object> clientConfig = new HashMap<>();
@@ -417,6 +415,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     throw new IllegalArgumentException("Missing dictionary in the configuration");
   }
 
+=======
+>>>>>>> candidate
   /*
    * Adds a Request filter that looks for any HTTP requests and redirects them to HTTPS
    */

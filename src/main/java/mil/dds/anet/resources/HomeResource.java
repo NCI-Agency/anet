@@ -47,11 +47,10 @@ public class HomeResource {
   public IndexView reactIndex(@Auth Person user) {
     IndexView view = new IndexView("/views/index.ftl");
     view.setCurrentUser(user);
-
     view.setSecurityBannerText(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
     view.setSecurityBannerColor(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     view.setDictionary(config.getDictionary());
-
+    view.setProjectVersion(config.getVersion());
     return view;
   }
 

@@ -13,11 +13,9 @@ describe("Anet home page", function() {
 describe("Anet default user login", () => {
   it('Default user is logged in"', () => {
     Home.open()
-    const defaultUserValue = "DEMO USE ONLY || ERINSON, Erin (edit)"
-    Home.waitForSecurityBannerValue(defaultUserValue)
-
     const securityText = Home.securityBanner.getText()
-    expect(securityText).to.equal(defaultUserValue)
+    const defaultUserValue = "DEMO USE ONLY || ERINSON, Erin (edit)"
+    expect(securityText.startsWith(defaultUserValue)).to.equal(true)
     Home.logout()
   })
 })
@@ -25,11 +23,9 @@ describe("Anet default user login", () => {
 describe("Anet super user login", () => {
   it('Super user is logged in"', () => {
     Home.openAsSuperUser()
-    const superUserValue = "DEMO USE ONLY || BECCABON, Rebecca (edit)"
-    Home.waitForSecurityBannerValue(superUserValue)
-
     const securityText = Home.securityBanner.getText()
-    expect(securityText).to.equal(superUserValue)
+    const superUserValue = "DEMO USE ONLY || BECCABON, Rebecca (edit)"
+    expect(securityText.startsWith(superUserValue)).to.equal(true)
     Home.logout()
   })
 })
@@ -37,11 +33,9 @@ describe("Anet super user login", () => {
 describe("Anet admin user login", () => {
   it('Admin user is logged in"', () => {
     Home.openAsAdminUser()
-    const adminUserValue = "DEMO USE ONLY || DMIN, Arthur (edit)"
-    Home.waitForSecurityBannerValue(adminUserValue)
-
     const securityText = Home.securityBanner.getText()
-    expect(securityText).to.equal(adminUserValue)
+    const adminUserValue = "DEMO USE ONLY || DMIN, Arthur (edit)"
+    expect(securityText.startsWith(adminUserValue)).to.equal(true)
     Home.logout()
   })
 })

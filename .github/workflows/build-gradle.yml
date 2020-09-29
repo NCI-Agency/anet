@@ -29,8 +29,6 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - run: echo "::add-path::./.gradle/yarn/yarn-latest/bin"
-    - run: echo "::add-path::./.gradle/nodejs/*/bin"
     - run: echo "::set-env name=CHROMEDRIVER_FILEPATH::$CHROMEWEBDRIVER/chromedriver"
     - name: cache gradle
       uses: actions/cache@v1
@@ -46,9 +44,10 @@ jobs:
         key: ${{ runner.os }}-node
         restore-keys: |
           ${{ runner.os }}-node
+    - run: ./gradlew yarnSetup
     - name: get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
     - name: cache yarn
       uses: actions/cache@v1
       with:
@@ -57,8 +56,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
     - run: ./gradlew jar
-    - working-directory: ./client
-      run: yarn run lint
+    - run: ./gradlew yarn_run_lint
     - name: Notify slack success
       if: success()
       env:
@@ -111,8 +109,6 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - run: echo "::add-path::./.gradle/yarn/yarn-latest/bin"
-    - run: echo "::add-path::./.gradle/nodejs/*/bin"
     - run: echo "::set-env name=CHROMEDRIVER_FILEPATH::$CHROMEWEBDRIVER/chromedriver"
     - uses: actions/cache@v1
       with:
@@ -126,9 +122,10 @@ jobs:
         key: ${{ runner.os }}-node
         restore-keys: |
           ${{ runner.os }}-node
+    - run: ./gradlew yarnSetup
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
     - uses: actions/cache@v1
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -155,8 +152,7 @@ jobs:
         unzip -q bsl.zip
         ./BrowserStackLocal --local-identifier ${{ steps.browserstack-local.outputs.identifier }} --key ${{ secrets.BROWSERSTACK_ACCESS_KEY }} &
       if: steps.tagName.outputs.tag != ''
-    - working-directory: ./client
-      run: yarn run test-all
+    - run: ./gradlew yarn_run_test-all
       env:
         GIT_TAG_NAME: ${{ steps.tagName.outputs.tag }}
         BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
