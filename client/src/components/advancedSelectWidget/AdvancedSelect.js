@@ -100,7 +100,7 @@ export const propTypes = {
   overlayColumns: PropTypes.array.isRequired,
   overlayRenderRow: PropTypes.func.isRequired,
   closeOverlayOnAdd: PropTypes.bool, // set to true if you want the overlay to be closed after an add action
-  filterDefs: PropTypes.object, // config of the search filters
+  filterDefs: PropTypes.object.isRequired, // config of the search filters
   onChange: PropTypes.func,
   // Required: ANET Object Type (Person, Report, etc) to search for.
   objectType: PropTypes.func.isRequired,
@@ -218,7 +218,10 @@ const AdvancedSelect = ({
     ]
   )
 
-  const [fetchResultsDebounced] = useDebouncedCallback(fetchResults, 400)
+  const { callback: fetchResultsDebounced } = useDebouncedCallback(
+    fetchResults,
+    400
+  )
 
   useEffect(() => {
     if (
@@ -346,7 +349,7 @@ const AdvancedSelect = ({
                 }
                 isOpen={showOverlay}
                 captureDismiss
-                dsabled={disabled}
+                disabled={disabled}
                 interactionKind={PopoverInteractionKind.CLICK}
                 onInteraction={handleInteraction}
                 usePortal={false}

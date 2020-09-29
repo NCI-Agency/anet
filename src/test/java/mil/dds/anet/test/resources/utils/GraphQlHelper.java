@@ -59,6 +59,14 @@ public final class GraphQlHelper {
   }
 
   /**
+   * @return the requested object of any type
+   */
+  public <T extends Object> T getObjectOfType(Person user, String query,
+      TypeReference<GraphQlResponse<T>> responseType) {
+    return graphQlClient.doGraphQlQuery(user, query, null, responseType);
+  }
+
+  /**
    * @return all objects of the requested type
    */
   public <T extends AbstractAnetBean> AnetBeanList<T> getAllObjects(Person user, String getQuery,

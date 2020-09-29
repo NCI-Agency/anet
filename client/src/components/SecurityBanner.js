@@ -1,12 +1,15 @@
+import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import React, { useContext } from "react"
+import { Version } from "settings"
 
 const SETTING_KEY_TEXT = "SECURITY_BANNER_TEXT"
 const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
 
 const css = {
-  zIndex: 101
+  zIndex: 101,
+  position: "relative"
 }
 
 const aCss = {
@@ -30,8 +33,19 @@ const SecurityBanner = () => {
       >
         (edit)
       </LinkTo>
+      <VersionBox>Version : {Version}</VersionBox>
     </div>
   )
 }
+
+const VersionBox = styled.h6`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin: 0;
+  @media (max-width: 768px) {
+    display: none;
+  }
+`
 
 export default SecurityBanner

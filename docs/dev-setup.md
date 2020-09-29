@@ -137,16 +137,16 @@ The tests are reliant on the data looking pretty similar to what you'd get after
 1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
-1. Make sure you have the proper nodejs and yarn in your path (see the [React Frontend](#react-frontend) instructions).
+1. Optionally, make sure you have the proper nodejs and yarn in your path (see the [React Frontend](#react-frontend) instructions).
 
-Run `yarn run lint-fix` to automatically fix some kinds of lint errors.
+Run `./gradlew yarn_run_lint-fix` to automatically fix some kinds of lint errors.
 
 #### Client-side testing locally
 To run the tests locally, make sure you have the server using the test-database running as above.
-1. Run the client side E2E tests against the test database: `yarn run test-e2e`
-1. Run the client side wdio tests against the test database: `yarn run test-wdio`
-1. Run the client side jest tests against the test database: `yarn run test-jest`
-1. Or run all client side tests against the test database: `yarn run test-all`
+1. Run the client side E2E tests against the test database: `./gradlew yarn_run_test-e2e`
+1. Run the client side wdio tests against the test database: `./gradlew yarn_run_test-wdio`
+1. Run the client side jest tests against the test database: `./gradlew yarn_run_test-jest`
+1. Or run all client side tests against the test database: `./gradlew yarn_run_test-all`
 
 To run the tests locally, by having [`chromedriver`](https://www.npmjs.com/package/chromedriver) as an npm dependency, we automatically have access to run in Chrome. To use Firefox instead, see [`geckodriver`](https://www.npmjs.com/package/geckodriver).
 
@@ -155,7 +155,7 @@ When writing browser tests, remember that when you take an action, you need to g
 If the tests are failing and you don't know why, run them with env var `DEBUG_LOG=true`:
 
 ```
-$ DEBUG_LOG=true yarn run test-e2e
+$ DEBUG_LOG=true ./gradlew yarn_run_test-e2e
 ```
 
 You can also insert the following into your code to make the browser pause, allowing you to investigate what is currently happening:
@@ -198,40 +198,41 @@ When all is set up, run the remote tests:
 1. Run;
     1.  the client side E2E tests:
         ```
-        $ yarn run test-e2e
+        $ ./gradlew yarn_run_test-e2e
         ```
     1. the client side wdio tests:
         ```
-        $ yarn run test-wdio
+        $ ./gradlew yarn_run_test-wdio
         ```
     1. the client side wdio-ie tests:
         ```
-        $ yarn run test-wdio-ie
+        $ ./gradlew yarn_run_test-wdio-ie
         ```
        **About IE tests:** Internet Explorer is not fully supported by ANET and all features are **NOT** guaranteed to work with IE. For that reason, a warning banner is displayed when IE detected. `test-wdio-ie` runs tests for this scenario and these tests run only on remote testing. When testing locally, they gracefully abort.
     1. all client side tests:
         ```
-        $ yarn run test-all
+        $ ./gradlew yarn_run_test-all
         ```
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ### Simulator
 ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.   
 
-The simulator can be started by running 'yarn run sim' in 'client'.
+The simulator can be started by running './gradlew yarn_run_sim'.
 
 ## React Frontend
+All of the frontend code is in the `client/` directory.
+
 ### Initial Setup
-1. Make sure you have the proper nodejs and yarn in your path. Example:
+1. You can run all client-side scripts via Yarn through Gradle. Otherwise, make sure you have the proper nodejs and yarn in your path; example:
     ```
-    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-latest
+    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-v1.22.10
     export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v12.14.1-linux-x64
     export PATH="$YARN_HOME/bin:$NODEJS_HOME/bin:$PATH"
+    cd client/
     ```
-    _Note_: nodejs version might have changed in the meanwhile, check inside <anet_root_path>/.gradle/nodejs/ for which version is being used and change the path accordingly.
-1. `cd client/`
-    1. All of the frontend code is in the `client/` directory.
-1. Run the server: `yarn run start`
+    _Note_: nodejs and yarn versions might have changed in the meanwhile, check inside `<anet_root_path>/.gradle/nodejs/` and `<anet_root_path>/.gradle/yarn/` for which versions are being used and change the path accordingly.
+1. Run the server: `./gradlew yarn_run_start`
 1. Go to [http://localhost:3000/](http://localhost:3000/) in your browser.
     1. When prompted for credentials:
         - **Username:** `erin`

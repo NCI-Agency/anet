@@ -134,8 +134,7 @@ const API = {
     if (creds) {
       return [
         "Authorization",
-        "Basic " +
-          Buffer.from(`${creds.user}:${creds.pass}`).toString("base64")
+        "Basic " + Buffer.from(`${creds.user}:${creds.pass}`).toString("base64")
       ]
     }
     return null

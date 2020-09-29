@@ -216,8 +216,7 @@ export function reportsToEvents(reports) {
       url: Report.pathFor(r),
       classNames: [`event-${Report.getStateForClassName(r)}`],
       extendedProps: { ...r },
-      allDay:
-        !Settings.engagementsIncludeTimeAndDuration || r.duration === null
+      allDay: !Settings.engagementsIncludeTimeAndDuration || r.duration === null
     }
   })
 }

@@ -133,7 +133,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
-  const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(false)
+  const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_ORGANIZATION,
@@ -414,27 +414,25 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
                   reportsFilter={
-                    !isSuperUser ? null : (
-                      <>
-                        <Button
-                          value="toggle-filter"
-                          className="btn btn-sm"
-                          onClick={() =>
-                            setFilterPendingApproval(!filterPendingApproval)}
-                        >
-                          {filterPendingApproval
-                            ? "Show all reports"
-                            : "Show pending approval"}
-                        </Button>
-                        <Checkbox
-                          checked={includeChildrenOrgs}
-                          onChange={() =>
-                            setIncludeChildrenOrgs(!includeChildrenOrgs)}
-                        >
-                          include reports from sub-orgs
-                        </Checkbox>
-                      </>
-                    )
+                    <>
+                      <Button
+                        value="toggle-filter"
+                        className="btn btn-sm"
+                        onClick={() =>
+                          setFilterPendingApproval(!filterPendingApproval)}
+                      >
+                        {filterPendingApproval
+                          ? "Show all reports"
+                          : "Show pending approval"}
+                      </Button>
+                      <Checkbox
+                        checked={includeChildrenOrgs}
+                        onChange={() =>
+                          setIncludeChildrenOrgs(!includeChildrenOrgs)}
+                      >
+                        include reports from sub-orgs
+                      </Checkbox>
+                    </>
                   }
                 />
               </Fieldset>

@@ -9,7 +9,7 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Form, Formik } from "formik"
-import { parseCoordinate } from "geoUtils"
+import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
@@ -78,7 +78,13 @@ const LocationForm = ({ edit, title, initialValues }) => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      initialValues={initialValues}
+      initialValues={{
+        ...initialValues,
+        displayedCoordinate: convertLatLngToMGRS(
+          parseCoordinate(initialValues.lat),
+          parseCoordinate(initialValues.lng)
+        )
+      }}
     >
       {({
         isSubmitting,
@@ -96,11 +102,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
           autoPan: true,
           onMove: (event, map) => {
             const latLng = map.wrapLatLng(event.target.getLatLng())
-            setValues({
-              ...values,
-              lat: parseCoordinate(latLng.lat),
-              lng: parseCoordinate(latLng.lng)
-            })
+            updateCoordinateFields(values, latLng)
           }
         }
         if (Location.hasCoordinates(values)) {
@@ -122,6 +124,13 @@ const LocationForm = ({ edit, title, initialValues }) => {
             </Button>
           </div>
         )
+
+        const coordinates = {
+          lat: values.lat,
+          lng: values.lng,
+          displayedCoordinate: values.displayedCoordinate
+        }
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty} />
@@ -144,10 +153,9 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
                 <GeoLocation
                   editable
-                  lat={values.lat}
-                  lng={values.lng}
+                  coordinates={coordinates}
                   isSubmitting={isSubmitting}
-                  setValues={vals => setValues({ ...values, ...vals })}
+                  setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
                 />
               </Fieldset>
@@ -157,11 +165,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                 markers={[marker]}
                 onMapClick={(event, map) => {
                   const latLng = map.wrapLatLng(event.latlng)
-                  setValues({
-                    ...values,
-                    lat: parseCoordinate(latLng.lat),
-                    lng: parseCoordinate(latLng.lng)
-                  })
+                  updateCoordinateFields(values, latLng)
                 }}
               />
 
@@ -204,6 +208,17 @@ const LocationForm = ({ edit, title, initialValues }) => {
             </Form>
           </div>
         )
+
+        function updateCoordinateFields(values, latLng) {
+          const parsedLat = parseCoordinate(latLng.lat)
+          const parsedLng = parseCoordinate(latLng.lng)
+          setValues({
+            ...values,
+            lat: parsedLat,
+            lng: parsedLng,
+            displayedCoordinate: convertLatLngToMGRS(parsedLat, parsedLng)
+          })
+        }
       }}
     </Formik>
   )
