@@ -57,8 +57,8 @@ public class HomeResource {
   @GET
   @Timed
   @Path("/api/logout")
-  public void logout(@Auth Person user, @Context HttpServletRequest request,
-      @Context HttpServletResponse response) throws IOException, ServletException {
+  public void logout(@Context HttpServletRequest request, @Context HttpServletResponse response)
+      throws IOException, ServletException {
     // Terminate the session
     final HttpSession session = request.getSession(false);
     if (session != null) {
