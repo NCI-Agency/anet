@@ -504,10 +504,8 @@ export default class Model {
       .map(note => ({ note: note, assessment: utils.parseJsonSafe(note.text) }))
       .filter(
         obj =>
-          // FIXME: make a nicer implementation of the check on period start
           obj.assessment.__recurrence === recurrence &&
-          obj.assessment.__periodStart ===
-            utils.parseJsonSafe(JSON.stringify(period.start))
+          moment(obj.assessment.__periodStart).isSame(period.start)
       )
   }
 
