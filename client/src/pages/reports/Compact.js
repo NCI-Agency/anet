@@ -835,7 +835,7 @@ const DropdownButton = css`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  z-index: 999999;
+  z-index: 19;
   & > div {
     position: relative;
     width: 100%;
@@ -1043,9 +1043,16 @@ export const CompactRow = ({ label, content, rowType, ...otherProps }) => {
 
   const lowerLabel =
     typeof label === "string" ? label.toLocaleLowerCase() : label
+  let ROW_LABEL_STYLE_CUSTOM = ROW_LABEL_STYLE
+  if (className === "reportField") {
+    ROW_LABEL_STYLE_CUSTOM = css`
+      ${ROW_LABEL_STYLE};
+      width: 15%;
+    `
+  }
   return (
     <tr css={customStyle} className={className || null}>
-      <th css={ROW_LABEL_STYLE}>{lowerLabel}</th>
+      <th css={ROW_LABEL_STYLE_CUSTOM}>{lowerLabel}</th>
       <td css={ROW_CONTENT_STYLE}>{content}</td>
     </tr>
   )
@@ -1067,7 +1074,7 @@ const ROW_LABEL_STYLE = css`
   padding: 4px 0;
   font-style: italic;
   color: grey;
-  width: 15%;
+  max-width: 50%;
   font-weight: 300;
 `
 
