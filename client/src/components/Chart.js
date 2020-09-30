@@ -3,12 +3,16 @@ import { LAYOUT_AGGREGATORS } from "layouts/utils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 
-const Chart = ({ items, layoutType, widgetElement, widgetConfig, style }) => {
+const Chart = ({
+  items,
+  layoutType,
+  widgetElement: Widget,
+  widgetConfig,
+  style
+}) => {
   const aggregator = LAYOUT_AGGREGATORS[layoutType]
   const [aggregatedItems] = aggregator(items)
-  const [ChartElement, HeaderElement, layout, initViewState, ref] = useLayout(
-    layoutType
-  )
+  const [HeaderElement, layout, initViewState, ref] = useLayout(layoutType)
 
   const [viewState, setViewState] = useState(initViewState)
 
@@ -16,13 +20,25 @@ const Chart = ({ items, layoutType, widgetElement, widgetConfig, style }) => {
     <>
       <HeaderElement viewState={viewState} setViewState={setViewState} />
       <svg ref={ref} style={style}>
-        <ChartElement
-          items={aggregatedItems}
-          layout={layout}
-          widgetElement={widgetElement}
-          viewState={viewState}
-          widgetConfig={widgetConfig}
-        />
+        {aggregatedItems.map(item => {
+          const boundingRect = layout(item, viewState)
+          // if it isn't in the layout ( e.g different year, month)
+          if (!boundingRect) {
+            return null
+          }
+          return (
+            <g
+              transform={`translate(${boundingRect.x}, ${boundingRect.y})`}
+              key={JSON.stringify(item)}
+            >
+              <Widget
+                item={item}
+                dimensions={boundingRect}
+                widgetConfig={widgetConfig}
+              />
+            </g>
+          )
+        })}
       </svg>
     </>
   )

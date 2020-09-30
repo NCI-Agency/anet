@@ -53,6 +53,7 @@ function generateMockData(numOfItems) {
         Math.floor(Math.random() * (maxVal - minVal) + minVal),
         "days"
       ),
+      coordinates: [45 + Math.random() * 10, 5 + Math.random() * 10],
       numOfEvents: randomNumOfEvents
     }
     newItem.id = newItem.date.format()

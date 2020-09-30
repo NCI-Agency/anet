@@ -1,8 +1,7 @@
-import DateChart from "components/DateChart"
-import GeoChart from "components/GeoChart"
 import * as LayoutHeaders from "components/LayoutHeader"
 import _groupBy from "lodash/groupBy"
 import moment from "moment"
+import * as d3 from "d3"
 
 export const LAYOUT_TYPES = {
   YEAR: "year",
@@ -16,12 +15,6 @@ export const LAYOUT_AGGREGATORS = {
   [LAYOUT_TYPES.GEO]: groupByLocation,
   [LAYOUT_TYPES.MONTH]: groupByDay,
   [LAYOUT_TYPES.YEAR]: groupByDay
-}
-
-export const LAYOUT_CHART_ELEMENTS = {
-  [LAYOUT_TYPES.GEO]: GeoChart,
-  [LAYOUT_TYPES.MONTH]: DateChart,
-  [LAYOUT_TYPES.YEAR]: DateChart
 }
 
 export const INIT_LAYOUT_STATES = {
@@ -56,4 +49,25 @@ export function groupByDay(inItems) {
 
   return [outItems, aggregationKey]
 }
-export function groupByLocation() {}
+
+export function groupByLocation(inItems) {
+  const reducer = (clusters, currentItem) => {
+    for (const cluster of clusters) {
+      for (const clusterItem of cluster.items) {
+        if (
+          d3.geoDistance(clusterItem.coordinates, currentItem.coordinates) <
+          0.01
+        ) {
+          cluster.items.push(currentItem)
+          return clusters
+        }
+      }
+    }
+    clusters.push({
+      coordinates: currentItem.coordinates,
+      items: [currentItem]
+    })
+    return clusters
+  }
+  return [inItems.reduce(reducer, []), "coordinates"]
+}

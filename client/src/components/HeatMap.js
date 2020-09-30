@@ -25,8 +25,7 @@ const HeatMap = ({ items, style }) => {
         >
           <option value={LAYOUT_TYPES.MONTH}>Month</option>
           <option value={LAYOUT_TYPES.YEAR}>Year</option>
-          {/* FIXME: Add geo option when ready */}
-          {/* <option value={LAYOUT_TYPES.GEO}>Geo</option> */}
+          <option value={LAYOUT_TYPES.GEO}>Geo</option>
         </select>
       </div>
       <Chart

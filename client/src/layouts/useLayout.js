@@ -1,16 +1,11 @@
 import LAYOUTS from "layouts"
-import {
-  INIT_LAYOUT_STATES,
-  LAYOUT_CHART_ELEMENTS,
-  LAYOUT_HEADERS
-} from "layouts/utils"
+import { INIT_LAYOUT_STATES, LAYOUT_HEADERS } from "layouts/utils"
 import { useMemo } from "react"
 import useDimensions from "react-use-dimensions"
 
 const useLayout = layoutType => {
   const [ref, dimensions] = useDimensions()
   const vars = useMemo(() => {
-    const chartElement = LAYOUT_CHART_ELEMENTS[layoutType]
     const chartHeader = LAYOUT_HEADERS[layoutType]
     const specificLayout = LAYOUTS[layoutType]
     const initViewState = INIT_LAYOUT_STATES[layoutType]
@@ -21,7 +16,7 @@ const useLayout = layoutType => {
         : specificLayout(item, dimensions, viewArgs)
     }
 
-    return [chartElement, chartHeader, layout, initViewState]
+    return [chartHeader, layout, initViewState]
   }, [layoutType, dimensions])
 
   return [...vars, ref]

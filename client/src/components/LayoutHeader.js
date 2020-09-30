@@ -78,11 +78,7 @@ export const GeoHeader = ({
 }) => {
   console.log(setViewLocation)
 
-  return (
-    <header>
-      <h2>{viewLocation}</h2>
-    </header>
-  )
+  return <header />
 }
 
 GeoHeader.propTypes = {
