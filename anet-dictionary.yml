@@ -184,12 +184,12 @@ fields:
                 label: None
           questions:
             type: json
-              label: Questions
-              helpText: JSON that defines the assessment (you need to know what you are doing)
-              placeholder: Fill in valid JSON
-              componentClass: textarea
-              style:
-                height: 200px
+            label: Questions
+            helpText: JSON that defines the assessment (you need to know what you are doing)
+            placeholder: Fill in valid JSON
+            componentClass: textarea
+            style:
+              height: 200px
 
   report:
     intent: Engagement purpose
