@@ -28,7 +28,6 @@ import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
-import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -119,7 +118,7 @@ public class FutureEngagementWorkerTest {
   public void testReportDueEndToday() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueEndToday_1");
-    report.setEngagementDate(Utils.endOfToday());
+    report.setEngagementDate(Instant.now());
     engine.getReportDao().update(report);
 
     expectedIds.add("testReportDueEndToday_1");
@@ -197,7 +196,7 @@ public class FutureEngagementWorkerTest {
     ra.setStep(step);
     ra.setStepUuid(step.getUuid());
     ra.setType(ActionType.APPROVE);
-    ra.setCreatedAt(Utils.endOfToday());
+    ra.setCreatedAt(Instant.now());
     engine.getReportActionDao().insert(ra);
 
     unexpectedIds.add("testApprovalStepReport_1");

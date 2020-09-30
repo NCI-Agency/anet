@@ -1,6 +1,7 @@
 package mil.dds.anet.threads;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import mil.dds.anet.AnetObjectEngine;
@@ -8,7 +9,6 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.FutureEngagementUpdated;
-import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class FutureEngagementWorker implements Runnable {
     // afterwards this report needs to go through the approval process of past
     // engagements.
     List<Report> reports =
-        AnetObjectEngine.getInstance().getReportDao().getFutureToPastReports(Utils.endOfToday());
+        AnetObjectEngine.getInstance().getReportDao().getFutureToPastReports(Instant.now());
 
     // update to draft state and send emails to the authors to let them know we updated their
     // report.
