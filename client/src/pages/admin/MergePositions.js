@@ -7,6 +7,7 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import PositionField from "components/MergeField"
 import Messages from "components/Messages"
+import { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -25,7 +26,7 @@ import { Position } from "models"
 import GeoLocation from "pages/locations/GeoLocation"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Grid, Row } from "react-bootstrap"
+import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -73,7 +74,7 @@ const MergePositions = ({ pageDispatchers }) => {
   const [
     [position1, position2, mergedPosition],
     [setPosition1, setPosition2, setMergedPosition]
-  ] = useMergeValidation(null, null, new Position(), "position")
+  ] = useMergeValidation({}, {}, new Position(), MODEL_TO_OBJECT_TYPE.Position)
 
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
@@ -328,26 +329,29 @@ const PositionColumn = ({
 }) => {
   return (
     <PositionCol>
-      {/* FIXME: label hmtlFor needs AdvancedSingleSelect id, no prop in AdvSelect to set id */}
-      <label style={{ textAlign: align }}>{label}</label>
-      <AdvancedSingleSelect
-        fieldName="position"
-        fieldLabel="Select a position"
-        placeholder="Select a position to merge"
-        value={position}
-        overlayColumns={["Position", "Organization", "Current Occupant"]}
-        overlayRenderRow={PositionOverlayRow}
-        filterDefs={positionsFilters}
-        onChange={value => {
-          return setPosition(value)
-        }}
-        objectType={Position}
-        valueKey="name"
-        fields={POSITION_FIELDS}
-        addon={POSITIONS_ICON}
-        vertical
-      />
-      {position && (
+      <label htmlFor={label.replace(/ /g, "")} style={{ textAlign: align }}>
+        {label}
+      </label>
+      <FormGroup controlId={label.replace(/ /g, "")}>
+        <AdvancedSingleSelect
+          fieldName="position"
+          fieldLabel="Select a position"
+          placeholder="Select a position to merge"
+          value={position}
+          overlayColumns={["Position", "Organization", "Current Occupant"]}
+          overlayRenderRow={PositionOverlayRow}
+          filterDefs={positionsFilters}
+          onChange={value => {
+            return setPosition(value)
+          }}
+          objectType={Position}
+          valueKey="name"
+          fields={POSITION_FIELDS}
+          addon={POSITIONS_ICON}
+          vertical
+        />
+      </FormGroup>
+      {areAllSet(position) && (
         <>
           <PositionField
             label="Name"
@@ -408,7 +412,7 @@ const PositionColumn = ({
           />
           <PositionField
             label="Organization"
-            value={position.organization.shortName}
+            value={position.organization?.shortName}
             align={align}
             action={getActionButton(
               () => setFieldValue("organization", position.organization),
@@ -417,7 +421,7 @@ const PositionColumn = ({
           />
           <PositionField
             label="Person"
-            value={position.person.name}
+            value={position.person?.name}
             align={align}
             action={getActionButton(() => {
               setFieldValue("person", position.person)
@@ -429,8 +433,8 @@ const PositionColumn = ({
             label="Location"
             value={
               <GeoLocation
-                lat={position.location.lat}
-                lng={position.location.lng}
+                lat={position.location?.lat}
+                lng={position.location?.lng}
               />
             }
             align={align}
@@ -452,7 +456,7 @@ const PositionCol = styled.div`
 `
 
 PositionColumn.propTypes = {
-  position: PropTypes.instanceOf(Position),
+  position: PropTypes.object,
   setPosition: PropTypes.func.isRequired,
   setFieldValue: PropTypes.func.isRequired,
   align: PropTypes.string.isRequired,
