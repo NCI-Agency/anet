@@ -18,6 +18,7 @@ import {
   CompactSecurityBanner,
   SETTING_KEY_COLOR
 } from "components/SecurityBanner"
+import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
@@ -263,7 +264,8 @@ const CompactReportView = ({ pageDispatchers }) => {
           <CompactViewHeader
             onPrintClick={printReport}
             returnToDefaultPage={returnToDefaultPage}
-            setAdditionalFields={setOptionalFields}
+            optionalFields={optionalFields}
+            setOptionalFields={setOptionalFields}
           />
           <div
             css={COMPACT_VIEW_STYLE}
@@ -334,7 +336,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                   className="reportField"
                 />
               ) : null}
-              {optionalFields.workflow && report.showWorkflow() ? (
+              {isActiveField("Workflow") && report.showWorkflow() ? (
                 <CompactRowReportWorkflow
                   workflow={report.workflow}
                   compactStyle={WORKFLOW_STYLE}
@@ -493,7 +495,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                           )
                         }
                       />
-                      {optionalFields.assessments &&
+                      {isActiveField("Assessments") &&
                         taskInstantAssessmentConfig && (
                           <ReadonlyCustomFields
                             parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
@@ -545,7 +547,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                   </React.Fragment>
                 }
                 content={
-                  optionalFields.assessments &&
+                  isActiveField("Assessments") &&
                   attendeeInstantAssessmentConfig && (
                     <table>
                       <tbody>
@@ -613,16 +615,31 @@ const CompactReportView = ({ pageDispatchers }) => {
     })
     return sortedAttendees
   }
+
+  function isActiveField(fieldName) {
+    const index = optionalFields.findIndex(field => field.text === fieldName)
+    if (index === -1) {
+      throw new Error("No name found in the optional fields array")
+    }
+    return optionalFields[index].active
+  }
 }
 
 CompactReportView.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-const OPTIONAL_FIELDS_INIT_STATUS = {
-  assessments: false,
-  workflow: false
-}
+const OPTIONAL_FIELDS_INIT_STATUS = [
+  {
+    text: "Assessments",
+    active: false
+  },
+  {
+    text: "Workflow",
+    active: false
+  }
+]
+
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
 const COMPACT_VIEW_STYLE = css`
@@ -718,60 +735,19 @@ const CompactViewHeader = ({
   onPrintClick,
   returnToDefaultPage,
   noReport,
-  setAdditionalFields
+  optionalFields,
+  setOptionalFields
 }) => {
-  const [active, setActive] = useState(false)
-
   return (
     <header css={HEADER_STYLE}>
       <h3 css={HEADER_TITLE_STYLE} value="title">
         {Settings.fields.report.compactView}
       </h3>
-      <div
-        css={css`
-          ${DropdownButton};
-          & > div {
-            display: ${active ? "block" : "none"};
-          }
-        `}
-      >
-        <button
-          className="btn btn-primary"
-          onClick={() => setActive(curr => !curr)}
-        >
-          Optional Fields ⇓
-        </button>
-        <div>
-          <div>
-            <label htmlFor="assessmentsBox">
-              Assessments
-              <input
-                type="checkbox"
-                name="assessments"
-                id="assessmentsBox"
-                onChange={() =>
-                  setAdditionalFields(prev => ({
-                    ...prev,
-                    assessments: !prev.assessments
-                  }))}
-              />
-            </label>
-            <label htmlFor="workflowBox">
-              Workflow
-              <input
-                type="checkbox"
-                name="workflow"
-                id="workflowBox"
-                onChange={() =>
-                  setAdditionalFields(prev => ({
-                    ...prev,
-                    workflow: !prev.workflow
-                  }))}
-              />
-            </label>
-          </div>
-        </div>
-      </div>
+      <SimpleMultiCheckboxDropdown
+        label="Optional Fields ⇓"
+        options={optionalFields}
+        toggleOption={setOptionalFields}
+      />
       <div css={BUTTONS_STYLE}>
         {!noReport && (
           <Button
@@ -800,7 +776,8 @@ CompactViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
   returnToDefaultPage: PropTypes.func,
   noReport: PropTypes.bool,
-  setAdditionalFields: PropTypes.func
+  optionalFields: PropTypes.arrayOf(PropTypes.object),
+  setOptionalFields: PropTypes.func
 }
 
 CompactViewHeader.defaultProps = {
@@ -830,38 +807,6 @@ const BUTTONS_STYLE = css`
   button {
     margin-left: 5px;
     margin-right: 5px;
-  }
-`
-
-const DropdownButton = css`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  z-index: 102;
-  & > div {
-    position: relative;
-    width: 100%;
-  }
-  & > div > div {
-    background-color: white;
-    width: 100%;
-    border-radius: 5px;
-    position: absolute;
-    left: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    input {
-      margin-left: 5px;
-      width: 16px;
-      height: 16px;
-    }
-  }
-  @media print {
-    display: none;
   }
 `
 
