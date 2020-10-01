@@ -554,6 +554,7 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	withEnvVar('ANET_DB_EXPOSED_PORT', run.environment["ANET_DB_EXPOSED_PORT"])
 	withEnvVar('GRANT_SUDO', "yes")
 	withEnvVar('JUPYTER_TOKEN', "anet")
+	withEnvVar('PYTHONPATH', "/home/jovyan/work")
 	hostConfig.portBindings = [run.environment["ANET_JUPYTER_PORT"] + ":" + "8888"]
 	user = "root"
 	workingDir = "/home/jovyan/work"
