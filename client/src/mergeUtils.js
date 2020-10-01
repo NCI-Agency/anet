@@ -1,5 +1,6 @@
 import { Button, Tooltip } from "@blueprintjs/core"
 import Leaflet from "components/Leaflet"
+import { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import * as L from "leaflet"
 import _escape from "lodash/escape"
 import { Location } from "models"
@@ -10,11 +11,16 @@ const useMergeValidation = (
   initMergeable1 = null,
   initMergeable2 = null,
   initMergedState = null,
-  mergeableType = "value"
+  mergeableType
 ) => {
   const [mergeable1, setMergeable1] = useState(initMergeable1)
   const [mergeable2, setMergeable2] = useState(initMergeable2)
   const [merged, setMerged] = useState(initMergedState)
+
+  const validForThatType = OBJECT_TYPE_TO_VALIDATOR[mergeableType]
+  if (!validForThatType) {
+    throw new Error("Pass a valid object type")
+  }
 
   function createStateSetter(mergeableNumber) {
     let other
@@ -34,16 +40,11 @@ const useMergeValidation = (
       // One of them being nullish means first time selecting or removing of a selection (which should always happen)
       // Only validate if both set
       if (other && newMergeable) {
-        // Validations applicable to all types
-        if (sameMergeable(other, newMergeable)) {
-          toast(`Please select a different ${mergeableType}`)
+        if (
+          !validForGeneral(other, newMergeable, mergeableType) ||
+          !validForThatType(other, newMergeable)
+        ) {
           return
-        }
-        // Type specific validations
-        if (mergeableType === "position") {
-          if (!validPositions(other, newMergeable)) {
-            return
-          }
         }
       }
       setMergeable(newMergeable)
@@ -56,6 +57,25 @@ const useMergeValidation = (
     [createStateSetter(1), createStateSetter(2), setMerged]
   ]
 }
+
+const OBJECT_TYPE_TO_VALIDATOR = {
+  [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
+  [MODEL_TO_OBJECT_TYPE.Location]: null,
+  [MODEL_TO_OBJECT_TYPE.Organization]: null,
+  [MODEL_TO_OBJECT_TYPE.Person]: null,
+  [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
+  [MODEL_TO_OBJECT_TYPE.Report]: null,
+  [MODEL_TO_OBJECT_TYPE.Task]: validTasks
+}
+// validations for every type of objects
+function validForGeneral(otherMergeable, newMergeable, mergeableType) {
+  if (sameMergeable(otherMergeable, newMergeable)) {
+    toast(`Please select different ${mergeableType}`)
+    return false
+  }
+}
+
+function validTasks() {}
 
 function validPositions(otherPos, newPos) {
   if (!sameOrganization(otherPos, newPos)) {
