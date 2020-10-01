@@ -5,6 +5,7 @@ import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
 import MergePeople from "pages/admin/MergePeople"
+import MergeTasks from "pages/admin/MergeTasks"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
@@ -130,6 +131,7 @@ const Routing = () => {
             <Switch>
               <Route exact path={`${url}/`} component={AdminIndex} />
               <Route path={`${url}/mergePeople`} component={MergePeople} />
+              <Route path={`${url}/mergeTasks`} component={MergeTasks} />
               <Route
                 exact
                 path={`${url}/authorizationGroups`}

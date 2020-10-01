@@ -3,7 +3,7 @@ import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import { TaskDetailedOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { TaskSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import TaskField from "components/MergeField"
 import Messages from "components/Messages"
@@ -17,20 +17,18 @@ import {
 import useMergeValidation, {
   areAllSet,
   getActionButton,
-  getActivationButton,
-  getClearButton,
-  getInfoButton,
-  getLeafletMap
+  getInfoButton
 } from "mergeUtils"
 import { Task } from "models"
-import GeoLocation from "pages/locations/GeoLocation"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Grid, Row } from "react-bootstrap"
+import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 
 const GQL_MERGE_TASK = gql`
   mutation($loserUuid: String!, $winnerTask: TaskInput!) {
@@ -43,8 +41,9 @@ const TASK_FIELDS = `
   uuid,
   shortName,
   longName,
-  responsiblePositions,
-
+  responsiblePositions {
+    uuid
+  }
 `
 
 const tasksFilters = {
@@ -56,16 +55,22 @@ const tasksFilters = {
   }
 }
 
+const taskLabel = Settings.fields.task.shortLabel
+const taskLabelPlural = pluralize(taskLabel)
+
 const MergeTasks = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
   const [
     [task1, task2, mergedTask],
     [setTask1, setTask2, setMergedTask]
-  ] = useMergeValidation(null, null, new Task(), MODEL_TO_OBJECT_TYPE.Task)
+  ] = useMergeValidation({}, {}, new Task(), MODEL_TO_OBJECT_TYPE.Task)
 
-  console.dir(tasksFilters)
-  console.dir(TASK_FIELDS)
+  console.dir({
+    task1,
+    task2,
+    mergedTask
+  })
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -76,7 +81,7 @@ const MergeTasks = ({ pageDispatchers }) => {
     <Grid fluid>
       <Row>
         <Messages error={saveError} />
-        <h2>Merge Tasks Tool</h2>
+        <h2>Merge {taskLabelPlural} Tool</h2>
       </Row>
       <Row>
         <Col md={4}>
@@ -85,7 +90,7 @@ const MergeTasks = ({ pageDispatchers }) => {
             setTask={setTask1}
             setFieldValue={setFieldValue}
             align="left"
-            label="Task 1"
+            label={`${taskLabel} 1`}
           />
         </Col>
         <Col md={4}>
@@ -96,7 +101,7 @@ const MergeTasks = ({ pageDispatchers }) => {
               !areAllSet(task1, task2),
               "Use All"
             )}
-            <h4 style={{ margin: "0" }}>Merged Task</h4>
+            <h4 style={{ margin: "0" }}>Merged {taskLabel}</h4>
             {getActionButton(
               () => setAllFields(task2),
               "right",
@@ -107,104 +112,26 @@ const MergeTasks = ({ pageDispatchers }) => {
           {!areAllSet(task1, task2) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="warning">
-                Please select <strong>both</strong> tasks to proceed...
+                Please select <strong>both</strong> {taskLabelPlural} to
+                proceed...
               </Callout>
             </div>
           )}
-          {areAllSet(task1, task2, !mergedTask?.name) && (
+          {areAllSet(task1, task2, !mergedTask.longName) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
                 Please choose a <strong>name</strong> to proceed...
               </Callout>
             </div>
           )}
-          {areAllSet(task1, task2, mergedTask?.name) && (
+          {areAllSet(task1, task2, mergedTask.longName) && (
             <>
               <TaskField
                 label="Name"
-                value={mergedTask.name}
+                value={`${mergedTask.shortName} ${mergedTask.longName}`}
                 align="center"
                 action={getInfoButton("Name is required.")}
               />
-              <TaskField
-                label="Type"
-                value={mergedTask.type}
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("type", Task.TYPE.ADVISOR)
-                })}
-              />
-              <TaskField
-                label="Code"
-                value={mergedTask.code}
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("code", "")
-                })}
-              />
-              <TaskField
-                label="Status"
-                value={mergedTask.status}
-                align="center"
-                action={getActivationButton(
-                  mergedTask.isActive(),
-                  () => {
-                    setFieldValue(
-                      "status",
-                      mergedTask.isActive()
-                        ? Task.STATUS.INACTIVE
-                        : Task.STATUS.ACTIVE
-                    )
-                  },
-                  "task"
-                )}
-              />
-              <TaskField
-                label="Associated Tasks"
-                value={mergedTask.associatedTasks}
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("associatedTasks", "")
-                })}
-              />
-              <TaskField
-                label="Previous People"
-                value={mergedTask.previousPeople}
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("previousPeople", "")
-                })}
-              />
-              <TaskField
-                label="Organization"
-                value={mergedTask.organization.shortName}
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("organization", {})
-                })}
-              />
-              <TaskField
-                label="Person"
-                value={mergedTask.person.name}
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("person", "")
-                })}
-              />
-              <TaskField
-                label="Location"
-                value={
-                  <GeoLocation
-                    lat={mergedTask.location.lat}
-                    lng={mergedTask.location.lng}
-                  />
-                }
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("location", "")
-                })}
-              />
-              {getLeafletMap("merged-location", mergedTask.location)}
             </>
           )}
         </Col>
@@ -214,7 +141,7 @@ const MergeTasks = ({ pageDispatchers }) => {
             setTask={setTask2}
             setFieldValue={setFieldValue}
             align="right"
-            label="Task 2"
+            label={`${taskLabel} 2`}
           />
         </Col>
       </Row>
@@ -225,7 +152,7 @@ const MergeTasks = ({ pageDispatchers }) => {
           intent="primary"
           text="Merge Tasks"
           onClick={mergeTask}
-          disabled={!areAllSet(task1, task2, mergedTask?.name)}
+          disabled={!areAllSet(task1, task2, mergedTask?.longName)}
         />
       </Row>
     </Grid>
@@ -252,7 +179,7 @@ const MergeTasks = ({ pageDispatchers }) => {
       .then(res => {
         if (res.mergeTask) {
           history.push(Task.pathFor({ uuid: res.mergeTask.uuid }), {
-            success: "Tasks merged. Displaying merged Task below."
+            success: `${taskLabelPlural} merged successfully. Displaying merged ${taskLabel} below.`
           })
         }
       })
@@ -299,110 +226,42 @@ const MergeTasks = ({ pageDispatchers }) => {
 const TaskColumn = ({ task, setTask, setFieldValue, align, label }) => {
   return (
     <TaskCol>
-      {/* FIXME: label hmtlFor needs AdvancedSingleSelect id, no prop in AdvSelect to set id */}
-      <label style={{ textAlign: align }}>{label}</label>
-      <AdvancedSingleSelect
-        fieldName="Task"
-        fieldLabel="Select a Task"
-        placeholder="Select a Task to merge"
-        value={task}
-        overlayColumns={["Task", "Organization", "Current Occupant"]}
-        overlayRenderRow={TaskDetailedOverlayRow}
-        filterDefs={tasksFilters}
-        onChange={value => {
-          return setTask(value)
-        }}
-        objectType={Task}
-        valueKey="name"
-        fields={TASK_FIELDS}
-        addon={TASKS_ICON}
-        vertical
-      />
-      {task && (
+      <label htmlFor={label.replace(/ /g, "")} style={{ textAlign: align }}>
+        {label}
+      </label>
+      <FormGroup controlId={label.replace(/ /g, "")}>
+        <AdvancedSingleSelect
+          fieldName={label.replace(/ /g, "")}
+          fieldLabel={`Select an ${taskLabel}`}
+          placeholder={`Select an ${taskLabel} to merge`}
+          value={task}
+          overlayColumns={["Name"]}
+          overlayRenderRow={TaskSimpleOverlayRow}
+          filterDefs={tasksFilters}
+          onChange={value => {
+            return setTask(value)
+          }}
+          objectType={Task}
+          valueKey="longName"
+          fields={TASK_FIELDS}
+          addon={TASKS_ICON}
+          vertical
+        />
+      </FormGroup>
+
+      {areAllSet(task) && (
         <>
           <TaskField
             label="Name"
-            value={task.name}
+            value={`${task.shortName} ${task.longName}`}
             align={align}
             action={getActionButton(() => {
-              setFieldValue("name", Task.name)
-            }, align)}
-          />
-          <TaskField
-            label="Type"
-            value={task.type}
-            align={align}
-            action={getActionButton(
-              () => setFieldValue("type", task.type),
-              align
-            )}
-          />
-          <TaskField
-            label="Code"
-            value={task.code}
-            align={align}
-            action={getActionButton(
-              () => setFieldValue("code", task.code),
-              align
-            )}
-          />
-          <TaskField
-            label="Status"
-            value={task.status}
-            align={align}
-            action={getActionButton(
-              () => setFieldValue("status", task.status),
-              align
-            )}
-          />
-          <TaskField
-            label="Associated Tasks"
-            value={task.associatedTasks}
-            align={align}
-            action={getActionButton(
-              () => setFieldValue("associatedTasks", task.associatedTasks),
-              align
-            )}
-          />
-          <TaskField
-            label="Previous People"
-            value={task.previousPeople}
-            align={align}
-            action={getActionButton(
-              () => setFieldValue("previousPeople", task.previousPeople),
-              align
-            )}
-          />
-          <TaskField
-            label="Organization"
-            value={task.organization.shortName}
-            align={align}
-            action={getActionButton(
-              () => setFieldValue("organization", task.organization),
-              align
-            )}
-          />
-          <TaskField
-            label="Person"
-            value={task.person.name}
-            align={align}
-            action={getActionButton(() => {
-              setFieldValue("person", task.person)
-              // setting person should also set uuid
+              setFieldValue("longName", task.longName)
+              setFieldValue("shortName", task.shortName)
+              // setting name should also set uuid
               setFieldValue("uuid", task.uuid)
             }, align)}
           />
-          <TaskField
-            label="Location"
-            value={
-              <GeoLocation lat={task.location.lat} lng={task.location.lng} />
-            }
-            align={align}
-            action={getActionButton(() => {
-              setFieldValue("location", task.location)
-            }, align)}
-          />
-          {getLeafletMap(task.uuid, task.location)}
         </>
       )}
     </TaskCol>
@@ -416,14 +275,22 @@ const TaskCol = styled.div`
 `
 
 TaskColumn.propTypes = {
-  task: PropTypes.instanceOf(Task),
+  task: PropTypes.object,
   setTask: PropTypes.func.isRequired,
   setFieldValue: PropTypes.func.isRequired,
   align: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired
 }
 
-const MidColTitle = ""
+const MidColTitle = styled.div`
+  display: flex;
+  height: 39px;
+  margin-top: 25px;
+  border-bottom: 1px solid #cccccc;
+  border-top: 1px solid #cccccc;
+  justify-content: space-between;
+  align-items: center;
+`
 
 MergeTasks.propTypes = {
   pageDispatchers: PageDispatchersPropType

@@ -3,14 +3,15 @@ import Leaflet from "components/Leaflet"
 import { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import * as L from "leaflet"
 import _escape from "lodash/escape"
+import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useState } from "react"
 import { toast } from "react-toastify"
 
 const useMergeValidation = (
-  initMergeable1 = null,
-  initMergeable2 = null,
-  initMergedState = null,
+  initMergeable1 = {},
+  initMergeable2 = {},
+  initMergedState = {},
   mergeableType
 ) => {
   const [mergeable1, setMergeable1] = useState(initMergeable1)
@@ -37,9 +38,9 @@ const useMergeValidation = (
     }
 
     return function setValidState(newMergeable) {
-      // One of them being nullish means first time selecting or removing of a selection (which should always happen)
-      // Only validate if both set
-      if (other && newMergeable) {
+      // One of them being empty means first time selecting or removing of a selection (cases which should always happen)
+      // Only validate if other and incoming selections are set
+      if (areAllSet(other, newMergeable)) {
         if (
           !validForGeneral(other, newMergeable, mergeableType) ||
           !validForThatType(other, newMergeable)
@@ -47,8 +48,8 @@ const useMergeValidation = (
           return
         }
       }
-      setMergeable(newMergeable)
-      setMerged(initMergedState) // merged state should reset when a mergeable changes
+      setMergeable(newMergeable || {})
+      setMerged(initMergedState || {}) // merged state should reset when a mergeable changes
     }
   }
 
@@ -57,7 +58,7 @@ const useMergeValidation = (
     [createStateSetter(1), createStateSetter(2), setMerged]
   ]
 }
-
+// FIXME: Fill when ready
 const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
   [MODEL_TO_OBJECT_TYPE.Location]: null,
@@ -73,9 +74,12 @@ function validForGeneral(otherMergeable, newMergeable, mergeableType) {
     toast(`Please select different ${mergeableType}`)
     return false
   }
+  return true
 }
-
-function validTasks() {}
+// FIXME: validation steps for tasks
+function validTasks() {
+  return true
+}
 
 function validPositions(otherPos, newPos) {
   if (!sameOrganization(otherPos, newPos)) {
@@ -102,7 +106,7 @@ function bothPosOccupied(otherPos, newPos) {
 }
 
 export function areAllSet(...args) {
-  return args.every(item => item)
+  return args.every(item => item && !_isEmpty(item))
 }
 
 export function getInfoButton(infoText) {

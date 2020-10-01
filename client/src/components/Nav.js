@@ -101,7 +101,7 @@ const Nav = ({
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
 
   const isAdvisor = currentUser.isAdvisor()
-  const taskShortLabel = Settings.fields.task.shortLabel
+  const pluralTaskLabel = pluralize(Settings.fields.task.shortLabel)
 
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
@@ -129,7 +129,7 @@ const Nav = ({
             handleOnClick={resetPages}
             id="my-tasks-nav"
           >
-            {`My ${pluralize(taskShortLabel)}`}
+            {`My ${pluralTaskLabel}`}
             {notifications?.myTasksWithPendingAssessments?.length ? (
               <NotificationBadge>
                 {notifications.myTasksWithPendingAssessments.length}
@@ -221,6 +221,9 @@ const Nav = ({
         <BSNav>
           <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
             <NavItem>Merge people</NavItem>
+          </LinkContainer>
+          <LinkContainer to="/admin/mergeTasks" onClick={resetPages}>
+            <NavItem>Merge {pluralTaskLabel}</NavItem>
           </LinkContainer>
           <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
             <NavItem>Authorization groups</NavItem>
