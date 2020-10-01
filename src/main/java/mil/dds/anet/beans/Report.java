@@ -788,7 +788,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
 
   @JsonIgnore
   public boolean isFutureEngagement() {
-    return engagementDate != null && engagementDate.isAfter(Utils.endOfToday());
+    return engagementDate != null && engagementDate.isAfter(Instant.now());
   }
 
   @GraphQLQuery(name = "engagementStatus")
