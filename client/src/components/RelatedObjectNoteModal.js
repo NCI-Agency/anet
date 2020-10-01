@@ -5,7 +5,6 @@ import Messages from "components/Messages"
 import Model, {
   GQL_CREATE_NOTE,
   GQL_UPDATE_NOTE,
-  MODEL_TO_OBJECT_TYPE,
   NOTE_TYPE
 } from "components/Model"
 import RelatedObjectsTable from "components/RelatedObjectsTable"
@@ -118,9 +117,8 @@ const RelatedObjectNoteModal = ({
                   <RelatedObjectsTable
                     relatedObjects={relatedObjects}
                     currentObject={edit ? undefined : currentObject}
-                    onSelect={handleRelatedObjectSelect}
+                    setRelatedObjects={setRelatedObjects}
                     showDelete
-                    onDelete={handleRelatedObjectDelete}
                   />
                 </div>
               </Modal.Body>
@@ -153,25 +151,6 @@ const RelatedObjectNoteModal = ({
       </Formik>
     </Modal>
   )
-
-  function handleRelatedObjectSelect(value, model) {
-    const relatedObjectsUuids = relatedObjects.map(o => o.relatedObjectUuid)
-    if (!relatedObjectsUuids.includes(value.uuid)) {
-      const newRelatedObject = {
-        relatedObjectType: MODEL_TO_OBJECT_TYPE[model],
-        relatedObjectUuid: value.uuid,
-        relatedObject: value
-      }
-      setRelatedObjects([...relatedObjects, newRelatedObject])
-    }
-  }
-
-  function handleRelatedObjectDelete(relatedObject) {
-    const newRelatedObjects = relatedObjects.filter(
-      item => item.relatedObjectUuid !== relatedObject.relatedObjectUuid
-    )
-    setRelatedObjects(newRelatedObjects)
-  }
 
   function onSubmit(values, form) {
     return save(values, form)
