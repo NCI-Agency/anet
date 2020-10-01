@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,6 @@ public class AdminResource {
   public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    final Map<String, LinkedHashSet<Map<String, String>>> userActivities = new HashMap<>();
     final Map<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
     final Cache<String, Person> domainUsersCache =
         AnetObjectEngine.getInstance().getPersonDao().getDomainUsersCache();
@@ -115,29 +115,14 @@ public class AdminResource {
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
       entry.getValue().getUserActivities().removeAll(Collections.singleton(null));
       entry.getValue().getUserActivities().forEach(k -> {
-        // Group all entries through user value
-        userActivities.computeIfAbsent(k.get("user"), l -> new LinkedHashSet<>()).add(k);
-        // In addition to keeping entries with the user key value,
-        // it is also necessary to hold all these entries with recentCalls key
-        // so we will have 2 result set : One is grouped by user values
-        // the other one is "recentCalls" which holds all entries without grouping them
+        // Hold all entries with recentCalls key
         recentCalls.computeIfAbsent("recentCalls", l -> new LinkedHashSet<>()).add(k);
       });
     }
-    final Map<String, Object> allActivities = new HashMap<>();
-    // Sort userActivities by time
-    if (!userActivities.isEmpty()) {
-      allActivities.put("users", userActivities.values().stream().map(s -> {
-        final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
-        final List<Map<String, String>> sortedList =
-            activities.stream().sorted((o1, o2) -> o2.get("time").compareTo(o1.get("time")))
-                .collect(Collectors.toList());
-        return new LinkedHashSet<>(sortedList);
-      }).collect(Collectors.toMap(k -> k.iterator().next().get("user"), Function.identity())));
-    } else {
-      allActivities.put("users", "");
-    }
-    // Sort recentCalls by time
+
+    final HashMap<String, Object> allActivities = new HashMap<>();
+
+    // Sort recentCalls by time in descending order
     if (!recentCalls.isEmpty()) {
       allActivities.put("recentCalls", recentCalls.values().stream().map(s -> {
         final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
@@ -148,8 +133,40 @@ public class AdminResource {
       }).collect(Collectors.toMap(k -> k.iterator().next().get("activity"), Function.identity()))
           .get("activity"));
     } else {
-      allActivities.put("recentCalls", "");
+      allActivities.put("recentCalls", new LinkedHashSet<HashMap<String, String>>());
     }
+
+    // We have recentCalls in time-sorted order ,
+    // Since all processes are in order by date descending, all we have to do is just putting the
+    // most recent activity of related user in a separate list according to the "user" key
+    // At the end, the user with the most current transaction will be listed at the top, the oldest
+    // user will be listed at the bottom.
+    final LinkedHashMap<String, LinkedHashSet<HashMap<String, String>>> sortedUsers =
+        new LinkedHashMap<>();
+    @SuppressWarnings("unchecked")
+    final LinkedHashSet<HashMap<String, String>> recentCallsHashSet =
+        (LinkedHashSet<HashMap<String, String>>) allActivities.get("recentCalls");
+    // We know that recentCalls are sorted by time in descending order
+    // Assume that recentCalls has some info like below
+    // An activity for erin at 2020/09/30 15:34
+    // An activity for arthur at 2020/09/30 15:29
+    // An activity for erin at 2020/09/30 12:01
+    // An activity for arthur at 2020/09/30 11:09
+    // An activity for rebecca at 2020/09/30 09:07
+    // After executing for loop , sortedUsers will be filtered like below
+    // Activity of erin at 2020/09/30 15:34
+    // Activity of arthur at 2020/09/30 15:29
+    // Activity of rebecca at 2020/09/30 09:07
+    for (HashMap<String, String> recentCall : recentCallsHashSet) {
+      if (!sortedUsers.containsKey(recentCall.get("user"))) {
+        final LinkedHashSet<HashMap<String, String>> recentCallSet = new LinkedHashSet<>();
+        recentCallSet.add(recentCall);
+        sortedUsers.put(recentCall.get("user"), recentCallSet);
+      }
+    }
+    // Put sorted users to the list
+    allActivities.put("users", sortedUsers);
+
     return allActivities;
   }
 
