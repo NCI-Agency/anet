@@ -735,7 +735,10 @@ const CompactViewHeader = ({
           }
         `}
       >
-        <button className="btn btn-primary" onClick={() => setActive(!active)}>
+        <button
+          className="btn btn-primary"
+          onClick={() => setActive(curr => !curr)}
+        >
           Optional Fields ⇓
         </button>
         <div>
@@ -835,7 +838,7 @@ const DropdownButton = css`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  z-index: 19;
+  z-index: 102;
   & > div {
     position: relative;
     width: 100%;
