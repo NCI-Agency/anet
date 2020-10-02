@@ -5,6 +5,11 @@ import { useState } from "react"
 
 const SimpleMultiCheckboxDropdown = ({ label, options, toggleOption }) => {
   const [active, setActive] = useState(false)
+  const optionsWithId = options.map(o => ({
+    ...o,
+    id: o.text.replace(/ /g, "")
+  }))
+  console.log(optionsWithId)
   return (
     <div
       css={css`
@@ -22,13 +27,12 @@ const SimpleMultiCheckboxDropdown = ({ label, options, toggleOption }) => {
       </button>
       <div>
         <div>
-          {options.map((option, index) => (
-            <label htmlFor={option.text} key={option.text}>
+          {optionsWithId.map((option, index) => (
+            <label htmlFor={option.id} key={option.text}>
               {option.text}
               <input
                 type="checkbox"
-                name={option.text}
-                id={option.text}
+                id={option.id}
                 onChange={() => {
                   toggleOption(prev => {
                     const newer = [...prev]

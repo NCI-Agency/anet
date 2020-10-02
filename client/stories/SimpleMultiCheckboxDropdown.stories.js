@@ -1,11 +1,6 @@
 import React, { useState } from "react"
 import SimpleMultiCheckboxDropdown from "../src/components/SimpleMultiCheckboxDropdown"
-
-export default {
-  title: "ANET/SimpleMultiCheckboxDropdown",
-  component: SimpleMultiCheckboxDropdown
-}
-
+// Generally will be called from wrapper
 const Wrapper = () => {
   const [options, setOptions] = useState([
     {
@@ -28,9 +23,15 @@ const Wrapper = () => {
       options={options}
       toggleOption={setOptions}
     />
+    // Do usefull stuff below according to active-passive options
   )
 }
 
-const Template = args => <Wrapper />
+const Template = () => <Wrapper />
 
 export const Basic = Template.bind({})
+
+export default {
+  title: "ANET/SimpleMultiCheckboxDropdown",
+  component: Wrapper
+}
