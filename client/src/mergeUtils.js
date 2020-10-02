@@ -101,6 +101,31 @@ function bothPosOccupied(otherPos, newPos) {
   return otherPos.person.uuid && newPos.person.uuid
 }
 
+export function unassignedPerson(position1, position2, mergedPosition) {
+  const msg = "You can't merge if a person is left unassigned"
+  // both positions having a person is validated in useMergeValidation, can't happen
+  // warn when one of them has it and merged doesn't
+  if (
+    // only position1 has it
+    !mergedPosition?.person?.uuid &&
+    position1?.person?.uuid &&
+    !position2?.person?.uuid
+  ) {
+    toast(msg)
+    return true
+  } else if (
+    // only position2 has it
+    !mergedPosition?.person?.uuid &&
+    !position1?.person?.uuid &&
+    position2?.person?.uuid
+  ) {
+    toast(msg)
+    return true
+  } else {
+    return false
+  }
+}
+
 export function areAllSet(...args) {
   return args.every(item => item && !_isEmpty(item))
 }

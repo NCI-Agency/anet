@@ -5,6 +5,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import LinkTo from "components/LinkTo"
 import PositionField from "components/MergeField"
 import Messages from "components/Messages"
 import { MODEL_TO_OBJECT_TYPE } from "components/Model"
@@ -14,13 +15,15 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import useMergeValidation, {
   areAllSet,
   getActionButton,
   getActivationButton,
   getClearButton,
   getInfoButton,
-  getLeafletMap
+  getLeafletMap,
+  unassignedPerson
 } from "mergeUtils"
 import { Position } from "models"
 import GeoLocation from "pages/locations/GeoLocation"
@@ -29,7 +32,6 @@ import React, { useState } from "react"
 import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
-import { toast } from "react-toastify"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_MERGE_POSITION = gql`
@@ -40,23 +42,57 @@ const GQL_MERGE_POSITION = gql`
   }
 `
 const POSITION_FIELDS = `
-  uuid,
-  name,
-  code,
-  type,
-  organization {
-    uuid,
-    shortName,
-    longName,
-    identificationCode
-  },
+uuid
+name
+type
+status
+code
+organization {
+  uuid
+  shortName
+  longName
+  identificationCode
+}
+person {
+  uuid
+  name
+  rank
+  role
+  avatar(size: 32)
+}
+associatedPositions {
+  uuid
+  name
+  type
   person {
-    uuid,
-    name,
-    rank,
-    role,
+    uuid
+    name
+    rank
+    role
     avatar(size: 32)
   }
+  organization {
+    uuid
+    shortName
+  }
+}
+previousPeople {
+  startTime
+  endTime
+  person {
+    uuid
+    name
+    rank
+    role
+    avatar(size: 32)
+  }
+}
+location {
+  uuid
+  name
+}
+${GRAPHQL_NOTES_FIELDS}
+
 `
 
 const positionsFilters = {
@@ -171,7 +207,15 @@ const MergePositions = ({ pageDispatchers }) => {
               />
               <PositionField
                 label="Associated Positions"
-                value={mergedPosition.associatedPositions}
+                value={
+                  <>
+                    {mergedPosition.associatedPositions.map(pos => (
+                      <React.Fragment key={`${pos.uuid}`}>
+                        <LinkTo modelType="Position" model={pos} />{" "}
+                      </React.Fragment>
+                    ))}
+                  </>
+                }
                 align="center"
                 action={getClearButton(() => {
                   setFieldValue("associatedPositions", "")
@@ -179,7 +223,15 @@ const MergePositions = ({ pageDispatchers }) => {
               />
               <PositionField
                 label="Previous People"
-                value={mergedPosition.previousPeople}
+                value={
+                  <>
+                    {mergedPosition.previousPeople.map(person => (
+                      <React.Fragment key={`${person.uuid}`}>
+                        <LinkTo modelType="Person" model={person} />{" "}
+                      </React.Fragment>
+                    ))}
+                  </>
+                }
                 align="center"
                 action={getClearButton(() => {
                   setFieldValue("previousPeople", "")
@@ -242,7 +294,7 @@ const MergePositions = ({ pageDispatchers }) => {
   )
 
   function mergePosition() {
-    if (unassignedPerson()) {
+    if (unassignedPerson(position1, position2, mergedPosition)) {
       return
     }
     let loser
@@ -278,31 +330,6 @@ const MergePositions = ({ pageDispatchers }) => {
 
   function setAllFields(pos) {
     setMergedPosition(new Position({ ...pos }))
-  }
-
-  function unassignedPerson() {
-    const msg = "You can't merge if a person is left unassigned"
-    // both positions having a person is validated in useMergeValidation, can't happen
-    // warn when one of them has it and merged doesn't
-    if (
-      // only position1 has it
-      !mergedPosition.person.uuid &&
-      position1.person.uuid &&
-      !position2.person.uuid
-    ) {
-      toast(msg)
-      return true
-    } else if (
-      // only position2 has it
-      !mergedPosition.person.uuid &&
-      !position1.person.uuid &&
-      position2.person.uuid
-    ) {
-      toast(msg)
-      return true
-    } else {
-      return false
-    }
   }
 }
 
@@ -390,7 +417,15 @@ const PositionColumn = ({
           />
           <PositionField
             label="Associated Positions"
-            value={position.associatedPositions}
+            value={
+              <>
+                {position.associatedPositions.map(pos => (
+                  <React.Fragment key={`${pos.uuid}`}>
+                    <LinkTo modelType="Position" model={pos} />{" "}
+                  </React.Fragment>
+                ))}
+              </>
+            }
             align={align}
             action={getActionButton(
               () =>
@@ -403,7 +438,15 @@ const PositionColumn = ({
           />
           <PositionField
             label="Previous People"
-            value={position.previousPeople}
+            value={
+              <>
+                {position.previousPeople.map(person => (
+                  <React.Fragment key={`${person.uuid}`}>
+                    <LinkTo modelType="Person" model={person} />{" "}
+                  </React.Fragment>
+                ))}
+              </>
+            }
             align={align}
             action={getActionButton(
               () => setFieldValue("previousPeople", position.previousPeople),
