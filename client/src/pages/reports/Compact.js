@@ -746,7 +746,7 @@ const CompactViewHeader = ({
       <SimpleMultiCheckboxDropdown
         label="Optional Fields ⇓"
         options={optionalFields}
-        toggleOption={setOptionalFields}
+        setOptions={setOptionalFields}
       />
       <div css={BUTTONS_STYLE}>
         {!noReport && (

@@ -1,17 +1,25 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core"
 import PropTypes from "prop-types"
-import { useState } from "react"
+import { useRef, useState } from "react"
+import { useOutsideClick } from "utils"
 
-const SimpleMultiCheckboxDropdown = ({ label, options, toggleOption }) => {
+/**
+ *  @param {string} label
+ *  @param {object[]} options
+ *  @param {function} setOptions
+ */
+const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
   const [active, setActive] = useState(false)
+  const dropDownRef = useRef(null)
+  useOutsideClick(dropDownRef, () => setActive(false))
   const optionsWithId = options.map(o => ({
     ...o,
-    id: o.text.replace(/ /g, "")
+    id: `${o.text.replace(/ /g, "")}-tick`
   }))
-  console.log(optionsWithId)
   return (
     <div
+      ref={dropDownRef}
       css={css`
         ${DropdownButton};
         & > div {
@@ -34,7 +42,7 @@ const SimpleMultiCheckboxDropdown = ({ label, options, toggleOption }) => {
                 type="checkbox"
                 id={option.id}
                 onChange={() => {
-                  toggleOption(prev => {
+                  setOptions(prev => {
                     const newer = [...prev]
                     newer[index].active = !newer[index].active
                     return newer
@@ -84,6 +92,6 @@ const DropdownButton = css`
 SimpleMultiCheckboxDropdown.propTypes = {
   label: PropTypes.string,
   options: PropTypes.array,
-  toggleOption: PropTypes.func
+  setOptions: PropTypes.func
 }
 export default SimpleMultiCheckboxDropdown

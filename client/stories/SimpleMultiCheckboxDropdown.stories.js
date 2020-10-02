@@ -21,7 +21,7 @@ const Wrapper = () => {
     <SimpleMultiCheckboxDropdown
       label="Basic Label ⇓"
       options={options}
-      toggleOption={setOptions}
+      setOptions={setOptions}
     />
     // Do usefull stuff below according to active-passive options
   )
