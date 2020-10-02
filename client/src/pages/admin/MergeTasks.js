@@ -5,6 +5,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { TaskSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import LinkTo from "components/LinkTo"
 import TaskField from "components/MergeField"
 import Messages from "components/Messages"
 import { MODEL_TO_OBJECT_TYPE } from "components/Model"
@@ -17,6 +18,7 @@ import {
 import useMergeValidation, {
   areAllSet,
   getActionButton,
+  getClearButton,
   getInfoButton
 } from "mergeUtils"
 import { Task } from "models"
@@ -26,7 +28,6 @@ import React, { useState } from "react"
 import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
-import { toast } from "react-toastify"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
@@ -41,6 +42,11 @@ const TASK_FIELDS = `
   uuid,
   shortName,
   longName,
+  customFieldRef1 {
+    uuid,
+    shortName,
+    longName
+  }
   responsiblePositions {
     uuid
   }
@@ -66,6 +72,7 @@ const MergeTasks = ({ pageDispatchers }) => {
     [setTask1, setTask2, setMergedTask]
   ] = useMergeValidation({}, {}, new Task(), MODEL_TO_OBJECT_TYPE.Task)
 
+  console.log("tasks")
   console.dir({
     task1,
     task2,
@@ -128,9 +135,53 @@ const MergeTasks = ({ pageDispatchers }) => {
             <>
               <TaskField
                 label="Name"
-                value={`${mergedTask.shortName} ${mergedTask.longName}`}
+                value={
+                  <LinkTo modelType="Task" model={mergedTask}>
+                    {mergedTask.shortName} {mergedTask.longName}
+                  </LinkTo>
+                }
                 align="center"
                 action={getInfoButton("Name is required.")}
+              />
+              <TaskField
+                label={Settings.fields.task.customFieldRef1.label}
+                value={
+                  <LinkTo modelType="Task" model={mergedTask.customFieldRef1}>
+                    {mergedTask.customFieldRef1.shortName}{" "}
+                    {mergedTask.customFieldRef1.longName}
+                  </LinkTo>
+                }
+                align="center"
+                action={getClearButton(() => {
+                  setFieldValue("customFieldRef1", {})
+                })}
+              />
+
+              <TaskField
+                label={Settings.fields.task.customField.label}
+                value={mergedTask.customField}
+                align="center"
+                action={getClearButton(() => {
+                  setFieldValue("customField", "")
+                })}
+              />
+              <TaskField
+                label={Settings.fields.task.taskedOrganizations.label}
+                value={
+                  <>
+                    {mergedTask.taskedOrganizations.map(org => (
+                      <LinkTo
+                        modelType="Organization"
+                        model={org}
+                        key={`${org.uuid}`}
+                      />
+                    ))}
+                  </>
+                }
+                align="center"
+                action={getClearButton(() => {
+                  setFieldValue("taskedOrganizations", [])
+                })}
               />
             </>
           )}
@@ -159,9 +210,6 @@ const MergeTasks = ({ pageDispatchers }) => {
   )
 
   function mergeTask() {
-    if (unassignedPerson()) {
-      return
-    }
     let loser
     if (mergedTask.uuid) {
       // uuid only gets set by person field, loser must be the task with different uuid
@@ -196,42 +244,18 @@ const MergeTasks = ({ pageDispatchers }) => {
   function setAllFields(task) {
     setMergedTask(new Task({ ...task }))
   }
-
-  function unassignedPerson() {
-    const msg = "You can't merge if a person is left unassigned"
-    // both tasks having a person is validated in useMergeValidation, can't happen
-    // warn when one of them has it and merged doesn't
-    if (
-      // only task1 has it
-      !mergedTask.person.uuid &&
-      task1.person.uuid &&
-      !task2.person.uuid
-    ) {
-      toast(msg)
-      return true
-    } else if (
-      // only task2 has it
-      !mergedTask.person.uuid &&
-      !task1.person.uuid &&
-      task2.person.uuid
-    ) {
-      toast(msg)
-      return true
-    } else {
-      return false
-    }
-  }
 }
 
 const TaskColumn = ({ task, setTask, setFieldValue, align, label }) => {
+  const inputId = label.replace(/ /g, "")
   return (
     <TaskCol>
-      <label htmlFor={label.replace(/ /g, "")} style={{ textAlign: align }}>
+      <label htmlFor={inputId} style={{ textAlign: align }}>
         {label}
       </label>
-      <FormGroup controlId={label.replace(/ /g, "")}>
+      <FormGroup controlId={inputId}>
         <AdvancedSingleSelect
-          fieldName={label.replace(/ /g, "")}
+          fieldName={inputId}
           fieldLabel={`Select an ${taskLabel}`}
           placeholder={`Select an ${taskLabel} to merge`}
           value={task}
@@ -253,13 +277,55 @@ const TaskColumn = ({ task, setTask, setFieldValue, align, label }) => {
         <>
           <TaskField
             label="Name"
-            value={`${task.shortName} ${task.longName}`}
+            value={
+              <LinkTo modelType="Task" model={task}>
+                {task.shortName} {task.longName}
+              </LinkTo>
+            }
             align={align}
             action={getActionButton(() => {
               setFieldValue("longName", task.longName)
               setFieldValue("shortName", task.shortName)
               // setting name should also set uuid
               setFieldValue("uuid", task.uuid)
+            }, align)}
+          />
+          <TaskField
+            label={Settings.fields.task.customFieldRef1.label}
+            value={
+              <LinkTo modelType="Task" model={task.customFieldRef1}>
+                {task.customFieldRef1.shortName} {task.customFieldRef1.longName}
+              </LinkTo>
+            }
+            align={align}
+            action={getActionButton(() => {
+              setFieldValue("customFieldRef1", task.customFieldRef1)
+            }, align)}
+          />
+          <TaskField
+            label={Settings.fields.task.customField.label}
+            value={task.customField}
+            align={align}
+            action={getActionButton(() => {
+              setFieldValue("customField", task.customField)
+            }, align)}
+          />
+          <TaskField
+            label={Settings.fields.task.taskedOrganizations.label}
+            value={
+              <>
+                {task.taskedOrganizations.map(org => (
+                  <LinkTo
+                    modelType="Organization"
+                    model={org}
+                    key={`${org.uuid}`}
+                  />
+                ))}
+              </>
+            }
+            align={align}
+            action={getActionButton(() => {
+              setFieldValue("taskedOrganizations", task.taskedOrganizations)
             }, align)}
           />
         </>

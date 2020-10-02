@@ -18,16 +18,15 @@ const MergeField = ({ label, value, align, action }) => {
 const MergeFieldBox = styled.div`
   display: flex;
   flex-direction: ${props => props.fDir};
-  justtify-content: space-between;
+  justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  height: 46px;
 `
 
 const LabelBox = styled.div`
   text-align: ${props => props.align};
   font-weight: bold;
-  text-decoratiın: underline;
+  text-decoration: underline;
 `
 
 MergeField.propTypes = {
