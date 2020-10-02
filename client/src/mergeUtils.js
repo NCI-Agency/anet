@@ -125,15 +125,11 @@ export function getClearButton(onClear) {
   )
 }
 
-export function getActivationButton(
-  isActive,
-  onClickAction,
-  mergeableType = "value"
-) {
+export function getActivationButton(isActive, onClickAction, resourceName) {
   return (
     <Tooltip
       content={
-        isActive ? `Deactivate ${mergeableType}` : `Activate ${mergeableType}`
+        isActive ? `Deactivate ${resourceName}` : `Activate ${resourceName}`
       }
       intent={isActive ? "danger" : "success"}
     >

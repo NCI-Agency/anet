@@ -15,9 +15,11 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import useMergeValidation, {
   areAllSet,
   getActionButton,
+  getActivationButton,
   getClearButton,
   getInfoButton
 } from "mergeUtils"
@@ -39,17 +41,79 @@ const GQL_MERGE_TASK = gql`
   }
 `
 const TASK_FIELDS = `
-  uuid,
-  shortName,
-  longName,
-  customFieldRef1 {
-    uuid,
-    shortName,
-    longName
-  }
-  responsiblePositions {
+uuid
+shortName
+longName
+status
+customField
+customFieldEnum1
+customFieldEnum2
+plannedCompletion
+projectedCompletion
+taskedOrganizations {
+  uuid
+  shortName
+  longName
+  identificationCode
+}
+customFieldRef1 {
+  uuid
+  shortName
+  longName
+}
+responsiblePositions {
+  uuid
+  name
+  code
+  type
+  status
+  organization {
     uuid
+    shortName
   }
+  person {
+    uuid
+    name
+    rank
+    role
+    avatar(size: 32)
+  }
+}
+planningApprovalSteps {
+  uuid
+  name
+  restrictedApproval
+  approvers {
+    uuid
+    name
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+  }
+}
+approvalSteps {
+  uuid
+  name
+  restrictedApproval
+  approvers {
+    uuid
+    name
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+  }
+}
+customFields
+${GRAPHQL_NOTES_FIELDS}
+
 `
 
 const tasksFilters = {
@@ -142,6 +206,23 @@ const MergeTasks = ({ pageDispatchers }) => {
                 }
                 align="center"
                 action={getInfoButton("Name is required.")}
+              />
+              <TaskField
+                label="Status"
+                value={mergedTask.status}
+                align="center"
+                action={getActivationButton(
+                  mergedTask.isActive(),
+                  () => {
+                    setFieldValue(
+                      "status",
+                      mergedTask.isActive()
+                        ? Task.STATUS.INACTIVE
+                        : Task.STATUS.ACTIVE
+                    )
+                  },
+                  Task.getInstanceName
+                )}
               />
               <TaskField
                 label={Settings.fields.task.customFieldRef1.label}
@@ -291,6 +372,14 @@ const TaskColumn = ({ task, setTask, setFieldValue, align, label }) => {
             }, align)}
           />
           <TaskField
+            label="Status"
+            value={task.status}
+            align={align}
+            action={getActionButton(() => {
+              setFieldValue("status", task.status)
+            }, align)}
+          />
+          <TaskField
             label={Settings.fields.task.customFieldRef1.label}
             value={
               <LinkTo modelType="Task" model={task.customFieldRef1}>
@@ -315,17 +404,39 @@ const TaskColumn = ({ task, setTask, setFieldValue, align, label }) => {
             value={
               <>
                 {task.taskedOrganizations.map(org => (
-                  <LinkTo
-                    modelType="Organization"
-                    model={org}
-                    key={`${org.uuid}`}
-                  />
+                  <React.Fragment key={`${org.uuid}`}>
+                    <LinkTo modelType="Organization" model={org} />{" "}
+                  </React.Fragment>
                 ))}
               </>
             }
             align={align}
             action={getActionButton(() => {
               setFieldValue("taskedOrganizations", task.taskedOrganizations)
+            }, align)}
+          />
+          <TaskField
+            label="Responsible Positions"
+            value={
+              <>
+                {task.responsiblePositions.map(pos => (
+                  <React.Fragment key={`${pos.uuid}`}>
+                    <LinkTo modelType="Position" model={pos} />{" "}
+                  </React.Fragment>
+                ))}
+              </>
+            }
+            align={align}
+            action={getActionButton(() => {
+              setFieldValue("taskedOrganizations", task.taskedOrganizations)
+            }, align)}
+          />
+          <TaskField
+            label="Custom fields"
+            value={task.customFields}
+            align={align}
+            action={getActionButton(() => {
+              setFieldValue("customFields", task.customFields)
             }, align)}
           />
         </>
