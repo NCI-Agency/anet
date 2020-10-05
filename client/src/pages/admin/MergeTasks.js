@@ -5,10 +5,14 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { TaskSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import { customFieldsJSONString } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import TaskField from "components/MergeField"
 import Messages from "components/Messages"
-import { MODEL_TO_OBJECT_TYPE } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  MODEL_TO_OBJECT_TYPE
+} from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -32,6 +36,7 @@ import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_MERGE_TASK = gql`
   mutation($loserUuid: String!, $winnerTask: TaskInput!) {
@@ -136,12 +141,6 @@ const MergeTasks = ({ pageDispatchers }) => {
     [setTask1, setTask2, setMergedTask]
   ] = useMergeValidation({}, {}, new Task(), MODEL_TO_OBJECT_TYPE.Task)
 
-  console.log("tasks")
-  console.dir({
-    task1,
-    task2,
-    mergedTask
-  })
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -291,19 +290,25 @@ const MergeTasks = ({ pageDispatchers }) => {
   )
 
   function mergeTask() {
-    let loser
-    if (mergedTask.uuid) {
-      // uuid only gets set by person field, loser must be the task with different uuid
-      loser = mergedTask.uuid === task1.uuid ? task2 : task1
-    } else {
-      // if not set, means no person in both tasks, doesn't matter which one is loser
-      mergedTask.uuid = task1.uuid
-      loser = task2
-    }
+    const winner = { ...mergedTask }
+    // winner has to have a uuid of one, setting name field forces that
+    const loser = winner.uuid === task1.uuid ? task2 : task1
+
+    // FIXME: copied from task/Form.js save function, what fields should we strip here?
+    // Should we also save a change record?
+    const winnerTask = Object.without(
+      new Task(winner),
+      "notes",
+      "assessment_customFieldEnum1",
+      "customFields", // initial JSON from the db
+      DEFAULT_CUSTOM_FIELDS_PARENT
+    )
+    winnerTask.customFieldRef1 = utils.getReference(winnerTask.customFieldRef1)
+    winnerTask.customFields = customFieldsJSONString({ task: winnerTask })
 
     API.mutation(GQL_MERGE_TASK, {
       loserUuid: loser.uuid,
-      winnerTask: mergedTask
+      winnerTask
     })
       .then(res => {
         if (res.mergeTask) {

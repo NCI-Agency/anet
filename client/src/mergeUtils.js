@@ -106,7 +106,12 @@ function bothPosOccupied(otherPos, newPos) {
 }
 
 export function areAllSet(...args) {
-  return args.every(item => item && !_isEmpty(item))
+  return args.every(item => {
+    if (typeof item === "boolean") {
+      return item
+    }
+    return !_isEmpty(item)
+  })
 }
 
 export function getInfoButton(infoText) {
