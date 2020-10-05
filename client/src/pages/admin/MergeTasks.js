@@ -5,6 +5,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { TaskSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import Approvals from "components/approvals/Approvals"
 import { customFieldsJSONString } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import TaskField from "components/MergeField"
@@ -288,6 +289,15 @@ const MergeTasks = ({ pageDispatchers }) => {
                   setFieldValue("customFields", "")
                 })}
               />
+              <TaskField
+                label="Engagement planning approval process"
+                value={<Approvals relatedObject={mergedTask} />}
+                align="center"
+                action={getClearButton(() => {
+                  setFieldValue("approvalSteps", [])
+                  setFieldValue("planningApprovalSteps", [])
+                })}
+              />
             </>
           )}
         </Col>
@@ -458,7 +468,7 @@ const TaskColumn = ({ task, setTask, setFieldValue, align, label }) => {
             }
             align={align}
             action={getActionButton(() => {
-              setFieldValue("taskedOrganizations", task.taskedOrganizations)
+              setFieldValue("responsiblePositions", task.responsiblePositions)
             }, align)}
           />
           <TaskField
@@ -467,6 +477,15 @@ const TaskColumn = ({ task, setTask, setFieldValue, align, label }) => {
             align={align}
             action={getActionButton(() => {
               setFieldValue("customFields", task.customFields)
+            }, align)}
+          />
+          <TaskField
+            label="Engagement planning approval process"
+            value={<Approvals relatedObject={task} />}
+            align={align}
+            action={getActionButton(() => {
+              setFieldValue("planningApprovalSteps", task.planningApprovalSteps)
+              setFieldValue("approvalSteps", task.approvalSteps)
             }, align)}
           />
         </>
