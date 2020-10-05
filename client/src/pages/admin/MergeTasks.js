@@ -263,6 +263,31 @@ const MergeTasks = ({ pageDispatchers }) => {
                   setFieldValue("taskedOrganizations", [])
                 })}
               />
+              <TaskField
+                label="Responsible Positions"
+                value={
+                  <>
+                    {mergedTask.responsiblePositions.map(pos => (
+                      <React.Fragment key={`${pos.uuid}`}>
+                        <LinkTo modelType="Position" model={pos} />{" "}
+                      </React.Fragment>
+                    ))}
+                  </>
+                }
+                align="center"
+                action={getClearButton(() => {
+                  setFieldValue("responsiblePositions", [])
+                })}
+              />
+
+              <TaskField
+                label="Custom fields"
+                value={mergedTask.customFields}
+                align="center"
+                action={getClearButton(() => {
+                  setFieldValue("customFields", "")
+                })}
+              />
             </>
           )}
         </Col>
