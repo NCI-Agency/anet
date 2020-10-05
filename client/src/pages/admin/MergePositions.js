@@ -157,14 +157,14 @@ const MergePositions = ({ pageDispatchers }) => {
               </Callout>
             </div>
           )}
-          {areAllSet(position1, position2, !mergedPosition?.name) && (
+          {areAllSet(position1, position2, !mergedPosition.name) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
                 Please choose a <strong>name</strong> to proceed...
               </Callout>
             </div>
           )}
-          {areAllSet(position1, position2, mergedPosition?.name) && (
+          {areAllSet(position1, position2, mergedPosition.name) && (
             <>
               <PositionField
                 label="Name"
