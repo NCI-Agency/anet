@@ -278,6 +278,8 @@ const AdvancedSearch = ({
       history.push({
         pathname: "/search"
       })
+      // Prevent browser navigation to the url
+      event.preventDefault()
     }
   }
 }
