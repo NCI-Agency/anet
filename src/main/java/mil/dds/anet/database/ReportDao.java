@@ -164,7 +164,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   public interface ReportBatch {
-    @SqlBatch("INSERT INTO \"reportPeople\" (\"reportUuid\", \"personUuid\", \"isPrimary\") VALUES (:reportUuid, :uuid, :primary)")
+    @SqlBatch("INSERT INTO \"reportPeople\" (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\") VALUES (:reportUuid, :uuid, :primary, :author)")
     void insertReportAttendees(@Bind("reportUuid") String reportUuid,
         @BindBean List<ReportPerson> reportPeople);
 
@@ -262,9 +262,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   @InTransaction
   public int addAttendeeToReport(ReportPerson rp, Report r) {
     return getDbHandle().createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
-        + "(\"personUuid\", \"reportUuid\", \"isPrimary\") VALUES (:personUuid, :reportUuid, :isPrimary)")
+        + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\") VALUES (:personUuid, :reportUuid, :isPrimary, :isAuthor)")
         .bind("personUuid", rp.getUuid()).bind("reportUuid", r.getUuid())
-        .bind("isPrimary", rp.isPrimary()).execute();
+        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor()).execute();
   }
 
   @InTransaction
@@ -278,9 +278,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   @InTransaction
   public int updateAttendeeOnReport(ReportPerson rp, Report r) {
     return getDbHandle().createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
-        + "SET \"isPrimary\" = :isPrimary WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
+        + "SET \"isPrimary\" = :isPrimary, \"isAuthor\" = :isAuthor WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
         .bind("reportUuid", r.getUuid()).bind("personUuid", rp.getUuid())
-        .bind("isPrimary", rp.isPrimary()).execute();
+        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor()).execute();
   }
 
   @InTransaction
@@ -601,7 +601,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   /**
    * Helper method that builds and executes the daily rollup query. Searching for just all reports
    * and for reports in certain organizations.
-   * 
+   *
    * @param orgType the type of organization to be looking for
    * @param orgs the list of orgs for whose reports to find, null means all
    * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
@@ -719,7 +719,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   static class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {
     private static final String sql = "/* batch.getAttendeesForReport */ SELECT "
         + PersonDao.PERSON_FIELDS
-        + ", \"reportPeople\".\"reportUuid\" , \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
+        + ", \"reportPeople\".\"reportUuid\" , \"reportPeople\".\"isPrimary\",\"reportPeople\".\"isAuthor\" FROM \"reportPeople\" "
         + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
         + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> )";
 

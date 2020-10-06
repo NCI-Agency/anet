@@ -3567,4 +3567,13 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-reportPeople-author" author="cemalettin-simsoft">
+		<addColumn tableName="reportPeople">
+			<column name="isAuthor" type="boolean" defaultValue="false" />
+		</addColumn>
+		<!-- FIXME: We need to set all the report authors isAuthor flag to true -->
+		<!-- Something like this -->
+		<!--  UPDATE reportPeople, report SET isAuthor = true WHERE personUuid = reports.authorUuid -->
+	</changeSet>
+
 </databaseChangeLog>
