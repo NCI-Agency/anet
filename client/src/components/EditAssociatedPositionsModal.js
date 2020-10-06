@@ -53,7 +53,7 @@ const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
             <td>
               <RemoveButton
                 title="Unassign person"
-                handleOnClick={() => onDelete(relPos)}
+                onClick={() => onDelete(relPos)}
               />
             </td>
           </tr>

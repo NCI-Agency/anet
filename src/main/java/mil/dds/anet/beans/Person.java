@@ -1,11 +1,13 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,8 @@ public class Person extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String code;
+
+  private List<Map<String, String>> userActivities;
 
   @Override
   public String getName() {
@@ -302,6 +306,19 @@ public class Person extends AbstractCustomizableAnetBean
     this.code = code;
   }
 
+  @JsonIgnore
+  public List<Map<String, String>> getUserActivities() {
+    if (userActivities == null) {
+      return new ArrayList<>();
+    }
+    return new ArrayList<>(userActivities);
+  }
+
+  @JsonIgnore
+  public void setUserActivities(List<Map<String, String>> userActivities) {
+    this.userActivities = userActivities;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Person)) {
@@ -315,6 +332,7 @@ public class Person extends AbstractCustomizableAnetBean
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
+        && Objects.equals(other.getUserActivities(), getUserActivities())
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
                 ? updatedAt.equals(other.getUpdatedAt())

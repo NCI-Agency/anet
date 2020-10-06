@@ -9,6 +9,7 @@ import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Form, Formik } from "formik"
+import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
@@ -77,15 +78,20 @@ const LocationForm = ({ edit, title, initialValues }) => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      initialValues={initialValues}
+      initialValues={{
+        ...initialValues,
+        displayedCoordinate: convertLatLngToMGRS(
+          parseCoordinate(initialValues.lat),
+          parseCoordinate(initialValues.lng)
+        )
+      }}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldTouched,
         setFieldValue,
+        setValues,
         values,
         submitForm
       }) => {
@@ -94,7 +100,10 @@ const LocationForm = ({ edit, title, initialValues }) => {
           name: _escape(values.name) || "", // escape HTML in location name!
           draggable: true,
           autoPan: true,
-          onMove: (event, map) => onMarkerMove(event, map, setFieldValue)
+          onMove: (event, map) => {
+            const latLng = map.wrapLatLng(event.target.getLatLng())
+            updateCoordinateFields(values, latLng)
+          }
         }
         if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
@@ -115,6 +124,13 @@ const LocationForm = ({ edit, title, initialValues }) => {
             </Button>
           </div>
         )
+
+        const coordinates = {
+          lat: values.lat,
+          lng: values.lng,
+          displayedCoordinate: values.displayedCoordinate
+        }
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty} />
@@ -137,8 +153,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
                 <GeoLocation
                   editable
-                  lat={values.lat}
-                  lng={values.lng}
+                  coordinates={coordinates}
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
@@ -149,7 +164,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
               <Leaflet
                 markers={[marker]}
                 onMapClick={(event, map) => {
-                  onMarkerMapClick(event, map, setFieldValue)
+                  const latLng = map.wrapLatLng(event.latlng)
+                  updateCoordinateFields(values, latLng)
                 }}
               />
 
@@ -192,28 +208,27 @@ const LocationForm = ({ edit, title, initialValues }) => {
             </Form>
           </div>
         )
+
+        function updateCoordinateFields(values, latLng) {
+          const parsedLat = parseCoordinate(latLng.lat)
+          const parsedLng = parseCoordinate(latLng.lng)
+          setValues({
+            ...values,
+            lat: parsedLat,
+            lng: parsedLng,
+            displayedCoordinate: convertLatLngToMGRS(parsedLat, parsedLng)
+          })
+        }
       }}
     </Formik>
   )
-
-  function onMarkerMove(event, map, setFieldValue) {
-    const latLng = map.wrapLatLng(event.target.getLatLng())
-    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
-    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
-  }
-
-  function onMarkerMapClick(event, map, setFieldValue) {
-    const latLng = map.wrapLatLng(event.latlng)
-    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
-    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
-  }
 
   function onCancel() {
     history.goBack()
   }
 
   function onSubmit(values, form) {
-    return save(values, form)
+    return save(values)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -240,8 +255,12 @@ const LocationForm = ({ edit, title, initialValues }) => {
     })
   }
 
-  function save(values, form) {
-    const location = Object.without(new Location(values), "notes")
+  function save(values) {
+    const location = Object.without(
+      new Location(values),
+      "notes",
+      "displayedCoordinate"
+    )
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
     })

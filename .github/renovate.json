@@ -9,11 +9,18 @@
   "packageRules": [
     {
       "packagePatterns": ["*"],
-      "excludePackageNames": ["com.microsoft.sqlserver:mssql-jdbc", "draft-js"],
       "minor": {
         "groupName": "most non-major dependencies",
         "groupSlug": "most-minor-patch"
       }
+    },
+    {
+      "packageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
+      "allowedVersions": "/^.*\\.jre8$/"
+    },
+    {
+      "packageNames": ["autoprefixer", "draft-js", "leaflet"],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {

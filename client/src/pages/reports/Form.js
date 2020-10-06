@@ -346,6 +346,18 @@ const ReportForm = ({
         resetForm,
         setSubmitting
       }) => {
+        // need up-to-date copies of these in the autosave handler
+        Object.assign(autoSaveSettings, { dirty, values, touched })
+        if (!autoSaveSettings.timeoutId) {
+          // Schedule the auto-save timer
+          const autosaveHandler = () =>
+            autoSave({ setFieldValue, setFieldTouched, resetForm })
+          autoSaveSettings.timeoutId = window.setTimeout(
+            autosaveHandler,
+            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+          )
+        }
+
         if (!validateFieldDebounced) {
           validateFieldDebounced = _debounce(validateField, 400)
         }
@@ -445,19 +457,7 @@ const ReportForm = ({
             queryVars: {}
           }
         }
-        // need up-to-date copies of these in the autosave handler
-        autoSaveSettings.dirty = dirty
-        autoSaveSettings.values = values
-        autoSaveSettings.touched = touched
-        if (!autoSaveSettings.timeoutId) {
-          // Schedule the auto-save timer
-          const autosaveHandler = () =>
-            autoSave({ setFieldValue, setFieldTouched, resetForm })
-          autoSaveSettings.timeoutId = window.setTimeout(
-            autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
-          )
-        }
+
         // Only the author can delete a report, and only in DRAFT.
         const canDelete =
           !!values.uuid &&
@@ -741,7 +741,14 @@ const ReportForm = ({
                       value={values.attendees}
                       renderSelected={
                         <AttendeesTable
-                          attendees={values.attendees}
+                          report={
+                            new Report({
+                              uuid: values.uuid,
+                              engagementDate: values.engagementDate,
+                              duration: Number.parseInt(values.duration) || 0,
+                              attendees: values.attendees
+                            })
+                          }
                           onChange={value =>
                             setFieldValue("attendees", value, true)}
                           showDelete
@@ -787,67 +794,69 @@ const ReportForm = ({
                 />
               </Fieldset>
 
-              <Fieldset
-                title={Settings.fields.task.subLevel.longLabel}
-                className="tasks-selector"
-              >
-                <Field
-                  name="tasks"
-                  label={Settings.fields.task.subLevel.longLabel}
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasks", value, true)
-                    setReportTasks(value)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="tasks"
-                      placeholder={`Search for ${tasksLabel}...`}
-                      value={values.tasks}
-                      renderSelected={
-                        <TaskTable
-                          id="tasks-tasks"
-                          tasks={values.tasks}
-                          showParent
-                          showDelete
-                          showDescription
-                          noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
-                        />
-                      }
-                      overlayColumns={[
-                        Settings.fields.task.subLevel.shortLabel,
-                        Settings.fields.task.topLevel.shortLabel
-                      ]}
-                      overlayRenderRow={TaskDetailedOverlayRow}
-                      filterDefs={tasksFilters}
-                      objectType={Task}
-                      queryParams={{ status: Task.STATUS.ACTIVE }}
-                      fields={Task.autocompleteQuery}
-                      addon={TASKS_ICON}
-                    />
-                  }
-                  extraColElem={
-                    <>
-                      <FieldHelper.FieldShortcuts
-                        title={`Recent ${tasksLabel}`}
-                        shortcuts={recents.tasks}
+              {!_isEmpty(tasksFilters) && (
+                <Fieldset
+                  title={Settings.fields.task.subLevel.longLabel}
+                  className="tasks-selector"
+                >
+                  <Field
+                    name="tasks"
+                    label={Settings.fields.task.subLevel.longLabel}
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("tasks", value, true)
+                      setReportTasks(value)
+                    }}
+                    widget={
+                      <AdvancedMultiSelect
                         fieldName="tasks"
+                        placeholder={`Search for ${tasksLabel}...`}
+                        value={values.tasks}
+                        renderSelected={
+                          <TaskTable
+                            id="tasks-tasks"
+                            tasks={values.tasks}
+                            showParent
+                            showDelete
+                            showDescription
+                            noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
+                          />
+                        }
+                        overlayColumns={[
+                          Settings.fields.task.subLevel.shortLabel,
+                          Settings.fields.task.topLevel.shortLabel
+                        ]}
+                        overlayRenderRow={TaskDetailedOverlayRow}
+                        filterDefs={tasksFilters}
                         objectType={Task}
-                        curValue={values.tasks}
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tasks", value, true)
-                          setReportTasks(value)
-                        }}
-                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                        queryParams={{ status: Task.STATUS.ACTIVE }}
+                        fields={Task.autocompleteQuery}
+                        addon={TASKS_ICON}
                       />
-                    </>
-                  }
-                />
-              </Fieldset>
+                    }
+                    extraColElem={
+                      <>
+                        <FieldHelper.FieldShortcuts
+                          title={`Recent ${tasksLabel}`}
+                          shortcuts={recents.tasks}
+                          fieldName="tasks"
+                          objectType={Task}
+                          curValue={values.tasks}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("tasks", value, true)
+                            setReportTasks(value)
+                          }}
+                          handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                        />
+                      </>
+                    }
+                  />
+                </Fieldset>
+              )}
 
               {Settings.fields.report.customFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
@@ -968,7 +977,7 @@ const ReportForm = ({
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value,
+                            value || null,
                             true
                           )}
                         widget={

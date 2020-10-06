@@ -134,6 +134,7 @@ export const CUSTOM_FIELD_TYPE = {
   NUMBER: "number",
   DATE: "date",
   DATETIME: "datetime",
+  JSON: "json",
   ENUM: "enum",
   ENUMSET: "enumset",
   ARRAY_OF_OBJECTS: "array_of_objects",
@@ -150,6 +151,20 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
   ),
   [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
   [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.JSON]: yup
+    .mixed()
+    .nullable()
+    .test(
+      "json",
+      "json error",
+      // can't use arrow function here because of binding to 'this'
+      function(value) {
+        return typeof value === "object"
+          ? true
+          : this.createError({ message: "Invalid JSON" })
+      }
+    )
+    .default(null),
   [CUSTOM_FIELD_TYPE.ENUM]: yup.string().nullable().default(""),
   [CUSTOM_FIELD_TYPE.ENUMSET]: yup.array().nullable().default([]),
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup.array().nullable().default([]),
@@ -184,20 +199,14 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }
-  // Field type specific validation not needed when the field is invisible or
-  // when INVISIBLE_CUSTOM_FIELDS_FIELD hasn't even been filled (like when the report
-  // has been created via sevrer side tests, or later maybe imported from an
-  // external system (and never went through the edit/create form which normally
-  // fills the INVISIBLE_CUSTOM_FIELDS_FIELD)
+  // Field type specific validation not needed when the field is invisible
   fieldYupSchema = fieldYupSchema.when(
     INVISIBLE_CUSTOM_FIELDS_FIELD,
-    (invisibleCustomFields, schema) => {
-      return invisibleCustomFields === null ||
-        (invisibleCustomFields &&
-          invisibleCustomFields.includes(`${parentFieldName}.${fieldKey}`))
+    (invisibleCustomFields, schema) =>
+      invisibleCustomFields &&
+      invisibleCustomFields.includes(`${parentFieldName}.${fieldKey}`)
         ? schema
         : schema.concat(fieldTypeYupSchema)
-    }
   )
   return fieldYupSchema
 }
@@ -442,17 +451,6 @@ export default class Model {
     return this.name || this.uuid
   }
 
-  static toConfigObject(value) {
-    switch (typeof value) {
-      case "object":
-        return value
-      case "string":
-        return utils.parseJsonSafe(value)
-      default:
-        return {}
-    }
-  }
-
   static parseAssessmentsConfig(assessmentsConfig) {
     return Object.fromEntries(
       assessmentsConfig.map(a => {
@@ -461,7 +459,7 @@ export default class Model {
           ? `${a.relatedObjectType}_${recurrence}`
           : recurrence
         const questions = a.questions || {}
-        return [assessmentKey, Model.toConfigObject(questions)]
+        return [assessmentKey, questions]
       })
     )
   }
@@ -511,10 +509,8 @@ export default class Model {
       .map(note => ({ note: note, assessment: utils.parseJsonSafe(note.text) }))
       .filter(
         obj =>
-          // FIXME: make a nicer implementation of the check on period start
           obj.assessment.__recurrence === recurrence &&
-          obj.assessment.__periodStart ===
-            utils.parseJsonSafe(JSON.stringify(period.start))
+          moment(obj.assessment.__periodStart).isSame(period.start)
       )
   }
 

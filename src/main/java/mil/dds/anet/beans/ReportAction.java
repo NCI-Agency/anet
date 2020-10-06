@@ -28,6 +28,9 @@ public class ReportAction extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   ActionType type;
+  @GraphQLQuery
+  @GraphQLInputField
+  private boolean planned; // only meaningful when type is APPROVE or PUBLISH
 
   @Override
   @JsonIgnore
@@ -134,6 +137,14 @@ public class ReportAction extends AbstractAnetBean {
     this.type = type;
   }
 
+  public boolean isPlanned() {
+    return planned;
+  }
+
+  public void setPlanned(boolean planned) {
+    this.planned = planned;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof ReportAction)) {
@@ -143,17 +154,18 @@ public class ReportAction extends AbstractAnetBean {
     return Objects.equals(getStepUuid(), other.getStepUuid())
         && Objects.equals(getPersonUuid(), other.getPersonUuid())
         && Objects.equals(getReportUuid(), other.getReportUuid())
+        && Objects.equals(planned, other.isPlanned())
         && Objects.equals(createdAt, other.getCreatedAt()) && Objects.equals(type, other.getType());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(step, person, report, createdAt, type);
+    return Objects.hash(step, person, report, createdAt, type, planned);
   }
 
   @Override
   public String toString() {
-    return String.format("[ReportAction: step:%s, type:%s, person:%s, report:%s]", getStepUuid(),
-        type, getPersonUuid(), getReportUuid());
+    return String.format("[ReportAction: step:%s, type:%s, planned:%s, person:%s, report:%s]",
+        getStepUuid(), type, planned, getPersonUuid(), getReportUuid());
   }
 }

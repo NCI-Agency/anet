@@ -177,13 +177,17 @@ export default {
     }
   },
 
-  parseJsonSafe: function(jsonString) {
+  parseJsonSafe: function(jsonString, throwError) {
     // TODO: Improve error handling so that consuming widgets can display an error w/o crashing
     let result
     try {
       result = JSON.parse(jsonString || "{}")
     } catch (error) {
-      console.error(`unable to parse JSON: ${jsonString}`)
+      if (throwError) {
+        throw error
+      } else {
+        console.error(`unable to parse JSON: ${jsonString}`)
+      }
     }
     return typeof result === "object" ? result || {} : {}
   },

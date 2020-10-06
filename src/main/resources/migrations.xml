@@ -3375,6 +3375,126 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
+	<changeSet id="update-task-assessment-questions" author="gjvoosten">
+		<!-- Note: the demo data has at most 3 assessment definitions for any one task
+		     and field installations have at most 2, so only update the first 3. -->
+
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+		<![CDATA[
+			-- change all &#34; to " inside 'questions'
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[0].questions', REPLACE(JSON_VALUE(customFields, 'strict $.assessments[0].questions'), '&#34;', '"'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[0].questions') IS NOT NULL
+			AND ISJSON(JSON_VALUE(customFields, 'strict $.assessments[0].questions')) = 0
+			AND JSON_VALUE(customFields, 'strict $.assessments[0].questions') LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[1].questions', REPLACE(JSON_VALUE(customFields, 'strict $.assessments[1].questions'), '&#34;', '"'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[1].questions') IS NOT NULL
+			AND ISJSON(JSON_VALUE(customFields, 'strict $.assessments[1].questions')) = 0
+			AND JSON_VALUE(customFields, 'strict $.assessments[1].questions') LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[2].questions', REPLACE(JSON_VALUE(customFields, 'strict $.assessments[2].questions'), '&#34;', '"'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[2].questions') IS NOT NULL
+			AND ISJSON(JSON_VALUE(customFields, 'strict $.assessments[2].questions')) = 0
+			AND JSON_VALUE(customFields, 'strict $.assessments[2].questions') LIKE '%&#34;%';
+
+			-- change all 'questions' from string to JSON
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[0].questions', JSON_QUERY(JSON_VALUE(customFields, 'strict $.assessments[0].questions'), '$'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[0].questions') IS NOT NULL;
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[1].questions', JSON_QUERY(JSON_VALUE(customFields, 'strict $.assessments[1].questions'), '$'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[1].questions') IS NOT NULL;
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[2].questions', JSON_QUERY(JSON_VALUE(customFields, 'strict $.assessments[2].questions'), '$'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[2].questions') IS NOT NULL;
+		]]>
+		</sql>
+
+		<!-- Requires at least PostgreSQL 9.5: -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			-- create convenience function
+			CREATE OR REPLACE FUNCTION is_valid_json(p_json text)
+				RETURNS boolean
+			AS
+			'
+			BEGIN
+				IF p_json IS NULL THEN
+					RETURN NULL;
+				ELSE
+					RETURN (p_json::json IS NOT NULL);
+				END IF;
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN FALSE;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			-- change all &#34; to " inside 'questions'
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 0, questions}', to_jsonb(replace("customFields"::jsonb#>>'{assessments, 0, questions}', '&#34;', '"')::text))
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 0, questions}') IS FALSE
+			AND "customFields"::jsonb#>>'{assessments, 0, questions}' LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 1, questions}', to_jsonb(replace("customFields"::jsonb#>>'{assessments, 1, questions}', '&#34;', '"')::text))
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 1, questions}') IS FALSE
+			AND "customFields"::jsonb#>>'{assessments, 1, questions}' LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 2, questions}', to_jsonb(replace("customFields"::jsonb#>>'{assessments, 2, questions}', '&#34;', '"')::text))
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 2, questions}') IS FALSE
+			AND "customFields"::jsonb#>>'{assessments, 2, questions}' LIKE '%&#34;%';
+
+			-- change all 'questions' from string to JSON
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 0, questions}', ("customFields"::jsonb#>>'{assessments, 0, questions}')::text::jsonb)
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 0, questions}') IS TRUE;
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 1, questions}', ("customFields"::jsonb#>>'{assessments, 1, questions}')::text::jsonb)
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 1, questions}') IS TRUE;
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 2, questions}', ("customFields"::jsonb#>>'{assessments, 2, questions}')::text::jsonb)
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 2, questions}') IS TRUE;
+
+			-- drop convenience function
+			DROP FUNCTION IF EXISTS is_valid_json;
+		]]>
+		</sql>
+
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-reportActions-planned" author="gjvoosten">
+		<addColumn tableName="reportActions">
+			<column name="planned" type="boolean" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
 	<changeSet id="people-pendingVerification" author="VassilIordanov">
 		<comment>We are going to use pendingVerification column instead of the NEW_USER value of the status column</comment>
 		<sql dbms="mssql">

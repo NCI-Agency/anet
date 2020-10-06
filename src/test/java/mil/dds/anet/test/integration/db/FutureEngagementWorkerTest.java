@@ -28,7 +28,6 @@ import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
-import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -65,6 +64,10 @@ public class FutureEngagementWorkerTest {
     futureEngagementWorker = new FutureEngagementWorker(engine.getReportDao());
     emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
 
+    // Flush all reports from previous tests
+    futureEngagementWorker.run();
+    // Flush all emails from previous tests
+    emailWorker.run();
     // Clear the email server before starting testing
     emailServer.clearEmailServer();
   }
@@ -101,6 +104,11 @@ public class FutureEngagementWorkerTest {
     expectedIds.add("reportsOK_3");
 
     testFutureEngagementWorker(3);
+
+    // Reports should be draft now
+    testReportDraft(report.getUuid());
+    testReportDraft(report2.getUuid());
+    testReportDraft(report3.getUuid());
   }
 
   @Test
@@ -119,12 +127,15 @@ public class FutureEngagementWorkerTest {
   public void testReportDueEndToday() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueEndToday_1");
-    report.setEngagementDate(Utils.endOfToday());
+    report.setEngagementDate(Instant.now());
     engine.getReportDao().update(report);
 
     expectedIds.add("testReportDueEndToday_1");
 
     testFutureEngagementWorker(1);
+
+    // Report should be draft now
+    testReportDraft(report.getUuid());
   }
 
   @Test
@@ -151,6 +162,11 @@ public class FutureEngagementWorkerTest {
     engine.getReportDao().update(report);
 
     testFutureEngagementWorker(isExpected ? 1 : 0);
+
+    if (isExpected) {
+      // Report should be draft now
+      testReportDraft(report.getUuid());
+    }
   }
 
   @Test
@@ -178,6 +194,11 @@ public class FutureEngagementWorkerTest {
     engine.getReportDao().update(report);
 
     testFutureEngagementWorker(isExpected ? 1 : 0);
+
+    if (isExpected) {
+      // Report should be draft now
+      testReportDraft(report.getUuid());
+    }
   }
 
   @Test
@@ -193,16 +214,69 @@ public class FutureEngagementWorkerTest {
     // Report in approve step
     final ReportAction ra = new ReportAction();
     ra.setReport(report);
-    ra.setReportUuid(report.getUuid());
     ra.setStep(step);
-    ra.setStepUuid(step.getUuid());
     ra.setType(ActionType.APPROVE);
-    ra.setCreatedAt(Utils.endOfToday());
+    ra.setCreatedAt(Instant.now());
     engine.getReportActionDao().insert(ra);
 
     unexpectedIds.add("testApprovalStepReport_1");
 
     testFutureEngagementWorker(0);
+  }
+
+  @Test
+  public void testPlanningApprovalStepReport() {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final Report report = createTestReport("testPlanningApprovalStepReport_1");
+    final ApprovalStep step = report.getApprovalStep();
+    step.setType(ApprovalStepType.PLANNING_APPROVAL);
+    engine.getApprovalStepDao().insert(step);
+    report.setApprovalStep(step);
+    engine.getReportDao().update(report);
+
+    // Report in planning approve step
+    final ReportAction ra = new ReportAction();
+    ra.setReport(report);
+    ra.setStep(step);
+    ra.setType(ActionType.APPROVE);
+    ra.setCreatedAt(Instant.now());
+    engine.getReportActionDao().insert(ra);
+
+    expectedIds.add("testPlanningApprovalStepReport_1");
+
+    testFutureEngagementWorker(1);
+
+    // Report should be draft now
+    testReportDraft(report.getUuid());
+  }
+
+  @Test
+  public void testAutomaticallyApprovedReport() {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final Report report = createTestReport("testAutomaticallyApprovedReport_1");
+    report.setApprovalStep(null);
+    engine.getReportDao().update(report);
+
+    // Report in automatic approve step (no planning workflow)
+    final ReportAction ra = new ReportAction();
+    ra.setReport(report);
+    ra.setType(ActionType.APPROVE);
+    ra.setPlanned(true);
+    ra.setCreatedAt(Instant.now());
+    engine.getReportActionDao().insert(ra);
+
+    expectedIds.add("testAutomaticallyApprovedReport_1");
+
+    testFutureEngagementWorker(1);
+
+    // Report should be draft now
+    testReportDraft(report.getUuid());
+  }
+
+  private void testReportDraft(final String uuid) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final Report updatedReport = engine.getReportDao().getByUuid(uuid);
+    assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);
   }
 
   // DB integration

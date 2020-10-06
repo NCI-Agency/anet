@@ -29,7 +29,6 @@ import MyCounterparts from "pages/positions/MyCounterparts"
 import PositionNew from "pages/positions/New"
 import PositionShow from "pages/positions/Show"
 import ReportEdit from "pages/reports/Edit"
-import ReportMinimal from "pages/reports/Minimal"
 import MyReports from "pages/reports/MyReports"
 import ReportNew from "pages/reports/New"
 import ReportShow from "pages/reports/Show"
@@ -58,7 +57,8 @@ const Routing = () => {
             <Route path={`${url}/mine`} component={MyReports} />
             <Route path={`${url}/new`} component={ReportNew} />
             <Route path={`${url}/:uuid/edit`} component={ReportEdit} />
-            <Route path={`${url}/:uuid/min`} component={ReportMinimal} />
+            {/* TODO: Backwards-compatibility; this route can be removed at some point */}
+            <Route path={`${url}/:uuid/min`} component={ReportShow} />
             <Route path={`${url}/:uuid`} component={ReportShow} />
           </Switch>
         )}
