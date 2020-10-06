@@ -862,6 +862,14 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     // User could be null when the publication action is being done automatically by a worker
     action.setPersonUuid(DaoUtils.getUuid(user));
     action.setType(ActionType.PUBLISH);
+    final List<ReportAction> workflow =
+        r.loadWorkflow(AnetObjectEngine.getInstance().getContext()).join();
+    if (!workflow.isEmpty()) {
+      final ReportAction lastAction = workflow.get(workflow.size() - 1);
+      // Keep 'planned' from previous (possibly automatic) APPROVE action,
+      // so the FutureEngagementWorker will pick it up if it was indeed planned
+      action.setPlanned(lastAction.isPlanned());
+    }
     AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
     // Move the report to PUBLISHED state
@@ -910,10 +918,12 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       sql.append("     INNER JOIN LATERAL (SELECT"); // PostgreSQL
     }
     sql.append("           \"reportActions\".\"reportUuid\",");
-    sql.append("           \"reportActions\".\"approvalStepUuid\"");
+    sql.append("           \"reportActions\".\"approvalStepUuid\",");
+    sql.append("           \"reportActions\".planned");
     sql.append("         FROM \"reportActions\"");
     sql.append("         WHERE \"reportActions\".\"reportUuid\" = r.uuid");
-    sql.append("         AND \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
+    sql.append("         AND ( \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
+    sql.append("         OR    \"reportActions\".planned = :planned )");
     sql.append("         ORDER BY \"reportActions\".\"createdAt\" DESC");
     if (DaoUtils.isMsSql()) {
       sql.append("     ) ra");
@@ -921,7 +931,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       sql.append("       LIMIT 1"); // PostgreSQL
       sql.append("     ) ra ON TRUE");
     }
-    sql.append("       WHERE ra.\"approvalStepUuid\" IN");
+    sql.append("       WHERE ra.planned = :planned OR ra.\"approvalStepUuid\" IN");
     sql.append("         ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\"");
     sql.append("           WHERE \"approvalSteps\".type = :planningApprovalStepType )");
     sql.append("     ) pr");
@@ -937,6 +947,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sqlArgs.put("reportRejected", DaoUtils.getEnumId(ReportState.REJECTED));
     sqlArgs.put("reportPendingApproval", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
     sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
+    sqlArgs.put("planned", true);
     sqlArgs.put("planningApprovalStepType", DaoUtils.getEnumId(ApprovalStepType.PLANNING_APPROVAL));
     return getDbHandle().createQuery(sql.toString()).bindMap(sqlArgs).map(new ReportMapper())
         .list();
