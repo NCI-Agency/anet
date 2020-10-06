@@ -105,6 +105,7 @@ const GQL_GET_REPORT = gql`
       attendees {
         uuid
         name
+        author
         primary
         rank
         role
@@ -327,7 +328,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
-  const isAuthor = Person.isEqual(currentUser, report.author)
+  // there can be multiple authors
+  const isAuthor =
+    report.attendees.find(person => person.author) ||
+    report.author.uuid === currentUser.uuid
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step

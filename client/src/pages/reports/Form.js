@@ -283,7 +283,6 @@ const ReportForm = ({
     reportSchema = reportSchema.concat(attendeesInstantAssessmentsSchema)
   }
   let validateFieldDebounced
-
   return (
     <Formik
       enableReinitialize
@@ -1345,8 +1344,8 @@ const ReportForm = ({
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = values.attendees.map(a =>
-      Object.without(
+    report.attendees = values.attendees.map(a => {
+      const attendee = Object.without(
         a,
         "firstName",
         "lastName",
@@ -1354,7 +1353,11 @@ const ReportForm = ({
         "customFields",
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
-    )
+      // if report's creator, it is true, otherwise check if selected author
+      attendee.author =
+        attendee.uuid === report.author.uuid ? true : !!attendee.author
+      return attendee
+    })
     // strip tasks fields not in data model
     report.tasks = values.tasks.map(t => utils.getReference(t))
     report.location = utils.getReference(report.location)

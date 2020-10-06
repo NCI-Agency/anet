@@ -5,7 +5,7 @@ import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
 import React from "react"
-import { Label, Radio, Table } from "react-bootstrap"
+import { Checkbox, Label, Radio, Table } from "react-bootstrap"
 import "./AttendeesTable.css"
 
 const AttendeeDividerRow = () => (
@@ -19,6 +19,9 @@ const AttendeeDividerRow = () => (
 const TableHeader = ({ showDelete, hide }) => (
   <thead>
     <tr>
+      <th className="col-xs-1" style={{ textAlign: "center" }}>
+        {!hide && "Authors"}
+      </th>
       <th className="col-xs-1" style={{ textAlign: "center" }}>
         {!hide && "Primary"}
       </th>
@@ -65,7 +68,7 @@ TableContainer.propTypes = {
   children: PropTypes.node
 }
 
-const RadioButton = ({ person, disabled, handleOnChange }) => (
+const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
   <Radio
     name={`primaryAttendee${person.role}`}
     className="primary"
@@ -76,7 +79,23 @@ const RadioButton = ({ person, disabled, handleOnChange }) => (
     {person.primary && <Label bsStyle="primary">Primary</Label>}
   </Radio>
 )
-RadioButton.propTypes = {
+PrimaryAttendeeRadioButton.propTypes = {
+  person: PropTypes.object,
+  disabled: PropTypes.bool,
+  handleOnChange: PropTypes.func
+}
+const AuthorAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
+  <Checkbox
+    name={`primaryAttendee${person.role}`}
+    className="primary"
+    value={!!person.author}
+    disabled={disabled}
+    onChange={() => !disabled && handleOnChange(person)}
+  >
+    {person.author && <Label bsStyle="primary">Author</Label>}
+  </Checkbox>
+)
+AuthorAttendeeCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
   handleOnChange: PropTypes.func
@@ -114,8 +133,17 @@ const AttendeesTable = ({
   function renderAttendeeRow(person) {
     return (
       <tr key={person.uuid}>
+        <td className="author-attendee">
+          {Person.isAdvisor(person) && (
+            <AuthorAttendeeCheckbox
+              person={person}
+              handleOnChange={setAuthorAttendee}
+              disabled={disabled}
+            />
+          )}
+        </td>
         <td className="primary-attendee">
-          <RadioButton
+          <PrimaryAttendeeRadioButton
             person={person}
             handleOnChange={setPrimaryAttendee}
             disabled={disabled}
@@ -168,6 +196,15 @@ const AttendeesTable = ({
         attendee.primary = true
       } else if (attendee.role === person.role) {
         attendee.primary = false
+      }
+    })
+    onChange(report.attendees)
+  }
+  // only advisors can be authors
+  function setAuthorAttendee(person) {
+    report.attendees.forEach(attendee => {
+      if (Person.isEqual(attendee, person)) {
+        attendee.author = !attendee.author
       }
     })
     onChange(report.attendees)
