@@ -976,7 +976,7 @@ const ReportForm = ({
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value,
+                            value || null,
                             true
                           )}
                         widget={
