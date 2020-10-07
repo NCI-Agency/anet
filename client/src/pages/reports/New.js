@@ -2,8 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import AppContext from "components/AppContext"
 import GuidedTour from "components/GuidedTour"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Person, Report } from "models"
@@ -24,6 +24,7 @@ const ReportNew = ({ pageDispatchers }) => {
   if (currentUser && currentUser.uuid) {
     const person = new Person(currentUser)
     person.primary = true
+    person.author = true
     report.attendees.push(person)
   }
   const reportInitialValues = Object.assign(

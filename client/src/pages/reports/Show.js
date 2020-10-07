@@ -328,10 +328,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
-  // there can be multiple authors
+  // there can be multiple authors, FIXME: can report.author(creator) be non-attending, if not, remove first check
   const isAuthor =
-    report.attendees.find(person => person.author) ||
-    report.author.uuid === currentUser.uuid
+    Person.isEqual(currentUser, report.author) ||
+    report.attendees.find(person => person.author)
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
