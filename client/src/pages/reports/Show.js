@@ -331,7 +331,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // there can be multiple authors, FIXME: can report.author(creator) be non-attending, if not, remove first check
   const isAuthor =
     Person.isEqual(currentUser, report.author) ||
-    report.attendees.find(person => person.author)
+    report.attendees.find(
+      person => person.author && Person.isEqual(person, currentUser)
+    )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step

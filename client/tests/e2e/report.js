@@ -106,7 +106,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
-    /* eslint-disable no-unused-vars */ $principalAuthorCheckbox1 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthorCheckbox2 /* eslint-enable no-unused-vars */,
     $principalPrimary2,
     $principalName2,
     /* eslint-disable no-unused-vars */

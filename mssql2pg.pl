@@ -31,6 +31,8 @@ if (/^INSERT INTO positions.* authorized/) { # very very specific
 }
 # This one is for populating report authorization groups
 s/(?<=rp.\"isPrimary\")\s+=\s+([10])/"= " . ($1 ? 'TRUE' : 'FALSE')/e;
+# This one for the old reports' authors' isAuthor flag update
+s/SET "isAuthor" = 1/ SET "isAuthor" = TRUE/;
 # standard date-time math would be so nice...
 s/DATEADD\s*\(([^,]*),\s*(-?\d+),\s*CURRENT_TIMESTAMP\)/CURRENT_TIMESTAMP + INTERVAL '$2 $1'/g;
 s/cast\((\S+) as datetime2\((\d+)\)\)/"date_trunc(" . ($2 eq '3' ? "'milliseconds'" : "'second'") . ", $1)"/ie;

@@ -141,7 +141,7 @@ const AttendeesTable = ({
   function renderAttendeeRow(person) {
     return (
       <tr key={person.uuid}>
-        <td className="author-attendee">
+        <td className="author-attendee" style={{ minWidth: "89px" }}>
           {Person.isAdvisor(person) && (
             <AuthorAttendeeCheckbox
               person={person}
