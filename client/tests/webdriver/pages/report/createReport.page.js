@@ -67,12 +67,12 @@ class CreateReport extends Page {
     )
 
     // wait for conflict loader to disappear
-    advisor.$("td:nth-child(6) div.bp3-spinner").waitForExist({ reverse: true })
+    advisor.$("td:nth-child(7) div.bp3-spinner").waitForExist({ reverse: true })
 
     return {
-      name: advisor.$("td:nth-child(2)").getText(),
-      conflictButton: advisor.$("td:nth-child(6) > span"),
-      deleteButton: advisor.$("td:nth-child(7) > button")
+      name: advisor.$("td:nth-child(3)").getText(),
+      conflictButton: advisor.$("td:nth-child(7) > span"),
+      deleteButton: advisor.$("td:nth-child(8) > button")
     }
   }
 
@@ -84,13 +84,13 @@ class CreateReport extends Page {
 
     // wait for conflict loader to disappear
     principal
-      .$("td:nth-child(6) div.bp3-spinner")
+      .$("td:nth-child(7) div.bp3-spinner")
       .waitForExist({ reverse: true })
 
     return {
-      name: principal.$("td:nth-child(2)").getText(),
-      conflictButton: principal.$("td:nth-child(6) > span"),
-      deleteButton: principal.$("td:nth-child(7) > button")
+      name: principal.$("td:nth-child(3)").getText(),
+      conflictButton: principal.$("td:nth-child(7) > span"),
+      deleteButton: principal.$("td:nth-child(8) > button")
     }
   }
 

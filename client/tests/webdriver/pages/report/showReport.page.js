@@ -59,8 +59,8 @@ class ShowReport extends Page {
       .$$("#attendeesContainer tbody > tr")
       .find(
         r =>
-          r.$("td:nth-child(2)").isExisting() &&
-          r.$("td:nth-child(2)").getText() === name
+          r.$("td:nth-child(3)").isExisting() &&
+          r.$("td:nth-child(3)").getText() === name
       )
 
     if (!row) {
@@ -68,12 +68,12 @@ class ShowReport extends Page {
     }
 
     // wait for conflict loader to disappear
-    row.$("td:nth-child(6) div.bp3-spinner").waitForExist({ reverse: true })
+    row.$("td:nth-child(7) div.bp3-spinner").waitForExist({ reverse: true })
 
     return {
-      name: row.$("td:nth-child(2)").getText(),
-      conflictButton: row.$("td:nth-child(6) > span"),
-      deleteButton: row.$("td:nth-child(7) > button")
+      name: row.$("td:nth-child(3)").getText(),
+      conflictButton: row.$("td:nth-child(7) > span"),
+      deleteButton: row.$("td:nth-child(8) > button")
     }
   }
 

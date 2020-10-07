@@ -1344,7 +1344,7 @@ const ReportForm = ({
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = values.attendees.map(a => {
+    report.attendees = values.attendees.map((a, index) => {
       const attendee = Object.without(
         a,
         "firstName",
@@ -1353,9 +1353,7 @@ const ReportForm = ({
         "customFields",
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
-      // if report's creator, it is true, otherwise check if selected author
-      attendee.author =
-        attendee.uuid === report.author.uuid ? true : !!attendee.author
+      attendee.author = !!values.attendees[index].author
       return attendee
     })
     // strip tasks fields not in data model
