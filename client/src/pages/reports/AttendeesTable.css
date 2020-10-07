@@ -15,3 +15,13 @@ div.checkbox.primary > label > span {
   padding-top: 4px;
   line-height: normal;
 }
+
+.isCurrentEditor.checkbox.primary > label > span {
+  background-color: green;
+}
+
+@media print {
+  .author-attendee {
+    display: none;
+  }
+}

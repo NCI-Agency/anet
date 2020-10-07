@@ -1,10 +1,11 @@
+import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import RemoveButton from "components/RemoveButton"
 import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { Checkbox, Label, Radio, Table } from "react-bootstrap"
 import "./AttendeesTable.css"
 
@@ -84,12 +85,17 @@ PrimaryAttendeeRadioButton.propTypes = {
   disabled: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
-const AuthorAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
+const AuthorAttendeeCheckbox = ({
+  person,
+  disabled,
+  isCurrentEditor,
+  handleOnChange
+}) => (
   <Checkbox
-    name={`primaryAttendee${person.role}`}
-    className="primary"
+    name={`authorAttendee${person.role}`}
+    className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}`}
     value={!!person.author}
-    disabled={disabled}
+    disabled={disabled || isCurrentEditor}
     onChange={() => !disabled && handleOnChange(person)}
   >
     {person.author && <Label bsStyle="primary">Author</Label>}
@@ -98,6 +104,7 @@ const AuthorAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
 AuthorAttendeeCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
+  isCurrentEditor: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
 
@@ -108,6 +115,7 @@ const AttendeesTable = ({
   showDelete,
   onDelete
 }) => {
+  const { currentUser } = useContext(AppContext)
   return (
     <div id="attendeesContainer">
       <TableContainer className="advisorAttendeesTable">
@@ -139,6 +147,7 @@ const AttendeesTable = ({
               person={person}
               handleOnChange={setAuthorAttendee}
               disabled={disabled}
+              isCurrentEditor={Person.isEqual(person, currentUser)}
             />
           )}
         </td>

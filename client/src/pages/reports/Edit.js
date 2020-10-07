@@ -45,6 +45,7 @@ const GQL_GET_REPORT = gql`
       attendees {
         uuid
         name
+        author
         primary
         rank
         role

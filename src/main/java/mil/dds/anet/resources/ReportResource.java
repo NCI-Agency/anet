@@ -190,7 +190,7 @@ public class ReportResource {
   /**
    * Perform all modifications to the report and its tasks and steps, returning the original state
    * of the report. Should be wrapped in a single transaction to ensure consistency.
-   * 
+   *
    * @param editor the current user (for authorization checks)
    * @param r a Report object with the desired modifications
    * @return the report as it was stored in the database before this method was called.
@@ -259,7 +259,8 @@ public class ReportResource {
         Optional<ReportPerson> existingPerson =
             existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
         if (existingPerson.isPresent()) {
-          if (existingPerson.get().isPrimary() != rp.isPrimary()) {
+          if (existingPerson.get().isPrimary() != rp.isPrimary()
+              || existingPerson.get().isAuthor() != rp.isAuthor()) {
             dao.updateAttendeeOnReport(rp, r);
           }
           existingPeople.remove(existingPerson.get());
@@ -696,7 +697,7 @@ public class ReportResource {
 
   /**
    * Get the daily rollup graph.
-   * 
+   *
    * @param start Start timestamp for the rollup period
    * @param end end timestamp for the rollup period
    * @param orgType If both advisorOrgUuid and principalOrgUuid are NULL then the type of
@@ -817,7 +818,7 @@ public class ReportResource {
   /**
    * Gets aggregated data per organization for engagements attended and reports submitted for each
    * advisor in a given organization.
-   * 
+   *
    * @param weeksAgo Weeks ago integer for the amount of weeks before the current week
    */
   @GraphQLQuery(name = "advisorReportInsights")

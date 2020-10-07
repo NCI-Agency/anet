@@ -69,6 +69,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
+    /* eslint-disable no-unused-vars */ $principalauthor1 /* eslint-enable no-unused-vars */,
     $principalPrimary1,
     $principalName1,
     $principalPosition1,
@@ -105,6 +106,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
+    /* eslint-disable no-unused-vars */ $principalAuthorCheckbox1 /* eslint-enable no-unused-vars */,
     $principalPrimary2,
     $principalName2,
     /* eslint-disable no-unused-vars */
@@ -642,6 +644,7 @@ test.serial(
     )
 
     const [
+      /* eslint-disable no-unused-vars */ $advisorAuthorCheckbox /* eslint-enable no-unused-vars */,
       $advisorPrimaryCheckbox,
       $advisorName,
       $advisorPosition,
