@@ -432,6 +432,7 @@ public class ReportResource {
       approval.setReportUuid(r.getUuid());
       approval.setPersonUuid(user.getUuid());
       approval.setType(ActionType.APPROVE);
+      approval.setPlanned(true); // so the FutureEngagementWorker can find this
       engine.getReportActionDao().insert(approval);
       r.setState(ReportState.APPROVED);
     } else {

@@ -1,30 +1,50 @@
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import Model, { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import RemoveButton from "components/RemoveButton"
-import _get from "lodash/get"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
-import utils from "utils"
 
 const RelatedObjectsTable = ({
   currentObject,
   relatedObjects,
-  onSelect,
-  showDelete,
-  onDelete
+  setRelatedObjects,
+  showDelete
 }) => {
-  const relatedObjectsExist = _get(relatedObjects, "length", 0) > 0
+  const fieldValue = relatedObjects.map(nro => ({
+    uuid: nro.relatedObjectUuid
+  }))
 
   return (
     <div id="related_objects">
       <MultiTypeAdvancedSelectComponent
+        value={fieldValue}
+        isMultiSelect
         onConfirm={(value, objectType) => {
-          onSelect(value, objectType)
+          if (value.length > fieldValue.length) {
+            // entity was added at the end, set correct value
+            const addedEntity = value.pop()
+            const newRelatedObject = {
+              relatedObjectType: MODEL_TO_OBJECT_TYPE[objectType],
+              relatedObjectUuid: addedEntity.uuid,
+              relatedObject: addedEntity
+            }
+            setRelatedObjects([...relatedObjects, newRelatedObject])
+          } else {
+            // entity was deleted, find which one, but always keep current object
+            const valueUuids = value.map(v => v.uuid)
+            const newRelatedObjects = relatedObjects.filter(
+              ro =>
+                (currentObject?.relatedObjectType === ro.relatedObjectType &&
+                  currentObject?.relatedObjectUuid === ro.relatedObjectUuid) ||
+                valueUuids.includes(ro.relatedObjectUuid)
+            )
+            setRelatedObjects(newRelatedObjects)
+          }
         }}
       />
-      {relatedObjectsExist ? (
+      {relatedObjects.length > 0 ? (
         <Table
           striped
           condensed
@@ -59,7 +79,13 @@ const RelatedObjectsTable = ({
                         <RemoveButton
                           title="Unlink object"
                           altText="Unlink object"
-                          onClick={() => onDelete(nro)}
+                          onClick={() => {
+                            const newRelatedObjects = relatedObjects.filter(
+                              item =>
+                                item.relatedObjectUuid !== nro.relatedObjectUuid
+                            )
+                            setRelatedObjects(newRelatedObjects)
+                          }}
                         />
                       </td>
                     ))}
@@ -77,9 +103,8 @@ const RelatedObjectsTable = ({
 RelatedObjectsTable.propTypes = {
   currentObject: Model.relatedObjectPropType,
   relatedObjects: Model.noteRelatedObjectsPropType.isRequired,
-  onSelect: PropTypes.func.isRequired,
-  showDelete: PropTypes.bool,
-  onDelete: utils.fnRequiredWhen.bind(null, "showDelete")
+  setRelatedObjects: PropTypes.func.isRequired,
+  showDelete: PropTypes.bool
 }
 
 RelatedObjectsTable.defaultProps = {

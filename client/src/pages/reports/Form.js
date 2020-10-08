@@ -346,6 +346,18 @@ const ReportForm = ({
         resetForm,
         setSubmitting
       }) => {
+        // need up-to-date copies of these in the autosave handler
+        Object.assign(autoSaveSettings, { dirty, values, touched })
+        if (!autoSaveSettings.timeoutId) {
+          // Schedule the auto-save timer
+          const autosaveHandler = () =>
+            autoSave({ setFieldValue, setFieldTouched, resetForm })
+          autoSaveSettings.timeoutId = window.setTimeout(
+            autosaveHandler,
+            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+          )
+        }
+
         if (!validateFieldDebounced) {
           validateFieldDebounced = _debounce(validateField, 400)
         }
@@ -445,19 +457,7 @@ const ReportForm = ({
             queryVars: {}
           }
         }
-        // need up-to-date copies of these in the autosave handler
-        autoSaveSettings.dirty = dirty
-        autoSaveSettings.values = values
-        autoSaveSettings.touched = touched
-        if (!autoSaveSettings.timeoutId) {
-          // Schedule the auto-save timer
-          const autosaveHandler = () =>
-            autoSave({ setFieldValue, setFieldTouched, resetForm })
-          autoSaveSettings.timeoutId = window.setTimeout(
-            autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
-          )
-        }
+
         // Only the author can delete a report, and only in DRAFT.
         const canDelete =
           !!values.uuid &&
@@ -976,7 +976,7 @@ const ReportForm = ({
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value,
+                            value || null,
                             true
                           )}
                         widget={
