@@ -94,7 +94,7 @@ const AuthorAttendeeCheckbox = ({
   <Checkbox
     name={`authorAttendee${person.role}`}
     className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}`}
-    value={!!person.author}
+    checked={!!person.author}
     disabled={disabled || isCurrentEditor}
     onChange={() => !disabled && handleOnChange(person)}
   >

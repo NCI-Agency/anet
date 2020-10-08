@@ -951,7 +951,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
   SELECT @noteUuid, 'tasks', t.uuid
   FROM tasks t
   WHERE t.shortName = '1.2.B';
-
+-- For migration <changeSet id="add-reportPeople-author">
 UPDATE reportPeople
 	SET isAuthor = 1
 	WHERE personUuid = (SELECT authorUuid FROM reports WHERE uuid = reportUuid);

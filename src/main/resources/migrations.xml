@@ -3568,6 +3568,8 @@
 	</changeSet>
 
 	<changeSet id="add-reportPeople-author" author="cemalettin-simsoft">
+		<!-- Before, we saved report's author with reports.authorUuid-->
+		<!-- since we need more authors we will save it with a flag in reportPeople.isAuthor -->
 		<addColumn tableName="reportPeople">
 			<column name="isAuthor" type="boolean" defaultValue="false" />
 		</addColumn>
