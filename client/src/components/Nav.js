@@ -83,7 +83,9 @@ const Nav = ({
   const inInsights = path.indexOf("/insights") === 0
   const inDashboards = path.indexOf("/dashboards") === 0
 
-  const myOrg = currentUser.position ? currentUser.position.organization : null
+  const myOrg = currentUser.position.uuid
+    ? currentUser.position.organization
+    : null
   let orgUuid, myOrgUuid
   if (inOrg) {
     orgUuid = path.split("/")[2]
@@ -115,7 +117,7 @@ const Nav = ({
 
       <BSNav id="reports-nav" />
 
-      {isAdvisor && currentUser.position && (
+      {isAdvisor && currentUser.position.uuid && (
         <>
           <SidebarLink
             linkTo={{ pathname: "/tasks/mine" }}

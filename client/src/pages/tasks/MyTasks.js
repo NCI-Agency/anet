@@ -47,7 +47,7 @@ const MyTasks = ({
         sortBy: "NAME",
         sortOrder: "ASC",
         status: Task.STATUS.ACTIVE,
-        taskedOrgUuid: currentUser.position?.organization?.uuid,
+        taskedOrgUuid: currentUser.position.organization?.uuid,
         orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
       }),
     [searchQueryParams, currentUser]
@@ -58,20 +58,12 @@ const MyTasks = ({
         sortBy: "NAME",
         sortOrder: "ASC",
         status: Task.STATUS.ACTIVE,
-        responsiblePositionUuid: currentUser.position?.uuid
+        responsiblePositionUuid: currentUser.position.uuid
       }),
     [searchQueryParams, currentUser]
   )
-  const pendingTasksSearchQueryParams = useMemo(
-    () =>
-      Object.assign({}, searchQueryParams, {
-        sortBy: "NAME",
-        sortOrder: "ASC",
-        status: Task.STATUS.ACTIVE,
-        responsiblePositionUuid: currentUser.position?.uuid
-      }),
-    [searchQueryParams, currentUser]
-  )
+
+  const pendingTasksSearchQueryParams = responsibleTasksSearchQueryParams
   const myOrgAssignedTasksTitle = (
     <>
       {pluralize(taskShortLabel)} assigned to{" "}
@@ -81,10 +73,7 @@ const MyTasks = ({
       />
     </>
   )
-  // FIXME: better indication
-  if (!currentUser?.position?.uuid) {
-    return <p>First assign a position</p>
-  }
+
   return (
     <div>
       <Fieldset id="my-org-assigned-tasks" title={myOrgAssignedTasksTitle}>
