@@ -1,5 +1,6 @@
 package mil.dds.anet.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +51,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private String emailFromAddr;
   private String serverUrl;
 
+  @JsonIgnore
   private Map<String, Object> dictionary;
 
   private String anetDictionaryName;
