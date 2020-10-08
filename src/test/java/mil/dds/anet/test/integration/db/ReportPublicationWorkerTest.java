@@ -7,10 +7,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
@@ -27,18 +28,18 @@ import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.threads.AnetEmailWorker;
-import mil.dds.anet.threads.FutureEngagementWorker;
+import mil.dds.anet.threads.ReportPublicationWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TestApp.class)
-public class FutureEngagementWorkerTest {
+public class ReportPublicationWorkerTest {
   private final static List<String> expectedIds = new ArrayList<>();
   private final static List<String> unexpectedIds = new ArrayList<>();
 
-  private static FutureEngagementWorker futureEngagementWorker;
+  private static ReportPublicationWorker reportPublicationWorker;
   private static FakeSmtpServer emailServer;
   private static AnetEmailWorker emailWorker;
 
@@ -49,7 +50,15 @@ public class FutureEngagementWorkerTest {
   @SuppressWarnings("unchecked")
   public static void setUpClass() throws Exception {
     final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
-    if (app.getConfiguration().getSmtp().isDisabled()) {
+    final AnetConfiguration configuration = app.getConfiguration();
+    final Map<String, Object> dictionary = new HashMap<>(configuration.getDictionary());
+    final Map<String, Object> reportWorkflowSettings =
+        (Map<String, Object>) dictionary.get("reportWorkflow");
+    // Make sure publication is immediate
+    reportWorkflowSettings.put("nbOfHoursQuarantineApproved", 0);
+    configuration.setDictionary(dictionary);
+
+    if (configuration.getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
@@ -57,15 +66,15 @@ public class FutureEngagementWorkerTest {
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
     whitelistedEmail =
-        "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
+        "@" + ((List<String>) configuration.getDictionaryEntry("domainNames")).get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    emailWorker = new AnetEmailWorker(engine.getEmailDao(), app.getConfiguration());
-    futureEngagementWorker = new FutureEngagementWorker(engine.getReportDao());
-    emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
+    emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration);
+    reportPublicationWorker = new ReportPublicationWorker(engine.getReportDao(), configuration);
+    emailServer = new FakeSmtpServer(configuration.getSmtp());
 
     // Flush all reports from previous tests
-    futureEngagementWorker.run();
+    reportPublicationWorker.run();
     // Flush all emails from previous tests
     emailWorker.run();
     // Clear the email server before starting testing
@@ -75,7 +84,7 @@ public class FutureEngagementWorkerTest {
   @AfterAll
   public static void tearDownClass() throws Exception {
     // Test that all emails have been correctly sent
-    testFutureEngagementWorkerEmail();
+    testReportPublicationWorkerEmail();
 
     // Clear the email server after testing
     emailServer.clearEmailServer();
@@ -86,119 +95,7 @@ public class FutureEngagementWorkerTest {
 
   @Test
   public void testNoReports() {
-    testFutureEngagementWorker(0);
-  }
-
-  @Test
-  public void reportsOK() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("reportsOK_1");
-    engine.getReportDao().update(report);
-    final Report report2 = createTestReport("reportsOK_2");
-    engine.getReportDao().update(report2);
-    final Report report3 = createTestReport("reportsOK_3");
-    engine.getReportDao().update(report3);
-
-    expectedIds.add("reportsOK_1");
-    expectedIds.add("reportsOK_2");
-    expectedIds.add("reportsOK_3");
-
-    testFutureEngagementWorker(3);
-
-    // Reports should be draft now
-    testReportDraft(report.getUuid());
-    testReportDraft(report2.getUuid());
-    testReportDraft(report3.getUuid());
-  }
-
-  @Test
-  public void testReportDueInFuture() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("testReportDueInFuture_1");
-    report.setEngagementDate(Instant.now().plus(Duration.ofDays(2L)));
-    engine.getReportDao().update(report);
-
-    unexpectedIds.add("testReportDueInFuture_1");
-
-    testFutureEngagementWorker(0);
-  }
-
-  @Test
-  public void testReportDueEndToday() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("testReportDueEndToday_1");
-    report.setEngagementDate(Instant.now());
-    engine.getReportDao().update(report);
-
-    expectedIds.add("testReportDueEndToday_1");
-
-    testFutureEngagementWorker(1);
-
-    // Report should be draft now
-    testReportDraft(report.getUuid());
-  }
-
-  @Test
-  public void testReportApprovalStates() {
-    checkApprovalStepType(ApprovalStepType.PLANNING_APPROVAL, true, "1");
-    checkApprovalStepType(ApprovalStepType.REPORT_APPROVAL, false, "2");
-  }
-
-  private void checkApprovalStepType(final ApprovalStepType type, final boolean isExpected,
-      final String id) {
-    final String fullId = "checkApprovalStepType_" + id;
-    if (isExpected) {
-      expectedIds.add(fullId);
-    } else {
-      unexpectedIds.add(fullId);
-    }
-
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport(fullId);
-    final ApprovalStep as = report.getApprovalStep();
-    as.setType(type);
-    engine.getApprovalStepDao().insert(as);
-    report.setApprovalStep(as);
-    engine.getReportDao().update(report);
-
-    testFutureEngagementWorker(isExpected ? 1 : 0);
-
-    if (isExpected) {
-      // Report should be draft now
-      testReportDraft(report.getUuid());
-    }
-  }
-
-  @Test
-  public void testReportStates() {
-    checkReportState(ReportState.APPROVED, true, "APPROVED");
-    checkReportState(ReportState.CANCELLED, false, "CANCELLED");
-    checkReportState(ReportState.DRAFT, false, "DRAFT");
-    checkReportState(ReportState.PENDING_APPROVAL, true, "PENDING_APPROVAL");
-    checkReportState(ReportState.PUBLISHED, true, "PUBLISHED");
-    checkReportState(ReportState.REJECTED, true, "REJECTED");
-  }
-
-  private void checkReportState(final ReportState state, final boolean isExpected,
-      final String id) {
-    final String fullId = "checkApprovalStepType_" + id;
-    if (isExpected) {
-      expectedIds.add(fullId);
-    } else {
-      unexpectedIds.add(fullId);
-    }
-
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport(fullId);
-    report.setState(state);
-    engine.getReportDao().update(report);
-
-    testFutureEngagementWorker(isExpected ? 1 : 0);
-
-    if (isExpected) {
-      // Report should be draft now
-      testReportDraft(report.getUuid());
-    }
+    testReportPublicationWorker(0);
   }
 
   @Test
@@ -219,9 +116,12 @@ public class FutureEngagementWorkerTest {
     ra.setCreatedAt(Instant.now());
     engine.getReportActionDao().insert(ra);
 
-    unexpectedIds.add("testApprovalStepReport_1");
+    expectedIds.add("testApprovalStepReport_1");
 
-    testFutureEngagementWorker(0);
+    testReportPublicationWorker(1);
+
+    // Report should be published now
+    testReportPublished(report.getUuid(), false);
   }
 
   @Test
@@ -244,10 +144,10 @@ public class FutureEngagementWorkerTest {
 
     expectedIds.add("testPlanningApprovalStepReport_1");
 
-    testFutureEngagementWorker(1);
+    testReportPublicationWorker(1);
 
-    // Report should be draft now
-    testReportDraft(report.getUuid());
+    // Report should be published now
+    testReportPublished(report.getUuid(), false);
   }
 
   @Test
@@ -267,28 +167,33 @@ public class FutureEngagementWorkerTest {
 
     expectedIds.add("testAutomaticallyApprovedReport_1");
 
-    testFutureEngagementWorker(1);
+    testReportPublicationWorker(1);
 
-    // Report should be draft now
-    testReportDraft(report.getUuid());
+    // Report should be published now
+    testReportPublished(report.getUuid(), true);
   }
 
-  private void testReportDraft(final String uuid) {
+  private void testReportPublished(final String uuid, final boolean expectedPlanned) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report updatedReport = engine.getReportDao().getByUuid(uuid);
-    assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);
+    assertThat(updatedReport.getState()).isEqualTo(ReportState.PUBLISHED);
+    final List<ReportAction> workflow = updatedReport.loadWorkflow(engine.getContext()).join();
+    assertThat(workflow).isNotEmpty();
+    final ReportAction lastAction = workflow.get(workflow.size() - 1);
+    assertThat(lastAction.getType()).isEqualTo(ActionType.PUBLISH);
+    assertThat(lastAction.isPlanned()).isEqualTo(expectedPlanned);
   }
 
   // DB integration
-  private void testFutureEngagementWorker(final int expectedCount) {
+  private void testReportPublicationWorker(final int expectedCount) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final int emailSize = engine.getEmailDao().getAll().size();
-    futureEngagementWorker.run();
+    reportPublicationWorker.run();
     assertThat(engine.getEmailDao().getAll().size()).isEqualTo(emailSize + expectedCount);
   }
 
   // Email integration
-  private static void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
+  private static void testReportPublicationWorkerEmail() throws IOException, InterruptedException {
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     // Make sure all messages have been (asynchronously) sent

@@ -3487,4 +3487,12 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
+	<changeSet id="add-reportActions-planned" author="gjvoosten">
+		<addColumn tableName="reportActions">
+			<column name="planned" type="boolean" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>
