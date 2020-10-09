@@ -39,6 +39,14 @@ class Home extends Page {
     return browser.$("#my-counterparts-nav")
   }
 
+  get myCounterpartsNotifications() {
+    return this.myCounterpartsLink.$("span:last-child")
+  }
+
+  get myTasksNotifications() {
+    return this.myTasksLink.$("span:last-child")
+  }
+
   waitForSecurityBannerValue(value) {
     this.securityBanner.waitForExist()
     this.securityBanner.waitForDisplayed()

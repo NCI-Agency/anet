@@ -18,6 +18,14 @@ class MyTasks extends Page {
   get myCounterparts() {
     return browser.$("#my-counterparts")
   }
+
+  get myPendingCounterparts() {
+    return browser.$("#my-pending-counterparts").$("tbody")
+  }
+
+  get myPendingCounterpartsContent() {
+    return browser.$("#my-pending-counterparts").$("tbody")
+  }
 }
 
 export default new MyTasks()
