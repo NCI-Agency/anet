@@ -210,7 +210,9 @@ export function reportsToEvents(reports) {
       (r.location && r.location.name) ||
       ""
     return {
-      title: who + "@" + where,
+      title: `${who} @ ${where} - ${
+        Report.isEngagementAllDay(r) ? "(all day)" : ""
+      }`,
       start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
       end: moment(r.engagementDate)
         .add(r.duration, "minutes")

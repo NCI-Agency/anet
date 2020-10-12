@@ -5,7 +5,7 @@ import {
 import Leaflet from "components/Leaflet"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
-import { Location } from "models"
+import { Location, Report } from "models"
 import PropTypes from "prop-types"
 import React, { useMemo } from "react"
 
@@ -25,7 +25,9 @@ const ReportsMapWidget = ({
     values.forEach(report => {
       if (Location.hasCoordinates(report.location)) {
         let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
-        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
+        label += `<br/>@ <b>${_escape(
+          report.location.name
+        )} ${Report.getAllDayIndicator(report)}</b>` // escape HTML in locationName!
         markerArray.push({
           id: report.uuid,
           lat: report.location.lat,
