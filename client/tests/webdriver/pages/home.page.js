@@ -47,6 +47,10 @@ class Home extends Page {
     return this.myTasksLink.$("span:last-child")
   }
 
+  get onboardingPopover() {
+    return browser.$(".hopscotch-bubble-container")
+  }
+
   waitForSecurityBannerValue(value) {
     this.securityBanner.waitForExist()
     this.securityBanner.waitForDisplayed()

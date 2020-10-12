@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import Home from "../pages/home.page"
 import MyCounterparts from "../pages/myCounterparts.page"
+import { createOnboardingNewPerson, examplePersonDetails } from "./newUserUtils"
 
 describe("Home page", () => {
   describe("When checking the navigation items", () => {
@@ -8,8 +9,10 @@ describe("Home page", () => {
       Home.open()
       Home.myCounterpartsLink.waitForDisplayed()
     })
-    it("Should NOT see a link to my counterparts page when the user is not an advisor", () => {
-      Home.openAsOnboardUser()
+  })
+  describe("When checking new user after onboarding to home page", () => {
+    it("Should NOT see a link to my counterparts page when the user does not have a position", () => {
+      createOnboardingNewPerson(examplePersonDetails, "bonny1")
       expect(Home.myCounterpartsLink.isExisting()).to.equal(false)
     })
   })
