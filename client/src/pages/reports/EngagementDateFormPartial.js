@@ -5,7 +5,7 @@ import { FastField, Field } from "formik"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { Col, ControlLabel, FormGroup, HelpBlock } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
@@ -28,18 +28,9 @@ const EngagementDatePartialFormWithDuration = ({
   edit,
   values
 }) => {
-  const [isAllDay, setIsAllDay] = useState(true)
-  useEffect(() => {
-    if (!edit || !initialValues.engagementDate) {
-      setIsAllDay(true)
-    } else if (!isStartOfDay(initialValues.engagementDate)) {
-      setIsAllDay(false)
-    } else {
-      setIsAllDay(initialValues.duration === null)
-    }
-    // this logic should run only once when the component is mounted
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const [isAllDay, setIsAllDay] = useState(() =>
+    getInitalAllDayState(edit, initialValues)
+  )
 
   return (
     <FormGroup>
@@ -115,6 +106,16 @@ const EngagementDatePartialFormWithDuration = ({
       </Col>
     </FormGroup>
   )
+}
+
+function getInitalAllDayState(edit, initialValues) {
+  if (!edit || !initialValues.engagementDate) {
+    return true
+  } else if (!isStartOfDay(initialValues.engagementDate)) {
+    return false
+  } else {
+    return initialValues.duration === null
+  }
 }
 
 EngagementDatePartialFormWithDuration.propTypes = {
