@@ -39,6 +39,10 @@ class Home extends Page {
     return browser.$("#my-counterparts-nav")
   }
 
+  get onboardingPopover() {
+    return browser.$(".hopscotch-bubble-container")
+  }
+
   waitForSecurityBannerValue(value) {
     this.securityBanner.waitForExist()
     this.securityBanner.waitForDisplayed()

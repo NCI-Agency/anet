@@ -36,8 +36,11 @@ class Page {
     this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
   }
 
-  openAsOnboardUser(pathName = "/") {
-    this._open(pathName, Page.DEFAULT_CREDENTIALS.onboardUser)
+  openAsOnboardUser(
+    pathName = "/",
+    uniqueName = Page.DEFAULT_CREDENTIALS.onboardUser
+  ) {
+    this._open(pathName, uniqueName)
   }
 
   getRandomOption(select) {
