@@ -36,8 +36,11 @@ public abstract class AbstractLocationSearcher
     if (Boolean.TRUE.equals(query.isInMyReports())) {
       qb.addFromClause("JOIN ("
           + "  SELECT reports.\"locationUuid\" AS uuid, MAX(reports.\"createdAt\") AS max FROM reports"
-          + "  WHERE reports.\"authorUuid\" = :userUuid GROUP BY reports.\"locationUuid\""
+          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
+          + "  GROUP BY reports.\"locationUuid\""
           + ") \"inMyReports\" ON locations.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 

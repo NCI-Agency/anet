@@ -75,8 +75,11 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           + "  SELECT \"reportTasks\".\"taskUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
           + "  JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\""
-          + "  WHERE reports.\"authorUuid\" = :userUuid GROUP BY \"reportTasks\".\"taskUuid\""
+          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
+          + "  GROUP BY \"reportTasks\".\"taskUuid\""
           + ") \"inMyReports\" ON tasks.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 

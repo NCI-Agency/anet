@@ -2,6 +2,7 @@ package mil.dds.anet.test.beans;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.Lists;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -35,18 +36,15 @@ public class ReportTest extends BeanTester<Report> {
     r.setEngagementDate(Instant.ofEpochMilli(1453753380000L));
     r.setDuration(90);
 
-    r.setAuthor(PersonTest.getJackJacksonStub());
-
     LinkedList<Task> tasks = new LinkedList<Task>();
     tasks.add(TaskTest.getTestTask());
     tasks.add(TaskTest.getTestTask());
     r.setTasks(tasks);
 
-    LinkedList<ReportPerson> principals = new LinkedList<ReportPerson>();
-    ReportPerson principal = PersonTest.personToReportPerson(PersonTest.getSteveStevesonStub());
-    principal.setPrimary(true);
-    principals.add(principal);
-    r.setAttendees(principals);
+    final ReportPerson author = PersonTest.personToReportAuthor(PersonTest.getJackJacksonStub());
+    final ReportPerson principal =
+        PersonTest.personToPrimaryReportPerson(PersonTest.getSteveStevesonStub());
+    r.setAttendees(Lists.newArrayList(author, principal));
 
     r.setReportText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
         + "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "

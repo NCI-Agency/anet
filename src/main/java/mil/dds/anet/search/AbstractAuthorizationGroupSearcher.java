@@ -49,9 +49,11 @@ public abstract class AbstractAuthorizationGroupSearcher
           + "  SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
           + "  JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\""
-          + "  WHERE reports.\"authorUuid\" = :userUuid"
+          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
           + "  GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\""
           + ") \"inMyReports\" ON \"authorizationGroups\".uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 

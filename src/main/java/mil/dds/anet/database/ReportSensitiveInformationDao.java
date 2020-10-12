@@ -3,7 +3,6 @@ package mil.dds.anet.database;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
@@ -134,7 +133,7 @@ public class ReportSensitiveInformationDao
 
   /**
    * A user is allowed to access a report's sensitive information if either of the following holds
-   * true: • the user is the author of the report; • the user is in an authorization group for the
+   * true: • the user is an author of the report; • the user is in an authorization group for the
    * report.
    *
    * @param user the user executing the request
@@ -148,7 +147,7 @@ public class ReportSensitiveInformationDao
       // No user or no report
       return false;
     }
-    if (Objects.equals(userUuid, report.getAuthorUuid())) {
+    if (report.isAuthor(user)) {
       // Author is always authorized
       return true;
     }

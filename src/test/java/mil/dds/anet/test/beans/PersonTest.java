@@ -186,6 +186,18 @@ public class PersonTest extends BeanTester<Person> {
     return rp;
   }
 
+  public static ReportPerson personToReportAuthor(Person p) {
+    final ReportPerson rp = personToReportPerson(p);
+    rp.setAuthor(true);
+    return rp;
+  }
+
+  public static ReportPerson personToPrimaryReportAuthor(Person p) {
+    final ReportPerson rp = personToReportAuthor(p);
+    rp.setPrimary(true);
+    return rp;
+  }
+
   public static ReportPerson personToReportPerson(Person p) {
     ReportPerson rp = new ReportPerson();
     rp.setName(p.getName());

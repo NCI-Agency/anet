@@ -19,7 +19,8 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-<#assign reportAuthor = (report.loadAuthor(context).get())!>
+<!-- FIXME: handle multiple authors -->
+<#assign reportAuthor = (report.loadAuthors(context).get()[0])!>
 Hi ${reportAuthor.name},
 
 <#assign commentAuthor = (comment.loadAuthor(context).get())!>

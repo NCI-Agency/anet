@@ -375,11 +375,12 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         "UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
         .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
 
-    // report author update
-    getDbHandle()
-        .createUpdate(
-            "UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    // FIXME: report author update
+    /*
+     * getDbHandle() .createUpdate(
+     * "UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+     * .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+     */
 
     // comment author update
     getDbHandle()

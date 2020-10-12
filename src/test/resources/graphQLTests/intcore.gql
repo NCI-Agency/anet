@@ -12,7 +12,7 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
     atmosphere
     atmosphereDetails
     state
-    author {
+    authors {
       uuid
       name
       rank

@@ -19,7 +19,8 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-<#assign reportAuthor = (report.loadAuthor(context).get())!>
+<!-- FIXME: handle multiple authors -->
+<#assign reportAuthor = (report.loadAuthors(context).get()[0])!>
 Hi ${reportAuthor.name},<br><br>
 
 <p>The date of your upcoming engagement, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is today. We've changed this upcoming engagement 

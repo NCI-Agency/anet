@@ -3568,13 +3568,11 @@
 	</changeSet>
 
 	<changeSet id="add-reportPeople-author" author="cemalettin-simsoft">
-		<!-- Before, we saved report's author with reports.authorUuid-->
+		<!-- Before, we saved report's author with reports.authorUuid -->
 		<!-- since we need more authors we will save it with a flag in reportPeople.isAuthor -->
 		<addColumn tableName="reportPeople">
 			<column name="isAuthor" type="boolean" defaultValue="false" />
 		</addColumn>
-	</changeSet>
-	<changeSet id="update-reportPeople-author" author="cemalettin-simsoft">
 		<!-- We need to set all previously written reports' authors' isAuthor flag to true -->
 		<sql dbms="postgresql">
 			UPDATE "reportPeople"
@@ -3586,6 +3584,10 @@
 			SET "isAuthor" = 1
 			WHERE "personUuid" = (SELECT "authorUuid" FROM reports WHERE uuid = "reportUuid");
 		</sql>
+		<!-- Now drop the obsolete authorUuid column -->
+		<dropIndex tableName="reports" indexName="IDX_reports_authorUuid" />
+		<dropForeignKeyConstraint baseTableName="reports" constraintName="FK_reports_author" />
+		<dropColumn tableName="reports" columnName="authorUuid" />
 	</changeSet>
 
 </databaseChangeLog>

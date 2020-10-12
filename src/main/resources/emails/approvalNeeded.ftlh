@@ -22,7 +22,8 @@
 Dear ${approvalStepName},
 <br><br>
 <div>
-  <#assign reportAuthor = (report.loadAuthor(context).get())!>
+  <!-- FIXME: handle multiple authors -->
+  <#assign reportAuthor = (report.loadAuthors(context).get()[0])!>
   ${reportAuthor.name}'s report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is ready for your review.<br>
   Using <a href="${serverUrl}/reports/${report.uuid}" />this link</a>,
   you can either <em>Approve</em>, <em>Request changes to</em> or <em>Edit</em> the report.

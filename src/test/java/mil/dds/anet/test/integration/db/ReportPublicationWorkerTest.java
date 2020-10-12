@@ -16,12 +16,13 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
+import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
@@ -207,7 +208,7 @@ public class ReportPublicationWorkerTest {
 
   private static Report createTestReport(final String toAdressId) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Person author = TestBeans.getTestPerson();
+    final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
     author.setEmailAddress(toAdressId + whitelistedEmail);
     engine.getPersonDao().insert(author);
 
@@ -218,7 +219,7 @@ public class ReportPublicationWorkerTest {
     approvalStep.setType(ApprovalStepType.PLANNING_APPROVAL);
     engine.getApprovalStepDao().insertAtEnd(approvalStep);
 
-    final Report report = TestBeans.getTestReport(author, approvalStep, ImmutableList.of());
+    final Report report = TestBeans.getTestReport(approvalStep, ImmutableList.of(author));
     engine.getReportDao().insert(report);
     return report;
   }

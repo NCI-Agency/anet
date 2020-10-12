@@ -15,7 +15,7 @@ report(uuid:"${reportUuid}") {
     uuid
     name
   }
-  author {
+  authors {
     uuid
     name
     rank
@@ -50,6 +50,7 @@ report(uuid:"${reportUuid}") {
     uuid
     name
     primary
+    author
     rank
     role
     status

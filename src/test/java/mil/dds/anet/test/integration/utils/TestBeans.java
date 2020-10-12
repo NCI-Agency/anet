@@ -51,11 +51,9 @@ public class TestBeans {
     return as;
   }
 
-  public static Report getTestReport(Person author, ApprovalStep approvalStep,
-      List<ReportPerson> attendees) {
+  public static Report getTestReport(ApprovalStep approvalStep, List<ReportPerson> attendees) {
     Report r = new Report();
     r.setState(ReportState.APPROVED);
-    r.setAuthor(author);
     r.setIntent("test_dummy");
     r.setAtmosphere(Atmosphere.NEUTRAL);
     r.setApprovalStep(approvalStep);

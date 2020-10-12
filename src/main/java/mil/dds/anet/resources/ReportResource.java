@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -120,8 +119,9 @@ public class ReportResource {
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
     }
-    if (r.getAuthorUuid() == null) {
-      r.setAuthorUuid(author.getUuid());
+    if (r.getAttendees() == null
+        || r.getAttendees().stream().noneMatch(p -> p.isAuthor())) {
+      throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
     }
 
     // FIXME: Eventually, also admins should no longer be allowed to create non-draft reports
@@ -169,8 +169,8 @@ public class ReportResource {
         action.setReport(existing);
         action.setEditor(editor);
         email.setAction(action);
-        email.setToAddresses(Collections
-            .singletonList(existing.loadAuthor(engine.getContext()).join().getEmailAddress()));
+        email.setToAddresses(existing.loadAuthors(AnetObjectEngine.getInstance().getContext())
+            .join().stream().map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
         AnetEmailWorker.sendEmailAsync(email);
       }
     }
@@ -197,7 +197,7 @@ public class ReportResource {
    */
   private Report executeReportUpdates(Person editor, Report r) {
     // Verify this person has access to edit this report
-    // Either they are the author, or an approver for the current step.
+    // Either they are an author, or an approver for the current step.
     final Report existing = dao.getByUuid(r.getUuid());
     if (existing == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
@@ -205,13 +205,12 @@ public class ReportResource {
     // Certain properties may not be changed through an update request
     r.setState(existing.getState());
     r.setApprovalStepUuid(existing.getApprovalStepUuid());
-    r.setAuthorUuid(existing.getAuthorUuid());
     assertCanUpdateReport(r, editor);
 
-    boolean isAuthor = Objects.equals(r.getAuthorUuid(), editor.getUuid());
     // State should not change when report is being edited by an approver
-    // State should change to draft when the report is being edited by its author
-    if (isAuthor) {
+    // State should change to draft when the report is being edited by its author,
+    // where editor must be one of the existing authors
+    if (existing.isAuthor(editor)) {
       r.setState(ReportState.DRAFT);
       r.setApprovalStep(null);
     }
@@ -340,25 +339,25 @@ public class ReportResource {
   @SuppressWarnings("checkstyle:MissingSwitchDefault")
   private void assertCanUpdateReport(Report report, Person editor) {
     String permError = "You do not have permission to edit this report. ";
-    boolean isAuthor = Objects.equals(report.getAuthorUuid(), editor.getUuid());
+    boolean isAuthor = report.isAuthor(editor);
     switch (report.getState()) {
       case DRAFT:
       case REJECTED:
       case APPROVED:
       case CANCELLED:
-        // Must be the author
+        // Must be an author
         if (!isAuthor) {
-          throw new WebApplicationException(permError + "Must be the author of this report.",
+          throw new WebApplicationException(permError + "Must be an author of this report.",
               Status.FORBIDDEN);
         }
         break;
       case PENDING_APPROVAL:
-        // Must be the author or the approver
+        // Must be an author or the approver
         boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
             report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
         if (!isAuthor && !canApprove) {
           throw new WebApplicationException(
-              permError + "Must be the author of this report or the current approver.",
+              permError + "Must be an author of this report or a current approver.",
               Status.FORBIDDEN);
         }
         break;
@@ -382,11 +381,11 @@ public class ReportResource {
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    if (!Objects.equals(r.getAuthorUuid(), user.getUuid())
-        && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true)
+    final boolean isAuthor = r.isAuthor(user);
+    if (!isAuthor && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true)
         && !AuthUtils.isAdmin(user)) {
       throw new WebApplicationException(
-          "Cannot submit report unless you are the report's author, his/her super user or an admin",
+          "Cannot submit report unless you are a report's author, his/her super user or an admin",
           Status.FORBIDDEN);
     }
 
@@ -451,7 +450,7 @@ public class ReportResource {
       logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
-    AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), r.getAuthorUuid());
+    AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), user.getUuid());
     // GraphQL mutations *have* to return something, we return the report
     return r;
   }
@@ -577,7 +576,8 @@ public class ReportResource {
     action.setComment(rejectionComment);
     AnetEmail email = new AnetEmail();
     email.setAction(action);
-    email.addToAddress(r.loadAuthor(engine.getContext()).join().getEmailAddress());
+    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -634,7 +634,8 @@ public class ReportResource {
     action.setReport(r);
     action.setComment(comment);
     email.setAction(action);
-    email.addToAddress(r.loadAuthor(engine.getContext()).join().getEmailAddress());
+    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -679,8 +680,8 @@ public class ReportResource {
     }
 
     if (report.getState() == ReportState.DRAFT || report.getState() == ReportState.REJECTED) {
-      // only the author may delete these reports
-      if (Objects.equals(report.getAuthorUuid(), user.getUuid())) {
+      // only an author may delete these reports
+      if (report.isAuthor(user)) {
         return;
       }
     }
