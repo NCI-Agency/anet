@@ -144,11 +144,11 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     r.setReportSensitiveInformation(rsi);
 
     final ReportBatch rb = getDbHandle().attach(ReportBatch.class);
-    if (r.getAttendees() != null) {
-      // Setify based on attendeeUuid to prevent violations of unique key constraint.
-      Map<String, ReportPerson> attendeeMap = new HashMap<>();
-      r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getUuid(), rp));
-      rb.insertReportAttendees(r.getUuid(), new ArrayList<ReportPerson>(attendeeMap.values()));
+    if (r.getReportPeople() != null) {
+      // Setify based on uuid to prevent violations of unique key constraint.
+      Map<String, ReportPerson> reportPeopleMap = new HashMap<>();
+      r.getReportPeople().stream().forEach(rp -> reportPeopleMap.put(rp.getUuid(), rp));
+      rb.insertReportPeople(r.getUuid(), new ArrayList<ReportPerson>(reportPeopleMap.values()));
     }
 
     if (r.getAuthorizationGroups() != null) {
@@ -165,7 +165,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
   public interface ReportBatch {
     @SqlBatch("INSERT INTO \"reportPeople\" (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\") VALUES (:reportUuid, :uuid, :primary, :author)")
-    void insertReportAttendees(@Bind("reportUuid") String reportUuid,
+    void insertReportPeople(@Bind("reportUuid") String reportUuid,
         @BindBean List<ReportPerson> reportPeople);
 
     @SqlBatch("INSERT INTO \"reportAuthorizationGroups\" (\"reportUuid\", \"authorizationGroupUuid\") VALUES (:reportUuid, :uuid)")
@@ -260,27 +260,32 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   @InTransaction
-  public int addAttendeeToReport(ReportPerson rp, Report r) {
-    return getDbHandle().createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
-        + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\") VALUES (:personUuid, :reportUuid, :isPrimary, :isAuthor)")
+  public int addPersonToReport(ReportPerson rp, Report r) {
+    return getDbHandle()
+        .createUpdate("/* addReportPerson */ INSERT INTO \"reportPeople\" "
+            + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\")"
+            + " VALUES (:personUuid, :reportUuid, :isPrimary, :isAuthor, :isAttendee)")
         .bind("personUuid", rp.getUuid()).bind("reportUuid", r.getUuid())
-        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor()).execute();
+        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor())
+        .bind("isAttendee", rp.isAttendee()).execute();
   }
 
   @InTransaction
-  public int removeAttendeeFromReport(Person p, Report r) {
+  public int removePersonFromReport(Person p, Report r) {
     return getDbHandle()
-        .createUpdate("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
+        .createUpdate("/* deleteReportPerson */ DELETE FROM \"reportPeople\" "
             + "WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
         .bind("reportUuid", r.getUuid()).bind("personUuid", p.getUuid()).execute();
   }
 
   @InTransaction
-  public int updateAttendeeOnReport(ReportPerson rp, Report r) {
-    return getDbHandle().createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
-        + "SET \"isPrimary\" = :isPrimary, \"isAuthor\" = :isAuthor WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
+  public int updatePersonOnReport(ReportPerson rp, Report r) {
+    return getDbHandle().createUpdate("/* updatePersonOnReport*/ UPDATE \"reportPeople\" "
+        + "SET \"isPrimary\" = :isPrimary, \"isAuthor\" = :isAuthor, \"isAttendee\" = :isAttendee"
+        + " WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
         .bind("reportUuid", r.getUuid()).bind("personUuid", rp.getUuid())
-        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor()).execute();
+        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor())
+        .bind("isAttendee", rp.isAttendee()).execute();
   }
 
   @InTransaction
@@ -333,9 +338,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("tagUuid", t.getUuid()).execute();
   }
 
-  public CompletableFuture<List<ReportPerson>> getAttendeesForReport(
+  public CompletableFuture<List<ReportPerson>> getPeopleForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_ATTENDEES,
+    return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_PEOPLE,
         reportUuid);
   }
 
@@ -389,9 +394,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         "/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?",
         reportUuid);
 
-    // Delete attendees
+    // Delete reportPeople
     getDbHandle().execute(
-        "/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?",
+        "/* deleteReport.reportPeople */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?",
         reportUuid);
 
     // Delete comments
@@ -719,21 +724,23 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   static class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {
-    private static final String sql = "/* batch.getAttendeesForReport */ SELECT "
+    private static final String sql = "/* batch.getPeopleForReport */ SELECT "
         + PersonDao.PERSON_FIELDS
-        + ", \"reportPeople\".\"reportUuid\" , \"reportPeople\".\"isPrimary\",\"reportPeople\".\"isAuthor\" FROM \"reportPeople\" "
+        + ", \"reportPeople\".\"reportUuid\", \"reportPeople\".\"isPrimary\""
+        + ", \"reportPeople\".\"isAuthor\", \"reportPeople\".\"isAttendee\" FROM \"reportPeople\" "
         + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
-        + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> )";
+        + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> ) "
+        + "ORDER BY people.name, people.uuid";
 
     public ReportPeopleBatcher() {
       super(sql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
     }
   }
 
-  public List<List<ReportPerson>> getAttendees(List<String> foreignKeys) {
-    final ForeignKeyBatcher<ReportPerson> attendeesBatcher =
+  public List<List<ReportPerson>> getReportPeople(List<String> foreignKeys) {
+    final ForeignKeyBatcher<ReportPerson> reportPeopleBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(ReportPeopleBatcher.class);
-    return attendeesBatcher.getByForeignKeys(foreignKeys);
+    return reportPeopleBatcher.getByForeignKeys(foreignKeys);
   }
 
   static class TagsBatcher extends ForeignKeyBatcher<Tag> {

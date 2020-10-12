@@ -82,8 +82,6 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   @GraphQLInputField
   ReportCancelledReason cancelledReason;
   // annotated below
-  List<ReportPerson> attendees;
-  // annotated below
   List<Task> tasks;
   @GraphQLQuery
   @GraphQLInputField
@@ -94,6 +92,10 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   @GraphQLQuery
   @GraphQLInputField
   String reportText;
+  // annotated below
+  private List<ReportPerson> reportPeople;
+  // annotated below
+  private List<ReportPerson> attendees;
   // annotated below
   private ForeignObjectHolder<Organization> advisorOrg = new ForeignObjectHolder<>();
   // annotated below
@@ -265,26 +267,46 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
     this.cancelledReason = cancelledReason;
   }
 
+  @GraphQLQuery(name = "reportPeople")
+  public CompletableFuture<List<ReportPerson>> loadReportPeople(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (reportPeople != null) {
+      return CompletableFuture.completedFuture(reportPeople);
+    }
+    return AnetObjectEngine.getInstance().getReportDao().getPeopleForReport(context, uuid)
+        .thenApply(o -> {
+          reportPeople = o;
+          return o;
+        });
+  }
+
+  public List<ReportPerson> getReportPeople() {
+    return reportPeople;
+  }
+
+  @GraphQLInputField(name = "reportPeople")
+  public void setReportPeople(List<ReportPerson> reportPeople) {
+    this.reportPeople = reportPeople;
+  }
+
   @GraphQLQuery(name = "attendees")
   public CompletableFuture<List<ReportPerson>> loadAttendees(
       @GraphQLRootContext Map<String, Object> context) {
     if (attendees != null) {
       return CompletableFuture.completedFuture(attendees);
     }
-    return AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(context, uuid)
-        .thenApply(o -> {
+    return loadReportPeople(context) // Force the load of reportPeople
+        .thenApply(l -> {
+          final List<ReportPerson> o =
+              l.stream().filter(p -> p.isAttendee()).collect(Collectors.toList());
           attendees = o;
           return o;
         });
   }
 
+  @JsonIgnore
   public List<ReportPerson> getAttendees() {
     return attendees;
-  }
-
-  @GraphQLInputField(name = "attendees")
-  public void setAttendees(List<ReportPerson> attendees) {
-    this.attendees = attendees;
   }
 
   @GraphQLQuery(name = "primaryAdvisor")
@@ -293,7 +315,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
     if (primaryAdvisor.hasForeignObject()) {
       return CompletableFuture.completedFuture(primaryAdvisor.getForeignObject());
     }
-    return loadAttendees(context) // Force the load of attendees
+    return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final ReportPerson o =
               l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.ADVISOR)).findFirst()
@@ -314,7 +336,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
     if (primaryPrincipal.hasForeignObject()) {
       return CompletableFuture.completedFuture(primaryPrincipal.getForeignObject());
     }
-    return loadAttendees(context) // Force the load of attendees
+    return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final ReportPerson o =
               l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.PRINCIPAL))
@@ -335,7 +357,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
     if (authors != null) {
       return CompletableFuture.completedFuture(authors);
     }
-    return loadAttendees(context) // Force the load of attendees
+    return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final List<ReportPerson> o =
               l.stream().filter(p -> p.isAuthor()).collect(Collectors.toList());
@@ -812,7 +834,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
         && Objects.equals(r.getIntent(), intent) && Objects.equals(r.getExsum(), exsum)
         && Objects.equals(r.getAtmosphere(), atmosphere)
         && Objects.equals(r.getAtmosphereDetails(), atmosphereDetails)
-        && Objects.equals(r.getAttendees(), attendees) && Objects.equals(r.getTasks(), tasks)
+        && Objects.equals(r.getReportPeople(), reportPeople) && Objects.equals(r.getTasks(), tasks)
         && Objects.equals(r.getReportText(), reportText)
         && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
         && Objects.equals(r.getTags(), tags)
@@ -824,7 +846,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   @Override
   public int hashCode() {
     return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt, location, intent, exsum,
-        attendees, tasks, reportText, nextSteps, comments, atmosphere, atmosphereDetails,
+        reportPeople, tasks, reportText, nextSteps, comments, atmosphere, atmosphereDetails,
         engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups,
         customFields);
   }

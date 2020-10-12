@@ -119,8 +119,7 @@ public class ReportResource {
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
     }
-    if (r.getAttendees() == null
-        || r.getAttendees().stream().noneMatch(p -> p.isAuthor())) {
+    if (r.getReportPeople() == null || r.getReportPeople().stream().noneMatch(p -> p.isAuthor())) {
       throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
     }
 
@@ -180,11 +179,12 @@ public class ReportResource {
   }
 
   private Person findPrimaryAttendee(Report r, Role role) {
-    if (r.getAttendees() == null) {
+    if (r.getReportPeople() == null) {
       return null;
     }
-    return r.getAttendees().stream().filter(p -> p.isPrimary() && p.getRole().equals(role))
-        .findFirst().orElse(null);
+    return r.getReportPeople().stream()
+        .filter(p -> p.isAttendee() && p.isPrimary() && p.getRole().equals(role)).findFirst()
+        .orElse(null);
   }
 
   /**
@@ -248,28 +248,28 @@ public class ReportResource {
       throw new WebApplicationException("Couldn't process report update", Status.NOT_FOUND);
     }
 
-    // Update Attendees:
-    if (r.getAttendees() != null) {
+    // Update report people:
+    if (r.getReportPeople() != null) {
       // Fetch the people associated with this report
       final List<ReportPerson> existingPeople =
-          dao.getAttendeesForReport(engine.getContext(), r.getUuid()).join();
+          dao.getPeopleForReport(engine.getContext(), r.getUuid()).join();
       // Find any differences and fix them.
-      for (ReportPerson rp : r.getAttendees()) {
+      for (ReportPerson rp : r.getReportPeople()) {
         Optional<ReportPerson> existingPerson =
             existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
         if (existingPerson.isPresent()) {
           if (existingPerson.get().isPrimary() != rp.isPrimary()
               || existingPerson.get().isAuthor() != rp.isAuthor()) {
-            dao.updateAttendeeOnReport(rp, r);
+            dao.updatePersonOnReport(rp, r);
           }
           existingPeople.remove(existingPerson.get());
         } else {
-          dao.addAttendeeToReport(rp, r);
+          dao.addPersonToReport(rp, r);
         }
       }
-      // Any attendees left in existingPeople needs to be removed.
+      // Any report people left in existingPeople needs to be removed.
       for (ReportPerson rp : existingPeople) {
-        dao.removeAttendeeFromReport(rp, r);
+        dao.removePersonFromReport(rp, r);
       }
     }
 

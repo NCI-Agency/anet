@@ -50,7 +50,6 @@ report(uuid:"${reportUuid}") {
     uuid
     name
     primary
-    author
     rank
     role
     status

@@ -44,7 +44,7 @@ public class ReportTest extends BeanTester<Report> {
     final ReportPerson author = PersonTest.personToReportAuthor(PersonTest.getJackJacksonStub());
     final ReportPerson principal =
         PersonTest.personToPrimaryReportPerson(PersonTest.getSteveStevesonStub());
-    r.setAttendees(Lists.newArrayList(author, principal));
+    r.setReportPeople(Lists.newArrayList(author, principal));
 
     r.setReportText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
         + "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "

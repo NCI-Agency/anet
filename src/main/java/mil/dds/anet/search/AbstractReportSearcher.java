@@ -130,8 +130,9 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getAttendeeUuid() != null) {
-      qb.addWhereClause(
-          "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :attendeeUuid)");
+      qb.addWhereClause("reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"personUuid\" = :attendeeUuid and \"isAttendee\" = :isAttendee)");
+      qb.addSqlArg("isAttendee", true);
       qb.addSqlArg("attendeeUuid", query.getAttendeeUuid());
     }
 
@@ -248,11 +249,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (query.getAttendeePositionUuid() != null) {
       // Search for reports attended by people serving in that position at the engagement date
-      qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r"
-          + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
-          + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"engagementDate\"",
-              "attendeePositionUuid")
-          + ")");
+      qb.addWhereClause(
+          "reports.uuid IN (SELECT r.uuid FROM reports r"
+              + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
+              + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"",
+                  "r.\"engagementDate\"", "attendeePositionUuid")
+              + " AND rp.\"isAttendee\" = :isAttendee)");
+      qb.addSqlArg("isAttendee", true);
       qb.addSqlArg("attendeePositionUuid", query.getAttendeePositionUuid());
     }
 

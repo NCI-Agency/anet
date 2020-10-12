@@ -276,12 +276,12 @@ public final class BatchingUtils {
                 () -> engine.getReportActionDao().getReportActions(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.REPORT_ATTENDEES.toString(),
+    dataLoaderRegistry.register(FkDataLoaderKey.REPORT_PEOPLE.toString(),
         new DataLoader<>(new BatchLoader<String, List<ReportPerson>>() {
           @Override
           public CompletionStage<List<List<ReportPerson>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(
-                () -> engine.getReportDao().getAttendees(foreignKeys), dispatcherService);
+                () -> engine.getReportDao().getReportPeople(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_REPORT_SENSITIVE_INFORMATION.toString(),

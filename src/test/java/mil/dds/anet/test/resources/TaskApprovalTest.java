@@ -528,7 +528,8 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final Person steve = getPersonFromDb("STEVESON, Steve");
     final ReportPerson advisor = PersonTest.personToPrimaryReportPerson(reina);
     final ReportPerson principal = PersonTest.personToPrimaryReportPerson(steve);
-    r.setAttendees(Lists.newArrayList(advisor, principal, PersonTest.personToReportAuthor(author)));
+    r.setReportPeople(
+        Lists.newArrayList(advisor, principal, PersonTest.personToReportAuthor(author)));
     r.setTasks(Lists.newArrayList(task));
     final Location testLocation = new Location();
     testLocation.setUuid(TEST_LOCATION_UUID);
