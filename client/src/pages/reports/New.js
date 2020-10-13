@@ -25,7 +25,8 @@ const ReportNew = ({ pageDispatchers }) => {
     const person = new Person(currentUser)
     person.primary = true
     person.author = true
-    report.attendees.push(person)
+    person.attendee = true
+    report.reportPeople.push(person)
   }
   const reportInitialValues = Object.assign(
     report,

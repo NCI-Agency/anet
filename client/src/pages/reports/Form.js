@@ -171,12 +171,10 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  // We need the report tasks/attendees in order to be able to dynamically
-  // update the yup schema for the selected tasks/attendees instant assessments
+  // We need the report tasks/people in order to be able to dynamically
+  // update the yup schema for the selected tasks/people instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
-  const [reportAttendees, setReportAttendees] = useState(
-    initialValues.attendees
-  )
+  const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
   const autoSaveSettings = useRef({
@@ -259,7 +257,7 @@ const ReportForm = ({
     }))
   }
 
-  // Update the report schema according to the selected report tasks and attendees
+  // Update the report schema according to the selected report tasks and people
   // instant assessments schema
   const {
     assessmentsConfig: tasksInstantAssessmentsConfig,
@@ -272,7 +270,7 @@ const ReportForm = ({
     assessmentsConfig: attendeesInstantAssessmentsConfig,
     assessmentsSchema: attendeesInstantAssessmentsSchema
   } = Person.getInstantAssessmentsDetailsForEntities(
-    reportAttendees,
+    reportPeople?.filter(rp => rp.attendee),
     Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
   )
   let reportSchema = Report.yupSchema
@@ -326,7 +324,7 @@ const ReportForm = ({
           }
         }
 
-        const attendeesFilters = {
+        const reportPeopleFilters = {
           all: {
             label: "All",
             queryVars: { matchPositionName: true }
@@ -341,7 +339,7 @@ const ReportForm = ({
           }
         }
         if (currentOrg) {
-          attendeesFilters.myColleagues = {
+          reportPeopleFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
               role: Person.ROLE.ADVISOR,
@@ -349,7 +347,7 @@ const ReportForm = ({
               orgUuid: currentOrg.uuid
             }
           }
-          attendeesFilters.myCounterparts = {
+          reportPeopleFilters.myCounterparts = {
             label: "My counterparts",
             list: currentUser.position.associatedPositions
               .filter(ap => ap.person)
@@ -357,7 +355,7 @@ const ReportForm = ({
           }
         }
         if (values.location && values.location.uuid) {
-          attendeesFilters.atLocation = {
+          reportPeopleFilters.atLocation = {
             label: `At ${values.location.name}`,
             queryVars: {
               locationUuid:
@@ -380,8 +378,8 @@ const ReportForm = ({
             }
           }
         }
-        const primaryAdvisors = values.attendees.filter(
-          a => a.role === Person.ROLE.ADVISOR && a.primary === true
+        const primaryAdvisors = values.reportPeople.filter(
+          a => a.role === Person.ROLE.ADVISOR && a.primary && a.attendee
         )
         const primaryAdvisor = primaryAdvisors.length
           ? primaryAdvisors[0]
@@ -682,21 +680,21 @@ const ReportForm = ({
                 id="attendance-fieldset"
               >
                 <Field
-                  name="attendees"
+                  name="reportPeople"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
-                    updateAttendees(
+                    updateReportPeople(
                       setFieldValue,
                       setFieldTouched,
-                      "attendees",
+                      "reportPeople",
                       value
                     )
                   }}
                   widget={
                     <AdvancedMultiSelect
-                      fieldName="attendees"
+                      fieldName="reportPeople"
                       placeholder="Search for the meeting attendees..."
-                      value={values.attendees}
+                      value={values.reportPeople}
                       renderSelected={
                         <AttendeesTable
                           report={
@@ -704,12 +702,11 @@ const ReportForm = ({
                               uuid: values.uuid,
                               engagementDate: values.engagementDate,
                               duration: Number.parseInt(values.duration) || 0,
-                              attendees: values.attendees
+                              reportPeople: values.reportPeople
                             })
                           }
                           onChange={value =>
-                            setFieldValue("attendees", value, true)
-                          }
+                            setFieldValue("reportPeople", value, true)}
                           showDelete
                         />
                       }
@@ -720,7 +717,7 @@ const ReportForm = ({
                         "Organization"
                       ]}
                       overlayRenderRow={PersonDetailedOverlayRow}
-                      filterDefs={attendeesFilters}
+                      filterDefs={reportPeopleFilters}
                       objectType={Person}
                       queryParams={{
                         status: Model.STATUS.ACTIVE,
@@ -735,14 +732,14 @@ const ReportForm = ({
                       <FieldHelper.FieldShortcuts
                         title="Recent attendees"
                         shortcuts={recents.persons}
-                        fieldName="attendees"
+                        fieldName="reportPeople"
                         objectType={Person}
-                        curValue={values.attendees}
+                        curValue={values.reportPeople}
                         onChange={value => {
-                          updateAttendees(
+                          updateReportPeople(
                             setFieldValue,
                             setFieldTouched,
-                            "attendees",
+                            "reportPeople",
                             value
                           )
                         }}
@@ -1026,7 +1023,7 @@ const ReportForm = ({
               >
                 <InstantAssessmentsContainerField
                   entityType={Person}
-                  entities={values.attendees}
+                  entities={values.reportPeople?.filter(rp => rp.attendee)}
                   entitiesInstantAssessmentsConfig={
                     attendeesInstantAssessmentsConfig
                   }
@@ -1115,19 +1112,24 @@ const ReportForm = ({
     return _upperFirst(getReportType(values))
   }
 
-  function updateAttendees(setFieldValue, setFieldTouched, field, attendees) {
+  function updateReportPeople(
+    setFieldValue,
+    setFieldTouched,
+    field,
+    reportPeople
+  ) {
     // validation will be done by setFieldValue
     setFieldTouched(field, true, false) // onBlur doesn't work when selecting an option
-    attendees.forEach(attendee => {
-      if (!attendees.find(a2 => attendee.role === a2.role && a2.primary)) {
-        attendee.primary = true
+    reportPeople.forEach(rp => {
+      if (!reportPeople.find(a2 => rp.role === a2.role && a2.primary)) {
+        rp.primary = true
       } else {
         // Make sure field is 'controlled' by defining a value
-        attendee.primary = attendee.primary || false
+        rp.primary = rp.primary || false
       }
     })
-    setFieldValue(field, attendees, true)
-    setReportAttendees(attendees)
+    setFieldValue(field, reportPeople, true)
+    setReportPeople(reportPeople)
   }
 
   function countCharsLeft(elemId, maxChars, event) {
@@ -1314,7 +1316,8 @@ const ReportForm = ({
       "cancelled",
       "reportTags",
       "showSensitiveInfo",
-      "attendees",
+      "authors",
+      "reportPeople",
       "tasks",
       "customFields", // initial JSON from the db
       DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -1343,9 +1346,9 @@ const ReportForm = ({
     }
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
-    // strip attendees fields not in data model
-    report.attendees = values.attendees.map(a => {
-      const attendee = Object.without(
+    // strip reportPeople fields not in data model
+    report.reportPeople = values.reportPeople.map(a => {
+      const rp = Object.without(
         a,
         "firstName",
         "lastName",
@@ -1353,8 +1356,9 @@ const ReportForm = ({
         "customFields",
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
-      attendee.author = !!a.author
-      return attendee
+      rp.author = !!a.author
+      rp.attendee = !!a.attendee
+      return rp
     })
     // strip tasks fields not in data model
     report.tasks = values.tasks.map(t => utils.getReference(t))
@@ -1365,7 +1369,7 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
-      const updateNotesVariables = { report }
+      const updateNotesVariables = { report: { uuid: report.uuid } }
       const tasksNotes = createInstantAssessments(
         Task,
         values.tasks,
@@ -1376,7 +1380,7 @@ const ReportForm = ({
       )
       const attendeesNotes = createInstantAssessments(
         Person,
-        values.attendees,
+        values.reportPeople?.filter(rp => rp.attendee),
         values,
         Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
         Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD,

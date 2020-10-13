@@ -40,23 +40,28 @@ TableHeader.propTypes = {
   hide: PropTypes.bool
 }
 
-const TableBody = ({ attendees, handleAttendeeRow, role, enableDivider }) => (
+const TableBody = ({
+  reportPeople,
+  handleAttendeeRow,
+  role,
+  enableDivider
+}) => (
   <tbody>
     {enableDivider && <AttendeeDividerRow />}
     {Person.map(
-      attendees.filter(p => p.role === role),
+      reportPeople.filter(p => p.role === role),
       person => handleAttendeeRow(person)
     )}
   </tbody>
 )
 TableBody.propTypes = {
-  attendees: PropTypes.array.isRequired,
+  reportPeople: PropTypes.array.isRequired,
   handleAttendeeRow: PropTypes.func,
   role: PropTypes.string,
   enableDivider: PropTypes.bool
 }
 TableBody.defaultProps = {
-  attendees: []
+  reportPeople: []
 }
 
 const TableContainer = ({ className, children }) => (
@@ -121,7 +126,7 @@ const AttendeesTable = ({
       <TableContainer className="advisorAttendeesTable">
         <TableHeader showDelete={showDelete} />
         <TableBody
-          attendees={report.attendees}
+          reportPeople={report.reportPeople}
           role={Person.ROLE.ADVISOR}
           handleAttendeeRow={renderAttendeeRow}
         />
@@ -129,7 +134,7 @@ const AttendeesTable = ({
       <TableContainer className="principalAttendeesTable">
         <TableHeader hide showDelete={showDelete} />
         <TableBody
-          attendees={report.attendees}
+          reportPeople={report.reportPeople}
           role={Person.ROLE.PRINCIPAL}
           handleAttendeeRow={renderAttendeeRow}
           enableDivider
@@ -200,23 +205,23 @@ const AttendeesTable = ({
   }
 
   function setPrimaryAttendee(person) {
-    report.attendees.forEach(attendee => {
-      if (Person.isEqual(attendee, person)) {
-        attendee.primary = true
-      } else if (attendee.role === person.role) {
-        attendee.primary = false
+    report.reportPeople.forEach(rp => {
+      if (Person.isEqual(rp, person)) {
+        rp.primary = true
+      } else if (rp.role === person.role) {
+        rp.primary = false
       }
     })
-    onChange(report.attendees)
+    onChange(report.reportPeople)
   }
   // only advisors can be authors
   function setAuthorAttendee(person) {
-    report.attendees.forEach(attendee => {
-      if (Person.isEqual(attendee, person)) {
-        attendee.author = !attendee.author
+    report.reportPeople.forEach(rp => {
+      if (Person.isEqual(rp, person)) {
+        rp.author = !rp.author
       }
     })
-    onChange(report.attendees)
+    onChange(report.reportPeople)
   }
 }
 

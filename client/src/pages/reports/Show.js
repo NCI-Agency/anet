@@ -102,11 +102,12 @@ const GQL_GET_REPORT = gql`
           }
         }
       }
-      attendees {
+      reportPeople {
         uuid
         name
         author
         primary
+        attendee
         rank
         role
         status
@@ -307,7 +308,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       text: tag.name
     }))
     data.report.tasks = Task.fromArray(data.report.tasks)
-    data.report.attendees = Person.fromArray(data.report.attendees)
+    data.report.reportPeople = Person.fromArray(data.report.reportPeople)
     data.report.to = ""
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.report.customFields
@@ -362,7 +363,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial tasks/attendees instant assessments values
+  // Get initial tasks/people instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
 
@@ -671,7 +672,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               >
                 <InstantAssessmentsContainerField
                   entityType={Person}
-                  entities={values.attendees}
+                  entities={values.reportPeople?.filter(rp => rp.attendee)}
                   parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
                   formikProps={{
                     values
@@ -704,10 +705,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         By pressing submit, this {reportType} will be sent to
                         <strong>
                           {" "}
-                          {Object.get(
-                            report,
-                            "author.position.organization.name" // FIXME: multiple authors
-                          ) || "your organization approver"}{" "}
+                          {Object.get(report, "advisorOrg.shortName") ||
+                            "your organization approver"}{" "}
                         </strong>
                         to go through the approval workflow.
                       </p>

@@ -168,16 +168,16 @@ export default class Report extends Model {
           }
         )
         .default({}),
-      attendees: yup
+      reportPeople: yup
         .array()
         .nullable()
         .test(
           "primary-principal",
           "primary principal error",
           // can't use arrow function here because of binding to 'this'
-          function(attendees) {
+          function(reportPeople) {
             const err = Report.checkPrimaryAttendee(
-              attendees,
+              reportPeople,
               Person.ROLE.PRINCIPAL
             )
             return err ? this.createError({ message: err }) : true
@@ -190,9 +190,9 @@ export default class Report extends Model {
               "primary-advisor",
               "primary advisor error",
               // can't use arrow function here because of binding to 'this'
-              function(attendees) {
+              function(reportPeople) {
                 const err = Report.checkPrimaryAttendee(
-                  attendees,
+                  reportPeople,
                   Person.ROLE.ADVISOR
                 )
                 return err ? this.createError({ message: err }) : true
@@ -382,8 +382,8 @@ export default class Report extends Model {
     return this.intent || "None"
   }
 
-  static checkPrimaryAttendee(attendees, role) {
-    const primaryAttendee = Report.getPrimaryAttendee(attendees, role)
+  static checkPrimaryAttendee(reportPeople, role) {
+    const primaryAttendee = Report.getPrimaryAttendee(reportPeople, role)
     const roleName = Person.humanNameOfRole(role)
     if (!primaryAttendee) {
       return `You must provide the primary ${roleName} for the Engagement`
@@ -401,8 +401,10 @@ export default class Report extends Model {
     }
   }
 
-  static getPrimaryAttendee(attendees, role) {
-    return attendees.find(el => el.role === role && el.primary)
+  static getPrimaryAttendee(reportPeople, role) {
+    return reportPeople.find(
+      el => el.role === role && el.primary && el.attendee
+    )
   }
 
   static getEngagementDateFormat() {
