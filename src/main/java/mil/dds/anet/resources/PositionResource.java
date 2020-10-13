@@ -237,16 +237,7 @@ public class PositionResource {
     final Position existingPos = dao.getByUuid(loserUuid);
 
     // Check that given two position can mergeable
-    canPositionsMergeable(existingPos, winnerPosition);
-    if ((Objects.nonNull(existingPos.getPersonUuid())
-        || Objects.nonNull(winnerPosition.getPersonUuid()))
-        && Objects.isNull(winnerPosition.getPersonUuid())) {
-      throw new WebApplicationException(
-          "If There is a person assigned to one of the combined Positions, "
-              + "This person must be in the position which is merged",
-          Status.BAD_REQUEST);
-    }
-
+    arePositionsMergeable(existingPos, winnerPosition);
     assertCanUpdatePosition(user, winnerPosition);
     validatePosition(user, winnerPosition);
 
@@ -273,7 +264,7 @@ public class PositionResource {
     return position;
   }
 
-  private void canPositionsMergeable(Position existingPos, Position existingPos2) {
+  private void arePositionsMergeable(Position existingPos, Position existingPos2) {
     if (existingPos.getUuid().equals(existingPos2.getUuid())) {
       throw new WebApplicationException("Cannot merge same Positions.", Status.BAD_REQUEST);
     }
@@ -286,6 +277,15 @@ public class PositionResource {
 
     if (!existingPos.getOrganizationUuid().equals(existingPos2.getOrganizationUuid())) {
       throw new WebApplicationException("Positions to be merged must be in the same organization.",
+          Status.BAD_REQUEST);
+    }
+
+    if ((Objects.nonNull(existingPos.getPersonUuid())
+        || Objects.nonNull(existingPos2.getPersonUuid()))
+        && Objects.isNull(existingPos2.getPersonUuid())) {
+      throw new WebApplicationException(
+          "If There is a person assigned to one of the combined Positions, "
+              + "This person must be in the position which is merged",
           Status.BAD_REQUEST);
     }
   }
