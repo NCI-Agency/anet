@@ -53,7 +53,7 @@ test.serial("Draft and submit a report", async t => {
   await $positiveAtmosphereButton.click()
 
   const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
-    "#attendees",
+    "#reportPeople",
     "topferness, christopf"
   )
 
@@ -94,7 +94,7 @@ test.serial("Draft and submit a report", async t => {
   await assertElementText(t, $principalOrg1, "MoD")
 
   const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
-    "#attendees",
+    "#reportPeople",
     "steveson, steve"
   )
   await $attendeesTitle.click()
@@ -664,7 +664,7 @@ test.serial(
     await assertElementText(t, $advisorOrg, "EF 2.2")
 
     const $addAttendeeShortcutButtons = await $$(
-      "#attendees-shortcut-list button"
+      "#reportPeople-shortcut-list button"
     )
     // Add all recent attendees
     await Promise.all(

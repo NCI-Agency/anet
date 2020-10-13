@@ -45,12 +45,12 @@ class CreateReport extends Page {
     return browser.$("#duration")
   }
 
-  get attendees() {
-    return browser.$("#attendees")
+  get reportPeople() {
+    return browser.$("#reportPeople")
   }
 
   get attendeesTable() {
-    return browser.$("#attendees-popover .table-responsive table")
+    return browser.$("#reportPeople-popover .table-responsive table")
   }
 
   get submitButton() {
@@ -95,7 +95,7 @@ class CreateReport extends Page {
   }
 
   selectAttendeeByName(name) {
-    this.attendees.click()
+    this.reportPeople.click()
     // wait for attendess table loader to disappear
     this.attendeesTable.waitForDisplayed()
     let searchTerm = name
