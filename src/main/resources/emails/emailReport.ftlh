@@ -333,9 +333,11 @@ ${sender.name} sent you a report from ANET:
         <label for="author" class="col-sm-2 control-label">Report author</label>
         <div class="col-sm-7">
           <div id="author" class="form-control-static">
-            <!-- FIXME: handle multiple authors -->
-            <#assign reportAuthor = (report.loadAuthors(context).get()[0])!>
-            <a href="/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
+            <#assign reportAuthors = (report.loadAuthors(context).get())!>
+            <#list reportAuthors as reportAuthor>
+              <a href="/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
+              <br>
+            </#list>
           </div>
         </div>
       </div>
