@@ -21,10 +21,24 @@ anet_import.generate_entity_classes(tables=["people","positions","peoplePosition
 # Import Entity Classes
 from src.core.models import Person, Position
 
-# Loop through dataframe, generate list of entity objects
+# Create a list of erroneous and correct records object
+erroneous_records, correct_records = list(), list()
+
+# Create entity_list object
 entity_list = list()
 
+# Loop through dataframe
 for index, row in csv_obj.df.iterrows():
+    # Write your rules to check if record is valid or not
+    if row["employee name"] == "Thiel":
+        # Append erroneous record to erroneous_records list.
+        erroneous_records.append(row)
+        continue
+
+    # Append correct record to correct_records list.
+    correct_records.append(row)
+    
+    # Create and fill entity objects with correct record.
     person = Person()
     person.name = row["employee name"]
     person.uuid = str(uuid.uuid4())
@@ -39,6 +53,10 @@ for index, row in csv_obj.df.iterrows():
     position.person = person
     
     entity_list.append(position)
+
+# Save log files
+anet_import.save_log(list_row = correct_records, log_file_name = "correct_records")
+anet_import.save_log(list_row = erroneous_records, log_file_name = "erroneous_records")
 
 # Write to DB
 anet_import.save_new_data(entity_list)

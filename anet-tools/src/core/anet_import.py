@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
@@ -8,6 +9,9 @@ class anet_import:
                             os.environ["ANET_DB_USERNAME"] + ":" + os.environ["ANET_DB_PASSWORD"] + "@" + \
                             "192.168.10.164" + "/" + \
                             os.environ["ANET_DB_NAME"]
+        self.path_root = "/".join(os.getcwd().split("/")[:4])
+        self.path_log = os.path.join(self.path_root, "datasamples")
+        
         print("db object created")
     
     def print_db_env_vars(self):
@@ -45,7 +49,7 @@ class anet_import:
         except Exception as e:
             print("EXCEPTION WHILE WRITING TO DATABASE: ", str(e))
     
-    def generate_entity_classes(self,tables, name):
+    def generate_entity_classes(self, tables, name):
         path_out_file = "/".join(os.getcwd().split("/")[:-1]) + "/core/" + name + ".py "
         generate_command = "sqlacodegen " + self.dbConnString + " --outfile " + path_out_file
         if len(tables) != 0:
@@ -55,3 +59,19 @@ class anet_import:
             print("Entity classes generated inside " + "/".join(path_out_file.split("/")[4:]))
         except Exception as e:
             print("EXCEPTION WHILE GENERATING ENTITY CLASSES: ", str(e))
+    
+    def save_log(self, list_row, log_file_name):
+        if type(list_row) != list:
+            raise Exception('Datatype must be list!')
+        if len(list_row) == 0:
+            print("Exiting, Nothing to write log file " + log_file_name)
+            return False
+        path_file = os.path.join(self.path_log, log_file_name + ".csv")
+        df_of_row = pd.DataFrame(list_row)
+        if os.path.exists(path_file):
+            log_file = pd.read_csv(path_file)
+            log_file = pd.concat([log_file, df_of_row])
+        else:
+            log_file = df_of_row
+        log_file.to_csv(path_file, index=False)
+        return True
