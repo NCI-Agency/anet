@@ -353,17 +353,36 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   @InTransaction
   public int mergePeople(Person winner, Person loser) {
-    // delete duplicates where other is primary, or where neither is primary
-    getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
-        + "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
-        + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
-        + ")) OR (\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
-        + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
-        + ")) OR ("
-        + "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("
-        + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" != :isPrimary"
-        + "))").bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid())
-        .bind("isPrimary", true).execute();
+    // For reports where both winner and loser are in the reportPeople:
+    // 1. set winner's isPrimary, isAttendee and is isAuthor flags to the logical OR of both
+    final String sqlUpd = "WITH dups AS ( SELECT"
+        + "  rpw.\"reportUuid\" AS wreportuuid, rpw.\"personUuid\" AS wpersonuuid,"
+        + "  rpw.\"isPrimary\" AS wprimary, rpl.\"isPrimary\" AS lprimary,"
+        + "  rpw.\"isAttendee\" AS wattendee, rpl.\"isAttendee\" AS lattendee,"
+        + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor"
+        + "  FROM \"reportPeople\" rpw"
+        + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
+        + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
+        + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary %1$s dups.lprimary),"
+        + " \"isAttendee\" = (dups.wattendee %1$s dups.lattendee),"
+        + " \"isAuthor\" = (dups.wauthor %1$s dups.lauthor) FROM dups"
+        + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
+        + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
+    // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
+    getDbHandle().createUpdate(String.format(sqlUpd, DaoUtils.isMsSql() ? "|" : "OR"))
+        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    // 2. delete the loser so we don't have duplicates
+    final String sqlDel = "WITH dups AS ( SELECT"
+        + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"
+        + "  FROM \"reportPeople\" rpw"
+        + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
+        + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
+        + " DELETE FROM \"reportPeople\" %1$s dups"
+        + " WHERE \"reportPeople\".\"reportUuid\" = dups.lreportuuid"
+        + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
+    // MS SQL and PostgreSQL have slightly different DELETE syntax
+    getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
+        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
 
     // update report attendance, should now be unique
     getDbHandle().createUpdate(
@@ -374,13 +393,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     getDbHandle().createUpdate(
         "UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
         .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
-
-    // FIXME: report author update
-    /*
-     * getDbHandle() .createUpdate(
-     * "UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-     * .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
-     */
 
     // comment author update
     getDbHandle()
