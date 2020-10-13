@@ -166,4 +166,13 @@ public class TaskResource {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
+
+  @GraphQLQuery(name = "responsibleTaskList")
+  public AnetBeanList<Task> getResponsibleTaskList(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    query.setResponsiblePositionUuid(DaoUtils.getUuid(user.getPosition()));
+    query.setUser(user);
+    return dao.search(query);
+  }
 }

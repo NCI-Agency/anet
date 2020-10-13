@@ -12,12 +12,17 @@ describe("Home page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(Home.myTasksNotifications.isExisting()).to.be.false
     })
-    it("Should see that Jack has no counterparts with pending assessments and 1 task that have pending assessments", () => {
+    it("Should see that Jack has no counterparts with pending assessment", () => {
       Home.open("/", "jack")
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
+    })
+    it("Should see that Jack has 1 task with pending assessments", () => {
+      Home.open("/", "jack")
+      Home.myCounterpartsLink.waitForDisplayed()
+      Home.myTasksLink.waitForDisplayed()
       expect(Home.myTasksNotifications.getText()).to.equal("1")
     })
   })

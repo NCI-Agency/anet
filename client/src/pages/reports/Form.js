@@ -1378,6 +1378,7 @@ const ReportForm = ({
         "lastName",
         "position",
         "customFields",
+        "responsibleTasks", // notifications for UI
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
     )

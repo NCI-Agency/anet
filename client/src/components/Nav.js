@@ -1,4 +1,3 @@
-import styled from "@emotion/styled"
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
@@ -7,7 +6,13 @@ import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect } from "react"
-import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
+import {
+  Badge,
+  MenuItem,
+  Nav as BSNav,
+  NavDropdown,
+  NavItem
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import {
   IndexLinkContainer as Link,
@@ -125,9 +130,9 @@ const Nav = ({
             id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
-            {notifications?.myTasksWithPendingAssessments ? (
+            {notifications?.myTasksWithPendingAssessments?.length ? (
               <NotificationBadge>
-                {notifications.myTasksWithPendingAssessments}
+                {notifications.myTasksWithPendingAssessments.length}
               </NotificationBadge>
             ) : null}
           </SidebarLink>
@@ -137,9 +142,9 @@ const Nav = ({
             id="my-counterparts-nav"
           >
             My Counterparts
-            {notifications?.myCounterpartsWithPendingAssessments ? (
+            {notifications?.myCounterpartsWithPendingAssessments?.length ? (
               <NotificationBadge>
-                {notifications.myCounterpartsWithPendingAssessments}
+                {notifications.myCounterpartsWithPendingAssessments.length}
               </NotificationBadge>
             ) : null}
           </SidebarLink>
@@ -288,16 +293,22 @@ const mapDispatchToProps = (dispatch, ownProps) =>
     dispatch
   )
 
-const NotificationBadge = styled.span`
-  position: absolute;
-  padding: 2px 4px;
-  top: 8px;
-  right: 5px;
-  border-radius: 50%;
-  background-color: #337ab7;
-  color: white;
-  font-weight: bold;
-`
+const NotificationBadge = ({ children }) => {
+  return (
+    <Badge
+      style={{
+        float: "right",
+        marginRight: "2px"
+      }}
+    >
+      {children}
+    </Badge>
+  )
+}
+
+NotificationBadge.propTypes = {
+  children: PropTypes.node
+}
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false

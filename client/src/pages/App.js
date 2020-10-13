@@ -10,8 +10,8 @@ import {
 import ResponsiveLayout from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
 import {
-  GRAPHQL_NOTIFICATIONS_NOTE_FIELDS,
-  useNotifications
+  getNotifications,
+  GRAPHQL_NOTIFICATIONS_NOTE_FIELDS
 } from "notificationsUtils"
 import Routing from "pages/Routing"
 import PropTypes from "prop-types"
@@ -85,6 +85,26 @@ const GQL_GET_APP_DATA = gql`
       }
     }
 
+    responsibleTasks: responsibleTaskList(
+      query: {
+        pageSize:0
+        status: ACTIVE
+      }
+    ) {
+      totalCount
+      pageNum
+      pageSize
+      list {
+        uuid
+        shortName
+        longName
+        customFieldRef1 {
+          uuid
+        }
+        ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
+      }
+    }
+
     adminSettings {
       key
       value
@@ -133,18 +153,10 @@ const App = ({ pageDispatchers, pageProps }) => {
   })
   const skip = done || error || !data
   const appState = skip ? null : processData(data)
-  const [
-    notifications,
-    loadingNotifications,
-    updateNotifications
-  ] = useNotifications(appState?.currentUser, skip)
+  const notifications = getNotifications(appState?.currentUser)
 
   if (done) {
     return result
-  }
-  if (loadingNotifications) {
-    // FIXME: need this otherwise, 404 tests breaks, how can we combine appData + notifications data and loading processes
-    return <div className="loader" />
   }
 
   if (!data) {
@@ -163,10 +175,7 @@ const App = ({ pageDispatchers, pageProps }) => {
       value={{
         appSettings: appState.settings,
         currentUser: appState.currentUser,
-        loadAppData: () => {
-          refetch()
-          updateNotifications()
-        },
+        loadAppData: refetch,
         notifications
       }}
     >
@@ -198,7 +207,7 @@ const App = ({ pageDispatchers, pageProps }) => {
       return organizations
     }
 
-    const currentUser = new Person(data.me)
+    const tempUser = new Person(data.me)
     const advisorOrganizations = getSortedOrganizationsFromData(
       data.topLevelAdvisorOrgs
     )
@@ -209,6 +218,11 @@ const App = ({ pageDispatchers, pageProps }) => {
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
     )
+
+    const responsibleTasks = tempUser.position?.uuid
+      ? data.responsibleTasks
+      : []
+    const currentUser = new Person({ ...tempUser, responsibleTasks })
 
     return {
       currentUser,

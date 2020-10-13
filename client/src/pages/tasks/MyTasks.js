@@ -13,11 +13,7 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Task } from "models"
-import {
-  getMyTasksWithPendingAssessments,
-  GQL_GET_MY_TASKS_LIST
-} from "notificationsUtils"
-import { Tasks } from "pages/Search"
+import { FakePagination, Tasks, TasksPagination } from "pages/Search"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useMemo } from "react"
@@ -35,7 +31,7 @@ const MyTasks = ({
     pageProps: DEFAULT_PAGE_PROPS,
     pageDispatchers
   })
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, notifications } = useContext(AppContext)
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
   const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
@@ -100,14 +96,9 @@ const MyTasks = ({
         id="my-tasks-with-pending-assessments"
         title={`${pluralize(taskShortLabel)} that have pending assessments`}
       >
-        <Tasks
-          pageDispatchers={pageDispatchers}
-          queryParams={responsibleTasksSearchQueryParams}
-          paginationKey="my_tasks_with_pending_assessments"
-          pagination={pagination}
-          setPagination={setPagination}
-          customQuery={GQL_GET_MY_TASKS_LIST}
-          filterTasks={getMyTasksWithPendingAssessments}
+        <FakePagination
+          allItems={notifications.myTasksWithPendingAssessments}
+          paginationComp={TasksPagination}
         />
       </Fieldset>
     </div>
