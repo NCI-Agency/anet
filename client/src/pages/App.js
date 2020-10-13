@@ -130,10 +130,11 @@ const App = ({ pageDispatchers, pageProps }) => {
   })
   const skip = done || error || !data
   const appState = skip ? null : processData(data)
-  const [notifications, loadingNotifications] = useNotifications(
-    appState?.currentUser,
-    skip
-  )
+  const [
+    notifications,
+    loadingNotifications,
+    updateNotifications
+  ] = useNotifications(appState?.currentUser, skip)
 
   if (done) {
     return result
@@ -154,13 +155,15 @@ const App = ({ pageDispatchers, pageProps }) => {
   ) {
     return <Redirect to="/onboarding" />
   }
-
   return (
     <AppContext.Provider
       value={{
         appSettings: appState.settings,
         currentUser: appState.currentUser,
-        loadAppData: refetch,
+        loadAppData: () => {
+          refetch()
+          updateNotifications()
+        },
         notifications
       }}
     >

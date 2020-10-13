@@ -46,7 +46,10 @@ export const useNotifications = (currentUser, skipQuery) => {
   // don't even query if user has no position
   const skip = !respPosUuid || skipQuery
 
-  const [taskData, loadingTask] = useMyPendingTasks(respPosUuid, skip)
+  const [taskData, loadingTask, refetchTasks] = useMyPendingTasks(
+    respPosUuid,
+    skip
+  )
 
   const pendingCParts = getPendingCounterparts(currentUser)
   const pendingTasks = getPendingTasks(taskData)
@@ -57,7 +60,7 @@ export const useNotifications = (currentUser, skipQuery) => {
   }
 
   // FIXME: should we show indication about error in notifications? app probably works fine without it.
-  return [notifications, loadingTask]
+  return [notifications, loadingTask, refetchTasks]
 }
 
 const useMyPendingTasks = (respPosUuid, skip) => {
@@ -65,7 +68,7 @@ const useMyPendingTasks = (respPosUuid, skip) => {
     ...baseTaskQuery,
     responsiblePositionUuid: respPosUuid
   }
-  const { loading, data } = API.useApiQuery(
+  const { loading, data, refetch } = API.useApiQuery(
     GQL_GET_MY_PENDING_TASK_LIST,
     {
       taskQuery
@@ -73,7 +76,7 @@ const useMyPendingTasks = (respPosUuid, skip) => {
     skip
   )
 
-  return [data, loading]
+  return [data, loading, refetch]
 }
 
 export const getPendingTasks = taskData => {

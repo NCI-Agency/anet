@@ -126,7 +126,7 @@ const GQL_GET_TASK = gql`
 `
 
 const TaskShow = ({ pageDispatchers }) => {
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
@@ -324,7 +324,10 @@ const TaskShow = ({ pageDispatchers }) => {
               entityType={Task}
               subEntities={subTasks}
               canAddAssessment={canEdit}
-              onUpdateAssessment={refetch}
+              onUpdateAssessment={() => {
+                loadAppData()
+                refetch()
+              }}
             />
 
             <Fieldset title="Responsible positions">
