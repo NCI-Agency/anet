@@ -28,7 +28,7 @@ const GQL_GET_REPORT_LIST = gql`
         atmosphere
         atmosphereDetails
         state
-        author {
+        authors {
           uuid
           name
           rank
@@ -156,7 +156,12 @@ const ReportTable = ({
               <tr key={report.uuid}>
                 {showAuthors && (
                   <td>
-                    <LinkTo modelType="Person" model={report.author} />
+                    {report.authors?.map(a => (
+                      <React.Fragment key={a.uuid}>
+                        <LinkTo modelType="Person" model={a} />
+                        <br />
+                      </React.Fragment>
+                    ))}
                   </td>
                 )}
                 <td>

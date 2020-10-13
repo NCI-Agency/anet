@@ -136,7 +136,7 @@ export const ReportDetailedOverlayRow = item => (
       <LinkTo modelType="Report" model={item} isLink={false} />
     </td>
     <td>
-      <span>{item.author ? item.author.name : "Unknown"}</span>
+      <span>{item.authors ? item.authors.join(", ") : "Unknown"}</span>
     </td>
     <td>
       <span>

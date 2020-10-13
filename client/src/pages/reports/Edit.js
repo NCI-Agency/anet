@@ -35,7 +35,7 @@ const GQL_GET_REPORT = gql`
         uuid
         name
       }
-      author {
+      authors {
         uuid
         name
         rank

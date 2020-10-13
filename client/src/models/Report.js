@@ -298,7 +298,7 @@ export default class Report extends Model {
       )
   })
 
-  static autocompleteQuery = "uuid, intent, author { uuid, name, rank, role }"
+  static autocompleteQuery = "uuid, intent, authors { uuid, name, rank, role }"
 
   constructor(props) {
     super(Model.fillObject(props, Report.yupSchema))

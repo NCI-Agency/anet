@@ -123,7 +123,7 @@ const GQL_CREATE_REPORT = gql`
     createReport(report: $report) {
       uuid
       state
-      author {
+      authors {
         uuid
       }
       reportSensitiveInformation {
@@ -138,7 +138,7 @@ const GQL_UPDATE_REPORT = gql`
     updateReport(report: $report, sendEditEmail: $sendEditEmail) {
       uuid
       state
-      author {
+      authors {
         uuid
       }
       reportSensitiveInformation {
@@ -414,11 +414,11 @@ const ReportForm = ({
           }
         }
 
-        // Only the author can delete a report, and only in DRAFT.
+        // Only an author can delete a report, and only in DRAFT.
         const canDelete =
           !!values.uuid &&
           (Report.isDraft(values.state) || Report.isRejected(values.state)) &&
-          Person.isEqual(currentUser, values.author)
+          values.authors?.find(a => Person.isEqual(currentUser, a))
         // Skip validation on save!
         const action = (
           <div>

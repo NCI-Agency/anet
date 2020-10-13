@@ -71,7 +71,7 @@ const GQL_GET_REPORT = gql`
         lat
         lng
       }
-      author {
+      authors {
         uuid
         name
         rank
@@ -328,12 +328,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
-  // there can be multiple authors, FIXME: can report.author(creator) be non-attending, if not, remove first check
-  const isAuthor =
-    Person.isEqual(currentUser, report.author) ||
-    report.attendees.find(
-      person => person.author && Person.isEqual(person, currentUser)
-    )
+  const isAuthor = report.authors?.find(a => Person.isEqual(currentUser, a))
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
@@ -355,7 +350,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // Approvers can edit
   canEdit = canEdit || canApprove
 
-  // Only the author can submit when report is in draft or rejected AND author has a position
+  // Only an author can submit when report is in draft or rejected AND author has a position
   const hasActivePosition = currentUser.hasActivePosition()
   const canSubmit =
     isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
@@ -599,9 +594,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 <Field
                   name="author"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo modelType="Person" model={report.author} />
-                  }
+                  humanValue={report.authors?.map(a => (
+                    <React.Fragment key={a.uuid}>
+                      <LinkTo modelType="Person" model={a} />
+                      <br />
+                    </React.Fragment>
+                  ))}
                 />
 
                 <Field
@@ -708,7 +706,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                           {" "}
                           {Object.get(
                             report,
-                            "author.position.organization.name"
+                            "author.position.organization.name" // FIXME: multiple authors
                           ) || "your organization approver"}{" "}
                         </strong>
                         to go through the approval workflow.
