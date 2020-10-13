@@ -1,5 +1,6 @@
 import { expect } from "chai"
 import moment from "moment"
+import Report from "../../../src/models/Report"
 import CreateReport from "../pages/report/createReport.page"
 import EditReport from "../pages/report/editReport.page"
 import ShowReport from "../pages/report/showReport.page"
@@ -38,7 +39,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(CreateReport.intent.getValue()).to.equal(report01.intent)
     expect(CreateReport.engagementDate.getValue()).to.equal(
-      report01.engagementDate.format("DD-MM-YYYY HH:mm")
+      Report.getFormattedEngagementDate(report01.engagementDate)
     )
     expect(CreateReport.duration.getValue()).to.equal(report01.duration)
     const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
@@ -70,7 +71,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(CreateReport.intent.getValue()).to.equal(report02.intent)
     expect(CreateReport.engagementDate.getValue()).to.equal(
-      report02.engagementDate.format("DD-MM-YYYY HH:mm")
+      Report.getFormattedEngagementDate(report02.engagementDate)
     )
     expect(CreateReport.duration.getValue()).to.equal(report02.duration)
     const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
@@ -116,7 +117,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.intent).to.equal(report01.intent)
     expect(ShowReport.engagementDate).to.equal(
-      report01.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
+      Report.getFormattedEngagementDate(report01.engagementDate)
     )
     expect(ShowReport.reportConflictIcon.isExisting()).to.equal(true)
 
@@ -157,7 +158,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.intent).to.equal(report02.intent)
     expect(ShowReport.engagementDate).to.equal(
-      report02.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
+      Report.getFormattedEngagementDate(report02.engagementDate)
     )
     expect(ShowReport.reportConflictIcon.isExisting()).to.equal(true)
 

@@ -6,7 +6,6 @@ import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
 import { Report } from "models"
-import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
@@ -172,11 +171,7 @@ const ReportTable = ({
                   />
                 </td>
                 {showStatus && <td>{report.state}</td>}
-                <td>
-                  {moment(report.engagementDate).format(
-                    Report.getEngagementDateFormat()
-                  )}
-                </td>
+                <td>{Report.getFormattedEngagementDate(report)}</td>
               </tr>
             ))}
           </tbody>
