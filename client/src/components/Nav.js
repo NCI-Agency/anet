@@ -83,8 +83,8 @@ const Nav = ({
   const inInsights = path.indexOf("/insights") === 0
   const inDashboards = path.indexOf("/dashboards") === 0
 
-  const myOrg = currentUser.position.uuid
-    ? currentUser.position.organization
+  const myOrg = currentUser.position?.uuid
+    ? currentUser.position?.organization
     : null
   let orgUuid, myOrgUuid
   if (inOrg) {
@@ -117,7 +117,7 @@ const Nav = ({
 
       <BSNav id="reports-nav" />
 
-      {isAdvisor && currentUser.position.uuid && (
+      {isAdvisor && currentUser.position?.uuid && (
         <>
           <SidebarLink
             linkTo={{ pathname: "/tasks/mine" }}
@@ -125,8 +125,10 @@ const Nav = ({
             id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
-            {notifications?.myTasks ? (
-              <NotificationBadge>{notifications.myTasks}</NotificationBadge>
+            {notifications?.myTasksWithPendingAssessments ? (
+              <NotificationBadge>
+                {notifications.myTasksWithPendingAssessments}
+              </NotificationBadge>
             ) : null}
           </SidebarLink>
           <SidebarLink
@@ -135,9 +137,9 @@ const Nav = ({
             id="my-counterparts-nav"
           >
             My Counterparts
-            {notifications?.myCounterparts ? (
+            {notifications?.myCounterpartsWithPendingAssessments ? (
               <NotificationBadge>
-                {notifications.myCounterparts}
+                {notifications.myCounterpartsWithPendingAssessments}
               </NotificationBadge>
             ) : null}
           </SidebarLink>

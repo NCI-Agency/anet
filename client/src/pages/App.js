@@ -9,7 +9,10 @@ import {
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
-import { GET_NOTIFICATIONS_NOTES, useNotifications } from "notificationsUtils"
+import {
+  GRAPHQL_NOTIFICATIONS_NOTE_FIELDS,
+  useNotifications
+} from "notificationsUtils"
 import Routing from "pages/Routing"
 import PropTypes from "prop-types"
 import React from "react"
@@ -72,7 +75,7 @@ const GQL_GET_APP_DATA = gql`
                 name
               }
             }
-          ${GET_NOTIFICATIONS_NOTES}
+          ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
           organization {
             uuid

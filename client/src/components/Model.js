@@ -575,14 +575,14 @@ export default class Model {
 
     // "for loop" to break early
     for (let i = 0; i < periodicRecurTypes.length; i++) {
-      // offset 1 so that the period is the lastest (not current) period
-      const latestPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 1)
-      const lastPeriodAssessments = entity.getPeriodAssessments(
+      // offset 1 so that the period is the previous (not current) period
+      const prevPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 1)
+      const prevPeriodAssessments = entity.getPeriodAssessments(
         periodicRecurTypes[i],
-        latestPeriod
+        prevPeriod
       )
       // if there is no assessment in the last period, we have pending assessment
-      if (lastPeriodAssessments.length === 0) {
+      if (prevPeriodAssessments.length === 0) {
         return true
       }
     }
@@ -590,20 +590,20 @@ export default class Model {
     return false
   }
 
-  static populateAssessmentsCustomFields(entity) {
+  static populateCustomFields(entity) {
     entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       entity.customFields
     )
-    Model.populateAssessmentCustomFields(entity)
+    Model.populateNotesCustomFields(entity)
   }
 
-  static populateSubEntitiesAssessmentsCustomFields(subEntities) {
-    subEntities.forEach(subEntity => {
-      Model.populateAssessmentCustomFields(subEntity)
+  static populateEntitiesAssessmentsCustomFields(entities) {
+    entities.forEach(subEntity => {
+      Model.populateNotesCustomFields(subEntity)
     })
   }
 
-  static populateAssessmentCustomFields(entity) {
+  static populateNotesCustomFields(entity) {
     entity.notes.forEach(
       note =>
         note.type !== NOTE_TYPE.FREE_TEXT &&

@@ -7,7 +7,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import { getPendingCounterparts } from "notificationsUtils"
+import { getMyCounterpartsWithPendingAssessments } from "notificationsUtils"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 
@@ -18,17 +18,19 @@ const MyCounterparts = ({ pageDispatchers }) => {
     pageDispatchers
   })
   const { currentUser } = useContext(AppContext)
-  const myPendingCParts = getPendingCounterparts(currentUser)
+  const myCounterpartsWithPendingAssessments = getMyCounterpartsWithPendingAssessments(
+    currentUser
+  )
   return (
     <div>
       <Fieldset id="my-counterparts" title="My Counterparts">
         <PositionTable positions={currentUser.position.associatedPositions} />
       </Fieldset>
       <Fieldset
-        id="my-pending-counterparts"
+        id="my-counterparts-with-pending-assessments"
         title="My Counterparts that have pending assessments"
       >
-        <PositionTable positions={myPendingCParts} />
+        <PositionTable positions={myCounterpartsWithPendingAssessments} />
       </Fieldset>
     </div>
   )

@@ -20,11 +20,11 @@ class MyTasks extends Page {
   }
 
   get myPendingTasks() {
-    return browser.$("#my-pending-tasks")
+    return browser.$("#my-tasks-with-pending-assessments")
   }
 
   get myPendingTasksContent() {
-    return browser.$("#my-pending-tasks").$("tbody")
+    return browser.$("#my-tasks-with-pending-assessments").$("tbody")
   }
 }
 

@@ -148,11 +148,11 @@ const TaskShow = ({ pageDispatchers }) => {
   }
 
   if (data) {
-    Model.populateAssessmentsCustomFields(data.task)
+    Model.populateCustomFields(data.task)
   }
   const task = new Task(data ? data.task : {})
 
-  data && Model.populateSubEntitiesAssessmentsCustomFields(data.subTasks.list)
+  data && Model.populateEntitiesAssessmentsCustomFields(data.subTasks.list)
 
   const subTasks = data.subTasks.list.map(task => new Task(task))
 

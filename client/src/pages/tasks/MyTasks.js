@@ -14,8 +14,8 @@ import {
 } from "components/SearchFilters"
 import { Task } from "models"
 import {
-  getPendingTasks,
-  GQL_GET_MY_PENDING_TASK_LIST
+  getMyTasksWithPendingAssessments,
+  GQL_GET_MY_TASKS_LIST
 } from "notificationsUtils"
 import { Tasks } from "pages/Search"
 import pluralize from "pluralize"
@@ -47,7 +47,7 @@ const MyTasks = ({
         sortBy: "NAME",
         sortOrder: "ASC",
         status: Task.STATUS.ACTIVE,
-        taskedOrgUuid: currentUser.position.organization?.uuid,
+        taskedOrgUuid: currentUser.position?.organization?.uuid,
         orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
       }),
     [searchQueryParams, currentUser]
@@ -58,18 +58,17 @@ const MyTasks = ({
         sortBy: "NAME",
         sortOrder: "ASC",
         status: Task.STATUS.ACTIVE,
-        responsiblePositionUuid: currentUser.position.uuid
+        responsiblePositionUuid: currentUser.position?.uuid
       }),
     [searchQueryParams, currentUser]
   )
 
-  const pendingTasksSearchQueryParams = responsibleTasksSearchQueryParams
   const myOrgAssignedTasksTitle = (
     <>
       {pluralize(taskShortLabel)} assigned to{" "}
       <LinkTo
         modelType="Organization"
-        model={currentUser.position.organization}
+        model={currentUser.position?.organization}
       />
     </>
   )
@@ -98,17 +97,17 @@ const MyTasks = ({
         />
       </Fieldset>
       <Fieldset
-        id="my-pending-tasks"
+        id="my-tasks-with-pending-assessments"
         title={`${pluralize(taskShortLabel)} that have pending assessments`}
       >
         <Tasks
           pageDispatchers={pageDispatchers}
-          queryParams={pendingTasksSearchQueryParams}
-          paginationKey="my_pending_tasks"
+          queryParams={responsibleTasksSearchQueryParams}
+          paginationKey="my_tasks_with_pending_assessments"
           pagination={pagination}
           setPagination={setPagination}
-          customQuery={GQL_GET_MY_PENDING_TASK_LIST}
-          filterTasks={getPendingTasks}
+          customQuery={GQL_GET_MY_TASKS_LIST}
+          filterTasks={getMyTasksWithPendingAssessments}
         />
       </Fieldset>
     </div>

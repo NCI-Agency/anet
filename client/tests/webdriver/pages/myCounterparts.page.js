@@ -20,11 +20,11 @@ class MyTasks extends Page {
   }
 
   get myPendingCounterparts() {
-    return browser.$("#my-pending-counterparts").$("tbody")
+    return browser.$("#my-counterparts-with-pending-assessments").$("tbody")
   }
 
   get myPendingCounterpartsContent() {
-    return browser.$("#my-pending-counterparts").$("tbody")
+    return browser.$("#my-counterparts-with-pending-assessments").$("tbody")
   }
 }
 

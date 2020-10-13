@@ -5,7 +5,7 @@ import MyTasks from "../pages/myTasks.page"
 
 describe("In my counterparts page", () => {
   describe("When Erin is checking the content of the page", () => {
-    it("Should see an empty table of pending counterparts", () => {
+    it("Should see 1 counterpart in the table of pending my counterparts that have pending assessments", () => {
       MyCounterparts.open()
       MyCounterparts.myPendingCounterparts.waitForDisplayed()
       const myPendingCounterpartsItems = MyCounterparts.myPendingCounterpartsContent.$$(
@@ -18,7 +18,7 @@ describe("In my counterparts page", () => {
 
 describe("In my tasks page", () => {
   describe("When Erin is checking the content of the page", () => {
-    it("Should see an empty table of pending tasks", () => {
+    it("Should see an empty table of my tasks that have pending assessments", () => {
       MyTasks.open()
       MyTasks.myPendingTasks.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
