@@ -176,10 +176,12 @@ export default class Report extends Model {
           "primary principal error",
           // can't use arrow function here because of binding to 'this'
           function(reportPeople) {
-            const err = Report.checkPrimaryAttendee(
+            const err1 = Report.checkPrimaryAttendee(
               reportPeople,
               Person.ROLE.PRINCIPAL
             )
+            const err2 = Report.checkAttendingAuthor(reportPeople)
+            const err = err1 || err2
             return err ? this.createError({ message: err }) : true
           }
         )
@@ -191,10 +193,12 @@ export default class Report extends Model {
               "primary advisor error",
               // can't use arrow function here because of binding to 'this'
               function(reportPeople) {
-                const err = Report.checkPrimaryAttendee(
+                const err1 = Report.checkPrimaryAttendee(
                   reportPeople,
                   Person.ROLE.ADVISOR
                 )
+                const err2 = Report.checkAttendingAuthor(reportPeople)
+                const err = err1 || err2
                 return err ? this.createError({ message: err }) : true
               }
             )
@@ -398,6 +402,12 @@ export default class Report extends Model {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
     } else if (primaryAttendee.position.status !== Model.STATUS.ACTIVE) {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
+    }
+  }
+
+  static checkAttendingAuthor(reportPeople) {
+    if (!reportPeople.some(rp => rp.author && rp.attendee)) {
+      return "You must provide at least 1 attending author"
     }
   }
 

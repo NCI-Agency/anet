@@ -20,8 +20,14 @@ div.checkbox.primary > label > span {
   background-color: green;
 }
 
+.inActive.checkbox.primary > label > span {
+  color: grey;
+  background-color: white;
+  font-style: italic;
+}
+
 @media print {
-  .author-attendee {
+  .report-author {
     display: none;
   }
 }

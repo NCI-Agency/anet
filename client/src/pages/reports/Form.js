@@ -674,13 +674,14 @@ const ReportForm = ({
               <Fieldset
                 title={
                   !values.cancelled && !isFutureEngagement
-                    ? "Meeting people"
-                    : "Planned people"
+                    ? "People involved in this engagement"
+                    : "People who will be involved in this planned engagement"
                 }
                 id="reportPeople-fieldset"
               >
                 <Field
                   name="reportPeople"
+                  label="People involved"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     updateReportPeople(
@@ -693,7 +694,7 @@ const ReportForm = ({
                   widget={
                     <AdvancedMultiSelect
                       fieldName="reportPeople"
-                      placeholder="Search for the meeting people..."
+                      placeholder="Search for people involved in this engagement..."
                       value={values.reportPeople}
                       renderSelected={
                         <ReportPeople
@@ -1126,6 +1127,15 @@ const ReportForm = ({
       } else {
         // Make sure field is 'controlled' by defining a value
         rp.primary = rp.primary || false
+      }
+      // After selecting a person, default to attending, unless it is intentionally set to false (by attendee checkbox)
+      // Do strict equality, attendee field may be undefined
+      if (rp.attendee !== false) {
+        rp.attendee = true
+      }
+      // Similarly, if not intentionally made author, default is not an author
+      if (rp.author !== true) {
+        rp.author = false
       }
     })
     setFieldValue(field, reportPeople, true)

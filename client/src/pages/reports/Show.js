@@ -330,6 +330,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAuthor = report.authors?.find(a => Person.isEqual(currentUser, a))
+  const isAttending = report.reportPeople?.find(rp =>
+    Person.isEqual(currentUser, rp)
+  )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
@@ -346,8 +349,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // Warn admins when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
-  // Authors can edit if report is not published
-  let canEdit = isAuthor && !report.isPublished()
+  // Attending authors can edit if report is not published
+  // Non-attending authors can only edit if it is future
+  let canEdit =
+    isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
   // Approvers can edit
   canEdit = canEdit || canApprove
 
