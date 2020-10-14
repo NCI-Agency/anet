@@ -58,8 +58,8 @@ import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
-import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+import ReportPeople from "./ReportPeople"
 
 const GQL_GET_RECENTS = gql`
   query($taskQuery: TaskSearchQueryInput) {
@@ -674,10 +674,10 @@ const ReportForm = ({
               <Fieldset
                 title={
                   !values.cancelled && !isFutureEngagement
-                    ? "Meeting attendance"
-                    : "Planned attendance"
+                    ? "Meeting people"
+                    : "Planned people"
                 }
-                id="attendance-fieldset"
+                id="reportPeople-fieldset"
               >
                 <Field
                   name="reportPeople"
@@ -693,10 +693,10 @@ const ReportForm = ({
                   widget={
                     <AdvancedMultiSelect
                       fieldName="reportPeople"
-                      placeholder="Search for the meeting attendees..."
+                      placeholder="Search for the meeting people..."
                       value={values.reportPeople}
                       renderSelected={
-                        <AttendeesTable
+                        <ReportPeople
                           report={
                             new Report({
                               uuid: values.uuid,

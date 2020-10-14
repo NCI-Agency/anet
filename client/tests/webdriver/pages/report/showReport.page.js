@@ -50,13 +50,13 @@ class ShowReport extends Page {
     return browser.$("div[name='location']").getText()
   }
 
-  get author() {
-    return browser.$("div[name='author']").getText()
+  get authors() {
+    return browser.$("div[name='authors']").getText()
   }
 
   getAttendeeByName(name) {
     const row = browser
-      .$$("#attendeesContainer tbody > tr")
+      .$$("#reportPeopleContainer tbody > tr")
       .find(
         r =>
           r.$("td:nth-child(3)").isExisting() &&

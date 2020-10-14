@@ -47,8 +47,8 @@ import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
-import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+import ReportPeople from "./ReportPeople"
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -593,7 +593,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 )}
 
                 <Field
-                  name="author"
+                  name="authors"
                   component={FieldHelper.ReadonlyField}
                   humanValue={report.authors?.map(a => (
                     <React.Fragment key={a.uuid}>
@@ -627,8 +627,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   }
                 />
               </Fieldset>
-              <Fieldset title="Meeting attendees">
-                <AttendeesTable report={report} disabled />
+              <Fieldset title="Meeting people">
+                <ReportPeople report={report} disabled />
               </Fieldset>
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
                 <NoPaginationTaskTable

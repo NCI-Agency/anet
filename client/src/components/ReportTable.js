@@ -143,7 +143,7 @@ const ReportTable = ({
         <Table striped>
           <thead>
             <tr>
-              {showAuthors && <th>Author</th>}
+              {showAuthors && <th>Authors</th>}
               <th>Organization</th>
               <th>Summary</th>
               {showStatus && <th>Status</th>}

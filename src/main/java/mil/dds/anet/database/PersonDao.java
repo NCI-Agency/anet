@@ -384,7 +384,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
         .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
 
-    // update report attendance, should now be unique
+    // update report people, should now be unique
     getDbHandle().createUpdate(
         "UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
         .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();

@@ -49,7 +49,7 @@ class CreateReport extends Page {
     return browser.$("#reportPeople")
   }
 
-  get attendeesTable() {
+  get reportPeopleTable() {
     return browser.$("#reportPeople-popover .table-responsive table")
   }
 
@@ -97,21 +97,21 @@ class CreateReport extends Page {
   selectAttendeeByName(name) {
     this.reportPeople.click()
     // wait for attendess table loader to disappear
-    this.attendeesTable.waitForDisplayed()
+    this.reportPeopleTable.waitForDisplayed()
     let searchTerm = name
     if (searchTerm.startsWith("CIV") || searchTerm.startsWith("Maj")) {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }
     browser.keys(searchTerm)
-    this.attendeesTable.waitForDisplayed()
-    const checkBox = this.attendeesTable.$(
+    this.reportPeopleTable.waitForDisplayed()
+    const checkBox = this.reportPeopleTable.$(
       "tbody tr:first-child td:first-child input.checkbox"
     )
     if (!checkBox.isSelected()) {
       checkBox.click()
     }
     this.title.click()
-    this.attendeesTable.waitForDisplayed({ reverse: true })
+    this.reportPeopleTable.waitForDisplayed({ reverse: true })
   }
 
   fillForm(fields) {

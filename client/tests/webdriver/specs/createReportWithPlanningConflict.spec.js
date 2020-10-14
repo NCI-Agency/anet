@@ -127,7 +127,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.duration).to.equal(report01.duration)
     expect(ShowReport.location).to.equal("Unspecified")
-    expect(ShowReport.author).to.equal("CIV ERINSON, Erin")
+    expect(ShowReport.authors).to.match(/CIV ERINSON, Erin/)
 
     const advisor01 = ShowReport.getAttendeeByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")
@@ -168,7 +168,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.duration).to.equal(report02.duration)
     expect(ShowReport.location).to.equal("Unspecified")
-    expect(ShowReport.author).to.equal("CIV ERINSON, Erin")
+    expect(ShowReport.authors).to.match(/CIV ERINSON, Erin/)
 
     const advisor01 = ShowReport.getAttendeeByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")

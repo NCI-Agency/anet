@@ -370,7 +370,7 @@ ${sender.name} sent you a report from ANET:
 
   <div>
     <h2 class="legend">
-      <span class="title-text">Meeting attendees</span>
+      <span class="title-text">Meeting people</span>
     </h2>
     <fieldset>
       <table class="borderless table table-condensed">

@@ -7,7 +7,7 @@ import Report from "models/Report"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Checkbox, Label, Radio, Table } from "react-bootstrap"
-import "./AttendeesTable.css"
+import "./ReportPeople.css"
 
 const AttendeeDividerRow = () => (
   <tr className="attendee-divider-row">
@@ -113,16 +113,10 @@ AuthorAttendeeCheckbox.propTypes = {
   handleOnChange: PropTypes.func
 }
 
-const AttendeesTable = ({
-  report,
-  disabled,
-  onChange,
-  showDelete,
-  onDelete
-}) => {
+const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   const { currentUser } = useContext(AppContext)
   return (
-    <div id="attendeesContainer">
+    <div id="reportPeopleContainer">
       <TableContainer className="advisorAttendeesTable">
         <TableHeader showDelete={showDelete} />
         <TableBody
@@ -225,7 +219,7 @@ const AttendeesTable = ({
   }
 }
 
-AttendeesTable.propTypes = {
+ReportPeople.propTypes = {
   report: PropTypes.instanceOf(Report),
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
@@ -233,4 +227,4 @@ AttendeesTable.propTypes = {
   onDelete: PropTypes.func
 }
 
-export default AttendeesTable
+export default ReportPeople
