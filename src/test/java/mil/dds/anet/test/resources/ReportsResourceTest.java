@@ -1882,4 +1882,78 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(approvedStep3.getState()).isEqualTo(Report.ReportState.APPROVED);
   }
 
+  @Test
+  public void testReportAuthors() {
+    final Person author = getJackJackson();
+    final Report r = new Report();
+    r.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(author)));
+    r.setState(ReportState.DRAFT);
+    r.setAtmosphere(Atmosphere.POSITIVE);
+    r.setIntent("Testing report authors");
+    r.setEngagementDate(Instant.now());
+    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+        "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(createdUuid).isNotNull();
+    final Report reportFirstAuthor = graphQLHelper.getObjectById(author, "report", FIELDS,
+        createdUuid, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(reportFirstAuthor.getUuid()).isNotNull();
+    assertThat(reportFirstAuthor.getState()).isEqualTo(ReportState.DRAFT);
+    assertThat(reportFirstAuthor.isAuthor(author)).isTrue();
+
+    // Try to remove the author, should fail
+    reportFirstAuthor.setReportPeople(null);
+    try {
+      graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput",
+          reportFirstAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
+    // Add a second author
+    final Person liz = getElizabethElizawell();
+    reportFirstAuthor.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(author),
+        PersonTest.personToReportAuthor(liz)));
+    final Report reportTwoAuthors = graphQLHelper.updateObject(author, "updateReport", "report",
+        FIELDS, "ReportInput", reportFirstAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(reportTwoAuthors.isAuthor(author)).isTrue();
+    assertThat(reportTwoAuthors.isAuthor(liz)).isTrue();
+
+    // Remove the first author
+    reportTwoAuthors.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(liz)));
+    final Report reportSecondAuthor = graphQLHelper.updateObject(author, "updateReport", "report",
+        FIELDS, "ReportInput", reportTwoAuthors, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(reportSecondAuthor.isAuthor(author)).isFalse();
+    assertThat(reportSecondAuthor.isAuthor(liz)).isTrue();
+
+    // Try to edit the report as the first author, should fail
+    reportSecondAuthor.setIntent("Testing report authors again");
+    try {
+      graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput",
+          reportSecondAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Try to add first author again, should fail
+    reportSecondAuthor.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(author),
+        PersonTest.personToReportAuthor(liz)));
+    try {
+      graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput",
+          reportSecondAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Try to delete the report as the first author, should fail
+    try {
+      graphQLHelper.deleteObject(author, "deleteReport", reportSecondAuthor.getUuid());
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Have the remaining author delete this report.
+    final Integer nrDeleted =
+        graphQLHelper.deleteObject(liz, "deleteReport", reportSecondAuthor.getUuid());
+    assertThat(nrDeleted).isEqualTo(1);
+  }
 }

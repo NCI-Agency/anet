@@ -202,15 +202,21 @@ public class ReportResource {
     if (existing == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
+
+    if (r.getReportPeople() == null || r.getReportPeople().stream().noneMatch(p -> p.isAuthor())) {
+      throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
+    }
+
     // Certain properties may not be changed through an update request
     r.setState(existing.getState());
     r.setApprovalStepUuid(existing.getApprovalStepUuid());
-    assertCanUpdateReport(r, editor);
+    // Only *existing* authors can change a report!
+    final boolean isAuthor = existing.isAuthor(editor);
+    assertCanUpdateReport(r, editor, isAuthor);
 
     // State should not change when report is being edited by an approver
-    // State should change to draft when the report is being edited by its author,
-    // where editor must be one of the existing authors
-    if (existing.isAuthor(editor)) {
+    // State should change to draft when the report is being edited by one of the existing authors
+    if (isAuthor) {
       r.setState(ReportState.DRAFT);
       r.setApprovalStep(null);
     }
@@ -338,9 +344,8 @@ public class ReportResource {
   }
 
   @SuppressWarnings("checkstyle:MissingSwitchDefault")
-  private void assertCanUpdateReport(Report report, Person editor) {
+  private void assertCanUpdateReport(Report report, Person editor, boolean isAuthor) {
     String permError = "You do not have permission to edit this report. ";
-    boolean isAuthor = report.isAuthor(editor);
     switch (report.getState()) {
       case DRAFT:
       case REJECTED:
