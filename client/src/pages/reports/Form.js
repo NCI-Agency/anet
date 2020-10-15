@@ -171,8 +171,8 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  // We need the report tasks/people in order to be able to dynamically
-  // update the yup schema for the selected tasks/people instant assessments
+  // We need the report tasks/attendees in order to be able to dynamically
+  // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
   // some autosave settings
@@ -257,7 +257,7 @@ const ReportForm = ({
     }))
   }
 
-  // Update the report schema according to the selected report tasks and people
+  // Update the report schema according to the selected report tasks and attendees
   // instant assessments schema
   const {
     assessmentsConfig: tasksInstantAssessmentsConfig,
@@ -1122,12 +1122,6 @@ const ReportForm = ({
     // validation will be done by setFieldValue
     setFieldTouched(field, true, false) // onBlur doesn't work when selecting an option
     reportPeople.forEach(rp => {
-      if (!reportPeople.find(a2 => rp.role === a2.role && a2.primary)) {
-        rp.primary = true
-      } else {
-        // Make sure field is 'controlled' by defining a value
-        rp.primary = rp.primary || false
-      }
       // After selecting a person, default to attending, unless it is intentionally set to false (by attendee checkbox)
       // Do strict equality, attendee field may be undefined
       if (rp.attendee !== false) {
@@ -1136,6 +1130,16 @@ const ReportForm = ({
       // Similarly, if not intentionally made author, default is not an author
       if (rp.author !== true) {
         rp.author = false
+      }
+      // if no one else is primary, set that person primary if attending
+      if (
+        !reportPeople.find(a2 => rp.role === a2.role && a2.primary) &&
+        rp.attendee
+      ) {
+        rp.primary = true
+      } else {
+        // Make sure field is 'controlled' by defining a value
+        rp.primary = rp.primary || false
       }
     })
     setFieldValue(field, reportPeople, true)

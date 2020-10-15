@@ -135,17 +135,19 @@ TableContainer.propTypes = {
   children: PropTypes.node
 }
 
-const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
-  <Radio
-    name={`primaryAttendee${person.role}`}
-    className={`primary${!person.primary ? " inActive" : ""}`}
-    checked={person.primary}
-    disabled={disabled || !person.attendee}
-    onChange={() => !disabled && handleOnChange(person)}
-  >
-    <Label bsStyle="primary">Primary</Label>
-  </Radio>
-)
+const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) =>
+  person.attendee ? (
+    <Radio
+      name={`primaryAttendee${person.role}`}
+      className={`primary${!person.primary ? " inActive" : ""}`}
+      checked={person.primary}
+      disabled={disabled || !person.attendee}
+      onChange={() => !disabled && handleOnChange(person)}
+    >
+      <Label bsStyle="primary">Primary</Label>
+    </Radio>
+  ) : null
+
 PrimaryAttendeeRadioButton.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
@@ -347,7 +349,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
       if (Person.isEqual(rp, person)) {
         if (isTheLastAuthorBeingRemoved) {
           toast("You must provide at least 1 author for a report", {
-            toastId: "lastAuthorToast"
+            toastId: "removingLastAuthor"
           })
         } else {
           rp.author = !rp.author
@@ -368,6 +370,15 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
         } else {
           rp.attendee = !rp.attendee
         }
+      }
+
+      // After setting attendees, check for primaries
+      // if no one else is primary in that role, set that person primary if attending
+      if (
+        !report.reportPeople.find(a2 => rp.role === a2.role && a2.primary) &&
+        rp.attendee
+      ) {
+        rp.primary = true
       }
     })
     onChange(report.reportPeople)
