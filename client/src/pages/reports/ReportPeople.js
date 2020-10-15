@@ -346,7 +346,9 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
     report.reportPeople.forEach(rp => {
       if (Person.isEqual(rp, person)) {
         if (isTheLastAuthorBeingRemoved) {
-          toast("You must provide at least 1 author for a report")
+          toast("You must provide at least 1 author for a report", {
+            toastId: "lastAuthorToast"
+          })
         } else {
           rp.author = !rp.author
         }
@@ -360,7 +362,9 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
       if (Person.isEqual(rp, person)) {
         // We can't remove primary attendee without making someone else primary
         if (rp.primary) {
-          toast("Select a primary first to remove this person")
+          toast("Select a primary first to remove this person", {
+            toastId: "removingPrimaryAttendee"
+          })
         } else {
           rp.attendee = !rp.attendee
         }
