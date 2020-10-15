@@ -183,7 +183,7 @@ public class ReportResource {
       return null;
     }
     return r.getReportPeople().stream()
-        .filter(p -> p.isAttendee() && p.isPrimary() && p.getRole().equals(role)).findFirst()
+        .filter(p -> p.isAttendee() && p.isPrimary() && role.equals(p.getRole())).findFirst()
         .orElse(null);
   }
 
